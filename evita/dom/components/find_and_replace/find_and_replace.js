@@ -7,14 +7,14 @@ goog.provide('find_and_replace');
 goog.scope(function() {
 /**
  * @param {string} string
- * @param {!TextRange.Case} stringCase
+ * @param {!CaseAnalysisResult} stringCase
  * @return string
  */
 function caseReplace(string, stringCase) {
   if (!string.length)
     return string;
   switch (stringCase) {
-    case TextRange.Case.CAPITALIZED_TEXT: {
+    case CaseAnalysisResult.CAPITALIZED_TEXT: {
       for (let index = 0; index < string.length; ++index) {
         let charCode = string.charCodeAt(index);
         let ucd = Unicode.UCD[charCode];
@@ -28,7 +28,7 @@ function caseReplace(string, stringCase) {
       }
       return string;
     }
-    case TextRange.Case.CAPITALIZED_WORDS: {
+    case CaseAnalysisResult.CAPITALIZED_WORDS: {
       /** @type {string} */
       let newString = '';
       /** @type {boolean}*/
@@ -62,14 +62,14 @@ function caseReplace(string, stringCase) {
       }
       return newString;
     }
-    case TextRange.Case.LOWER:
+    case CaseAnalysisResult.LOWER:
       return string.toLocaleLowerCase();
-    case TextRange.Case.MIXED:
+    case CaseAnalysisResult.MIXED:
       return string;
-    case TextRange.Case.UPPER:
+    case CaseAnalysisResult.UPPER:
       return string.toLocaleUpperCase()
   }
-  throw `Invalid TextRange.Case ${stringCase}`;
+  throw `Invalid CaseAnalysisResult ${stringCase}`;
 }
 
 /**

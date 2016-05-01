@@ -43,21 +43,6 @@ Editor.RegExp.Match;
  */
 var RegExpMatch;
 
-// TODO(eval1749): We should rename |TextRange.Case| to |CaseAnalysisResult|.
-/** @enum {!symbol} */
-TextRange.Case = {
-  // "This is capitalized."
-  CAPITALIZED_TEXT: 'CAPITALIZED_TEXT',
-  // "This Is Capitalized Words."
-  CAPITALIZED_WORDS: 'CAPITALIZED_WORDS',
-  // "this is lower."
-  LOWER: 'LOWER',
-  // "ThisIsMixed."
-  MIXED: 'MIXED',
-  // "THIS IS UPPER."
-  UPPER: 'UPPER',
-};
-
 /**
  * @interface
  */

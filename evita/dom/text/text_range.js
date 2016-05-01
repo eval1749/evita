@@ -4,20 +4,6 @@
 'use strict';
 
 (function() {
-  /** @enum{!symbol} */
-  global.TextRange.Case = {
-    // "This is capitalized."
-    CAPITALIZED_TEXT: Symbol('CAPITALIZED_TEXT'),
-    // "This Is Capitalized Words."
-    CAPITALIZED_WORDS: Symbol('CAPITALIZED_WORDS'),
-    // "this is lower."
-    LOWER: Symbol('LOWER'),
-    // "ThisIsMixed."
-    MIXED: Symbol('MIXED'),
-    // "THIS IS UPPER."
-    UPPER: Symbol('UPPER'),
-  };
-
   Object.defineProperties(TextRange.prototype, {
     length: {
       get:
@@ -27,7 +13,7 @@
   });
 
   /**
-   * @return {!TextRange.Case}
+   * @return {!CaseAnalysisResult}
    */
   TextRange.prototype.analyzeCase = function() {
     /** @enum{!symbol} */
@@ -45,7 +31,7 @@
     var document = this.document;
     var start = this.start;
     var end = this.end;
-    var stringCase = TextRange.Case.MIXED;
+    var stringCase = CaseAnalysisResult.MIXED;
     var state = State.START;
     for (var offset = start; offset < end; ++offset) {
       var charCode = document.charCodeAt(offset);
@@ -56,17 +42,17 @@
       switch (state) {
         case State.START:
           if (upperCase) {
-            stringCase = TextRange.Case.CAPITALIZED_WORDS;
+            stringCase = CaseAnalysisResult.CAPITALIZED_WORDS;
             state = State.FIRST_CAP_SECOND;
           } else if (lowerCase) {
-            stringCase = TextRange.Case.LOWER;
+            stringCase = CaseAnalysisResult.LOWER;
             state = State.LOWER;
           }
           break;
         case State.FIRST_CAP_IN_WORD:
           if (upperCase) {
             // We found "FoB".
-            return TextRange.Case.MIXED;
+            return CaseAnalysisResult.MIXED;
           } else if (lowerCase) {
             // We found "Foo".
           } else {
@@ -80,14 +66,14 @@
             state = State.REST_CAP_IN_WORD;
           } else if (lowerCase) {
             // We found "Foo b"
-            stringCase = TextRange.Case.CAPITALIZED_TEXT;
+            stringCase = CaseAnalysisResult.CAPITALIZED_TEXT;
             state = State.LOWER;
           }
           break;
         case State.FIRST_CAP_SECOND:
           if (upperCase) {
             // We found "FO"
-            stringCase = TextRange.Case.UPPER;
+            stringCase = CaseAnalysisResult.UPPER;
             state = State.UPPER;
           } else if (lowerCase) {
             // We found "Fo"
@@ -100,13 +86,13 @@
         case State.LOWER:
           if (upperCase) {
             // We found "foB"
-            return TextRange.Case.MIXED;
+            return CaseAnalysisResult.MIXED;
           }
           break;
         case State.REST_CAP_IN_WORD:
           if (upperCase) {
             // We found "Foo Bar BaZ"
-            return TextRange.Case.MIXED;
+            return CaseAnalysisResult.MIXED;
           }
           if (!lowerCase) {
             // We found "Foo Bar+"
@@ -116,7 +102,7 @@
         case State.REST_CAP_NOT_WORD:
           if (lowerCase) {
             // We found "Foo Bar+b"
-            return TextRange.Case.MIXED;
+            return CaseAnalysisResult.MIXED;
           }
           if (upperCase) {
             // We found "Foo Bar+B"
@@ -126,7 +112,7 @@
         case State.UPPER:
           if (lowerCase) {
             // We found "FOo"
-            return TextRange.Case.MIXED;
+            return CaseAnalysisResult.MIXED;
           }
           break;
         default:

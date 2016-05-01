@@ -7,6 +7,20 @@
 /** @enum {string} */
 var Alter = {EXTEND: 'EXTEND', MOVE: 'MOVE'};
 
+/** @enum {string} */
+var CaseAnalysisResult = {
+  // "This is capitalized."
+  CAPITALIZED_TEXT: 'CAPITALIZED_TEXT',
+  // "This Is Capitalized Words."
+  CAPITALIZED_WORDS: 'CAPITALIZED_WORDS',
+  // "this is lower."
+  LOWER: 'LOWER',
+  // "ThisIsMixed."
+  MIXED: 'MIXED',
+  // "THIS IS UPPER."
+  UPPER: 'UPPER',
+};
+
 /** @enum {number} */
 var Count = {
   BACKWARD: -1 << 28,

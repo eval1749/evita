@@ -4,6 +4,8 @@
 
 goog.provide('visuals.Node');
 
+goog.scope(function() {
+
 class Node {
   /**
    * @protected
@@ -207,3 +209,10 @@ Node.nodeIdMap_;
 Object.defineProperties(Node, {
   nodeIdMap_: {value: new Map()},
 });
+
+/** @constructor */
+visuals.Node = Node;
+});
+
+/** @constructor */
+var Node = visuals.Node;

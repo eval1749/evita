@@ -2,86 +2,105 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-(function() {
-  /**
-   * @this {!FormControl}
-   * @return {boolean}
-   */
-  function canFocus() { return !this.disabled && !!this.form; }
+goog.scope(function() {
+/**
+ * @this {!FormControl}
+ * @return {boolean}
+ */
+function canFocus() {
+  return !this.disabled && !!this.form;
+}
 
-  /**
-   * @this {!FormControl}
-   */
-  function dispatchChangeEvent() {
-    const event = new Event('change', {bubbles: true});
-    this.dispatchEvent(event);
+/**
+ * @this {!FormControl}
+ */
+function dispatchChangeEvent() {
+  const event = new Event('change', {bubbles: true});
+  this.dispatchEvent(event);
+}
+
+/**
+ * @this {!FormControl}
+ */
+function dispatchInputEvent() {
+  const event = new Event('input', {bubbles: true});
+  this.dispatchEvent(event);
+}
+
+/**
+ * @param {!FormControl} control
+ * @param {!Event} event
+ */
+function dispatchEventWithDefaultHandler(control, event) {
+  if (!control.dispatchEvent(event))
+    return;
+  control.constructor.handleEvent.call(control, event);
+}
+
+/**
+ * @this {!FormControl}
+ */
+function focus() {
+  if (!this.canFocus()) {
+    throw new Error(
+        "Failed to execute 'focus' on 'FormControl': " +
+        `${this} can not have focus.`);
   }
-
-  /**
-   * @this {!FormControl}
-   */
-  function dispatchInputEvent() {
-    const event = new Event('input', {bubbles: true});
-    this.dispatchEvent(event);
-  }
-
-  /**
-   * @param {!FormControl} control
-   * @param {!Event} event
-   */
-  function dispatchEventWithDefaultHandler(control, event) {
-    if (!control.dispatchEvent(event))
-      return;
-    control.constructor.handleEvent.call(control, event);
-  }
-
-  /**
-   * @this {!FormControl}
-   */
-  function focus() {
-    if (!this.canFocus()) {
-      throw new Error(
-          "Failed to execute 'focus' on 'FormControl': " +
-          `${this} can not have focus.`);
-    }
-    const oldFocused = this.form.focusControl;
-    if (oldFocused === this)
-      return;
-    this.form.focusControl = this;
-    if (oldFocused) {
-      dispatchEventWithDefaultHandler(
-          oldFocused, new FocusEvent(Event.Names.BLUR, {relatedTarget: this}));
-    }
+  const oldFocused = this.form.focusControl;
+  if (oldFocused === this)
+    return;
+  this.form.focusControl = this;
+  if (oldFocused) {
     dispatchEventWithDefaultHandler(
-        this, new FocusEvent(Event.Names.FOCUS, {relatedTarget: oldFocused}));
+        oldFocused, new FocusEvent(Event.Names.BLUR, {relatedTarget: this}));
   }
+  dispatchEventWithDefaultHandler(
+      this, new FocusEvent(Event.Names.FOCUS, {relatedTarget: oldFocused}));
+}
 
-  Object.defineProperties(FormControl.prototype, {
-    accessKey_: {value: '', writable: true},
-    accessKey: {
-      get: function() { return this.accessKey_; },
-      set: function(key) { this.accessKey_ = key; }
-    },
-    canFocus: {value: canFocus, writable: true},
-    dispatchChangeEvent: {value: dispatchChangeEvent},
-    dispatchInputEvent: {value: dispatchInputEvent},
-    focus: {value: focus}
-  });
+/** @this {!FormControl} @return {string} */
+function getAccessKey() {
+  return this.accessKey_;
+}
 
-  /**
-   * @this {!FormControl}
-   * @param {!Event} event
-   * Default event handler.
-   */
-  function handleEvent(event) {
-    if (event.defaultPrevented)
-      return;
-    if (!this.form)
-      return;
-    Form.handleEvent.call(this.form, event);
-  }
+/** @this {!FormControl} @param {string} newAccessKey*/
+function setAccessKey(newAccessKey) {
+  this.accessKey_ = newAccessKey;
+}
 
-  Object.defineProperties(FormControl, {
-    handleEvent: {value: handleEvent},
-  });
-})();
+Object.defineProperties(FormControl.prototype, {
+  accessKey_: {value: '', writable: true},
+  accessKey: {get: getAccessKey, set: setAccessKey},
+  canFocus: {value: canFocus, writable: true},
+  dispatchChangeEvent: {value: dispatchChangeEvent},
+  dispatchInputEvent: {value: dispatchInputEvent},
+  focus: {value: focus}
+});
+
+/**
+ * @this {!FormControl}
+ * @param {!Event} event
+ * Default event handler.
+ */
+function handleEvent(event) {
+  if (event.defaultPrevented)
+    return;
+  if (!this.form)
+    return;
+  Form.handleEvent.call(this.form, event);
+}
+
+Object.defineProperties(FormControl, {
+  handleEvent: {value: handleEvent},
+});
+
+/**
+ * @type {function()}
+ */
+FormControl.prototype.dispatchChangeEvent;
+
+/**
+ * @type {function()}
+ */
+FormControl.prototype.dispatchInputEvent;
+});

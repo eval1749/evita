@@ -2,25 +2,34 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-Object.defineProperty(Os, 'getenv', {
-  value: (function() {
-    var environment = new Map();
+goog.scope(function() {
 
-    // Os.environmentStrings has "key1=val1\0key2=val2\0...keyN=valN".
-    // It has "=C:", "=D:", ... "=Z:" for working directory of each drive,
-    // "=ExitCode=000000".
-    Os.environmentStrings.split('\0').forEach(function(keyValueString) {
-      var match = keyValueString.match("^(.[^=]+)=(.*)$");
-      if (match)
-        environment.set(match[1], match[2]);
-    });
+/**
+ * @const @type {string}
+ */
+Os.environmentStrings;
 
-    /**
-     * @param {string} name
-     * @return {string|undefined}
-     */
-    function getenv(name) { return environment.get(name); }
+/** @const @type {!Map<string, string>} */
+const environment = new Map();
 
-    return getenv;
-  })()
+// Os.environmentStrings has "key1=val1\0key2=val2\0...keyN=valN".
+// It has "=C:", "=D:", ... "=Z:" for working directory of each drive,
+// "=ExitCode=000000".
+Os.environmentStrings.split('\0').forEach(function(keyValueString) {
+  const match = keyValueString.match("^(.[^=]+)=(.*)$");
+  if (!match)
+    return;
+  environment.set(match[1], match[2]);
+});
+
+/**
+ * @param {string} name
+ * @return {string|undefined}
+ */
+function getenv(name) {
+  return environment.get(name);
+}
+
+
+Os.getenv = getenv;
 });

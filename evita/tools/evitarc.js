@@ -47,7 +47,7 @@
     'Tokenizer', 'tokenizer', 'Tooltip', 'tooltip', 'toplevel', 'Tuple',
     'tuple', 'typedef',
     // U
-    'unordered',
+    'unicode', 'unordered',
     // V
     'Validator', 'validator', 'Variadic', 'variadic', 'Visitable', 'visitable',
     'viewport',

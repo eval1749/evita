@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+goog.scope(function() {
+
 /**
  * CSSStyleRule
  * @implements {CSSStyleObserver}
@@ -54,3 +56,11 @@ class CSSStyleRule extends CSSRule {
     this.parentStyleSheet_.didChangeCSSRule(this.index_);
   }
 }
+
+/** @constructor */
+visuals.CSSStyleRule = CSSStyleRule;
+
+});
+
+/** @constructor */
+var CSSStyleRule = visuals.CSSStyleRule;

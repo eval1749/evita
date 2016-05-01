@@ -143,7 +143,12 @@ js_module("global_module") {
               "global.js",
               "goog.js",
               "closure_compiler_workaround.js",
-            ] + js_defs_files + js_lib_files
+              "enums.js",
+              "events/event_enums.js",
+              "strings_en_US.js",
+              "unicode/unicode_enums.js",
+              "windows/window_enums.js",
+            ] + js_lib_files
   externs = [
     "//evita/dom/components/clipboard/clipboard_externs.js",
     "//evita/dom/os/os_externs.js",

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+goog.require('spell_checker');
+
 goog.scope(function() {
 
 /**
@@ -13,7 +15,7 @@ function ensureDocument(name) {
   if (present)
     return present;
   const document = TextDocument.new(name);
-  SpellChecker.disable(document);
+  spell_checker.SpellChecker.disable(document);
 
   // Bind "Ctrl+L" to clear document.
   document.bindKey(

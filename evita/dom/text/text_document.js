@@ -560,7 +560,7 @@
     documentNameMap.set(this.name_, this);
   }
 
-  $initialize(function() {
+  core.Initializer.register(function() {
     documentNameMap.clear();
     if (internalTextDocumentSetObservers.size === 0) {
       internalTextDocumentSetObservers = new Set(documentSetObservers);

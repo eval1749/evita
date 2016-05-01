@@ -359,7 +359,7 @@ void AbstractDomTest::SetUp() {
       auto const key = keys->Get(index);
       global->Set(key, object->Get(key));
     }
-    runner_->Run(L"initialize()", L"*test*");
+    runner_->Run(L"core.Initialize.initialize()", L"*test*");
     return;
   }
 

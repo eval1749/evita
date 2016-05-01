@@ -30,7 +30,7 @@ global.editors = {};
    * @param {!Array.<string>} args
    */
   function start(args) {
-    initialize();
+    Initializer.initialize();
     loadUserScript();
     /** @const @type {!EditorWindow} */
     const editorWindow = new EditorWindow();

@@ -7,6 +7,7 @@ goog.require('find_and_replace');
 goog.scope(function() {
 const FindAndReplace = find_and_replace.FindAndReplace;
 const FindAndReplaceOptions = find_and_replace.FindAndReplaceOptions;
+const hasUpperCase = find_and_replace.hasUpperCase;
 
 /** @const @type {number} */
 const MAX_ENTRIES = 7;
@@ -316,21 +317,6 @@ function handleTextFieldKeyDown(event) {
       event.preventDefault();
       break;
   }
-}
-
-/**
- * @param {string} text
- * @return {boolean}
- */
-function hasUpperCase(text) {
-  for (let i = 0; i < text.length; ++i) {
-    let data = Unicode.UCD[text.charCodeAt(i)];
-    if (data.category === Unicode.Category.Lu ||
-        data.category === Unicode.Category.Lt) {
-      return true;
-    }
-  }
-  return false;
 }
 
 /**

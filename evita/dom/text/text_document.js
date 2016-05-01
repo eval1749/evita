@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file
 
+goog.require('unicode');
+
 goog.scope(function() {
 /** @enum {string} */
 const WordClass = {
@@ -58,7 +60,7 @@ function throwUnsupportedUnit(name, unit) {
  * line
  */
 function wordClassOf(charCode) {
-  return WORD_CLASS_MAP.get(Unicode.UCD[charCode].category) || null;
+  return WORD_CLASS_MAP.get(unicode.categoryOf(charCode)) || null;
 }
 
 /**

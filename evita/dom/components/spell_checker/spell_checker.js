@@ -4,6 +4,8 @@
 
 goog.provide('spell_checker');
 
+goog.require('unicode');
+
 goog.scope(function() {
 /**
  * @enum {number}
@@ -149,9 +151,7 @@ class Scanner {
   atStart() { return this.offset_ === 0; }
 
   /** @return {boolean} */
-  atWordChar() {
-    return Unicode.UCD[this.charCode()].category.charCodeAt(0) === 0x4C;
-  }
+  atWordChar() { return unicode.isLetter(this.charCode()); }
 
   /** @return {number} */
   charCode() { return this.document_.charCodeAt(this.offset_); }
@@ -183,17 +183,16 @@ class Scanner {
   isDead() { return this.life_ === 0 }
 
   /**
-   * @param {!Unicode.CharacterData} wordData
+   * @param {!Unicode.Script} script
    * @return {boolean}
    *
    * Note: The script for U+30FC, Katakana-Hiragana prolonged sound mark, is
    * Unicode.Script.COMMON, instead of "HIRAGANA" or KATAKANA.
    */
-  isWordChar(wordData) {
-    const data = Unicode.UCD[this.charCode()];
-    if (data.category.charCodeAt(0) !== 0x4C)
+  isWordChar(script) {
+    if (!unicode.isLetter(this.charCode()))
       return false;
-    return wordData.script === data.script;
+    return unicode.scriptOf(this.charCode()) === script;
   }
 
   moveNext() {
@@ -216,10 +215,13 @@ class Scanner {
   moveToEndOfWord() {
     if (this.atEnd())
       return false;
-    const wordData = Unicode.UCD[this.charCode()];
-    if (wordData.category.charCodeAt(0) !== 0x4C)
-      return true;
-    while (!this.atEnd() && this.isWordChar(wordData)) {
+    /** @const @type {number} */
+    const charCode = this.charCode();
+    if (!unicode.isLetter(charCode))
+      return false;
+    /** @const @type {symbol} */
+    const script = unicode.scriptOf(charCode);
+    while (!this.atEnd() && this.isWordChar(script)) {
       if (!this.moveNext())
         return false;
     }
@@ -249,11 +251,12 @@ class Scanner {
     }
     if (this.atStart())
       return true;
-    const wordData = Unicode.UCD[this.charCode()];
+    /** @const @type {!Unicode.Script} */
+    const script = unicode.scriptOf(this.charCode());
     while (!this.atStart()) {
       if (!this.movePrevious())
         return false;
-      if (!this.isWordChar(wordData))
+      if (!this.isWordChar(script))
         return this.moveNext();
     }
     return true;

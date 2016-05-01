@@ -4,6 +4,8 @@
 
 goog.provide('find_and_replace');
 
+goog.require('unicode');
+
 goog.scope(function() {
 /**
  * @param {string} string
@@ -15,12 +17,11 @@ function caseReplace(string, stringCase) {
     return string;
   switch (stringCase) {
     case CaseAnalysisResult.CAPITALIZED_TEXT: {
-      for (let index = 0; index < string.length; ++index) {
-        let charCode = string.charCodeAt(index);
-        let ucd = Unicode.UCD[charCode];
-        if (ucd.category === Unicode.Category.Lu ||
-            ucd.category === Unicode.Category.Ll ||
-            ucd.category === Unicode.Category.Lt) {
+      for (/** @type {number} */ let index = 0; index < string.length;
+           ++index) {
+        /** @const @type {number} */
+        const charCode = string.charCodeAt(index);
+        if (unicode.isLetter(charCode)) {
           return string.substr(0, index) +
               string.substr(index, 1).toLocaleUpperCase() +
               string.substr(index + 1);
@@ -36,12 +37,11 @@ function caseReplace(string, stringCase) {
       for (let index = 0; index < string.length; ++index) {
         /** @type {number} */
         const charCode = string.charCodeAt(index);
-        const ucd = Unicode.UCD[charCode];
-        /** @type {boolean} */
-        const upperCase = ucd.category === Unicode.Category.Lu ||
-            ucd.category === Unicode.Category.Lt;
-        /** @type {boolean} */
-        const lowerCase = ucd.category === Unicode.Category.Ll;
+        /** @const @type {boolean} */
+        const upperCase =
+            unicode.isUpperCase(charCode) || unicode.isTitleCase(charCode);
+        /** @const @type {boolean} */
+        const lowerCase = unicode.isLowerCase(charCode);
         /** @type {number} */
         let newCharCode = charCode;
         if (inWord) {
@@ -168,12 +168,11 @@ function find(window, searchText, findOptions) {
  * @return {boolean}
  */
 function hasUpperCase(text) {
-  for (let i = 0; i < text.length; ++i) {
-    const data = Unicode.UCD[text.charCodeAt(i)];
-    if (data.category === Unicode.Category.Lu ||
-        data.category === Unicode.Category.Lt) {
+  for (/** @type {number} */ let i = 0; i < text.length; ++i) {
+    /** @const @type {number} */
+    const charCode = text.charCodeAt(i);
+    if (unicode.isUpperCase(charCode) || unicode.isTitleCase(charCode))
       return true;
-    }
   }
   return false;
 }
@@ -597,4 +596,10 @@ find_and_replace.FindAndReplace = FindAndReplace;
 
 /** @constructor */
 find_and_replace.FindAndReplaceOptions = FindAndReplaceOptions;
+
+/**
+ * @param {string} text
+ * @return {boolean}
+ */
+find_and_replace.hasUpperCase = hasUpperCase;
 });

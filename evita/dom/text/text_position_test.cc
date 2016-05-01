@@ -197,7 +197,7 @@ TEST_F(TextPositionTest, moveWhile) {
       "var pos = new TextPosition(doc, 0);"
       "function whitespace() {"
       "  var char_code = this.charCode();"
-      "  return Unicode.UCD[char_code].category.charAt(0) == 'Z';"
+      "  return unicode.isSeparator(char_code);"
       "}");
   EXPECT_SCRIPT_EQ("1", "pos.moveWhile(whitespace).offset");
   EXPECT_SCRIPT_EQ("0", "pos.moveWhile(whitespace, -1).offset");

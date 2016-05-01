@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+goog.require('unicode');
+
 goog.scope(function() {
 
 /** @enum{string} */
@@ -42,10 +44,11 @@ function analyzeCase() {
   let state = State.START;
   for (let offset = start; offset < end; ++offset) {
     const charCode = document.charCodeAt(offset);
-    const ucd = Unicode.UCD[charCode];
-    const lowerCase = ucd.category == Unicode.Category.Ll ||
-        ucd.category == Unicode.Category.Lt;
-    const upperCase = ucd.category == Unicode.Category.Lu;
+    /** @const @type {boolean} */
+    const lowerCase = unicode.isLowerCase(charCode);
+    /** @const @type {boolean} */
+    const upperCase =
+        unicode.isUpperCase(charCode) || unicode.isTitleCase(charCode);
     switch (state) {
       case State.START:
         if (upperCase) {
@@ -137,11 +140,8 @@ function analyzeCase() {
 function capitalize() {
   /** @const @type {string} */
   const text = this.text;
-  for (/** @type {number} */let i = 0; i < text.length; ++i) {
-    const data = Unicode.UCD[text.charCodeAt(i)];
-    if (data.category == Unicode.Category.Lu ||
-        data.category == Unicode.Category.Ll ||
-        data.category == Unicode.Category.Lt) {
+  for (/** @type {number} */ let i = 0; i < text.length; ++i) {
+    if (unicode.isLetter(text.charCodeAt(i))) {
       this.text = text.substr(0, i) + text.charAt(i).toLocaleUpperCase() +
           text.substr(i + 1).toLocaleLowerCase();
       break;

@@ -17,6 +17,7 @@ FILE_TYPES = {
     '.c': 'c++',
     '.gn': 'gn',
     '.gni': 'gn',
+    '.idl': 'c++',
     '.js': 'js',
     '.java': 'java',
     '.py': 'python',

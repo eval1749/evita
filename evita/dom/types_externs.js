@@ -93,6 +93,14 @@ var RunScriptResult;
 /** @typedef {boolean|number|string} */
 var SwitchValue;
 
+/**
+ * @typedef {{
+ *  absolute: boolean,
+ *  components: !Array.<string>,
+ *  winDrive: ?string}}
+ */
+var FilePathSplit;
+
 //////////////////////////////////////////////////////////////////////
 //
 // Unicode

@@ -82,8 +82,7 @@
 
   /**
    * @param {string} fileName
-   * @return {{absolute: boolean, components: Array.<string>,
-   *           winDrive: ?string}}
+   * @return {!FilePathSplit}
    */
   FilePath.split = function(fileName) {
     var matches = fileName.match(RE_PATHNAME);

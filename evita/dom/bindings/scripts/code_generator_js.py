@@ -403,7 +403,11 @@ def type_string_without_nullable(idl_type):
                                for member_type in idl_type.member_types))
     if idl_type.is_array or idl_type.is_sequence or \
        idl_type.is_array_or_sequence_type:
-        return 'Array.<%s>' % type_string(idl_type.element_type)
+        element_type = type_string(idl_type.element_type)
+        # TODO(eval1749): We should handle |Generator<T>| to better way.
+        if str(idl_type).startswith('FrozenArray<'):
+            return 'Generator<%s>' % element_type
+        return 'Array.<%s>' % element_type
     assert idl_type.base_type, idl_type
     if idl_type.base_type in IDL_TO_JS_TYPE_MAP:
         return IDL_TO_JS_TYPE_MAP[idl_type.base_type]

@@ -25,15 +25,10 @@ TEST_F(UnicodTest, File) {
 TEST_F(UnicodTest, Basic) {
   EXPECT_SCRIPT_VALID("var u = Unicode");
   EXPECT_SCRIPT_EQ("65536", "u.UCD.length");
-  EXPECT_SCRIPT_TRUE("u.UCD['\\n'.charCodeAt(0)].bidi == u.Bidi.B");
   EXPECT_SCRIPT_TRUE("u.UCD['\\n '.charCodeAt(0)].category == u.Category.Cc");
-  EXPECT_SCRIPT_TRUE("u.UCD[' '.charCodeAt(0)].bidi == u.Bidi.WS");
   EXPECT_SCRIPT_TRUE("u.UCD[' '.charCodeAt(0)].category == u.Category.Zs");
-  EXPECT_SCRIPT_TRUE("u.UCD['5'.charCodeAt(0)].bidi == u.Bidi.EN");
   EXPECT_SCRIPT_TRUE("u.UCD['5'.charCodeAt(0)].category == u.Category.Nd");
-  EXPECT_SCRIPT_TRUE("u.UCD['A'.charCodeAt(0)].bidi == u.Bidi.L");
   EXPECT_SCRIPT_TRUE("u.UCD['A'.charCodeAt(0)].category == u.Category.Lu");
-  EXPECT_SCRIPT_TRUE("u.UCD['z'.charCodeAt(0)].bidi == u.Bidi.L");
   EXPECT_SCRIPT_TRUE("u.UCD['z'.charCodeAt(0)].category == u.Category.Ll");
 }
 

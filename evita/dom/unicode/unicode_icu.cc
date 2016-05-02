@@ -17,17 +17,6 @@ namespace dom {
 namespace internal {
 
 namespace {
-// Note: The order of |kBidiClassNames| must be matched to |UCharDirection|.
-const char* kBidiClassNames[] = {
-    "L",   "R",   "EN", "ES",  "ET",  "AN",  "CS",  "B",
-    "S",   "WS",  "ON", "LRE", "LRO", "AL",  "RLE", "RLO",
-    "PDF", "NSM", "BN", "FSI", "LRI", "RLI", "PDI",
-};
-
-static_assert(sizeof(kBidiClassNames) / sizeof(*kBidiClassNames) ==
-                  U_CHAR_DIRECTION_COUNT,
-              "kBidiClassNames size mismatch");
-
 // Note: The order of |kCategoryNames| must be matched to |UCharCategory|.
 const char* kCategoryNames[] = {
     "Cn", "Lu", "Ll", "Lt", "Lm", "Lo", "Mn", "Me", "Mc", "Nd",
@@ -224,37 +213,15 @@ static_assert(sizeof(kCategoryNames) / sizeof(*kCategoryNames) ==
   DCHECK((vector)[index][0] == (name)[0] && (vector)[index][1] == (name)[1] && \
          (vector)[index][2] == (name)[2] && (vector)[index][3] == (name)[3])
 
-// Unicode.BIDI_CLASS_SHORT_NAMES : Array.<string>
-// Unicode.GENERAL_CATEGORY_SHOT_NAMES : Array.<string>
-// Unicode.Bidi : enum
+// Unicode.CATEGORY_SHOT_NAMES : Array.<string>
+// Unicode.SCRIPT_NAMES : Array.<string>
 // Unicode.Category : enum
 // Unicode.Script: enum
-// Uicode.UCD : Array.<{
-//  bidi: Unicode.Bidi,
+// Unicode.UCD : Array.<{
 //  category: Unicode.Category,
 //  script: Unicode.Script,
 // }>
 v8::Local<v8::Object> CreateUnicode(v8::Isolate* isolate) {
-  DCHECK_EQ_CHAR_1(kBidiClassNames, U_LEFT_TO_RIGHT, "L");
-  DCHECK_EQ_CHAR_1(kBidiClassNames, U_RIGHT_TO_LEFT, "R");
-  DCHECK_EQ_CHAR_2(kBidiClassNames, U_EUROPEAN_NUMBER, "EN");
-  DCHECK_EQ_CHAR_2(kBidiClassNames, U_EUROPEAN_NUMBER_SEPARATOR, "ES");
-  DCHECK_EQ_CHAR_2(kBidiClassNames, U_EUROPEAN_NUMBER_TERMINATOR, "ET");
-  DCHECK_EQ_CHAR_2(kBidiClassNames, U_ARABIC_NUMBER, "AN");
-  DCHECK_EQ_CHAR_2(kBidiClassNames, U_COMMON_NUMBER_SEPARATOR, "CS");
-  DCHECK_EQ_CHAR_1(kBidiClassNames, U_BLOCK_SEPARATOR, "B");
-  DCHECK_EQ_CHAR_1(kBidiClassNames, U_SEGMENT_SEPARATOR, "S");
-  DCHECK_EQ_CHAR_2(kBidiClassNames, U_WHITE_SPACE_NEUTRAL, "WS");
-  DCHECK_EQ_CHAR_2(kBidiClassNames, U_OTHER_NEUTRAL, "ON");
-  DCHECK_EQ_CHAR_3(kBidiClassNames, U_LEFT_TO_RIGHT_EMBEDDING, "LRE");
-  DCHECK_EQ_CHAR_3(kBidiClassNames, U_LEFT_TO_RIGHT_OVERRIDE, "LRO");
-  DCHECK_EQ_CHAR_2(kBidiClassNames, U_RIGHT_TO_LEFT_ARABIC, "AL");
-  DCHECK_EQ_CHAR_3(kBidiClassNames, U_RIGHT_TO_LEFT_EMBEDDING, "RLE");
-  DCHECK_EQ_CHAR_3(kBidiClassNames, U_RIGHT_TO_LEFT_OVERRIDE, "RLO");
-  DCHECK_EQ_CHAR_3(kBidiClassNames, U_POP_DIRECTIONAL_FORMAT, "PDF");
-  DCHECK_EQ_CHAR_3(kBidiClassNames, U_DIR_NON_SPACING_MARK, "NSM");
-  DCHECK_EQ_CHAR_2(kBidiClassNames, U_BOUNDARY_NEUTRAL, "BN");
-
   DCHECK_EQ_CHAR_2(kCategoryNames, U_UNASSIGNED, "Cn");
   DCHECK_EQ_CHAR_2(kCategoryNames, U_UPPERCASE_LETTER, "Lu");
   DCHECK_EQ_CHAR_2(kCategoryNames, U_LOWERCASE_LETTER, "Ll");
@@ -296,17 +263,6 @@ v8::Local<v8::Object> CreateUnicode(v8::Isolate* isolate) {
   v8::EscapableHandleScope handle_scope(isolate);
   auto unicode = v8::Object::New(isolate);
 
-  // Bidi class list
-  auto bidi_names = v8::Array::New(isolate, arraysize(kBidiClassNames));
-  auto bidi_object = v8::Object::New(isolate);
-  for (auto i = 0; i < arraysize(kBidiClassNames); ++i) {
-    auto name = gin::StringToV8(isolate, kBidiClassNames[i]);
-    bidi_object->Set(name, name);
-    bidi_names->Set(static_cast<size_t>(i), name);
-  }
-  unicode->Set(gin::StringToV8(isolate, "Bidi"), bidi_object);
-  unicode->Set(gin::StringToV8(isolate, "BIDI_CLASS_SHORT_NAMES"), bidi_names);
-
   // Category name
   auto category_names = v8::Array::New(isolate, arraysize(kCategoryNames));
   auto category_object = v8::Object::New(isolate);
@@ -336,7 +292,6 @@ v8::Local<v8::Object> CreateUnicode(v8::Isolate* isolate) {
   unicode->Set(gin::StringToV8(isolate, "UCD"), ucd);
   auto name = gin::StringToV8(isolate, "name");
   auto category = gin::StringToV8(isolate, "category");
-  auto bidi_class = gin::StringToV8(isolate, "bidi");
   auto script_string = gin::StringToV8(isolate, "script");
   for (auto code = 0; code <= 0xFFFF; ++code) {
     auto data = v8::Object::New(isolate);
@@ -352,11 +307,6 @@ v8::Local<v8::Object> CreateUnicode(v8::Isolate* isolate) {
     CHECK_EQ(U_ZERO_ERROR, error_code);
     data->ForceSet(name, gin::StringToV8(isolate, name_buffer));
 #endif
-
-    // bidi class
-    auto const bidi_class_index = u_charDirection(code);
-    CHECK(bidi_class_index < arraysize(kBidiClassNames));
-    data->ForceSet(bidi_class, bidi_names->Get(bidi_class_index));
 
     // general category
     auto const category_index = u_charType(code);

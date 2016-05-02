@@ -154,7 +154,6 @@ Unicode.Script;
 
 /**
  * @typedef {{
- *    bidi: string,
  *    category: string,
  *    script: Unicode.Script
  * }}

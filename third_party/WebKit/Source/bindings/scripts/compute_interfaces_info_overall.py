@@ -92,6 +92,7 @@ INHERITED_EXTENDED_ATTRIBUTES = set([
     'ActiveDOMObject',
     'DependentLifetime',
     'GarbageCollected',
+    'JsNamespace',
     'WillBeGarbageCollected',
 ])
 
@@ -168,6 +169,7 @@ def compute_global_type_info():
     ancestors = {}
     dictionaries = {}
     component_dirs = {}
+    namespaces = {}
     implemented_as_interfaces = {}
     will_be_garbage_collected_interfaces = set()
     garbage_collected_interfaces = set()
@@ -186,6 +188,8 @@ def compute_global_type_info():
             implemented_as_interfaces[interface_name] = interface_info['implemented_as']
 
         inherited_extended_attributes = interface_info['inherited_extended_attributes']
+        if 'JsNamespace' in inherited_extended_attributes:
+            namespaces[interface_name] = inherited_extended_attributes['JsNamespace']
         if 'WillBeGarbageCollected' in inherited_extended_attributes:
             will_be_garbage_collected_interfaces.add(interface_name)
         if 'GarbageCollected' in inherited_extended_attributes:
@@ -194,6 +198,7 @@ def compute_global_type_info():
     interfaces_info['ancestors'] = ancestors
     interfaces_info['callback_interfaces'] = callback_interfaces
     interfaces_info['dictionaries'] = dictionaries
+    interfaces_info['namespaces'] = namespaces
     interfaces_info['implemented_as_interfaces'] = implemented_as_interfaces
     interfaces_info['garbage_collected_interfaces'] = garbage_collected_interfaces
     interfaces_info['will_be_garbage_collected_interfaces'] = will_be_garbage_collected_interfaces

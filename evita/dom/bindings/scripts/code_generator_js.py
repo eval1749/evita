@@ -26,6 +26,7 @@ import idl_types
 from idl_types import IdlType
 
 IDL_TO_JS_TYPE_MAP = {
+    'Any': '*',
     'DOMString': 'string',
     'DOMHighResTimeStamp': 'number',
     'DOMTimeStamp': 'Date',
@@ -45,11 +46,6 @@ IDL_TO_JS_TYPE_MAP = {
     'unsigned short': 'number',
 }
 
-NAMESPACE_MAP = {
-    'AbstractFile': 'Os',
-    'File': 'Os',
-}
-
 
 NON_NULL_JS_TYPE_SET = frozenset([
     'boolean',
@@ -57,6 +53,17 @@ NON_NULL_JS_TYPE_SET = frozenset([
     'string',
     'void',
 ])
+
+
+global_namespace_map = dict()
+
+
+# We changed "compute_interfaces_info_overall.py"[1] to get JavaScript namespace
+# information in extended attributes into "InterfaceInfoOverall.pickle".
+# [1] third_party/WebKit/Source/bindings/scripts/
+def set_global_namespace_map(info_provider):
+    global global_namespace_map
+    global_namespace_map = info_provider.interfaces_info['namespaces']
 
 
 # TODO(eval1749) We should share |set_global_type_info()| with
@@ -145,6 +152,7 @@ class CodeGeneratorJS(object):
         self.typedef_resolver = TypedefResolver(info_provider)
         self.output_dir = output_dir
         set_global_type_info(info_provider)
+        set_global_namespace_map(info_provider)
 
     def generate_code(self, module_definitions):
         definitions = module_definitions['dom']
@@ -178,13 +186,13 @@ class CodeGeneratorJS(object):
             context = function_context_of(interface.constructors +
                                           interface.custom_constructors)
             context['name'] = interface.name
-            context['parent_name'] = parent_name_of(interface.parent)
+            context['parent_name'] = js_interface_name_of(interface.parent)
             context['kind'] = 'constructor'
             return [context]
         context = {
             'name': interface.name,
             'parameters': [],
-            'parent_name': parent_name_of(interface.parent),
+            'parent_name': js_interface_name_of(interface.parent),
         }
         if is_pure_interface(interface):
             context['kind'] = 'interface'
@@ -330,6 +338,13 @@ def initialize_jinja_env(cache_dir):
     return jinja_env
 
 
+def js_interface_name_of(name):
+    """Add namespace name to interface name if needed."""
+    if not(name in global_namespace_map):
+        return name
+    return '%s.%s' % (global_namespace_map[name], name)
+
+
 def overloaded_parameter(overloaded_parameters):
     parameters = [parameter for parameter in overloaded_parameters
                   if parameter]
@@ -359,12 +374,6 @@ def parameter_name(name, is_optional):
 def parameter_type_string(parameter, is_optional):
     string = type_string(parameter.idl_type)
     return string + '=' if is_optional else string
-
-
-def parent_name_of(name):
-    if name in NAMESPACE_MAP:
-        return NAMESPACE_MAP[name] + '.' + name
-    return name
 
 
 def sort_context_list(context_list):
@@ -402,7 +411,7 @@ def type_string_without_nullable(idl_type):
     assert idl_type.base_type, idl_type
     if idl_type.base_type in IDL_TO_JS_TYPE_MAP:
         return IDL_TO_JS_TYPE_MAP[idl_type.base_type]
-    return idl_type.name
+    return js_interface_name_of(idl_type.name)
 
 
 def union_type_string(type_strings):

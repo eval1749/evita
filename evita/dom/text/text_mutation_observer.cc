@@ -132,8 +132,10 @@ void TextMutationObserver::Tracker::RunCallback() {
   ginx::Runner::Scope runner_scope(runner);
   const auto isolate = runner->isolate();
   v8::Local<v8::Value> records;
-  if (!gin::TryConvertToV8(isolate, TakeRecords(), &records))
+  if (!gin::TryConvertToV8(isolate, TakeRecords(), &records)) {
+    LOG(FATAL) << "Failed to convert mutation records";
     return;
+  }
   runner->CallAsFunction(observer_->callback_.NewLocal(isolate),
                          v8::Undefined(isolate), records,
                          gin::ConvertToV8(isolate, observer_));

@@ -7,8 +7,10 @@
   </outputs>
   <release seq="1">
     <includes>
-      <include file="${target_out_dir}/global_module.bin"
-               name="GLOBAL_MODULE_BIN" type="BINDATA"/>
+      <include file="${target_out_dir}/global_module.jsobj"
+               name="GLOBAL_MODULE_JSOBJ" type="BINDATA"/>
+      <include file="${target_out_dir}/components/components.jslib"
+               name="COMPONETNS_JSLIB" type="BINDATA"/>
     </includes>
   </release>
 </grit>

@@ -19,8 +19,8 @@
 namespace dom {
 
 bool Global::LoadScript(ginx::Runner* runner) {
-  const auto& raw_list =
-      base::ResourceBundle::GetInstance()->GetRawDatResource(GLOBAL_MODULE_BIN);
+  const auto& raw_list = base::ResourceBundle::GetInstance()->GetRawDatResource(
+      GLOBAL_MODULE_JSOBJ);
   if (!raw_list.data()) {
     LOG(FATAL) << "No global js files in resource.";
     return false;

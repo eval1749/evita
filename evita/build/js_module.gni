@@ -42,7 +42,7 @@ template("js_module") {
   }
 
   checked_js = "${target_name}_checked.js"
-  module_bin = "$target_out_dir/${target_name}.bin"
+  module_obj = "$target_out_dir/${target_name}.jsobj"
 
   checked_js_module(checked_js) {
     forward_variables_from(invoker,
@@ -57,8 +57,8 @@ template("js_module") {
 
   action(target_name) {
     response_file_contents = rebase_path(invoker.sources)
-    output_name = "$module_bin"
-    script = "//evita/build/scripts/make_js_module_bin.py"
+    output_name = "$module_obj"
+    script = "//evita/build/scripts/make_js_module_obj.py"
     inputs = invoker.sources
     outputs = [
       output_name,

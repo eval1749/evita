@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-callback FrameRequestCallback = void (DOMHighResTimeStamp time);
-callback IdleRequestCallback = void (IdleDeadline deadline);
+callback FrameRequestCallback = void(DOMHighResTimeStamp time);
+callback IdleRequestCallback = void(IdleDeadline deadline);
 
 // Trace Event JSON
 // pid  process id
@@ -17,23 +17,22 @@ callback IdleRequestCallback = void (IdleDeadline deadline);
 // dur  duration
 // tdur thread duration
 // tts  thread time
-callback TraceLogOutputCallback = void(DOMString trace_event_json,
-                                       boolean has_more_events);
+callback TraceLogOutputCallback =
+    void(DOMString trace_event_json, boolean has_more_events);
 
 interface Editor {
   static readonly attribute Performance performance;
   static readonly attribute DOMString v8Version;
   static readonly attribute DOMString version;
 
-  [ImplementedAs=JavaScript]
-  static readonly attribute KeyBindingMapMap key_binding_map_map_;
+  [ImplementedAs = JavaScript] static readonly attribute KeyBindingMapMap
+      key_binding_map_map_;
 
-  [ImplementedAs=JavaScript]
-  static Window activeWindow();
+  [ImplementedAs = JavaScript] static Window activeWindow();
 
-  [ImplementedAs=JavaScript]
-  static void bindKey(Function window_class, DOMString key_combination,
-                      Function command, optional DOMString description);
+  [ImplementedAs = JavaScript] static void bindKey(
+      Function window_class, DOMString key_combination, Function command,
+      optional DOMString description);
 
   static Promise<boolean> checkSpelling(DOMString word_to_check);
 
@@ -43,11 +42,9 @@ interface Editor {
    */
   static boolean collectGarbage(optional long hint);
 
-  [ImplementedAs=JavaScript]
-  static void exit();
+  [ImplementedAs = JavaScript] static void exit();
 
-  [ImplementedAs=JavaScript]
-  static void forceExit();
+  [ImplementedAs = JavaScript] static void forceExit();
 
   static Promise<DOMString> getFileNameForLoad(Window? window,
                                                DOMString file_name);
@@ -55,11 +52,11 @@ interface Editor {
                                                DOMString file_name);
   static Promise<DOMString[]> getSpellingSuggestions(DOMString wrong_word);
 
-  [ImplementedAs=JavaScript]
-  static DOMString localizeText(DOMString format_text);
+  [ImplementedAs = JavaScript] static DOMString localizeText(
+      DOMString format_text);
 
-  [ImplementedAs=JavaScript]
-  static DOMString localizeText(DOMString format_text, StringDict opt_dict);
+  [ImplementedAs = JavaScript] static DOMString localizeText(
+      DOMString format_text, StringDict opt_dict);
 
   /**
    * @param {Window?} window
@@ -71,27 +68,23 @@ interface Editor {
   static Promise<long> messageBox(Window? window, DOMString message,
                                   long flags, optional DOMString title);
 
-  [ImplementedAs=GetMetrics]
-  static Promise<DOMString> metrics(DOMString name);
+  [ImplementedAs = GetMetrics] static Promise<DOMString> metrics(
+      DOMString name);
 
-  [ImplementedAs=JavaScript]
-  static void open(DOMString fileName);
+  [ImplementedAs = JavaScript] static void open(DOMString fileName);
 
-  [ImplementedAs=JavaScript]
-  static long parseKeyCombination(DOMString spec);
+  [ImplementedAs = JavaScript] static long parseKeyCombination(DOMString spec);
 
-  [ImplementedAs=JavaScript]
-  static void processCommandLine(DOMString directory, DOMString[] args);
+  [ImplementedAs = JavaScript] static void processCommandLine(
+      DOMString directory, DOMString[] args);
 
   static void setTabData(Window window, TabData tabData);
 
   static void setSwitch(DOMString name, SwitchValue new_value);
 
-  [ImplementedAs=GetSwitch]
-  static SwitchValue switch(DOMString name);
+  [ImplementedAs = GetSwitch] static SwitchValue switch (DOMString name);
 
-  [ImplementedAs=GetSwitchNames]
-  static DOMString[] switcheNames();
+  [ImplementedAs = GetSwitchNames] static DOMString[] switcheNames();
 
   /**
    * @param {string} script_text
@@ -101,8 +94,7 @@ interface Editor {
   static RunScriptResult runScript(DOMString script_text,
                                    optional DOMString file_name);
 
-  [ImplementedAs=JavaScript]
-  static DOMString stringify(any value);
+  [ImplementedAs = JavaScript] static DOMString stringify(any value);
 
   // Trace Log
   // |config_string| is a dictionary formatted as a JSON string, containing both

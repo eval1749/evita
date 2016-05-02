@@ -39,140 +39,174 @@ static_assert(sizeof(kCategoryNames) / sizeof(*kCategoryNames) ==
                   U_CHAR_CATEGORY_COUNT,
               "kCategoryNames size mismatch");
 
-#define FOR_EACH_SCRIPT(V)                                    \
-  V(CAUCASIAN_ALBANIAN, "Aghb", "Caucasian Albanian")         \
-  V(AHOM, "Ahom", "Ahom")                                     \
-  V(ARABIC, "Arab", "Arabic")                                 \
-  V(IMPERIAL_ARAMAIC, "Armi", "Imperial Aramaic")             \
-  V(ARMENIAN, "Armn", "Armenian")                             \
-  V(AVESTAN, "Avst", "Avestan")                               \
-  V(BALINESE, "Bali", "Balinese")                             \
-  V(BAMUM, "Bamu", "Bamum")                                   \
-  V(BASSA_VAH, "Bass", "Bassa Vah")                           \
-  V(BATAK, "Batk", "Batak")                                   \
-  V(BENGALI, "Beng", "Bengali")                               \
-  V(BOPOMOFO, "Bopo", "Bopomofo")                             \
-  V(BRAHMI, "Brah", "Brahmi")                                 \
-  V(BRAILLE, "Brai", "Braille")                               \
-  V(BUGINESE, "Bugi", "Buginese")                             \
-  V(BUHID, "Buhd", "Buhid")                                   \
-  V(CHAKMA, "Cakm", "Chakma")                                 \
-  V(CANADIAN_ABORIGINAL, "Cans", "Canadian Aboriginal")       \
-  V(CARIAN, "Cari", "Carian")                                 \
-  V(CHAM, "Cham", "Cham")                                     \
-  V(CHEROKEE, "Cher", "Cherokee")                             \
-  V(COPTIC, "Copt", "Coptic")                                 \
-  V(CYPRIOT, "Cprt", "Cypriot")                               \
-  V(CYRILLIC, "Cyrl", "Cyrillic")                             \
-  V(DEVANAGARI, "Deva", "Devanagari")                         \
-  V(DESERET, "Dsrt", "Deseret")                               \
-  V(DUPLOYAN, "Dupl", "Duployan")                             \
-  V(EGYPTIAN_HIEROGLYPHS, "Egyp", "Egyptian Hieroglyphs")     \
-  V(ELBASAN, "Elba", "Elbasan")                               \
-  V(ETHIOPIC, "Ethi", "Ethiopic")                             \
-  V(GEORGIAN, "Geor", "Georgian")                             \
-  V(GLAGOLITIC, "Glag", "Glagolitic")                         \
-  V(GOTHIC, "Goth", "Gothic")                                 \
-  V(GRANTHA, "Gran", "Grantha")                               \
-  V(GREEK, "Grek", "Greek")                                   \
-  V(GUJARATI, "Gujr", "Gujarati")                             \
-  V(GURMUKHI, "Guru", "Gurmukhi")                             \
-  V(HANGUL, "Hang", "Hangul")                                 \
-  V(HAN, "Hani", "Han")                                       \
-  V(HANUNOO, "Hano", "Hanunoo")                               \
-  V(HATRAN, "Hatr", "Hatran")                                 \
-  V(HEBREW, "Hebr", "Hebrew")                                 \
-  V(HIRAGANA, "Hira", "Hiragana")                             \
-  V(ANATOLIAN_HIEROGLYPHS, "Hluw", "Anatolian Hieroglyphs")   \
-  V(PAHAWH_HMONG, "Hmng", "Pahawh Hmong")                     \
-  V(KATAKANA_OR_HIRAGANA, "Hrkt", "Katakana Or Hiragana")     \
-  V(OLD_HUNGARIAN, "Hung", "Old Hungarian")                   \
-  V(OLD_ITALIC, "Ital", "Old Italic")                         \
-  V(JAVANESE, "Java", "Javanese")                             \
-  V(KAYAH_LI, "Kali", "Kayah Li")                             \
-  V(KATAKANA, "Kana", "Katakana")                             \
-  V(KHAROSHTHI, "Khar", "Kharoshthi")                         \
-  V(KHMER, "Khmr", "Khmer")                                   \
-  V(KHOJKI, "Khoj", "Khojki")                                 \
-  V(KANNADA, "Knda", "Kannada")                               \
-  V(KAITHI, "Kthi", "Kaithi")                                 \
-  V(TAI_THAM, "Lana", "Tai Tham")                             \
-  V(LAO, "Laoo", "Lao")                                       \
-  V(LATIN, "Latn", "Latin")                                   \
-  V(LEPCHA, "Lepc", "Lepcha")                                 \
-  V(LIMBU, "Limb", "Limbu")                                   \
-  V(LINEAR_A, "Lina", "Linear A")                             \
-  V(LINEAR_B, "Linb", "Linear B")                             \
-  V(LISU, "Lisu", "Lisu")                                     \
-  V(LYCIAN, "Lyci", "Lycian")                                 \
-  V(LYDIAN, "Lydi", "Lydian")                                 \
-  V(MAHAJANI, "Mahj", "Mahajani")                             \
-  V(MANDAIC, "Mand", "Mandaic")                               \
-  V(MANICHAEAN, "Mani", "Manichaean")                         \
-  V(MENDE_KIKAKUI, "Mend", "Mende Kikakui")                   \
-  V(MEROITIC_CURSIVE, "Merc", "Meroitic Cursive")             \
-  V(MEROITIC_HIEROGLYPHS, "Mero", "Meroitic Hieroglyphs")     \
-  V(MALAYALAM, "Mlym", "Malayalam")                           \
-  V(MODI, "Modi", "Modi")                                     \
-  V(MONGOLIAN, "Mong", "Mongolian")                           \
-  V(MRO, "Mroo", "Mro")                                       \
-  V(MEETEI_MAYEK, "Mtei", "Meetei Mayek")                     \
-  V(MULTANI, "Mult", "Multani")                               \
-  V(MYANMAR, "Mymr", "Myanmar")                               \
-  V(OLD_NORTH_ARABIAN, "Narb", "Old North Arabian")           \
-  V(NABATAEAN, "Nbat", "Nabataean")                           \
-  V(NKO, "Nkoo", "Nko")                                       \
-  V(OGHAM, "Ogam", "Ogham")                                   \
-  V(OL_CHIKI, "Olck", "Ol Chiki")                             \
-  V(OLD_TURKIC, "Orkh", "Old Turkic")                         \
-  V(ORIYA, "Orya", "Oriya")                                   \
-  V(OSMANYA, "Osma", "Osmanya")                               \
-  V(PALMYRENE, "Palm", "Palmyrene")                           \
-  V(PAU_CIN_HAU, "Pauc", "Pau Cin Hau")                       \
-  V(OLD_PERMIC, "Perm", "Old Permic")                         \
-  V(PHAGS_PA, "Phag", "Phags Pa")                             \
-  V(INSCRIPTIONAL_PAHLAVI, "Phli", "Inscriptional Pahlavi")   \
-  V(PSALTER_PAHLAVI, "Phlp", "Psalter Pahlavi")               \
-  V(PHOENICIAN, "Phnx", "Phoenician")                         \
-  V(MIAO, "Plrd", "Miao")                                     \
-  V(INSCRIPTIONAL_PARTHIAN, "Prti", "Inscriptional Parthian") \
-  V(REJANG, "Rjng", "Rejang")                                 \
-  V(RUNIC, "Runr", "Runic")                                   \
-  V(SAMARITAN, "Samr", "Samaritan")                           \
-  V(OLD_SOUTH_ARABIAN, "Sarb", "Old South Arabian")           \
-  V(SAURASHTRA, "Saur", "Saurashtra")                         \
-  V(SIGN_WRITING, "Sgnw", "Sign Writing")                     \
-  V(SHAVIAN, "Shaw", "Shavian")                               \
-  V(SHARADA, "Shrd", "Sharada")                               \
-  V(SIDDHAM, "Sidd", "Siddham")                               \
-  V(KHUDAWADI, "Sind", "Khudawadi")                           \
-  V(SINHALA, "Sinh", "Sinhala")                               \
-  V(SORA_SOMPENG, "Sora", "Sora Sompeng")                     \
-  V(SUNDANESE, "Sund", "Sundanese")                           \
-  V(SYLOTI_NAGRI, "Sylo", "Syloti Nagri")                     \
-  V(SYRIAC, "Syrc", "Syriac")                                 \
-  V(TAGBANWA, "Tagb", "Tagbanwa")                             \
-  V(TAKRI, "Takr", "Takri")                                   \
-  V(TAI_LE, "Tale", "Tai Le")                                 \
-  V(NEW_TAI_LUE, "Talu", "New Tai Lue")                       \
-  V(TAMIL, "Taml", "Tamil")                                   \
-  V(TAI_VIET, "Tavt", "Tai Viet")                             \
-  V(TELUGU, "Telu", "Telugu")                                 \
-  V(TIFINAGH, "Tfng", "Tifinagh")                             \
-  V(TAGALOG, "Tglg", "Tagalog")                               \
-  V(THAANA, "Thaa", "Thaana")                                 \
-  V(THAI, "Thai", "Thai")                                     \
-  V(TIBETAN, "Tibt", "Tibetan")                               \
-  V(TIRHUTA, "Tirh", "Tirhuta")                               \
-  V(UGARITIC, "Ugar", "Ugaritic")                             \
-  V(VAI, "Vaii", "Vai")                                       \
-  V(WARANG_CITI, "Wara", "Warang Citi")                       \
-  V(OLD_PERSIAN, "Xpeo", "Old Persian")                       \
-  V(CUNEIFORM, "Xsux", "Cuneiform")                           \
-  V(YI, "Yiii", "Yi")                                         \
-  V(INHERITED, "Zinh", "Inherited")                           \
-  V(COMMON, "Zyyy", "Common")                                 \
-  V(UNKNOWN, "Zzzz", "Unknown")
+#define FOR_EACH_SCRIPT(V)                    \
+  V(COMMON, 0, "Zyyy")                        \
+  V(INHERITED, 1, "Zinh")                     \
+  V(ARABIC, 2, "Arab")                        \
+  V(ARMENIAN, 3, "Armn")                      \
+  V(BENGALI, 4, "Beng")                       \
+  V(BOPOMOFO, 5, "Bopo")                      \
+  V(CHEROKEE, 6, "Cher")                      \
+  V(COPTIC, 7, "Copt")                        \
+  V(CYRILLIC, 8, "Cyrl")                      \
+  V(DESERET, 9, "Dsrt")                       \
+  V(DEVANAGARI, 10, "Deva")                   \
+  V(ETHIOPIC, 11, "Ethi")                     \
+  V(GEORGIAN, 12, "Geor")                     \
+  V(GOTHIC, 13, "Goth")                       \
+  V(GREEK, 14, "Grek")                        \
+  V(GUJARATI, 15, "Gujr")                     \
+  V(GURMUKHI, 16, "Guru")                     \
+  V(HAN, 17, "Hani")                          \
+  V(HANGUL, 18, "Hang")                       \
+  V(HEBREW, 19, "Hebr")                       \
+  V(HIRAGANA, 20, "Hira")                     \
+  V(KANNADA, 21, "Knda")                      \
+  V(KATAKANA, 22, "Kana")                     \
+  V(KHMER, 23, "Khmr")                        \
+  V(LAO, 24, "Laoo")                          \
+  V(LATIN, 25, "Latn")                        \
+  V(MALAYALAM, 26, "Mlym")                    \
+  V(MONGOLIAN, 27, "Mong")                    \
+  V(MYANMAR, 28, "Mymr")                      \
+  V(OGHAM, 29, "Ogam")                        \
+  V(OLD_ITALIC, 30, "Ital")                   \
+  V(ORIYA, 31, "Orya")                        \
+  V(RUNIC, 32, "Runr")                        \
+  V(SINHALA, 33, "Sinh")                      \
+  V(SYRIAC, 34, "Syrc")                       \
+  V(TAMIL, 35, "Taml")                        \
+  V(TELUGU, 36, "Telu")                       \
+  V(THAANA, 37, "Thaa")                       \
+  V(THAI, 38, "Thai")                         \
+  V(TIBETAN, 39, "Tibt")                      \
+  V(CANADIAN_ABORIGINAL, 40, "Cans")          \
+  V(YI, 41, "Yiii")                           \
+  V(TAGALOG, 42, "Tglg")                      \
+  V(HANUNOO, 43, "Hano")                      \
+  V(BUHID, 44, "Buhd")                        \
+  V(TAGBANWA, 45, "Tagb")                     \
+  V(BRAILLE, 46, "Brai")                      \
+  V(CYPRIOT, 47, "Cprt")                      \
+  V(LIMBU, 48, "Limb")                        \
+  V(LINEAR_B, 49, "Linb")                     \
+  V(OSMANYA, 50, "Osma")                      \
+  V(SHAVIAN, 51, "Shaw")                      \
+  V(TAI_LE, 52, "Tale")                       \
+  V(UGARITIC, 53, "Ugar")                     \
+  V(KATAKANA_OR_HIRAGANA, 54, "Hrkt")         \
+  V(BUGINESE, 55, "Bugi")                     \
+  V(GLAGOLITIC, 56, "Glag")                   \
+  V(KHAROSHTHI, 57, "Khar")                   \
+  V(SYLOTI_NAGRI, 58, "Sylo")                 \
+  V(NEW_TAI_LUE, 59, "Talu")                  \
+  V(TIFINAGH, 60, "Tfng")                     \
+  V(OLD_PERSIAN, 61, "Xpeo")                  \
+  V(BALINESE, 62, "Bali")                     \
+  V(BATAK, 63, "Batk")                        \
+  V(BLISSYMBOLS, 64, "Blis")                  \
+  V(BRAHMI, 65, "Brah")                       \
+  V(CHAM, 66, "Cham")                         \
+  V(CIRTH, 67, "Cirt")                        \
+  V(OLD_CHURCH_SLAVONIC_CYRILLIC, 68, "Cyrs") \
+  V(DEMOTIC_EGYPTIAN, 69, "Egyd")             \
+  V(HIERATIC_EGYPTIAN, 70, "Egyh")            \
+  V(EGYPTIAN_HIEROGLYPHS, 71, "Egyp")         \
+  V(KHUTSURI, 72, "Geok")                     \
+  V(SIMPLIFIED_HAN, 73, "Hans")               \
+  V(TRADITIONAL_HAN, 74, "Hant")              \
+  V(PAHAWH_HMONG, 75, "Hmng")                 \
+  V(OLD_HUNGARIAN, 76, "Hung")                \
+  V(HARAPPAN_INDUS, 77, "Inds")               \
+  V(JAVANESE, 78, "Java")                     \
+  V(KAYAH_LI, 79, "Kali")                     \
+  V(LATIN_FRAKTUR, 80, "Latf")                \
+  V(LATIN_GAELIC, 81, "Latg")                 \
+  V(LEPCHA, 82, "Lepc")                       \
+  V(LINEAR_A, 83, "Lina")                     \
+  V(MANDAIC, 84, "Mand")                      \
+  V(MAYAN_HIEROGLYPHS, 85, "Maya")            \
+  V(MEROITIC_HIEROGLYPHS, 86, "Mero")         \
+  V(NKO, 87, "Nkoo")                          \
+  V(ORKHON, 88, "Orkh")                       \
+  V(OLD_PERMIC, 89, "Perm")                   \
+  V(PHAGS_PA, 90, "Phag")                     \
+  V(PHOENICIAN, 91, "Phnx")                   \
+  V(MIAO, 92, "Plrd")                         \
+  V(RONGORONGO, 93, "Roro")                   \
+  V(SARATI, 94, "Sara")                       \
+  V(ESTRANGELO_SYRIAC, 95, "Syre")            \
+  V(WESTERN_SYRIAC, 96, "Syrj")               \
+  V(EASTERN_SYRIAC, 97, "Syrn")               \
+  V(TENGWAR, 98, "Teng")                      \
+  V(VAI, 99, "Vaii")                          \
+  V(VISIBLE_SPEECH, 100, "Visp")              \
+  V(CUNEIFORM, 101, "Xsux")                   \
+  V(UNWRITTEN_LANGUAGES, 102, "Zxxx")         \
+  V(UNKNOWN, 103, "Zzzz")                     \
+  V(CARIAN, 104, "Cari")                      \
+  V(JAPANESE, 105, "Jpan")                    \
+  V(LANNA, 106, "Lana")                       \
+  V(LYCIAN, 107, "Lyci")                      \
+  V(LYDIAN, 108, "Lydi")                      \
+  V(OL_CHIKI, 109, "Olck")                    \
+  V(REJANG, 110, "Rjng")                      \
+  V(SAURASHTRA, 111, "Saur")                  \
+  V(SIGN_WRITING, 112, "Sgnw")                \
+  V(SUNDANESE, 113, "Sund")                   \
+  V(MOON, 114, "Moon")                        \
+  V(MEITEI_MAYEK, 115, "Mtei")                \
+  V(IMPERIAL_ARAMAIC, 116, "Armi")            \
+  V(AVESTAN, 117, "Avst")                     \
+  V(CHAKMA, 118, "Cakm")                      \
+  V(KOREAN, 119, "Kore")                      \
+  V(KAITHI, 120, "Kthi")                      \
+  V(MANICHAEAN, 121, "Mani")                  \
+  V(INSCRIPTIONAL_PAHLAVI, 122, "Phli")       \
+  V(PSALTER_PAHLAVI, 123, "Phlp")             \
+  V(BOOK_PAHLAVI, 124, "Phlv")                \
+  V(INSCRIPTIONAL_PARTHIAN, 125, "Prti")      \
+  V(SAMARITAN, 126, "Samr")                   \
+  V(TAI_VIET, 127, "Tavt")                    \
+  V(MATHEMATICAL_NOTATION, 128, "Zmth")       \
+  V(SYMBOLS, 129, "Zsym")                     \
+  V(BAMUM, 130, "Bamu")                       \
+  V(LISU, 131, "Lisu")                        \
+  V(NAKHI_GEBA, 132, "Nkgb")                  \
+  V(OLD_SOUTH_ARABIAN, 133, "Sarb")           \
+  V(BASSA_VAH, 134, "Bass")                   \
+  V(DUPLOYAN, 135, "Dupl")                    \
+  V(ELBASAN, 136, "Elba")                     \
+  V(GRANTHA, 137, "Gran")                     \
+  V(KPELLE, 138, "Kpel")                      \
+  V(LOMA, 139, "Loma")                        \
+  V(MENDE, 140, "Mend")                       \
+  V(MEROITIC_CURSIVE, 141, "Merc")            \
+  V(OLD_NORTH_ARABIAN, 142, "Narb")           \
+  V(NABATAEAN, 143, "Nbat")                   \
+  V(PALMYRENE, 144, "Palm")                   \
+  V(KHUDAWADI, 145, "Sind")                   \
+  V(WARANG_CITI, 146, "Wara")                 \
+  V(AFAKA, 147, "Afak")                       \
+  V(JURCHEN, 148, "Jurc")                     \
+  V(MRO, 149, "Mroo")                         \
+  V(NUSHU, 150, "Nshu")                       \
+  V(SHARADA, 151, "Shrd")                     \
+  V(SORA_SOMPENG, 152, "Sora")                \
+  V(TAKRI, 153, "Takr")                       \
+  V(TANGUT, 154, "Tang")                      \
+  V(WOLEAI, 155, "Wole")                      \
+  V(ANATOLIAN_HIEROGLYPHS, 156, "Hluw")       \
+  V(KHOJKI, 157, "Khoj")                      \
+  V(TIRHUTA, 158, "Tirh")                     \
+  V(CAUCASIAN_ALBANIAN, 159, "Aghb")          \
+  V(MAHAJANI, 160, "Mahj")                    \
+  V(AHOM, 161, "Ahom")                        \
+  V(HATRAN, 162, "Hatr")                      \
+  V(MODI, 163, "Modi")                        \
+  V(MULTANI, 164, "Mult")                     \
+  V(PAU_CIN_HAU, 165, "Pauc")                 \
+  V(SIDDHAM, 166, "Sidd")
 
 #define USCRIPT_TAI_THAM USCRIPT_LANNA
 #define USCRIPT_MENDE_KIKAKUI USCRIPT_MENDE
@@ -253,9 +287,9 @@ v8::Local<v8::Object> CreateUnicode(v8::Isolate* isolate) {
   DCHECK_EQ_CHAR_2(kCategoryNames, U_FINAL_PUNCTUATION, "Pf");
 
   std::array<v8::Local<v8::Symbol>, USCRIPT_CODE_LIMIT> kScriptAbbrevs;
-#define V(id, abbrev, name)      \
+#define V(id, num, abbrev)       \
   kScriptAbbrevs[USCRIPT_##id] = \
-      v8::Symbol::New(isolate, gin::StringToV8(isolate, abbrev));
+      v8::Symbol::New(isolate, gin::StringToV8(isolate, #id));
   FOR_EACH_SCRIPT(V)
 #undef V
 
@@ -286,13 +320,16 @@ v8::Local<v8::Object> CreateUnicode(v8::Isolate* isolate) {
                category_names);
 
   // Script name
+  auto script_names = v8::Array::New(isolate, USCRIPT_CODE_LIMIT);
   auto script_object = v8::Object::New(isolate);
-#define V(id, abbrev, name)                         \
+#define V(id, num, abbrev)                          \
   script_object->Set(gin::StringToV8(isolate, #id), \
-                     kScriptAbbrevs[USCRIPT_##id]);
+                     kScriptAbbrevs[USCRIPT_##id]); \
+  script_names->Set(USCRIPT_##id, gin::StringToV8(isolate, #id));
   FOR_EACH_SCRIPT(V)
 #undef V
   unicode->Set(gin::StringToV8(isolate, "Script"), script_object);
+  unicode->Set(gin::StringToV8(isolate, "SCRIPT_NAMES"), script_names);
 
   // UCD
   auto ucd = v8::Array::New(isolate, 0x10000);

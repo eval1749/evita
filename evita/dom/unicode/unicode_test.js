@@ -7,6 +7,13 @@ goog.require("unicode");
 
 goog.scope(function() {
 
+testing.test('unicode.constants', function(t) {
+  t.expect(Unicode.SCRIPT_NAMES[100]).toEqual('VISIBLE_SPEECH');
+  t.expect(Unicode.SCRIPT_NAMES[166]).toEqual('SIDDHAM');
+  t.expect(Unicode.SCRIPT_NAMES.length).toEqual(167);
+});
+
+
 testing.test('unicode.categoryOf', function(t) {
   t.expect(unicode.categoryOf('0'.charCodeAt(0))).toEqual(Unicode.Category.Nd);
   t.expect(unicode.categoryOf('!'.charCodeAt(0))).toEqual(Unicode.Category.Po);

@@ -99,8 +99,21 @@ var SwitchValue;
 //
 var Unicode;
 
-/** @const @type{Array.<string>} */
+/**
+ * @const @type {!Array<string>}
+ * The order of Unicode category name must be matched with ICU.
+ * See |UCharCategory| in "icu/source/common/unicode/uchar.h"
+ *
+ */
 Unicode.CATEGORY_SHORT_NAMES;
+
+/**
+ * @const @type {!Array<string>}
+ * The order of Unicode category name must be matched with ICU.
+ * See |UCharCategory| in "icu/source/common/unicode/uchar.h"
+ *
+ */
+Unicode.SCRIPT_NAMES;
 
 /** @enum{string} */
 Unicode.Category = {

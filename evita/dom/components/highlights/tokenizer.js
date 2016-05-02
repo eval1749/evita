@@ -60,6 +60,13 @@ class Tokenizer extends Logger {
 
   /**
    * @public
+   * @return {number}
+   * For |HighlightEngine| printer.
+   */
+  get scanOffset() { return this.scanOffset_; }
+
+  /**
+   * @public
    * @param {number} headCount
    * @param {number} tailCount
    * @param {number} delta
@@ -327,6 +334,7 @@ class Tokenizer extends Logger {
 
   /**
    * For debugging
+   * @return {!Generator<!StateRange>}
    */
   * ranges() { yield * this.rangeMap_.ranges(); }
 }

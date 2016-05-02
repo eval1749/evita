@@ -126,6 +126,15 @@ class HighlightEngine extends text.SimpleMutationObserverBase {
     taskScheduler.schedule(this, kIntervalMs);
   }
 
+  /** @override */
+  toString() {
+    /** @const @type {number} */
+    const scanOffset = this.tokenizer_.scanOffset;
+    /** @const @type {number} */
+    const maxOffset = this.document.length;
+    return `${this.constructor.name}(scanOffset: ${scanOffset}/${maxOffset})`;
+  }
+
   /**
    * @param {string} name
    * @param {!TextDocument} document

@@ -288,12 +288,12 @@ v8::Local<v8::Object> CreateUnicode(v8::Isolate* isolate) {
   unicode->Set(gin::StringToV8(isolate, "SCRIPT_NAMES"), script_names);
 
   // UCD
-  auto ucd = v8::Array::New(isolate, 0x10000);
+  auto ucd = v8::Array::New(isolate, UCHAR_MAX_VALUE + 1);
   unicode->Set(gin::StringToV8(isolate, "UCD"), ucd);
   auto name = gin::StringToV8(isolate, "name");
   auto category = gin::StringToV8(isolate, "category");
   auto script_string = gin::StringToV8(isolate, "script");
-  for (auto code = 0; code <= 0xFFFF; ++code) {
+  for (auto code = 0; code <= UCHAR_MAX_VALUE; ++code) {
     auto data = v8::Object::New(isolate);
 
     auto error_code = U_ZERO_ERROR;

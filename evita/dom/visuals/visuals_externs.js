@@ -3,6 +3,3 @@
 // found in the LICENSE file.
 
 goog.provide('visuals');
-
-/** @type {!Generator<!visuals.Node>} */
-visuals.Node.prototype.childNodes;

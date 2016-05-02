@@ -1,5 +1,6 @@
 {# License text resides in aggregate file, blink_externs.js #}
 {% set BLANK_LINE = '' %}
+{% set NEWLINE = '\n' %}
 {#////////////////////////////////////////////////////////////////////////
 //
 // Emit constructor
@@ -139,19 +140,21 @@ var {{dictionary.dictionary_name}};
 //
 #}
 {%- for attribute in attributes %}
-/**
- * @type {{ '{' }}{{attribute.type}}{{ '}' }}
-{%- if attribute.is_read_only %}
- * This property is read only.
-{%- endif %}
- */
-{%- if attribute.is_static %}
-{{interface_name}}.{{attribute.name}};
-{%- else %}
-{{interface_name}}.prototype.{{attribute.name}};
-{%- endif %}
-{{ BLANK_LINE }}
+{%-   if attribute.is_read_only %}
+{%      set READ_ONLY = ' readonly' %}
+{%    else %}
+{%      set READ_ONLY = '' %}
+{%-   endif %}
+/** @type {{ '{' }}{{attribute.type}}{{ '}' }} {{READ_OONLY}}*/
+{%-   if attribute.is_static %}
+{{interface_name}}.{{attribute.name}};{{ NEWLINE }}
+{%-   else %}
+{{interface_name}}.prototype.{{attribute.name}};{{ NEWLINE }}
+{%-   endif %}
 {%- endfor %}
+{%- if attributes %}
+{{ NEWLINE }}
+{%- endif %}
 {#//////////////////////////////////////////////////////////////////////
 //
 // Methods

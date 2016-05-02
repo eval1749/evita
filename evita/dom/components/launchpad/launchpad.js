@@ -4,12 +4,36 @@
 
 goog.provide('launchpad');
 
+goog.require('base');
 goog.require('imaging');
+goog.require('visuals');
+goog.require('windows');
 
 goog.scope(function() {
-const Singleton = base.Singleton;
-const IconUtil = imaging.IconUtil;
 
+/** @constructor */
+const CSSRuleBuilder = visuals.CSSRuleBuilder;
+
+/** @constructor */
+const CSSStyleSheet = visuals.CSSStyleSheet;
+
+/** @constructor */
+const Document = visuals.Document;
+
+/** @constructor */
+const Element = visuals.Element;
+
+/** @constructor */
+const Node = visuals.Node;
+
+/** @constructor */
+const Singleton = base.Singleton;
+
+/** @constructor */
+const Text = visuals.Text;
+
+/** @constructor */
+const IconUtil = imaging.IconUtil;
 
 /**
  * @typedef {{

@@ -24,6 +24,9 @@ const Document = visuals.Document;
 const Element = visuals.Element;
 
 /** @constructor */
+const Image = visuals.Image;
+
+/** @constructor */
 const Node = visuals.Node;
 
 /** @constructor */
@@ -93,6 +96,7 @@ const kBlankDocumentImageData = new Uint8ClampedArray(
  * @return {string}
  */
 function extensionOf(fileName) {
+  /** @const @type {number} */
   const lastDot = fileName.lastIndexOf('.');
   if (lastDot < 0)
     return '';
@@ -123,11 +127,14 @@ class IconMap {
    * @return {!Promise<!ImageData>}
    */
   loadIcon(fileName) {
+    /** @const @type {string} */
     const extension = extensionOf(fileName);
+    /** @const @type {?ImageData} */
     const present = this.iconMap_.get(extension) || null;
     if (present !== null)
       return Promise.resolve(present);
     return IconUtil.loadIconForExtension(extension).then(maybeImage => {
+      /** @const @type {!ImageData} */
       const image = maybeImage || this.blankDocumentIcon_;
       this.iconMap_.set(extension, image);
       return image;
@@ -168,8 +175,9 @@ function compareString(string1, string2) {
 function nodeIndexOf(node) {
   if (!node)
     throw new Error('Null pointer');
+  /** @type {number} */
   let index = 0;
-  for (const runner of node.parentNode.childNodes) {
+  for (/** @type {!Node} */ const runner of node.parentNode.childNodes) {
     if (runner === node)
       return index;
     ++index;
@@ -185,13 +193,16 @@ function createDocumentTree(rowMap) {
   /** @const @type {!Document} */
   const document = new Document();
 
+  /** @const @type {!Element} */
   const body = document.createElement('body');
   document.appendChild(body);
 
   // List header
+  /** @const @type {!Element} */
   const head = document.createElement('header');
   body.appendChild(head);
   for (const header of HEADER_MODEL) {
+    /** @const @type {!Element} */
     const cell = document.createElement('headerCell', header.id);
     cell.appendChild(document.createText(header.label));
     cell.style.width = header.width.toString();
@@ -199,6 +210,7 @@ function createDocumentTree(rowMap) {
   }
 
   // List body
+  /** @const @type {!Element} */
   const list = document.createElement('list', 'list');
   body.appendChild(list);
 
@@ -207,11 +219,13 @@ function createDocumentTree(rowMap) {
       (doc1, doc2) => { return compareString(doc1.name, doc2.name); })
 
                             for (const textDocument of textDocuments) {
+    /** @const @type {?TextDocumentState} */
     const state = TextDocumentState.get(textDocument);
     if (!state) {
       console.log('WARNING', 'no TextDocumentState for', textDocument);
       continue;
     }
+    /** @const @type {!Element} */
     const row = createRow(document, textDocument);
     rowMap.set(textDocument, row);
     list.appendChild(row);
@@ -226,6 +240,7 @@ function createDocumentTree(rowMap) {
  * @return {!Element}
  */
 function createRow(document, textDocument) {
+  /** @const @type {!Element} */
   const row = document.createElement('row');
   row.data = new TextDocumentModel(textDocument, row);
   return row;
@@ -265,11 +280,15 @@ class ListModel extends SimpleTextDocumentSetObserver {
    * @param {!TextDocument} textDocument
    */
   didAddTextDocument(textDocument) {
+    /** @const @type {!Element} */
     const newRow = createRow(this.document_, textDocument);
     this.rowMap_.set(textDocument, newRow);
+    /** @type {boolean} */
     let inserted = false;
-    for (const child of this.list_.childNodes) {
+    for (/** @const @type {!Node} */ const child of this.list_.childNodes) {
+      /** @const @type {!Element} */
       const row = /** @type {!Element} */ (child);
+      /** @const @type {!TextDocumentModel} */
       const present = /** @type {!TextDocumentModel} */ (row.data);
       if (compareString(textDocument.name, present.name) < 0) {
         this.list_.insertBefore(newRow, row);
@@ -288,10 +307,12 @@ class ListModel extends SimpleTextDocumentSetObserver {
    * @param {!TextDocument} textDocument
    */
   didRemoveTextDocument(textDocument) {
-    const oldRow = this.rowMap_.get(textDocument);
+    /** @const @type {!Element} */
+    const oldRow = /** @type {!Element} */ (this.rowMap_.get(textDocument));
     this.rowMap_.delete(textDocument);
     oldRow.parentNode.removeChild(oldRow);
     this.selection_.didRemoveNode(oldRow);
+    /** @const @type {!TextDocumentModel} */
     const textDocumentModel = /** @type {!TextDocumentModel} */ (oldRow.data);
     textDocumentModel.close();
   }
@@ -366,8 +387,8 @@ class SelectionModel {
       }
       return;
     }
-    for (let runner = this.anchorNode_; runner !== this.focusNode_;
-         runner = runner.previousSibling) {
+    for (/** @type {?Node} */ let runner = this.anchorNode_;
+         runner !== this.focusNode_; runner = runner.previousSibling) {
       this.selectedNodes_.add(/** @type {!Node} */ (runner));
     }
   }
@@ -376,6 +397,7 @@ class SelectionModel {
   * items() {
     if (!this.anchorNode_)
       return;
+    /** @const @type {!Node} */
     const list = this.anchorNode_.parentNode;
     for (const runner of list.childNodes) {
       if (this.selectedNodes_.has(runner))
@@ -488,7 +510,9 @@ class TextDocumentModel {
    * @return {string}
    */
   computeStateCell() {
+    /** @const @type {!TextDocument} */
     const document = this.document_;
+    /** @const @type {!number} */
     const numberOfWindows = document.listWindows().length;
     return [
       document.modified ? '*' : '-',
@@ -504,7 +528,9 @@ class TextDocumentModel {
    * @return {!Element}
    */
   createIcon(document, name) {
+    /** @const @type {!Element} */
     const icon = document.createElement('icon');
+    /** @const @type {!Image} */
     const image = document.createImage(IconMap.instance.defaultIcon);
     IconMap.instance.loadIcon(name).then(imageData => {
       if (imageData === null)
@@ -517,10 +543,14 @@ class TextDocumentModel {
 
   /** @private */
   setupRow() {
+    /** @const @type {!RowModel} */
     const rowModel = this.computeRowModel();
+    /** @const @type {!Document} */
     const document = this.row_.ownerDocument;
-    for (const header of HEADER_MODEL) {
+    for (/** @type {!Header} */ const header of HEADER_MODEL) {
+      /** @const @type {!Element} */
       const cell = document.createElement('cell');
+      /** @const @type {string} */
       const text = rowModel[header.id];
       if (header.id === 'name')
         cell.appendChild(this.createIcon(document, text));
@@ -533,11 +563,12 @@ class TextDocumentModel {
   /** @private */
   update() {
     const rowModel = this.computeRowModel();
-    let cell = this.row_.firstChild;
-    for (const header of HEADER_MODEL) {
+    /** @type {!Node} */
+    let cell = /** @type {!Node} */ (this.row_.firstChild);
+    for (/** @type {!Header} */ const header of HEADER_MODEL) {
       const text = /** @type {!Text} */ (cell.firstChild);
       text.data = rowModel[header.id];
-      cell = cell.nextSibling;
+      cell = /** @type {!Node} */ (cell.nextSibling);
     }
   }
 
@@ -578,6 +609,7 @@ class TextDocumentModel {
  * @return {!CSSStyleSheet}
  */
 function createStyleSheet() {
+  /** @const @type {!CSSStyleSheet} */
   const styleSheet = new CSSStyleSheet();
   styleSheet.appendRule(
       CSSRuleBuilder.selector('body')
@@ -683,13 +715,14 @@ class LaunchPad {
    * @return {Element}
    */
   findRowAtPoint(pointX, pointY) {
-    let node = this.window_.hitTest(pointX, pointY);
-    while (node) {
-      if (node.nodeName === 'row')
+    /** @type {?Node} */
+    let runner = this.window_.hitTest(pointX, pointY);
+    while (runner) {
+      if (runner.nodeName === 'row')
         break;
-      node = node.parentNode;
+      runner = runner.parentNode;
     }
-    return /** @type {Element} */ (node);
+    return /** @type {Element} */ (runner);
   }
 
   openSelected() {
@@ -701,6 +734,7 @@ class LaunchPad {
 
   /** @private */
   setTabData() {
+    /** @const @type {!TabData} */
     const tabData = new TabData();
     tabData.icon = 0;
     tabData.state = 0;
@@ -710,10 +744,14 @@ class LaunchPad {
   }
 
   updateSelected() {
+    /** @const @type {string} */
     const add = this.hasFocus_ ? 'activeSelected' : 'inactiveSelected';
+    /** @const @type {string} */
     const remove = this.hasFocus_ ? 'inactiveSelected' : 'activeSelected';
+    /** @type {number} */
     let count = 0;
     for (const child of this.list_.childNodes) {
+      /** @const @type {!Element} */
       const row = /** @type {!Element} */ (child);
       row.classList.remove(remove);
       if (this.selection_.contains(row)) {
@@ -788,6 +826,7 @@ class LaunchPad {
 
   /** @private @param {!MouseEvent} event */
   onMouseDown(event) {
+    /** @type {?Element} */
     const row = this.findRowAtPoint(event.clientX, event.clientY);
     if (!row)
       return;
@@ -810,6 +849,7 @@ class LaunchPad {
 
   /** @private @param {!MouseEvent} event */
   onMouseMove(event) {
+    /** @type {?Element} */
     const hover = this.findRowAtPoint(event.clientX, event.clientY);
     if (hover === this.lastHover_)
       return;
@@ -825,12 +865,15 @@ class LaunchPad {
  * @this {!Window}
  */
 function listTextDocumentCommand() {
+  /** @const @type {?Window} */
   const present = this.parent.children.find(function(child) {
     if (!(child instanceof VisualWindow))
       return false;
+    /** @const @type(!VisualWindow) */
     const window = /** @type(!VisualWindow) */ (child);
     return window.styleSheet == styleSheet;
-  });
+  }) ||
+      null;
   if (present) {
     present.focus();
     return;

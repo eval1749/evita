@@ -89,11 +89,9 @@ import sys
 from utilities import idl_filename_to_component, read_pickle_files, write_pickle_file, merge_dict_recursively
 
 INHERITED_EXTENDED_ATTRIBUTES = set([
-    'ActiveDOMObject',
+    'ActiveScriptWrappable',
     'DependentLifetime',
-    'GarbageCollected',
     'JsNamespace',
-    'WillBeGarbageCollected',
 ])
 
 # Main variable (filled in and exported)
@@ -171,7 +169,6 @@ def compute_global_type_info():
     component_dirs = {}
     namespaces = {}
     implemented_as_interfaces = {}
-    will_be_garbage_collected_interfaces = set()
     garbage_collected_interfaces = set()
     callback_interfaces = set()
 
@@ -190,10 +187,7 @@ def compute_global_type_info():
         inherited_extended_attributes = interface_info['inherited_extended_attributes']
         if 'JsNamespace' in inherited_extended_attributes:
             namespaces[interface_name] = inherited_extended_attributes['JsNamespace']
-        if 'WillBeGarbageCollected' in inherited_extended_attributes:
-            will_be_garbage_collected_interfaces.add(interface_name)
-        if 'GarbageCollected' in inherited_extended_attributes:
-            garbage_collected_interfaces.add(interface_name)
+        garbage_collected_interfaces.add(interface_name)
 
     interfaces_info['ancestors'] = ancestors
     interfaces_info['callback_interfaces'] = callback_interfaces
@@ -201,7 +195,6 @@ def compute_global_type_info():
     interfaces_info['namespaces'] = namespaces
     interfaces_info['implemented_as_interfaces'] = implemented_as_interfaces
     interfaces_info['garbage_collected_interfaces'] = garbage_collected_interfaces
-    interfaces_info['will_be_garbage_collected_interfaces'] = will_be_garbage_collected_interfaces
     interfaces_info['component_dirs'] = component_dirs
 
 

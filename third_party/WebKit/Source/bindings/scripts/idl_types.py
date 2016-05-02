@@ -10,6 +10,7 @@ IdlTypeBase
  IdlArrayOrSequenceType
   IdlArrayType
   IdlSequenceType
+  IdlFrozenArrayType
  IdlNullableType
 
 IdlTypes are picklable because we store them in interfaces_info.
@@ -200,6 +201,10 @@ class IdlType(IdlTypeBase):
         return self.base_type in NUMERIC_TYPES
 
     @property
+    def is_boolean_type(self):
+        return self.base_type == 'boolean'
+
+    @property
     def is_primitive_type(self):
         return self.base_type in PRIMITIVE_TYPES
 
@@ -334,11 +339,12 @@ class IdlUnionType(IdlTypeBase):
 
 
 ################################################################################
-# IdlArrayOrSequenceType, IdlArrayType, IdlSequenceType
+# IdlArrayOrSequenceType, IdlArrayType, IdlSequenceType, IdlFrozenArrayType
 ################################################################################
 
+# TODO(bashi): Rename this like "IdlArrayTypeBase" or something.
 class IdlArrayOrSequenceType(IdlTypeBase):
-    """Base class for IdlArrayType and IdlSequenceType."""
+    """Base class for array-like types."""
 
     def __init__(self, element_type):
         super(IdlArrayOrSequenceType, self).__init__()
@@ -359,6 +365,10 @@ class IdlArrayOrSequenceType(IdlTypeBase):
     @property
     def is_array_or_sequence_type(self):
         return True
+
+    @property
+    def is_frozen_array(self):
+        return False
 
     @property
     def enum_values(self):
@@ -396,6 +406,23 @@ class IdlSequenceType(IdlArrayOrSequenceType):
     @property
     def name(self):
         return self.element_type.name + 'Sequence'
+
+
+class IdlFrozenArrayType(IdlArrayOrSequenceType):
+    def __init__(self, element_type):
+        super(IdlFrozenArrayType, self).__init__(element_type)
+
+    def __str__(self):
+        return 'FrozenArray<%s>' % self.element_type
+
+    @property
+    def name(self):
+        return self.element_type.name + 'Array'
+
+    @property
+    def is_frozen_array(self):
+        return True
+
 
 
 ################################################################################

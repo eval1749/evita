@@ -35,7 +35,7 @@ import re
 
 from idl_types import IdlTypeBase
 import idl_types
-from idl_definitions import Exposure, IdlInterface, IdlAttribute, IdlOperation
+from idl_definitions import Exposure, IdlInterface, IdlAttribute
 from v8_globals import includes
 
 ACRONYMS = [
@@ -125,7 +125,7 @@ def scoped_name(interface, definition, base_name):
     if partial_interface_implemented_as:
         return '%s::%s' % (partial_interface_implemented_as, base_name)
     if (definition.is_static or
-        definition.name in ('Constructor', 'NamedConstructor')):
+            definition.name in ('Constructor', 'NamedConstructor')):
         return '%s::%s' % (cpp_name(interface), base_name)
     return 'impl->%s' % base_name
 
@@ -176,7 +176,7 @@ def activity_logging_world_check(member):
     if 'LogActivity' not in extended_attributes:
         return False
     if ('PerWorldBindings' not in extended_attributes and
-        'LogAllWorlds' not in extended_attributes):
+            'LogAllWorlds' not in extended_attributes):
         return True
     return False
 
@@ -185,9 +185,9 @@ def activity_logging_world_check(member):
 CALL_WITH_ARGUMENTS = {
     'ScriptState': 'scriptState',
     'ExecutionContext': 'executionContext',
-    'ScriptArguments': 'scriptArguments.release()',
-    'ActiveWindow': 'callingDOMWindow(info.GetIsolate())',
-    'FirstWindow': 'enteredDOMWindow(info.GetIsolate())',
+    'ScriptArguments': 'scriptArguments',
+    'CurrentWindow': 'currentDOMWindow(info.GetIsolate())',
+    'EnteredWindow': 'enteredDOMWindow(info.GetIsolate())',
     'Document': 'document',
     'ThisValue': 'ScriptValue(scriptState, info.This())',
 }
@@ -196,8 +196,8 @@ CALL_WITH_VALUES = [
     'ScriptState',
     'ExecutionContext',
     'ScriptArguments',
-    'ActiveWindow',
-    'FirstWindow',
+    'CurrentWindow',
+    'EnteredWindow',
     'Document',
     'ThisValue',
 ]
@@ -209,20 +209,6 @@ def call_with_arguments(call_with_values):
     return [CALL_WITH_ARGUMENTS[value]
             for value in CALL_WITH_VALUES
             if extended_attribute_value_contains(call_with_values, value)]
-
-
-# [Conditional]
-DELIMITER_TO_OPERATOR = {
-    '|': '||',
-    ',': '&&',
-}
-
-
-def conditional_string(definition_or_member):
-    extended_attributes = definition_or_member.extended_attributes
-    if 'Conditional' not in extended_attributes:
-        return None
-    return 'ENABLE(%s)' % extended_attributes['Conditional']
 
 
 # [Constructor], [NamedConstructor]
@@ -237,7 +223,7 @@ def deprecate_as(member):
     extended_attributes = member.extended_attributes
     if 'DeprecateAs' not in extended_attributes:
         return None
-    includes.add('core/frame/UseCounter.h')
+    includes.add('core/frame/Deprecation.h')
     return extended_attributes['DeprecateAs']
 
 
@@ -245,10 +231,12 @@ def deprecate_as(member):
 EXPOSED_EXECUTION_CONTEXT_METHOD = {
     'CompositorWorker': 'isCompositorWorkerGlobalScope',
     'DedicatedWorker': 'isDedicatedWorkerGlobalScope',
+    'PaintWorklet': 'isPaintWorkletGlobalScope',
     'ServiceWorker': 'isServiceWorkerGlobalScope',
     'SharedWorker': 'isSharedWorkerGlobalScope',
     'Window': 'isDocument',
     'Worker': 'isWorkerGlobalScope',
+    'Worklet': 'isWorkletGlobalScope',
 }
 
 
@@ -292,7 +280,7 @@ class ExposureSet:
 
     @staticmethod
     def _code(exposure):
-        exposed = ('context->%s()' %
+        exposed = ('executionContext->%s()' %
                    EXPOSED_EXECUTION_CONTEXT_METHOD[exposure.exposed])
         if exposure.runtime_enabled is not None:
             runtime_enabled = ('RuntimeEnabledFeatures::%sEnabled()' %
@@ -336,16 +324,6 @@ def exposed(member, interface):
     return exposure_set.code()
 
 
-# [GarbageCollected], [WillBeGarbageCollected]
-def gc_type(definition):
-    extended_attributes = definition.extended_attributes
-    if 'GarbageCollected' in extended_attributes:
-        return 'GarbageCollectedObject'
-    elif 'WillBeGarbageCollected' in extended_attributes:
-        return 'WillBeGarbageCollectedObject'
-    return 'RefCountedObject'
-
-
 # [ImplementedAs]
 def cpp_name(definition_or_member):
     extended_attributes = definition_or_member.extended_attributes
@@ -380,6 +358,46 @@ def measure_as(definition_or_member, interface):
     return None
 
 
+# [OriginTrialEnabled]
+def origin_trial_enabled_function_name(definition_or_member, interface):
+    """Returns the name of the OriginTrials enabled function.
+
+    An exception is raised if both the OriginTrialEnabled and RuntimeEnabled
+    extended attributes are applied to the same IDL member. Only one of the
+    two attributes can be applied to any member - they are mutually exclusive.
+
+    The returned function checks if the IDL member should be enabled.
+    Given extended attribute OriginTrialEnabled=FeatureName, return:
+        OriginTrials::{featureName}Enabled
+
+    If the OriginTrialEnabled extended attribute is found, the includes are
+    also updated as a side-effect.
+    """
+    extended_attributes = definition_or_member.extended_attributes
+    is_origin_trial_enabled = 'OriginTrialEnabled' in extended_attributes
+
+    if (is_origin_trial_enabled and 'RuntimeEnabled' in extended_attributes):
+        raise Exception('[OriginTrialEnabled] and [RuntimeEnabled] must '
+                        'not be specified on the same definition: '
+                        '%s.%s' % (definition_or_member.idl_name, definition_or_member.name))
+
+    if is_origin_trial_enabled:
+        includes.add('core/inspector/ConsoleMessage.h')
+        includes.add('core/origin_trials/OriginTrials.h')
+
+        trial_name = extended_attributes['OriginTrialEnabled']
+        return 'OriginTrials::%sEnabled' % uncapitalize(trial_name)
+
+    return None
+
+
+def runtime_feature_name(definition_or_member):
+    extended_attributes = definition_or_member.extended_attributes
+    if 'RuntimeEnabled' not in extended_attributes:
+        return None
+    return extended_attributes['RuntimeEnabled']
+
+
 # [RuntimeEnabled]
 def runtime_enabled_function_name(definition_or_member):
     """Returns the name of the RuntimeEnabledFeatures function.
@@ -387,11 +405,16 @@ def runtime_enabled_function_name(definition_or_member):
     The returned function checks if a method/attribute is enabled.
     Given extended attribute RuntimeEnabled=FeatureName, return:
         RuntimeEnabledFeatures::{featureName}Enabled
+
+    If the RuntimeEnabled extended attribute is found, the includes
+    are also updated as a side-effect.
     """
-    extended_attributes = definition_or_member.extended_attributes
-    if 'RuntimeEnabled' not in extended_attributes:
-        return None
-    feature_name = extended_attributes['RuntimeEnabled']
+    feature_name = runtime_feature_name(definition_or_member)
+
+    if not feature_name:
+        return
+
+    includes.add('platform/RuntimeEnabledFeatures.h')
     return 'RuntimeEnabledFeatures::%sEnabled' % uncapitalize(feature_name)
 
 
@@ -402,14 +425,10 @@ def is_unforgeable(interface, member):
             not member.is_static)
 
 
-# [TypeChecking=Interface] / [LegacyInterfaceTypeChecking]
+# [LegacyInterfaceTypeChecking]
 def is_legacy_interface_type_checking(interface, member):
-    if not ('TypeChecking' in interface.extended_attributes or
-            'TypeChecking' in member.extended_attributes):
-        return True
-    if 'LegacyInterfaceTypeChecking' in member.extended_attributes:
-        return True
-    return False
+    return ('LegacyInterfaceTypeChecking' in interface.extended_attributes or
+            'LegacyInterfaceTypeChecking' in member.extended_attributes)
 
 
 # [Unforgeable], [Global], [PrimaryGlobal]
@@ -421,10 +440,25 @@ def on_instance(interface, member):
     - [Unforgeable] members
     - regular members of [Global] or [PrimaryGlobal] interfaces
     """
-    # TODO(yukishiino): Implement this function following the spec.
     if member.is_static:
         return False
-    return not on_prototype(interface, member)
+
+    # TODO(yukishiino): Remove a hack for toString once we support
+    # Symbol.toStringTag.
+    if (interface.name == 'Window' and member.name == 'toString'):
+        return False
+
+    # TODO(yukishiino): Implement "interface object" and its [[Call]] method
+    # in a better way.  Then we can get rid of this hack.
+    if is_constructor_attribute(member):
+        return True
+
+    if ('PrimaryGlobal' in interface.extended_attributes or
+            'Global' in interface.extended_attributes or
+            'Unforgeable' in member.extended_attributes or
+            'Unforgeable' in interface.extended_attributes):
+        return True
+    return False
 
 
 def on_prototype(interface, member):
@@ -433,26 +467,29 @@ def on_prototype(interface, member):
 
     Most members are defined on the prototype object.  Exceptions are as
     follows.
-    - constant members
     - static members (optional)
     - [Unforgeable] members
     - members of [Global] or [PrimaryGlobal] interfaces
     - named properties of [Global] or [PrimaryGlobal] interfaces
     """
-    # TODO(yukishiino): Implement this function following the spec.
-
-    # These members must not be placed on prototype chains.
-    if (is_constructor_attribute(member) or
-            member.is_static or
-            is_unforgeable(interface, member)):
+    if member.is_static:
         return False
 
-    # TODO(yukishiino): We should handle [Global] and [PrimaryGlobal] instead of
-    # Window.
-    if (interface.name == 'Window'):
-        return (member.idl_type.name == 'EventHandler' or
-                type(member) == IdlOperation)
+    # TODO(yukishiino): Remove a hack for toString once we support
+    # Symbol.toStringTag.
+    if (interface.name == 'Window' and member.name == 'toString'):
+        return True
 
+    # TODO(yukishiino): Implement "interface object" and its [[Call]] method
+    # in a better way.  Then we can get rid of this hack.
+    if is_constructor_attribute(member):
+        return False
+
+    if ('PrimaryGlobal' in interface.extended_attributes or
+            'Global' in interface.extended_attributes or
+            'Unforgeable' in member.extended_attributes or
+            'Unforgeable' in interface.extended_attributes):
+        return False
     return True
 
 
@@ -462,10 +499,8 @@ def on_interface(interface, member):
     interface object.
 
     The following members must be defiend on an interface object.
-    - constant members
     - static members
     """
-    # TODO(yukishiino): Implement this function following the spec.
     if member.is_static:
         return True
     return False

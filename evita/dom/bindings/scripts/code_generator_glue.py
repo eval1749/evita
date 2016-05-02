@@ -286,8 +286,6 @@ def set_global_type_info(info_provider):
         interfaces_info['implemented_as_interfaces'])
     IdlType.set_garbage_collected_types(
         interfaces_info['garbage_collected_interfaces'])
-    IdlType.set_will_be_garbage_collected_types(
-        interfaces_info['will_be_garbage_collected_interfaces'])
 
 
 def depends_on_union_types(idl_type):

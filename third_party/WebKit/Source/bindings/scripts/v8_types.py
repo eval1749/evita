@@ -111,11 +111,12 @@ CPP_SPECIAL_CONVERSION_RULES = {
     'Date': 'double',
     'Dictionary': 'Dictionary',
     'EventHandler': 'EventListener*',
-    'NodeFilter': 'RefPtrWillBeRawPtr<NodeFilter>',
+    'EventListener': 'EventListener*',
+    'NodeFilter': 'NodeFilter*',
     'Promise': 'ScriptPromise',
     'ScriptValue': 'ScriptValue',
     # FIXME: Eliminate custom bindings for XPathNSResolver  http://crbug.com/345529
-    'XPathNSResolver': 'RawPtr<XPathNSResolver>',
+    'XPathNSResolver': 'XPathNSResolver*',
     'boolean': 'bool',
     'unrestricted double': 'double',
     'unrestricted float': 'float',
@@ -144,10 +145,12 @@ def cpp_type(idl_type, extended_attributes=None, raw_type=False, used_as_rvalue_
     def string_mode():
         if extended_attributes.get('TreatNullAs') == 'EmptyString':
             return 'TreatNullAsEmptyString'
-        if idl_type.is_nullable or extended_attributes.get('TreatNullAs') == 'NullString':
+        if extended_attributes.get('TreatNullAs') == 'NullString':
             if extended_attributes.get('TreatUndefinedAs') == 'NullString':
                 return 'TreatNullAndUndefinedAsNullString'
             return 'TreatNullAsNullString'
+        if idl_type.is_nullable:
+            return 'TreatNullAndUndefinedAsNullString'
         return ''
 
     extended_attributes = extended_attributes or {}
@@ -159,7 +162,7 @@ def cpp_type(idl_type, extended_attributes=None, raw_type=False, used_as_rvalue_
     else:
         native_array_element_type = idl_type.native_array_element_type
     if native_array_element_type:
-        vector_type = cpp_ptr_type('Vector', 'HeapVector', native_array_element_type.gc_type)
+        vector_type = cpp_ptr_type('Vector', 'HeapVector', native_array_element_type.is_gc_type)
         vector_template_type = cpp_template_type(vector_type, native_array_element_type.cpp_type_args(used_in_cpp_sequence=True))
         if used_as_rvalue_type:
             return 'const %s&' % vector_template_type
@@ -177,7 +180,7 @@ def cpp_type(idl_type, extended_attributes=None, raw_type=False, used_as_rvalue_
     if base_idl_type in CPP_SPECIAL_CONVERSION_RULES:
         return CPP_SPECIAL_CONVERSION_RULES[base_idl_type]
 
-    if base_idl_type in NON_WRAPPER_TYPES:
+    if base_idl_type == 'SerializedScriptValue':
         return ('PassRefPtr<%s>' if used_as_rvalue_type else 'RefPtr<%s>') % base_idl_type
     if idl_type.is_string_type:
         if not raw_type:
@@ -190,11 +193,11 @@ def cpp_type(idl_type, extended_attributes=None, raw_type=False, used_as_rvalue_
         return 'Flexible' + idl_type.base_type + 'View'
     if idl_type.is_interface_type:
         implemented_as_class = idl_type.implemented_as
-        if raw_type or (used_as_rvalue_type and idl_type.is_garbage_collected):
+        if raw_type or (used_as_rvalue_type and idl_type.is_garbage_collected) or not used_in_cpp_sequence:
             return implemented_as_class + '*'
-        new_type = 'Member' if used_in_cpp_sequence else 'RawPtr'
-        ptr_type = cpp_ptr_type(('PassRefPtr' if used_as_rvalue_type else 'RefPtr'), new_type, idl_type.gc_type)
-        return cpp_template_type(ptr_type, implemented_as_class)
+        if not used_in_cpp_sequence:
+            return implemented_as_class + '*'
+        return cpp_template_type('Member', implemented_as_class)
     if idl_type.is_dictionary:
         return base_idl_type
     if idl_type.is_union_type:
@@ -253,13 +256,9 @@ def cpp_template_type(template, inner_type):
     return format_string.format(template=template, inner_type=inner_type)
 
 
-def cpp_ptr_type(old_type, new_type, gc_type):
-    if gc_type == 'GarbageCollectedObject':
+def cpp_ptr_type(old_type, new_type, is_gc_type):
+    if is_gc_type:
         return new_type
-    if gc_type == 'WillBeGarbageCollectedObject':
-        if old_type == 'Vector':
-            return 'WillBe' + new_type
-        return old_type + 'WillBe' + new_type
     return old_type
 
 
@@ -303,31 +302,15 @@ IdlType.set_garbage_collected_types = classmethod(
         cls.garbage_collected_types.update(new_garbage_collected_types))
 
 
-# [WillBeGarbageCollected]
-IdlType.will_be_garbage_collected_types = set()
-
-IdlType.is_will_be_garbage_collected = property(
-    lambda self: self.base_type in IdlType.will_be_garbage_collected_types)
-
-IdlType.set_will_be_garbage_collected_types = classmethod(
-    lambda cls, new_will_be_garbage_collected_types:
-        cls.will_be_garbage_collected_types.update(new_will_be_garbage_collected_types))
+def is_gc_type(idl_type):
+    return idl_type.is_garbage_collected or idl_type.is_dictionary or idl_type.is_union_type
 
 
-def gc_type(idl_type):
-    if idl_type.is_garbage_collected or idl_type.is_dictionary or idl_type.is_union_type:
-        return 'GarbageCollectedObject'
-    if idl_type.is_will_be_garbage_collected:
-        return 'WillBeGarbageCollectedObject'
-    return 'RefCountedObject'
-
-IdlTypeBase.gc_type = property(gc_type)
+IdlTypeBase.is_gc_type = property(is_gc_type)
 
 
 def is_traceable(idl_type):
-    return (idl_type.is_garbage_collected
-            or idl_type.is_will_be_garbage_collected
-            or idl_type.is_dictionary)
+    return (idl_type.is_garbage_collected or idl_type.is_dictionary)
 
 IdlTypeBase.is_traceable = property(is_traceable)
 IdlUnionType.is_traceable = property(lambda self: True)
@@ -510,7 +493,7 @@ V8_VALUE_TO_CPP_VALUE = {
     'FlexibleArrayBufferView': 'toFlexibleArrayBufferView({isolate}, {v8_value}, {variable_name}, allocateFlexibleArrayBufferViewStorage({v8_value}))',
     'NodeFilter': 'toNodeFilter({v8_value}, info.Holder(), ScriptState::current({isolate}))',
     'Promise': 'ScriptPromise::cast(ScriptState::current({isolate}), {v8_value})',
-    'SerializedScriptValue': 'SerializedScriptValueFactory::instance().create({isolate}, {v8_value}, 0, 0, exceptionState)',
+    'SerializedScriptValue': 'SerializedScriptValueFactory::instance().create({isolate}, {v8_value}, nullptr, exceptionState)',
     'ScriptValue': 'ScriptValue(ScriptState::current({isolate}), {v8_value})',
     'Window': 'toDOMWindow({isolate}, {v8_value})',
     'XPathNSResolver': 'toXPathNSResolver(ScriptState::current({isolate}), {v8_value})',
@@ -583,9 +566,10 @@ def v8_value_to_cpp_value(idl_type, extended_attributes, v8_value, variable_name
         cpp_expression_format = (
             '{v8_value}->Is{idl_type}() ? '
             'V8{idl_type}::toImpl(v8::Local<v8::{idl_type}>::Cast({v8_value})) : 0')
+    elif idl_type.is_union_type:
+        nullable = 'UnionTypeConversionMode::Nullable' if idl_type.includes_nullable_type else 'UnionTypeConversionMode::NotNullable'
+        cpp_expression_format = 'V8{idl_type}::toImpl({isolate}, {v8_value}, {variable_name}, %s, exceptionState)' % nullable
     elif idl_type.use_output_parameter_for_result:
-        if idl_type.includes_nullable_type:
-            base_idl_type = idl_type.cpp_type + 'OrNull'
         cpp_expression_format = 'V8{idl_type}::toImpl({isolate}, {v8_value}, {variable_name}, exceptionState)'
     else:
         cpp_expression_format = (
@@ -604,8 +588,8 @@ def v8_value_to_cpp_value_array_or_sequence(native_array_element_type, v8_value,
     if (native_array_element_type.is_interface_type and
         native_array_element_type.name != 'Dictionary'):
         this_cpp_type = None
-        ref_ptr_type = cpp_ptr_type('RefPtr', 'Member', native_array_element_type.gc_type)
-        expression_format = '(to{ref_ptr_type}NativeArray<{native_array_element_type}, V8{native_array_element_type}>({v8_value}, {index}, {isolate}, exceptionState))'
+        ref_ptr_type = 'Member'
+        expression_format = '(to{ref_ptr_type}NativeArray<{native_array_element_type}>({v8_value}, {index}, {isolate}, exceptionState))'
     else:
         ref_ptr_type = None
         this_cpp_type = native_array_element_type.cpp_type
@@ -757,7 +741,7 @@ def v8_conversion_type(idl_type, extended_attributes):
     # Array or sequence types
     native_array_element_type = idl_type.native_array_element_type
     if native_array_element_type:
-        return 'array'
+        return 'FrozenArray' if idl_type.is_frozen_array else 'array'
 
     # Simple types
     base_idl_type = idl_type.base_type
@@ -769,14 +753,7 @@ def v8_conversion_type(idl_type, extended_attributes):
     if idl_type.is_string_type:
         if idl_type.is_nullable:
             return 'StringOrNull'
-        if 'TreatReturnedNullStringAs' not in extended_attributes:
-            return base_idl_type
-        treat_returned_null_string_as = extended_attributes['TreatReturnedNullStringAs']
-        if treat_returned_null_string_as == 'Null':
-            return 'StringOrNull'
-        if treat_returned_null_string_as == 'Undefined':
-            return 'StringOrUndefined'
-        raise 'Unrecognized TreatReturnedNullStringAs value: "%s"' % treat_returned_null_string_as
+        return base_idl_type
     if idl_type.is_basic_type or base_idl_type == 'ScriptValue':
         return base_idl_type
     # Generic dictionary type
@@ -800,9 +777,7 @@ V8_SET_RETURN_VALUE = {
     'DOMString': 'v8SetReturnValueString(info, {cpp_value}, info.GetIsolate())',
     'ByteString': 'v8SetReturnValueString(info, {cpp_value}, info.GetIsolate())',
     'USVString': 'v8SetReturnValueString(info, {cpp_value}, info.GetIsolate())',
-    # [TreatReturnedNullStringAs]
     'StringOrNull': 'v8SetReturnValueStringOrNull(info, {cpp_value}, info.GetIsolate())',
-    'StringOrUndefined': 'v8SetReturnValueStringOrUndefined(info, {cpp_value}, info.GetIsolate())',
     'void': '',
     # No special v8SetReturnValue* function (set value directly)
     'float': 'v8SetReturnValue(info, {cpp_value})',
@@ -812,13 +787,14 @@ V8_SET_RETURN_VALUE = {
     # No special v8SetReturnValue* function, but instead convert value to V8
     # and then use general v8SetReturnValue.
     'array': 'v8SetReturnValue(info, {cpp_value})',
+    'FrozenArray': 'v8SetReturnValue(info, {cpp_value})',
     'Date': 'v8SetReturnValue(info, {cpp_value})',
     'EventHandler': 'v8SetReturnValue(info, {cpp_value})',
     'ScriptValue': 'v8SetReturnValue(info, {cpp_value})',
     'SerializedScriptValue': 'v8SetReturnValue(info, {cpp_value})',
     # DOMWrapper
-    'DOMWrapperForMainWorld': 'v8SetReturnValueForMainWorld(info, WTF::getPtr({cpp_value}))',
-    'DOMWrapperFast': 'v8SetReturnValueFast(info, WTF::getPtr({cpp_value}), {script_wrappable})',
+    'DOMWrapperForMainWorld': 'v8SetReturnValueForMainWorld(info, {cpp_value})',
+    'DOMWrapperFast': 'v8SetReturnValueFast(info, {cpp_value}, {script_wrappable})',
     'DOMWrapperDefault': 'v8SetReturnValue(info, {cpp_value})',
     # Note that static attributes and operations do not check whether |this| is
     # an instance of the interface nor |this|'s creation context is the same as
@@ -837,7 +813,7 @@ V8_SET_RETURN_VALUE = {
 }
 
 
-def v8_set_return_value(idl_type, cpp_value, extended_attributes=None, script_wrappable='', release=False, for_main_world=False, is_static=False):
+def v8_set_return_value(idl_type, cpp_value, extended_attributes=None, script_wrappable='', for_main_world=False, is_static=False):
     """Returns a statement that converts a C++ value to a V8 value and sets it as a return value.
 
     """
@@ -853,7 +829,7 @@ def v8_set_return_value(idl_type, cpp_value, extended_attributes=None, script_wr
     idl_type, cpp_value = preprocess_idl_type_and_value(idl_type, cpp_value, extended_attributes)
     this_v8_conversion_type = idl_type.v8_conversion_type(extended_attributes)
     # SetReturn-specific overrides
-    if this_v8_conversion_type in ['Date', 'EventHandler', 'ScriptValue', 'SerializedScriptValue', 'array']:
+    if this_v8_conversion_type in ['Date', 'EventHandler', 'ScriptValue', 'SerializedScriptValue', 'array', 'FrozenArray']:
         # Convert value to V8 and then use general v8SetReturnValue
         cpp_value = idl_type.cpp_value_to_v8_value(cpp_value, extended_attributes=extended_attributes)
     if this_v8_conversion_type == 'DOMWrapper':
@@ -862,17 +838,11 @@ def v8_set_return_value(idl_type, cpp_value, extended_attributes=None, script_wr
         this_v8_conversion_type += 'Static'
 
     format_string = V8_SET_RETURN_VALUE[this_v8_conversion_type]
-    # FIXME: oilpan: Remove .release() once we remove all RefPtrs from generated code.
-    if release:
-        cpp_value = '%s.release()' % cpp_value
     statement = format_string.format(cpp_value=cpp_value, script_wrappable=script_wrappable)
     return statement
 
 
 IdlTypeBase.v8_set_return_value = v8_set_return_value
-
-IdlType.release = property(lambda self: self.is_interface_type)
-IdlUnionType.release = False
 
 
 CPP_VALUE_TO_V8_VALUE = {
@@ -889,16 +859,15 @@ CPP_VALUE_TO_V8_VALUE = {
     'double': 'v8::Number::New({isolate}, {cpp_value})',
     'unrestricted double': 'v8::Number::New({isolate}, {cpp_value})',
     'void': 'v8Undefined()',
-    # [TreatReturnedNullStringAs]
     'StringOrNull': '{cpp_value}.isNull() ? v8::Local<v8::Value>(v8::Null({isolate})) : v8String({isolate}, {cpp_value})',
-    'StringOrUndefined': '{cpp_value}.isNull() ? v8Undefined() : v8String({isolate}, {cpp_value})',
     # Special cases
     'Dictionary': '{cpp_value}.v8Value()',
-    'EventHandler': '{cpp_value} ? v8::Local<v8::Value>(V8AbstractEventListener::cast({cpp_value})->getListenerObject(impl->executionContext())) : v8::Local<v8::Value>(v8::Null({isolate}))',
+    'EventHandler': '{cpp_value} ? v8::Local<v8::Value>(V8AbstractEventListener::cast({cpp_value})->getListenerObject(impl->getExecutionContext())) : v8::Local<v8::Value>(v8::Null({isolate}))',
     'ScriptValue': '{cpp_value}.v8Value()',
     'SerializedScriptValue': '{cpp_value} ? {cpp_value}->deserialize() : v8::Local<v8::Value>(v8::Null({isolate}))',
     # General
     'array': 'toV8({cpp_value}, {creation_context}, {isolate})',
+    'FrozenArray': 'freezeV8Object(toV8({cpp_value}, {creation_context}, {isolate}), {isolate})',
     'DOMWrapper': 'toV8({cpp_value}, {creation_context}, {isolate})',
     # Passing nullable dictionaries isn't a pattern currently used
     # anywhere in the web platform, and more work would be needed in

@@ -53,13 +53,24 @@ def unwrap_nullable_if_needed(idl_type):
 def dictionary_context(dictionary, interfaces_info):
     includes.clear()
     includes.update(DICTIONARY_CPP_INCLUDES)
+
+    members = [member_context(dictionary, member)
+               for member in sorted(dictionary.members,
+                                    key=operator.attrgetter('name'))]
+
+    for member in members:
+        if member['runtime_enabled_function']:
+            includes.add('platform/RuntimeEnabledFeatures.h')
+            break
+
     cpp_class = v8_utilities.cpp_name(dictionary)
     context = {
         'cpp_class': cpp_class,
         'header_includes': set(DICTIONARY_H_INCLUDES),
-        'members': [member_context(dictionary, member)
-                    for member in sorted(dictionary.members,
-                                         key=operator.attrgetter('name'))],
+        'members': members,
+        'required_member_names': sorted([member.name
+                                         for member in dictionary.members
+                                         if member.is_required]),
         'use_permissive_dictionary_conversion': 'PermissiveDictionaryConversion' in dictionary.extended_attributes,
         'v8_class': v8_types.v8_type(cpp_class),
         'v8_original_class': v8_types.v8_type(dictionary.name),
@@ -114,11 +125,12 @@ def member_context(dictionary, member):
         'enum_values': unwrapped_idl_type.enum_values,
         'has_method_name': has_method_name_for_dictionary_member(member),
         'idl_type': idl_type.base_type,
-        'is_interface_type': idl_type.is_interface_type and not (idl_type.is_dictionary_type or is_deprecated_dictionary),
+        'is_interface_type': idl_type.is_interface_type and not is_deprecated_dictionary,
         'is_nullable': idl_type.is_nullable,
         'is_object': unwrapped_idl_type.name == 'Object' or is_deprecated_dictionary,
         'is_required': member.is_required,
         'name': member.name,
+        'runtime_enabled_function': v8_utilities.runtime_enabled_function_name(member),  # [RuntimeEnabled]
         'setter_name': setter_name_for_dictionary_member(member),
         'null_setter_name': null_setter_name_for_dictionary_member(member),
         'v8_default_value': v8_default_value,

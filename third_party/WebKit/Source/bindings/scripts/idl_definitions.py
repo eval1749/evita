@@ -64,7 +64,7 @@ Design doc: http://www.chromium.org/developers/design-documents/idl-compiler
 
 import abc
 
-from idl_types import IdlType, IdlUnionType, IdlArrayType, IdlSequenceType, IdlNullableType
+from idl_types import IdlType, IdlUnionType, IdlArrayType, IdlSequenceType, IdlFrozenArrayType, IdlNullableType
 
 SPECIAL_KEYWORD_LIST = ['GETTER', 'SETTER', 'DELETER']
 
@@ -286,6 +286,7 @@ class IdlInterface(object):
         self.serializer = None
         self.stringifier = None
         self.iterable = None
+        self.has_indexed_elements = False
         self.maplike = None
         self.setlike = None
         self.original_interface = None
@@ -301,11 +302,17 @@ class IdlInterface(object):
         self.name = node.GetName()
         self.idl_type = IdlType(self.name)
 
+        has_indexed_property_getter = False
+        has_integer_typed_length = False
+
         children = node.GetChildren()
         for child in children:
             child_class = child.GetClass()
             if child_class == 'Attribute':
-                self.attributes.append(IdlAttribute(idl_name, child))
+                attr = IdlAttribute(idl_name, child)
+                if attr.idl_type.is_integer_type and attr.name == 'length':
+                    has_integer_typed_length = True
+                self.attributes.append(attr)
             elif child_class == 'Const':
                 self.constants.append(IdlConstant(idl_name, child))
             elif child_class == 'ExtAttributes':
@@ -315,7 +322,10 @@ class IdlInterface(object):
                 clear_constructor_attributes(extended_attributes)
                 self.extended_attributes = extended_attributes
             elif child_class == 'Operation':
-                self.operations.append(IdlOperation(idl_name, child))
+                op = IdlOperation(idl_name, child)
+                if 'getter' in op.specials and str(op.arguments[0].idl_type) == 'unsigned long':
+                    has_indexed_property_getter = True
+                self.operations.append(op)
             elif child_class == 'Inherit':
                 self.parent = child.GetName()
             elif child_class == 'Serializer':
@@ -335,6 +345,9 @@ class IdlInterface(object):
 
         if len(filter(None, [self.iterable, self.maplike, self.setlike])) > 1:
             raise ValueError('Interface can only have one of iterable<>, maplike<> and setlike<>.')
+
+        if has_integer_typed_length and has_indexed_property_getter:
+            self.has_indexed_elements = True
 
     def accept(self, visitor):
         visitor.visit_interface(self)
@@ -374,6 +387,10 @@ class IdlInterface(object):
         self.attributes.extend(other.attributes)
         self.constants.extend(other.constants)
         self.operations.extend(other.operations)
+        if self.serializer is None:
+            self.serializer = other.serializer
+        if self.stringifier is None:
+            self.stringifier = other.stringifier
 
 
 class IdlException(IdlInterface):
@@ -1006,7 +1023,7 @@ def type_node_inner_to_type(node):
         return IdlType(node.GetName(), is_unrestricted=is_unrestricted)
     elif node_class == 'Any':
         return IdlType('any')
-    elif node_class == 'Sequence':
+    elif node_class in ['Sequence', 'FrozenArray']:
         return sequence_node_to_type(node)
     elif node_class == 'UnionType':
         return union_type_node_to_idl_union_type(node)
@@ -1017,14 +1034,20 @@ def type_node_inner_to_type(node):
 
 def sequence_node_to_type(node):
     children = node.GetChildren()
+    class_name = node.GetClass()
     if len(children) != 1:
-        raise ValueError('Sequence node expects exactly 1 child, got %s' % len(children))
+        raise ValueError('%s node expects exactly 1 child, got %s' % (class_name, len(children)))
     sequence_child = children[0]
     sequence_child_class = sequence_child.GetClass()
     if sequence_child_class != 'Type':
         raise ValueError('Unrecognized node class: %s' % sequence_child_class)
     element_type = type_node_to_type(sequence_child)
-    sequence_type = IdlSequenceType(element_type)
+    if class_name == 'Sequence':
+        sequence_type = IdlSequenceType(element_type)
+    elif class_name == 'FrozenArray':
+        sequence_type = IdlFrozenArrayType(element_type)
+    else:
+        raise ValueError('Unexpected node: %s' % class_name)
     if node.GetProperty('NULLABLE'):
         return IdlNullableType(sequence_type)
     return sequence_type

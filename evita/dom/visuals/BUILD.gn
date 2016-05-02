@@ -2,11 +2,11 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-css_gen_dir = "$target_gen_dir"
+import("//evita/build/js_module_externs.gni")
 
 source_set("visuals") {
   sources = [
-    "$css_gen_dir/css_value_simple_parsers.cc",
+    "$target_gen_dir/css_value_simple_parsers.cc",
     "css_style.cc",
     "css_style.h",
     "css_style_sheet_handle.cc",
@@ -23,6 +23,7 @@ source_set("visuals") {
 
   deps = [
     ":css_properties",
+    ":visuals_externs",
   ]
 }
 
@@ -38,15 +39,34 @@ action("css_properties") {
   ]
 
   outputs = [
-    "$css_gen_dir/CSSStyleDeclaration.idl",
-    "$css_gen_dir/css_style_declaration.js",
-    "$css_gen_dir/css_value_simple_parsers.cc",
+    "$target_gen_dir/CSSStyleDeclaration.idl",
+    "$target_gen_dir/css_style_declaration.js",
+    "$target_gen_dir/css_value_simple_parsers.cc",
   ]
 
   args = [
     "--output-directory",
-    rebase_path("$css_gen_dir"),
+    rebase_path("$target_gen_dir"),
     rebase_path("//evita/visuals/css/properties.in", root_build_dir),
+  ]
+}
+
+js_module_externs("visuals_externs") {
+  sources = [
+    "$target_gen_dir/CSSStyleDeclaration.idl",
+    "CSSRule.idl",
+    "CSSRuleBuilder.idl",
+    "CSSStyleRule.idl",
+    "CSSStyleSheet.idl",
+    "DOMTokenList.idl",
+    "Document.idl",
+    "Element.idl",
+    "Image.idl",
+    "Node.idl",
+    "Text.idl",
+  ]
+  deps = [
+    ":css_properties",
   ]
 }
 

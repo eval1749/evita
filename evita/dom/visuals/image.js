@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+goog.require('visuals.Node');
+
+goog.scope(function() {
+
+/** @constructor */
+const Node = visuals.Node;
+
 class Image extends Node {
   /**
    * @param {!Document} document
@@ -27,3 +34,7 @@ class Image extends Node {
   /** @override @return {string} */
   get nodeName() { return '#image'; }
 }
+
+/** @constructor */
+visuals.Image = Image;
+});

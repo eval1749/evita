@@ -4,9 +4,15 @@
 
 goog.scope(function() {
 
+/** @constructor */
+const CSSRule = visuals.CSSRule;
+
+/** @constructor */
+const CSSStyleDeclaration = visuals.CSSStyleDeclaration;
+
 /**
  * CSSStyleRule
- * @implements {CSSStyleObserver}
+ * @implements {visuals.CSSStyleObserver}
  */
 class CSSStyleRule extends CSSRule {
   /**

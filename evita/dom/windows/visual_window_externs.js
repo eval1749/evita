@@ -2,23 +2,23 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/** @type {!Document} */
+/** @type {!visuals.Document} */
 VisualWindow.prototype.document;
 
-/** @type {!CSSStyleSheet} */
+/** @type {!visuals.CSSStyleSheet} */
 VisualWindow.prototype.styleSheet;
 
 /**
  * @this {!VisualWindow}
- * @param {number} point_x
- * @param {number} point_y
- * @return {Node}
+ * @param {number} pointX
+ * @param {number} pointY
+ * @return {visuals.Node}
  */
-VisualWindow.prototype.hitTest = function(point_x, point_y) {};
+VisualWindow.prototype.hitTest = function(pointX, pointY) {};
 
 /**
- * @param {!Document} document
- * @param {!CSSStyleSheet} styleSheet
+ * @param {!visuals.Document} document
+ * @param {!visuals.CSSStyleSheet} styleSheet
  * @return {!VisualWindow}
  */
 VisualWindow.newWindow = function(document, styleSheet) {};

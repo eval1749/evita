@@ -2,23 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/**
- * @interface
- */
-var CSSStyleObserver = function() {};
+goog.provide('visuals');
 
-/**
- * @param {!CSSStyleDeclaration} style
- */
-CSSStyleObserver.didChangeCSSStyle = function(style) {};
-
-/**
- * @interface
- */
-var DOMTokenListOwner = function() {};
-
-/** @param {string} token */
-DOMTokenListOwner.didAddToken = function(token) {};
-
-/** @param {string} token */
-DOMTokenListOwner.didRemoveToken = function(token) {};
+/** @type {!Generator<!visuals.Node>} */
+visuals.Node.prototype.childNodes;

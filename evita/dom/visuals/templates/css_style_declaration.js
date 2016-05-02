@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+goog.scope(function() {
+
+/** @constructor */
+const CSSStyleObserver = visuals.CSSStyleObserver;
+
 /** @const @type {!Array.<string>} */
 const CSS_PROPERTY_NAMES = [
   "invalid",
@@ -174,3 +179,7 @@ class CSSStyleDeclaration {
     this.notifyChanged();
   }
 }
+
+/** @constructor */
+visuals.CSSStyleDeclaration = CSSStyleDeclaration;
+});

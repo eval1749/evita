@@ -2,11 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Copyright (c) 2016 Project Vogue. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+goog.require('visuals');
 
-testing.test('Node', function(t) {
+testing.test('Element', function(t) {
+  /** @constructor */
+  const Document = visuals.Document;
+
   const document = new Document();
   const element = document.createElement('div', 'foo');
 

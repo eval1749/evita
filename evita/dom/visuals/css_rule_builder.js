@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+goog.provide('visuals.CSSRuleBuilder');
+
+goog.scope(function() {
+
+/** @constructor */
+const CSSStyleDeclaration = visuals.CSSStyleDeclaration;
+
 //////////////////////////////////////////////////////////////////////
 //
 // CSSRuleBuilder
@@ -146,3 +153,7 @@ class CSSRuleBuilder {
    */
   static selector(selectorText) { return new CSSRuleBuilder(selectorText); }
 }
+
+/** @constructor */
+visuals.CSSRuleBuilder = CSSRuleBuilder;
+});

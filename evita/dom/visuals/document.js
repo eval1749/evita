@@ -4,6 +4,20 @@
 
 goog.require('visuals.Node');
 
+goog.scope(function() {
+
+/** @constructor */
+const Element = visuals.Element;
+
+/** @constructor */
+const Image = visuals.Image;
+
+/** @constructor */
+const Node = visuals.Node;
+
+/** @constructor */
+const Text = visuals.Text;
+
 class Document extends Node {
   constructor() { super(null, NodeHandle.createDocument()); }
 
@@ -47,3 +61,10 @@ class Document extends Node {
   /** @override @return {string} */
   get nodeName() { return '#document'; }
 }
+
+/** @constructor */
+visuals.Document = Document;
+});
+
+/** @constructor */
+var Document = visuals.Document;

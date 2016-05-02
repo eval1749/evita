@@ -2,6 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+goog.provide('visuals.Text');
+
+goog.scope(function() {
+
+/** @constructor */
+const Document = visuals.Document;
+
+/** @constructor */
+const Node = visuals.Node;
+
 class Text extends Node {
   /**
    * @param {!Document} document
@@ -27,3 +37,7 @@ class Text extends Node {
   /** @override @return {string} */
   get nodeName() { return '#text'; }
 }
+
+/** @constructor */
+visuals.Text = Text;
+});

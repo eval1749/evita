@@ -58,17 +58,19 @@ js_lib_files = [
   "timers/timer.js",
   "trace_logger.js",
   "unicode/unicode.js",
+
+  "visuals/visuals.js",
   "visuals/node.js",
   "$root_gen_dir/evita/dom/visuals/css_style_declaration.js",
   "visuals/css_rule.js",
   "visuals/css_style_rule.js",
   "visuals/css_style_sheet.js",
-  "visuals/document.js",
   "visuals/dom_token_list.js",
   "visuals/element.js",
   "visuals/image.js",
   "visuals/shape.js",
   "visuals/text.js",
+  "visuals/document.js",
 
   "visuals/css_rule_builder.js",
 

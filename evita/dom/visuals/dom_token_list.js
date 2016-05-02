@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+goog.scope(function() {
+
+/** @constructor */
+const DOMTokenListOwner = visuals.DOMTokenListOwner;
+
 //////////////////////////////////////////////////////////////////////
 //
 // DOMTokenList
@@ -86,3 +91,7 @@ class DOMTokenList {
     this.clearListCache();
   }
 }
+
+/** @constructor */
+visuals.DOMTokenList = DOMTokenList;
+});

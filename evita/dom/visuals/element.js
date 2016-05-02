@@ -2,6 +2,28 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+goog.provide('visuals.Element');
+
+goog.scope(function() {
+
+/** @constructor */
+const CSSStyleDeclaration = visuals.CSSStyleDeclaration;
+
+/** @constructor */
+const CSSStyleObserver = visuals.CSSStyleObserver;
+
+/** @constructor */
+const DOMTokenList = visuals.DOMTokenList;
+
+/** @constructor */
+const DOMTokenListOwner = visuals.DOMTokenListOwner;
+
+/** @constructor */
+const Document = visuals.Document;
+
+/** @constructor */
+const Node = visuals.Node;
+
 /**
  * @implements {CSSStyleObserver}
  * @implements {DOMTokenListOwner}
@@ -104,3 +126,8 @@ class Element extends Node {
    */
   didRemoveToken(token) { NodeHandle.removeClass(this.handle_, token); }
 }
+
+/** @constructor */
+visuals.Element = Element;
+
+});

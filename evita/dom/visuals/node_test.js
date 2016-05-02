@@ -2,7 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+goog.require('visuals');
+
 testing.test('Node', function(t) {
+  /** @constructor */
+  const Document = visuals.Document;
+
   const document = new Document();
   const body = document.createElement('body');
   const div1 = document.createElement('div1', 'div1');

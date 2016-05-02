@@ -3,10 +3,9 @@
 // found in the LICENSE file.
 
 [
-  ImplementedAs=JavaScript,
-  Constructor()
-]
-interface Document : Node {
-  Element createElement(DOMString tagName);
+  JsNamespace = visuals, ImplementedAs = JavaScript, Constructor()
+] interface Document : Node {
+  Element createElement(DOMString tagName, optional DOMString id);
+  Image createImage(ImageData data);
   Text createText(DOMString data);
 };

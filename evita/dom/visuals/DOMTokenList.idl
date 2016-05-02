@@ -1,0 +1,17 @@
+// Copyright (c) 2016 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+[
+  JsNamespace=visuals,
+  ImplementedAs=JavaScript,
+]
+interface DOMTokenList {
+  readonly attribute unsigned long length;
+
+  void add(DOMString token);
+  boolean contains(DOMString token);
+  string item(unsigned long index);
+  void remove(DOMString token);
+  void toggle(DOMString token);
+};

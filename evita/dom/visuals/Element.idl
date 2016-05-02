@@ -3,13 +3,14 @@
 // found in the LICENSE file.
 
 [
-  ImplementedAs=JavaScript,
+  JsNamespace = visuals, ImplementedAs = JavaScript,
   Constructor(Document document, DOMString tagName, optional DOMString id)
-]
-interface Element : Node {
+] interface Element : Node {
+  readonly attribute DOMTokenList classList;
   readonly attribute DOMString id;
-  readonly attribute DOMString tagName;
   attribute Any data;
+  attribute CSSStyleDeclaration style;
+  readonly attribute DOMString tagName;
 
   void addClass(DOMString className);
   void removeClass(DOMString className);

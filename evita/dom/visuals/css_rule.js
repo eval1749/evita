@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+goog.scope(function() {
+
 //////////////////////////////////////////////////////////////////////
 //
 // CSSRule
@@ -14,7 +16,7 @@ class CSSRule {
     /** @const @type {CSSRule} */
     this.parentRule_ = null;
 
-    /** @type {CSSStyleSheet} */
+    /** @type {visuals.CSSStyleSheet} */
     this.parentStyleSheet_ = null;
   }
 
@@ -24,7 +26,7 @@ class CSSRule {
   /** @return {CSSRule} */
   get parentRule() { return this.parentRule_; }
 
-  /** @return {CSSStyleSheet} */
+  /** @return {visuals.CSSStyleSheet} */
   get parentStyleSheet() { return this.parentStyleSheet_; }
 
   /** @return {number} */
@@ -39,3 +41,7 @@ class CSSRule {
   static get MARGIN_RULE() { return 9; }
   static get NAMESPACE_RULE() { return 10; }
 }
+
+/** @constructor */
+visuals.CSSRule = CSSRule;
+});

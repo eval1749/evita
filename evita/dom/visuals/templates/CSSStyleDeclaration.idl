@@ -2,15 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+[
+  JsNamespace=visuals,
+  ImplementedAs=JavaScript,
+]
 interface CSSStyleDeclaration {
   attribute DOMString cssText;
 {% for property in properties %}
   attribute DOMString {{property.camelCaseName}};
 {% endfor %}
 
-  DOMString getPropertyValue(DOMString property)
-  DOMString getPropertyPriority(DOMString property)
-  void SetPropertyValue(DOMString property, DOMString value)
-  void SetPropertyPriority(DOMString property, DOMString value)
+  DOMString getPropertyValue(DOMString property);
+  DOMString getPropertyPriority(DOMString property);
+  void SetPropertyValue(DOMString property, DOMString value);
+  void SetPropertyPriority(DOMString property, DOMString value);
   DOMString removeProperty(DOMString property);
 };

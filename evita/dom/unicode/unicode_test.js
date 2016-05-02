@@ -7,12 +7,45 @@ goog.require("unicode");
 
 goog.scope(function() {
 
-testing.test('unicode.constants', function(t) {
+testing.test('Unicode.CATEGORY_DATA', function(t) {
+  t.expect(Unicode.CATEGORY_DATA.length).toEqual(0x10FFFF + 1);
+  t.expect(Unicode.CATEGORY_DATA['0'.charCodeAt(0)]).toEqual(9);
+  t.expect(Unicode.CATEGORY_DATA['!'.charCodeAt(0)]).toEqual(23);
+  t.expect(Unicode.CATEGORY_DATA['A'.charCodeAt(0)]).toEqual(1);
+  t.expect(Unicode.CATEGORY_DATA['Z'.charCodeAt(0)]).toEqual(1);
+  t.expect(Unicode.CATEGORY_DATA['a'.charCodeAt(0)]).toEqual(2);
+  t.expect(Unicode.CATEGORY_DATA['z'.charCodeAt(0)]).toEqual(2);
+  t.expect(Unicode.CATEGORY_DATA[0x1F2]).toEqual(3);
+  t.expect(Unicode.CATEGORY_DATA[0x3042]).toEqual(5);
+});
+
+testing.test('Unicode.CATEGORY_SHORT_NAMES', function(t) {
+  t.expect(Unicode.CATEGORY_SHORT_NAMES.length).toEqual(30);
+});
+
+testing.test('Unicode.SCRIPT_DATA', function(t) {
+  t.expect(Unicode.SCRIPT_DATA.length).toEqual(0x10FFFF + 1);
+  t.expect(Unicode.SCRIPT_DATA['0'.charCodeAt(0)])
+      .toEqual(Unicode.Script.COMMON);
+  t.expect(Unicode.SCRIPT_DATA['!'.charCodeAt(0)])
+      .toEqual(Unicode.Script.COMMON);
+  t.expect(Unicode.SCRIPT_DATA['A'.charCodeAt(0)])
+      .toEqual(Unicode.Script.LATIN);
+  t.expect(Unicode.SCRIPT_DATA['Z'.charCodeAt(0)])
+      .toEqual(Unicode.Script.LATIN);
+  t.expect(Unicode.SCRIPT_DATA['a'.charCodeAt(0)])
+      .toEqual(Unicode.Script.LATIN);
+  t.expect(Unicode.SCRIPT_DATA['z'.charCodeAt(0)])
+      .toEqual(Unicode.Script.LATIN);
+  t.expect(Unicode.SCRIPT_DATA[0x1F2]).toEqual(Unicode.Script.LATIN);
+  t.expect(Unicode.SCRIPT_DATA[0x3042]).toEqual(Unicode.Script.HIRAGANA);
+});
+
+testing.test('Unicode.SCRIPT_NAMES', function(t) {
   t.expect(Unicode.SCRIPT_NAMES[100]).toEqual('VISIBLE_SPEECH');
   t.expect(Unicode.SCRIPT_NAMES[166]).toEqual('SIDDHAM');
   t.expect(Unicode.SCRIPT_NAMES.length).toEqual(167);
 });
-
 
 testing.test('unicode.categoryOf', function(t) {
   t.expect(unicode.categoryOf('0'.charCodeAt(0))).toEqual(Unicode.Category.Nd);

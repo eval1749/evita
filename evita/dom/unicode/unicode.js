@@ -6,15 +6,12 @@ goog.provide('unicode');
 
 goog.scope(function() {
 
-// TODO(eval1749): We should introduce following functions:
-//  unicode.scriptOf(charCode)
-
 /**
  * @param {number} charCode
  * @return {string}
  */
 function categoryOf(charCode) {
-  return Unicode.UCD[charCode].category;
+  return Unicode.CATEGORY_SHORT_NAMES[Unicode.CATEGORY_DATA[charCode]];
 }
 
 /**
@@ -62,7 +59,7 @@ function isUpperCase(charCode) {
  * @return {!Unicode.Script}
  */
 function scriptOf(charCode) {
-  return Unicode.UCD[charCode].script;
+  return /** @type {!Unicode.Script} */ (Unicode.SCRIPT_DATA[charCode]);
 }
 
 /**

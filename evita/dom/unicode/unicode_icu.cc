@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <stdint.h>
+
 #include <array>
 #include <memory>
 
@@ -213,14 +215,17 @@ static_assert(sizeof(kCategoryNames) / sizeof(*kCategoryNames) ==
   DCHECK((vector)[index][0] == (name)[0] && (vector)[index][1] == (name)[1] && \
          (vector)[index][2] == (name)[2] && (vector)[index][3] == (name)[3])
 
+v8::Local<v8::Uint8Array> MakeUint8Array(v8::Isolate* isolate, size_t length) {
+  auto buffer = v8::ArrayBuffer::New(isolate, length);
+  return v8::Uint8Array::New(buffer, 0, length);
+}
+
 // Unicode.CATEGORY_SHOT_NAMES : Array.<string>
-// Unicode.SCRIPT_NAMES : Array.<string>
-// Unicode.Category : enum
-// Unicode.Script: enum
-// Unicode.UCD : Array.<{
-//  category: Unicode.Category,
-//  script: Unicode.Script,
-// }>
+// Unicode.CATEGORY_DATA: Uint8Array
+// Unicode.SCRIPT_NAMES: Array.<string>
+// Unicode.SCRIPT_DATA: Uint8Array
+// Unicode.Category : @enum{string}
+// Unicode.Script: @enum{string}
 v8::Local<v8::Object> CreateUnicode(v8::Isolate* isolate) {
   DCHECK_EQ_CHAR_2(kCategoryNames, U_UNASSIGNED, "Cn");
   DCHECK_EQ_CHAR_2(kCategoryNames, U_UPPERCASE_LETTER, "Lu");
@@ -253,13 +258,6 @@ v8::Local<v8::Object> CreateUnicode(v8::Isolate* isolate) {
   DCHECK_EQ_CHAR_2(kCategoryNames, U_INITIAL_PUNCTUATION, "Pi");
   DCHECK_EQ_CHAR_2(kCategoryNames, U_FINAL_PUNCTUATION, "Pf");
 
-  std::array<v8::Local<v8::Symbol>, USCRIPT_CODE_LIMIT> kScriptAbbrevs;
-#define V(id, num, abbrev)       \
-  kScriptAbbrevs[USCRIPT_##id] = \
-      v8::Symbol::New(isolate, gin::StringToV8(isolate, #id));
-  FOR_EACH_SCRIPT(V)
-#undef V
-
   v8::EscapableHandleScope handle_scope(isolate);
   auto unicode = v8::Object::New(isolate);
 
@@ -278,47 +276,37 @@ v8::Local<v8::Object> CreateUnicode(v8::Isolate* isolate) {
   // Script name
   auto script_names = v8::Array::New(isolate, USCRIPT_CODE_LIMIT);
   auto script_object = v8::Object::New(isolate);
-#define V(id, num, abbrev)                          \
-  script_object->Set(gin::StringToV8(isolate, #id), \
-                     kScriptAbbrevs[USCRIPT_##id]); \
+#define V(id, num, abbrev)                                     \
+  script_object->Set(gin::StringToV8(isolate, #id),            \
+                     v8::Integer::New(isolate, USCRIPT_##id)); \
   script_names->Set(USCRIPT_##id, gin::StringToV8(isolate, #id));
   FOR_EACH_SCRIPT(V)
 #undef V
   unicode->Set(gin::StringToV8(isolate, "Script"), script_object);
   unicode->Set(gin::StringToV8(isolate, "SCRIPT_NAMES"), script_names);
 
-  // UCD
-  auto ucd = v8::Array::New(isolate, UCHAR_MAX_VALUE + 1);
-  unicode->Set(gin::StringToV8(isolate, "UCD"), ucd);
-  auto name = gin::StringToV8(isolate, "name");
-  auto category = gin::StringToV8(isolate, "category");
-  auto script_string = gin::StringToV8(isolate, "script");
+  // Character Data
+  auto category_data_array = MakeUint8Array(isolate, UCHAR_MAX_VALUE + 1);
+  unicode->Set(gin::StringToV8(isolate, "CATEGORY_DATA"), category_data_array);
+  const auto& category_data_contents =
+      category_data_array->Buffer()->GetContents();
+  auto category_data = static_cast<uint8_t*>(category_data_contents.Data());
+
+  auto script_data_array = MakeUint8Array(isolate, UCHAR_MAX_VALUE + 1);
+  unicode->Set(gin::StringToV8(isolate, "SCRIPT_DATA"), script_data_array);
+  const auto& script_data_contents = script_data_array->Buffer()->GetContents();
+  auto script_data = static_cast<uint8_t*>(script_data_contents.Data());
+
   for (auto code = 0; code <= UCHAR_MAX_VALUE; ++code) {
-    auto data = v8::Object::New(isolate);
-
-    auto error_code = U_ZERO_ERROR;
-#if 0
-    // Note: Because of Chromium icudata doesn't contain unames.icu. So, we
-    // can't have character names.
-    // name
-    char name_buffer[100];
-    u_charName(code, U_UNICODE_CHAR_NAME, name_buffer, sizeof(name_buffer),
-               &error_code);
-    CHECK_EQ(U_ZERO_ERROR, error_code);
-    data->ForceSet(name, gin::StringToV8(isolate, name_buffer));
-#endif
-
-    // general category
-    auto const category_index = u_charType(code);
+    // category
+    const auto category_index = u_charType(code);
     CHECK(category_index < arraysize(kCategoryNames));
-    data->ForceSet(category,
-                   category_names->Get(static_cast<size_t>(category_index)));
+    category_data[code] = static_cast<uint8_t>(category_index);
 
     // script
-    auto const script_code = uscript_getScript(code, &error_code);
-    data->ForceSet(script_string, kScriptAbbrevs[script_code]);
-
-    ucd->Set(static_cast<size_t>(code), data);
+    auto error_code = U_ZERO_ERROR;
+    const auto script_code = uscript_getScript(code, &error_code);
+    script_data[code] = static_cast<uint8_t>(script_code);
   }
   return handle_scope.Escape(unicode);
 }

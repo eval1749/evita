@@ -1,0 +1,112 @@
+# Copyright (c) 2016 Project Vogue. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//evita/build/compiled_idl.gni")
+
+# Parameters:
+#   deps (optional)
+#   externs (optional)
+#   output_dir (optional, default is "${target_gen_dir}"
+#   output_name (optional, default "${target_name}.js")
+#   sources (required)
+#
+# Example:
+#   js_module_externs("foo_externs") {
+#     sources = [
+#       "Foo.idl",
+#       "Bar.idl","
+#     ]
+#     deps = [
+#       "//foo/bar",
+#       "//foo/baz",
+#     ]
+#   }
+#
+
+template("js_module_externs") {
+  assert(defined(invoker.sources),
+         "Need sources in $target_name listing the IDL files.")
+
+  if (defined(invoker.deps)) {
+    target_deps = invoker.deps
+  } else {
+    target_deps = []
+  }
+
+  if (defined(invoker.output_dir)) {
+    _output_dir = invoker.output_dir
+  } else {
+    _output_dir = target_gen_dir
+  }
+
+  if (defined(invoker.output_name)) {
+    _output_name = invoker.output_name
+  } else {
+    _output_name = target_name + ".js"
+  }
+
+  if (defined(invoker.externs)) {
+    externs = invoker.externs
+  } else {
+    externs = []
+  }
+
+  idl_js_externs = process_file_template(
+          invoker.sources,
+          [ "$target_gen_dir/{{source_name_part}}_externs.js" ])
+
+  compiled_idl("compiled_idl") {
+    visibility = [ ":*" ]
+    sources = invoker.sources
+    deps = target_deps
+  }
+
+  action_foreach("js_externs_individual") {
+    visibility = [ ":*" ]
+    script = "//evita/dom/bindings/scripts/idl_to_js_externs.py"
+    sources = invoker.sources
+    inputs = [
+      "//evita/dom/bindings/scripts/idl_to_js_externs.py",
+      "//evita/dom/bindings/scripts/code_generator_js.py",
+      "//evita/dom/bindings/templates/dictionary.js",
+      "//evita/dom/bindings/templates/interface.js",
+      "$target_gen_dir/modules/InterfacesInfoOverall.pickle",
+      "$target_gen_dir/lextab.py",
+      "$target_gen_dir/parsetab.pickle",
+      "//third_party/WebKit/Source/bindings/IDLExtendedAttributes.txt",
+    ]
+    outputs = [
+      "$target_gen_dir/{{source_name_part}}_externs.js",
+    ]
+    args = [
+      "--output-dir",
+      rebase_path(target_gen_dir),
+      "--cache-dir",
+      rebase_path(target_gen_dir),
+      "--info-dir",
+      rebase_path(target_gen_dir),
+      "--write-file-only-if-changed=1",
+      "--target-component=core",
+      "{{source}}",
+    ]
+    deps = [ ":compiled_idl" ] + target_deps
+  }
+
+  action(target_name) {
+    output_name = "${_output_dir}/${_output_name}"
+    response_file_contents = rebase_path(externs + idl_js_externs)
+    script = "//evita/dom/bindings/scripts/concatenate.py"
+    inputs = [ script ] + externs + idl_js_externs
+    outputs = [
+      output_name,
+    ]
+    args = [
+      rebase_path(output_name),
+      "{{response_file_name}}",
+    ]
+    deps = [
+      ":js_externs_individual",
+    ]
+  }
+}

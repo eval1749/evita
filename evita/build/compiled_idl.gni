@@ -1,0 +1,99 @@
+# Copyright (c) 2016 Project Vogue. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Parameters
+#   sources (required)
+#   visibility (optional)
+
+idl_lexer_parser_files = [
+  "//third_party/ply/lex.py",
+  "//third_party/ply/yacc.py",
+  "//third_party/WebKit/Source/bindings/scripts/blink_idl_lexer.py",
+  "//third_party/WebKit/Source/bindings/scripts/blink_idl_parser.py",
+  "//tools/idl_parser/idl_lexer.py",
+  "//tools/idl_parser/idl_node.py",
+  "//tools/idl_parser/idl_parser.py",
+]
+
+template("compiled_idl") {
+  assert(defined(invoker.sources),
+         "Need sources in $target_name listing the IDL files.")
+
+  if (defined(invoker.deps)) {
+    target_deps = invoker.deps
+  } else {
+    target_deps = []
+  }
+
+  action("cached_lex_yacc_tables") {
+    visibility = [ ":*" ]
+    script = "//third_party/WebKit/Source/bindings/scripts/blink_idl_parser.py"
+    inputs = idl_lexer_parser_files
+    outputs = [
+      "$target_gen_dir/lextab.py",
+      "$target_gen_dir/parsetab.pickle",
+    ]
+    args = [ rebase_path(target_gen_dir, root_build_dir) ]
+  }
+
+  action("interfaces_info_individual") {
+    visibility = [ ":*" ]
+    script = "//third_party/WebKit/Source/bindings/scripts/compute_interfaces_info_individual.py"
+    sources = invoker.sources
+    outputs = [
+      "$target_gen_dir/core/InterfacesInfoCoreIndividual.pickle",
+      "$target_gen_dir/core/ComponentInfoCore.pickle",
+    ]
+
+    # TODO(eval1749): We should make compute_interfaces_info_individual.py to
+    # take space separated input file.
+    # response_file_contents = rebase_path(sources)
+    idl_file_list = "$target_gen_dir/idl_file_list.txt"
+    write_file(idl_file_list, rebase_path(sources))
+    args = [
+      "--cache-directory",
+      rebase_path(target_gen_dir),
+      "--idl-files-list",
+      rebase_path(idl_file_list),
+      "--interfaces-info-file",
+      rebase_path("$target_gen_dir/core/InterfacesInfoCoreIndividual.pickle"),
+      "--component-info-file",
+      rebase_path("$target_gen_dir/core/ComponentInfoCore.pickle"),
+      "--write-file-only-if-changed=1",
+      "--",
+    ]
+    deps = target_deps
+  }
+
+  action("interfaces_info") {
+    visibility = [ ":*" ]
+    deps = [
+      ":interfaces_info_individual",
+    ]
+    script = "//third_party/WebKit/Source/bindings/scripts/compute_interfaces_info_overall.py"
+    inputs = [
+      "$target_gen_dir/core/InterfacesInfoCoreIndividual.pickle",
+    ]
+    outputs = [
+      "$target_gen_dir/modules/InterfacesInfoOverall.pickle",
+    ]
+    args = [
+      "--write-file-only-if-changed=1",
+      "--",
+      rebase_path("$target_gen_dir/core/InterfacesInfoCoreIndividual.pickle"),
+      rebase_path("$target_gen_dir/modules/InterfacesInfoOverall.pickle"),
+    ]
+  }
+
+  group(target_name) {
+    if (defined(invoker.visibility)) {
+      visibility = invoker.visibility
+    }
+    public_deps = [
+      ":cached_lex_yacc_tables",
+      ":interfaces_info",
+    ]
+    deps = target_deps
+  }
+}

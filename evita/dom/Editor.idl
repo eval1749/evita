@@ -25,9 +25,6 @@ interface Editor {
   static readonly attribute DOMString v8Version;
   static readonly attribute DOMString version;
 
-  [ImplementedAs = JavaScript] static readonly attribute KeyBindingMapMap
-      key_binding_map_map_;
-
   [ImplementedAs = JavaScript] static Window activeWindow();
 
   [ImplementedAs = JavaScript] static void bindKey(

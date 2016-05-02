@@ -2,10 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-idl_gen_dir = "$root_gen_dir/evita/dom/idl"
-idl_scripts_output_dir = "$root_gen_dir/evita/dom/idl"
 bindings_gen_dir = "$root_gen_dir/evita/dom/bindings"
-externs_gen_dir = "$root_gen_dir/evita/dom/externs"
 
 interface_idl_files = [
   "//evita/dom/components/clipboard/DataTransfer.idl",
@@ -104,53 +101,4 @@ dictionary_idl_files = [
   "//evita/dom/text/RegExpInit.idl",
   "//evita/dom/timing/IdleRequestOptions.idl",
   "//evita/dom/windows/FormWindowInit.idl",
-]
-
-idl_lexer_parser_files = [
-  "//third_party/ply/lex.py",
-  "//third_party/ply/yacc.py",
-  "//third_party/WebKit/Source/bindings/scripts/blink_idl_lexer.py",
-  "//third_party/WebKit/Source/bindings/scripts/blink_idl_parser.py",
-  "//tools/idl_parser/idl_lexer.py",
-  "//tools/idl_parser/idl_node.py",
-  "//tools/idl_parser/idl_parser.py",
-]
-
-static_js_externs_files = [
-  #"//evita/dom/base/base_externs.js",
-  #"//evita/dom/base/base64_externs.js",
-  #"//evita/dom/base/logging_externs.js",
-  #"//evita/dom/base/ordered_set_externs.js",
-  #"//evita/dom/base/strings/string_util_externs.js",
-  #"//evita/dom/bracket_externs.js",
-  "//evita/dom/components/clipboard/clipboard_externs.js",
-  "//evita/dom/components/find_and_replace/find_and_replace_externs.js",
-  "//evita/dom/components/launchpad/launchpad_externs.js",
-
-  #"//evita/dom/components/repl/console_externs.js",
-  #"//evita/dom/components/repl/js_completer_externs.js",
-  #"//evita/dom/components/repl/js_console_externs.js",
-  #"//evita/dom/components/repl/repl_externs.js",
-  "//evita/dom/components/spell_checker/spell_checker_externs.js",
-  "//evita/dom/css/text_style_externs.js",
-  "//evita/dom/errors_externs.js",
-  "//evita/dom/forms/form_control_externs.js",
-  "//evita/dom/jslib/editors_externs.js",
-  "//evita/dom/jslib/windows_externs.js",
-  "//evita/dom/key_names_externs.js",
-  "//evita/dom/os/os_externs.js",
-  "//evita/dom/testing/testing_externs.js",
-  "//evita/dom/testing/gtest_externs.js",
-  "//evita/dom/testing/test_externs.js",
-  "//evita/dom/text/text_externs.js",
-  "//evita/dom/text/text_document_externs.js",
-  "//evita/dom/text/text_range_externs.js",
-  "//evita/dom/text/simple_mutation_observer_externs.js",
-  "//evita/dom/text/text_position_externs.js",
-
-  #"//evita/dom/types_externs.js",
-  "//evita/dom/visuals/visuals_externs.js",
-  "//evita/dom/windows/text_document_state_externs.js",
-  "//evita/dom/windows/tab_data_externs.js",
-  "//evita/dom/windows/visual_window_externs.js",
 ]

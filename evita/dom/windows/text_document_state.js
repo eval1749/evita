@@ -119,7 +119,6 @@ class TextDocumentState {
   static controller() { return controller; }
 
   /**
-   * For debugging only
    * @param {!TextDocument} document
    * @return {TextDocumentState}
    */

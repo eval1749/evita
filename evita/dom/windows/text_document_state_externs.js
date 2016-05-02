@@ -36,3 +36,9 @@ TextDocumentState.prototype.revision;
 
 /** @type {number} */
 TextDocumentState.prototype.state;
+
+/**
+ * @param {!TextDocument} document
+ * @return {TextDocumentState}
+ */
+TextDocumentState.get = function(document) {};

@@ -3,12 +3,6 @@
 // found in the LICENSE file.
 
 /**
- * @param {number} level
- * @param {...*} args
- */
-function DVLOG(level, args) {}
-
-/**
  * @param {string} text
  * @return {string}
  */

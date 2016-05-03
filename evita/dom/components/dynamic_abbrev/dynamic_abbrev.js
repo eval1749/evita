@@ -2,16 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Note: DynamicAbbrevExpander should be in file scope. Although, when we use
+// Note: Expander should be in file scope. Although, when we use
 // IIFE, immediately-invoked function expression, Closure compiler can't find
-// |DynamicAbbrevExpander| type.
+// |Expander| type.
 
 goog.provide('dynamic_abbrev');
 
 goog.scope(function() {
 
 /** @const @type{string} */
-const PROPERTY_NAME = 'evita.DynamicAbbrevExpander';
+const PROPERTY_NAME = 'evita.DynamicAbbrev';
 
 /**
  * @param {string} text
@@ -66,7 +66,7 @@ function findWordStartsWith(text, range, direction) {
   return false;
 }
 
-class DynamicAbbrevExpander {
+class Expander {
   /**
    * @public
    * @param {!TextDocument} document
@@ -86,13 +86,13 @@ class DynamicAbbrevExpander {
 
   /**
    * @param {!TextDocument} document
-   * @return {!DynamicAbbrevExpander}
+   * @return {!Expander}
    */
   static getOrCreate(document) {
     const expander = document.properties.get(PROPERTY_NAME);
     if (expander)
-      return /** @type {!DynamicAbbrevExpander} */ (expander);
-    const newExpander = new DynamicAbbrevExpander(document);
+      return /** @type {!Expander} */ (expander);
+    const newExpander = new Expander(document);
     document.properties.set(PROPERTY_NAME, newExpander);
     return newExpander;
   }
@@ -197,9 +197,12 @@ class DynamicAbbrevExpander {
   }
 }
 
+/** @constructor */
+dynamic_abbrev.Expander = Expander;
+
 Editor.bindKey(TextWindow, 'Ctrl+/', /** @this {!TextWindow} */ function() {
-  /** @const @type {!DynamicAbbrevExpander} */
-  const expander = DynamicAbbrevExpander.getOrCreate(this.document);
+  /** @const @type {!Expander} */
+  const expander = Expander.getOrCreate(this.document);
   expander.expand(this.selection);
 });
 

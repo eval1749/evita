@@ -84,8 +84,6 @@ js_lib_files = [
   "windows/window.js",
 
   "components/commander/commander.js",
-  "components/find_and_replace/find_and_replace.js",
-  "components/find_and_replace/find_and_replace_commands.js",
 
   "components/highlights/highlights.js",
   "components/highlights/painter.js",

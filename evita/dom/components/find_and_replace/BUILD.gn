@@ -1,0 +1,24 @@
+# Copyright (c) 2016 Project Vogue. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//evita/build/js_module.gni")
+
+js_module("find_and_replace") {
+  sources = [
+    "find_and_replace.js",
+    "find_and_replace_commands.js",
+  ]
+  externs = [
+    #"//evita/dom/jslib/task_scheduler_externs.js",
+    #"//evita/dom/text/text_externs.js",
+    #"//evita/dom/text/simple_text_document_set_observer_externs.js",
+    #"//evita/dom/text/simple_mutation_observer_externs.js",
+    "//evita/dom/text/text_document_externs.js",
+    # TODO(eval1749): We should move strings to resource.
+    "//evita/dom/strings_en_US.js",
+    "//evita/dom/unicode/unicode_enums.js",
+    "//evita/dom/unicode/unicode_externs.js",
+    "//evita/dom/windows/window_enums.js",
+  ]
+}

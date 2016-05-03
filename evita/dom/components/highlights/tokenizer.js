@@ -151,6 +151,32 @@ class Tokenizer extends Logger {
   }
 
   /**
+   * @public
+   * For debugging.
+   */
+  dump() {
+    /** @type {?Token} */
+    let token = null;
+    for (const range of this.ranges()) {
+      if (token !== range.token) {
+        token = range.token;
+        /** @const @type {string} */
+        const tokenText =
+            extractSample(this.document, token.start, token.end, 40);
+        console.log(
+            token.start, token.end, `"${token.syntax}"`,
+            asStringLiteral(tokenText));
+      }
+      /** @const @type {string} */
+      const rangeText =
+          extractSample(this.document, range.start, range.end, 20);
+      console.log(
+          ' ', range.start, range.end, `s${range.state}`,
+          asStringLiteral(rangeText));
+    }
+  }
+
+  /**
    * @private
    * @param {!StateRange} range
    * @param {number} end
@@ -179,6 +205,21 @@ class Tokenizer extends Logger {
    * @return {boolean}
    */
   isFinished() { return this.scanOffset_ === this.document_.length; }
+
+  /**
+   * @private
+   * @param {number} scanOffset
+   * @param {number} charCode
+   * @param {number} state
+   * @param {?Token} token
+   */
+  logLoopStart(scanOffset, charCode, state, token) {
+    if (this.verbose <= 0)
+      return;
+    this.log(
+        0, 'LOOP', scanOffset, asStringLiteral(String.fromCharCode(charCode)),
+        `s${state}`, token);
+  }
 
   /**
    * @public
@@ -283,47 +324,6 @@ class Tokenizer extends Logger {
     this.endRange(lastRange, scanEnd);
     this.endToken(lastRange.token);
     return scanEnd;
-  }
-
-  /**
-   * @public
-   * For debugging.
-   */
-  dump() {
-    /** @type {?Token} */
-    let token = null;
-    for (const range of this.ranges()) {
-      if (token !== range.token) {
-        token = range.token;
-        /** @const @type {string} */
-        const tokenText =
-            extractSample(this.document, token.start, token.end, 40);
-        console.log(
-            token.start, token.end, `"${token.syntax}"`,
-            asStringLiteral(tokenText));
-      }
-      /** @const @type {string} */
-      const rangeText =
-          extractSample(this.document, range.start, range.end, 20);
-      console.log(
-          ' ', range.start, range.end, `s${range.state}`,
-          asStringLiteral(rangeText));
-    }
-  }
-
-  /**
-   * @private
-   * @param {number} scanOffset
-   * @param {number} charCode
-   * @param {number} state
-   * @param {?Token} token
-   */
-  logLoopStart(scanOffset, charCode, state, token) {
-    if (this.verbose <= 0)
-      return;
-    this.log(
-        0, 'LOOP', scanOffset, asStringLiteral(String.fromCharCode(charCode)),
-        `s${state}`, token);
   }
 
   /**

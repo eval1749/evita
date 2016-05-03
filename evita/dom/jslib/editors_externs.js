@@ -8,8 +8,3 @@ var editors;
 
 /** @param {!Array.<string>} args */
 editors.start = function(args) {}
-
-/**
- * @const @type {!TaskScheduler}
- */
-var taskScheduler;

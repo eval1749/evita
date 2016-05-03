@@ -32,9 +32,7 @@ function loadUserScript() {
 /**
  * @param {!Array.<string>} args
  */
-function start(args) {
-  Initializer.initialize();
-  loadUserScript();
+function processCommandLine(args) {
   /** @const @type {!EditorWindow} */
   const editorWindow = new EditorWindow();
   /** @const @type {!TextDocument} */
@@ -47,6 +45,16 @@ function start(args) {
   editorWindow.appendChild(textWindow);
   editorWindow.realize();
   args.forEach(fileName => Editor.open(fileName));
+}
+
+/**
+ * @param {!Array.<string>} args
+ */
+function start(args) {
+  Initializer.initialize();
+  loadUserScript()
+      .then(value => processCommandLine(args))
+      .catch(value => processCommandLine(args));
 }
 
 /** @const @type {function(!Array.<string>)} */

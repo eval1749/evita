@@ -93,6 +93,7 @@ class Tokenizer extends Logger {
       this.log(0, 'change occurred beyond processed area');
       return;
     }
+    /** @const @type {?StateRange} */
     const cleanStateRange = this.rangeMap_.rangeBefore(headCount);
     if (cleanStateRange === null) {
       this.scanOffset_ = 0;
@@ -100,6 +101,7 @@ class Tokenizer extends Logger {
       return;
     }
     this.scanOffset_ = cleanStateRange.end;
+    /** @const @type {number} */
     const state = cleanStateRange.state;
     this.stateMachine_.resetTo(state);
     this.log(0, 'Restart after', cleanStateRange);
@@ -141,7 +143,7 @@ class Tokenizer extends Logger {
 
   /**
    * @private
-   * @param {Token} token
+   * @param {?Token} token
    */
   endToken(token) {
     if (token === null)
@@ -185,11 +187,11 @@ class Tokenizer extends Logger {
     if (scanStart >= scanEnd)
       return scanStart;
 
-    /** @type {StateRange} */
+    /** @type {?StateRange} */
     let range = this.rangeMap_.rangeEndsAt(scanStart);
     this.log(0, 'start', 'range', range);
 
-    /** @type {Token} */
+    /** @type {?Token} */
     let token = null;
     this.stateMachine_.resetTo(0);
     if (scanStart === startOffset) {
@@ -221,7 +223,7 @@ class Tokenizer extends Logger {
         state = this.stateMachine_.updateState(charCode);
       }
 
-      /** @const @type {StateRange} */
+      /** @const @type {?StateRange} */
       const nextRange = this.rangeMap_.rangeStartsAt(scanOffset);
       if (nextRange !== null) {
         if (nextRange.state === state) {
@@ -255,17 +257,19 @@ class Tokenizer extends Logger {
    * For debugging.
    */
   dump() {
-    /** @type {Token} */
+    /** @type {?Token} */
     let token = null;
     for (const range of this.ranges()) {
       if (token !== range.token) {
         token = range.token;
+        /** @const @type {string} */
         const tokenText =
             extractSample(this.document, token.start, token.end, 40);
         console.log(
             token.start, token.end, `"${token.syntax}"`,
             asStringLiteral(tokenText));
       }
+      /** @const @type {string} */
       const rangeText =
           extractSample(this.document, range.start, range.end, 20);
       console.log(
@@ -285,10 +289,11 @@ class Tokenizer extends Logger {
    * @private
    * @param {number} scanOffset
    * @param {number} state
-   * @param {Token} token
+   * @param {?Token} token
    * @return {!Token}
    */
   startOrExtendToken(scanOffset, state, token) {
+    /** @const @type {string} */
     const syntax = state === 0 ? 'zero' : this.stateMachine_.syntaxOf(state);
     if (token === null)
       return new Token(this.document_, scanOffset, scanOffset + 1, syntax);
@@ -337,6 +342,7 @@ class Tokenizer extends Logger {
    * @return {number}
    */
   updateState(charCode) {
+    /** @const @type {number} */
     const state = this.stateMachine_.updateState(charCode);
     if (state !== 0)
       return state;

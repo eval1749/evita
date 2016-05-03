@@ -81,9 +81,13 @@ class Tokenizer extends Logger {
 
   /**
    * @private
-   * @param {!StateRange} range
-   * @param {number} state
-   * @param {?Token} token
+   * @param {!StateRange} range A |StateRange| to check.
+   * @param {number} state  An expected state for |range|.
+   * @param {?Token} token  The last token.
+   *
+   * We can use existing |range| if
+   *   - |state| equals to |range.start|
+   *   - |range| isn't part of the last token.
    */
   canUseRange(range, state, token) {
     if (range.state !== state) {
@@ -91,7 +95,7 @@ class Tokenizer extends Logger {
       return false;
     }
     if (token && range.token === token) {
-      this.log(0, 'canUseRange: token mismatched', token, range);
+      this.log(0, 'canUseRange: range is part of last token', token, range);
       return false;
     }
     this.log(0, 'canUseRange: REUSE', range);
@@ -105,7 +109,7 @@ class Tokenizer extends Logger {
    * @param {number} delta
    */
   didChangeTextDocument(headCount, tailCount, delta) {
-    this.log(0, 'didChangeTextDocument', headCount, tailCount, delta);
+    this.log(0, 'didChangeTextDocument:', headCount, tailCount, delta);
     this.painter_.didChangeTextDocument(headCount, tailCount, delta);
     this.rangeMap_.didChangeTextDocument(headCount, tailCount, delta);
     if (this.scanOffset_ < headCount) {
@@ -182,7 +186,7 @@ class Tokenizer extends Logger {
    * @param {number} end
    */
   endRange(range, end) {
-    this.log(0, 'endRange', range, end);
+    this.log(0, 'endRange:', range, end);
     if (range.end < end)
       this.rangeMap_.removeBetween(range.end, end);
     range.end = end;
@@ -196,7 +200,7 @@ class Tokenizer extends Logger {
   endToken(token) {
     if (token === null)
       return;
-    this.log(0, 'paint', token);
+    this.log(0, 'paint:', token);
     this.painter_.paint(token);
   }
 
@@ -246,13 +250,13 @@ class Tokenizer extends Logger {
    * @return {number}
    */
   processRange(scanStart, scanEnd, startOffset, endOffset) {
-    this.log(0, 'START', scanStart, 'to', scanEnd);
+    this.log(0, 'START:', scanStart, 'to', scanEnd);
     if (scanStart >= scanEnd)
       return scanStart;
 
     /** @type {?StateRange} */
     let lastRange = this.rangeMap_.rangeEndsAt(scanStart);
-    this.log(0, 'start', 'lastRange', lastRange);
+    this.log(0, 'start', 'lastRange:', lastRange);
 
     /** @type {?Token} */
     let token = null;
@@ -299,7 +303,7 @@ class Tokenizer extends Logger {
           this.log(0, 'END skip beyond scanEnd', scanEnd, lastRange);
           return lastRange.end;
         }
-        this.log(0, 'skip after', lastRange);
+        this.log(0, 'skip after:', lastRange);
         token = lastRange.token;
         scanOffset = lastRange.end - 1;
         this.stateMachine_.resetTo(lastRange.state);
@@ -318,7 +322,7 @@ class Tokenizer extends Logger {
       this.endToken(token);
       token = null;
     }
-    this.log(0, 'END', scanEnd, lastRange);
+    this.log(0, 'END:', scanEnd, lastRange);
     if (lastRange === null)
       return scanEnd;
     this.endRange(lastRange, scanEnd);

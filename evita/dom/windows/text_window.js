@@ -535,7 +535,7 @@ function updateObsolete() {
   }
   document.obsolete = TextDocument.Obsolete.CHECKING;
   Os.File.stat(document.fileName)
-      .then((info) => {
+      .then(info => {
         document.lastStatTime_ = new Date();
         document.obsolete = info.lastModificationDate.valueOf() ===
                 document.lastWriteTime.valueOf() ?
@@ -559,8 +559,13 @@ function updateObsolete() {
               reloadTextDocument(window, document);
             });
       })
-      .catch((reason) => {
-        console.log('Os.File.stat', document.fileName, reason);
+      .catch(reason => {
+        // TODO(eval1749): We should have |ERROR_FILE_NOT_FOUND|==2 in
+        // somewhere.
+        // TODO(eval1749): Should we suppress logging for
+        // |ERROR_PATH_NOT_FOUND|==3
+        if (reason.winLastError !== 2)
+          console.log('Os.File.stat', document.fileName, reason);
         document.lastStatTime_ = new Date();
         document.obsolete = TextDocument.Obsolete.UNKNOWN;
       });

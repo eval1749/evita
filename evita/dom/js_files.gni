@@ -8,7 +8,6 @@ js_lib_files = [
   "key_names.js",
 
   "base/base.js",
-  "base/define.js",
   "base/async.js",
   "base/base64.js",
   "base/logger.js",

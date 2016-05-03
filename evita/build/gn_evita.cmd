@@ -1,7 +1,5 @@
 @if "%_echo%"=="" echo off
 setlocal
-call ..\setenv.cmd
-if "%outdir%"=="" goto no_outdir
 echo.
 echo.
 echo //////////////////////////////////////////////////////////////////////
@@ -12,6 +10,20 @@ echo //
 echo // DEPOT_TOOLS_WIN_TOOLCHAIN=%DEPOT_TOOLS_WIN_TOOLCHAIN%
 echo // GYP_MSVS_VERSION=%GYP_MSVS_VERSION%
 echo //
+
+if exist setenv.cmd (
+  call setenv.cmd
+  goto called_setenv
+)
+if exist ..\setenv.cmd  (
+  call ..\setenv.cmd
+  goto called_setenv
+)
+echo No setenv.cmd to set OUTDIR
+exit/b 1
+
+:called_setenv
+if "%outdir%"=="" goto no_outdir
 
 : v8 should have  -DICU_UTIL_DATA_IMPL=ICU_UTIL_DATA_SHARE
 

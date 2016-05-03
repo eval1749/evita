@@ -19,6 +19,8 @@ function ensureTextDocument() {
     return present;
   /** @const @type {!TextDocument} */
   const newTextDocument = TextDocument.new(kDocumentName);
+  // TODO(eval1749): We should make |Console| class independent from
+  // mode.
   newTextDocument.mode = Mode.chooseModeByFileName('foo.js');
   return newTextDocument;
 }
@@ -56,8 +58,9 @@ class Console {
       return;
     if (params.length === 0)
       throw new Error('Assertion failed');
+    /** @const @type {string} */
     const message = params.map(formatValue).join(' ');
-    throw new Error('Assertion failed: ' + message);
+    throw new Error(`Assertion failed: ${message}`);
   }
 
   /*
@@ -66,6 +69,7 @@ class Console {
   clear() {
     /** @const @type {!TextDocument} */
     const document = this.ensureTextDocument();
+    /** @const @type {boolean} */
     const readonly = document.readonly;
     document.readonly = false;
     document.replace(0, document.length, '');
@@ -101,6 +105,7 @@ class Console {
    * Emits new line if console doesn't end with newline.
    */
   freshLine() {
+    /** @const @type {!TextDocument} */
     const document = this.ensureTextDocument();
     if (document.length === 0)
       return;
@@ -136,11 +141,12 @@ class Console {
    * Updates windows showing console.
    */
   update_() {
-    for (const window of this.document_.listWindows())
+    for (/** @type {!Window} */ const window of this.document_.listWindows())
       window.update();
   }
 }
 
+/** @const @type {!Console} */
 const console = new Console();
 
 Initializer.register(() => console.reset_());

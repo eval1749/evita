@@ -17,11 +17,25 @@ const Token = highlights.Token;
 const TokenStateMachine = highlights.TokenStateMachine;
 const asStringLiteral = base.asStringLiteral;
 
+/**
+ * @param {!TextDocument} document
+ * @param {number} start
+ * @param {number} end
+ * @param {number} maxChars
+ * @return {string}
+ *
+ * Extracts characters from |start| to |end|, exclusive, from |document|. If
+ * number of characters is greater than |maxChars|, middle of characters are
+ * replaced with "...".
+ */
 function extractSample(document, start, end, maxChars) {
   if (end - start < maxChars)
     return document.slice(start, end);
+  /** @const @type {number} */
   const count = Math.floor(maxChars / 2);
+  /** @const @type {number} */
   const headEnd = start + count;
+  /** @const @type {number} */
   const tailStart = end - count;
   return [document.slice(start, headEnd), document.slice(tailStart, end)].join(
       ' ... ');

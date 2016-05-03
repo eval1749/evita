@@ -227,9 +227,11 @@ class Tokenizer extends Logger {
       const nextRange = this.rangeMap_.rangeStartsAt(scanOffset);
       if (nextRange !== null) {
         if (nextRange.state === state) {
-          this.log(0, 'finish early', nextRange);
-          this.endToken(token);
-          return endOffset;
+          // We've already processed |nextRange|, so we can skip it.
+          token = nextRange.token;
+          scanOffset = nextRange.end;
+          this.log(0, 'skip', nextRange);
+          continue;
         }
         this.rangeMap_.remove(nextRange);
       }

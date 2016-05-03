@@ -58,7 +58,13 @@ class HighlightEngine extends text.SimpleMutationObserverBase {
    */
   didChangeTextDocument(headCount, tailCount, delta) {
     this.tokenizer_.didChangeTextDocument(headCount, tailCount, delta);
-    this.scheduleUpdte();
+    /**
+     * @const @type {number}
+     * Since average typing speed is greater than 100ms, we don't need to run
+     * so frequently.
+     */
+    const kDelayMs = 100;
+    this.scheduleUpdte(kDelayMs);
   }
 
   /**
@@ -76,7 +82,7 @@ class HighlightEngine extends text.SimpleMutationObserverBase {
    */
   doColor(hint) {
     this.tokenizer_.doColor(hint);
-    this.scheduleUpdte();
+    this.scheduleUpdte(0);
   }
 
   /**
@@ -113,17 +119,12 @@ class HighlightEngine extends text.SimpleMutationObserverBase {
 
   /**
    * @private
+   * @param {number} delayMs
    */
-  scheduleUpdte() {
+  scheduleUpdte(delayMs) {
     if (this.isFinished())
       return;
-    /**
-     * @const @type {number}
-     * Since average typing speed is greater than 100ms, we don't need to run
-     * so frequently.
-     */
-    const kIntervalMs = 100;
-    taskScheduler.schedule(this, kIntervalMs);
+    taskScheduler.schedule(this, delayMs);
   }
 
   /** @override */

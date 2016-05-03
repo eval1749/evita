@@ -6,10 +6,12 @@
  * @constructor
  * @implements {TextDocumentSetObserver}
  */
-var SimpleTextDocumentSetObserver = function();
+var SimpleTextDocumentSetObserver = function() {};
 
 /** @param {!TextDocument} document */
-SimpleTextDocumentSetObserver.prototype.didAddTextDocument = function(document) {};
+SimpleTextDocumentSetObserver.prototype.didAddTextDocument = function(
+    document) {};
 
 /** @param {!TextDocument} document */
-SimpleTextDocumentSetObserver.prototype.didRemoveTextDocument = function(document) {};
+SimpleTextDocumentSetObserver.prototype.didRemoveTextDocument = function(
+    document) {};

@@ -5,7 +5,7 @@
 /**
  * @interface
  */
-text.SimpleMutationObserver;
+text.SimpleMutationObserver = function() {};
 
 /**
  * @param {number} headCount

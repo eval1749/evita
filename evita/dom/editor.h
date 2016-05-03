@@ -64,6 +64,8 @@ class Editor final : public ginx::Scriptable<Editor> {
   // Get global switch names.
   static std::vector<base::string16> GetSwitchNames();
 
+  static bool LoadModule(ScriptHost* script_host, const base::string16& name);
+
   // Show message box
   static v8::Local<v8::Promise> MessageBox(Window* maybe_window,
                                            const base::string16& message,

@@ -8,6 +8,7 @@
 
 #include "base/bind.h"
 #include "base/strings/utf_string_conversions.h"
+#include "evita/dom/global.h"
 #include "evita/dom/lock.h"
 #include "evita/dom/promise_resolver.h"
 #include "evita/dom/public/io_delegate.h"
@@ -267,6 +268,13 @@ domapi::SwitchValue Editor::GetSwitch(const base::string16& name) {
 
 std::vector<base::string16> Editor::GetSwitchNames() {
   return ScriptHost::instance()->view_delegate()->GetSwitchNames();
+}
+
+bool Editor::LoadModule(ScriptHost* script_host, const base::string16& name16) {
+  const auto& name = base::UTF16ToUTF8(name16);
+  const auto& runner = script_host->runner();
+  ginx::Runner::Scope runner_scope(runner);
+  return Global::LoadModule(runner, name);
 }
 
 v8::Local<v8::Promise> Editor::MessageBox(Window* maybe_window,

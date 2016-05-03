@@ -450,6 +450,14 @@ function highlightMatchedBrackets(window) {
 }
 
 /**
+ * @param {!TextDocument} document
+ * @return {!Array<!TextWindow>}
+ */
+function listTextWindows(document) {
+  return document.listWindows().filter(window => window instanceof TextWindow);
+}
+
+/**
  * @param {!MouseEvent} event
  * @return {number}
  */
@@ -460,31 +468,45 @@ function mapPointToOffset(event) {
 }
 
 /**
- * @param {!TextWindow} textWindow
  * @param {!TextDocument} document
+ * @return {!Map<!TextSelection, number>}
  */
-function reloadTextDocument(textWindow, document) {
+function rememberSelections(document) {
   /** @const @type {!Map<!TextSelection, number>} */
   const selectionMap = new Map();
-  for (/** @type {!Window} */ let window of document.listWindows()) {
-    if (!(window instanceof TextWindow))
-      continue;
-    /** @const @type {!TextWindow} */
-    const textWindow = /** @const @type {!TextWindow} */ (window);
+  for (/** @type {!TextWindow} */ let window of listTextWindows(document)) {
     /** @const @type {!TextSelection} */
-    const selection = textWindow.selection;
+    const selection = window.selection;
     selectionMap.set(selection, selection.range.start);
   }
-  document.load().then((zero) => {
-    textWindow.status = 'Reloaded';
-    for (let window of document.listWindows()) {
-      /** @const @type {!TextSelection} */
-      const selection = window.selection;
-      /** @const @type {number} */
-      const present = selectionMap.get(selection) || 0;
-      selection.range.collapseTo(present ? present : 0);
-    }
-  });
+  return selectionMap;
+}
+
+/**
+ * @param {!TextDocument} document
+ * @return {!Promise<number>}
+ */
+function reloadTextDocument(document) {
+  /** @const @type {!Map<!TextSelection, number>} */
+  const selectionMap = rememberSelections(document);
+  return document.load().then(zero => restorSelections(document, selectionMap));
+}
+
+/**
+ * @param {!TextDocument} document
+ * @param {!Map<!TextSelection, number>} selectionMap
+ */
+function restorSelections(document, selectionMap) {
+  for (/** @const @type {!TextWindow} */ const window of listTextWindows(
+      document)) {
+    /** @const @type {!TextSelection} */
+    const selection = window.selection;
+    /** @const @type {number|undefined} */
+    const present = selectionMap.get(selection);
+    if (present === undefined)
+      continue;
+    selection.range.collapseTo(Math.min(present, document.length));
+  }
 }
 
 /**
@@ -556,7 +578,8 @@ function updateObsolete() {
                 document.lastWriteTime = info.lastModificationDate;
                 return;
               }
-              reloadTextDocument(window, document);
+              reloadTextDocument(document).then(
+                  zero => window.status = 'Reloaded');
             });
       })
       .catch(reason => {
@@ -632,10 +655,8 @@ function handleEvent(event) {
   const handler = handlerMap.get(event.type) || null;
   if (handler)
     handler(this, event);
-  if (event instanceof CompositionEvent) {
-    handleCompositionEvent(this, event);
-    return
-  }
+  if (event instanceof CompositionEvent)
+    return handleCompositionEvent(this, event);
   Window.handleEvent.call(this, event);
 };
 

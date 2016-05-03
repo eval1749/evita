@@ -80,6 +80,25 @@ class Tokenizer extends Logger {
   get scanOffset() { return this.scanOffset_; }
 
   /**
+   * @private
+   * @param {!StateRange} range
+   * @param {number} state
+   * @param {?Token} token
+   */
+  canUseRange(range, state, token) {
+    if (range.state !== state) {
+      this.log(0, `canUseRange: state mismatched s${state}`, range);
+      return false;
+    }
+    if (token && range.token === token) {
+      this.log(0, 'canUseRange: token mismatched', token, range);
+      return false;
+    }
+    this.log(0, 'canUseRange: REUSE', range);
+    return true;
+  }
+
+  /**
    * @public
    * @param {number} headCount
    * @param {number} tailCount
@@ -105,6 +124,9 @@ class Tokenizer extends Logger {
     const state = cleanStateRange.state;
     this.stateMachine_.resetTo(state);
     this.log(0, 'Restart after', cleanStateRange);
+    if (this.verbose === 0)
+      return;
+    this.dump();
   }
 
   /**
@@ -183,13 +205,13 @@ class Tokenizer extends Logger {
    * @return {number}
    */
   processRange(scanStart, scanEnd, startOffset, endOffset) {
-    this.log(0, 'processRange', 'START', scanStart, scanEnd);
+    this.log(0, 'START', scanStart, 'to', scanEnd);
     if (scanStart >= scanEnd)
       return scanStart;
 
     /** @type {?StateRange} */
-    let range = this.rangeMap_.rangeEndsAt(scanStart);
-    this.log(0, 'start', 'range', range);
+    let lastRange = this.rangeMap_.rangeEndsAt(scanStart);
+    this.log(0, 'start', 'lastRange', lastRange);
 
     /** @type {?Token} */
     let token = null;
@@ -198,10 +220,10 @@ class Tokenizer extends Logger {
       // Since pattern doesn't support "^", we treat start of document as
       // following of newline character.
       this.stateMachine_.updateState(Unicode.LF);
-    } else if (range && !this.shouldResetState(range.state)) {
-      // Since, previous range isn't accepted yet, we should extent it.
-      this.stateMachine_.resetTo(range.state);
-      token = range.token;
+    } else if (lastRange && !this.shouldResetState(lastRange.state)) {
+      // Since, previous lastRange isn't accepted yet, we should extent it.
+      this.stateMachine_.resetTo(lastRange.state);
+      token = lastRange.token;
     }
 
     for (let scanOffset = scanStart; scanOffset < scanEnd; ++scanOffset) {
@@ -211,11 +233,11 @@ class Tokenizer extends Logger {
       const charCode = this.document_.charCodeAt(scanOffset);
       /** @type {number} */
       let state = this.stateMachine_.updateState(charCode);
-      this.log(0, 'scanOffset', scanOffset, charCode, 'state', state, token);
-      if (state === lastState && range)
+      this.logLoopStart(scanOffset, charCode, state, token);
+      if (state === lastState && lastRange)
         continue;
-      if (range)
-        this.endRange(range, scanOffset);
+      if (lastRange)
+        this.endRange(lastRange, scanOffset);
       if (state === 0) {
         // |charCode| doesn't belong to current token.
         this.endToken(token);
@@ -224,20 +246,30 @@ class Tokenizer extends Logger {
       }
 
       /** @const @type {?StateRange} */
-      const nextRange = this.rangeMap_.rangeStartsAt(scanOffset);
-      if (nextRange !== null) {
-        if (nextRange.state === state) {
-          // We've already processed |nextRange|, so we can skip it.
-          token = nextRange.token;
-          scanOffset = nextRange.end;
-          this.log(0, 'skip', nextRange);
-          continue;
+      const currentRange = this.rangeMap_.rangeStartsAt(scanOffset);
+      if (currentRange && this.canUseRange(currentRange, state, token)) {
+        // We've already processed |currentRange|, so we can skip it.
+        lastRange = this.skipExistingRanges(currentRange, endOffset);
+        if (!lastRange) {
+          this.log(0, 'END skip until end of document at', endOffset);
+          return endOffset;
         }
-        this.rangeMap_.remove(nextRange);
+        if (lastRange.end >= scanEnd) {
+          this.log(0, 'END skip beyond scanEnd', scanEnd, lastRange);
+          return lastRange.end;
+        }
+        this.log(0, 'skip after', lastRange);
+        token = lastRange.token;
+        scanOffset = lastRange.end - 1;
+        this.stateMachine_.resetTo(lastRange.state);
+        continue;
       }
 
+      if (currentRange)
+        this.rangeMap_.remove(currentRange);
+
       token = this.startOrExtendToken(scanOffset, state, token);
-      range = this.startRange(scanOffset, state, token);
+      lastRange = this.startRange(scanOffset, state, token);
       if (!this.shouldResetState(state))
         continue;
       // |charCode| terminates current token.
@@ -245,12 +277,11 @@ class Tokenizer extends Logger {
       this.endToken(token);
       token = null;
     }
-    this.log(0, 'processRange', 'END', scanEnd, range);
-
-    if (range === null)
+    this.log(0, 'END', scanEnd, lastRange);
+    if (lastRange === null)
       return scanEnd;
-    this.endRange(range, scanEnd);
-    this.endToken(range.token);
+    this.endRange(lastRange, scanEnd);
+    this.endToken(lastRange.token);
     return scanEnd;
   }
 
@@ -282,10 +313,45 @@ class Tokenizer extends Logger {
 
   /**
    * @private
+   * @param {number} scanOffset
+   * @param {number} charCode
+   * @param {number} state
+   * @param {?Token} token
+   */
+  logLoopStart(scanOffset, charCode, state, token) {
+    if (this.verbose <= 0)
+      return;
+    this.log(
+        0, 'LOOP', scanOffset, asStringLiteral(String.fromCharCode(charCode)),
+        `s${state}`, token);
+  }
+
+  /**
+   * @private
    * @param {number} state
    * @return {boolean}
    */
   shouldResetState(state) { return this.stateMachine_.isAcceptable(state); }
+
+  /**
+   * @private
+   * @param {!StateRange} startRange
+   * @param {number} endOffset
+   * @return {?StateRange}
+   */
+  skipExistingRanges(startRange, endOffset) {
+    /** @type {!StateRange} */
+    let lastRange = startRange;
+    while (lastRange.token.end < endOffset) {
+      /** @type {?StateRange} */
+      const range = this.rangeMap_.rangeStartsAt(lastRange.token.end);
+      if (!range)
+        return lastRange;
+      console.assert(lastRange.token !== range.token, lastRange, range);
+      lastRange = range;
+    }
+    return null;
+  }
 
   /**
    * @private

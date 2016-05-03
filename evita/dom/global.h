@@ -19,7 +19,7 @@ class Global final : public common::Singleton<Global> {
   ~Global() final;
 
   v8::Local<v8::ObjectTemplate> GetObjectTemplate(v8::Isolate* isolate);
-  bool LoadGlobalScript(ginx::Runner* runner);
+  static bool LoadGlobalScript(ginx::Runner* runner);
 
  private:
   friend class common::Singleton<Global>;

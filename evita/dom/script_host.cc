@@ -320,7 +320,7 @@ void ScriptHost::DidStartScriptHost() {
   PopulateEnviromentStrings(runner());
   if (testing_)
     return;
-  if (!Global::instance()->LoadGlobalScript(runner()))
+  if (!Global::LoadGlobalScript(runner()))
     return view_delegate_->DidStartScriptHost(state_);
 
   // Invoke |editors.start()| with command line arguments.

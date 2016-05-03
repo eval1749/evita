@@ -50,7 +50,7 @@ template("js_module") {
                              "externs",
                              "is_global",
                            ])
-    output_name = "$checked_js"
+    output_name = invoker.target_name
     sources = invoker.sources
     deps = target_deps
   }

@@ -117,7 +117,7 @@
    * @this {!Window}
    */
   function splitThisWindowVerticallyCommand() {
-    if (!this.clone)
+    if (!('clone' in this))
       return;
     this.splitVertically(this.clone());
   }
@@ -128,7 +128,7 @@
    * @this {!Window}
    */
   function splitThisWindowHorizontallyCommand() {
-    if (!this.clone)
+    if (!('clone' in this))
       return;
     this.splitHorizontally(this.clone());
   }

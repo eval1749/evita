@@ -113,8 +113,8 @@ class HighlightEngine extends text.SimpleMutationObserverBase {
      * Number of characters to color during scheduled task.
      * This is an experiment for searching right value.
      */
-    const kIncrementalCount = 1000;
-    this.doColor(kIncrementalCount);
+    const incrementalCount = this.verbose ? 100 : 1000;
+    this.doColor(incrementalCount);
   }
 
   /**

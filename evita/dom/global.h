@@ -18,7 +18,7 @@ class Global final : public common::Singleton<Global> {
  public:
   ~Global() final;
 
-  v8::Local<v8::ObjectTemplate> object_template(v8::Isolate* isolate);
+  v8::Local<v8::ObjectTemplate> GetObjectTemplate(v8::Isolate* isolate);
   bool LoadScript(ginx::Runner* runner);
 
  private:

@@ -435,7 +435,7 @@ void ScriptHost::WillDestroyViewHost() {
 
 v8::Local<v8::ObjectTemplate> ScriptHost::GetGlobalTemplate(
     ginx::Runner* runner) {
-  return Global::instance()->object_template(runner->isolate());
+  return Global::instance()->GetObjectTemplate(runner->isolate());
 }
 
 void ScriptHost::UnhandledException(ginx::Runner*,

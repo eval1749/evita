@@ -60,7 +60,7 @@ Global::Global() {}
 
 Global::~Global() {}
 
-v8::Local<v8::ObjectTemplate> Global::object_template(v8::Isolate* isolate) {
+v8::Local<v8::ObjectTemplate> Global::GetObjectTemplate(v8::Isolate* isolate) {
   if (!object_template_->IsEmpty())
     return object_template_.NewLocal(isolate);
 

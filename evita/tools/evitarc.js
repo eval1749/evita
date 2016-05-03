@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+goog.require('dynamic_abbrev');
+goog.require('launchpad');
+
 [
     // A
     'accessor', 'affine', 'allocator', 'allocatable', 'Allocatable',
@@ -86,10 +89,10 @@
     // Chromium
     'DCHECK', 'DCHECK_EQ', 'DCHECK_NE', 'DCHECK_LE', 'DCHECK_LT', 'DCHECK_GE',
     'DCHECK_GT', 'FOR_EACH_OBSERVER', 'NOTREACHED', 'arraysize', 'base::Bind',
-    'base::Callback', 'base::Closure',
-    'base::checked_cast', 'base::char16', 'base::string16', 'base::StringPiece',
-    'base::StringPiece16', 'base::StringPrintf', 'base::Time',
-    'base::TimeDelta', 'base::TimeTicks', 'base::Unretained', 'scoped_refptr',
+    'base::Callback', 'base::Closure', 'base::checked_cast', 'base::char16',
+    'base::string16', 'base::StringPiece', 'base::StringPiece16',
+    'base::StringPrintf', 'base::Time', 'base::TimeDelta', 'base::TimeTicks',
+    'base::Unretained', 'scoped_refptr',
 
     // v8
     'v8::ArrayBuffer', 'v8::Context', 'v8::EscapableHandleScope', 'v8::Eternal',

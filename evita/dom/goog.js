@@ -4,7 +4,12 @@
 
 var goog = {};
 
-goog.require = function() {};
+/** @param {string} name */
+goog.require = function(name) {
+  if (name in global)
+    return;
+  Editor.loadModule(name);
+};
 
 /** @param {string} qualifiedName */
 goog.provide = function(qualifiedName) {

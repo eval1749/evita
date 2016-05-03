@@ -83,19 +83,18 @@ class Tokenizer extends Logger {
    * @private
    * @param {!StateRange} range A |StateRange| to check.
    * @param {number} state  An expected state for |range|.
-   * @param {?Token} token  The last token.
    *
    * We can use existing |range| if
-   *   - |state| equals to |range.start|
-   *   - |range| isn't part of the last token.
+   *   - |state| equals to |range.start|, and
+   *   - |range| is a start of token.
    */
-  canUseRange(range, state, token) {
+  canUseRange(range, state) {
     if (range.state !== state) {
       this.log(0, `canUseRange: state mismatched s${state}`, range);
       return false;
     }
-    if (token && range.token === token) {
-      this.log(0, 'canUseRange: range is part of last token', token, range);
+    if (range.token.start !== range.start) {
+      this.log(0, 'canUseRange: range is not start of token', range);
       return false;
     }
     this.log(0, 'canUseRange: REUSE', range);
@@ -292,7 +291,7 @@ class Tokenizer extends Logger {
 
       /** @const @type {?StateRange} */
       const currentRange = this.rangeMap_.rangeStartsAt(scanOffset);
-      if (currentRange && this.canUseRange(currentRange, state, token)) {
+      if (currentRange && this.canUseRange(currentRange, state)) {
         // We've already processed |currentRange|, so we can skip it.
         lastRange = this.skipExistingRanges(currentRange, endOffset);
         if (!lastRange) {

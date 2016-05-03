@@ -2,9 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-goog.provide('apps.iconViewer');
+goog.provide('imaging.iconViewer');
 
 goog.scope(function() {
+
+const CSSRuleBuilder = visuals.CSSRuleBuilder;
+const CSSStyleSheet = visuals.CSSStyleSheet;
+const Document = visuals.Document;
+
 /** @return {!Document} */
 function createDocument() {
   const document = new Document();
@@ -146,5 +151,9 @@ class IconViewer {
   }
 }
 
-apps.iconViewer = new IconViewer();
+// Usage:
+// new imaging.IconViewe().run('icon file name');
+
+/** @constructor */
+imaging.IconViewer = IconViewer;
 });

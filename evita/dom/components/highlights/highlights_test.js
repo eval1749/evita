@@ -259,10 +259,11 @@ testing.test('JavaScriptPainter', function(t) {
   const machine = new highlights.JavaScriptTokenStateMachine();
   const paint =
       testPaint.bind(this, highlights.JavaScriptPainter.create, machine);
-  t.expect(paint('default:')).toEqual('k8');
+  t.expect(paint('default:')).toEqual('k7 o1');
   t.expect(paint('if')).toEqual('k2');
   t.expect(paint('var')).toEqual('k3');
   t.expect(paint('foo')).toEqual('i3');
+  t.expect(paint('foo:')).toEqual('l3 o1');
   t.expect(paint('/* foo */')).toEqual('c9');
   t.expect(paint('// bar\nfoo')).toEqual('c6 w1 i3');
   t.expect(paint('\'s1\';')).toEqual('s4 o1');

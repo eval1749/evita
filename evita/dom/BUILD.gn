@@ -35,6 +35,7 @@ grit("resources") {
   ]
   deps = [
     ":global_module",
+    "//evita/dom/components",
   ]
 }
 
@@ -152,7 +153,6 @@ js_module("global_module") {
   externs = [
     "//evita/dom/components/clipboard/clipboard_externs.js",
     "//evita/dom/os/os_externs.js",
-    "//evita/dom/visuals/visuals_externs.js",
   ]
   deps = [
     "//evita/dom/bindings:bindings_externs_js",

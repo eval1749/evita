@@ -1,0 +1,25 @@
+# Copyright (c) 2016 Project Vogue. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//evita/build/js_module.gni")
+
+js_module("launchpad") {
+  sources = [
+    "launchpad.js",
+  ]
+  externs = [
+    "//evita/dom/base/base_externs.js",
+    "//evita/dom/base/base64_externs.js",
+    "//evita/dom/components/imaging/imaging_externs.js",
+    "//evita/dom/jslib/windows_externs.js",
+    "//evita/dom/text/simple_text_document_set_observer.js",
+    "//evita/dom/text/text_document_externs.js",
+    "//evita/dom/visuals/visuals_externs.js",
+    "$root_gen_dir/evita/dom/visuals/visuals_externs.js",
+    "//evita/dom/windows/visual_window_externs.js",
+  ]
+  deps = [
+    "//evita/dom/visuals:visuals_externs",
+  ]
+}

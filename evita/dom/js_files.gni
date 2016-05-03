@@ -84,7 +84,6 @@ js_lib_files = [
   "windows/window.js",
 
   "components/commander/commander.js",
-  "components/dynamic_abbrev/dynamic_abbrev.js",
   "components/find_and_replace/find_and_replace.js",
   "components/find_and_replace/find_and_replace_commands.js",
 
@@ -125,7 +124,6 @@ js_lib_files = [
   "components/highlights/langs/html_painter.js",
 
   "components/imaging/icon_util_win.js",
-  "components/launchpad/launchpad.js",
   "components/modes/mode.js",
   "components/modes/modes.js",
   "components/logging/logging_document.js",

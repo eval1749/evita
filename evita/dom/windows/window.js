@@ -2,65 +2,75 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(eval1749): We should get rid of dependency to 'commander'.
 goog.require('components.commander');
 
-(function() {
-  /** @type {string} */
-  Window.prototype.status_;
+goog.scope(function() {
 
-  /** @type {boolean} */
-  Window.prototype.visible_;
+/** @type {string} */
+Window.prototype.status_;
 
-  /**
-   * @param {!KeyboardEvent} event
-   */
-  function handleKeyDown(event) {
-    const target = /** @type {!Window} */ (event.target);
-    components.commander.Commander.instance.execute(target, event.keyCode);
-  }
+/** @type {boolean} */
+Window.prototype.visible_;
 
-  /**
-   * Default event handler.
-   * @this {!Window}
-   * @param {!Event} event
-   */
-  function handleEvent(event) {
-    switch (event.type) {
-      case Event.Names.HIDE:
-        this.status_ = '';
-        this.visible_ = false;
-        return;
-      case Event.Names.KEYDOWN:
-        return handleKeyDown(/** @type {!KeyboardEvent} */ (event));
-      case Event.Names.SHOW:
-        this.visible_ = true;
-        return;
-    }
-  }
+/**
+ * @param {!KeyboardEvent} event
+ */
+function handleKeyDown(event) {
+  const target = /** @type {!Window} */ (event.target);
+  components.commander.Commander.instance.execute(target, event.keyCode);
+}
 
-  /**
-   * @this {!Window}
-   * @return {string}
-   */
-  function statusGet() { return this.status_; }
-
-  /**
-   * @this {!Window}
-   */
-  function statusSet(newStatus) {
-    if (this.status_ === newStatus)
+/**
+ * Default event handler.
+ * @this {!Window}
+ * @param {!Event} event
+ */
+function handleEvent(event) {
+  switch (event.type) {
+    case Event.Names.HIDE:
+      this.status_ = '';
+      this.visible_ = false;
       return;
-    this.status_ = newStatus;
-    Editor.messageBox(this, this.status_, MessageBox.ICONINFORMATION);
+    case Event.Names.KEYDOWN:
+      return handleKeyDown(/** @type {!KeyboardEvent} */ (event));
+    case Event.Names.SHOW:
+      this.visible_ = true;
+      return;
   }
+}
 
-  Object.defineProperties(Window, {handleEvent: {value: handleEvent}});
+/**
+ * @this {!Window}
+ * @return {string}
+ */
+function statusGet() {
+  return this.status_;
+}
 
-  Object.defineProperties(Window.prototype, {
-    focusTick_: {value: 0, writable: true},
-    status: {get: statusGet, set: statusSet},
-    status_: {value: '', writable: true},
-    visible: {get: function() { return this.visible_; }},
-    visible_: {value: false, writable: true}
-  });
-})();
+/**
+ * @this {!Window}
+ */
+function statusSet(newStatus) {
+  if (this.status_ === newStatus)
+    return;
+  this.status_ = newStatus;
+  Editor.messageBox(this, this.status_, MessageBox.ICONINFORMATION);
+}
+
+/**
+ * @this {!Window}
+ * @return {boolean}
+ */
+function getVisible() { return this.visible_; }
+
+Object.defineProperties(Window, {handleEvent: {value: handleEvent}});
+
+Object.defineProperties(Window.prototype, {
+  focusTick_: {value: 0, writable: true},
+  status: {get: statusGet, set: statusSet},
+  status_: {value: '', writable: true},
+  visible: {get: getVisible},
+  visible_: {value: false, writable: true}
+});
+});

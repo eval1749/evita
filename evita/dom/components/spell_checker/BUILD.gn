@@ -1,0 +1,22 @@
+# Copyright (c) 2016 Project Vogue. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Copyright (c) 2016 Project Vogue. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//evita/build/js_module.gni")
+
+js_module("spell_checker") {
+  sources = [
+    "spell_checker.js",
+  ]
+  externs = [
+    "//evita/dom/jslib/task_scheduler_externs.js",
+    "//evita/dom/text/text_externs.js",
+    "//evita/dom/text/simple_text_document_set_observer_externs.js",
+    "//evita/dom/text/simple_mutation_observer_externs.js",
+    "//evita/dom/unicode/unicode_externs.js",
+  ]
+}

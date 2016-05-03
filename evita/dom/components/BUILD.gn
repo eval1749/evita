@@ -8,10 +8,12 @@ js_library("components") {
   sources = [
     "${target_out_dir}/dynamic_abbrev/dynamic_abbrev.jsobj",
     "${target_out_dir}/launchpad/launchpad.jsobj",
+    "${target_out_dir}/spell_checker/spell_checker.jsobj",
   ]
   deps = [
     "dynamic_abbrev",
     "launchpad",
+    "spell_checker",
   ]
 }
 

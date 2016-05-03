@@ -4,6 +4,7 @@
 
 goog.provide('spell_checker');
 
+goog.require('text');
 goog.require('unicode');
 
 goog.scope(function() {
@@ -761,9 +762,9 @@ class SpellCheckerController extends SimpleTextDocumentSetObserver {
 // to/from document.
 TextDocument.addObserver(new SpellCheckerController());
 
+// Enable spell checker for existing documents
+TextDocument.list.forEach(document => SpellChecker.enable(document));
+
 /** @constructor */
 spell_checker.SpellChecker = SpellChecker;
 });
-
-/** @constructor */
-var SpellChecker = spell_checker.SpellChecker;

@@ -4,6 +4,11 @@
 
 goog.require('dynamic_abbrev');
 goog.require('launchpad');
+goog.require('spell_checker');
+
+goog.scope(function() {
+
+const SpellChecker = spell_checker.SpellChecker;
 
 [
     // A
@@ -235,3 +240,6 @@ Editor.bindKey(TextWindow, 'Ctrl+Shift+M', function() {
   TextDocument.addTemplate('js', copyrightTextCxx);
   TextDocument.addTemplate('py', pythonTemplate);
 })();
+
+});
+

@@ -33,7 +33,7 @@ const SpellChecker = spell_checker.SpellChecker;
     // H
     'hotlight', 'hwnd',
     // I
-    'ime', 'initializer', 'invoker', 'Iterable', 'iterable',
+    'idl', 'ime', 'initializer', 'invoker', 'Iterable', 'iterable',
     // J
     'javascript',
     // L
@@ -112,25 +112,6 @@ const SpellChecker = spell_checker.SpellChecker;
     'gfx::PointF', 'gfx::Rect', 'gfx::RectF', 'gfx::Size', 'gfx::SizeF',
 ].forEach((keyword) => { CppLexer.addKeyword(keyword); });
 
-function toCamelCase(document) {
-  var underscore = new Editor.RegExp('\\b([a-z]+)(_[a-z])');
-  var range = new Range(document);
-  var offset = 0;
-  while (offset < document.length) {
-    var matches = document.match_(underscore, offset, document.length);
-    if (!matches)
-      break;
-    range.collapseTo(matches[1].start);
-    range.end = matches[1].end;
-    if (range.text != 'opt') {
-      range.collapseTo(matches[2].start);
-      range.end = matches[2].end;
-      range.text = range.text[1].toUpperCase();
-    }
-    offset = matches[0].end;
-  }
-}
-
 Mode.registerExtension('e', 'c#');
 
 // Report spell checker progress
@@ -201,7 +182,7 @@ Editor.bindKey(TextWindow, 'Ctrl+Shift+M', function() {
     '',
     '',
     'if __name__ == \'__main__\':',
-    'sys.exit(main())',
+    '    sys.exit(main())',
     '',
   ].join('\n');
 
@@ -241,5 +222,29 @@ Editor.bindKey(TextWindow, 'Ctrl+Shift+M', function() {
   TextDocument.addTemplate('py', pythonTemplate);
 })();
 
+//////////////////////////////////////////////////////////////////////
+//
+// Utility functions
+//
+function toCamelCase(document) {
+  var underscore = new Editor.RegExp('\\b([a-z]+)(_[a-z])');
+  var range = new Range(document);
+  var offset = 0;
+  while (offset < document.length) {
+    var matches = document.match_(underscore, offset, document.length);
+    if (!matches)
+      break;
+    range.collapseTo(matches[1].start);
+    range.end = matches[1].end;
+    if (range.text != 'opt') {
+      range.collapseTo(matches[2].start);
+      range.end = matches[2].end;
+      range.text = range.text[1].toUpperCase();
+    }
+    offset = matches[0].end;
+  }
+}
+
+global.toCamelCase = toCamelCase;
 });
 

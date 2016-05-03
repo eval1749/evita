@@ -33,7 +33,8 @@ const SpellChecker = spell_checker.SpellChecker;
     // H
     'hotlight', 'hwnd',
     // I
-    'idl', 'ime', 'initializer', 'invoker', 'Iterable', 'iterable',
+    'idl', 'ime', 'Initializer', 'initializer', 'invoker', 'Iterable',
+    'iterable',
     // J
     'javascript',
     // L
@@ -247,4 +248,3 @@ function toCamelCase(document) {
 
 global.toCamelCase = toCamelCase;
 });
-

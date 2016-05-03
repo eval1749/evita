@@ -18,7 +18,7 @@
 
 namespace dom {
 
-bool Global::LoadScript(ginx::Runner* runner) {
+bool Global::LoadGlobalScript(ginx::Runner* runner) {
   const auto& raw_list = base::ResourceBundle::GetInstance()->GetRawDatResource(
       GLOBAL_MODULE_JSOBJ);
   if (!raw_list.data()) {

@@ -1,0 +1,45 @@
+# Copyright (c) 2016 Project Vogue. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Parameters:
+#   deps (optional)
+#   sources (required)
+#
+# Example:
+#   js_library("foo") {
+#     sources = [
+#       "${target_out_dir}/bar/bar.jsobj",
+#       "${target_out_dir}/baz/baz.jsobj"
+#     ]
+#     deps = [
+#       "//foo/bar",
+#       "//foo/baz",
+#     ]
+#   }
+#
+template("js_library") {
+  assert(defined(invoker.sources),
+         "Need sources in $target_name listing the js files.")
+
+  if (defined(invoker.deps)) {
+    target_deps = invoker.deps
+  } else {
+    target_deps = []
+  }
+
+  action(target_name) {
+    output_name = "${target_out_dir}/${target_name}.jslib"
+    response_file_contents = rebase_path(invoker.sources)
+    script = "//evita/build/scripts/make_js_module_lib.py"
+    outputs = [
+      output_name,
+    ]
+    inputs = [ script ] + invoker.sources
+    args = [
+      rebase_path(output_name),
+      "{{response_file_name}}",
+    ]
+    deps = target_deps
+  }
+}

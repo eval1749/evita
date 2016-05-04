@@ -137,6 +137,7 @@ class HighlightEngine extends text.SimpleMutationObserverBase {
   }
 
   /**
+   * @public
    * @param {string} name
    * @param {!TextDocument} document
    * @return {!HighlightEngine}
@@ -149,6 +150,7 @@ class HighlightEngine extends text.SimpleMutationObserverBase {
   }
 
   /**
+   * @public
    * @param {string} name
    * @return {!Set<string>}
    */
@@ -160,6 +162,7 @@ class HighlightEngine extends text.SimpleMutationObserverBase {
   }
 
   /**
+   * @public
    * @param {string} name
    * @param {!HighlightEngineCreator} creator
    * @param {!Set<string>} keywords

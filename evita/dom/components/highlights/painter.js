@@ -40,7 +40,7 @@ class Painter {
    */
   didLoadTextDocument() {}
 
-  /** @return {!TextDocument} */
+  /** @public @return {!TextDocument} */
   get document() { return this.document_; }
 
   /**
@@ -63,7 +63,7 @@ class Painter {
   paint(token) { this.paintToken(token); }
 
   /**
-   * @public
+   * @protected
    * @param {number} start
    * @param {number} end
    * @param {string} syntax

@@ -2,7 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/** @type {*} */
+var $0;
+
 goog.scope(function() {
+
 /** @const @type {!Array<number>} */
 const ZOOM_STEPS = [
   20,  30,  40,  50,  60,  70,  80,  90,  100, 110,

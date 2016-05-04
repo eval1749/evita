@@ -51,6 +51,7 @@ function processCommandLine(args) {
  */
 function start(args) {
   Initializer.initialize();
+  Editor.loadModule('commands');
   loadUserScript()
       .then(value => processCommandLine(args))
       .catch(value => processCommandLine(args));

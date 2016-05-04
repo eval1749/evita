@@ -6,6 +6,7 @@ import("//evita/build/js_library.gni")
 
 js_library("components") {
   sources = [
+    "${target_out_dir}/commands/commands.jsobj",
     "${target_out_dir}/dynamic_abbrev/dynamic_abbrev.jsobj",
     "${target_out_dir}/find_and_replace/find_and_replace.jsobj",
     "${target_out_dir}/launchpad/launchpad.jsobj",
@@ -13,6 +14,7 @@ js_library("components") {
     "${target_out_dir}/spell_checker/spell_checker.jsobj",
   ]
   deps = [
+    "commands",
     "dynamic_abbrev",
     "find_and_replace",
     "launchpad",

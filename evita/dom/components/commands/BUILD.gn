@@ -1,0 +1,18 @@
+# Copyright (c) 2015 Project Vogue. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//evita/build/js_module.gni")
+
+js_module("commands") {
+  sources = [
+    "text_window_commands.js",
+    "window_commands.js",
+  ]
+  externs = [
+    "//evita/dom/jslib/windows_externs.js",
+    "//evita/dom/strings_en_US.js",
+    "//evita/dom/text/text_document_externs.js",
+    "//evita/dom/unicode/unicode_enums.js",
+  ]
+}

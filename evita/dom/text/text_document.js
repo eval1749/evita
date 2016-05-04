@@ -33,9 +33,6 @@ const WORD_CLASS_MAP = (function() {
 /** @type {Keymap} */
 TextDocument.prototype.keymap_;
 
-/** @type {Mode} */
-TextDocument.prototype.mode_;
-
 /** @type {string} */
 TextDocument.prototype.name_;
 
@@ -594,30 +591,10 @@ function getKeymap() {
 
 /**
  * @this {!TextDocument}
- * @return {?Mode}
- */
-function getMode() {
-  return this.mode_;
-}
-
-/**
- * @this {!TextDocument}
  * @return {string}
  */
 function getName() {
   return this.name_;
-}
-
-/**
- * @this {!TextDocument}
- * @param {?Mode} newMode
- */
-function setMode(newMode) {
-  if (this.mode_)
-    this.mode_.detach();
-  this.mode_ = newMode;
-  if (newMode)
-    newMode.attach(this);
 }
 
 /**
@@ -635,8 +612,6 @@ Object.defineProperties(TextDocument.prototype, {
   keymap: {get: getKeymap},
   keymap_: {value: null, writable: true},
   lastWriteTime: {value: new Date(0), writable: true},
-  mode: {get: getMode, set: setMode},
-  mode_: {value: null, writable: true},
   modified: {get: getTextDocumentModified, set: setTextDocumentModified},
   name_: {value: '', writable: true},
   name: {get: getName},

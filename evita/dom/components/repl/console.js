@@ -19,9 +19,7 @@ function ensureTextDocument() {
     return present;
   /** @const @type {!TextDocument} */
   const newTextDocument = TextDocument.new(kDocumentName);
-  // TODO(eval1749): We should make |Console| class independent from
-  // mode.
-  newTextDocument.mode = Mode.create(Mode.chooseModeByFileName('foo.js'));
+  newTextDocument.dispatchEvent(new TextDocumentEvent(Event.Names.NEWFILE));
   return newTextDocument;
 }
 

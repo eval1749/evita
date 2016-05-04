@@ -43,8 +43,6 @@
 
   readonly attribute long length;
 
-  [ImplementedAs = JavaScript] attribute Mode ? mode;
-
   [ImplementedAs = JavaScript] attribute boolean modified;
 
   [ImplementedAs = JavaScript] readonly attribute DOMString name;

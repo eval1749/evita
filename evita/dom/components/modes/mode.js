@@ -22,6 +22,9 @@ const staticFileNameMap = new Map();
 /** @const @type {!Map<string, !ModeDescription>} */
 const staticIdMap = new Map();
 
+/** @const @type {!Map<!TextDocument, !Mode>} */
+const staticDocumentModeMap = new Map();
+
 /**
  * @param {!TextDocument} document
  * @param {string} name
@@ -120,10 +123,10 @@ class Mode {
   }
 
   /**
-   * @public
+   * @private
    * @param {!TextDocument} document
    */
-  attach(document) {
+  didAttach(document) {
     if (this.document_)
       throw new Error(this + ' is already attached to ' + this.document_);
     this.document_ = document;
@@ -131,23 +134,13 @@ class Mode {
   }
 
   /**
-   * @public
+   * @private
    */
-  detach() {
+  willDetach() {
     if (!this.document_)
       throw new Error(this + ' is already attached to ' + this.document_);
     this.highlightEngine_.detach();
-  }
-
-  /**
-   * @public
-   * @param {!TextDocument} document
-   * @param {number} hint
-   */
-  doColor(document, hint) {
-    if (!this.document_)
-      throw new Error(this + ' is detached.');
-    this.highlightEngine_.doColor(hint);
+    this.document_ = null;
   }
 
   /** @public @return {!ModeDescription} */
@@ -211,6 +204,23 @@ class Mode {
   }
 
   /**
+   * @param {!TextDocument} document
+   * @param {string} modeId
+   */
+  static attach(document, modeId) {
+    /** @const @type {?Mode} */
+    const present = Mode.modeOf(document);
+    if (present && present.id == modeId)
+      return;
+    if (present)
+      present.willDetach();
+    /** @const @type {!Mode} */
+    const mode = Mode.create(modeId);
+    staticDocumentModeMap.set(document, mode);
+    mode.didAttach(document);
+  }
+
+  /**
    * @param {string} id
    * @return {!Mode}
    */
@@ -227,6 +237,14 @@ class Mode {
    * @return {ModeDescription}
    */
   static findMode(id) { return staticIdMap.get(id) || null; }
+
+  /**
+   * @param {!TextDocument} document
+   * @return {?Mode}
+   */
+  static modeOf(document) {
+    return staticDocumentModeMap.get(document) || null;
+  }
 
   /**
    * @param {string} id

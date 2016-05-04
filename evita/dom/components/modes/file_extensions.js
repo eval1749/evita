@@ -73,6 +73,8 @@ Mode.registerExtension('xml', 'xml', 'XML Document');
 Mode.registerExtension('xsd', 'xml', 'XSD Document');
 Mode.registerExtension('xsl', 'xml', 'XSLT Document');
 
+Mode.registerFileName('*javascript*', 'javascript');
+Mode.registerFileName('*scratch*', 'plain');
 Mode.registerFileName('DEPS', 'python');
 Mode.registerFileName('Makefile', 'config');
 Mode.registerFileName('autohandler', 'mason');

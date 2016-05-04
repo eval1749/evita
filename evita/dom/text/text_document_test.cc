@@ -256,31 +256,8 @@ TEST_F(TextDocumentTest, load_succeeded) {
   EXPECT_SCRIPT_TRUE("doc.fileName.endsWith('foo.cc')");
   EXPECT_SCRIPT_EQ("123456", "doc.lastWriteTime.valueOf()");
   EXPECT_SCRIPT_TRUE("doc.lastStatTime_.valueOf() != 0");
-  EXPECT_SCRIPT_EQ("C++", "doc.mode.name");
   EXPECT_SCRIPT_TRUE("TextDocument.Obsolete.NO === doc.obsolete");
   EXPECT_SCRIPT_TRUE("doc.readonly") << "set readonly from file attribute";
-}
-
-TEST_F(TextDocumentTest, mode) {
-  EXPECT_SCRIPT_VALID(
-      "var doc = TextDocument.new('foo');"
-      "var mode = Mode.create(Mode.chooseModeByFileName('foo.txt'));"
-      "doc.mode = mode;");
-  EXPECT_SCRIPT_TRUE("doc.mode === mode");
-}
-
-TEST_F(TextDocumentTest, mode_auto_mode) {
-  EXPECT_SCRIPT_VALID(
-      "function testIt(fileName) {"
-      "  var doc = TextDocument.new(fileName);"
-      "  doc.mode = Mode.create(Mode.chooseModeByFileName(fileName));"
-      "  return doc.mode.name;"
-      "}");
-  EXPECT_SCRIPT_EQ("C++", "testIt('foo.cc')");
-  EXPECT_SCRIPT_EQ("C++", "testIt('foo.cpp')");
-  EXPECT_SCRIPT_EQ("C++", "testIt('foo.h')");
-  EXPECT_SCRIPT_EQ("Java", "testIt('foo.java')");
-  EXPECT_SCRIPT_EQ("JavaScript", "testIt('foo.js')");
 }
 
 TEST_F(TextDocumentTest, modified) {

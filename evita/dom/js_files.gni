@@ -82,8 +82,6 @@ js_lib_files = [
   "windows/visual_window.js",
   "windows/window.js",
 
-  "components/commander/commander.js",
-
   "components/highlights/highlights.js",
   "components/highlights/painter.js",
   "components/highlights/tokenizer.js",
@@ -144,4 +142,7 @@ js_lib_files = [
   "jslib/install_stringify.js",
 
   "testing/test.js",
+
+  # Commander provides keyboard binding.
+  "global/commander.js",
 ]

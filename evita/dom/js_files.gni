@@ -121,8 +121,11 @@ js_lib_files = [
   "components/highlights/langs/html_painter.js",
 
   "components/imaging/icon_util_win.js",
+
   "components/modes/mode.js",
   "components/modes/modes.js",
+  "components/modes/file_extensions.js",
+
   "components/win_resource/win_resource.js",
 
   "components/repl/repl.js",

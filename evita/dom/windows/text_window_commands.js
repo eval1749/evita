@@ -62,18 +62,8 @@ function makeSelectionMotionCommand(unit, direction, alter) {
 /**
  * @param {number} charCode
  */
-function isRightBracket(charCode) {
-  // return charCode === 0x29 || charCode === 0x5D || charCode === 0x7D ?
-  return false;
-}
-
-/**
- * @param {number} charCode
- */
 function makeTypeCharCommand(charCode) {
-  return isRightBracket(charCode) ? function(count = 1) {
-    typeRightBracket.call(this, charCode, count);
-  } : function(count = 1) { typeChar.call(this, charCode, count); };
+  return function(count = 1) { typeChar.call(this, charCode, count); };
 }
 
 /**
@@ -121,41 +111,6 @@ function typeChar(charCode, count = 1) {
   const range = this.selection.range;
   range.text = String.fromCharCode(charCode).repeat(count);
   range.collapseTo(range.end);
-}
-
-/** @type {number}*/
-global.parenthesisColor = 0xCCFF90;
-
-/**
- * Type right bracket.
- * @this {!TextWindow}
- * @param {number} charCode
- * @param {number=} count
- */
-function typeRightBracket(charCode, count = 1) {
-  /** @type {!TextWindow} */
-  const window = this;
-  /** @type {!TextSelection} */
-  const selection = /** @type {!TextSelection} */ (window.selection);
-  /** @type {!TextDocument} */
-  const document = selection.document;
-  selection.range.text = String.fromCharCode(charCode).repeat(count);
-  selection.range.collapseTo(selection.range.end);
-  document.doColor_(1000);
-
-  /** @type {!TextRange} */
-  const enclosingRange = new TextRange(selection.range);
-  enclosingRange.moveStart(Unit.BRACKET, -1);
-  if (enclosingRange.collapsed) {
-    window.status = Strings.IDS_NO_MATCHING_PAREN;
-    return;
-  }
-
-  enclosingRange.setStyle({backgroundColor: global.parenthesisColor});
-  new OneShotTimer().start(160, function() {
-    // TODO(eval1749): We should restore original background color.
-    enclosingRange.setStyle({backgroundColor: 0xFFFFFF});
-  });
 }
 
 // Install |TypeChar| commands.

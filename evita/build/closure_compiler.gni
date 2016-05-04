@@ -51,8 +51,6 @@ template("checked_js_module") {
       "//evita/dom/css/text_style_externs.js",
       "//evita/dom/components/clipboard/clipboard_externs.js",
       "//evita/dom/components/repl/console_externs.js",
-      "//evita/dom/enums.js",
-      "//evita/dom/events/event_enums.js",
       "//evita/dom/os/os_externs.js",
       "//evita/dom/windows/tab_data_externs.js",
       "//evita/dom/windows/text_document_state_externs.js",
@@ -63,7 +61,14 @@ template("checked_js_module") {
   }
 
   action(target_name) {
-    sources = invoker.sources
+    if (is_global) {
+      sources = invoker.sources
+    } else {
+      sources = [
+                  "//evita/dom/enums.js",
+                  "//evita/dom/events/event_enums.js",
+                ] + invoker.sources
+    }
     response_file_contents =
         rebase_path(sources) + [ "--externs" ] + rebase_path(externs)
 

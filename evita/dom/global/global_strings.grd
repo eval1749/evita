@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Experimental: Not used yet.
+Real file is "//evita/dom/strings_en_US.js"
+-->
+<grit current_release="1" latest_public_release="0"
+      source_lang_id="en" enc_check="möl">
+  <outputs>
+    <output filename="grit/global_strings.js" type="js_map_format"/>
+    <!--
+    output/@type is Python module name in "//tools/grit/grit/format/"
+    Output is something like:
+        localizedStrings["Foo Bar"] = "... translated string...";
+        ...
+    -->
+    <output filename="global_strings_en-US.pak" type="data_package" lang="en"/>
+  </outputs>
+  <release seq="1">
+    <messages fallback_to_english="true">
+      <message name="IDS_APP_TITLE">evita 5.0</message>
+      <message name="IDS_ASK_REFRESH" desc="refresh message"><ph name="name">$1<ex>__name__</ex></ph>
+      This file has been modified outside of the editor.
+      Do you want to reload it?</message>
+      <message name="IDS_ASK_RELOAD">Do you really want to discard the changes you made to and revert to saved __name__?</message>
+      <message name="IDS_ASK_SAVE">Do you want to save the changes to __name__?</message>
+      <message name="IDS_BAD_REGEX">Bad regex at __position__ (err=__error__)</message>
+      <message name="IDS_CAN_NOT_SPLIT">Can't split window</message>
+      <message name="IDS_DA_CONTINUE">Passed the start of the document</message>
+      <message name="IDS_DA_NOT_FOUND">No word starts with '__prefix__'</message>
+      <message name="IDS_DA_NO_MORE">No more abbreviation starts with '__prefix__'</message>
+      <message name="IDS_DA_TOO_LONG">Too long abbreviation</message>
+      <message name="IDS_DA_TOO_SHORT">Too short abbreviation</message>
+      <message name="IDS_FIND_FOUND">Found "__text__"</message>
+      <message name="IDS_FIND_NOT_FOUND">Not found "__text__"</message>
+      <message name="IDS_NOT_COMMAND">__name__ is not a command</message>
+      <message name="IDS_NO_MATCHING_PAREN">No matching parenthesis.</message>
+      <message name="IDS_NO_MORE_REDO">No more redo</message>
+      <message name="IDS_NO_MORE_UNDO">No more undo</message>
+      <message name="IDS_NO_OTHER_WINDOWS">No other windows</message>
+      <message name="IDS_PASSED_END">Passed the end of the document</message>
+      <message name="IDS_REPLACED">Replaced __count__ occurrences</message>
+      <message name="IDS_STATUS_BUSY">Busy</message>
+      <message name="IDS_STATUS_READY">Ready</message>
+    </messages>
+  </release>
+</grit>

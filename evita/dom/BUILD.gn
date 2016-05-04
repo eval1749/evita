@@ -36,6 +36,7 @@ grit("resources") {
   deps = [
     ":global_module",
     "//evita/dom/components",
+    "//evita/dom/global:global_strings",
   ]
 }
 

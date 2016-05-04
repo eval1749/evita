@@ -1,0 +1,18 @@
+# Copyright (c) 2016 Project Vogue. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//tools/grit/grit_rule.gni")
+
+grit("global_strings") {
+  source = "global_strings.grd"
+  resource_ids = "//evita/res/resource_ids"
+  outputs = [
+    "global_strings_en-US.pak",
+    "grit/global_strings.js",
+  ]
+  grit_flags = [
+    "-E",
+    "target_gen_dir=" + rebase_path(target_gen_dir),
+  ]
+}

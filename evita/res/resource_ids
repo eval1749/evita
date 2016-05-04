@@ -18,5 +18,6 @@
   "SRCDIR": "../..",
 
   "evita/dom/dom_resources.grd": {"includes": [10000]},
+  "evita/dom/global/global_strings.grd": {"messages": [30000]},
 }
 

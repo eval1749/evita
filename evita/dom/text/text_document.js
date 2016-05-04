@@ -398,16 +398,6 @@ function computeWhile(charSet, count, start) {
 
 /**
  * @this {!TextDocument}
- * @param {number} hint
- */
-function doColor_(hint) {
-  if (!this.mode)
-    return;
-  this.mode.doColor(this, hint);
-}
-
-/**
- * @this {!TextDocument}
  * @return {boolean}
  */
 function getTextDocumentModified() {
@@ -661,7 +651,6 @@ Object.defineProperties(TextDocument.prototype, {
   computeMotion_: {value: computeMotion},
   computeStartOf_: {value: computeStartOf},
   computeWhile_: {value: computeWhile},
-  doColor_: {value: doColor_},
   lines: {get: lines},
   listWindows: {value: listWindows},
   renameTo: {value: renameTo},

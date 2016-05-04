@@ -82,8 +82,6 @@
   [ImplementedAs = JavaScript] long computeWhile_(DOMString charSet, long count,
                                                   TextOffset offset);
 
-  [ImplementedAs = JavaScript] void doColor_(long hint);
-
   [ImplementedAs = EndUndoGroup] void endUndoGroup_(DOMString name);
 
   [ImplementedAs = JavaScript] void forceClose();

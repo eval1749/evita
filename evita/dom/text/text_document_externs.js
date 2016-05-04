@@ -15,9 +15,6 @@ TextDocument.prototype.obsolete;
 /** @export  @type {!Map.<string, *>} */
 TextDocument.prototype.properties;
 
-/** @export @type {function()} */
-TextDocument.prototype.parseFileProperties;
-
 /**
  * @param {string} name
  * @param {function()} callback

@@ -101,6 +101,10 @@
 
   [ImplementedAs = JavaScript] boolean needSave();
 
+  // TODO(eval1749): We should move |parseFileProperties()| somewhere,
+  // because it looks like non core feature.
+  [ImplementedAs = JavaScript] void parseFileProperties();
+
   long redo(TextOffset offset);
 
   [ImplementedAs = JavaScript] static void renameTo(DOMString newName);

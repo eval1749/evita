@@ -2,6 +2,7 @@
 setlocal
 call ..\setenv.cmd
 if "%outdir%"=="" goto no_outdir
+set exedir=%outdir%\Debug
 
 set which=%1
 set pattern=%2
@@ -10,7 +11,7 @@ set options=--single-process-tests --gtest_break_on_failure --gtest_throw_on_fai
 if "%which%"=="" goto usage
 if "%pattern%"=="" goto usage
 
-set target=%outdir%\evita_%which%_tests.exe
+set target=%exedir%\evita_%which%_tests.exe
 if not exist %target% goto not_fond
 start devenv.exe /debugexe %target% %options% --gtest_filter=%pattern%
 
@@ -24,7 +25,7 @@ exit/b
 :usage
 echo Usage: %~nx0 which [pattern]
 echo which is one of
-for /f "usebackq delims=_ tokens=2" %%x in (`dir/b %outdir%\evita_*_tests.exe`) do (
+for /f "usebackq delims=_ tokens=2" %%x in (`dir/b %exedir%\evita_*_tests.exe`) do (
   echo %space% %space% %%x
 )
 exit/b

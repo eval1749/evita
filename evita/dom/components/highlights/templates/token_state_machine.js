@@ -195,11 +195,6 @@ highlights.create{{Name}}Tokenizer = create{{Name}}Tokenizer;
 ].forEach(word => static{{Name}}Keywords.add(word));
 {% endif %}
 
-// Override |{{Name}}Lexer| by |{{Name}}HighlightEngine|.
-// TODO(eval1749): Once we get rid of |{{Name}}Lexer|, we should get rid of this
-// override.
-global['{{Name}}Lexer'] = {{Name}}HighlightEngine;
-
 HighlightEngine.registerEngine(
     '{{id}}', {{Name}}HighlightEngine.create, static{{Name}}Keywords);
 {% endif %}

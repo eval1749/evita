@@ -10,6 +10,7 @@ goog.require('spell_checker');
 
 goog.scope(function() {
 
+const HighlightEngine = highlights.HighlightEngine;
 const Mode = modes.Mode;
 const SpellChecker = spell_checker.SpellChecker;
 
@@ -116,7 +117,7 @@ Mode.registerExtension('e', 'c#');
     'domapi::EventType', 'gfx::Canvas::AxisAlignedClipScope', 'gfx::Brush',
     'gfx::Canvas', 'gfx::ColorF', 'gfx::Canvas::DrawingScope', 'gfx::Point',
     'gfx::PointF', 'gfx::Rect', 'gfx::RectF', 'gfx::Size', 'gfx::SizeF',
-].forEach((keyword) => { CppLexer.addKeyword(keyword); });
+].forEach((keyword) => { HighlightEngine.keywordsFor('c++').add(keyword); });
 
 // Report spell checker progress
 Editor.bindKey(TextWindow, 'Ctrl+Shift+M', function() {

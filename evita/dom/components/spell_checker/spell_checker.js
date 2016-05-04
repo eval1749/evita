@@ -314,6 +314,9 @@ class Scanner {
     this.end_ = newEnd;
   }
 
+  // Implements Runnable.prototype.run
+  run() { throw new Error(`%{this.name} should implement run()`); }
+
   /**
    * @param {number} newOffset
    * @param {number} newEnd

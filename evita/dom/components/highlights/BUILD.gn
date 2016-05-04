@@ -2,6 +2,60 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//evita/build/js_module.gni")
+
+js_module("highlights") {
+  # Note: To avoid alphabetical sort of |sources| by "gn format", we use
+  # auxiliary variable to |file| to keep file order in module object file.
+  files = [
+    "highlights.js",
+    "painter.js",
+    "tokenizer.js",
+    "highlight_engine.js",
+    "$target_gen_dir/xmltag_tokens.js",
+    "tag_painter.js",
+    "$target_gen_dir/cmd_tokens.js",
+    "$target_gen_dir/config_tokens.js",
+    "$target_gen_dir/cpp_tokens.js",
+    "$target_gen_dir/csharp_tokens.js",
+    "$target_gen_dir/css_tokens.js",
+    "$target_gen_dir/gn_tokens.js",
+    "$target_gen_dir/html_tokens.js",
+    "$target_gen_dir/idl_tokens.js",
+    "$target_gen_dir/javascript_tokens.js",
+    "$target_gen_dir/java_tokens.js",
+    "$target_gen_dir/plain_tokens.js",
+    "$target_gen_dir/python_tokens.js",
+    "$target_gen_dir/xml_tokens.js",
+    "langs/cmd_painter.js",
+    "langs/config_painter.js",
+    "langs/cpp_painter.js",
+    "langs/csharp_painter.js",
+    "langs/css_painter.js",
+    "langs/gn_painter.js",
+    "langs/idl_painter.js",
+    "langs/javascript_painter.js",
+    "langs/java_painter.js",
+    "langs/plain_painter.js",
+    "langs/python_painter.js",
+    "langs/xml_painter.js",
+    "langs/html_painter.js",
+  ]
+  sources = files
+  externs = [
+    "//evita/dom/base/ordered_set_externs.js",
+    "//evita/dom/base/logger_externs.js",
+    "//evita/dom/base/logging_externs.js",
+    "//evita/dom/jslib/task_scheduler_externs.js",
+    "//evita/dom/text/text_externs.js",
+    "//evita/dom/text/simple_mutation_observer_externs.js",
+    "//evita/dom/unicode/unicode_enums.js",
+  ]
+  deps = [
+    ":token_state_machines",
+  ]
+}
+
 action_foreach("token_state_machines") {
   script = "scripts/make_token_state_machine.py"
   sources = [

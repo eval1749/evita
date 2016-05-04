@@ -44,7 +44,7 @@ const RE_WORD = new RegExp(
     '^[A-Za-z][a-z]{' + (kMinWordLength - 1) + ',' + (kMaxWordLength - 1) +
     '}$');
 
-/** @const @type {!Set.<string>} */
+/** @const @type {!Set<string>} */
 const keywords = new Set();
 
 /**
@@ -74,10 +74,10 @@ class Controller {
     /** @type {number} */
     this.numberOfRequests_ = 0;
 
-    /** @const @type {!Set.<string>} */
+    /** @const @type {!Set<string>} */
     this.correctWords_ = new Set();
 
-    /** @const @type {!Set.<string>} */
+    /** @const @type {!Set<string>} */
     this.missSpelledWords_ = new Set();
   }
 
@@ -87,7 +87,7 @@ class Controller {
   canRequest() { return this.numberOfRequests_ < kMaxNumberOfRequests; }
 
   /**
-   * @param {string}word
+   * @param {string} word
    * @return {Spelling}
    */
   checkSpelling(word) {
@@ -108,7 +108,7 @@ class Controller {
    */
   requestCheckSpelling(word) {
     ++this.numberOfRequests_;
-    return Editor.checkSpelling(word).then((isCorrect) => {
+    return Editor.checkSpelling(word).then(isCorrect => {
       --this.numberOfRequests_;
       if (isCorrect)
         this.correctWords_.add(word);
@@ -118,10 +118,11 @@ class Controller {
     });
   }
 }
+
+/** @const @type {!Controller} */
 const controller = new Controller();
 
 /**
- * @class
  * @implements {Runnable}
  */
 class Scanner {
@@ -361,7 +362,9 @@ class ColdPainter extends Scanner {
   run() {
     this.ensureOffsets();
     for (let wordRange of this.words()) {
+      /** @const @type {string} */
       const word = this.document.slice(wordRange.start, wordRange.end);
+      /** @const @type {Spelling} */
       const spelling = controller.checkSpelling(word);
       paint(this.document, wordRange.start, wordRange.end, spelling);
     }
@@ -400,6 +403,7 @@ class ColdScanner extends Scanner {
    * @return {boolean}
    */
   checkWord(wordStart, wordEnd) {
+    /** @const @type {string} */
     const word = this.prepareRequest(wordStart, wordEnd);
     if (word.length === 0) {
       this.checked_ = wordEnd;
@@ -471,11 +475,11 @@ class HotScanner extends Scanner {
 
     /**
      * @const
-     * @type {!Array.<!TextRange>}
+     * @type {!Array<!TextRange>}
      * List of ranges can be used for checking spelling.
      */
     this.freeRanges_ = new Array(10);
-    for (var i = 0; i < this.freeRanges_.length; ++i)
+    for (let i = 0; i < this.freeRanges_.length; ++i)
       this.freeRanges_[i] = new TextRange(range.document);
   }
 
@@ -496,6 +500,7 @@ class HotScanner extends Scanner {
    * @return {boolean}
    */
   checkWord(wordStart, wordEnd) {
+    /** @const @type {string} */
     const word = this.prepareRequest(wordStart, wordEnd);
     if (word.length === 0)
       return true;
@@ -676,6 +681,7 @@ class SpellChecker extends text.SimpleMutationObserverBase {
    * @param {!UiEvent} event
    */
   didAttachWindow(event) {
+    /** @const @type {!TextWindow} */
     const window = /** @type {!TextWindow} */ (event.view);
     window.addEventListener(Event.Names.BLUR, this.didBlurWindow.bind(this));
     window.addEventListener(Event.Names.FOCUS, this.didFocusWindow.bind(this));
@@ -720,6 +726,7 @@ class SpellChecker extends text.SimpleMutationObserverBase {
    * @param {!TextDocument} document
    */
   static disable(document) {
+    /** @const @type {?SpellChecker} */
     const spellChecker = SpellChecker.get(document);
     if (!spellChecker)
       return;
@@ -733,6 +740,7 @@ class SpellChecker extends text.SimpleMutationObserverBase {
   static enable(document) {
     if (spellCheckerMap.has(document))
       return;
+    /** @const @type {!SpellChecker} */
     const spellChecker = new SpellChecker(document);
     spellCheckerMap.set(document, spellChecker);
   }

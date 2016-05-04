@@ -49,21 +49,6 @@ function fromDigitChar(charCode, base) {
 }
 
 /**
- * @param {!Unit} unit
- * @param {number} direction
- */
-function makeSelectionMotionCommand(unit, direction, alter) {
-  /**
-   * @this {!TextWindow}
-   * @param {number=} count
-   */
-  function command_function(count = 1) {
-    this.selection.modify(unit, count * direction, alter);
-  }
-  return command_function;
-}
-
-/**
  * @param {number} charCode
  */
 function makeTypeCharCommand(charCode) {
@@ -316,18 +301,6 @@ function makeSelectionVisibleCommand() {
 }
 Editor.bindKey(TextWindow, 'Ctrl+L', makeSelectionVisibleCommand);
 
-Editor.bindKey(
-    TextWindow, 'Ctrl+ArrowLeft',
-    makeSelectionMotionCommand(Unit.WORD, -1, Alter.MOVE),
-    'move selection left word\n' +
-        'Move selection to left by words');
-
-Editor.bindKey(
-    TextWindow, 'Ctrl+ArrowRight',
-    makeSelectionMotionCommand(Unit.WORD, 1, Alter.MOVE),
-    'move selection right word\n' +
-        'Move selection to right by words');
-
 /**
  * Reload document
  * @this {!TextWindow}
@@ -481,18 +454,6 @@ Editor.bindKey(
         'Move active position of selection to home of document.');
 
 Editor.bindKey(
-    TextWindow, 'Ctrl+Shift+ArrowLeft',
-    makeSelectionMotionCommand(Unit.WORD, -1, Alter.EXTEND),
-    'extend selection left word\n' +
-        'Extend selection to left by words');
-
-Editor.bindKey(
-    TextWindow, 'Ctrl+Shift+ArrowRight',
-    makeSelectionMotionCommand(Unit.WORD, 1, Alter.EXTEND),
-    'extend selection right word\n' +
-        'Extend selection to right by words');
-
-Editor.bindKey(
     TextWindow, 'Ctrl+Shift+U',
     /**
      * @this {!TextWindow}
@@ -611,16 +572,6 @@ Editor.bindKey(
     'move to home of window line\n' +
         'Move active position of selection to home of window line.');
 
-Editor.bindKey(
-    TextWindow, 'ArrowLeft',
-    makeSelectionMotionCommand(Unit.CHARACTER, -1, Alter.MOVE),
-    'move selection to left by character');
-
-Editor.bindKey(
-    TextWindow, 'ArrowRight',
-    makeSelectionMotionCommand(Unit.CHARACTER, 1, Alter.MOVE),
-    'move selection to right by character');
-
 Editor.bindKey(TextWindow, 'Shift+Delete', cutToClipboardCommand);
 
 Editor.bindKey(
@@ -640,16 +591,6 @@ Editor.bindKey(
         'Move active position of selection to home of window line.');
 
 Editor.bindKey(TextWindow, 'Shift+Insert', pasteFromClipboardCommand);
-
-Editor.bindKey(
-    TextWindow, 'Shift+ArrowLeft',
-    makeSelectionMotionCommand(Unit.CHARACTER, -1, Alter.EXTEND),
-    'extend selection to left by character');
-
-Editor.bindKey(
-    TextWindow, 'Shift+ArrowRight',
-    makeSelectionMotionCommand(Unit.CHARACTER, 1, Alter.EXTEND),
-    'extend selection to right by character');
 
 // TODO(eval1749): We should get |Indent|/|Outdent| tab width from another
 // place.
@@ -743,100 +684,4 @@ Editor.bindKey(
     TextWindow, 'Tab', indentCommand, 'indent\n' +
         'Caret: insert spaces until tab stop column.\n' +
         'TextRange: insert spaces all lines in range.');
-
-Editor.bindKey(
-    TextWindow, 'ArrowUp',
-    makeSelectionMotionCommand(Unit.WINDOW_LINE, -1, Alter.MOVE),
-    'move up by window line\n' +
-        'Move focus position up by window line.');
-
-Editor.bindKey(
-    TextWindow, 'ArrowDown',
-    makeSelectionMotionCommand(Unit.WINDOW_LINE, 1, Alter.MOVE),
-    'move down by window line\n' +
-        'Move focus position down by window line.');
-
-Editor.bindKey(
-    TextWindow, 'PageUp',
-    makeSelectionMotionCommand(Unit.SCREEN, -1, Alter.MOVE),
-    'move up by screen\n' +
-        'Move focus position up by screen.');
-
-Editor.bindKey(
-    TextWindow, 'PageDown',
-    makeSelectionMotionCommand(Unit.SCREEN, 1, Alter.MOVE),
-    'move down by screen\n' +
-        'Move focus position down by screen.');
-
-Editor.bindKey(
-    TextWindow, 'Ctrl+ArrowUp',
-    makeSelectionMotionCommand(Unit.BRACKET, -1, Alter.MOVE),
-    'move up by bracket\n' +
-        'Move focus position up by bracket.');
-
-Editor.bindKey(
-    TextWindow, 'Ctrl+ArrowDown',
-    makeSelectionMotionCommand(Unit.BRACKET, 1, Alter.MOVE),
-    'move down by bracket\n' +
-        'Move focus position down by bracket.');
-
-Editor.bindKey(
-    TextWindow, 'Ctrl+PageUp',
-    makeSelectionMotionCommand(Unit.WINDOW, -1, Alter.MOVE),
-    'move up by window\n' +
-        'Move focus position up by window.');
-
-Editor.bindKey(
-    TextWindow, 'Ctrl+PageDown',
-    makeSelectionMotionCommand(Unit.WINDOW, 1, Alter.MOVE),
-    'move down by window\n' +
-        'Move focus position down by window.');
-
-Editor.bindKey(
-    TextWindow, 'Shift+ArrowUp',
-    makeSelectionMotionCommand(Unit.WINDOW_LINE, -1, Alter.EXTEND),
-    'extend up by window line\n' +
-        'Extend focus position up by window line.');
-
-Editor.bindKey(
-    TextWindow, 'Shift+ArrowDown',
-    makeSelectionMotionCommand(Unit.WINDOW_LINE, 1, Alter.EXTEND),
-    'extend down by window line\n' +
-        'Extend focus position down by window line.');
-
-Editor.bindKey(
-    TextWindow, 'Shift+PageUp',
-    makeSelectionMotionCommand(Unit.SCREEN, -1, Alter.EXTEND),
-    'extend up by screen\n' +
-        'Extend focus position up by screen.');
-
-Editor.bindKey(
-    TextWindow, 'Shift+PageDown',
-    makeSelectionMotionCommand(Unit.SCREEN, 1, Alter.EXTEND),
-    'extend down by screen\n' +
-        'Extend focus position down by screen.');
-
-Editor.bindKey(
-    TextWindow, 'Shift+Ctrl+ArrowDown',
-    makeSelectionMotionCommand(Unit.BRACKET, 1, Alter.EXTEND),
-    'extend down by bracket\n' +
-        'Extend focus position down by bracket');
-
-Editor.bindKey(
-    TextWindow, 'Shift+Ctrl+ArrowUp',
-    makeSelectionMotionCommand(Unit.BRACKET, -1, Alter.EXTEND),
-    'extend up by bracket\n' +
-        'Extend focus position up by bracket');
-
-Editor.bindKey(
-    TextWindow, 'Shift+Ctrl+PageUp',
-    makeSelectionMotionCommand(Unit.WINDOW, -1, Alter.EXTEND),
-    'extend up by window\n' +
-        'Extend focus position up by window.');
-
-Editor.bindKey(
-    TextWindow, 'Shift+Ctrl+PageDown',
-    makeSelectionMotionCommand(Unit.WINDOW, 1, Alter.EXTEND),
-    'extend down by window\n' +
-        'Extend focus position down by window.');
 });

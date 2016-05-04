@@ -37,7 +37,6 @@ function processCommandLine(args) {
   const editorWindow = new EditorWindow();
   /** @const @type {!TextDocument} */
   const doc = TextDocument.new('*scratch*');
-  doc.mode = Mode.create('plain');
   /** @const @type {!TextRange} */
   const range = new TextRange(doc);
   /** @const @type {!TextWindow} */

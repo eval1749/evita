@@ -121,8 +121,8 @@ js_lib_files = [
   "components/imaging/icon_util_win.js",
 
   "components/modes/mode.js",
-  "components/modes/modes.js",
   "components/modes/file_extensions.js",
+  "components/modes/modes.js",
 
   "components/win_resource/win_resource.js",
 

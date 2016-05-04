@@ -172,7 +172,7 @@ class Mode {
 
   /**
    * @param {!TextDocument} document
-   * @return {!Mode}
+   * @return {string}
    */
   static chooseMode(document) {
     /** @const @type {string} */
@@ -182,7 +182,7 @@ class Mode {
       /** @const @type {?ModeDescription} */
       const modeDescription = Mode.findMode(modeId.toLowerCase());
       if (modeDescription)
-        return new Mode(modeDescription);
+        return modeDescription.id;
     }
     if (document.fileName !== '')
       return Mode.chooseModeByFileName(document.fileName);
@@ -191,7 +191,7 @@ class Mode {
 
   /**
    * @param {string} fileName
-   * @return {!Mode}
+   * @return {string}
    */
   static chooseModeByFileName(fileName) {
     const matches = /[.]([^.]+)$/.exec(FilePath.basename(fileName));
@@ -199,15 +199,15 @@ class Mode {
       /** @type {string} */
       const modeId =
           staticFileNameMap.get(FilePath.basename(fileName)) || kDefaultModeId;
-      return makeMode(modeId);
+      return modeId;
     }
     /** @const @type {string} */
     const extension = matches[1]
         /** @const @type {ExtensionDescription} */
         const description = staticExtensionMap.get(extension) || null;
     if (!description)
-      return makeMode(kDefaultModeId);
-    return makeMode(description.modeId);
+      return kDefaultModeId;
+    return description.modeId;
   }
 
   /**

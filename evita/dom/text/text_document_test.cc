@@ -264,7 +264,7 @@ TEST_F(TextDocumentTest, load_succeeded) {
 TEST_F(TextDocumentTest, mode) {
   EXPECT_SCRIPT_VALID(
       "var doc = TextDocument.new('foo');"
-      "var mode = Mode.chooseModeByFileName('foo.txt');"
+      "var mode = Mode.create(Mode.chooseModeByFileName('foo.txt'));"
       "doc.mode = mode;");
   EXPECT_SCRIPT_TRUE("doc.mode === mode");
 }
@@ -273,7 +273,7 @@ TEST_F(TextDocumentTest, mode_auto_mode) {
   EXPECT_SCRIPT_VALID(
       "function testIt(fileName) {"
       "  var doc = TextDocument.new(fileName);"
-      "  doc.mode = Mode.chooseModeByFileName(fileName);"
+      "  doc.mode = Mode.create(Mode.chooseModeByFileName(fileName));"
       "  return doc.mode.name;"
       "}");
   EXPECT_SCRIPT_EQ("C++", "testIt('foo.cc')");

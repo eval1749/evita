@@ -21,7 +21,7 @@ function ensureTextDocument() {
   const newTextDocument = TextDocument.new(kDocumentName);
   // TODO(eval1749): We should make |Console| class independent from
   // mode.
-  newTextDocument.mode = Mode.chooseModeByFileName('foo.js');
+  newTextDocument.mode = Mode.create(Mode.chooseModeByFileName('foo.js'));
   return newTextDocument;
 }
 

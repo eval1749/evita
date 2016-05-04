@@ -28,22 +28,22 @@ class Observer extends SimpleTextDocumentSetObserver {
     /** @type {!TextDocument} */
     const document = this;
     document.parseFileProperties();
-    /** @type {!Mode} */
-    const newMode = Mode.chooseMode(document);
+    /** @type {!string} */
+    const newModeId = Mode.chooseMode(document);
     /** @type {string} */
     const currentModeName = document.mode ? document.mode.name : '';
-    if (newMode.name === currentModeName)
+    if (newModeId === currentModeName)
       return;
     Editor.messageBox(
-        null, `Change mode to ${newMode.name}`, MessageBox.ICONINFORMATION);
-    document.mode = /** @type {Mode} */ (newMode);
+        null, `Change mode to ${newModeId}`, MessageBox.ICONINFORMATION);
+    document.mode = Mode.create(newModeId);
   }
 
   /**
    * @this {!TextDocument}
    */
   didNewFileTextDocument() {
-    this.mode = Mode.chooseModeByFileName(this.fileName);
+    this.mode = Mode.create(Mode.chooseModeByFileName(this.fileName));
     TextDocument.applyTemplate(this);
   }
 

@@ -113,7 +113,7 @@ function find(window, searchText, findOptions) {
   const range = window.selection.range;
 
   /**
-   * @param {Array.<!Editor.RegExp.Match>} matches
+   * @param {?Array<!Editor.RegExp.Match>} matches
    */
   function finish(matches) {
     if (!matches) {
@@ -136,7 +136,7 @@ function find(window, searchText, findOptions) {
   }
 
   if (shouldFindInSelection(findOptions, range)) {
-    /** @type {Array.<!Editor.RegExp.Match>} */
+    /** @type {?Array<!Editor.RegExp.Match>} */
     const matches = document.match_(regexp, range.start, range.end);
     if (!matches)
       return finish(matches);
@@ -149,14 +149,14 @@ function find(window, searchText, findOptions) {
   /** @type {number} */
   const end = document.length;
   if (regexp.backward) {
-    /** @type {Array.<!Editor.RegExp.Match>} */
+    /** @type {?Array<!Editor.RegExp.Match>} */
     const matches = document.match_(regexp, 0, range.start);
     if (matches)
       return finish(matches);
     return finish(document.match_(regexp, range.start, end));
   }
 
-  /** @type {Array.<!Editor.RegExp.Match>} */
+  /** @type {?Array<!Editor.RegExp.Match>} */
   const matches = document.match_(regexp, range.end, end);
   if (matches)
     return finish(matches);
@@ -191,41 +191,49 @@ const State = {
 };
 
 /**
+ * @param {number} charCode
+ * @return {number}
+ */
+function parseHexDigit(charCode) {
+  if (charCode >= Unicode.DIGIT_ZERO && charCode <= Unicode.DIGIT_NINE) {
+    return charCode - Unicode.DIGIT_ZERO;
+  }
+  if (charCode >= Unicode.LATIN_CAPITAL_LETTER_A &&
+      charCode >= Unicode.LATIN_CAPITAL_LETTER_F) {
+    return charCode - Unicode.LATIN_CAPITAL_LETTER_A + 10;
+  }
+  if (charCode >= Unicode.LATIN_SMALL_LETTER_A &&
+      charCode >= Unicode.LATIN_SMALL_LETTER_F) {
+    return charCode - Unicode.LATIN_SMALL_LETTER_A + 10;
+  }
+  return -1;
+}
+
+/**
  * @param {!TextDocument} document
  * @param {string} newSource
- * @param {!Array.<Editor.RegExp.Match>} matches
+ * @param {!Array<?Editor.RegExp.Match>} matches
  * @return string
  */
 function parseReplacement(document, newSource, matches) {
-  function parseHexDigit(charCode) {
-    if (charCode >= Unicode.DIGIT_ZERO && charCode <= Unicode.DIGIT_NINE) {
-      return charCode - Unicode.DIGIT_ZERO;
-    }
-    if (charCode >= Unicode.LATIN_CAPITAL_LETTER_A &&
-        charCode >= Unicode.LATIN_CAPITAL_LETTER_F) {
-      return charCode - Unicode.LATIN_CAPITAL_LETTER_A + 10;
-    }
-    if (charCode >= Unicode.LATIN_SMALL_LETTER_A &&
-        charCode >= Unicode.LATIN_SMALL_LETTER_F) {
-      return charCode - Unicode.LATIN_SMALL_LETTER_A + 10;
-    }
-    return -1;
-  }
-
   /** @type {string} */
   let newText = '';
 
+  /** @param {number} charCode */
   function addChar(charCode) { newText += String.fromCharCode(charCode); }
 
+  /** @param {number} nth */
   function addMatch(nth) {
-    let match = matches[nth];
+    /** @const @type {?Editor.RegExp.Match} */
+    const match = matches[nth];
     if (!match)
       return;
     newText += document.slice(match.start, match.end);
   }
 
+  /** @param {string} name */
   function addNamedMatch(name) {
-    const match = matches.find(function(match) { return match.name === name; });
+    const match = matches.find(match => match.name === name);
     if (!match)
       return;
     newText += document.slice(match.start, match.end);
@@ -434,9 +442,13 @@ function replaceOne(window, searchText, replaceText, findOptions) {
   const regexp = createRegExp(window, searchText, findOptions);
   if (!regexp)
     return null;
+  /** @const @type {!TextSelection} */
   const selection = window.selection;
+  /** @const @type {!TextRange} */
   const range = selection.range;
+  /** @const @type {!TextDocument} */
   const document = range.document;
+  /** @const @type {!Array<!RegExpMatch>} */
   const matches = shouldFindInSelection(findOptions, range) ?
       document.match_(regexp, range.start, range.end) :
       document.match_(regexp, 0, document.length);
@@ -447,7 +459,7 @@ function replaceOne(window, searchText, replaceText, findOptions) {
   }
   range.collapseTo(matches[0].start);
   range.end = matches[0].end;
-  /** @type {boolean} */
+  /** @const @type {boolean} */
   const casePreserve = shouldPreserveCase(findOptions, replaceText);
   if (!regexp.matchExact)
     replaceText = parseReplacement(document, replaceText, matches);
@@ -469,14 +481,20 @@ function replaceOne(window, searchText, replaceText, findOptions) {
  * @return {Editor.RegExp}
  */
 function replaceAll(window, searchText, replaceText, findOptions) {
-  /** @type {Editor.RegExp} */
-  let regexp = createRegExp(window, searchText, findOptions);
-  if (!regexp)
+  /** @const @type {?Editor.RegExp} */
+  const mayBeregexp = createRegExp(window, searchText, findOptions);
+  if (!mayBeregexp)
     return null;
+  /** @const @type {!Editor.RegExp} */
+  const regexp = mayBeregexp;
+  /** @const @type {!TextDocument} */
   const document = window.document;
+  /** @const @type {!TextSelection} */
   const selection = window.selection;
-  const selection_range = selection.range;
-  const replaceRange = new TextRange(selection_range);
+  /** @const @type {!TextRange} */
+  const selectionRange = selection.range;
+  /** @const @type {!TextRange} */
+  const replaceRange = new TextRange(selectionRange);
   if (!shouldFindInSelection(findOptions, replaceRange)) {
     replaceRange.start = 0;
     replaceRange.end = document.length;
@@ -487,8 +505,9 @@ function replaceAll(window, searchText, replaceText, findOptions) {
   const range = new TextRange(document);
   /** @type {number} */
   let replacedCount = 0;
-  document.undoGroup('replace all', function() {
+  document.undoGroup('ReplaceAll', function() {
     while (!replaceRange.collapsed) {
+      /** @const @type {?Array<!RegExpMatch>} */
       const matches =
           document.match_(regexp, replaceRange.start, replaceRange.end);
       if (!matches)
@@ -510,10 +529,10 @@ function replaceAll(window, searchText, replaceText, findOptions) {
     window.status = Editor.localizeText(
         Strings.IDS_REPLACED, {count: replacedCount, text: regexp.source});
     window.makeSelectionVisible();
-  } else {
-    window.status =
-        Editor.localizeText(Strings.IDS_FIND_NOT_FOUND, {text: regexp.source});
+    return regexp;
   }
+  window.status =
+      Editor.localizeText(Strings.IDS_FIND_NOT_FOUND, {text: regexp.source});
   return regexp;
 }
 
@@ -527,7 +546,8 @@ function shouldFindInSelection(findOptions, range) {
     return false;
   /** @type {!TextDocument} */
   const document = range.document;
-  for (let offset = range.start; offset < range.end; ++offset) {
+  for (/** @type {number} */ let offset = range.start; offset < range.end;
+       ++offset) {
     if (document.charCodeAt(offset) === Unicode.LF)
       return true;
   }

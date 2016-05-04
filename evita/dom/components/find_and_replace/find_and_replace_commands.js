@@ -30,7 +30,8 @@ class TextFieldLogger {
    * @param {string} value
    */
   add(value) {
-    let length = this.texts_.length;
+    /** @const @type {number} */
+    const length = this.texts_.length;
     if (length && this.texts_[length - 1] === value)
       return;
     if (length >= MAX_ENTRIES)
@@ -45,10 +46,12 @@ class TextFieldLogger {
    * @param {number} direction
    */
   retrieve(direction) {
-    let length = this.texts_.length;
+    /** @const @type {number} */
+    const length = this.texts_.length;
     if (!length)
       return;
-    let newCursor = this.cursor_ + direction;
+    /** @const @type {number} */
+    const newCursor = this.cursor_ + direction;
     if (newCursor < 0 || newCursor >= length)
       return;
     let control = this.control_;
@@ -102,7 +105,8 @@ let useRegexpCheckbox = null;
  * @param {!Window} window
  */
 function doFindNext(window) {
-  let textWindow = ensureTextWindow(window);
+  /** @const @type {?TextWindow} */
+  const textWindow = ensureTextWindow(window);
   if (!textWindow)
     return;
   FindAndReplace.find(
@@ -113,7 +117,8 @@ function doFindNext(window) {
  * @param {!Window} window
  */
 function doFindPrevious(window) {
-  let textWindow = ensureTextWindow(window);
+  /** @const @type {?TextWindow} */
+  const textWindow = ensureTextWindow(window);
   if (!textWindow)
     return;
   FindAndReplace.find(
@@ -124,7 +129,8 @@ function doFindPrevious(window) {
  * @param {!Window} window
  */
 function doReplaceOne(window) {
-  let textWindow = ensureTextWindow(window);
+  /** @const @type {?TextWindow} */
+  const textWindow = ensureTextWindow(window);
   if (!textWindow)
     return;
   FindAndReplace.replaceOne(
@@ -136,7 +142,8 @@ function doReplaceOne(window) {
  * @param {!Window} window
  */
 function doReplaceAll(window) {
-  let textWindow = ensureTextWindow(window);
+  /** @const @type {?TextWindow} */
+  const textWindow = ensureTextWindow(window);
   if (!textWindow)
     return;
   FindAndReplace.replaceAll(
@@ -150,15 +157,28 @@ function ensureForm() {
 
   form = new Form();
 
-  let BUTTON_MARGIN = 5;
-  let CONTROL_HEIGHT = 26;
-  let LINE_MARGIN = 5;
-  let PADDING_LEFT = 5;
-  let PADDING_TOP = 5;
+  /** @const @type {number} */
+  const BUTTON_MARGIN = 5;
+  /** @const @type {number} */
+  const CHECKBOX_HEIGHT = 20;
+  /** @const @type {number} */
+  const CONTROL_HEIGHT = 26;
+  /** @const @type {number} */
+  const LINE_MARGIN = 5;
+  /** @const @type {number} */
+  const PADDING_LEFT = 5;
+  /** @const @type {number} */
+  const PADDING_TOP = 5;
 
+  /** @type {number} */
   let controlLeft = PADDING_LEFT;
+  /** @type {number} */
   let controlTop = PADDING_TOP;
 
+  /**
+   * @param {!FormControl} control
+   * @param {number} width
+   */
   function add(control, width) {
     control.clientLeft = controlLeft;
     control.clientTop = controlTop;
@@ -190,14 +210,18 @@ function ensureForm() {
   newline();
 
   // Checkboxes
+  /**
+   * @param {string} text
+   * @param {string} accessKey
+   */
   function addCheckbox(text, accessKey) {
-    let checkbox = new CheckboxControl();
+    /** @const @type {!CheckboxControl} */
+    const checkbox = new CheckboxControl();
     checkbox.accessKey = accessKey;
-    add(checkbox, 20);
+    add(checkbox, CHECKBOX_HEIGHT);
     add(new LabelControl(text), text.length * 10);
     return checkbox;
   }
-  CONTROL_HEIGHT = 20;
   matchCaseCheckbox = addCheckbox('Match case', 'C');
   newline();
   matchWholeWordCheckbox = addCheckbox('Match whole word', 'W');
@@ -209,9 +233,13 @@ function ensureForm() {
   newline();
 
   // Buttons
-  CONTROL_HEIGHT = 26;
+  /**
+   * @param {string} text
+   * @param {string} accessKey
+   */
   function addButton(text, accessKey) {
-    let button = new ButtonControl(text);
+    /** @const @type {!ButtonControl} */
+    const button = new ButtonControl(text);
     button.accessKey = accessKey;
     add(button, 100);
     controlLeft += BUTTON_MARGIN;
@@ -227,7 +255,8 @@ function ensureForm() {
 
   function updateUiByFindWhat() {
     findWhatText.logger_.resetCursor();
-    let canFind = findWhatText.value !== '';
+    /** @const @type {boolean} */
+    const canFind = findWhatText.value !== '';
     findNextButton.disabled = !canFind;
     findPreviousButton.disabled = !canFind;
     replaceOneButton.disabled = !canFind;
@@ -236,6 +265,9 @@ function ensureForm() {
   }
   findWhatText.addEventListener(Event.Names.INPUT, updateUiByFindWhat);
 
+  /**
+   * @param {!TextFieldControl} textField
+   */
   function setupTextField(textField) {
     textField.addEventListener(Event.Names.CHANGE, function() {
       textField.logger_.add(textField.value);
@@ -249,8 +281,14 @@ function ensureForm() {
 
   form.addEventListener(Event.Names.KEYDOWN, handleGlobalKeyDown);
 
+  /**
+   * @param {?ButtonControl} button
+   * @param {!function(!Window)} handler
+   */
   function installButton(button, handler) {
-    button.addEventListener('click', function(event) {
+    if (!button)
+      return;
+    button.addEventListener(Event.Names.CLICK, function(event) {
       if (!Window.focus)
         return;
       handler(/**@type{!Window}*/ (Window.focus));
@@ -274,6 +312,7 @@ function ensureForm() {
 function ensureTextWindow(windowIn) {
   if (windowIn instanceof TextWindow)
     return windowIn;
+  /** @type {?TextWindow} */
   let textWindow = null;
   for (let editorWindow of EditorWindow.list) {
     for (let window of editorWindow.children) {

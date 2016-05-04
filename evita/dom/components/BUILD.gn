@@ -29,11 +29,8 @@ source_set("test_files") {
   data = [
     "highlights/highlights_test.js",
     "imaging/imaging_test.js",
+    "modes/modes_test.js",
     "win_resource/win_resource_test.js",
-  ]
-
-  deps = [
-    "modes:test_files",
   ]
 
   public_deps = [

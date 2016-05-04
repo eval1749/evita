@@ -25,6 +25,10 @@ TEST_F(ComponentsTest, Imaging) {
   RunFile({"components", "imaging", "imaging_test.js"});
 }
 
+TEST_F(ComponentsTest, Modes) {
+  RunFile({"components", "modes", "modes_test.js"});
+}
+
 TEST_F(ComponentsTest, WinRegistry) {
   RunFile({"components", "win_registry", "win_registry_test.js"});
 }

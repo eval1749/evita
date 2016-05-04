@@ -4,6 +4,7 @@
 
 goog.scope(function() {
 
+/** @constructor */
 const Mode = modes.Mode;
 
 Mode.registerExtension('asdl', 'xml', 'ASDL Document');

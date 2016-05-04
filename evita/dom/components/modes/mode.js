@@ -31,7 +31,8 @@ const staticDocumentModeMap = new Map();
  * @return {string}
  */
 function getProperty(document, name) {
-  const value = document.properties.get(name);
+  /** @const @type {string|undefined} */
+  const value = /** @type {string|undefined} */ (document.properties.get(name));
   if (!value)
     return '';
   return /** @type {string} */ (value);

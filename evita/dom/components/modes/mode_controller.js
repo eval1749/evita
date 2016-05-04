@@ -4,6 +4,7 @@
 
 goog.scope(function() {
 
+/** @constructor */
 const Mode = modes.Mode;
 
 /** @param {!TextDocument} document */
@@ -53,7 +54,7 @@ class Controller extends SimpleTextDocumentSetObserver {
   didRemoveTextDocument(document) { document.mode = null; }
 }
 
-TextDocument.list.forEach(document => attachModeIfNeeded);
+TextDocument.list.forEach(attachModeIfNeeded);
 
 TextDocument.addObserver(new Controller());
 

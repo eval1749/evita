@@ -320,6 +320,7 @@ void AbstractDomTest::SetUp() {
   runner_.reset(runner);
   script_host_->set_testing_runner(runner);
   ginx::Runner::Scope runner_scope(runner);
+  DOM_AUTO_LOCK_SCOPE();
   Global::LoadGlobalScript(runner);
 }
 

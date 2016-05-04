@@ -13,6 +13,7 @@
 #include "base/i18n/icu_util.h"
 #include "base/logging.h"
 #include "base/path_service.h"
+#include "base/process/launch.h"
 #include "common/win/com_init.h"
 #include "common/win/native_window.h"
 #include "evita/base/resource/resource_bundle.h"
@@ -28,6 +29,15 @@ void InitFeatureList() {
   base::FeatureList::InitializeInstance(
       command_line.GetSwitchValueASCII("enable_features"),
       command_line.GetSwitchValueASCII("disable_features"));
+}
+
+void InitLogging() {
+  logging::LoggingSettings settings;
+  settings.logging_dest = logging::LOG_TO_SYSTEM_DEBUG_LOG;
+  logging::InitLogging(settings);
+  const auto& command_line = *base::CommandLine::ForCurrentProcess();
+  if (command_line.HasSwitch("enable_logging"))
+    base::RouteStdioToConsole(true);
 }
 
 void InitResoruce() {
@@ -54,11 +64,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
   base::i18n::InitializeICU();
   base::CommandLine::set_slash_is_not_a_switch();
   base::CommandLine::Init(0, nullptr);
-  {
-    logging::LoggingSettings settings;
-    settings.logging_dest = logging::LOG_TO_SYSTEM_DEBUG_LOG;
-    logging::InitLogging(settings);
-  }
+  InitLogging();
   InitFeatureList();
   common::win::NativeWindow::Init(hInstance);
   common::win::ComInit com_init;

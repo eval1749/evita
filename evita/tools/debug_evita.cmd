@@ -2,7 +2,7 @@
 call ..\setenv.cmd
 if "%outdir%"=="" goto no_outdir
 
-start devenv.exe /debugexe %outdir%\Debug\evita.exe --multiple --v=0
+start devenv.exe /debugexe %outdir%\Debug\evita.exe --enable_logging --multiple --v=0
 exit/b
 
 :no_outdir

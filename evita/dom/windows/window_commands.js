@@ -71,8 +71,6 @@ function openTextDocumentCommand() {
       });
 }
 Editor.bindKey(Window, 'Ctrl+O', openTextDocumentCommand);
-Editor.bindKey(
-    Window, 'Ctrl+U', components.commander.Commander.argumentCommand);
 
 /**
  * Close this window.

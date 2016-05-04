@@ -352,9 +352,6 @@
           'Move selection to right by words');
 
   Editor.bindKey(
-      TextWindow, 'Ctrl+Q', components.commander.Commander.quoteCommand);
-
-  Editor.bindKey(
       TextWindow, 'Ctrl+R',
       /**
        * Reload document

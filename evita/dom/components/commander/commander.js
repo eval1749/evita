@@ -364,6 +364,9 @@ class Commander {
   static quoteCommand() { Commander.instance.startQuote(); }
 }
 
+Editor.bindKey(TextWindow, 'Ctrl+Q', Commander.quoteCommand);
+Editor.bindKey(Window, 'Ctrl+U', Commander.argumentCommand);
+
 /** @const */
 components.commander.Commander = Commander;
 });

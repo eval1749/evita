@@ -16,6 +16,21 @@ function computeStartDirectory(window) {
 }
 
 /**
+ * @param {string} fileName
+ * @return {!TextDocument}
+ */
+function newTextFile(fileName) {
+  const absoluteFileName = FilePath.fullPath(fileName);
+  if (TextDocument.findFile(absoluteFileName))
+    throw new Error(`${fileName} already exists.`);
+  /** @const @type {!TextDocument} */
+  const document = TextDocument.new(FilePath.basename(fileName));
+  document.fileName = absoluteFileName;
+  document.dispatchEvent(new TextDocumentEvent(Event.Names.NEWFILE));
+  return document;
+}
+
+/**
  * @param {string} absoluteFileName
  * @return {!TextDocument}
  */
@@ -49,9 +64,7 @@ function newTextDocumentCommand(arg) {
 
   Editor.getFileNameForSave(this, computeStartDirectory(this))
       .then(function(fileName) {
-        /** @const @type {!TextDocument} */
-        const document = TextDocument.open(fileName);
-        windows.newTextWindow(editorWindow, document)
+        windows.newTextWindow(editorWindow, newTextFile(fileName));
       });
 }
 Editor.bindKey(Window, 'Ctrl+N', newTextDocumentCommand);
@@ -159,8 +172,7 @@ function newTextDocumentInNewWindowCommand(arg) {
 
   Editor.getFileNameForSave(this, computeStartDirectory(this))
       .then(function(fileName) {
-        const document = TextDocument.open(fileName);
-        windows.newEditorWindow(document);
+        windows.newEditorWindow(newTextFile(fileName));
       });
 }
 Editor.bindKey(Window, 'Ctrl+Shift+N', newTextDocumentInNewWindowCommand);

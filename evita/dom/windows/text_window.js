@@ -617,7 +617,6 @@ function updateStatusBar(window, stateText) {
   /** @const @type {!Array<string>} */
   const newTexts = [
     document.state === 0 ? stateText : DOCUMENT_STATE_TEXTS[document.state],
-    document.mode ? document.mode.name : '--',
     document.encoding ? document.encoding : 'n/a',
     NEWLINE_MODES[document.newline],
     'Ln ' + lineAndColumn.lineNumber,

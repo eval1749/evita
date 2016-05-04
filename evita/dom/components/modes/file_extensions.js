@@ -27,6 +27,7 @@ Mode.registerModeAlias('perl', 'Perl', 'python');
 
 Mode.registerExtension('asdl', 'xml', 'ASDL Document');
 Mode.registerExtension('bat', 'cmd', 'Windows Command Script');
+Mode.registerExtension('c', 'c++', 'C Source');
 Mode.registerExtension('cc', 'c++', 'C++ Source');
 Mode.registerExtension('cfg', 'config', 'Config File');
 Mode.registerExtension('cl', 'c++', 'CommonLisp Source');

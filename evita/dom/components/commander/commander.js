@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-goog.provide('components.commander');
-
 goog.scope(function() {
 /** @const @type {number} */ const MOD_ALT = 0x800;
 /** @const @type {number} */ const MOD_CTRL = 0x200;
@@ -364,9 +362,22 @@ class Commander {
   static quoteCommand() { Commander.instance.startQuote(); }
 }
 
+/**
+ * @param {!KeyboardEvent} event
+ */
+function handleKeyboardEvent(event) {
+  if (event.type !== Event.Names.KEYDOWN)
+    return;
+  const target = /** @type {!Window} */ (event.target);
+  Commander.instance.execute(target, event.keyCode);
+}
+
+Object.defineProperty(
+    Window, 'handleKeyboardEvent', {value: handleKeyboardEvent});
+
 Editor.bindKey(TextWindow, 'Ctrl+Q', Commander.quoteCommand);
 Editor.bindKey(Window, 'Ctrl+U', Commander.argumentCommand);
 
-/** @const */
-components.commander.Commander = Commander;
+// Expose in 'global' for debugging.
+global['Commander'] = Commander;
 });

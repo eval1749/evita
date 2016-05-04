@@ -7,6 +7,9 @@ interface Window : ViewEventTarget {
 
   [ImplementedAs = JavaScript] static void handleEvent(Event event);
 
+  [ImplementedAs = JavaScript] static void handleKeyboardEvent(
+      KeyboardEvent event);
+
   [ImplementedAs = child_windows] readonly attribute Window[] children;
 
   // Window bounds in client coordinate is represented by

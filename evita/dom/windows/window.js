@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(eval1749): We should get rid of dependency to 'commander'.
-goog.require('components.commander');
-
 goog.scope(function() {
 
 /** @type {string} */
@@ -13,13 +10,7 @@ Window.prototype.status_;
 /** @type {boolean} */
 Window.prototype.visible_;
 
-/**
- * @param {!KeyboardEvent} event
- */
-function handleKeyDown(event) {
-  const target = /** @type {!Window} */ (event.target);
-  components.commander.Commander.instance.execute(target, event.keyCode);
-}
+// See "//evita/dom/global/commander.js" for |Window.handleKeyboardEvent()|.
 
 /**
  * Default event handler.
@@ -33,7 +24,7 @@ function handleEvent(event) {
       this.visible_ = false;
       return;
     case Event.Names.KEYDOWN:
-      return handleKeyDown(/** @type {!KeyboardEvent} */ (event));
+      return Window.handleKeyboardEvent(/** @type {!KeyboardEvent} */ (event));
     case Event.Names.SHOW:
       this.visible_ = true;
       return;
@@ -62,7 +53,9 @@ function statusSet(newStatus) {
  * @this {!Window}
  * @return {boolean}
  */
-function getVisible() { return this.visible_; }
+function getVisible() {
+  return this.visible_;
+}
 
 Object.defineProperties(Window, {handleEvent: {value: handleEvent}});
 

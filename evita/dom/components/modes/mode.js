@@ -4,7 +4,7 @@
 
 goog.provide('modes');
 
-goog.require('highlights.HighlightEngine');
+goog.require('highlights');
 
 goog.scope(function() {
 
@@ -285,8 +285,3 @@ class Mode {
 /** @constructor */
 modes.Mode = Mode;
 });
-
-/** @typedef {modes.Mode} */
-var Mode;
-
-global['Mode'] = modes.Mode;

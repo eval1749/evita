@@ -9,12 +9,14 @@ js_library("components") {
     "${target_out_dir}/dynamic_abbrev/dynamic_abbrev.jsobj",
     "${target_out_dir}/find_and_replace/find_and_replace.jsobj",
     "${target_out_dir}/launchpad/launchpad.jsobj",
+    "${target_out_dir}/modes/modes.jsobj",
     "${target_out_dir}/spell_checker/spell_checker.jsobj",
   ]
   deps = [
     "dynamic_abbrev",
     "find_and_replace",
     "launchpad",
+    "modes",
     "spell_checker",
   ]
 }

@@ -5,11 +5,14 @@
 goog.require('dynamic_abbrev');
 goog.require('find_and_replace');
 goog.require('launchpad');
+goog.require('modes');
 goog.require('spell_checker');
 
 goog.scope(function() {
 
 const SpellChecker = spell_checker.SpellChecker;
+
+modes.Mode.registerExtension('e', 'c#');
 
 [
     // A
@@ -113,8 +116,6 @@ const SpellChecker = spell_checker.SpellChecker;
     'gfx::Canvas', 'gfx::ColorF', 'gfx::Canvas::DrawingScope', 'gfx::Point',
     'gfx::PointF', 'gfx::Rect', 'gfx::RectF', 'gfx::Size', 'gfx::SizeF',
 ].forEach((keyword) => { CppLexer.addKeyword(keyword); });
-
-Mode.registerExtension('e', 'c#');
 
 // Report spell checker progress
 Editor.bindKey(TextWindow, 'Ctrl+Shift+M', function() {

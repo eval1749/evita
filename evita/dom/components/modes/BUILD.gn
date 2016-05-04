@@ -1,3 +1,21 @@
 # Copyright (c) 2015 Project Vogue. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
+
+import("//evita/build/js_module.gni")
+
+js_module("modes") {
+  # Note: To avoid alphabetical sort of |sources| by "gn format", we use
+  # auxiliary variable to |file| to keep file order in module object file.
+  files = [
+    "mode.js",
+    "mode_controller.js",
+    "modes.js",
+    "file_extensions.js",
+  ]
+  sources = files
+  externs = [
+    "//evita/dom/text/simple_text_document_set_observer_externs.js",
+    "//evita/dom/components/highlights/highlights_externs.js",
+  ]
+}

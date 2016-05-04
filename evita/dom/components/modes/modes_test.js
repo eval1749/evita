@@ -2,9 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+goog.require('modes');
 goog.require('testing');
 
 goog.scope(function() {
+
+const Mode = modes.Mode;
 
 function modeFromProperty(mode_name) {
   const doc = new TextDocument();

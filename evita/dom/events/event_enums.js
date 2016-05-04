@@ -29,6 +29,7 @@ Event.Names = {
   MOUSELEAVE: 'mouseleave',
   MOUSEMOVE: 'mousemove',
   MOUSEUP: 'mouseup',
+  NEWFILE: 'newfile',  // TextDocumentEvent
   QUERYCLOSE: 'queryclose',
   REALIZE: 'realize',
   REMOVE: 'remove',

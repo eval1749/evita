@@ -15,6 +15,8 @@ class Observer extends SimpleTextDocumentSetObserver {
   didAddTextDocument(document) {
     document.addEventListener(
         Event.Names.LOAD, this.didLoadTextDocument.bind(document));
+    document.addEventListener(
+        Event.Names.NEWFILE, this.didNewFileTextDocument.bind(document));
   }
 
   /**
@@ -35,6 +37,14 @@ class Observer extends SimpleTextDocumentSetObserver {
     Editor.messageBox(
         null, `Change mode to ${newMode.name}`, MessageBox.ICONINFORMATION);
     document.mode = /** @type {Mode} */ (newMode);
+  }
+
+  /**
+   * @this {!TextDocument}
+   */
+  didNewFileTextDocument() {
+    this.mode = Mode.chooseModeByFileName(this.fileName);
+    TextDocument.applyTemplate(this);
   }
 
   /** @param {!TextDocument} document */

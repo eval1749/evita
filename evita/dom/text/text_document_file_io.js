@@ -65,7 +65,7 @@ function open(fileName) {
     return present;
   const document = TextDocument.new(FilePath.basename(fileName));
   document.fileName = absoluteFileName;
-  document.mode = Mode.chooseModeByFileName(fileName);
+  document.dispatchEvent(new TextDocumentEvent(Event.Names.NEWFILE));
   return document;
 }
 

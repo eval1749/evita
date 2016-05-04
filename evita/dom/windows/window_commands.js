@@ -51,7 +51,6 @@
     Editor.getFileNameForSave(this, computeStartDirectory(this))
         .then(function(fileName) {
           const document = TextDocument.open(fileName);
-          TextDocument.applyTemplate(document);
           windows.newTextWindow(editorWindow, document)
         });
   }

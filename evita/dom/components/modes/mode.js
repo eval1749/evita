@@ -25,6 +25,12 @@ const staticIdMap = new Map();
 /** @const @type {!Map<!TextDocument, !Mode>} */
 const staticDocumentModeMap = new Map();
 
+/** @typedef {string|function(!TextDocument):string} */
+var TextDocumentTemplate;
+
+/** @const @type {!Map.<string, !TextDocumentTemplate>} */
+const staticTemplateMap = new Map();
+
 /**
  * @param {!TextDocument} document
  * @param {string} name
@@ -206,6 +212,24 @@ class Mode {
 
   /**
    * @param {!TextDocument} document
+   */
+  static applyTemplate(document) {
+    /** @const @type {?Array<string>} */
+    const matches = (new RegExp('[.](.+)$')).exec(document.name);
+    if (matches === null)
+      return;
+    /** @const @type {?TextDocumentTemplate} */
+    const template = staticTemplateMap.get(matches[1]) || null;
+    if (!template)
+      return;
+    if (typeof(template) === 'string')
+      return document.replace(0, 0, template);
+    if (typeof(template) === 'function')
+      return document.replace(0, 0, template(document));
+  }
+
+  /**
+   * @param {!TextDocument} document
    * @param {string} modeId
    */
   static attach(document, modeId) {
@@ -280,6 +304,14 @@ class Mode {
    */
   static registerModeAlias(id, name, aliasId) {
     staticIdMap.set(id, new ModeDescription(aliasId, name));
+  }
+
+  /**
+   * @param {string} extension
+   * @param {!TextDocumentTemplate} template
+   */
+  static registerTemplate(extension, template) {
+    staticTemplateMap.set(extension, template);
   }
 }
 

@@ -47,7 +47,7 @@ class Controller extends SimpleTextDocumentSetObserver {
    */
   didNewFileTextDocument() {
     attachModeIfNeeded(this);
-    TextDocument.applyTemplate(this);
+    Mode.applyTemplate(this);
   }
 
   /** @param {!TextDocument} document */

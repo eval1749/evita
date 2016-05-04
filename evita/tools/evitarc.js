@@ -10,9 +10,10 @@ goog.require('spell_checker');
 
 goog.scope(function() {
 
+const Mode = modes.Mode;
 const SpellChecker = spell_checker.SpellChecker;
 
-modes.Mode.registerExtension('e', 'c#');
+Mode.registerExtension('e', 'c#');
 
 [
     // A
@@ -218,11 +219,11 @@ Editor.bindKey(TextWindow, 'Ctrl+Shift+M', function() {
         `}  // namespace ${namespace}\n` + '\n' + `#endif  // ${guard}\n`;
   }
 
-  TextDocument.addTemplate('cc', cppTemplateFor);
-  TextDocument.addTemplate('gn', copyrightTextSharp);
-  TextDocument.addTemplate('h', cheaderTemplateFor);
-  TextDocument.addTemplate('js', copyrightTextCxx);
-  TextDocument.addTemplate('py', pythonTemplate);
+  Mode.registerTemplate('cc', cppTemplateFor);
+  Mode.registerTemplate('gn', copyrightTextSharp);
+  Mode.registerTemplate('h', cheaderTemplateFor);
+  Mode.registerTemplate('js', copyrightTextCxx);
+  Mode.registerTemplate('py', pythonTemplate);
 })();
 
 //////////////////////////////////////////////////////////////////////

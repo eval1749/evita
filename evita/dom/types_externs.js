@@ -48,6 +48,8 @@ var RegExpMatch;
  */
 var Runnable;
 
+Runnable.prototype.run = function() {};
+
 /** @typedef {number} */
 var TextOffset;
 

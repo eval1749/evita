@@ -3,14 +3,11 @@
 // found in the LICENSE file.
 
 interface Window : ViewEventTarget {
-  [ImplementedAs=JavaScript]
-  static readonly attribute Window focus;
+  [ImplementedAs = JavaScript] static readonly attribute Window focus;
 
-  [ImplementedAs=JavaScript]
-  static void handleEvent(Event event);
+  [ImplementedAs = JavaScript] static void handleEvent(Event event);
 
-  [ImplementedAs=child_windows]
-  readonly attribute Window[] children;
+  [ImplementedAs = child_windows] readonly attribute Window[] children;
 
   // Window bounds in client coordinate is represented by
   //  * |clientLeft|, |clientTop| + |clientWidth| x |clientHeight|.
@@ -20,79 +17,61 @@ interface Window : ViewEventTarget {
   readonly attribute float clientWidth;
 
   // The first child window in child window list.
-  [ImplementedAs=first_child]
-  readonly attribute Window? firstChild;
+  [ImplementedAs = first_child] readonly attribute Window ? firstChild;
 
   // Focus tick count for internal use.
-  [ImplementedAs=JavaScript]
-  readonly attribute long focusTick_;
+  [ImplementedAs = JavaScript] readonly attribute long focusTick_;
 
-  [ImplementedAs=window_id]
-  readonly attribute long id;
+  [ImplementedAs = window_id] readonly attribute long id;
 
   // The Last child window in child window list.
-  [ImplementedAs=last_child]
-  readonly attribute Window? lastChild;
+  [ImplementedAs = last_child] readonly attribute Window ? lastChild;
 
   // Next sibling window in child window list.
-  [ImplementedAs=next_sibling]
-  readonly attribute Window? nextSibling;
+  [ImplementedAs = next_sibling] readonly attribute Window ? nextSibling;
 
   // A parent window
-  [ImplementedAs=parent_window]
-  readonly attribute Window? parent;
+  [ImplementedAs = parent_window] readonly attribute Window ? parent;
 
   // Previous sibling window in child window list.
-  [ImplementedAs=previous_sibling]
-  readonly attribute Window? previousSibling;
+  [ImplementedAs = previous_sibling] readonly attribute Window
+      ? previousSibling;
   readonly attribute DOMString state;
 
-  [ImplementedAs=JavaScript]
-  attribute DOMString status;
+  [ImplementedAs = JavaScript] attribute DOMString status;
 
-  [ImplementedAs=JavaScript]
-  readonly attribute boolean visible;
+  [ImplementedAs = JavaScript] readonly attribute boolean visible;
 
   ////////////////////////////////////////////////////////////
   //
   // Operations
   //
-  [ImplementedAs=AddWindow, RaisesException]
-  void appendChild(Window newChild);
+  [ ImplementedAs = AddWindow, RaisesException ] void appendChild(
+      Window newChild);
 
-  [ImplementedAs=ChangeParentWindow, RaisesException]
-  void changeParent(Window newParent);
+  [ ImplementedAs = ChangeParentWindow, RaisesException ] void changeParent(
+      Window newParent);
 
-  [RaisesException]
-  void destroy();
+  [RaisesException] void destroy();
 
-  [RaisesException]
-  void focus();
+  [RaisesException] void focus();
 
-  [RaisesException]
-  void hide();
+  [RaisesException] void hide();
 
-  [RaisesException]
-  void realize();
+  [RaisesException] void realize();
 
-  [RaisesException]
-  void releaseCapture();
+  [RaisesException] void releaseCapture();
 
-  [ImplementedAs=RemoveWindow, RaisesException]
-  void removeChild(Window child);
+  [ ImplementedAs = RemoveWindow, RaisesException ] void removeChild(
+      Window child);
 
-  [RaisesException]
-  void setCapture();
+  [RaisesException] void setCapture();
 
-  [RaisesException]
-  void show();
+  [RaisesException] void show();
 
-  [RaisesException]
-  void splitHorizontally(Window newRightWindow);
+  [RaisesException] void splitHorizontally(Window newRightWindow);
 
-  [RaisesException]
-  void splitVertically(Window newBelowWindow);
+  [RaisesException] void splitVertically(Window newBelowWindow);
 
-  [RaisesException]
-  void update();
+  [RaisesException] void update();
 };

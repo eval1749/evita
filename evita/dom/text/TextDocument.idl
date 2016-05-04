@@ -2,167 +2,132 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-[
-    CustomConstructor()
-]
-interface TextDocument : EventTarget {
-    [ImplementedAs=JavaScript]
-    static void add(TextDocument document);
+[CustomConstructor()] interface TextDocument : EventTarget {
+  [ImplementedAs = JavaScript] static void add(TextDocument document);
 
-    [ImplementedAs=JavaScript]
-    static void addObserver(TextDocumentSetObserver observer);
+  [ImplementedAs = JavaScript] static void addObserver(
+      TextDocumentSetObserver observer);
 
-    [ImplementedAs=JavaScript]
-    static void addTemplate(DOMString type, Object template);
+  [ImplementedAs = JavaScript] static void addTemplate(DOMString type,
+                                                       Object template);
 
-    [ImplementedAs=JavaScript]
-    static void applyTemplate(TextDocument document);
+  [ImplementedAs = JavaScript] static void applyTemplate(TextDocument document);
 
-    [ImplementedAs=JavaScript]
-    static TextDocument? find(DOMString name);
+  [ImplementedAs = JavaScript] static TextDocument ? find(DOMString name);
 
-    [ImplementedAs=JavaScript]
-    static TextDocument? findFile(DOMString absoluteFileName);
+  [ImplementedAs = JavaScript] static TextDocument
+      ? findFile(DOMString absoluteFileName);
 
-    [ImplementedAs=JavaScript]
-    static readonly attribute TextDocument[] list;
+  [ImplementedAs = JavaScript] static readonly attribute TextDocument[] list;
 
-    [ImplementedAs=JavaScript]
-    static TextDocument new(DOMString name);
+  [ImplementedAs = JavaScript] static TextDocument new (DOMString name);
 
-    [ImplementedAs=JavaScript]
-    static TextDocument open(DOMString fileName);
+  [ImplementedAs = JavaScript] static TextDocument open(DOMString fileName);
 
-    [ImplementedAs=JavaScript]
-    static void remove(TextDocument document);
+  [ImplementedAs = JavaScript] static void remove(TextDocument document);
 
-    [ImplementedAs=JavaScript]
-    static void removeObserver(TextDocumentSetObserver observer);
+  [ImplementedAs = JavaScript] static void removeObserver(
+      TextDocumentSetObserver observer);
 
-    [ImplementedAs=JavaScript]
-    static void removeTemplate(DOMString type);
+  [ImplementedAs = JavaScript] static void removeTemplate(DOMString type);
 
-    [ImplementedAs=JavaScript]
-    attribute DOMString encoding;
+  [ImplementedAs = JavaScript] attribute DOMString encoding;
 
-    [ImplementedAs=JavaScript]
-    attribute DOMString fileName;
+  [ImplementedAs = JavaScript] attribute DOMString fileName;
 
-    [ImplementedAs=JavaScript]
-    attribute Keymap keymap;
+  [ImplementedAs = JavaScript] attribute Keymap keymap;
 
-    [ImplementedAs=JavaScript]
-    attribute Date lastStartTime_;
+  [ImplementedAs = JavaScript] attribute Date lastStartTime_;
 
-    [ImplementedAs=JavaScript]
-    attribute Date lastWriteTime;
+  [ImplementedAs = JavaScript] attribute Date lastWriteTime;
 
-    readonly attribute long length;
+  readonly attribute long length;
 
-    [ImplementedAs=JavaScript]
-    attribute Mode? mode;
+  [ImplementedAs = JavaScript] attribute Mode ? mode;
 
-    [ImplementedAs=JavaScript]
-    attribute boolean modified;
+  [ImplementedAs = JavaScript] attribute boolean modified;
 
-    [ImplementedAs=JavaScript]
-    readonly attribute DOMString name;
+  [ImplementedAs = JavaScript] readonly attribute DOMString name;
 
-    [ImplementedAs=JavaScript]
-    attribute long newline;
+  [ImplementedAs = JavaScript] attribute long newline;
 
-    [ImplementedAs=read_only]
-    attribute boolean _readonly;
+  [ImplementedAs = read_only] attribute boolean _readonly;
 
-    [ImplementedAs=revision]
-    readonly attribute boolean revision_;
+  [ImplementedAs = revision] readonly attribute boolean revision_;
 
-    [ImplementedAs=JavaScript]
-    attribute long state;
+  [ImplementedAs = JavaScript] attribute long state;
 
-    ////////////////////////////////////////////////////////////
-    //
-    // Operations
-    //
-    [ImplementedAs=JavaScript]
-    void bindKey(DOMString keyCombination, Object command);
+  ////////////////////////////////////////////////////////////
+  //
+  // Operations
+  //
+  [ImplementedAs = JavaScript] void bindKey(DOMString keyCombination,
+                                            Object command);
 
-    [ImplementedAs=charCodeAt, RaisesException]
-    long charCodeAt(TextOffset offset);
+  [ ImplementedAs = charCodeAt, RaisesException ] long charCodeAt(
+      TextOffset offset);
 
-    void clearUndo();
+  void clearUndo();
 
-    [ImplementedAs=JavaScript]
-    void close();
+  [ImplementedAs = JavaScript] void close();
 
-    [ImplementedAs=JavaScript]
-    long computeEndOf_(Unit unit, TextOffset offset);
+  [ImplementedAs = JavaScript] long computeEndOf_(Unit unit, TextOffset offset);
 
-    [ImplementedAs=JavaScript]
-    long computeMotion_(Unit unit, long count, TextOffset offset);
+  [ImplementedAs = JavaScript] long computeMotion_(Unit unit, long count,
+                                                   TextOffset offset);
 
-    [ImplementedAs=JavaScript]
-    long computeStartOf_(Unit unit, TextOffset offset);
+  [ImplementedAs = JavaScript] long computeStartOf_(Unit unit,
+                                                    TextOffset offset);
 
-    [ImplementedAs=JavaScript]
-    long computeWhile_(DOMString charSet, long count, TextOffset offset);
+  [ImplementedAs = JavaScript] long computeWhile_(DOMString charSet, long count,
+                                                  TextOffset offset);
 
-    [ImplementedAs=JavaScript]
-    void doColor_(long hint);
+  [ImplementedAs = JavaScript] void doColor_(long hint);
 
-    [ImplementedAs=EndUndoGroup]
-    void endUndoGroup_(DOMString name);
+  [ImplementedAs = EndUndoGroup] void endUndoGroup_(DOMString name);
 
-    [ImplementedAs=JavaScript]
-    void forceClose();
+  [ImplementedAs = JavaScript] void forceClose();
 
-    // {column: long, lineNumber: long}
-    [ImplementedAs=GetLineAndColumn, RaisesException]
-    LineAndColumn getLineAndColumn_(TextOffset offset);
+  // {column: long, lineNumber: long}
+  [ ImplementedAs = GetLineAndColumn, RaisesException ] LineAndColumn
+  getLineAndColumn_(TextOffset offset);
 
-    [ImplementedAs=JavaScript]
-    TextWindow[] listWindows();
+  [ImplementedAs = JavaScript] TextWindow[] listWindows();
 
-    [ImplementedAs=JavaScript]
-    Promise<long> load(optional DOMString fileName);
+  [ImplementedAs = JavaScript] Promise<long> load(optional DOMString fileName);
 
-    [ImplementedAs=Match]
-    RegExpMatch[] match_(RegularExpression regexp, TextOffset start,
-                         TextOffset end);
+  [ImplementedAs = Match] RegExpMatch[] match_(
+      RegularExpression regexp, TextOffset start, TextOffset end);
 
-    [ImplementedAs=JavaScript]
-    boolean needSave();
+  [ImplementedAs = JavaScript] boolean needSave();
 
-    long redo(TextOffset offset);
+  long redo(TextOffset offset);
 
-    [ImplementedAs=JavaScript]
-    static void renameTo(DOMString newName);
+  [ImplementedAs = JavaScript] static void renameTo(DOMString newName);
 
-    [RaisesException]
-    void replace(TextOffset start, TextOffset end, DOMString replacement);
+  [RaisesException] void replace(TextOffset start, TextOffset end,
+                                 DOMString replacement);
 
-    [ImplementedAs=JavaScript]
-    Promise<long> save(optional DOMString fileName);
+  [ImplementedAs = JavaScript] Promise<long> save(optional DOMString fileName);
 
-    DOMString slice(long start, optional long end);
+  DOMString slice(long start, optional long end);
 
-    [ImplementedAs=StartUndoGroup]
-    void startUndoGroup_(DOMString name);
+  [ImplementedAs = StartUndoGroup] void startUndoGroup_(DOMString name);
 
-    [ImplementedAs=spelling_at, RaisesException]
-    DOMString spellingAt(TextOffset offset);
+  [ ImplementedAs = spelling_at, RaisesException ] DOMString spellingAt(
+      TextOffset offset);
 
-    [RaisesException]
-    void setSpelling(TextOffset start, TextOffset end, long spelling);
+  [RaisesException] void setSpelling(TextOffset start, TextOffset end,
+                                     long spelling);
 
-    [ImplementedAs=style_at, RaisesException]
-    TextStyle styleAt(TextOffset offset);
+  [ ImplementedAs = style_at, RaisesException ] TextStyle styleAt(
+      TextOffset offset);
 
-    [RaisesException]
-    void setSyntax(TextOffset start, TextOffset end, DOMString syntax);
+  [RaisesException] void setSyntax(TextOffset start, TextOffset end,
+                                   DOMString syntax);
 
-    [ImplementedAs=syntax_at, RaisesException]
-    DOMString syntaxAt(TextOffset offset);
+  [ ImplementedAs = syntax_at, RaisesException ] DOMString syntaxAt(
+      TextOffset offset);
 
-    long undo(TextOffset offset);
+  long undo(TextOffset offset);
 };

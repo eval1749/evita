@@ -2,6 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//evita/build/js_test.gni")
 import("//testing/test.gni")
 
 source_set("text") {
@@ -23,21 +24,17 @@ source_set("text") {
   ]
 }
 
-source_set("test_files") {
-  testonly = true
+js_test("test_files") {
+  test_name = "text"
   sources = [
     "regular_expression_test.cc",
     "text_document_test.cc",
-    "text_position_test.cc",
     "text_range_test.cc",
   ]
 
   data = [
     "text_document_test.js",
     "text_mutation_observer_test.js",
-  ]
-
-  public_deps = [
-    "//evita/dom/testing:test_support",
+    "text_position_test.js",
   ]
 }

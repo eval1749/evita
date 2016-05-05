@@ -138,6 +138,7 @@ class Mode {
       throw new Error(this + ' is already attached to ' + this.document_);
     this.document_ = document;
     this.highlightEngine_ = HighlightEngine.createEngine(this.id, document);
+    this.highlightEngine_.didLoadTextDocument();
   }
 
   /**

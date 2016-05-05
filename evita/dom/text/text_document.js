@@ -167,9 +167,11 @@ function computeEndOf(unit, offset) {
  * @return {number}
  */
 function computeMotionBracket(document, count, offset) {
-  const position = new TextPosition(document, offset);
-  position.move(Unit.BRACKET, count);
-  return position.offset;
+  if (count === 0)
+    return count;
+  if (count > 0)
+    return text.findBracketForward(document, offset);
+  return text.findBracketBackward(document, offset);
 }
 
 /**

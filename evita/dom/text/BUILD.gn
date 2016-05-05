@@ -35,6 +35,5 @@ js_test("test_files") {
   data = [
     "text_document_test.js",
     "text_mutation_observer_test.js",
-    "text_position_test.js",
   ]
 }

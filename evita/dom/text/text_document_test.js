@@ -21,12 +21,11 @@ function testFindBracket(sample, direction) {
   if (typeof(actual) !== 'number')
     return actual.toString();
   if (actual > anchor) {
-    return text.substr(0, anchor) + '^' +
-        text.substr(anchor, actual - anchor) + '|' +
-        text.substr(actual);
+    return text.substr(0, anchor) + '^' + text.substr(anchor, actual - anchor) +
+        '|' + text.substr(actual);
   }
-  return text.substr(0, actual) + '|' +
-      text.substr(actual, anchor - actual) + '^' + text.substr(anchor);
+  return text.substr(0, actual) + '|' + text.substr(actual, anchor - actual) +
+      '^' + text.substr(anchor);
 }
 
 function highlight(document) {
@@ -82,42 +81,7 @@ function testFindBracketForward(t, sample, description = '') {
   t.expect(testFindBracket(sample, 1), description).toEqual(sample);
 }
 
-testing.test('TextPosition.findBacketForward', function(t) {
-  testFindBracketForward(t, '^(foo)| (bar)');
-  testFindBracketForward(t, '(^foo)| (bar)');
-  testFindBracketForward(t, '(f^oo)| (bar)');
-  testFindBracketForward(t, '(fo^o)| (bar)');
-  testFindBracketForward(t, '(foo^)| (bar)');
-  testFindBracketForward(t, '(foo)^ |(bar)');
-  testFindBracketForward(t, '(foo) ^(bar)|');
-
-  testFindBracketForward(
-      t, '}^ else |{ foo', 'bracket and others have different colors.');
-
-  testFindBracketForward(
-      t, '^(foo !bar)! baz)|', 'string is a different matching context.');
-  testFindBracketForward(
-      t, '!^(foo! bar) !baz)|!', 'string is a different matching context.');
-
-  testFindBracketForward(t, '^(foo #) bar)| baz', 'escape character in string');
-  testFindBracketForward(
-      t, '^(foo ##)| bar) baz', 'escaped escape character in string');
-
-  testFindBracketForward(
-      t, '|^(foo] bar',
-      'we should stop mismatched bracket to know mismatched bracket.');
-  testFindBracketForward(
-      t, '^{ if |(foo }',
-      'we should stop mismatched bracket to know mismatched bracket.');
-  testFindBracketForward(
-      t, '{ if |^(foo }',
-      'we should stop mismatched bracket to know mismatched bracket.');
-
-  testFindBracketForward(t, '^((foo))|', 'skip nested bracket');
-  testFindBracketForward(t, '(^(foo)|)', 'inner bracket pair');
-});
-
-testing.test('TextPosition.findBacketBackward', function(t) {
+testing.test('TextDocument.findBacketBackward', function(t) {
   testBracketBackwardTest(t, '|^(foo) (bar)');
   testBracketBackwardTest(t, '|(^foo) (bar)');
   testBracketBackwardTest(t, '|(f^oo) (bar)');
@@ -154,6 +118,40 @@ testing.test('TextPosition.findBacketBackward', function(t) {
   testBracketBackwardTest(t, '|((foo))^', 'nested brackets');
 });
 
+testing.test('TextDocument.findBacketForward', function(t) {
+  testFindBracketForward(t, '^(foo)| (bar)');
+  testFindBracketForward(t, '(^foo)| (bar)');
+  testFindBracketForward(t, '(f^oo)| (bar)');
+  testFindBracketForward(t, '(fo^o)| (bar)');
+  testFindBracketForward(t, '(foo^)| (bar)');
+  testFindBracketForward(t, '(foo)^ |(bar)');
+  testFindBracketForward(t, '(foo) ^(bar)|');
+
+  testFindBracketForward(
+      t, '}^ else |{ foo', 'bracket and others have different colors.');
+
+  testFindBracketForward(
+      t, '^(foo !bar)! baz)|', 'string is a different matching context.');
+  testFindBracketForward(
+      t, '!^(foo! bar) !baz)|!', 'string is a different matching context.');
+
+  testFindBracketForward(t, '^(foo #) bar)| baz', 'escape character in string');
+  testFindBracketForward(
+      t, '^(foo ##)| bar) baz', 'escaped escape character in string');
+
+  testFindBracketForward(
+      t, '|^(foo] bar',
+      'we should stop mismatched bracket to know mismatched bracket.');
+  testFindBracketForward(
+      t, '^{ if |(foo }',
+      'we should stop mismatched bracket to know mismatched bracket.');
+  testFindBracketForward(
+      t, '{ if |^(foo }',
+      'we should stop mismatched bracket to know mismatched bracket.');
+
+  testFindBracketForward(t, '^((foo))|', 'skip nested bracket');
+  testFindBracketForward(t, '(^(foo)|)', 'inner bracket pair');
+});
 
 testing.test('TextDocument.replace', function(t) {
   const doc = new TextDocument();

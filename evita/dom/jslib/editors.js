@@ -9,7 +9,8 @@ goog.scope(function() {
 const Initializer = core.Initializer;
 
 function loadUserScript() {
-  var context = {
+  /** @const @type {{dirs: !Array<string>, scriptPath: string}} */
+  const context = {
     dirs: [
       Os.getenv('HOME'), Os.getenv('USERPROFILE'),
       Os.getenv('HOMEDRIVE') + Os.getenv('HOMEPATH')
@@ -20,6 +21,8 @@ function loadUserScript() {
     if (!context.dirs.length)
       return Promise.reject('none');
     context.scriptPath = FilePath.join(context.dirs.shift(), 'evitarc.js');
+    // TODO(eval1749): We should not use |repl.load()| or move |repl.load()|
+    // here.
     return repl.load(context.scriptPath, {verbose: true});
   }
   return tryLoad().catch(function(reason) {
@@ -30,7 +33,7 @@ function loadUserScript() {
 }
 
 /**
- * @param {!Array.<string>} args
+ * @param {!Array<string>} args
  */
 function processCommandLine(args) {
   /** @const @type {!EditorWindow} */
@@ -47,7 +50,7 @@ function processCommandLine(args) {
 }
 
 /**
- * @param {!Array.<string>} args
+ * @param {!Array<string>} args
  */
 function start(args) {
   Initializer.initialize();
@@ -57,6 +60,6 @@ function start(args) {
       .catch(value => processCommandLine(args));
 }
 
-/** @const @type {function(!Array.<string>)} */
+/** @const @type {function(!Array<string>)} */
 editors.start = start;
 });

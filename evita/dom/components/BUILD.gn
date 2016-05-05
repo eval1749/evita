@@ -3,6 +3,7 @@
 # found in the LICENSE file.
 
 import("//evita/build/js_library.gni")
+import("//evita/build/js_test.gni")
 
 js_library("components") {
   sources = [
@@ -25,10 +26,9 @@ js_library("components") {
   ]
 }
 
-source_set("test_files") {
-  testonly = true
+js_test("test_files") {
+  test_name = "components"
   sources = [
-    "components_test.cc",
     "repl/console_unittest.cc",
   ]
 
@@ -37,9 +37,5 @@ source_set("test_files") {
     "imaging/imaging_test.js",
     "modes/modes_test.js",
     "win_resource/win_resource_test.js",
-  ]
-
-  public_deps = [
-    "//evita/dom/testing:test_support",
   ]
 }

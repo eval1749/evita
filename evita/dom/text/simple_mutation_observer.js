@@ -33,9 +33,10 @@ class TextDocumentObserver {
     /** @const @type {!TextDocument} */
     this.document_ = document;
 
-    /** @type {!Set.<!SimpleMutationObserver>} */
-    this.observers_ = new Set();
+    /** @type {!Set<!SimpleMutationObserver>} */
+    this.clients_ = new Set();
 
+    /** @const @type {!TextMutationObserver} */
     this.observer_ =
         new TextMutationObserver(this.mutationCallback_.bind(this));
     this.startObserving_();
@@ -46,31 +47,20 @@ class TextDocumentObserver {
   }
 
   /**
-   * @param {!SimpleMutationObserver} observer
+   * @param {!SimpleMutationObserver} client
    */
-  add(observer) { this.observers_.add(observer); }
+  add(client) { this.clients_.add(client); }
 
+  /** @private */
   didLoadTextDocument_() {
     this.startObserving_();
-    for (let observer of this.observers_.values())
-      observer.didLoadTextDocument();
-  }
-
-  /**
-   * @param {!TextDocument} document
-   */
-  static getOrCreate(document) {
-    const observer = observerMap.get(document);
-    if (observer)
-      return observer;
-    const newObserver = new TextDocumentObserver(document);
-    observerMap.set(document, newObserver);
-    return newObserver;
+    for (const client of this.clients_.values())
+      client.didLoadTextDocument();
   }
 
   /**
    * @private
-   * @param {!Array.<!TextMutationRecord>} mutations
+   * @param {!Array<!TextMutationRecord>} mutations
    * @param {!TextMutationObserver} observer
    *
    * Resets hot offset to minimal changed offset and kicks word scanner.
@@ -78,34 +68,51 @@ class TextDocumentObserver {
   mutationCallback_(mutations, observer) {
     if (mutations.length === 0)
       return;
+    /** @const @type {!TextMutationRecord} */
     const mutation = mutations[0];
+    /** @const @type {number} */
     const headCount = mutation.headCount;
+    /** @const @type {number} */
     const tailCount = mutation.tailCount;
+    /** @const @type {number} */
     const delta = mutation.delta;
-    for (const observer of this.observers_.values())
-      observer.didChangeTextDocument(headCount, tailCount, delta);
+    for (const client of this.clients_.values())
+      client.didChangeTextDocument(headCount, tailCount, delta);
   }
 
   /**
-   * @param {!SimpleMutationObserver} observer
+   * @param {!SimpleMutationObserver} client
    */
-  remove(observer) { this.observers_.delete(observer); }
+  remove(client) { this.clients_.delete(client); }
 
   /** @private */
   startObserving_() { this.observer_.observe(this.document_, {summary: true}); }
 
-  /**
-   * @private
-   */
+  /** @private */
   willLoadTextDocument_() { this.observer_.disconnect(); }
+
+  /**
+   * @param {!TextDocument} document
+   * @return {!TextDocumentObserver}
+   */
+  static getOrCreate(document) {
+    /** @const @type {!TextDocumentObserver|undefined} */
+    const observer = observerMap.get(document);
+    if (observer)
+      return observer;
+    /** @const @type {!TextDocumentObserver} */
+    const newObserver = new TextDocumentObserver(document);
+    observerMap.set(document, newObserver);
+    return newObserver;
+  }
 }
 
-//////////////////////////////////////////////////////////////////////
-//
-// SimpleMutationObserverBase
-//
+/**
+ * @implements {SimpleMutationObserver}
+ */
 class SimpleMutationObserverBase {
   /**
+   * @protected
    * @param {!TextDocument} document
    */
   constructor(document) {
@@ -114,12 +121,36 @@ class SimpleMutationObserverBase {
     TextDocumentObserver.getOrCreate(document).add(this);
   }
 
-  /** @return {!TextDocument} */
+  /**
+   * @public
+   * @return {!TextDocument}
+   */
   get document() { return this.document_; }
 
-  didLoadTextDocument() {}
+  /**
+   * @public
+   * @param {number} headCount
+   * @param {number} tailCount
+   * @param {number} delta
+   */
+  didChangeTextDocument(headCount, tailCount, delta) {
+    /** @const @type {string} */
+    const name = this.constructor.name;
+    throw new Error(`${name} should implement didChangeTextDocument()`);
+  }
 
-  /*
+  /**
+   * @public
+   * Called by |TextDocumentObserver.protected.mutationCallback_()|.
+   */
+  didLoadTextDocument() {
+    /** @const @type {string} */
+    const name = this.constructor.name;
+    throw new Error(`${name} should implement didLoadTextDocument()`);
+  }
+
+  /**
+   * @public
    * implements text.SimpleMutationObserver.stopObserving()
    */
   stopObserving() {

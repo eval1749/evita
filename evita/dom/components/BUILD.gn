@@ -28,14 +28,11 @@ js_library("components") {
 
 js_test("test_files") {
   test_name = "components"
-  sources = [
-    "repl/console_unittest.cc",
-  ]
-
   data = [
     "highlights/highlights_test.js",
     "imaging/imaging_test.js",
     "modes/modes_test.js",
+    "repl/console_test.js",
     "win_resource/win_resource_test.js",
   ]
 }

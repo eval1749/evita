@@ -100,35 +100,6 @@ AbstractDomTest::RunnerDelegate::GetGlobalTemplate(ginx::Runner* runner) {
 void AbstractDomTest::RunnerDelegate::UnhandledException(
     ginx::Runner*,
     const v8::TryCatch& try_catch) {
-  base::string16 text;
-  auto const error = try_catch.Exception();
-  auto const message = try_catch.Message();
-  if (!message.IsEmpty()) {
-    text = base::StringPrintf(
-        L"Exception: %ls\n"
-        L"Source: %ls\n"
-        L"Source name: %ls(%d)\n",
-        V8ToString(error).c_str(), V8ToString(message->GetSourceLine()).c_str(),
-        V8ToString(message->GetScriptResourceName()).c_str(),
-        message->GetLineNumber());
-    auto const stack_trace = message->GetStackTrace();
-    if (!stack_trace.IsEmpty()) {
-      text += L"Stack trace:\n";
-      auto const length = static_cast<size_t>(stack_trace->GetFrameCount());
-      for (auto index = 0u; index < length; ++index) {
-        auto const frame = stack_trace->GetFrame(index);
-        text += base::StringPrintf(L"  at %ls (%ls(%d))\n",
-                                   V8ToString(frame->GetFunctionName()).c_str(),
-                                   V8ToString(frame->GetScriptName()).c_str(),
-                                   frame->GetLineNumber());
-      }
-    }
-  } else if (try_catch.HasTerminated()) {
-    text = L"Script execution is terminated.";
-  } else if (message.IsEmpty()) {
-    text = L"No details";
-  }
-  LOG(0) << text;
   test_instance_->exception_ =
       base::UTF16ToUTF8(V8ToString(try_catch.Exception()));
 }

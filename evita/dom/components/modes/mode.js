@@ -235,7 +235,7 @@ class Mode {
   static attach(document, modeId) {
     /** @const @type {?Mode} */
     const present = Mode.modeOf(document);
-    if (present && present.id == modeId)
+    if (present && present.id === modeId)
       return;
     if (present)
       present.willDetach();

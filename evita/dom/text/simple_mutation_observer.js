@@ -36,9 +36,13 @@ class TextDocumentObserver {
     /** @type {!Set<!SimpleMutationObserver>} */
     this.clients_ = new Set();
 
+    /** @type {boolean} */
+    this.connected_ = false;
+
     /** @const @type {!TextMutationObserver} */
     this.observer_ =
         new TextMutationObserver(this.mutationCallback_.bind(this));
+
     this.startObserving_();
     document.addEventListener(
         Event.Names.BEFORELOAD, this.willLoadTextDocument_.bind(this));
@@ -86,10 +90,20 @@ class TextDocumentObserver {
   remove(client) { this.clients_.delete(client); }
 
   /** @private */
-  startObserving_() { this.observer_.observe(this.document_, {summary: true}); }
+  startObserving_() {
+    if (this.connected_)
+      return;
+    this.observer_.observe(this.document_, {summary: true});
+    this.connected_ = true;
+  }
 
   /** @private */
-  willLoadTextDocument_() { this.observer_.disconnect(); }
+  willLoadTextDocument_() {
+    if (!this.connected_)
+      return;
+    this.observer_.disconnect();
+    this.connected_ = false;
+  }
 
   /**
    * @param {!TextDocument} document

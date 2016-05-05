@@ -12,8 +12,8 @@ function testFindBracket(sample, direction) {
   console.assert(anchor >= 0, `No ^ in sample "${sample}".`);
   const focus = sample.replace('^', '').indexOf(`|`);
   console.assert(focus >= 0, `No | in sample "${sample}".`);
-  const text = sample.replace(/[|^]/g, '') const quotedText =
-      text.replace(/[!]/g, '"').replace(/[#]/g, '\\');
+  const text = sample.replace(/[|^]/g, '');
+  const quotedText = text.replace(/[!]/g, '"').replace(/[#]/g, '\\');
   doc.replace(0, doc.length, quotedText);
   doc.setSyntax(0, doc.length, 'other');
   highlight(doc);

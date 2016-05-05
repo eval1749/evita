@@ -163,24 +163,32 @@ function moveForwardBracket(position) {
         bracketStack.push(new BracketMatchData(bracket, position.offset));
         break;
       case Bracket.Type.RIGHT:
-        if (!bracketStack.length) {
-          // We reach right bracket.
+        if (bracketStack.length === 0) {
+          // We reach right bracket before seeing left bracket:
+          //    ^...}
+          // Move to next of right bracket:
+          //    ^...}|
           position.move(Unit.CHARACTER);
           return;
         }
         /** @const @type {!BracketMatchData} */
         const lastBracket = bracketStack.pop();
-        if (lastBracket.data.pair !== position.charCode()) {
-          // We reach mismatched right bracket.
-          return;
-        }
-
-        if (!bracketStack.length) {
-          // We reach matched right bracket.
+        if (lastBracket.data.pair === position.charCode()) {
+          if (bracketStack.length > 0)
+            continue;
+          // We reach matched right bracket:
+          //    ^(...|)
+          // Move to next of right bracket:
+          //    ^(...)|
           position.move(Unit.CHARACTER);
           return;
         }
-        break;
+        // We reach nested mismatched right bracket:
+        //    ^{ if (foo ... |} or { if ^(foo ... |}
+        // Back to left bracket to know mismatched bracket:
+        //    ^{ if |(foo ... } or { if ^(foo ... |}
+        position.offset = lastBracket.offset;
+        return;
     }
   }
   if (bracketStack.length)

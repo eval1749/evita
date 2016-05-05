@@ -142,7 +142,15 @@ testing.test('TextPosition.findBacketForward', function(t) {
   testFindBracketForward(
       t, '^(foo ##)| bar) baz', 'escaped escape character in string');
 
-  testFindBracketForward(t, '^(foo|] bar', 'mismatched bracket');
+  testFindBracketForward(
+      t, '|^(foo] bar',
+      'we should stop mismatched bracket to know mismatched bracket.');
+  testFindBracketForward(
+      t, '^{ if |(foo }',
+      'we should stop mismatched bracket to know mismatched bracket.');
+  testFindBracketForward(
+      t, '{ if |^(foo }',
+      'we should stop mismatched bracket to know mismatched bracket.');
 
   testFindBracketForward(t, '^((foo))|', 'skip nested bracket');
   testFindBracketForward(t, '(^(foo)|)', 'inner bracket pair');

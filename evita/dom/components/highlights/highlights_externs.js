@@ -9,6 +9,7 @@ highlights.HighlightEngineCreator;
 
 /**
  * @constructor
+ * @extends {text.SimpleMutationObserverBase}
  * @param {!TextDocument} document
  * @param {!function(!TextDocument):!highlights.Painter} painterCreator
  * @param {!highlights.TokenStateMachine} stateMachine

@@ -15,6 +15,8 @@ js_module("modes") {
   ]
   sources = files
   externs = [
+    "//evita/dom/text/text_externs.js",
+    "//evita/dom/text/simple_mutation_observer_externs.js",
     "//evita/dom/text/simple_text_document_set_observer_externs.js",
     "//evita/dom/components/highlights/highlights_externs.js",
   ]

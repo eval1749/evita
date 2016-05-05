@@ -1,0 +1,71 @@
+# Copyright (c) 2016 Project Vogue. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Parameters
+#   data (required)
+#   deps (optional)
+#   sources (optional)
+#   test_name (optional, default is target_name)
+#
+# Example:
+#   js_test("components") {
+#     data = [
+#       "highlights/highlights_test.js",
+#       "imaging/imaging_test.js",
+#       "modes/modes_test.js",
+#       "win_resource/win_resource_test.js",
+#     ]
+#   }
+
+template("js_test") {
+  assert(defined(invoker.data),
+         "Need js_test in $target_name to specify input JS files.")
+
+  if (defined(invoker.test_name)) {
+    test_name = invoker.test_name
+  } else {
+    test_name = target_name
+  }
+
+  action("${test_name}_test_cc") {
+    visibility = [ ":*" ]
+    outputs = [
+      "${target_gen_dir}/${test_name}_test.cc",
+    ]
+    script = "//evita/build/scripts/make_js_test_cc.py"
+    inputs = [
+      script,
+      "//evita/build/templates/js_test.cc",
+    ]
+    response_file_contents = rebase_path(invoker.data, "..")
+    args = rebase_path(outputs) + [
+             test_name,
+             "{{response_file_name}}",
+           ]
+  }
+
+  source_set(target_name) {
+    testonly = true
+    sources = [
+      "${target_gen_dir}/${test_name}_test.cc",
+    ]
+
+    if (defined(invoker.sources)) {
+      sources += invoker.sources
+    }
+
+    data = invoker.data
+
+    deps = [
+      ":${test_name}_test_cc",
+    ]
+    if (defined(invoker.deps)) {
+      deps += invoker.deps
+    }
+
+    public_deps = [
+      "//evita/dom/testing:test_support",
+    ]
+  }
+}

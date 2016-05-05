@@ -6,6 +6,96 @@ goog.require('testing');
 
 goog.scope(function() {
 
+function testFindBracket(sample, direction) {
+  const doc = new TextDocument();
+  const anchor = sample.replace('|', '').indexOf('^');
+  console.assert(anchor >= 0, `No ^ in sample "${sample}".`);
+  const focus = sample.replace('^', '').indexOf(`|`);
+  console.assert(focus >= 0, `No | in sample "${sample}".`);
+  const text = sample.replace(/[|^]/g, '') const quotedText =
+      text.replace(/[!]/g, '"').replace(/[#]/g, '\\');
+  doc.replace(0, doc.length, quotedText);
+  doc.setSyntax(0, doc.length, 'other');
+  highlight(doc);
+  const pos = new TextPosition(doc, anchor);
+  pos.move(Unit.BRACKET, direction);
+  if (pos.offset > anchor) {
+    return text.substr(0, anchor) + '^' +
+        text.substr(anchor, pos.offset - anchor) + '|' +
+        text.substr(pos.offset);
+  }
+  return text.substr(0, pos.offset) + '|' +
+      text.substr(pos.offset, anchor - pos.offset) + '^' + text.substr(anchor);
+}
+
+function highlight(document) {
+  const pos = new TextPosition(document, 0);
+  const range = new TextRange(document);
+  let state = 'NORMAL';
+  let color = 0;
+  let charSyntax = 'other';
+
+  function finish(advance) {
+    range.end = pos.offset + advance;
+    if (!range.collapsed) {
+      range.setStyle({color: color});
+      range.setSyntax(charSyntax);
+    }
+    range.collapseTo(range.end);
+    state = 'NORMAL';
+    color = 0;
+    charSyntax = 'other';
+  }
+
+  for (; pos.offset < document.length; pos.move(Unit.CHARACTER)) {
+    const charCode = pos.charCode();
+    switch (state) {
+      case 'NORMAL':
+        if (charCode === Unicode.QUOTATION_MARK) {
+          finish(0);
+          state = 'STRING1';
+          color = 0x000080;
+          charSyntax = 'one';
+        } else if (charCode === Unicode.SOLIDUS) {
+          finish(0);
+          state = 'COMMENT_1';
+          color = 0x008000;
+          charSyntax = 'two';
+        } else if (
+            charCode === Unicode.LEFT_CURLY_BRACKET ||
+            charCode === Unicode.RIGHT_CURLY_BRACKET) {
+          finish(0);
+          color = 0;
+          charSyntax = 'three';
+          finish(1);
+          pos.move(Unit.CHARACTER);
+        }
+        break;
+      case 'COMMENT_1':
+        if (charCode === Unicode.SOLIDUS)
+          finish(1);
+        break;
+      case 'STRING1':
+        if (charCode === Unicode.QUOTATION_MARK)
+          finish(1);
+        else if (charCode === Unicode.REVERSE_SOLIDUS)
+          state = 'STRING1_ESCAPE';
+        break;
+      case 'STRING1_ESCAPE':
+        state = 'STRING1';
+        break;
+    }
+  }
+}
+
+function testBracketBackwardTest(t, sample, description = '') {
+  t.expect(testFindBracket(sample, -1), description).toEqual(sample);
+}
+
+function testFindBracketForward(t, sample, description = '') {
+  t.expect(testFindBracket(sample, 1), description).toEqual(sample);
+}
+
 testing.test('TextPosition.basic', function(t) {
   const doc = new TextDocument();
   doc.replace(0, doc.length, 'foo bar baz');
@@ -37,156 +127,68 @@ testing.test('TextPosition.move', function(t) {
   t.expect(pos.move(Unit.CHARACTER, -1).offset).toEqual(2);
 });
 
-testing.test('TextPosition.moveBracket', function(t) {
-  const doc = new TextDocument();
-  const range = new TextRange(doc);
+testing.test('TextPosition.findBacketForward', function(t) {
+  testFindBracketForward(t, '^(foo)| (bar)');
+  testFindBracketForward(t, '(^foo)| (bar)');
+  testFindBracketForward(t, '(f^oo)| (bar)');
+  testFindBracketForward(t, '(fo^o)| (bar)');
+  testFindBracketForward(t, '(foo^)| (bar)');
+  testFindBracketForward(t, '(foo)^ |(bar)');
+  testFindBracketForward(t, '(foo) ^(bar)|');
 
-  function testIt(sample, direction) {
-    range.start = 0;
-    range.end = doc.length;
-    var text =
-        sample.replace('^', '').replace(/[|]/g, '"').replace(/[#]/g, '\\');
-    range.text = text;
-    range.setSyntax('other');
-    highlight(doc);
-    var pos = new TextPosition(doc, sample.indexOf('^'));
-    pos.move(Unit.BRACKET, direction);
-    var text2 = text.replace(/\x22/g, '|').replace(/[\\]/g, '#');
-    return text2.substr(0, pos.offset) + '^' + text2.substr(pos.offset);
-  }
+  testFindBracketForward(
+      t, '}^ else |{ foo', 'bracket and others have different colors.');
 
-  function backward(sample) { return testIt(sample, -1); }
+  testFindBracketForward(
+      t, '^(foo !bar)! baz)|', 'string is a different matching context.');
+  testFindBracketForward(
+      t, '!^(foo! bar) !baz)|!', 'string is a different matching context.');
 
-  function forward(sample) { return testIt(sample, 1); }
+  testFindBracketForward(t, '^(foo #) bar)| baz', 'escape character in string');
+  testFindBracketForward(
+      t, '^(foo ##)| bar) baz', 'escaped escape character in string');
 
-  function highlight(document) {
-    var pos = new TextPosition(document, 0);
-    var range = new TextRange(document);
-    var state = 'NORMAL';
-    var color = 0;
-    var charSyntax = 'other';
+  testFindBracketForward(t, '^(foo|] bar', 'mismatched bracket');
 
-    function finish(advance) {
-      range.end = pos.offset + advance;
-      if (!range.collapsed) {
-        range.setStyle({color: color});
-        range.setSyntax(charSyntax);
-      }
-      range.collapseTo(range.end);
-      state = 'NORMAL';
-      color = 0;
-      charSyntax = 'other';
-    }
+  testFindBracketForward(t, '^((foo))|', 'skip nested bracket');
+  testFindBracketForward(t, '(^(foo)|)', 'inner bracket pair');
+});
 
-    for (; pos.offset < document.length; pos.move(Unit.CHARACTER)) {
-      var char_code = pos.charCode();
-      switch (state) {
-        case 'NORMAL':
-          if (char_code == Unicode.QUOTATION_MARK) {
-            finish(0);
-            state = 'STRING1';
-            color = 0x000080;
-            charSyntax = 'one';
-          } else if (char_code == Unicode.SOLIDUS) {
-            finish(0);
-            state = 'COMMENT_1';
-            color = 0x008000;
-            charSyntax = 'two';
-          } else if (
-              char_code == Unicode.LEFT_CURLY_BRACKET ||
-              char_code == Unicode.RIGHT_CURLY_BRACKET) {
-            finish(0);
-            color = 0;
-            charSyntax = 'three';
-            finish(1);
-            pos.move(Unit.CHARACTER);
-          }
-          break;
-        case 'COMMENT_1':
-          if (char_code == Unicode.SOLIDUS)
-            finish(1);
-          break;
-        case 'STRING1':
-          if (char_code == Unicode.QUOTATION_MARK)
-            finish(1);
-          else if (char_code == Unicode.REVERSE_SOLIDUS)
-            state = 'STRING1_ESCAPE';
-          break;
-        case 'STRING1_ESCAPE':
-          state = 'STRING1';
-          break;
-      }
-    }
-  }
-  // forward
-  t.expect(forward('^(foo) (bar)')).toEqual("(foo)^ (bar)");
-  t.expect(forward('(^foo) (bar)')).toEqual("(foo)^ (bar)");
-  t.expect(forward('(f^oo) (bar)')).toEqual("(foo)^ (bar)");
-  t.expect(forward('(fo^o) (bar)')).toEqual("(foo)^ (bar)");
-  t.expect(forward('(foo^) (bar)')).toEqual("(foo)^ (bar)");
-  t.expect(forward('(foo)^ (bar)')).toEqual("(foo) ^(bar)");
-  t.expect(forward('(foo) ^(bar)')).toEqual("(foo) (bar)^");
+testing.test('TextPosition.findBacketBackward', function(t) {
+  testBracketBackwardTest(t, '|^(foo) (bar)');
+  testBracketBackwardTest(t, '|(^foo) (bar)');
+  testBracketBackwardTest(t, '|(f^oo) (bar)');
+  testBracketBackwardTest(t, '|(fo^o) (bar)');
+  testBracketBackwardTest(t, '|(foo^) (bar)');
+  testBracketBackwardTest(t, '|(foo)^ (bar)');
+  testBracketBackwardTest(t, '(foo)| ^(bar)');
 
-  // bracket and others have different colors.
-  t.expect(forward('}^ else { foo')).toEqual("} else ^{ foo");
+  testBracketBackwardTest(
+      t, '}| else ^{ foo', 'bracket and others have different colors.');
 
-  // string is a different matching context.
-  t.expect(forward('^(foo |bar)| baz)')).toEqual("(foo |bar)| baz)^");
-  t.expect(forward('|^(foo| bar) |baz)|')).toEqual("|(foo| bar) |baz)^|");
+  testBracketBackwardTest(
+      t, '|(foo !(bar! baz)^', 'string is a different matching context.');
 
   // escape
-  t.expect(forward('^(foo #) bar) baz')).toEqual("(foo #) bar)^ baz");
-  t.expect(forward('^(foo ##) bar) baz')).toEqual("(foo ##)^ bar) baz");
+  testBracketBackwardTest(t, '|(foo #( bar)^ baz');
+  testBracketBackwardTest(t, '(foo ##|( bar)^ baz');
 
-  // mismatched
-  t.expect(forward('^(foo] bar')).toEqual("(foo^] bar");
+  testBracketBackwardTest(
+      t, '(foo]|^ bar', "We don't move caret for mismatched right bracket.");
+  testBracketBackwardTest(
+      t, '!|(foo! (bar !baz)^!',
+      "We don't care mismatched left bracket in different character syntax.");
 
-  // nested parenthesis
-  t.expect(forward('^((foo))')).toEqual("((foo))^");
-  t.expect(forward('(^(foo))')).toEqual("((foo)^)");
-
-  // backward
-  t.expect(backward('^(foo) (bar)')).toEqual("^(foo) (bar)");
-  t.expect(backward('(^foo) (bar)')).toEqual("^(foo) (bar)");
-  t.expect(backward('(f^oo) (bar)')).toEqual("^(foo) (bar)");
-  t.expect(backward('(fo^o) (bar)')).toEqual("^(foo) (bar)");
-  t.expect(backward('(foo^) (bar)')).toEqual("^(foo) (bar)");
-  t.expect(backward('(foo)^ (bar)')).toEqual("^(foo) (bar)");
-  t.expect(backward('(foo) ^(bar)')).toEqual("(foo)^ (bar)");
-
-  // bracket and others have different colors.
-  t.expect(backward('} else ^{ foo')).toEqual("}^ else { foo");
-
-  // string is a different matching context.
-  t.expect(backward('(foo |(bar| baz)^')).toEqual("^(foo |(bar| baz)");
-
-  // escape
-  t.expect(backward('(foo #( bar)^ baz')).toEqual("^(foo #( bar) baz");
-  t.expect(backward('(foo ##( bar)^ baz')).toEqual("(foo ##^( bar) baz");
-
-  // mismatched
-  t.expect(
-       backward('(foo]^ bar'),
-       "We don't move caret for mismatched right bracket.")
-      .toEqual("(foo]^ bar");
-
-  t.expect(
-       backward('|(foo| (bar |baz)^|'),
-       "We don't care mismatched left bracket in different character syntax.")
-
-      .toEqual("|^(foo| (bar |baz)|", "backward('|(foo| (bar |baz)^|')");
-
-  // nested parenthesis
-  t.expect(backward('^((foo))')).toEqual("^((foo))");
-  t.expect(backward('(^(foo))')).toEqual("^((foo))");
-  t.expect(backward('((^foo))')).toEqual("(^(foo))");
-  t.expect(backward('((f^oo))')).toEqual("(^(foo))");
-  t.expect(backward('((f^oo))')).toEqual("(^(foo))");
-  t.expect(backward('((fo^o))')).toEqual("(^(foo))");
-  t.expect(backward('((foo^))')).toEqual("(^(foo))");
-  t.expect(backward('((foo^))')).toEqual("(^(foo))");
-  t.expect(backward('((foo)^)')).toEqual("(^(foo))");
-  t.expect(backward('((foo))^')).toEqual("^((foo))");
+  testBracketBackwardTest(t, '|^((foo))', 'nested brackets');
+  testBracketBackwardTest(t, '|(^(foo))', 'nested brackets');
+  testBracketBackwardTest(t, '(|(^foo))', 'nested brackets');
+  testBracketBackwardTest(t, '(|(f^oo))', 'nested brackets');
+  testBracketBackwardTest(t, '(|(f^oo))', 'nested brackets');
+  testBracketBackwardTest(t, '(|(fo^o))', 'nested brackets');
+  testBracketBackwardTest(t, '(|(foo^))', 'nested brackets');
+  testBracketBackwardTest(t, '(|(foo^))', 'nested brackets');
+  testBracketBackwardTest(t, '(|(foo)^)', 'nested brackets');
+  testBracketBackwardTest(t, '|((foo))^', 'nested brackets');
 });
 
 testing.test('TextPosition.moveWhile', function(t) {

@@ -7,16 +7,16 @@ const LINE_COMMENT = '\x2F/';
 
 /**
  * @param {string} scriptPath
- * @param {!Object=} opt_options
+ * @param {!Object=} options
  * @return {!Promise}
  *
  * Options:
  *  encoding: string
  *  verbose: boolean
  */
-function load(scriptPath, opt_options) {
-  let options = opt_options ? /** @type{!Object} */ (opt_options) : {};
-  let encoding =
+function load(scriptPath, options = {}) {
+  /** @const @type {string} */
+  const encoding =
       options.encoding ? /** @type{string} */ (options.encoding) : 'utf-8';
   if (options.verbose)
     console.log(LINE_COMMENT, 'loading', scriptPath);
@@ -25,7 +25,7 @@ function load(scriptPath, opt_options) {
   return (async(function * () {
            file = yield Os.File.open(scriptPath);
            /** @type {number} */
-           let total_read = 0;
+           let totalRead = 0;
            /** @type {string} */
            let text = '';
            /** @type {!ArrayBufferView} */
@@ -33,18 +33,20 @@ function load(scriptPath, opt_options) {
            /** @type {!TextDecoder} */
            const decoder = new TextDecoder(encoding, {fatal: true});
            for (;;) {
-             let num_read = yield file.read(buffer);
-             if (num_read == 0)
+             /** @const @type {number} */
+             const numRead = yield file.read(buffer);
+             if (numRead === 0)
                break;
-             text += decoder.decode(buffer.subarray(0, num_read));
-             total_read += num_read;
+             text += decoder.decode(buffer.subarray(0, numRead));
+             totalRead += numRead;
            }
            file.close();
            file = null;
            text = text.replace(/\r\n/g, '\n');
            if (options.verbose)
-             console.log(LINE_COMMENT, 'loaded', scriptPath, total_read);
-           let result = Editor.runScript(text, scriptPath);
+             console.log(LINE_COMMENT, 'loaded', scriptPath, totalRead);
+           /** @const @type {!RunScriptResult} */
+           const result = Editor.runScript(text, scriptPath);
            if (result.exception instanceof SyntaxError) {
              const syntaxError = result.exception + '; ' + scriptPath + '(' +
                  result.lineNumber + ':' + result.startColumn + ':' +

@@ -33,10 +33,10 @@ template("js_test") {
     outputs = [
       "${target_gen_dir}/${test_name}_test.cc",
     ]
-    script = "//evita/build/scripts/make_js_test_cc.py"
+    script = "//evita/dom/testing/scripts/make_js_test_cc.py"
     inputs = [
       script,
-      "//evita/build/templates/js_test.cc",
+      "//evita/dom/testing/templates/js_test.cc",
     ]
     response_file_contents = rebase_path(invoker.data, "..")
     args = rebase_path(outputs) + [

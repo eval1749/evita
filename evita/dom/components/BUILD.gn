@@ -3,7 +3,7 @@
 # found in the LICENSE file.
 
 import("//evita/build/js_library.gni")
-import("//evita/build/js_test.gni")
+import("//evita/dom/testing/js_test.gni")
 
 js_library("components") {
   sources = [

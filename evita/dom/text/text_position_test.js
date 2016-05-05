@@ -10,7 +10,7 @@ function testFindBracket(sample, direction) {
   const doc = new TextDocument();
   const anchor = sample.replace('|', '').indexOf('^');
   console.assert(anchor >= 0, `No ^ in sample "${sample}".`);
-  const focus = sample.replace('^', '').indexOf(`|`);
+  const focus = sample.replace('^', '').indexOf('|');
   console.assert(focus >= 0, `No | in sample "${sample}".`);
   const text = sample.replace(/[|^]/g, '');
   const quotedText = text.replace(/[!]/g, '"').replace(/[#]/g, '\\');
@@ -19,6 +19,8 @@ function testFindBracket(sample, direction) {
   highlight(doc);
   const pos = new TextPosition(doc, anchor);
   pos.move(Unit.BRACKET, direction);
+  if (typeof(pos.offset) !== 'number')
+    return pos.offset.toString();
   if (pos.offset > anchor) {
     return text.substr(0, anchor) + '^' +
         text.substr(anchor, pos.offset - anchor) + '|' +
@@ -61,14 +63,6 @@ function highlight(document) {
           state = 'COMMENT_1';
           color = 0x008000;
           charSyntax = 'two';
-        } else if (
-            charCode === Unicode.LEFT_CURLY_BRACKET ||
-            charCode === Unicode.RIGHT_CURLY_BRACKET) {
-          finish(0);
-          color = 0;
-          charSyntax = 'three';
-          finish(1);
-          pos.move(Unit.CHARACTER);
         }
         break;
       case 'COMMENT_1':

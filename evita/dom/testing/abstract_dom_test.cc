@@ -23,6 +23,7 @@
 #include "evita/dom/lock.h"
 #include "evita/dom/scheduler/scheduler.h"
 #include "evita/dom/script_host.h"
+#include "evita/dom/testing/gmock.h"
 #include "evita/dom/testing/gtest.h"
 #include "evita/dom/testing/mock_io_delegate.h"
 #include "evita/dom/testing/mock_view_impl.h"
@@ -91,7 +92,12 @@ AbstractDomTest::RunnerDelegate::GetGlobalTemplate(ginx::Runner* runner) {
   auto const context = v8::Context::New(isolate);
   v8::Context::Scope context_scope(context);
   test_instance_->PopulateGlobalTemplate(isolate, templ);
-  GTest::Install(isolate, templ);
+
+  const auto testing_templ = v8::ObjectTemplate::New(isolate);
+  templ->Set(gin::StringToV8(isolate, "testing"), testing_templ);
+
+  GMock::Install(isolate, testing_templ);
+  GTest::Install(isolate, testing_templ);
   TestRunner::Install(isolate, templ);
   return templ;
 }

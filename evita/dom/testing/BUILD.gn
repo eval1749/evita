@@ -10,6 +10,8 @@ source_set("test_support") {
   sources = [
     "abstract_dom_test.cc",
     "abstract_dom_test.h",
+    "gmock.cc",
+    "gmock.h",
     "gtest.cc",
     "gtest.h",
     "mock_io_delegate.cc",

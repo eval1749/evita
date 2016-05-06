@@ -54,11 +54,8 @@ void Succeed(const std::string& name) {
 
 // Install testing.gtest
 
-
 void GTest::Install(v8::Isolate* isolate,
-                    v8::Local<v8::ObjectTemplate> global) {
-  const auto testing = v8::ObjectTemplate::New(isolate);
-  global->Set(gin::StringToV8(isolate, "testing"), testing);
+                    v8::Local<v8::ObjectTemplate> testing) {
   const auto& gtest = gin::ObjectTemplateBuilder(isolate)
                           .SetMethod("expectEqual", ExpectEqual)
                           .SetMethod("expectFalse", ExpectTrue)

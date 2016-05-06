@@ -119,6 +119,10 @@ Mode.registerExtension('e', 'c#');
     'gfx::PointF', 'gfx::Rect', 'gfx::RectF', 'gfx::Size', 'gfx::SizeF',
 ].forEach((keyword) => { HighlightEngine.keywordsFor('c++').add(keyword); });
 
+// JavaScript keywords
+['goog', 'goog.provide', 'goog.require', 'goog.scope', ].forEach(
+    (keyword) => { HighlightEngine.keywordsFor('javascript').add(keyword); });
+
 // Report spell checker progress
 Editor.bindKey(TextWindow, 'Ctrl+Shift+M', function() {
   const document = this.document;

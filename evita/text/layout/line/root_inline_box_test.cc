@@ -10,6 +10,7 @@
 #include "evita/text/layout/line/inline_box.h"
 #include "evita/text/layout/line/root_inline_box.h"
 #include "evita/text/layout/render_font_set.h"
+#include "evita/text/style/computed_style_builder.h"
 #include "evita/text/style/models/style.h"
 #include "gtest/gtest.h"
 
@@ -103,8 +104,8 @@ ComputedStyle CreateStyle() {
   css_style.set_font_size(10);
   css_style.set_font_style(css::FontStyle::Normal);
   css_style.set_text_decoration(css::TextDecoration::None);
-  auto const font = FontSet::GetFont(css_style, 'x');
-  return ComputedStyle(css_style, *font);
+  const auto& font = FontSet::GetFont(css_style, 'x');
+  return ComputedStyle::Builder().Load(css_style, *font).Build();
 }
 
 float LineBuilder::WidthOf(const base::string16& text) const {

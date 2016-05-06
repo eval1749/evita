@@ -29,6 +29,7 @@
 #include "evita/text/layout/render_selection.h"
 #include "evita/text/models/spelling.h"
 #include "evita/text/style/computed_style.h"
+#include "evita/text/style/computed_style_builder.h"
 
 namespace layout {
 
@@ -62,10 +63,6 @@ const gfx::Font* GetFont(const css::Style& style) {
   return FontSet::GetFont(style, 'x');
 }
 
-ComputedStyle GetComputedStyle(const css::Style& style) {
-  return ComputedStyle(style, *GetFont(style));
-}
-
 base::char16 IntToHex(int k) {
   DCHECK_GE(k, 0);
   DCHECK_LE(k, 15);
@@ -74,9 +71,13 @@ base::char16 IntToHex(int k) {
   return static_cast<base::char16>(k - 10 + 'A');
 }
 
-ComputedStyle MakeComputedStyle(const css::Style& style,
+ComputedStyle MakeComputedStyle(const css::Style& model,
                                 const gfx::Font& font) {
-  return ComputedStyle(style, font);
+  return ComputedStyle::Builder().Load(model, font).Build();
+}
+
+ComputedStyle MakeComputedStyle(const css::Style& style) {
+  return MakeComputedStyle(style, *GetFont(style));
 }
 
 }  // namespace
@@ -192,7 +193,7 @@ TextFormatter::TextFormatter(const text::Buffer& text_buffer,
                              const gfx::RectF& bounds,
                              float zoom)
     : bounds_(bounds),
-      default_computed_style_(GetComputedStyle(text_buffer.GetDefaultStyle())),
+      default_computed_style_(MakeComputedStyle(text_buffer.GetDefaultStyle())),
       line_start_(line_start),
       text_scanner_(new TextScanner(text_buffer)),
       zoom_(zoom) {

@@ -23,9 +23,9 @@ namespace layout {
 //
 class ComputedStyle {
  public:
-  ComputedStyle(const css::Style& values, const gfx::Font& font);
+  class Builder;
+
   ComputedStyle(const ComputedStyle& other);
-  ComputedStyle();
   ~ComputedStyle();
 
   bool operator==(const ComputedStyle& other) const;
@@ -38,6 +38,8 @@ class ComputedStyle {
   css::TextDecoration text_decoration() const { return text_decoration_; }
 
  private:
+  ComputedStyle();
+
   gfx::ColorF bgcolor_;
   gfx::ColorF color_;
   const gfx::Font* font_;

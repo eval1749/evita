@@ -14,12 +14,6 @@ gfx::ColorF ColorToColorF(const css::Color& color) {
                      static_cast<float>(color.blue()) / 255, color.alpha());
 }
 
-ComputedStyle::ComputedStyle(const css::Style& values, const gfx::Font& font)
-    : bgcolor_(ColorToColorF(values.bgcolor())),
-      color_(ColorToColorF(values.color())),
-      font_(&font),
-      text_decoration_(values.text_decoration()) {}
-
 ComputedStyle::ComputedStyle(const ComputedStyle& other)
     : bgcolor_(other.bgcolor_),
       color_(other.color_),

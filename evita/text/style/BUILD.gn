@@ -6,6 +6,8 @@ source_set("style") {
   sources = [
     "computed_style.cc",
     "computed_style.h",
+    "computed_style_builder.cc",
+    "computed_style_builder.h",
   ]
 
   deps = [

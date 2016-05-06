@@ -14,7 +14,7 @@
 #include "evita/dom/windows/window.h"
 #include "evita/gfx/canvas.h"
 #include "evita/gfx/color_f.h"
-#include "evita/layout/scroll_bar.h"
+#include "evita/text/layout/scroll_bar.h"
 #include "evita/ui/controls/scroll_bar_observer.h"
 #include "evita/visuals/display/public/display_item_list.h"
 

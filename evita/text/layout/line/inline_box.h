@@ -2,24 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_PAINT_PUBLIC_LINE_INLINE_BOX_H_
-#define EVITA_PAINT_PUBLIC_LINE_INLINE_BOX_H_
+#ifndef EVITA_TEXT_LAYOUT_LINE_INLINE_BOX_H_
+#define EVITA_TEXT_LAYOUT_LINE_INLINE_BOX_H_
 
 #include "base/macros.h"
 #include "evita/base/castable.h"
 #include "evita/gfx/rect.h"
-#include "evita/paint/public/line/inline_box_forward.h"
 #include "evita/text/layout/computed_style.h"
+#include "evita/text/layout/line/inline_box_forward.h"
+#include "evita/text/models/offset.h"
 
 namespace gfx {
 class Font;
 }
 
 namespace layout {
-class ComputedStyle;
-}
-
-namespace paint {
 
 enum class TextMarker {
   EndOfDocument,
@@ -28,15 +25,17 @@ enum class TextMarker {
   Tab,
 };
 
-#define DECLARE_PAINT_INLINE_BOX_CLASS(self, super) \
+class ComputedStyle;
+
+#define DECLARE_INLINE_BOX_CLASS(self, super) \
   DECLARE_CASTABLE_CLASS(self, super)
 
-#define DECLARE_PAINT_INLINE_BOX_ABSTRACT_CLASS(self, super) \
-  DECLARE_PAINT_INLINE_BOX_CLASS(self, super)
+#define DECLARE_INLINE_BOX_ABSTRACT_CLASS(self, super) \
+  DECLARE_INLINE_BOX_CLASS(self, super)
 
-#define DECLARE_PAINT_INLINE_BOX_FINAL_CLASS(self, super) \
-  DECLARE_PAINT_INLINE_BOX_CLASS(self, super)             \
- private:                                                 \
+#define DECLARE_INLINE_BOX_FINAL_CLASS(self, super) \
+  DECLARE_INLINE_BOX_CLASS(self, super)             \
+ private:                                           \
   void Accept(InlineBoxVisitor* visitor) final;
 
 //////////////////////////////////////////////////////////////////////
@@ -44,40 +43,44 @@ enum class TextMarker {
 // InlineBox
 //
 class InlineBox : public base::Castable<InlineBox> {
-  DECLARE_PAINT_INLINE_BOX_ABSTRACT_CLASS(InlineBox, Castable);
+  DECLARE_INLINE_BOX_ABSTRACT_CLASS(InlineBox, Castable);
 
  public:
-  using ComputedStyle = layout::ComputedStyle;
-
   virtual ~InlineBox();
 
+  float ascent() const { return height_ - descent_; }
   float descent() const { return descent_; }
+  text::OffsetDelta end() const { return end_; }
   float height() const { return height_; }
-  float line_height() const { return line_height_; }
+  float left() const { return left_; }
+  text::OffsetDelta start() const { return start_; }
   const ComputedStyle& style() const { return style_; }
-  float top() const;
   float width() const { return width_; }
 
   virtual void Accept(InlineBoxVisitor* visitor) = 0;
-  virtual InlineBox* Copy() const = 0;
-  virtual bool Equal(const InlineBox* pInlineBox) const;
-  virtual size_t Hash() const;
+
+  // Returns text offset at |point_x| in box local coordinate, or |start()|
+  // for negative |point_x|, or |end()| for |point_x| grater than or equal to
+  // |width()|. This function never return |text::OffsetDelta::Invalid()|.
+  virtual text::OffsetDelta HitTestPoint(float point_x) const;
+  virtual gfx::RectF HitTestTextPosition(text::OffsetDelta position,
+                                         float baseline) const = 0;
 
  protected:
   InlineBox(const ComputedStyle& style,
+            float left,
             float width,
             float height,
-            float descent,
-            float line_height,
-            float line_descent);
-
-  float line_descent() const { return line_descent_; }
+            text::OffsetDelta start,
+            text::OffsetDelta end,
+            float descent);
 
  private:
   const float descent_;
+  const text::OffsetDelta end_;
   const float height_;
-  const float line_descent_;
-  const float line_height_;
+  const float left_;
+  const text::OffsetDelta start_;
   const ComputedStyle style_;
   const float width_;
 
@@ -91,20 +94,20 @@ class InlineBox : public base::Castable<InlineBox> {
 // TODO(eval1749): We should use |LayoutBlockFlow|'s padding-left instead of
 // |InlineFillerBox|.
 class InlineFillerBox final : public InlineBox {
-  DECLARE_PAINT_INLINE_BOX_FINAL_CLASS(InlineFillerBox, InlineBox);
+  DECLARE_INLINE_BOX_FINAL_CLASS(InlineFillerBox, InlineBox);
 
  public:
   InlineFillerBox(const ComputedStyle& style,
+                  float left,
                   float width,
                   float height,
-                  float line_height,
-                  float line_descent);
+                  text::OffsetDelta offset);
   ~InlineFillerBox() final;
 
  private:
   // InlineBox
-  InlineBox* Copy() const final;
-
+  gfx::RectF HitTestTextPosition(text::OffsetDelta offset,
+                                 float baseline) const final;
   DISALLOW_COPY_AND_ASSIGN(InlineFillerBox);
 };
 
@@ -131,24 +134,27 @@ class WithFont {
 // InlineMarkerBox
 //
 class InlineMarkerBox final : public InlineBox, public WithFont {
-  DECLARE_PAINT_INLINE_BOX_FINAL_CLASS(InlineMarkerBox, InlineBox);
+  DECLARE_INLINE_BOX_FINAL_CLASS(InlineMarkerBox, InlineBox);
 
  public:
   InlineMarkerBox(const ComputedStyle& style,
+                  float left,
                   float width,
                   float height,
-                  TextMarker marker_name,
-                  float line_height,
-                  float line_descent);
-  ~InlineMarkerBox() final;
+                  text::OffsetDelta start,
+                  text::OffsetDelta end,
+                  TextMarker marker_name);
+  virtual ~InlineMarkerBox();
 
   TextMarker marker_name() const { return marker_name_; }
 
  private:
+  static text::OffsetDelta ComputeEndOffset(text::OffsetDelta offset,
+                                            TextMarker marker_name);
+
   // InlineBox
-  InlineBox* Copy() const final;
-  bool Equal(const InlineBox* pInlineBox) const final;
-  size_t Hash() const final;
+  gfx::RectF HitTestTextPosition(text::OffsetDelta offset,
+                                 float baseline) const final;
 
   const TextMarker marker_name_;
 
@@ -160,24 +166,24 @@ class InlineMarkerBox final : public InlineBox, public WithFont {
 // InlineTextBoxBase
 //
 class InlineTextBoxBase : public InlineBox, public WithFont {
-  DECLARE_PAINT_INLINE_BOX_ABSTRACT_CLASS(InlineTextBoxBase, InlineBox);
+  DECLARE_INLINE_BOX_ABSTRACT_CLASS(InlineTextBoxBase, InlineBox);
 
  public:
   const base::string16 characters() const { return characters_; }
 
  protected:
   InlineTextBoxBase(const ComputedStyle& style,
+                    float left,
                     float width,
                     float height,
-                    const base::string16& characters,
-                    float line_height,
-                    float line_descent);
+                    text::OffsetDelta start,
+                    text::OffsetDelta end,
+                    const base::string16& characters);
   ~InlineTextBoxBase() override;
 
  private:
   // InlineBox
-  bool Equal(const InlineBox* pInlineBox) const override;
-  size_t Hash() const override;
+  text::OffsetDelta HitTestPoint(float x) const override;
 
   const base::string16 characters_;
 
@@ -189,20 +195,21 @@ class InlineTextBoxBase : public InlineBox, public WithFont {
 // InlineTextBox
 //
 class InlineTextBox final : public InlineTextBoxBase {
-  DECLARE_PAINT_INLINE_BOX_FINAL_CLASS(InlineTextBox, InlineTextBoxBase);
+  DECLARE_INLINE_BOX_FINAL_CLASS(InlineTextBox, InlineTextBoxBase);
 
  public:
   InlineTextBox(const ComputedStyle& style,
+                float left,
                 float width,
                 float height,
-                const base::string16& characters,
-                float line_height,
-                float line_descent);
+                text::OffsetDelta start,
+                const base::string16& characters);
   ~InlineTextBox() final;
 
  private:
   // InlineBox
-  InlineBox* Copy() const final;
+  gfx::RectF HitTestTextPosition(text::OffsetDelta position,
+                                 float baseline) const final;
 
   DISALLOW_COPY_AND_ASSIGN(InlineTextBox);
 };
@@ -212,24 +219,26 @@ class InlineTextBox final : public InlineTextBoxBase {
 // InlineUnicodeBox
 //
 class InlineUnicodeBox final : public InlineTextBoxBase {
-  DECLARE_PAINT_INLINE_BOX_FINAL_CLASS(InlineUnicodeBox, InlineTextBoxBase);
+  DECLARE_INLINE_BOX_FINAL_CLASS(InlineUnicodeBox, InlineTextBoxBase);
 
  public:
   InlineUnicodeBox(const ComputedStyle& style,
+                   float left,
                    float width,
                    float height,
-                   const base::string16& characters,
-                   float line_height,
-                   float line_descent);
+                   text::OffsetDelta start,
+                   const base::string16& characters);
   ~InlineUnicodeBox() final;
 
  private:
   // InlineBox
-  InlineBox* Copy() const final;
+  text::OffsetDelta HitTestPoint(float x) const override;
+  gfx::RectF HitTestTextPosition(text::OffsetDelta offset,
+                                 float baseline) const final;
 
   DISALLOW_COPY_AND_ASSIGN(InlineUnicodeBox);
 };
 
-}  // namespace paint
+}  // namespace layout
 
-#endif  // EVITA_PAINT_PUBLIC_LINE_INLINE_BOX_H_
+#endif  // EVITA_TEXT_LAYOUT_LINE_INLINE_BOX_H_

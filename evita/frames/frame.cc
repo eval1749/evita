@@ -30,7 +30,7 @@
 #include "evita/gfx/dx_device.h"
 #include "evita/gfx/font.h"
 #include "evita/gfx/rect_conversions.h"
-#include "evita/layout/render_font_set.h"
+#include "evita/text/layout/render_font_set.h"
 #include "evita/ui/animation/animator.h"
 #include "evita/ui/compositor/root_layer.h"
 #include "evita/ui/events/event.h"

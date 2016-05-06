@@ -24,7 +24,7 @@ source_set("paint") {
 
   public_deps = [
     "//evita/gfx",
-    "//evita/layout",
     "//evita/paint/public",
+    "//evita/text/layout",
   ]
 }

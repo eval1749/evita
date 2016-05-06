@@ -36,6 +36,7 @@ class ScriptHost;
 class AbstractDomTest : public ::testing::Test {
  public:
   MockIoDelegate* mock_io_delegate() const { return mock_io_delegate_.get(); }
+  MockViewImpl* mock_view_impl() const { return mock_view_impl_.get(); }
 
   static AbstractDomTest* GetInstance();
 
@@ -84,7 +85,6 @@ class AbstractDomTest : public ::testing::Test {
 
   v8::Isolate* isolate() const;
   MockScheduler* mock_scheduler() const { return mock_scheduler_.get(); }
-  MockViewImpl* mock_view_impl() const { return mock_view_impl_.get(); }
   ginx::Runner* runner() const { return runner_.get(); }
   domapi::ViewEventHandler* view_event_handler() const;
 

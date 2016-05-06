@@ -33,7 +33,6 @@ class TextFormatterTest : public ::testing::Test {
   text::Buffer* buffer() const { return buffer_.get(); }
   text::MarkerSet* markers() const { return markers_.get(); }
 
-  ComputedStyle StyleAt(text::Offset offset) const;
   float WidthOf(const ComputedStyle& style, const base::string16& text) const;
 
  private:
@@ -45,15 +44,6 @@ class TextFormatterTest : public ::testing::Test {
 
 TextFormatterTest::TextFormatterTest()
     : buffer_(new text::Buffer()), markers_(new text::MarkerSet(*buffer_)) {}
-
-ComputedStyle TextFormatterTest::StyleAt(text::Offset offset) const {
-  auto style = buffer()->GetStyleAt(offset);
-  style.Merge(buffer()->GetDefaultStyle());
-  const auto sample =
-      offset < buffer()->GetEnd() ? buffer()->GetCharAt(offset) : 'x';
-  const auto font = FontSet::GetFont(style, sample);
-  return ComputedStyle::Builder().Load(style, *font).Build();
-}
 
 float TextFormatterTest::WidthOf(const ComputedStyle& style,
                                  const base::string16& text) const {

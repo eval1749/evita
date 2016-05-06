@@ -14,8 +14,8 @@
 #include "evita/dom/v8_strings.h"
 #include "evita/ginx/converter.h"
 #include "evita/ginx/runner.h"
-#include "evita/text/buffer.h"
-#include "evita/text/range.h"
+#include "evita/text/models/buffer.h"
+#include "evita/text/models/range.h"
 
 namespace dom {
 namespace internal {

@@ -14,8 +14,8 @@
 #include "evita/layout/line/root_inline_box.h"
 #include "evita/layout/line/root_inline_box_cache.h"
 #include "evita/layout/text_formatter.h"
-#include "evita/text/buffer.h"
-#include "evita/text/static_range.h"
+#include "evita/text/models/buffer.h"
+#include "evita/text/models/static_range.h"
 
 namespace layout {
 

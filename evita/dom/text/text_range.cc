@@ -6,9 +6,9 @@
 
 #include "evita/dom/bindings/exception_state.h"
 #include "evita/dom/text/text_document.h"
-#include "evita/text/buffer.h"
-#include "evita/text/offset.h"
-#include "evita/text/range.h"
+#include "evita/text/models/buffer.h"
+#include "evita/text/models/offset.h"
+#include "evita/text/models/range.h"
 
 namespace dom {
 

@@ -6,7 +6,7 @@
 #define EVITA_ISTRINGCURSOR_H_
 
 #include "base/strings/string16.h"
-#include "evita/text/offset.h"
+#include "evita/text/models/offset.h"
 
 struct IStringCursor {
   virtual bool CanMove(int count) = 0;

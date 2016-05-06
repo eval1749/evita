@@ -9,7 +9,7 @@
 #include "base/strings/string16.h"
 #include "evita/gc/member.h"
 #include "evita/ginx/scriptable.h"
-#include "evita/text/offset.h"
+#include "evita/text/models/offset.h"
 
 namespace dom {
 

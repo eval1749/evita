@@ -8,7 +8,7 @@
 #include "evita/dom/windows/text_window.h"
 #include "evita/gc/member.h"
 #include "evita/ginx/scriptable.h"
-#include "evita/text/selection_change_observer.h"
+#include "evita/text/models/selection_change_observer.h"
 
 namespace text {
 class Selection;

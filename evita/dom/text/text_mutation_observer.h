@@ -10,7 +10,7 @@
 
 #include "evita/ginx/scoped_persistent.h"
 #include "evita/ginx/scriptable.h"
-#include "evita/text/offset.h"
+#include "evita/text/models/offset.h"
 
 namespace dom {
 

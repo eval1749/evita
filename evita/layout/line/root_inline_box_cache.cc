@@ -9,8 +9,8 @@
 
 #include "base/trace_event/trace_event.h"
 #include "evita/layout/line/root_inline_box.h"
-#include "evita/text/buffer.h"
-#include "evita/text/static_range.h"
+#include "evita/text/models/buffer.h"
+#include "evita/text/models/static_range.h"
 
 namespace layout {
 

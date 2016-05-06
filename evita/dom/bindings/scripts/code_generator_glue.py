@@ -42,7 +42,7 @@ JS_INTERFACE_NAMES = {
     'Int8Array': 'gin/array_buffer.h',
     'Int16Array': 'gin/array_buffer.h',
     'Int32Array': 'gin/array_buffer.h',
-    'LineAndColumn': 'evita/text/buffer.h',
+    'LineAndColumn': 'evita/text/models/buffer.h',
     'Point': 'evita/dom/windows/point.h',
     'Rect': 'evita/dom/windows/rect.h',
     'Uint8Array': 'gin/array_buffer.h',

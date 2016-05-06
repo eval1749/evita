@@ -5,7 +5,7 @@
 
 #include "base/time/time.h"
 #include "evita/ginx/converter.h"
-#include "evita/text/buffer.h"
+#include "evita/text/models/buffer.h"
 
 namespace gin {
 

@@ -7,7 +7,7 @@
 
 #include "evita/editor/dom_lock.h"
 #include "evita/layout/block_flow.h"
-#include "evita/text/buffer.h"
+#include "evita/text/models/buffer.h"
 #include "gtest/gtest.h"
 
 namespace layout {

@@ -18,7 +18,7 @@
 #include "evita/dom/public/script_host_state.h"
 #include "evita/dom/public/switch_value.h"
 #include "evita/dom/public/window_id.h"
-#include "evita/text/offset.h"
+#include "evita/text/models/offset.h"
 
 // TODO(eval1749): We should not use DOM object in DOM API.
 namespace dom {

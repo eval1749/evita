@@ -12,8 +12,8 @@
 #include "evita/dom/windows/rect.h"
 #include "evita/dom/windows/scroll_bar.h"
 #include "evita/gc/member.h"
-#include "evita/text/buffer_mutation_observer.h"
-#include "evita/text/selection_change_observer.h"
+#include "evita/text/models/buffer_mutation_observer.h"
+#include "evita/text/models/selection_change_observer.h"
 #include "evita/ui/animation/animation_frame_handler.h"
 #include "evita/ui/controls/scroll_bar_observer.h"
 

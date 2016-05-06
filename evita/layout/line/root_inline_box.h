@@ -11,7 +11,7 @@
 
 #include "base/macros.h"
 #include "evita/gfx/rect_f.h"
-#include "evita/text/offset.h"
+#include "evita/text/models/offset.h"
 
 namespace layout {
 

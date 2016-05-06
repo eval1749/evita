@@ -1,74 +1,21 @@
-# Copyright 2015 Project Vogue. All rights reserved.
+# Copyright (c) 2016 Project Vogue. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 import("//testing/test.gni")
 
-source_set("text") {
-  sources = [
-    "buffer.cc",
-    "buffer.h",
-    "buffer_core.cc",
-    "buffer_core.h",
-    "buffer_mutation_observer.cc",
-    "buffer_mutation_observer.h",
-    "interval.cc",
-    "interval.h",
-    "interval_set.cc",
-    "interval_set.h",
-    "interval_set_observer.cc",
-    "interval_set_observer.h",
-    "line_number_cache.cc",
-    "line_number_cache.h",
-    "marker.cc",
-    "marker.h",
-    "marker_set.cc",
-    "marker_set.h",
-    "marker_set_observer.cc",
-    "marker_set_observer.h",
-    "offset.cc",
-    "offset.h",
-    "range.cc",
-    "range.h",
-    "range_base.cc",
-    "range_base.h",
-    "range_set.cc",
-    "range_set.h",
-    "range_set_base.cc",
-    "range_set_base.h",
-    "scoped_undo_group.cc",
-    "scoped_undo_group.h",
-    "selection.cc",
-    "selection.h",
-    "selection_change_observer.cc",
-    "selection_change_observer.h",
-    "static_range.cc",
-    "static_range.h",
-    "undo_stack.cc",
-    "undo_step.cc",
-  ]
-
-  public_deps = [
-    "//base",
-    "//common",
-    "//evita/base",
-    "//evita/css",
-    "//evita/text/encodings",
+group("text") {
+  deps = [
+    "models",
   ]
 }
 
 test("evita_text_tests") {
-  sources = [
-    "buffer_test.cc",
-    "marker_set_test.cc",
-    "range_test.cc",
-    "undo_stack_test.cc",
-  ]
-
   deps = [
     ":text",
     "//base/test:run_all_unittests",
     "//evita/css:tests",
     "//evita/text/encodings:tests",
+    "//evita/text/models:tests",
   ]
 }

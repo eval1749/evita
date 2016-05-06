@@ -15,9 +15,9 @@
 #include "evita/dom/text/text_document.h"
 #include "evita/dom/text/text_mutation_record.h"
 #include "evita/ginx/runner.h"
-#include "evita/text/buffer.h"
-#include "evita/text/buffer_mutation_observer.h"
-#include "evita/text/static_range.h"
+#include "evita/text/models/buffer.h"
+#include "evita/text/models/buffer_mutation_observer.h"
+#include "evita/text/models/static_range.h"
 
 namespace dom {
 

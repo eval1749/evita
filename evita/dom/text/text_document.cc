@@ -17,12 +17,12 @@
 #include "evita/dom/v8_strings.h"
 #include "evita/ginx/runner.h"
 #include "evita/metrics/time_scope.h"
-#include "evita/text/buffer.h"
-#include "evita/text/marker.h"
-#include "evita/text/marker_set.h"
-#include "evita/text/offset.h"
-#include "evita/text/spelling.h"
-#include "evita/text/static_range.h"
+#include "evita/text/models/buffer.h"
+#include "evita/text/models/marker.h"
+#include "evita/text/models/marker_set.h"
+#include "evita/text/models/offset.h"
+#include "evita/text/models/spelling.h"
+#include "evita/text/models/static_range.h"
 
 namespace dom {
 

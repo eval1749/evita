@@ -12,7 +12,7 @@
 #include "evita/layout/line/root_inline_box.h"
 #include "evita/layout/render_font_set.h"
 #include "evita/layout/text_formatter.h"
-#include "evita/text/buffer.h"
+#include "evita/text/models/buffer.h"
 #include "gtest/gtest.h"
 
 namespace layout {

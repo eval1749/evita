@@ -30,8 +30,8 @@
 #include "evita/paint/public/caret.h"
 #include "evita/paint/public/selection.h"
 #include "evita/paint/public/view.h"
-#include "evita/text/buffer.h"
-#include "evita/text/selection.h"
+#include "evita/text/models/buffer.h"
+#include "evita/text/models/selection.h"
 #include "evita/ui/base/selection_state.h"
 #include "evita/visuals/display/public/display_item_list.h"
 

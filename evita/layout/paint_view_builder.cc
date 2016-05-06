@@ -22,7 +22,7 @@
 #include "evita/paint/public/line/root_inline_box.h"
 #include "evita/paint/public/selection.h"
 #include "evita/paint/public/view.h"
-#include "evita/text/buffer.h"
+#include "evita/text/models/buffer.h"
 #include "evita/ui/animation/animatable_window.h"
 #include "evita/ui/base/ime/text_input_client.h"
 

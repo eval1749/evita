@@ -14,7 +14,7 @@
 #include "evita/dom/testing/mock_io_delegate.h"
 #include "evita/dom/testing/mock_view_impl.h"
 #include "evita/dom/text/text_document.h"
-#include "evita/text/buffer.h"
+#include "evita/text/models/buffer.h"
 #include "gmock/gmock.h"
 
 namespace dom {

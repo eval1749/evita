@@ -10,9 +10,9 @@
 #include "evita/dom/text/text_document.h"
 #include "evita/dom/text/text_range.h"
 #include "evita/dom/windows/text_window.h"
-#include "evita/text/offset.h"
-#include "evita/text/range.h"
-#include "evita/text/selection.h"
+#include "evita/text/models/offset.h"
+#include "evita/text/models/range.h"
+#include "evita/text/models/selection.h"
 
 namespace dom {
 

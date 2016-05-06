@@ -11,7 +11,7 @@
 #include "base/macros.h"
 #include "base/strings/string16.h"
 #include "evita/layout/computed_style.h"
-#include "evita/text/offset.h"
+#include "evita/text/models/offset.h"
 
 namespace layout {
 

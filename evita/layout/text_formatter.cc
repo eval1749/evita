@@ -15,10 +15,10 @@
 #include "evita/css/style_selector.h"
 #include "evita/gfx/direct2d_factory_win.h"
 #include "evita/gfx/font.h"
-#include "evita/text/buffer.h"
-#include "evita/text/interval.h"
-#include "evita/text/marker.h"
-#include "evita/text/marker_set.h"
+#include "evita/text/models/buffer.h"
+#include "evita/text/models/interval.h"
+#include "evita/text/models/marker.h"
+#include "evita/text/models/marker_set.h"
 // TODO(eval1749): We should have "evita/layout/public/text_marker.h" to avoid
 // include "inline_box.h" in "text_formatter.cc".
 #include "evita/layout/computed_style.h"
@@ -27,7 +27,7 @@
 #include "evita/layout/line/root_inline_box.h"
 #include "evita/layout/render_font_set.h"
 #include "evita/layout/render_selection.h"
-#include "evita/text/spelling.h"
+#include "evita/text/models/spelling.h"
 
 namespace layout {
 

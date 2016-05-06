@@ -27,7 +27,7 @@
 #include "evita/dom/windows/window_set.h"
 #include "evita/gc/local.h"
 #include "evita/ginx/runner.h"
-#include "evita/text/buffer.h"
+#include "evita/text/models/buffer.h"
 
 namespace dom {
 

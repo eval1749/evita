@@ -24,8 +24,6 @@ testing.test('windows.highlightMatchedBrackets', function(t) {
   const sample = new TextWindow(new TextRange(new TextDocument()));
   sample.document.replace(0, 0, ' (foo)');
 
-  console.log('Bracket.DATA', Bracket.DATA[0x28], Bracket.DATA[0x29]);
-
   // Move after right bracket
   sample.selection.range.collapseTo(6);
   windows.highlightMatchedBrackets(sample);

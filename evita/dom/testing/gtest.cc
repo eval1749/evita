@@ -45,18 +45,20 @@ void Log(gin::Arguments* args) {
   LOG(0) << message;
 }
 
-void Succeed() {
-  SUCCEED();
+void Succeed(const std::string& name) {
+  std::cout << "[          ]   JavaScript " << name << std::endl;
+  SUCCEED() << name;
 }
 
 }  // namespace
 
 // Install testing.gtest
+
+
 void GTest::Install(v8::Isolate* isolate,
                     v8::Local<v8::ObjectTemplate> global) {
   const auto testing = v8::ObjectTemplate::New(isolate);
   global->Set(gin::StringToV8(isolate, "testing"), testing);
-
   const auto& gtest = gin::ObjectTemplateBuilder(isolate)
                           .SetMethod("expectEqual", ExpectEqual)
                           .SetMethod("expectFalse", ExpectTrue)

@@ -29,5 +29,5 @@ gtest.expectTrue = function(condition, description) {};
  */
 gtest.fail = function(description) {};
 
-/** @return {void} */
-gtest.succeed = function() {};
+/** @param {name} */
+gtest.succeed = function(name) {};

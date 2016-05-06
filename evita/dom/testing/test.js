@@ -15,7 +15,7 @@ testing.gtest;
 /** @type {function(string)} */
 testing.gtest.fail;
 
-/** @type {function()} */
+/** @type {function(string)} */
 testing.gtest.succeed;
 
 function equals(object1, object2) {
@@ -157,7 +157,7 @@ function test(fixtureName, fixtureFunction) {
       testing.gtest.fail(fixture.asPrettyString());
     });
     if (succeeded)
-      testing.gtest.succeed();
+      testing.gtest.succeed(fixtureName);
     return;
   }
   errors.forEach(error => console.log(error));

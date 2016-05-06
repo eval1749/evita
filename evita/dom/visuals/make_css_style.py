@@ -6,7 +6,7 @@ from optparse import OptionParser
 import os
 import sys
 
-# SCRIPT_DIR = evita/dom/css
+# SCRIPT_DIR = evita/dom/visuals/css
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 ROOT_DIR = os.path.normpath(os.path.join(SCRIPT_DIR, os.pardir, os.pardir,
                                          os.pardir))

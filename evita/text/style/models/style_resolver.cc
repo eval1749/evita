@@ -137,6 +137,13 @@ StyleSheet* GetDefaultStyleSheet() {
     default_style_sheet.AddRule(StyleSelector::ime_active2(), style);
   }
 
+  // Bracket matching
+  {
+    Style style;
+    style.set_bgcolor(Color(238, 255, 65));
+    default_style_sheet.AddRule(base::AtomicString(L"bracket"), style);
+  }
+
   return &default_style_sheet;
 }
 }  // namespace

@@ -115,6 +115,7 @@ TextWindow.prototype.textCompositionRange;
 
 /**
  * @this {!TextWindow}
+ * @return {!TextWindow}
  */
 function cloneTextWindow() {
   return new TextWindow(this.selection.range);
@@ -181,7 +182,9 @@ function handleCompositionEvent(window, event) {
   range.text = event.data;
   // Decorate composition text.
   for (let span of event.spans) {
+    /** @const @type {number} */
     const start = span.start;
+    /** @const @type {number} */
     const end = span.end;
     if (start === end)
       continue;
@@ -372,29 +375,43 @@ function createOrGetRange(document, key) {
  * @param {!TextWindow} window
  */
 function highlightMatchedBrackets(window) {
-  /** @param {!TextRange} range */
+  /**
+   * @param {!TextRange} range
+   * @return {boolean}
+   */
   function isLeftBracket(range) {
     if (range.start == range.document.length)
       return false;
+    /** @const @type {!Bracket.Detail|undefined} */
     const leftBracket = Bracket.DATA[document.charCodeAt(range.start)];
-    return leftBracket && leftBracket.type === Bracket.Type.LEFT;
+    return !!leftBracket && leftBracket.type === Bracket.Type.LEFT;
   }
 
-  /** @param {!TextRange} range */
+  /**
+   * @param {!TextRange} range
+   * @return {boolean}
+   */
   function isRightBracket(range) {
     if (range.start === 0)
       return false;
+    /** @const @type {!Bracket.Detail|undefined} */
     const rightBracket = Bracket.DATA[document.charCodeAt(range.start - 1)];
-    return rightBracket && rightBracket.type === Bracket.Type.RIGHT;
+    return !!rightBracket && rightBracket.type === Bracket.Type.RIGHT;
   }
 
-  /** @param {!TextRange} range */
+  /**
+   * @param {!TextRange} range
+   * @return {boolean}
+   */
   function tryLeft(range) {
     range.moveEnd(Unit.BRACKET, 1);
     return !range.collapsed;
   }
 
-  /** @param {!TextRange} range */
+  /**
+   * @param {!TextRange} range
+   * @return {boolean}
+   */
   function tryRight(range) {
     range.moveStart(Unit.BRACKET, -1);
     return !range.collapsed;
@@ -409,6 +426,9 @@ function highlightMatchedBrackets(window) {
     window.setMarker(range.end - 1, range.end, marker);
   }
 
+  /**
+   * @param {!TextWindow} window
+   */
   function reportNoMatching(window) {
     window.status = Strings.IDS_NO_MATCHING_PAREN;
   }
@@ -594,6 +614,11 @@ function updateObsolete() {
  * @param {string} stateText
  */
 function updateStatusBar(window, stateText) {
+  /**
+   * @param {!Array<string>} texts1
+   * @param {!Array<string>} texts2
+   * @return {boolean}
+   */
   function equal(texts1, texts2) {
     if (texts1.length !== texts2.length)
       return false;

@@ -71,6 +71,9 @@
   <keyword origin="c++">or</keyword>
   <keyword origin="c++">or_eq</keyword>
   <keyword origin="c++">override</keyword>
+  <keyword origin="c++">protected</keyword>
+  <keyword origin="c++">private</keyword>
+  <keyword origin="c++">public</keyword>
   <keyword origin="c++">register</keyword>
   <keyword origin="c++">reinterpret_cast</keyword>
   <keyword origin="c++">return</keyword>

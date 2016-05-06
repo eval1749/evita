@@ -228,6 +228,8 @@ class MarkerSet::Impl final : public BufferMutationObserver {
   explicit Impl(const Buffer& buffer);
   ~Impl() final;
 
+  const Buffer& buffer() const { return buffer_; }
+
   void AddObserver(MarkerSetObserver* observer);
   const Marker* GetMarkerAt(Offset offset) const;
   const Marker* GetLowerBoundMarker(Offset offset) const;
@@ -406,6 +408,10 @@ void MarkerSet::Impl::DidInsertBefore(const StaticRange& range) {
 MarkerSet::MarkerSet(const Buffer& buffer) : impl_(new Impl(buffer)) {}
 
 MarkerSet::~MarkerSet() {}
+
+const Buffer& MarkerSet::buffer() const {
+  return impl_->buffer();
+}
 
 void MarkerSet::AddObserver(MarkerSetObserver* observer) {
   impl_->AddObserver(observer);

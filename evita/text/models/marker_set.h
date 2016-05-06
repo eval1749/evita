@@ -31,6 +31,8 @@ class MarkerSet final {
   explicit MarkerSet(const Buffer& buffer);
   ~MarkerSet();
 
+  const Buffer& buffer() const;
+
   // Add |observer|
   void AddObserver(MarkerSetObserver* observer);
 

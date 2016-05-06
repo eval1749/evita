@@ -63,6 +63,9 @@ class TextDocument final : public ginx::Scriptable<TextDocument, EventTarget> {
   void EndUndoGroup(const base::string16& name);
   text::LineAndColumn GetLineAndColumn(text::Offset offset,
                                        ExceptionState* exception_state) const;
+  bool IsValidNonEmptyRange(text::Offset start,
+                            text::Offset end,
+                            ExceptionState* exception_state) const;
   bool IsValidPosition(text::Offset offset,
                        ExceptionState* exception_state) const;
   bool IsValidRange(text::Offset start,
@@ -94,10 +97,6 @@ class TextDocument final : public ginx::Scriptable<TextDocument, EventTarget> {
   friend class bindings::TextDocumentClass;
 
   TextDocument();
-
-  bool IsValidNonEmptyRange(text::Offset start,
-                            text::Offset end,
-                            ExceptionState* exception_state) const;
 
   // TextDocument interface implementations
   void Replace(text::Offset start,

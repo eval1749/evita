@@ -185,20 +185,22 @@ function handleCompositionEvent(window, event) {
     const end = span.end;
     if (start === end)
       continue;
-    selectionRange.collapseTo(range.start + start);
-    selectionRange.end = range.start + end;
+    /** @const @type {number} */
+    const spanStart = range.start + start;
+    /** @const @type {number} */
+    const spanEnd = range.start + end;
     switch (span.data) {
       case 0:  // ATTR_INPUT
       case 4:  // ATTR_INPUT_ERROR
-        selectionRange.setStyle({textDecoration: 'imeinput'});
+        window.setMarker(spanStart, spanEnd, 'ime_input');
         break;
       case 1:  // ATTR_TARGET_CONVERTED
       case 3:  // ATTR_TARGET_NOTCONVERTED
-        selectionRange.setStyle({backgroundColor: 0x3399FF, color: 0xFFFFFF});
+        window.setMarker(spanStart, spanEnd, 'ime_active2');
         break;
       case 2:  // ATTR_CONVERTED
       case 5:  // ATTR_FIXEDCONVERTED
-        selectionRange.setStyle({textDecoration: 'imeinactive2'});
+        window.setMarker(spanStart, spanEnd, 'ime_inactive2');
         break;
     }
   }

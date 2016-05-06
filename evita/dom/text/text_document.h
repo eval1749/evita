@@ -55,8 +55,6 @@ class TextDocument final : public ginx::Scriptable<TextDocument, EventTarget> {
   // Returns syntax at |offset|.
   base::string16 syntax_at(text::Offset offset,
                            ExceptionState* exception_state) const;
-  v8::Local<v8::Object> style_at(text::Offset position,
-                                 ExceptionState* exception_state) const;
 
   bool CheckCanChange(ExceptionState* exception_state) const;
   void ClearUndo();

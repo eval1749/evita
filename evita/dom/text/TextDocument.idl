@@ -113,9 +113,6 @@
   [RaisesException] void setSpelling(TextOffset start, TextOffset end,
                                      long spelling);
 
-  [ ImplementedAs = style_at, RaisesException ] TextStyle styleAt(
-      TextOffset offset);
-
   [RaisesException] void setSyntax(TextOffset start, TextOffset end,
                                    DOMString syntax);
 

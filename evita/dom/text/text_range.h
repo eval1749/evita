@@ -70,9 +70,6 @@ class TextRange final : public ginx::Scriptable<TextRange> {
   void set_start(int offsetLike, ExceptionState* exception_state);
   void set_text(const base::string16& text, ExceptionState* exception_state);
 
-  void SetStyle(v8::Local<v8::Object> style_dict,
-                ExceptionState* exception_state) const;
-
   gc::Member<TextDocument> document_;
   // TODO(yosi): We should manage life time of text::Range.
   text::Range* range_;

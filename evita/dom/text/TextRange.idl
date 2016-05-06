@@ -84,9 +84,6 @@ interface TextRange {
   void setSpelling(long spelling);
 
   [RaisesException]
-  void setStyle(Object style);
-
-  [RaisesException]
   void setSyntax(DOMString syntax);
 
   [ImplementedAs=JavaScript]

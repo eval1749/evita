@@ -44,8 +44,6 @@ source_set("core") {
   visibility = [ ":*" ]
   sources = [
     "$target_gen_dir/v8_strings.cc",
-    "css/text_style.cc",
-    "css/text_style.h",
     "editor.cc",
     "editor.h",
     "file_path.cc",
@@ -182,7 +180,6 @@ action("dom_v8_strings_cc") {
 
 test("evita_dom_tests") {
   sources = [
-    "css/text_style_test.cc",
     "editor_unittest.cc",
     "errors_unittest.cc",
     "file_path_unittest.cc",

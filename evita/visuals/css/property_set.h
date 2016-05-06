@@ -37,7 +37,6 @@ class PropertySet final {
   class Builder;
   // See "evita/visuals/css/property_set_editor.h" for implementation.
   class Editor;
-  class Iterator;
 
   PropertySet(const PropertySet& other);
   PropertySet(PropertySet&& other);

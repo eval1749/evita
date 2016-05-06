@@ -158,22 +158,29 @@ function ensureForm() {
   form = new Form();
 
   /** @const @type {number} */
+  const BUTTON_HEIGHT = 26;
+  /** @const @type {number} */
   const BUTTON_MARGIN = 5;
   /** @const @type {number} */
   const CHECKBOX_HEIGHT = 20;
   /** @const @type {number} */
-  const CONTROL_HEIGHT = 26;
+  const CHECKBOX_WIDTH = 20;
   /** @const @type {number} */
   const LINE_MARGIN = 5;
   /** @const @type {number} */
   const PADDING_LEFT = 5;
   /** @const @type {number} */
   const PADDING_TOP = 5;
+  /** @const @type {number} */
+  const TEXT_FIELD_HEIGHT = 26;
 
   /** @type {number} */
   let controlLeft = PADDING_LEFT;
   /** @type {number} */
   let controlTop = PADDING_TOP;
+
+  /** @type {number} */
+  let controlHeight = TEXT_FIELD_HEIGHT;
 
   /**
    * @param {!FormControl} control
@@ -183,7 +190,7 @@ function ensureForm() {
     control.clientLeft = controlLeft;
     control.clientTop = controlTop;
     control.clientWidth = width;
-    control.clientHeight = CONTROL_HEIGHT;
+    control.clientHeight = controlHeight;
     controlLeft += control.clientWidth;
     form.add(control);
     return control;
@@ -191,7 +198,7 @@ function ensureForm() {
 
   function newline() {
     controlLeft = PADDING_LEFT;
-    controlTop += CONTROL_HEIGHT + LINE_MARGIN;
+    controlTop += controlHeight + LINE_MARGIN;
   }
 
   form.title = 'Find and Replace - evita';
@@ -210,6 +217,7 @@ function ensureForm() {
   newline();
 
   // Checkboxes
+  controlHeight = CHECKBOX_HEIGHT;
   /**
    * @param {string} text
    * @param {string} accessKey
@@ -218,7 +226,7 @@ function ensureForm() {
     /** @const @type {!CheckboxControl} */
     const checkbox = new CheckboxControl();
     checkbox.accessKey = accessKey;
-    add(checkbox, CHECKBOX_HEIGHT);
+    add(checkbox, CHECKBOX_WIDTH);
     add(new LabelControl(text), text.length * 10);
     return checkbox;
   }
@@ -233,6 +241,7 @@ function ensureForm() {
   newline();
 
   // Buttons
+  controlHeight = BUTTON_HEIGHT;
   /**
    * @param {string} text
    * @param {string} accessKey

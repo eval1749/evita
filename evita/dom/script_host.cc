@@ -22,7 +22,6 @@
 #include "evita/dom/scheduler/idle_task.h"
 #include "evita/dom/scheduler/micro_task.h"
 #include "evita/dom/scheduler/scheduler.h"
-#include "evita/dom/static_script_source.h"
 #include "evita/dom/timing/performance.h"
 #include "evita/dom/v8_strings.h"
 #include "evita/dom/view_event_handler_impl.h"

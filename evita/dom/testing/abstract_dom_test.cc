@@ -23,7 +23,6 @@
 #include "evita/dom/lock.h"
 #include "evita/dom/scheduler/scheduler.h"
 #include "evita/dom/script_host.h"
-#include "evita/dom/static_script_source.h"
 #include "evita/dom/testing/gtest.h"
 #include "evita/dom/testing/mock_io_delegate.h"
 #include "evita/dom/testing/mock_view_impl.h"

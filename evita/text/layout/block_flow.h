@@ -10,8 +10,8 @@
 
 #include "base/memory/ref_counted.h"
 #include "evita/gfx/rect_f.h"
-#include "evita/text/layout/computed_style.h"
 #include "evita/text/models/offset.h"
+#include "evita/text/style/computed_style.h"
 
 namespace text {
 class Buffer;

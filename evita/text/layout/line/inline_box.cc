@@ -10,8 +10,8 @@
 #include "base/logging.h"
 #include "evita/gfx/font.h"
 #include "evita/gfx/rect_f.h"
-#include "evita/text/layout/computed_style.h"
 #include "evita/text/layout/line/inline_box_visitor.h"
+#include "evita/text/style/computed_style.h"
 
 namespace layout {
 

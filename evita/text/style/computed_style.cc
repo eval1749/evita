@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/text/layout/computed_style.h"
+#include "evita/text/style/computed_style.h"
 
 #include "evita/gfx/font.h"
 

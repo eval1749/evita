@@ -11,7 +11,6 @@
 #include "base/trace_event/trace_event.h"
 #include "evita/gfx/font.h"
 #include "evita/text/layout/block_flow.h"
-#include "evita/text/layout/computed_style.h"
 #include "evita/text/layout/line/inline_box.h"
 #include "evita/text/layout/line/inline_box_visitor.h"
 #include "evita/text/layout/line/root_inline_box.h"
@@ -23,6 +22,7 @@
 #include "evita/text/paint/public/line/root_inline_box.h"
 #include "evita/text/paint/public/selection.h"
 #include "evita/text/paint/public/view.h"
+#include "evita/text/style/computed_style.h"
 #include "evita/ui/animation/animatable_window.h"
 #include "evita/ui/base/ime/text_input_client.h"
 

@@ -8,8 +8,8 @@
 #include "base/macros.h"
 #include "evita/base/castable.h"
 #include "evita/gfx/rect.h"
-#include "evita/text/layout/computed_style.h"
 #include "evita/text/paint/public/line/inline_box_forward.h"
+#include "evita/text/style/computed_style.h"
 
 namespace gfx {
 class Font;

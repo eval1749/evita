@@ -10,8 +10,8 @@
 
 #include "base/macros.h"
 #include "base/strings/string16.h"
-#include "evita/text/layout/computed_style.h"
 #include "evita/text/models/offset.h"
+#include "evita/text/style/computed_style.h"
 
 namespace layout {
 

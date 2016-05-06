@@ -22,13 +22,13 @@
 // TODO(eval1749): We should have "evita/text/layout/public/text_marker.h" to
 // avoid
 // include "inline_box.h" in "text_formatter.cc".
-#include "evita/text/layout/computed_style.h"
 #include "evita/text/layout/line/inline_box.h"
 #include "evita/text/layout/line/line_builder.h"
 #include "evita/text/layout/line/root_inline_box.h"
 #include "evita/text/layout/render_font_set.h"
 #include "evita/text/layout/render_selection.h"
 #include "evita/text/models/spelling.h"
+#include "evita/text/style/computed_style.h"
 
 namespace layout {
 

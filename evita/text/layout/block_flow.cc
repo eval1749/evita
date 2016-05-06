@@ -9,13 +9,13 @@
 #include "evita/text/layout/block_flow.h"
 
 #include "base/trace_event/trace_event.h"
-#include "evita/text/layout/computed_style.h"
 #include "evita/text/layout/line/inline_box.h"
 #include "evita/text/layout/line/root_inline_box.h"
 #include "evita/text/layout/line/root_inline_box_cache.h"
 #include "evita/text/layout/text_formatter.h"
 #include "evita/text/models/buffer.h"
 #include "evita/text/models/static_range.h"
+#include "evita/text/style/computed_style.h"
 
 namespace layout {
 

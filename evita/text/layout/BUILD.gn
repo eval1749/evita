@@ -8,8 +8,6 @@ source_set("layout") {
   sources = [
     "block_flow.cc",
     "block_flow.h",
-    "computed_style.cc",
-    "computed_style.h",
     "paint_view_builder.cc",
     "paint_view_builder.h",
     "render_font_set.cc",
@@ -25,11 +23,12 @@ source_set("layout") {
   ]
 
   public_deps = [
+    "line",
     "//base",
     "//evita/gfx",
-    "//evita/text",
-    "//evita/text/layout/line",
+    "//evita/text/models",
     "//evita/text/paint/public",
+    "//evita/text/style",
     "//evita/text/style/models",
   ]
 }

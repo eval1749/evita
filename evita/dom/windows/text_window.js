@@ -365,9 +365,6 @@ function createOrGetRange(document, key) {
   return newRange;
 }
 
-/** @type {number}*/
-global.matchedBracketsColor = 0xEEFF41;
-
 /**
  * Highlight matched brackets at selection.
  * @param {!TextWindow} window
@@ -401,20 +398,13 @@ function highlightMatchedBrackets(window) {
     return !range.collapsed;
   }
 
-  /** @param {!TextRange} range */
-  function colorMatching(range) {
-    const rangeStart = range.start;
-    const rangeEnd = range.end;
-
-    range.collapseTo(rangeStart + 1);
-    range.start = rangeStart;
-    range.setStyle({backgroundColor: global.matchedBracketsColor});
-
-    range.collapseTo(rangeEnd);
-    range.start = rangeEnd - 1;
-    range.setStyle({backgroundColor: global.matchedBracketsColor});
-
-    range.start = rangeStart;
+  /**
+   * @param {!TextRange} range
+   * @param {string} marker
+   */
+  function colorMatching(range, marker) {
+    window.setMarker(range.start, range.start + 1, marker);
+    window.setMarker(range.end - 1, range.end, marker);
   }
 
   function reportNoMatching(window) {
@@ -429,23 +419,25 @@ function highlightMatchedBrackets(window) {
   const document = selection.document;
   /** @const @type {!TextRange} */
   const range = createOrGetRange(document, 'bracket');
-  // TODO(eval1749): We should just remove 'backgroundColor' style from
-  // range.
-  range.setStyle({backgroundColor: 0xFFFFFF});
+  if (!range.collapsed) {
+    // Text inside enclosing bracket maybe changed, we remove highlight marker
+    // inside |range|.
+    window.setMarker(range.start, range.end, '');
+  }
   if (!selectionRange.collapsed)
     return;
 
   range.collapseTo(selectionRange.start);
   if (isLeftBracket(range)) {
     if (tryLeft(range))
-      return colorMatching(range);
+      return colorMatching(range, 'bracket');
     return reportNoMatching(window);
   }
 
   if (!isRightBracket(range))
     return;
   if (tryRight(range))
-    return colorMatching(range);
+    return colorMatching(range, 'bracket');
   return reportNoMatching(window);
 }
 
@@ -673,4 +665,10 @@ Object.defineProperties(TextWindow.prototype, {
 Object.defineProperties(TextWindow, {
   handleEvent: {value: handleEvent},
 });
+
+/**
+ * @param {!TextWindow} window
+ * Exposed for testing.
+ */
+windows.highlightMatchedBrackets = highlightMatchedBrackets;
 });

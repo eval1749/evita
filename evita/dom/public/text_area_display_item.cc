@@ -4,8 +4,8 @@
 
 #include "evita/dom/public/text_area_display_item.h"
 
-#include "evita/paint/public/selection.h"
-#include "evita/paint/public/view.h"
+#include "evita/text/paint/public/selection.h"
+#include "evita/text/paint/public/view.h"
 #include "evita/visuals/display/public/display_item_list.h"
 
 namespace domapi {

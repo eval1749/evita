@@ -9,7 +9,7 @@
 #include "evita/dom/public/scroll_bar_orientation.h"
 #include "evita/dom/public/scroll_bar_part.h"
 #include "evita/dom/public/scroll_bar_state.h"
-#include "evita/paint/scroll_bar_painter.h"
+#include "evita/text/paint/scroll_bar_painter.h"
 #include "evita/visuals/display/display_item_list_builder.h"
 #include "evita/visuals/display/public/display_item_list.h"
 

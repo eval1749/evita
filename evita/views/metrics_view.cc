@@ -16,8 +16,8 @@
 #include "evita/gfx/text_format.h"
 #include "evita/gfx/text_layout.h"
 #include "evita/metrics/sampling.h"
-#include "evita/paint/paint_thread.h"
-#include "evita/paint/paint_thread_canvas_owner.h"
+#include "evita/text/paint/paint_thread.h"
+#include "evita/text/paint/paint_thread_canvas_owner.h"
 #include "evita/ui/compositor/layer.h"
 
 namespace views {

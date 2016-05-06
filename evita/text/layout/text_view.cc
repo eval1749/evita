@@ -10,12 +10,12 @@
 #include "evita/text/layout/text_view.h"
 
 #include "base/trace_event/trace_event.h"
-#include "evita/paint/public/selection.h"
-#include "evita/paint/public/view.h"
-#include "evita/paint/view_painter.h"
 #include "evita/text/layout/block_flow.h"
 #include "evita/text/models/buffer.h"
 #include "evita/text/models/static_range.h"
+#include "evita/text/paint/public/selection.h"
+#include "evita/text/paint/public/view.h"
+#include "evita/text/paint/view_painter.h"
 
 namespace layout {
 

@@ -40,6 +40,7 @@
    <keyword origin="c++">constexpr</keyword>
    <keyword origin="c++">const_cast</keyword>
    <keyword origin="c++">continue</keyword>
+   <keyword origin="c++">default</keyword>
    <keyword origin="c++">decltype</keyword>
    <keyword origin="c++">delete</keyword>
    <keyword origin="c++">do</keyword>

@@ -413,7 +413,7 @@ const Buffer& MarkerSet::buffer() const {
   return impl_->buffer();
 }
 
-void MarkerSet::AddObserver(MarkerSetObserver* observer) {
+void MarkerSet::AddObserver(MarkerSetObserver* observer) const {
   impl_->AddObserver(observer);
 }
 
@@ -431,7 +431,7 @@ void MarkerSet::InsertMarker(const StaticRange& range,
   impl_->InsertMarker(range, type);
 }
 
-void MarkerSet::RemoveObserver(MarkerSetObserver* observer) {
+void MarkerSet::RemoveObserver(MarkerSetObserver* observer) const {
   impl_->RemoveObserver(observer);
 }
 

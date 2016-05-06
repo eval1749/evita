@@ -34,7 +34,7 @@ class MarkerSet final {
   const Buffer& buffer() const;
 
   // Add |observer|
-  void AddObserver(MarkerSetObserver* observer);
+  void AddObserver(MarkerSetObserver* observer) const;
 
   // Get marker at |offset|.
   const Marker* GetMarkerAt(Offset offset) const;
@@ -48,7 +48,7 @@ class MarkerSet final {
   void InsertMarker(const StaticRange& range, const base::AtomicString& type);
 
   // Remove |observer|
-  void RemoveObserver(MarkerSetObserver* observer);
+  void RemoveObserver(MarkerSetObserver* observer) const;
 
  private:
   class Impl;

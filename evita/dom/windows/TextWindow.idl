@@ -2,31 +2,25 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-[
-  CallWith=ScriptHost,
-  Constructor(TextRange range)
-]
-interface TextWindow : Window {
+[ CallWith = ScriptHost, Constructor(TextRange range) ] interface TextWindow
+    : Window {
   readonly attribute TextDocument document;
   readonly attribute TextSelection selection;
 
-  [RaisesException=Setter]
-  attribute float zoom;
+  [RaisesException = Setter] attribute float zoom;
 
-  [ImplementedAs=ComputeMotion]
-  long compute_(long method, optional TextOffset offset, optional long count,
-                optional Point point);
+  [ImplementedAs = ComputeMotion] long compute_(
+      long method, optional TextOffset offset, optional long count,
+      optional Point point);
 
-  [ImplementedAs=HitTestTextPosition]
-  Rect hitTestTextPosition_(TextOffset offset);
+  [ImplementedAs = HitTestTextPosition] Rect hitTestTextPosition_(
+      TextOffset offset);
 
   void makeSelectionVisible();
 
-  [ImplementedAs=HitTestPoint]
-  long hitTestPoint(float x, float y);
+  [ImplementedAs = HitTestPoint] long hitTestPoint(float x, float y);
 
-  [ImplementedAs=Reconvert]
-  void reconvert_(DOMString text);
+  [ImplementedAs = Reconvert] void reconvert_(DOMString text);
 
   void scroll(long direction);
 };

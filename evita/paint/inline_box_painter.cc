@@ -92,16 +92,6 @@ void FillBackground(gfx::Canvas* canvas,
            inline_box.style().bgcolor());
 }
 
-void FillOverlay(gfx::Canvas* canvas,
-                 const gfx::RectF& rect,
-                 const InlineBox& inline_box) {
-  if (inline_box.style().overlay_color().alpha() == 0.0f)
-    return;
-  FillRect(canvas, gfx::RectF(rect.left, rect.top, ::ceilf(rect.right),
-                              ::ceilf(rect.bottom)),
-           inline_box.style().overlay_color());
-}
-
 //////////////////////////////////////////////////////////////////////
 //
 // PaintVisitor
@@ -190,7 +180,6 @@ void PaintVisitor::VisitInlineMarkerBox(InlineMarkerBox* inline_box) {
       break;
     }
   }
-  FillOverlay(canvas_, marker_rect, *inline_box);
 }
 
 void PaintVisitor::VisitInlineTextBox(InlineTextBox* inline_box) {
@@ -241,8 +230,6 @@ void PaintVisitor::VisitInlineTextBox(InlineTextBox* inline_box) {
       DrawHLine(canvas_, font, text_brush, rect_.left, rect_.right, underline);
       break;
   }
-
-  FillOverlay(canvas_, text_rect, *inline_box);
 }
 
 void PaintVisitor::VisitInlineUnicodeBox(InlineUnicodeBox* inline_box) {
@@ -257,7 +244,6 @@ void PaintVisitor::VisitInlineUnicodeBox(InlineUnicodeBox* inline_box) {
   DrawText(canvas_, style.font(), text_brush, text_rect - gfx::SizeF(2, 2),
            inline_box->characters());
   canvas_->DrawRectangle(text_brush, text_rect - gfx::SizeF(1, 1));
-  FillOverlay(canvas_, text_rect, *inline_box);
 }
 
 }  // namespace

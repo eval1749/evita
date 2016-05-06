@@ -24,7 +24,6 @@ ComputedStyle::ComputedStyle(const ComputedStyle& other)
     : bgcolor_(other.bgcolor_),
       color_(other.color_),
       font_(other.font_),
-      overlay_color_(other.overlay_color_),
       text_decoration_(other.text_decoration_) {}
 
 ComputedStyle::ComputedStyle()
@@ -34,16 +33,11 @@ ComputedStyle::~ComputedStyle() {}
 
 bool ComputedStyle::operator==(const ComputedStyle& other) const {
   return bgcolor_ == other.bgcolor_ && color_ == other.color_ &&
-         font_ == other.font_ && overlay_color_ == other.overlay_color_ &&
-         text_decoration_ == other.text_decoration_;
+         font_ == other.font_ && text_decoration_ == other.text_decoration_;
 }
 
 bool ComputedStyle::operator!=(const ComputedStyle& other) const {
   return !operator==(other);
-}
-
-void ComputedStyle::set_overlay_color(const css::Color& color) {
-  overlay_color_ = ColorToColorF(color);
 }
 
 }  // namespace layout
@@ -55,7 +49,6 @@ size_t hash<layout::ComputedStyle>::operator()(
   result ^= std::hash<gfx::ColorF>()(style.bgcolor());
   result ^= std::hash<gfx::ColorF>()(style.color());
   result ^= std::hash<gfx::Font>()(style.font());
-  result ^= std::hash<gfx::ColorF>()(style.overlay_color());
   result ^= std::hash<css::TextDecoration>()(style.text_decoration());
   return result;
 }

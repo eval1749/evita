@@ -35,15 +35,12 @@ class ComputedStyle {
   const gfx::ColorF& color() const { return color_; }
   const gfx::Font& font() const { return *font_; }
   void set_fond(const gfx::Font& font) { font_ = &font; }
-  const gfx::ColorF& overlay_color() const { return overlay_color_; }
-  void set_overlay_color(const css::Color& color);
   css::TextDecoration text_decoration() const { return text_decoration_; }
 
  private:
   gfx::ColorF bgcolor_;
   gfx::ColorF color_;
   const gfx::Font* font_;
-  gfx::ColorF overlay_color_;
   css::TextDecoration text_decoration_;
 };
 

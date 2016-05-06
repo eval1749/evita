@@ -6,6 +6,7 @@
 #include <cmath>
 #include <numeric>
 
+#include "evita/base/strings/atomic_string.h"
 #include "evita/gfx/font.h"
 #include "evita/gfx/rect_conversions.h"
 #include "evita/text/layout/line/inline_box.h"
@@ -13,6 +14,8 @@
 #include "evita/text/layout/render_font_set.h"
 #include "evita/text/layout/text_formatter.h"
 #include "evita/text/models/buffer.h"
+#include "evita/text/models/marker_set.h"
+#include "evita/text/models/static_range.h"
 #include "evita/text/style/computed_style_builder.h"
 #include "gtest/gtest.h"
 
@@ -28,17 +31,20 @@ class TextFormatterTest : public ::testing::Test {
   ~TextFormatterTest() override = default;
 
   text::Buffer* buffer() const { return buffer_.get(); }
+  text::MarkerSet* markers() const { return markers_.get(); }
 
   ComputedStyle StyleAt(text::Offset offset) const;
   float WidthOf(const ComputedStyle& style, const base::string16& text) const;
 
  private:
-  std::unique_ptr<text::Buffer> buffer_;
+  const std::unique_ptr<text::Buffer> buffer_;
+  const std::unique_ptr<text::MarkerSet> markers_;
 
   DISALLOW_COPY_AND_ASSIGN(TextFormatterTest);
 };
 
-TextFormatterTest::TextFormatterTest() : buffer_(new text::Buffer()) {}
+TextFormatterTest::TextFormatterTest()
+    : buffer_(new text::Buffer()), markers_(new text::MarkerSet(*buffer_)) {}
 
 ComputedStyle TextFormatterTest::StyleAt(text::Offset offset) const {
   auto style = buffer()->GetStyleAt(offset);
@@ -59,8 +65,8 @@ TEST_F(TextFormatterTest, FormatLineBasic) {
   const auto& origin = gfx::PointF(300.0f, 200.0f);
   const auto& bounds = gfx::RectF(origin, gfx::SizeF(100.0f, 50.0f));
 
-  TextFormatter formatter1(*buffer(), text::Offset(0), text::Offset(0), bounds,
-                           1.0f);
+  TextFormatter formatter1(*buffer(), text::Offset(0), text::Offset(0),
+                           *markers(), bounds, 1.0f);
   const auto line1 = formatter1.FormatLine();
   line1->set_origin(origin);
   const auto height = line1->height();
@@ -92,8 +98,8 @@ TEST_F(TextFormatterTest, FormatLineBasic) {
   css::Style style;
   style.set_bgcolor(css::Color(255, 0, 0));
   buffer()->SetStyle(text::Offset(1), text::Offset(2), style);
-  TextFormatter formatter2(*buffer(), text::Offset(0), text::Offset(0), bounds,
-                           1.0f);
+  TextFormatter formatter2(*buffer(), text::Offset(0), text::Offset(0),
+                           *markers(), bounds, 1.0f);
   const auto line2 = formatter2.FormatLine();
   line2->set_origin(origin);
   EXPECT_EQ(5, line2->boxes().size());
@@ -109,13 +115,35 @@ TEST_F(TextFormatterTest, FormatLineBasic) {
       << "Changing background color doesn't change line bounds.";
 }
 
+TEST_F(TextFormatterTest, FormatLineMarker) {
+  buffer()->InsertBefore(text::Offset(0), L"<abc>");
+  // Set marker to "abc".
+  markers()->InsertMarker(
+      text::StaticRange(*buffer(), text::Offset(0), text::Offset(1)),
+      base::AtomicString(L"keyword"));
+  markers()->InsertMarker(
+      text::StaticRange(*buffer(), text::Offset(4), text::Offset(5)),
+      base::AtomicString(L"keyword"));
+  const auto& origin = gfx::PointF(300.0f, 200.0f);
+  const auto& bounds = gfx::RectF(origin, gfx::SizeF(100.0f, 50.0f));
+
+  TextFormatter formatter1(*buffer(), text::Offset(0), text::Offset(0),
+                           *markers(), bounds, 1.0f);
+  const auto line1 = formatter1.FormatLine();
+  EXPECT_EQ(5, line1->boxes().size());
+  EXPECT_EQ(text::OffsetDelta(1), line1->boxes()[2]->start())
+      << "'abc' should be paint differently";
+  EXPECT_EQ(text::OffsetDelta(4), line1->boxes()[2]->end())
+      << "'abc' should be paint differently";
+}
+
 TEST_F(TextFormatterTest, FormatLineMissingCharacter) {
   buffer()->InsertBefore(text::Offset(0), L"f\uFFFFo");
   const auto& origin = gfx::PointF(10.0f, 200.0f);
   const auto& bounds = gfx::RectF(origin, gfx::SizeF(100.0f, 50.0f));
 
-  TextFormatter formatter1(*buffer(), text::Offset(0), text::Offset(0), bounds,
-                           1.0f);
+  TextFormatter formatter1(*buffer(), text::Offset(0), text::Offset(0),
+                           *markers(), bounds, 1.0f);
   const auto line1 = formatter1.FormatLine();
   line1->set_origin(origin);
   EXPECT_EQ(5, line1->boxes().size()) << "line width is " << line1->width();
@@ -141,8 +169,8 @@ TEST_F(TextFormatterTest, FormatLineMissingCharacter) {
 TEST_F(TextFormatterTest, FormatLineWrap) {
   buffer()->InsertBefore(text::Offset(0), L"0123456");
   const auto& bounds = gfx::RectF(gfx::SizeF(40.0f, 50.0f));
-  TextFormatter formatter1(*buffer(), text::Offset(0), text::Offset(0), bounds,
-                           1.0f);
+  TextFormatter formatter1(*buffer(), text::Offset(0), text::Offset(0),
+                           *markers(), bounds, 1.0f);
   // View:
   //    012>
   //    345>

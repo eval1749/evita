@@ -13,12 +13,17 @@
 #include "evita/dom/windows/scroll_bar.h"
 #include "evita/gc/member.h"
 #include "evita/text/models/buffer_mutation_observer.h"
+#include "evita/text/models/marker_set_observer.h"
 #include "evita/text/models/selection_change_observer.h"
 #include "evita/ui/animation/animation_frame_handler.h"
 #include "evita/ui/controls/scroll_bar_observer.h"
 
 namespace layout {
 class TextView;
+}
+
+namespace text {
+class MarkerSet;
 }
 
 namespace dom {
@@ -37,6 +42,7 @@ class TextWindowClass;
 class TextWindow final : public ginx::Scriptable<TextWindow, Window>,
                          public ScrollBarOwner,
                          public text::BufferMutationObserver,
+                         public text::MarkerSetObserver,
                          public text::SelectionChangeObserver,
                          public ui::ScrollBarObserver {
   DECLARE_SCRIPTABLE_OBJECT(TextWindow);
@@ -100,6 +106,9 @@ class TextWindow final : public ginx::Scriptable<TextWindow, Window>,
   void DidDeleteAt(const text::StaticRange& range) final;
   void DidInsertBefore(const text::StaticRange& range) final;
 
+  // text::MarkerSetObserver
+  void DidChangeMarker(text::Offset start, text::Offset end) final;
+
   // text::SelectionChangeObserver
   void DidChangeSelection() final;
 
@@ -123,6 +132,7 @@ class TextWindow final : public ginx::Scriptable<TextWindow, Window>,
 
   const std::unique_ptr<Caret> caret_;
   bool is_waiting_animation_frame_ = false;
+  const std::unique_ptr<text::MarkerSet> markers_;
   const gc::Member<TextSelection> selection_;
   const std::unique_ptr<layout::TextView> text_view_;
   const std::unique_ptr<ScrollBar> vertical_scroll_bar_;

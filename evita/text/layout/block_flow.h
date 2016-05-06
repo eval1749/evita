@@ -15,6 +15,7 @@
 
 namespace text {
 class Buffer;
+class MarkerSet;
 class StaticRange;
 }
 
@@ -30,7 +31,7 @@ class RootInlineBoxCache;
 //
 class BlockFlow final {
  public:
-  explicit BlockFlow(const text::Buffer& buffer);
+  BlockFlow(const text::Buffer& buffer, const text::MarkerSet& markers);
   ~BlockFlow();
 
   const gfx::RectF& bounds() const { return bounds_; }
@@ -90,6 +91,7 @@ class BlockFlow final {
   bool dirty_line_point_ = true;
   std::list<RootInlineBox*> lines_;
   float lines_height_ = 0.0f;
+  const text::MarkerSet& markers_;
   const text::Buffer& text_buffer_;
   std::unique_ptr<RootInlineBoxCache> text_line_cache_;
   int version_ = 0;

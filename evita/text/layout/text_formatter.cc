@@ -89,9 +89,10 @@ ComputedStyle MakeComputedStyle(const css::Style& style) {
 //
 class TextFormatter::TextScanner final {
  public:
-  explicit TextScanner(const text::Buffer& buffer);
+  TextScanner(const text::Buffer& buffer, const text::MarkerSet& markers);
   ~TextScanner() = default;
 
+  base::AtomicString highlight() const;
   base::AtomicString spelling() const;
   const css::StyleResolver* style_resolver() const {
     return buffer_.style_resolver();
@@ -112,6 +113,8 @@ class TextFormatter::TextScanner final {
   const text::Buffer& buffer_;
   text::Offset buffer_cache_end_;
   text::Offset buffer_cache_start_;
+  const text::MarkerSet& highlight_markers_;
+  mutable const text::Marker* highlight_marker_;
   text::Interval* interval_;
   mutable const text::Marker* spelling_marker_;
   mutable const text::Marker* syntax_marker_;
@@ -120,14 +123,29 @@ class TextFormatter::TextScanner final {
   DISALLOW_COPY_AND_ASSIGN(TextScanner);
 };
 
-TextFormatter::TextScanner::TextScanner(const text::Buffer& buffer)
+TextFormatter::TextScanner::TextScanner(
+    const text::Buffer& buffer,
+    const text::MarkerSet& highlight_markers)
     : buffer_(buffer),
       buffer_cache_end_(0),
       buffer_cache_start_(0),
+      highlight_markers_(highlight_markers),
+      highlight_marker_(nullptr),
       interval_(nullptr),
       spelling_marker_(nullptr),
       syntax_marker_(nullptr),
-      text_offset_(0) {}
+      text_offset_(0) {
+  DCHECK_EQ(&buffer, &highlight_markers.buffer());
+}
+
+base::AtomicString TextFormatter::TextScanner::highlight() const {
+  if (!highlight_marker_ || text_offset_ >= highlight_marker_->end()) {
+    highlight_marker_ = highlight_markers_.GetLowerBoundMarker(text_offset_);
+  }
+  return highlight_marker_ && highlight_marker_->Contains(text_offset_)
+             ? highlight_marker_->type()
+             : base::AtomicString();
+}
 
 base::AtomicString TextFormatter::TextScanner::spelling() const {
   if (!spelling_marker_ || text_offset_ >= spelling_marker_->end()) {
@@ -190,12 +208,13 @@ void TextFormatter::TextScanner::Next() {
 TextFormatter::TextFormatter(const text::Buffer& text_buffer,
                              text::Offset line_start,
                              text::Offset text_offset,
+                             const text::MarkerSet& markers,
                              const gfx::RectF& bounds,
                              float zoom)
     : bounds_(bounds),
       default_computed_style_(MakeComputedStyle(text_buffer.GetDefaultStyle())),
       line_start_(line_start),
-      text_scanner_(new TextScanner(text_buffer)),
+      text_scanner_(new TextScanner(text_buffer, markers)),
       zoom_(zoom) {
   DCHECK(!bounds_.empty());
   DCHECK_GT(zoom_, 0.0f);
@@ -262,6 +281,12 @@ bool TextFormatter::FormatChar(LineBuilder* line_builder,
   if (!syntax.empty()) {
     style.Merge(
         text_scanner_->style_resolver()->ResolveWithoutDefaults(syntax));
+  }
+
+  const auto highlight = text_scanner_->highlight();
+  if (!highlight.empty()) {
+    style.Merge(
+        text_scanner_->style_resolver()->ResolveWithoutDefaults(highlight));
   }
 
   style.Merge(

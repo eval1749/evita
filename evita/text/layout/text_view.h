@@ -23,6 +23,7 @@ class View;
 
 namespace text {
 class Buffer;
+class MarkerSet;
 class Offset;
 class StaticRange;
 }
@@ -43,7 +44,7 @@ class TextView final {
   using CaretDisplayItem = paint::Caret;
 
  public:
-  explicit TextView(const text::Buffer& buffer);
+  TextView(const text::Buffer& buffer, const text::MarkerSet& markers);
   ~TextView();
 
   const BlockFlow& block() const { return *block_; }

@@ -46,8 +46,8 @@ gfx::RectF RoundBounds(const gfx::RectF& bounds) {
 //
 // TextView
 //
-TextView::TextView(const text::Buffer& buffer)
-    : block_(new BlockFlow(buffer)),
+TextView::TextView(const text::Buffer& buffer, const text::MarkerSet& markers)
+    : block_(new BlockFlow(buffer, markers)),
       buffer_(buffer),
       caret_offset_(text::Offset::Invalid()) {}
 

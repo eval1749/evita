@@ -10,6 +10,7 @@
 #include "base/trace_event/trace_event.h"
 #include "evita/text/layout/line/root_inline_box.h"
 #include "evita/text/models/buffer.h"
+#include "evita/text/models/marker_set.h"
 #include "evita/text/models/static_range.h"
 
 namespace layout {
@@ -18,13 +19,17 @@ namespace layout {
 //
 // RootInlineBoxCache
 //
-RootInlineBoxCache::RootInlineBoxCache(const text::Buffer& buffer)
-    : buffer_(buffer) {
+RootInlineBoxCache::RootInlineBoxCache(const text::Buffer& buffer,
+                                       const text::MarkerSet& markers)
+    : buffer_(buffer), markers_(markers) {
+  DCHECK_EQ(&buffer_, &markers_.buffer());
   buffer_.AddObserver(this);
+  markers_.AddObserver(this);
 }
 
 RootInlineBoxCache::~RootInlineBoxCache() {
   buffer_.RemoveObserver(this);
+  markers_.RemoveObserver(this);
 }
 
 RootInlineBox* RootInlineBoxCache::FindLine(text::Offset offset) const {
@@ -164,6 +169,12 @@ void RootInlineBoxCache::DidInsertBefore(const text::StaticRange& range) {
   TRACE_EVENT0("layout", "RootInlineBoxCache::DidInsertBefore");
   RemoveOverwapLines(range);
   RelocateLines(range.end(), range.length());
+}
+
+// text::MarkerSetObserver
+void RootInlineBoxCache::DidChangeMarker(text::Offset start, text::Offset end) {
+  TRACE_EVENT0("layout", "RootInlineBoxCache::DidChangeMarker");
+  RemoveOverwapLines(text::StaticRange(buffer_, start, end));
 }
 
 }  // namespace layout

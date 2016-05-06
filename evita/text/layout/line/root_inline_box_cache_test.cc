@@ -10,6 +10,7 @@
 #include "evita/text/layout/line/root_inline_box_cache.h"
 #include "evita/text/layout/text_formatter.h"
 #include "evita/text/models/buffer.h"
+#include "evita/text/models/marker_set.h"
 #include "evita/text/style/models/style.h"
 #include "gtest/gtest.h"
 
@@ -27,6 +28,7 @@ class RootInlineBoxCacheTest : public ::testing::Test {
   const gfx::RectF& bounds() const { return bounds_; }
   text::Buffer* buffer() const { return buffer_.get(); }
   RootInlineBoxCache* cache() const { return cache_.get(); }
+  text::MarkerSet* markers() const { return markers_.get(); }
   const std::vector<RootInlineBox*> lines() const { return lines_; }
   float zoom() const { return zoom_; }
 
@@ -36,6 +38,8 @@ class RootInlineBoxCacheTest : public ::testing::Test {
  private:
   gfx::RectF bounds_;
   const std::unique_ptr<text::Buffer> buffer_;
+  const std::unique_ptr<text::MarkerSet> markers_;
+  // |cache_| takes |buffer_| and |markers_|.
   const std::unique_ptr<RootInlineBoxCache> cache_;
   std::vector<RootInlineBox*> lines_;
   float zoom_ = 1.0f;
@@ -46,13 +50,14 @@ class RootInlineBoxCacheTest : public ::testing::Test {
 RootInlineBoxCacheTest::RootInlineBoxCacheTest()
     : bounds_(gfx::PointF(), gfx::SizeF(640.0f, 480.0f)),
       buffer_(new text::Buffer()),
-      cache_(new RootInlineBoxCache(*buffer())) {}
+      markers_(new text::MarkerSet(*buffer_)),
+      cache_(new RootInlineBoxCache(*buffer_, *markers_)) {}
 
 void RootInlineBoxCacheTest::PopulateCache(const base::string16& text) {
   buffer()->InsertBefore(text::Offset(), text);
   cache_->Invalidate(bounds_, zoom_);
-  TextFormatter formatter(*buffer(), text::Offset(0), text::Offset(0), bounds_,
-                          zoom_);
+  TextFormatter formatter(*buffer(), text::Offset(0), text::Offset(0),
+                          *markers(), bounds_, zoom_);
   for (;;) {
     const auto line = cache_->Register(formatter.FormatLine());
     lines_.push_back(line);

@@ -14,6 +14,7 @@
 
 namespace text {
 class Buffer;
+class MarkerSet;
 }
 
 namespace layout {
@@ -30,6 +31,7 @@ class TextFormatter final {
   TextFormatter(const text::Buffer& buffer,
                 text::Offset line_start,
                 text::Offset text_offset,
+                const text::MarkerSet& markers,
                 const gfx::RectF& bounds,
                 float zoom);
   ~TextFormatter();

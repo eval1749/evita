@@ -8,6 +8,7 @@
 #include "evita/editor/dom_lock.h"
 #include "evita/text/layout/block_flow.h"
 #include "evita/text/models/buffer.h"
+#include "evita/text/models/marker_set.h"
 #include "gtest/gtest.h"
 
 namespace layout {
@@ -33,20 +34,24 @@ class BlockFlowTest : public ::testing::Test {
 
   BlockFlow* block() const { return block_.get(); }
   text::Buffer* buffer() const { return buffer_.get(); }
+  text::MarkerSet* markers() const { return markers_.get(); }
 
   text::Offset HitTestPoint(const gfx::PointF& view_point) const;
 
  private:
   const std::unique_ptr<text::Buffer> buffer_;
+  const std::unique_ptr<text::MarkerSet> markers_;
 
-  // |BlockFlow| constructor takes |buffer_|.
+  // |BlockFlow| constructor takes |buffer_| and |markers_|.
   const std::unique_ptr<BlockFlow> block_;
 
   DISALLOW_COPY_AND_ASSIGN(BlockFlowTest);
 };
 
 BlockFlowTest::BlockFlowTest()
-    : buffer_(new text::Buffer()), block_(new BlockFlow(*buffer_)) {
+    : buffer_(new text::Buffer()),
+      markers_(new text::MarkerSet(*buffer_)),
+      block_(new BlockFlow(*buffer_, *markers_)) {
   block()->SetBounds(
       gfx::RectF(gfx::PointF(300.0f, 200.0f), gfx::SizeF(100.0f, 150.0f)));
   editor::DomLock::GetInstance()->Acquire(FROM_HERE);

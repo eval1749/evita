@@ -14,6 +14,7 @@
 #include "evita/text/layout/line/root_inline_box_cache.h"
 #include "evita/text/layout/text_formatter.h"
 #include "evita/text/models/buffer.h"
+#include "evita/text/models/marker_set.h"
 #include "evita/text/models/static_range.h"
 #include "evita/text/style/computed_style.h"
 
@@ -23,9 +24,13 @@ namespace layout {
 //
 // BlockFlow
 //
-BlockFlow::BlockFlow(const text::Buffer& text_buffer)
-    : text_buffer_(text_buffer),
-      text_line_cache_(new RootInlineBoxCache(text_buffer)) {}
+BlockFlow::BlockFlow(const text::Buffer& text_buffer,
+                     const text::MarkerSet& markers)
+    : markers_(markers),
+      text_buffer_(text_buffer),
+      text_line_cache_(new RootInlineBoxCache(text_buffer, markers)) {
+  DCHECK_EQ(&text_buffer, &markers.buffer());
+}
 
 BlockFlow::~BlockFlow() {}
 
@@ -63,7 +68,8 @@ text::Offset BlockFlow::ComputeEndOfLine(text::Offset text_offset) {
     return line->text_end() - text::OffsetDelta(1);
 
   const auto line_start = text_buffer_.ComputeStartOfLine(text_offset);
-  TextFormatter formatter(text_buffer_, line_start, line_start, bounds_, zoom_);
+  TextFormatter formatter(text_buffer_, line_start, line_start, markers_,
+                          bounds_, zoom_);
   for (;;) {
     const auto& line = FormatLine(&formatter);
     if (text_offset < line->text_end())
@@ -83,7 +89,8 @@ text::Offset BlockFlow::ComputeStartOfLine(text::Offset text_offset) {
     return line->text_start();
 
   const auto line_start = text_buffer_.ComputeStartOfLine(text_offset);
-  TextFormatter formatter(text_buffer_, line_start, line_start, bounds_, zoom_);
+  TextFormatter formatter(text_buffer_, line_start, line_start, markers_,
+                          bounds_, zoom_);
   for (;;) {
     const auto& line = FormatLine(&formatter);
     if (text_offset < line->text_end())
@@ -196,7 +203,8 @@ void BlockFlow::Format(text::Offset text_offset) {
   dirty_line_point_ = false;
 
   const auto line_start = text_buffer_.ComputeStartOfLine(text_offset);
-  TextFormatter formatter(text_buffer_, line_start, line_start, bounds_, zoom_);
+  TextFormatter formatter(text_buffer_, line_start, line_start, markers_,
+                          bounds_, zoom_);
   for (;;) {
     const auto line = FormatLine(&formatter);
     DCHECK_GT(line->bounds().height(), 0.0f);
@@ -300,7 +308,8 @@ text::Offset BlockFlow::MapPointXToOffset(text::Offset text_offset,
     return line->HitTestPoint(point_x);
 
   const auto line_start = text_buffer_.ComputeStartOfLine(text_offset);
-  TextFormatter formatter(text_buffer_, line_start, line_start, bounds_, zoom_);
+  TextFormatter formatter(text_buffer_, line_start, line_start, markers_,
+                          bounds_, zoom_);
   for (;;) {
     const auto& line = FormatLine(&formatter);
     if (text_offset < line->text_end())
@@ -339,7 +348,8 @@ bool BlockFlow::ScrollDown() {
   ++version_;
   const auto goal_offset = lines_.front()->text_start() - text::OffsetDelta(1);
   const auto line_start = text_buffer_.ComputeStartOfLine(goal_offset);
-  TextFormatter formatter(text_buffer_, line_start, line_start, bounds_, zoom_);
+  TextFormatter formatter(text_buffer_, line_start, line_start, markers_,
+                          bounds_, zoom_);
   for (;;) {
     const auto& line = FormatLine(&formatter);
     if (goal_offset < line->text_end()) {
@@ -455,7 +465,8 @@ bool BlockFlow::ScrollUp() {
   const auto offset = last_line->text_end();
   const auto line_start =
       last_line->IsEndOfLine() ? offset : last_line->line_start();
-  TextFormatter formatter(text_buffer_, line_start, offset, bounds_, zoom_);
+  TextFormatter formatter(text_buffer_, line_start, offset, markers_, bounds_,
+                          zoom_);
   Append(FormatLine(&formatter));
   return true;
 }

@@ -28,7 +28,10 @@
 #include "evita/text/layout/render_selection.h"
 #include "evita/text/layout/text_view.h"
 #include "evita/text/models/buffer.h"
+#include "evita/text/models/marker.h"
+#include "evita/text/models/marker_set.h"
 #include "evita/text/models/selection.h"
+#include "evita/text/models/static_range.h"
 #include "evita/text/paint/public/caret.h"
 #include "evita/text/paint/public/selection.h"
 #include "evita/text/paint/public/view.h"
@@ -194,17 +197,21 @@ void Caret::Update(const gfx::FloatRect& new_bounds,
 TextWindow::TextWindow(ScriptHost* script_host, TextRange* selection_range)
     : Scriptable(script_host),
       caret_(new Caret(this)),
+      markers_(new text::MarkerSet(*selection_range->document()->buffer())),
       selection_(new TextSelection(this, selection_range)),
-      text_view_(new layout::TextView(*selection_range->document()->buffer())),
+      text_view_(new layout::TextView(*selection_range->document()->buffer(),
+                                      *markers_)),
       vertical_scroll_bar_(
           new ScrollBar(domapi::ScrollBarOrientation::Vertical, this, this)) {
   document()->buffer()->AddObserver(this);
+  markers_->AddObserver(this);
   selection_->text_selection()->AddObserver(this);
   script_host->view_delegate()->CreateTextWindow(window_id());
 }
 
 TextWindow::~TextWindow() {
   document()->buffer()->RemoveObserver(this);
+  markers_->RemoveObserver(this);
   selection_->text_selection()->RemoveObserver(this);
 }
 
@@ -523,6 +530,12 @@ void TextWindow::DidDeleteAt(const text::StaticRange& range) {
 
 void TextWindow::DidInsertBefore(const text::StaticRange& range) {
   text_view_->DidInsertBefore(range);
+  RequestAnimationFrame();
+}
+
+// text::MarkerSetObserver
+void TextWindow::DidChangeMarker(text::Offset start, text::Offset end) {
+  text_view_->DidChangeStyle(text::StaticRange(*buffer(), start, end));
   RequestAnimationFrame();
 }
 

@@ -88,20 +88,4 @@ TEST_F(TextWindowTest, realize) {
   EXPECT_SCRIPT_TRUE("event.view === sample");
 }
 
-TEST_F(TextWindowTest, zoom) {
-  EXPECT_CALL(*mock_view_impl(), CreateTextWindow(_));
-  EXPECT_SCRIPT_VALID(
-      "var sample = new TextWindow(new TextRange(TextDocument.new('foo')));"
-      "sample.zoom = 1.5;");
-  EXPECT_SCRIPT_EQ("1.5", "sample.zoom");
-  EXPECT_SCRIPT_EQ(
-      "RangeError: Failed to set the 'zoom' property on 'TextWindow': "
-      "TextWindow zoom must be greater than zero.",
-      "sample.zoom = 0;");
-  EXPECT_SCRIPT_EQ(
-      "RangeError: Failed to set the 'zoom' property on 'TextWindow': "
-      "TextWindow zoom must be greater than zero.",
-      "sample.zoom = -1;");
-}
-
 }  // namespace dom

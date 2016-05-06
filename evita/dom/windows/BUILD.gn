@@ -2,6 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//evita/dom/testing/js_test.gni")
+
 source_set("windows") {
   sources = [
     "editor_window.cc",
@@ -38,8 +40,8 @@ source_set("windows") {
   ]
 }
 
-source_set("test_files") {
-  testonly = true
+js_test("test_files") {
+  test_name = "windows"
   sources = [
     "editor_window_unittest.cc",
     "point_unittest.cc",
@@ -47,6 +49,10 @@ source_set("test_files") {
     "text_selection_unittest.cc",
     "text_window_unittest.cc",
     "window_unittest.cc",
+  ]
+
+  data = [
+    "text_window_test.js",
   ]
 
   deps = [

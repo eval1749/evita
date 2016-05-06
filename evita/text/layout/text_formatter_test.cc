@@ -61,7 +61,7 @@ TEST_F(TextFormatterTest, FormatLineBasic) {
   line1->set_origin(origin);
   const auto height = line1->height();
 
-  EXPECT_EQ(3, line1->boxes().size());
+  ASSERT_EQ(3, line1->boxes().size());
   EXPECT_TRUE(line1->boxes()[0]->is<InlineFillerBox>());
   EXPECT_TRUE(line1->boxes()[1]->is<InlineTextBox>());
   EXPECT_TRUE(line1->boxes()[2]->is<InlineMarkerBox>());
@@ -92,7 +92,7 @@ TEST_F(TextFormatterTest, FormatLineBasic) {
                            *markers(), bounds, 1.0f);
   const auto line2 = formatter2.FormatLine();
   line2->set_origin(origin);
-  EXPECT_EQ(5, line2->boxes().size());
+  ASSERT_EQ(5, line2->boxes().size());
   EXPECT_TRUE(line2->boxes()[0]->is<InlineFillerBox>());
   EXPECT_TRUE(line2->boxes()[1]->is<InlineTextBox>());
   EXPECT_TRUE(line2->boxes()[2]->is<InlineTextBox>());
@@ -136,7 +136,7 @@ TEST_F(TextFormatterTest, FormatLineMissingCharacter) {
                            *markers(), bounds, 1.0f);
   const auto line1 = formatter1.FormatLine();
   line1->set_origin(origin);
-  EXPECT_EQ(5, line1->boxes().size()) << "line width is " << line1->width();
+  ASSERT_EQ(5, line1->boxes().size()) << "line width is " << line1->width();
   EXPECT_TRUE(line1->boxes()[0]->is<InlineFillerBox>());
   EXPECT_TRUE(line1->boxes()[1]->is<InlineTextBox>());
   EXPECT_TRUE(line1->boxes()[2]->is<InlineUnicodeBox>());

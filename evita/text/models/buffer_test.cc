@@ -78,6 +78,10 @@ class BufferTest : public ::testing::Test, public BufferMutationObserver {
   DISALLOW_COPY_AND_ASSIGN(BufferTest);
 };
 
+void BufferTest::EndObserve() {
+  buffer_->RemoveObserver(this);
+}
+
 base::StringPiece16 BufferTest::GetMarkerAt(int offset) const {
   const auto marker = buffer_->syntax_markers()->GetMarkerAt(Offset(offset));
   return marker ? marker->type().value() : L"";
@@ -92,10 +96,6 @@ void BufferTest::SetMarker(int start, int end, base::StringPiece16 marker) {
   buffer_->syntax_markers()->InsertMarker(
       StaticRange(*buffer_, Offset(start), Offset(end)),
       base::AtomicString(marker));
-}
-
-void BufferTest::EndObserve() {
-  buffer_->RemoveObserver(this);
 }
 
 // BufferMutationObserver

@@ -9,6 +9,7 @@
 #include "base/logging.h"
 #include "base/timer/timer.h"
 #include "base/trace_event/trace_event.h"
+#include "evita/base/strings/atomic_string.h"
 #include "evita/dom/bindings/exception_state.h"
 #include "evita/dom/promise_resolver.h"
 #include "evita/dom/public/cursor.h"
@@ -429,6 +430,15 @@ bool TextWindow::LargeScroll(int, int iDy) {
   return scrolled;
 }
 
+base::string16 TextWindow::MarkerAt(text::Offset offset,
+                                    ExceptionState* exception_state) const {
+  if (!document()->IsValidPosition(offset, exception_state))
+    return base::string16();
+  if (auto marker = markers_->GetMarkerAt(offset))
+    return marker->type().as_string();
+  return base::string16();
+}
+
 void TextWindow::MakeSelectionVisible() {
   text_view_->MakeSelectionVisible();
 }
@@ -454,6 +464,16 @@ void TextWindow::RequestAnimationFrame() {
 
 void TextWindow::Scroll(int direction) {
   SmallScroll(0, direction);
+}
+
+void TextWindow::SetMarker(text::Offset start,
+                           text::Offset end,
+                           const base::string16& marker,
+                           ExceptionState* exception_state) {
+  if (!document()->IsValidNonEmptyRange(start, end, exception_state))
+    return;
+  markers_->InsertMarker(text::StaticRange(*buffer(), start, end),
+                         base::AtomicString(marker));
 }
 
 bool TextWindow::SmallScroll(int, int y_count) {

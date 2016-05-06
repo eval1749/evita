@@ -91,10 +91,16 @@ class TextWindow final : public ginx::Scriptable<TextWindow, Window>,
                              const gfx::FloatPoint& point);
   text::Offset HitTestPoint(float x, float y);
   gfx::FloatRect HitTestTextPosition(text::Offset position);
+  base::string16 MarkerAt(text::Offset offset,
+                          ExceptionState* exception_state) const;
   void MakeSelectionVisible();
   TextWindow* NewTextWindow(TextRange* range);
   void Reconvert(const base::string16& text);
   void Scroll(int direction);
+  void SetMarker(text::Offset start,
+                 text::Offset end,
+                 const base::string16& marker,
+                 ExceptionState* exception_state);
 
   // ScrollBarOwner
   void DidChangeScrollBar() final;

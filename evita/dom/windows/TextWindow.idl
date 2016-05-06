@@ -20,7 +20,12 @@
 
   [ImplementedAs = HitTestPoint] long hitTestPoint(float x, float y);
 
+  [RaisesException] DOMString markerAt(TextOffset offset);
+
   [ImplementedAs = Reconvert] void reconvert_(DOMString text);
 
   void scroll(long direction);
+
+  [RaisesException] void setMarker(TextOffset start, TextOffset end,
+                                   DOMString marker);
 };

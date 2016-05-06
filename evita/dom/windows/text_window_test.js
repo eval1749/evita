@@ -6,6 +6,18 @@ goog.require("testing");
 
 goog.scope(function() {
 
+testing.test('TextWindow.prototype.markerAt', function(t) {
+  testing.gmock.expectCallCreateTextWindow(1);
+  const sample = new TextWindow(new TextRange(new TextDocument()));
+  sample.document.replace(0, 0, '0123456789');
+  sample.setMarker(3, 5, 'foo');
+
+  t.expect(sample.markerAt(0)).toEqual('');
+  t.expect(sample.markerAt(3)).toEqual('foo');
+  t.expect(sample.markerAt(4)).toEqual('foo');
+  t.expect(sample.markerAt(5)).toEqual('');
+});
+
 testing.test('TextWindow.prototype.zoom', function(t) {
   testing.gmock.expectCallCreateTextWindow(1);
   const sample = new TextWindow(new TextRange(new TextDocument()));

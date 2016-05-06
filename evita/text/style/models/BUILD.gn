@@ -4,7 +4,7 @@
 
 import("//testing/test.gni")
 
-source_set("css") {
+source_set("models") {
   sources = [
     "color.cc",
     "style.cc",
@@ -24,7 +24,7 @@ source_set("tests") {
   ]
 
   public_deps = [
-    ":css",
+    ":models",
     "//testing/gtest",
   ]
 }

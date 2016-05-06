@@ -5,9 +5,9 @@
 #ifndef EVITA_TEXT_LAYOUT_RENDER_SELECTION_H_
 #define EVITA_TEXT_LAYOUT_RENDER_SELECTION_H_
 
-#include "evita/css/style.h"
 #include "evita/gfx/color_f.h"
 #include "evita/text/models/offset.h"
+#include "evita/text/style/models/style.h"
 #include "evita/ui/base/selection_state.h"
 
 namespace layout {

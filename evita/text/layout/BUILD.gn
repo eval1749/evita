@@ -26,11 +26,11 @@ source_set("layout") {
 
   public_deps = [
     "//base",
-    "//evita/css",
     "//evita/gfx",
     "//evita/text",
     "//evita/text/layout/line",
     "//evita/text/paint/public",
+    "//evita/text/style/models",
   ]
 }
 

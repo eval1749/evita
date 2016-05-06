@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/css/style.h"
+#include "evita/text/style/models/style.h"
 
 #include "base/logging.h"
 #include "base/strings/string_util.h"

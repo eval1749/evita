@@ -6,11 +6,11 @@
 #include <vector>
 
 #include "base/strings/string16.h"
-#include "evita/css/style.h"
 #include "evita/text/layout/line/root_inline_box.h"
 #include "evita/text/layout/line/root_inline_box_cache.h"
 #include "evita/text/layout/text_formatter.h"
 #include "evita/text/models/buffer.h"
+#include "evita/text/style/models/style.h"
 #include "gtest/gtest.h"
 
 namespace layout {

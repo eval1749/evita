@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_CSS_STYLE_H_
-#define EVITA_CSS_STYLE_H_
+#ifndef EVITA_TEXT_STYLE_MODELS_STYLE_H_
+#define EVITA_TEXT_STYLE_MODELS_STYLE_H_
 
 #include <functional>
 #include <vector>
 
 #include "base/strings/string16.h"
-#include "evita/css/color.h"
+#include "evita/text/style/models/color.h"
 
 namespace css {
 
@@ -136,4 +136,4 @@ struct hash<css::Style> {
 };
 }  // namespace std
 
-#endif  // EVITA_CSS_STYLE_H_
+#endif  // EVITA_TEXT_STYLE_MODELS_STYLE_H_

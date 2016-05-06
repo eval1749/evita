@@ -10,15 +10,15 @@
 #include "base/logging.h"
 #include "base/trace_event/trace_event.h"
 #include "common/memory/singleton.h"
-#include "evita/css/style.h"
-#include "evita/css/style_resolver.h"
-#include "evita/css/style_selector.h"
 #include "evita/gfx/direct2d_factory_win.h"
 #include "evita/gfx/font.h"
 #include "evita/text/models/buffer.h"
 #include "evita/text/models/interval.h"
 #include "evita/text/models/marker.h"
 #include "evita/text/models/marker_set.h"
+#include "evita/text/style/models/style.h"
+#include "evita/text/style/models/style_resolver.h"
+#include "evita/text/style/models/style_selector.h"
 // TODO(eval1749): We should have "evita/text/layout/public/text_marker.h" to
 // avoid
 // include "inline_box.h" in "text_formatter.cc".

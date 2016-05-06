@@ -7,11 +7,11 @@
 #include <string>
 
 #include "base/strings/utf_string_conversions.h"
-#include "evita/css/style.h"
 #include "evita/text/models/buffer.h"
 #include "evita/text/models/offset.h"
 #include "evita/text/models/range.h"
 #include "evita/text/models/static_range.h"
+#include "evita/text/style/models/style.h"
 #include "gtest/gtest.h"
 
 namespace {

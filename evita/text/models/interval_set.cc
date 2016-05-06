@@ -10,13 +10,13 @@
 #include <vector>
 
 #include "base/logging.h"
-#include "evita/css/style.h"
 #include "evita/text/models/buffer.h"
 #include "evita/text/models/buffer_mutation_observer.h"
 #include "evita/text/models/interval.h"
 #include "evita/text/models/offset.h"
 #include "evita/text/models/range_set_base.h"
 #include "evita/text/models/static_range.h"
+#include "evita/text/style/models/style.h"
 
 namespace std {
 template <>

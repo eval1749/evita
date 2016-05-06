@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_CSS_STYLE_SHEET_H_
-#define EVITA_CSS_STYLE_SHEET_H_
+#ifndef EVITA_TEXT_STYLE_MODELS_STYLE_SHEET_H_
+#define EVITA_TEXT_STYLE_MODELS_STYLE_SHEET_H_
 
 #include <memory>
 #include <unordered_map>
@@ -11,7 +11,7 @@
 #include "base/observer_list.h"
 #include "base/strings/string16.h"
 #include "base/strings/string_piece.h"
-#include "evita/css/style_sheet_observer.h"
+#include "evita/text/style/models/style_sheet_observer.h"
 
 namespace base {
 class AtomicString;
@@ -45,4 +45,4 @@ class StyleSheet final {
 
 }  // namespace css
 
-#endif  // EVITA_CSS_STYLE_SHEET_H_
+#endif  // EVITA_TEXT_STYLE_MODELS_STYLE_SHEET_H_

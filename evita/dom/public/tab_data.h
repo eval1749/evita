@@ -6,7 +6,7 @@
 #define EVITA_DOM_PUBLIC_TAB_DATA_H_
 
 #include "base/strings/string16.h"
-#include "evita/css/color.h"
+#include "evita/text/style/models/color.h"
 
 namespace domapi {
 

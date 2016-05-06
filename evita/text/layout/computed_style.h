@@ -8,8 +8,8 @@
 #include <functional>
 
 #include "base/macros.h"
-#include "evita/css/style.h"
 #include "evita/gfx/color_f.h"
+#include "evita/text/style/models/style.h"
 
 namespace gfx {
 class Font;

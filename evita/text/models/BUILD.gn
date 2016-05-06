@@ -50,8 +50,8 @@ source_set("models") {
     "//base",
     "//common",
     "//evita/base",
-    "//evita/css",
     "//evita/text/encodings",
+    "//evita/text/style/models",
   ]
 }
 

@@ -7,7 +7,6 @@
 #include <algorithm>
 
 #include "base/logging.h"
-#include "evita/css/style_resolver.h"
 #include "evita/text/models/interval.h"
 #include "evita/text/models/interval_set.h"
 #include "evita/text/models/line_number_cache.h"
@@ -17,6 +16,7 @@
 #include "evita/text/models/range_set.h"
 #include "evita/text/models/static_range.h"
 #include "evita/text/models/undo_stack.h"
+#include "evita/text/style/models/style_resolver.h"
 
 namespace text {
 

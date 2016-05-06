@@ -9,7 +9,6 @@
 
 #include "base/logging.h"
 #include "base/strings/stringprintf.h"
-#include "evita/css/style_selector.h"
 #include "evita/dom/bindings/exception_state.h"
 #include "evita/dom/public/view_delegate.h"
 #include "evita/dom/script_host.h"
@@ -23,6 +22,7 @@
 #include "evita/text/models/offset.h"
 #include "evita/text/models/spelling.h"
 #include "evita/text/models/static_range.h"
+#include "evita/text/style/models/style_selector.h"
 
 namespace dom {
 

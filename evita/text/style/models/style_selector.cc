@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/css/style_selector.h"
+#include "evita/text/style/models/style_selector.h"
 
 namespace css {
 

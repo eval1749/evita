@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/css/style_sheet.h"
+#include "evita/text/style/models/style_sheet.h"
 
 #include "base/logging.h"
 #include "evita/base/strings/atomic_string.h"
-#include "evita/css/style.h"
-#include "evita/css/style_rule.h"
-#include "evita/css/style_selector.h"
+#include "evita/text/style/models/style.h"
+#include "evita/text/style/models/style_rule.h"
+#include "evita/text/style/models/style_selector.h"
 
 namespace css {
 

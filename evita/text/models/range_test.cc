@@ -9,9 +9,9 @@
 #include "gtest/gtest.h"
 #pragma warning(pop)
 
-#include "evita/css/style.h"
 #include "evita/text/models/buffer.h"
 #include "evita/text/models/range.h"
+#include "evita/text/style/models/style.h"
 
 namespace text {
 

@@ -8,10 +8,10 @@
 #pragma warning(pop)
 
 #include "base/logging.h"
-#include "evita/css/style.h"
-#include "evita/css/style_resolver.h"
-#include "evita/css/style_selector.h"
-#include "evita/css/style_sheet.h"
+#include "evita/text/style/models/style.h"
+#include "evita/text/style/models/style_resolver.h"
+#include "evita/text/style/models/style_selector.h"
+#include "evita/text/style/models/style_sheet.h"
 
 namespace {
 

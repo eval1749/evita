@@ -8,8 +8,8 @@
 #include <ostream>
 
 #include "base/macros.h"
-#include "evita/css/style.h"
 #include "evita/text/models/range_base.h"
+#include "evita/text/style/models/style.h"
 
 namespace text {
 

@@ -6,7 +6,6 @@
 
 #include "base/strings/stringprintf.h"
 #include "common/memory/singleton.h"
-#include "evita/css/style.h"
 #include "evita/dom/bindings/exception_state.h"
 #include "evita/dom/script_host.h"
 #include "evita/dom/text/text_document.h"
@@ -16,6 +15,7 @@
 #include "evita/ginx/runner.h"
 #include "evita/text/models/buffer.h"
 #include "evita/text/models/range.h"
+#include "evita/text/style/models/style.h"
 
 namespace dom {
 namespace internal {

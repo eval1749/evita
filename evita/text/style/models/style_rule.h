@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_CSS_STYLE_RULE_H_
-#define EVITA_CSS_STYLE_RULE_H_
+#ifndef EVITA_TEXT_STYLE_MODELS_STYLE_RULE_H_
+#define EVITA_TEXT_STYLE_MODELS_STYLE_RULE_H_
 
 #include "base/macros.h"
 #include "evita/base/strings/atomic_string.h"
@@ -29,4 +29,4 @@ class StyleRule final {
 
 }  // namespace css
 
-#endif  // EVITA_CSS_STYLE_RULE_H_
+#endif  // EVITA_TEXT_STYLE_MODELS_STYLE_RULE_H_

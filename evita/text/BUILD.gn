@@ -14,8 +14,8 @@ test("evita_text_tests") {
   deps = [
     ":text",
     "//base/test:run_all_unittests",
-    "//evita/css:tests",
     "//evita/text/encodings:tests",
     "//evita/text/models:tests",
+    "//evita/text/style/models:tests",
   ]
 }

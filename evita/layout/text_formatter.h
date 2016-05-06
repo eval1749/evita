@@ -9,7 +9,7 @@
 
 #include "base/macros.h"
 #include "evita/gfx/rect_f.h"
-#include "evita/layout/render_style.h"
+#include "evita/layout/computed_style.h"
 #include "evita/text/offset.h"
 
 namespace text {
@@ -52,7 +52,7 @@ class TextFormatter final {
                     text::OffsetDelta length);
 
   const gfx::RectF bounds_;
-  RenderStyle default_render_style_;
+  ComputedStyle default_computed_style_;
   text::Offset line_start_;
   std::unique_ptr<TextScanner> text_scanner_;
   const float zoom_;

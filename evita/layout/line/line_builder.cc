@@ -32,7 +32,7 @@ float AlignHeightToPixel(float height) {
 
 }  // namespace
 
-LineBuilder::LineBuilder(const RenderStyle& style,
+LineBuilder::LineBuilder(const ComputedStyle& style,
                          text::Offset line_start,
                          text::Offset text_start,
                          float line_width)
@@ -50,7 +50,7 @@ void LineBuilder::AddBoxInternal(InlineBox* box) {
   descent_ = std::max(box->descent(), descent_);
 }
 
-void LineBuilder::AddCodeUnitBox(const RenderStyle& style,
+void LineBuilder::AddCodeUnitBox(const ComputedStyle& style,
                                  float width,
                                  float height,
                                  text::Offset offset,
@@ -60,7 +60,7 @@ void LineBuilder::AddCodeUnitBox(const RenderStyle& style,
                                       offset - text_start_, text));
 }
 
-void LineBuilder::AddFillerBox(const RenderStyle& style,
+void LineBuilder::AddFillerBox(const ComputedStyle& style,
                                float width,
                                float height,
                                text::Offset offset) {
@@ -69,7 +69,7 @@ void LineBuilder::AddFillerBox(const RenderStyle& style,
                                      offset - text_start_));
 }
 
-void LineBuilder::AddMarkerBox(const RenderStyle& style,
+void LineBuilder::AddMarkerBox(const ComputedStyle& style,
                                float width,
                                float height,
                                text::Offset start,
@@ -113,7 +113,7 @@ bool LineBuilder::HasRoomFor(float width) const {
   return current_x_ + pending_text_width_ + width + marker_width < line_width_;
 }
 
-bool LineBuilder::TryAddChar(const RenderStyle& style,
+bool LineBuilder::TryAddChar(const ComputedStyle& style,
                              text::Offset offset,
                              base::char16 char_code) {
   if (style_ != style) {

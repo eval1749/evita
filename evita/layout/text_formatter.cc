@@ -21,12 +21,12 @@
 #include "evita/text/marker_set.h"
 // TODO(eval1749): We should have "evita/layout/public/text_marker.h" to avoid
 // include "inline_box.h" in "text_formatter.cc".
+#include "evita/layout/computed_style.h"
 #include "evita/layout/line/inline_box.h"
 #include "evita/layout/line/line_builder.h"
 #include "evita/layout/line/root_inline_box.h"
 #include "evita/layout/render_font_set.h"
 #include "evita/layout/render_selection.h"
-#include "evita/layout/render_style.h"
 #include "evita/text/spelling.h"
 
 namespace layout {
@@ -61,8 +61,8 @@ const gfx::Font* GetFont(const css::Style& style) {
   return FontSet::GetFont(style, 'x');
 }
 
-RenderStyle GetRenderStyle(const css::Style& style) {
-  return RenderStyle(style, *GetFont(style));
+ComputedStyle GetComputedStyle(const css::Style& style) {
+  return ComputedStyle(style, *GetFont(style));
 }
 
 base::char16 IntToHex(int k) {
@@ -73,8 +73,9 @@ base::char16 IntToHex(int k) {
   return static_cast<base::char16>(k - 10 + 'A');
 }
 
-RenderStyle MakeRenderStyle(const css::Style& style, const gfx::Font& font) {
-  return RenderStyle(style, font);
+ComputedStyle MakeComputedStyle(const css::Style& style,
+                                const gfx::Font& font) {
+  return ComputedStyle(style, font);
 }
 
 }  // namespace
@@ -190,7 +191,7 @@ TextFormatter::TextFormatter(const text::Buffer& text_buffer,
                              const gfx::RectF& bounds,
                              float zoom)
     : bounds_(bounds),
-      default_render_style_(GetRenderStyle(text_buffer.GetDefaultStyle())),
+      default_computed_style_(GetComputedStyle(text_buffer.GetDefaultStyle())),
       line_start_(line_start),
       text_scanner_(new TextScanner(text_buffer)),
       zoom_(zoom) {
@@ -215,9 +216,9 @@ std::unique_ptr<RootInlineBox> TextFormatter::FormatLine() {
   TRACE_EVENT0("views", "TextFormatter::FormatLine");
   DCHECK(!bounds_.empty());
 
-  LineBuilder line_builder(default_render_style_, line_start_,
+  LineBuilder line_builder(default_computed_style_, line_start_,
                            text_scanner_->text_offset(), bounds_.width());
-  line_builder.AddFillerBox(default_render_style_, kLeftMargin, kMinHeight,
+  line_builder.AddFillerBox(default_computed_style_, kLeftMargin, kMinHeight,
                             text_scanner_->text_offset());
   for (;;) {
     if (text_scanner_->AtEnd()) {
@@ -277,7 +278,7 @@ bool TextFormatter::FormatChar(LineBuilder* line_builder,
     if (!line_builder->HasRoomFor(width))
       return false;
     const auto height = AlignHeightToPixel(font->height());
-    line_builder->AddMarkerBox(MakeRenderStyle(style, *font), width, height,
+    line_builder->AddMarkerBox(MakeComputedStyle(style, *font), width, height,
                                offset, offset + text::OffsetDelta(1),
                                TextMarker::Tab);
     return true;
@@ -307,12 +308,12 @@ bool TextFormatter::FormatChar(LineBuilder* line_builder,
     if (!line_builder->HasRoomFor(width))
       return false;
     const auto height = AlignHeightToPixel(font2->height()) + 4;
-    line_builder->AddCodeUnitBox(MakeRenderStyle(style, *font2), width, height,
-                                 offset, string);
+    line_builder->AddCodeUnitBox(MakeComputedStyle(style, *font2), width,
+                                 height, offset, string);
     return true;
   }
 
-  return line_builder->TryAddChar(MakeRenderStyle(style, *font), offset,
+  return line_builder->TryAddChar(MakeComputedStyle(style, *font), offset,
                                   char_code);
 }
 
@@ -329,7 +330,7 @@ void TextFormatter::FormatMarker(LineBuilder* line_builder,
   const auto font = FontSet::GetFont(style, 'x');
   const auto width = AlignWidthToPixel(font->GetCharWidth('x'));
   const auto height = AlignHeightToPixel(font->height());
-  line_builder->AddMarkerBox(MakeRenderStyle(style, *font), width, height,
+  line_builder->AddMarkerBox(MakeComputedStyle(style, *font), width, height,
                              text_scanner_->text_offset(),
                              text_scanner_->text_offset() + length,
                              marker_name);

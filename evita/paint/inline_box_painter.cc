@@ -10,7 +10,7 @@
 #include "evita/gfx/brush.h"
 #include "evita/gfx/canvas.h"
 #include "evita/gfx/font.h"
-#include "evita/layout/render_style.h"
+#include "evita/layout/computed_style.h"
 #include "evita/paint/public/line/inline_box.h"
 #include "evita/paint/public/line/inline_box_visitor.h"
 

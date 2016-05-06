@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_LAYOUT_RENDER_STYLE_H_
-#define EVITA_LAYOUT_RENDER_STYLE_H_
+#ifndef EVITA_LAYOUT_COMPUTED_STYLE_H_
+#define EVITA_LAYOUT_COMPUTED_STYLE_H_
 
 #include <functional>
 
@@ -19,17 +19,17 @@ namespace layout {
 
 //////////////////////////////////////////////////////////////////////
 //
-// RenderStyle
+// ComputedStyle
 //
-class RenderStyle {
+class ComputedStyle {
  public:
-  RenderStyle(const css::Style& values, const gfx::Font& font);
-  RenderStyle(const RenderStyle& other);
-  RenderStyle();
-  ~RenderStyle();
+  ComputedStyle(const css::Style& values, const gfx::Font& font);
+  ComputedStyle(const ComputedStyle& other);
+  ComputedStyle();
+  ~ComputedStyle();
 
-  bool operator==(const RenderStyle& other) const;
-  bool operator!=(const RenderStyle& other) const;
+  bool operator==(const ComputedStyle& other) const;
+  bool operator!=(const ComputedStyle& other) const;
 
   const gfx::ColorF& bgcolor() const { return bgcolor_; }
   const gfx::ColorF& color() const { return color_; }
@@ -53,9 +53,9 @@ gfx::ColorF ColorToColorF(const css::Color& color);
 
 namespace std {
 template <>
-struct hash<layout::RenderStyle> {
-  size_t operator()(const layout::RenderStyle& style) const;
+struct hash<layout::ComputedStyle> {
+  size_t operator()(const layout::ComputedStyle& style) const;
 };
 }  // namespace std
 
-#endif  // EVITA_LAYOUT_RENDER_STYLE_H_
+#endif  // EVITA_LAYOUT_COMPUTED_STYLE_H_

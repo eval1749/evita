@@ -28,8 +28,8 @@ class TextFormatterTest : public ::testing::Test {
 
   text::Buffer* buffer() const { return buffer_.get(); }
 
-  RenderStyle StyleAt(text::Offset offset) const;
-  float WidthOf(const RenderStyle& style, const base::string16& text) const;
+  ComputedStyle StyleAt(text::Offset offset) const;
+  float WidthOf(const ComputedStyle& style, const base::string16& text) const;
 
  private:
   std::unique_ptr<text::Buffer> buffer_;
@@ -39,16 +39,16 @@ class TextFormatterTest : public ::testing::Test {
 
 TextFormatterTest::TextFormatterTest() : buffer_(new text::Buffer()) {}
 
-RenderStyle TextFormatterTest::StyleAt(text::Offset offset) const {
+ComputedStyle TextFormatterTest::StyleAt(text::Offset offset) const {
   auto style = buffer()->GetStyleAt(offset);
   style.Merge(buffer()->GetDefaultStyle());
   const auto sample =
       offset < buffer()->GetEnd() ? buffer()->GetCharAt(offset) : 'x';
   const auto font = FontSet::GetFont(style, sample);
-  return RenderStyle(style, *font);
+  return ComputedStyle(style, *font);
 }
 
-float TextFormatterTest::WidthOf(const RenderStyle& style,
+float TextFormatterTest::WidthOf(const ComputedStyle& style,
                                  const base::string16& text) const {
   return ::ceil(style.font().GetTextWidth(text));
 }

@@ -25,7 +25,7 @@ const auto kLeadingWidth = 10.0f;
 //
 class LineBuilder final {
  public:
-  LineBuilder(text::Offset start, const RenderStyle& style);
+  LineBuilder(text::Offset start, const ComputedStyle& style);
   ~LineBuilder() = default;
 
   void AddCodeUnit(const base::char16 code_unit);
@@ -36,7 +36,7 @@ class LineBuilder final {
 
  private:
   void AddBoxInternal(InlineBox* box);
-  static RenderStyle CreateStyle();
+  static ComputedStyle CreateStyle();
 
   float ascent_ = 0;
   std::vector<InlineBox*> boxes_;
@@ -44,12 +44,12 @@ class LineBuilder final {
   float left_ = 0;
   text::OffsetDelta offset_;
   text::Offset start_;
-  const RenderStyle& style_;
+  const ComputedStyle& style_;
 
   DISALLOW_COPY_AND_ASSIGN(LineBuilder);
 };
 
-LineBuilder::LineBuilder(text::Offset start, const RenderStyle& style)
+LineBuilder::LineBuilder(text::Offset start, const ComputedStyle& style)
     : style_(style), start_(start) {
   AddBoxInternal(
       new InlineFillerBox(style_, 0, kLeadingWidth, 10, text::OffsetDelta(0)));
@@ -94,7 +94,7 @@ gfx::RectF CaretBoundsOf(int origin_x, int origin_y, int height) {
       gfx::SizeF(1.0f, static_cast<float>(height)));
 }
 
-RenderStyle CreateStyle() {
+ComputedStyle CreateStyle() {
   css::Style css_style;
   css_style.set_bgcolor(css::Color());
   css_style.set_color(css::Color());
@@ -104,7 +104,7 @@ RenderStyle CreateStyle() {
   css_style.set_font_style(css::FontStyle::Normal);
   css_style.set_text_decoration(css::TextDecoration::None);
   auto const font = FontSet::GetFont(css_style, 'x');
-  return RenderStyle(css_style, *font);
+  return ComputedStyle(css_style, *font);
 }
 
 float LineBuilder::WidthOf(const base::string16& text) const {
@@ -122,14 +122,14 @@ class RootInlineBoxTest : public ::testing::Test {
   RootInlineBoxTest();
   ~RootInlineBoxTest() override = default;
 
-  const RenderStyle& style() const { return style_; }
+  const ComputedStyle& style() const { return style_; }
 
   gfx::PointF PointFor(const RootInlineBox& line,
                        const std::vector<base::string16>& texts) const;
   float WidthOf(const base::string16& text) const;
 
  private:
-  RenderStyle style_;
+  ComputedStyle style_;
 
   DISALLOW_COPY_AND_ASSIGN(RootInlineBoxTest);
 };

@@ -10,8 +10,8 @@
 #include "base/logging.h"
 #include "evita/gfx/font.h"
 #include "evita/gfx/rect_f.h"
+#include "evita/layout/computed_style.h"
 #include "evita/layout/line/inline_box_visitor.h"
-#include "evita/layout/render_style.h"
 
 namespace layout {
 
@@ -24,7 +24,7 @@ FOR_EACH_INLINE_BOX(V)
 //
 // InlineBox
 //
-InlineBox::InlineBox(const RenderStyle& style,
+InlineBox::InlineBox(const ComputedStyle& style,
                      float left,
                      float width,
                      float height,
@@ -54,7 +54,7 @@ text::OffsetDelta InlineBox::HitTestPoint(float point_x) const {
 //
 // InlineFillerBox
 //
-InlineFillerBox::InlineFillerBox(const RenderStyle& style,
+InlineFillerBox::InlineFillerBox(const ComputedStyle& style,
                                  float left,
                                  float width,
                                  float height,
@@ -85,7 +85,7 @@ WithFont::~WithFont() {}
 //
 // InlineMarkerBox
 //
-InlineMarkerBox::InlineMarkerBox(const RenderStyle& style,
+InlineMarkerBox::InlineMarkerBox(const ComputedStyle& style,
                                  float left,
                                  float width,
                                  float height,
@@ -111,7 +111,7 @@ gfx::RectF InlineMarkerBox::HitTestTextPosition(text::OffsetDelta offset,
 //
 // InlineTextBoxBase
 //
-InlineTextBoxBase::InlineTextBoxBase(const RenderStyle& style,
+InlineTextBoxBase::InlineTextBoxBase(const ComputedStyle& style,
                                      float left,
                                      float width,
                                      float height,
@@ -140,7 +140,7 @@ text::OffsetDelta InlineTextBoxBase::HitTestPoint(float x) const {
 //
 // InlineTextBox
 //
-InlineTextBox::InlineTextBox(const RenderStyle& style,
+InlineTextBox::InlineTextBox(const ComputedStyle& style,
                              float left,
                              float width,
                              float height,
@@ -176,7 +176,7 @@ gfx::RectF InlineTextBox::HitTestTextPosition(text::OffsetDelta offset,
 //
 // InlineUnicodeBox
 //
-InlineUnicodeBox::InlineUnicodeBox(const RenderStyle& style,
+InlineUnicodeBox::InlineUnicodeBox(const ComputedStyle& style,
                                    float left,
                                    float width,
                                    float height,

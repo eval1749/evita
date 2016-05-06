@@ -8,7 +8,7 @@
 #include "base/macros.h"
 #include "evita/base/castable.h"
 #include "evita/gfx/rect.h"
-#include "evita/layout/render_style.h"
+#include "evita/layout/computed_style.h"
 #include "evita/paint/public/line/inline_box_forward.h"
 
 namespace gfx {
@@ -16,7 +16,7 @@ class Font;
 }
 
 namespace layout {
-class RenderStyle;
+class ComputedStyle;
 }
 
 namespace paint {
@@ -47,14 +47,14 @@ class InlineBox : public base::Castable<InlineBox> {
   DECLARE_PAINT_INLINE_BOX_ABSTRACT_CLASS(InlineBox, Castable);
 
  public:
-  using RenderStyle = layout::RenderStyle;
+  using ComputedStyle = layout::ComputedStyle;
 
   virtual ~InlineBox();
 
   float descent() const { return descent_; }
   float height() const { return height_; }
   float line_height() const { return line_height_; }
-  const RenderStyle& style() const { return style_; }
+  const ComputedStyle& style() const { return style_; }
   float top() const;
   float width() const { return width_; }
 
@@ -64,7 +64,7 @@ class InlineBox : public base::Castable<InlineBox> {
   virtual size_t Hash() const;
 
  protected:
-  InlineBox(const RenderStyle& style,
+  InlineBox(const ComputedStyle& style,
             float width,
             float height,
             float descent,
@@ -78,7 +78,7 @@ class InlineBox : public base::Castable<InlineBox> {
   const float height_;
   const float line_descent_;
   const float line_height_;
-  const RenderStyle style_;
+  const ComputedStyle style_;
   const float width_;
 
   DISALLOW_COPY_AND_ASSIGN(InlineBox);
@@ -94,7 +94,7 @@ class InlineFillerBox final : public InlineBox {
   DECLARE_PAINT_INLINE_BOX_FINAL_CLASS(InlineFillerBox, InlineBox);
 
  public:
-  InlineFillerBox(const RenderStyle& style,
+  InlineFillerBox(const ComputedStyle& style,
                   float width,
                   float height,
                   float line_height,
@@ -134,7 +134,7 @@ class InlineMarkerBox final : public InlineBox, public WithFont {
   DECLARE_PAINT_INLINE_BOX_FINAL_CLASS(InlineMarkerBox, InlineBox);
 
  public:
-  InlineMarkerBox(const RenderStyle& style,
+  InlineMarkerBox(const ComputedStyle& style,
                   float width,
                   float height,
                   TextMarker marker_name,
@@ -166,7 +166,7 @@ class InlineTextBoxBase : public InlineBox, public WithFont {
   const base::string16 characters() const { return characters_; }
 
  protected:
-  InlineTextBoxBase(const RenderStyle& style,
+  InlineTextBoxBase(const ComputedStyle& style,
                     float width,
                     float height,
                     const base::string16& characters,
@@ -192,7 +192,7 @@ class InlineTextBox final : public InlineTextBoxBase {
   DECLARE_PAINT_INLINE_BOX_FINAL_CLASS(InlineTextBox, InlineTextBoxBase);
 
  public:
-  InlineTextBox(const RenderStyle& style,
+  InlineTextBox(const ComputedStyle& style,
                 float width,
                 float height,
                 const base::string16& characters,
@@ -215,7 +215,7 @@ class InlineUnicodeBox final : public InlineTextBoxBase {
   DECLARE_PAINT_INLINE_BOX_FINAL_CLASS(InlineUnicodeBox, InlineTextBoxBase);
 
  public:
-  InlineUnicodeBox(const RenderStyle& style,
+  InlineUnicodeBox(const ComputedStyle& style,
                    float width,
                    float height,
                    const base::string16& characters,

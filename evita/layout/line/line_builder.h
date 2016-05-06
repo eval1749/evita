@@ -10,13 +10,13 @@
 
 #include "base/macros.h"
 #include "base/strings/string16.h"
-#include "evita/layout/render_style.h"
+#include "evita/layout/computed_style.h"
 #include "evita/text/offset.h"
 
 namespace layout {
 
 class InlineBox;
-class RenderStyle;
+class ComputedStyle;
 class RootInlineBox;
 enum class TextMarker;
 
@@ -26,7 +26,7 @@ enum class TextMarker;
 //
 class LineBuilder final {
  public:
-  LineBuilder(const RenderStyle& style,
+  LineBuilder(const ComputedStyle& style,
               text::Offset line_start,
               text::Offset text_start,
               float line_width);
@@ -34,16 +34,16 @@ class LineBuilder final {
 
   float current_x() const { return current_x_; }
 
-  void AddCodeUnitBox(const RenderStyle& style,
+  void AddCodeUnitBox(const ComputedStyle& style,
                       float width,
                       float height,
                       text::Offset offset,
                       const base::string16& text);
-  void AddFillerBox(const RenderStyle& style,
+  void AddFillerBox(const ComputedStyle& style,
                     float width,
                     float height,
                     text::Offset offset);
-  void AddMarkerBox(const RenderStyle& style,
+  void AddMarkerBox(const ComputedStyle& style,
                     float width,
                     float height,
                     text::Offset start,
@@ -52,7 +52,7 @@ class LineBuilder final {
   void AddTextBoxIfNeeded();
   std::unique_ptr<RootInlineBox> Build();
   bool HasRoomFor(float width) const;
-  bool TryAddChar(const RenderStyle& style,
+  bool TryAddChar(const ComputedStyle& style,
                   text::Offset offset,
                   base::char16 char_code);
 
@@ -66,7 +66,7 @@ class LineBuilder final {
   float current_x_ = 0.0f;
   const float line_width_;
   const text::Offset line_start_;
-  RenderStyle style_;
+  ComputedStyle style_;
   const text::Offset text_start_;
   float pending_text_width_ = 0.0f;
   std::vector<base::char16> pending_text_;

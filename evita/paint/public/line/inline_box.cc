@@ -10,7 +10,7 @@
 
 #include "base/logging.h"
 #include "evita/gfx/font.h"
-#include "evita/layout/render_style.h"
+#include "evita/layout/computed_style.h"
 #include "evita/paint/public/line/inline_box_visitor.h"
 
 namespace paint {
@@ -24,7 +24,7 @@ FOR_EACH_PAINT_INLINE_BOX(V)
 //
 // InlineBox
 //
-InlineBox::InlineBox(const RenderStyle& style,
+InlineBox::InlineBox(const ComputedStyle& style,
                      float width,
                      float height,
                      float descent,
@@ -57,7 +57,7 @@ bool InlineBox::Equal(const InlineBox* other) const {
 size_t InlineBox::Hash() const {
   auto hash_code = static_cast<size_t>(width_);
   hash_code ^= static_cast<size_t>(line_height_);
-  hash_code ^= std::hash<RenderStyle>()(style_);
+  hash_code ^= std::hash<ComputedStyle>()(style_);
   return hash_code;
 }
 
@@ -65,7 +65,7 @@ size_t InlineBox::Hash() const {
 //
 // InlineFillerBox
 //
-InlineFillerBox::InlineFillerBox(const RenderStyle& style,
+InlineFillerBox::InlineFillerBox(const ComputedStyle& style,
                                  float width,
                                  float height,
                                  float line_height,
@@ -93,7 +93,7 @@ WithFont::~WithFont() {}
 //
 // InlineMarkerBox
 //
-InlineMarkerBox::InlineMarkerBox(const RenderStyle& style,
+InlineMarkerBox::InlineMarkerBox(const ComputedStyle& style,
                                  float width,
                                  float height,
                                  TextMarker marker_name,
@@ -135,7 +135,7 @@ size_t InlineMarkerBox::Hash() const {
 //
 // InlineTextBoxBase
 //
-InlineTextBoxBase::InlineTextBoxBase(const RenderStyle& style,
+InlineTextBoxBase::InlineTextBoxBase(const ComputedStyle& style,
                                      float width,
                                      float height,
                                      const base::string16& characters,
@@ -168,7 +168,7 @@ size_t InlineTextBoxBase::Hash() const {
 //
 // InlineTextBox
 //
-InlineTextBox::InlineTextBox(const RenderStyle& style,
+InlineTextBox::InlineTextBox(const ComputedStyle& style,
                              float width,
                              float height,
                              const base::string16& characters,
@@ -192,7 +192,7 @@ InlineBox* InlineTextBox::Copy() const {
 //
 // InlineUnicodeBox
 //
-InlineUnicodeBox::InlineUnicodeBox(const RenderStyle& style,
+InlineUnicodeBox::InlineUnicodeBox(const ComputedStyle& style,
                                    float width,
                                    float height,
                                    const base::string16& characters,

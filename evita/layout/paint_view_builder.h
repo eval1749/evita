@@ -24,7 +24,7 @@ class Buffer;
 namespace layout {
 
 class BlockFlow;
-class RenderStyle;
+class ComputedStyle;
 class TextSelectionModel;
 
 //////////////////////////////////////////////////////////////////////

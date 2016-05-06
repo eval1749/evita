@@ -8,8 +8,8 @@
 #include "base/macros.h"
 #include "evita/base/castable.h"
 #include "evita/gfx/rect.h"
+#include "evita/layout/computed_style.h"
 #include "evita/layout/line/inline_box_forward.h"
-#include "evita/layout/render_style.h"
 #include "evita/text/offset.h"
 
 namespace gfx {
@@ -25,7 +25,7 @@ enum class TextMarker {
   Tab,
 };
 
-class RenderStyle;
+class ComputedStyle;
 
 #define DECLARE_INLINE_BOX_CLASS(self, super) \
   DECLARE_CASTABLE_CLASS(self, super)
@@ -54,7 +54,7 @@ class InlineBox : public base::Castable<InlineBox> {
   float height() const { return height_; }
   float left() const { return left_; }
   text::OffsetDelta start() const { return start_; }
-  const RenderStyle& style() const { return style_; }
+  const ComputedStyle& style() const { return style_; }
   float width() const { return width_; }
 
   virtual void Accept(InlineBoxVisitor* visitor) = 0;
@@ -67,7 +67,7 @@ class InlineBox : public base::Castable<InlineBox> {
                                          float baseline) const = 0;
 
  protected:
-  InlineBox(const RenderStyle& style,
+  InlineBox(const ComputedStyle& style,
             float left,
             float width,
             float height,
@@ -81,7 +81,7 @@ class InlineBox : public base::Castable<InlineBox> {
   const float height_;
   const float left_;
   const text::OffsetDelta start_;
-  const RenderStyle style_;
+  const ComputedStyle style_;
   const float width_;
 
   DISALLOW_COPY_AND_ASSIGN(InlineBox);
@@ -97,7 +97,7 @@ class InlineFillerBox final : public InlineBox {
   DECLARE_INLINE_BOX_FINAL_CLASS(InlineFillerBox, InlineBox);
 
  public:
-  InlineFillerBox(const RenderStyle& style,
+  InlineFillerBox(const ComputedStyle& style,
                   float left,
                   float width,
                   float height,
@@ -137,7 +137,7 @@ class InlineMarkerBox final : public InlineBox, public WithFont {
   DECLARE_INLINE_BOX_FINAL_CLASS(InlineMarkerBox, InlineBox);
 
  public:
-  InlineMarkerBox(const RenderStyle& style,
+  InlineMarkerBox(const ComputedStyle& style,
                   float left,
                   float width,
                   float height,
@@ -172,7 +172,7 @@ class InlineTextBoxBase : public InlineBox, public WithFont {
   const base::string16 characters() const { return characters_; }
 
  protected:
-  InlineTextBoxBase(const RenderStyle& style,
+  InlineTextBoxBase(const ComputedStyle& style,
                     float left,
                     float width,
                     float height,
@@ -198,7 +198,7 @@ class InlineTextBox final : public InlineTextBoxBase {
   DECLARE_INLINE_BOX_FINAL_CLASS(InlineTextBox, InlineTextBoxBase);
 
  public:
-  InlineTextBox(const RenderStyle& style,
+  InlineTextBox(const ComputedStyle& style,
                 float left,
                 float width,
                 float height,
@@ -222,7 +222,7 @@ class InlineUnicodeBox final : public InlineTextBoxBase {
   DECLARE_INLINE_BOX_FINAL_CLASS(InlineUnicodeBox, InlineTextBoxBase);
 
  public:
-  InlineUnicodeBox(const RenderStyle& style,
+  InlineUnicodeBox(const ComputedStyle& style,
                    float left,
                    float width,
                    float height,

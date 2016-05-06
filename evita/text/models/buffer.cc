@@ -7,8 +7,6 @@
 #include <algorithm>
 
 #include "base/logging.h"
-#include "evita/text/models/interval.h"
-#include "evita/text/models/interval_set.h"
 #include "evita/text/models/line_number_cache.h"
 #include "evita/text/models/marker_set.h"
 #include "evita/text/models/offset.h"
@@ -16,6 +14,7 @@
 #include "evita/text/models/range_set.h"
 #include "evita/text/models/static_range.h"
 #include "evita/text/models/undo_stack.h"
+#include "evita/text/style/models/style.h"
 #include "evita/text/style/models/style_resolver.h"
 
 namespace text {
@@ -31,8 +30,7 @@ namespace text {
 // Buffer
 //
 Buffer::Buffer()
-    : intervals_(new IntervalSet(this)),
-      line_number_cache_(new LineNumberCache(*this)),
+    : line_number_cache_(new LineNumberCache(*this)),
       ranges_(new RangeSet(this)),
       spelling_markers_(new MarkerSet(*this)),
       style_resolver_(new css::StyleResolver()),
@@ -112,10 +110,6 @@ const css::Style& Buffer::GetDefaultStyle() const {
   return *css::Style::Default();
 }
 
-Interval* Buffer::GetIntervalAt(Offset offset) const {
-  return intervals_->GetIntervalAt(std::min(offset, GetEnd()));
-}
-
 LineAndColumn Buffer::GetLineAndColumn(Offset offset) const {
   DCHECK(IsValidPosn(offset)) << "offset=" << offset << " length=" << GetEnd();
   auto const line_number_result = line_number_cache_->Get(offset);
@@ -181,14 +175,6 @@ Offset Buffer::Undo(Offset offset) {
 void Buffer::UpdateChangeTick() {
   ++revision_;
   ++version_;
-}
-
-// IntervalSetObserver
-void Buffer::DidChangeInterval(Offset start, Offset end) {
-  DCHECK_LT(start, end);
-  ++version_;
-  const auto& range = StaticRange(*this, start, end);
-  FOR_EACH_OBSERVER(BufferMutationObserver, observers_, DidChangeStyle(range));
 }
 
 // MarkerSetObserver

@@ -13,7 +13,6 @@
 #include "evita/gfx/direct2d_factory_win.h"
 #include "evita/gfx/font.h"
 #include "evita/text/models/buffer.h"
-#include "evita/text/models/interval.h"
 #include "evita/text/models/marker.h"
 #include "evita/text/models/marker_set.h"
 #include "evita/text/style/models/style.h"
@@ -85,7 +84,7 @@ ComputedStyle MakeComputedStyle(const css::Style& style) {
 //////////////////////////////////////////////////////////////////////
 //
 // TextScanner
-// Enumerator for characters and interval
+// Enumerator for characters and markes
 //
 class TextFormatter::TextScanner final {
  public:
@@ -105,7 +104,6 @@ class TextFormatter::TextScanner final {
 
   bool AtEnd() const;
   base::char16 GetChar();
-  const css::Style& GetStyle();
   void Next();
 
  private:
@@ -115,7 +113,6 @@ class TextFormatter::TextScanner final {
   text::Offset buffer_cache_start_;
   const text::MarkerSet& highlight_markers_;
   mutable const text::Marker* highlight_marker_;
-  text::Interval* interval_;
   mutable const text::Marker* spelling_marker_;
   mutable const text::Marker* syntax_marker_;
   text::Offset text_offset_;
@@ -131,7 +128,6 @@ TextFormatter::TextScanner::TextScanner(
       buffer_cache_start_(0),
       highlight_markers_(highlight_markers),
       highlight_marker_(nullptr),
-      interval_(nullptr),
       spelling_marker_(nullptr),
       syntax_marker_(nullptr),
       text_offset_(0) {
@@ -185,14 +181,6 @@ base::char16 TextFormatter::TextScanner::GetChar() {
   DCHECK_GE(text_offset_, buffer_cache_start_);
   DCHECK_LT(text_offset_, buffer_cache_end_);
   return buffer_cache_[text_offset_ - buffer_cache_start_];
-}
-
-const css::Style& TextFormatter::TextScanner::GetStyle() {
-  if (AtEnd())
-    return buffer_.GetDefaultStyle();
-  if (!interval_ || !interval_->Contains(text_offset_))
-    interval_ = buffer_.GetIntervalAt(text_offset_);
-  return interval_->style();
 }
 
 void TextFormatter::TextScanner::Next() {
@@ -269,7 +257,7 @@ std::unique_ptr<RootInlineBox> TextFormatter::FormatLine() {
 bool TextFormatter::FormatChar(LineBuilder* line_builder,
                                base::char16 char_code) {
   const auto offset = text_scanner_->text_offset();
-  auto style = text_scanner_->GetStyle();
+  css::Style style;
 
   const auto spelling = text_scanner_->spelling();
   if (!spelling.empty()) {
@@ -347,7 +335,7 @@ bool TextFormatter::FormatChar(LineBuilder* line_builder,
 void TextFormatter::FormatMarker(LineBuilder* line_builder,
                                  TextMarker marker_name,
                                  text::OffsetDelta length) {
-  auto style = text_scanner_->GetStyle();
+  css::Style style;
   style.Merge(
       text_scanner_->style_resolver()->Resolve(css::StyleSelector::defaults()));
   style.OverrideBy(text_scanner_->style_resolver()->ResolveWithoutDefaults(

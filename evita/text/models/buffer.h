@@ -16,7 +16,6 @@
 #include "evita/IStringCursor.h"
 #include "evita/text/models/buffer_core.h"
 #include "evita/text/models/buffer_mutation_observer.h"
-#include "evita/text/models/interval_set_observer.h"
 #include "evita/text/models/marker_set_observer.h"
 
 namespace css {
@@ -27,8 +26,6 @@ class StyleResolver;
 namespace text {
 
 class Buffer;
-class Interval;
-class IntervalSet;
 class LineNumberCache;
 class Marker;
 class MarkerSet;
@@ -52,9 +49,7 @@ struct LineAndColumn {
 //
 // Buffer
 //
-class Buffer final : public BufferCore,
-                     public IntervalSetObserver,
-                     public MarkerSetObserver {
+class Buffer final : public BufferCore, public MarkerSetObserver {
  public:
   Buffer();
   virtual ~Buffer();
@@ -79,7 +74,6 @@ class Buffer final : public BufferCore,
   void Delete(Offset start, Offset end);
   void EndUndoGroup(const base::string16& name);
   const css::Style& GetDefaultStyle() const;
-  Interval* GetIntervalAt(Offset) const;
   LineAndColumn GetLineAndColumn(Offset offset) const;
   UndoStack* GetUndo() const { return undo_stack_.get(); }
   bool IsReadOnly() const { return read_only_; }
@@ -110,14 +104,10 @@ class Buffer final : public BufferCore,
  private:
   void UpdateChangeTick();
 
-  // Implements IntervalSetObserver
-  void DidChangeInterval(Offset start, Offset end) final;
-
   // Implements MarkerSetObserver
   void DidChangeMarker(Offset start, Offset end) final;
 
   base::ObserverList<BufferMutationObserver> observers_;
-  std::unique_ptr<IntervalSet> intervals_;
   std::unique_ptr<LineNumberCache> line_number_cache_;
   std::unique_ptr<MarkerSet> spelling_markers_;
   std::unique_ptr<MarkerSet> syntax_markers_;

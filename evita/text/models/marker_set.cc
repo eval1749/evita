@@ -19,8 +19,7 @@
 namespace text {
 
 // Markers indexed by end offset
-// See also: text::IntervalSet and text::LineNumberCache, they also manages
-// ranges.
+// See also: text::LineNumberCache, they also manages ranges.
 using Markers = std::map<Offset, std::unique_ptr<Marker>>;
 
 namespace {

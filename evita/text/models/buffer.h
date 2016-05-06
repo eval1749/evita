@@ -81,7 +81,6 @@ class Buffer final : public BufferCore,
   const css::Style& GetDefaultStyle() const;
   Interval* GetIntervalAt(Offset) const;
   LineAndColumn GetLineAndColumn(Offset offset) const;
-  const css::Style& GetStyleAt(Offset) const;
   UndoStack* GetUndo() const { return undo_stack_.get(); }
   bool IsReadOnly() const { return read_only_; }
   void InsertBefore(Offset offset, const base::string16& text);
@@ -92,7 +91,6 @@ class Buffer final : public BufferCore,
   void Replace(Offset start, Offset end, const base::string16& replacement);
   void ResetRevision(int revision);
   bool SetReadOnly(bool read_only) { return read_only_ = read_only; }
-  void SetStyle(Offset, Offset, const css::Style& style_values);
   void StartUndoGroup(const base::string16& name);
 
   // Does undo last modification if it starts at |offset| and returns

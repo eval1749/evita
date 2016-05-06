@@ -84,10 +84,10 @@ TEST_F(TextFormatterTest, FormatLineBasic) {
                  gfx::SizeF(1.0f, line1->boxes()[1]->height())),
       line1->HitTestTextPosition(text::Offset(1)));
 
-  // Change background color offset 1 and format again
-  css::Style style;
-  style.set_bgcolor(css::Color(255, 0, 0));
-  buffer()->SetStyle(text::Offset(1), text::Offset(2), style);
+  // Change color offset 1 and format again
+  buffer()->syntax_markers()->InsertMarker(
+      text::StaticRange(*buffer(), text::Offset(1), text::Offset(2)),
+      base::AtomicString(L"keyword"));
   TextFormatter formatter2(*buffer(), text::Offset(0), text::Offset(0),
                            *markers(), bounds, 1.0f);
   const auto line2 = formatter2.FormatLine();

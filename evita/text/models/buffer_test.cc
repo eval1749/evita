@@ -8,6 +8,8 @@
 
 #include "base/strings/utf_string_conversions.h"
 #include "evita/text/models/buffer.h"
+#include "evita/text/models/marker.h"
+#include "evita/text/models/marker_set.h"
 #include "evita/text/models/offset.h"
 #include "evita/text/models/range.h"
 #include "evita/text/models/static_range.h"
@@ -62,6 +64,8 @@ class BufferTest : public ::testing::Test, public BufferMutationObserver {
   }
 
   void EndObserve();
+  base::StringPiece16 GetMarkerAt(int offset) const;
+  void SetMarker(int start, int end, base::StringPiece16 marker);
   void StartObserve();
 
  private:
@@ -74,9 +78,20 @@ class BufferTest : public ::testing::Test, public BufferMutationObserver {
   DISALLOW_COPY_AND_ASSIGN(BufferTest);
 };
 
+base::StringPiece16 BufferTest::GetMarkerAt(int offset) const {
+  const auto marker = buffer_->syntax_markers()->GetMarkerAt(Offset(offset));
+  return marker ? marker->type().value() : L"";
+}
+
 void BufferTest::StartObserve() {
   style_changes_ = std::ostringstream();
   buffer_->AddObserver(this);
+}
+
+void BufferTest::SetMarker(int start, int end, base::StringPiece16 marker) {
+  buffer_->syntax_markers()->InsertMarker(
+      StaticRange(*buffer_, Offset(start), Offset(end)),
+      base::AtomicString(marker));
 }
 
 void BufferTest::EndObserve() {
@@ -125,13 +140,8 @@ TEST_F(BufferTest, GetLineAndColumn) {
 TEST_F(BufferTest, InsertBefore) {
   buffer()->InsertBefore(Offset(0), base::ASCIIToUTF16("abc"));
 
-  css::Style style_values1;
-  style_values1.set_text_decoration(css::TextDecoration::GreenWave);
-  buffer()->SetStyle(Offset(1), Offset(2), style_values1);
-
-  css::Style style_values2;
-  style_values2.set_text_decoration(css::TextDecoration::RedWave);
-  buffer()->SetStyle(Offset(2), Offset(3), style_values2);
+  SetMarker(1, 2, L"marker1");
+  SetMarker(2, 3, L"marker2");
 
   auto range = std::make_unique<text::Range>(buffer(), Offset(2), Offset(2));
 
@@ -140,12 +150,10 @@ TEST_F(BufferTest, InsertBefore) {
   EXPECT_EQ(Offset(4), buffer()->GetEnd());
   EXPECT_EQ('X', buffer()->GetCharAt(Offset(2)));
   EXPECT_EQ('c', buffer()->GetCharAt(Offset(3)));
-  EXPECT_EQ(css::TextDecoration::GreenWave,
-            buffer()->GetStyleAt(Offset(2)).text_decoration())
+  EXPECT_EQ(L"marker1", GetMarkerAt(2))
       << "The style of inserted text is inherited from styles before insertion"
          " position.";
-  EXPECT_EQ(css::TextDecoration::RedWave,
-            buffer()->GetStyleAt(Offset(3)).text_decoration())
+  EXPECT_EQ(L"marker2", GetMarkerAt(3))
       << "The style at insertion position isn't changed.";
   EXPECT_EQ(Offset(3), range->start())
       << "The range at insertion position should be push back.";
@@ -167,42 +175,36 @@ TEST_F(BufferTest, Replace) {
   EXPECT_EQ(L"acz", buffer()->GetText(Offset(0), buffer()->GetEnd()));
 }
 
-TEST_F(BufferTest, SetStyle) {
+TEST_F(BufferTest, SetMarker) {
   buffer()->InsertBefore(Offset(0), base::ASCIIToUTF16("foo bar baz"));
 
   // Set all text font size to 30.
-  css::Style style_font_size_30;
-  style_font_size_30.set_font_size(30);
-  buffer()->SetStyle(Offset(0), buffer()->GetEnd(), style_font_size_30);
+  SetMarker(0, 11, L"size30");
 
   // Color "bar" to red.
-  css::Style style_color_red;
-  style_color_red.set_color(css::Color(0xCC, 0, 0));
-  buffer()->SetStyle(Offset(4), Offset(7), style_color_red);
+  SetMarker(4, 7, L"red");
 
-  EXPECT_EQ(30, buffer()->GetStyleAt(Offset(4)).font_size())
-      << "Set color doesn't affect font size.";
+  EXPECT_EQ(L"size30", GetMarkerAt(0));
+  EXPECT_EQ(L"red", GetMarkerAt(4));
 
   const auto version = buffer()->version();
-  buffer()->SetStyle(Offset(4), Offset(7), style_color_red);
+  SetMarker(4, 7, L"red");
   EXPECT_EQ(version, buffer()->version())
       << "Set same style doesn't change buffer";
 }
 
-TEST_F(BufferTest, SetStyleWithObserver) {
+TEST_F(BufferTest, SetMarkerWithObserver) {
   buffer()->InsertBefore(Offset(0), L"012345678");
-  css::Style style1(css::Color(1, 0, 0), css::Color(2, 0, 0));
-  buffer()->SetStyle(text::Offset(0), text::Offset(9), style1);
+  SetMarker(0, 9, L"marker1");
 
-  css::Style style2(css::Color(3, 0, 0), css::Color(2, 0, 0));
   StartObserve();
-  buffer()->SetStyle(text::Offset(2), text::Offset(4), style2);
-  buffer()->SetStyle(text::Offset(6), text::Offset(8), style2);
+  SetMarker(2, 4, L"marker2");
+  SetMarker(6, 8, L"marker2");
   EXPECT_EQ("2,4 6,8", style_changes());
   EndObserve();
 
   StartObserve();
-  buffer()->SetStyle(text::Offset(0), text::Offset(9), style2);
+  SetMarker(0, 9, L"marker2");
   EndObserve();
   EXPECT_EQ("0,2 4,6 8,9", style_changes());
 }

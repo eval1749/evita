@@ -125,10 +125,6 @@ LineAndColumn Buffer::GetLineAndColumn(Offset offset) const {
   return result;
 }
 
-const css::Style& Buffer::GetStyleAt(Offset offset) const {
-  return GetIntervalAt(offset)->style();
-}
-
 void Buffer::InsertBefore(Offset offset, const base::string16& text) {
   DCHECK(IsValidPosn(offset));
   DCHECK(!IsReadOnly());
@@ -170,15 +166,6 @@ void Buffer::RemoveObserver(BufferMutationObserver* observer) const {
 void Buffer::ResetRevision(int revision) {
   DCHECK_NO_STATIC_RANGE();
   revision_ = revision;
-}
-
-void Buffer::SetStyle(Offset start, Offset end, const css::Style& style) {
-  if (end > GetEnd())
-    end = GetEnd();
-  if (start == end)
-    return;
-  DCHECK_LT(start, end);
-  intervals_->SetStyle(start, end, style);
 }
 
 void Buffer::StartUndoGroup(const base::string16& name) {

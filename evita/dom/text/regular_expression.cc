@@ -68,11 +68,6 @@ class EnumChar final {
 
   int GetPosn() const { return offset_.value(); }
 
-  const css::Style& GetStyle() const {
-    DCHECK(!AtEnd());
-    return buffer_->GetStyleAt(offset_);
-  }
-
   text::Offset GoTo(text::Offset lPosn) { return offset_ = lPosn; }
   void Next() {
     DCHECK(!AtEnd());
@@ -115,11 +110,6 @@ class EnumCharRev final {
   int GetPosn() const {
     DCHECK(!AtEnd());
     return offset_.value();
-  }
-
-  const css::Style& GetStyle() const {
-    DCHECK(!AtEnd());
-    return buffer_->GetStyleAt(offset_ - text::OffsetDelta(1));
   }
 
   void Next() {

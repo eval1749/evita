@@ -6,12 +6,13 @@
 #include <vector>
 
 #include "base/strings/string16.h"
+#include "evita/base/strings/atomic_string.h"
 #include "evita/text/layout/line/root_inline_box.h"
 #include "evita/text/layout/line/root_inline_box_cache.h"
 #include "evita/text/layout/text_formatter.h"
 #include "evita/text/models/buffer.h"
 #include "evita/text/models/marker_set.h"
-#include "evita/text/style/models/style.h"
+#include "evita/text/models/static_range.h"
 #include "gtest/gtest.h"
 
 namespace layout {
@@ -74,7 +75,9 @@ void RootInlineBoxCacheTest::SetBounds(const gfx::RectF& new_bounds) {
 TEST_F(RootInlineBoxCacheTest, DidChangeStyle) {
   PopulateCache(L"foo\nbar\nbaz");
   css::Style style(css::Color(255, 0, 0), css::Color(255, 255, 255));
-  buffer()->SetStyle(text::Offset(1), text::Offset(2), style);
+  buffer()->syntax_markers()->InsertMarker(
+      text::StaticRange(*buffer(), text::Offset(1), text::Offset(2)),
+      base::AtomicString(L"keyword"));
   EXPECT_EQ(nullptr, cache()->FindLine(text::Offset(0)));
   EXPECT_EQ(nullptr, cache()->FindLine(text::Offset(1)));
   EXPECT_EQ(lines()[1], cache()->FindLine(text::Offset(4)))

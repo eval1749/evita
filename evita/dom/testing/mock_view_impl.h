@@ -13,7 +13,7 @@
 #include "evita/dom/public/float_rect.h"
 #include "evita/dom/public/tab_data.h"
 #include "evita/dom/public/view_delegate.h"
-#include "gmock/gmock.h"
+#include "testing/gmock/include/gmock/gmock.h"
 
 namespace dom {
 

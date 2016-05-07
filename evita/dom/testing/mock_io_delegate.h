@@ -14,7 +14,7 @@
 #include "base/strings/string_piece.h"
 #include "evita/dom/public/io_delegate.h"
 #include "evita/dom/public/promise.h"
-#include "gmock/gmock.h"
+#include "testing/gmock/include/gmock/gmock.h"
 
 namespace dom {
 

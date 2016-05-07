@@ -9,7 +9,7 @@
 #include "evita/dom/testing/abstract_dom_test.h"
 #include "evita/dom/testing/mock_io_delegate.h"
 #include "evita/dom/testing/mock_view_impl.h"
-#include "gmock/gmock.h"
+#include "testing/gmock/include/gmock/gmock.h"
 
 namespace {
 

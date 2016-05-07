@@ -73,6 +73,18 @@ function highlight(document) {
   }
 }
 
+/**
+ * @param {!TextDocument} document
+ * @return {string}
+ */
+function spellingMarkersOf(document) {
+  /** @const @type {!Array<string>} */
+  const result = [];
+  for (let offset = 0; offset < document.length; ++offset)
+    result.push((document.spellingAt(offset) + '.').substr(0, 1));
+  return result.join('');
+}
+
 function testBracketBackwardTest(t, sample, description = '') {
   t.expect(testFindBracket(sample, -1), description).toEqual(sample);
 }
@@ -175,6 +187,14 @@ testing.test('TextDocument.replace', function(t) {
 
   doc.replace(1, 3, '012');
   t.expect(doc.slice(0), 'replace with longer').toEqual('a012z');
+});
+
+testing.test('TextDocument.setSpelling', function(t) {
+  const doc = new TextDocument();
+  doc.replace(0, 0, 'foo bar baz');
+  doc.setSpelling(4, 7, 2);
+
+  t.expect(spellingMarkersOf(doc)).toEqual('....mmm....');
 });
 
 });

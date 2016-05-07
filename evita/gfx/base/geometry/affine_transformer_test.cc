@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 #include "evita/gfx/base/geometry/affine_transformer.h"
-#include "gtest/gtest.h"
+#include "testing/gtest/include/gtest/gtest.h"
 
 #include "evita/gfx/base/geometry/float_rect.h"
 

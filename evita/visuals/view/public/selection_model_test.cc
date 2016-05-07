@@ -6,7 +6,7 @@
 
 #include "evita/visuals/dom/document.h"
 #include "evita/visuals/dom/text.h"
-#include "gtest/gtest.h"
+#include "testing/gtest/include/gtest/gtest.h"
 
 namespace visuals {
 

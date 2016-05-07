@@ -7,7 +7,7 @@
 
 #include "evita/base/adaptors/reversed.h"
 
-#include "gtest/gtest.h"
+#include "testing/gtest/include/gtest/gtest.h"
 
 namespace base {
 

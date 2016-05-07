@@ -16,7 +16,7 @@
 #include "evita/visuals/layout/root_box.h"
 #include "evita/visuals/layout/simple_box_tree.h"
 #include "evita/visuals/paint/paint_info.h"
-#include "gtest/gtest.h"
+#include "testing/gtest/include/gtest/gtest.h"
 
 namespace visuals {
 

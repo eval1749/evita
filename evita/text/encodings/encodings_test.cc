@@ -7,7 +7,7 @@
 
 #pragma warning(push)
 #pragma warning(disable : 4365 4625 4626 4826)
-#include "gtest/gtest.h"
+#include "testing/gtest/include/gtest/gtest.h"
 #pragma warning(pop)
 
 #include "evita/text/encodings/decoder.h"

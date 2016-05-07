@@ -12,7 +12,7 @@
 #include "evita/visuals/layout/root_box.h"
 #include "evita/visuals/layout/simple_box_tree.h"
 #include "evita/visuals/layout/text_box.h"
-#include "gtest/gtest.h"
+#include "testing/gtest/include/gtest/gtest.h"
 
 namespace visuals {
 

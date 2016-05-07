@@ -13,7 +13,7 @@
 #include "evita/dom/testing/mock_view_impl.h"
 #include "evita/ginx/constructor_template.h"
 #include "evita/ginx/converter.h"
-#include "gtest/gtest.h"
+#include "testing/gtest/include/gtest/gtest.h"
 
 namespace dom {
 

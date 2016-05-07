@@ -22,7 +22,7 @@
 #include "evita/visuals/style/style_tree.h"
 #include "evita/visuals/view/public/selection.h"
 #include "evita/visuals/view/public/view_lifecycle.h"
-#include "gtest/gtest.h"
+#include "testing/gtest/include/gtest/gtest.h"
 
 namespace visuals {
 

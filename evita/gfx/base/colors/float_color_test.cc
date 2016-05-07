@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 #include "evita/gfx/base/colors/float_color.h"
-#include "gtest/gtest.h"
+#include "testing/gtest/include/gtest/gtest.h"
 
 namespace gfx {
 

@@ -9,7 +9,7 @@
 #include "evita/visuals/css/property_set_editor.h"
 #include "evita/visuals/css/values.h"
 #include "evita/visuals/css/values/value.h"
-#include "gtest/gtest.h"
+#include "testing/gtest/include/gtest/gtest.h"
 
 namespace visuals {
 namespace css {

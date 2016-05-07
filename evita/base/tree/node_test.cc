@@ -10,7 +10,7 @@
 #include "evita/base/tree/descendants.h"
 #include "evita/base/tree/descendants_or_self.h"
 #include "evita/base/tree/node.h"
-#include "gtest/gtest.h"
+#include "testing/gtest/include/gtest/gtest.h"
 
 namespace {
 

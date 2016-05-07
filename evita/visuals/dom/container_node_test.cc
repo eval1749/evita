@@ -9,7 +9,7 @@
 #include "evita/visuals/dom/node_editor.h"
 #include "evita/visuals/dom/node_tree_builder.h"
 #include "evita/visuals/dom/text.h"
-#include "gtest/gtest.h"
+#include "testing/gtest/include/gtest/gtest.h"
 
 namespace visuals {
 

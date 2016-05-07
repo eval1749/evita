@@ -17,7 +17,7 @@
 #include "evita/text/models/marker_set.h"
 #include "evita/text/models/static_range.h"
 #include "evita/text/style/computed_style_builder.h"
-#include "gtest/gtest.h"
+#include "testing/gtest/include/gtest/gtest.h"
 
 namespace layout {
 

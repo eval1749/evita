@@ -13,7 +13,7 @@
 #include "evita/text/models/buffer.h"
 #include "evita/text/models/marker_set.h"
 #include "evita/text/models/static_range.h"
-#include "gtest/gtest.h"
+#include "testing/gtest/include/gtest/gtest.h"
 
 namespace layout {
 

@@ -4,7 +4,7 @@
 
 #include "evita/visuals/css/style.h"
 #include "evita/visuals/css/style_builder.h"
-#include "gtest/gtest.h"
+#include "testing/gtest/include/gtest/gtest.h"
 
 namespace visuals {
 namespace css {

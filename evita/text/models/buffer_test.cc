@@ -14,7 +14,7 @@
 #include "evita/text/models/range.h"
 #include "evita/text/models/static_range.h"
 #include "evita/text/style/models/style.h"
-#include "gtest/gtest.h"
+#include "testing/gtest/include/gtest/gtest.h"
 
 namespace {
 

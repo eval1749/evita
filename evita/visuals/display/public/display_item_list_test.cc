@@ -5,7 +5,7 @@
 #include "evita/visuals/display/public/display_item_list.h"
 #include "evita/visuals/display/display_item_list_builder.h"
 #include "evita/visuals/display/public/display_items.h"
-#include "gtest/gtest.h"
+#include "testing/gtest/include/gtest/gtest.h"
 
 namespace visuals {
 

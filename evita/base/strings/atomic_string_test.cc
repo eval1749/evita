@@ -8,7 +8,7 @@
 
 #include "evita/base/strings/atomic_string.h"
 #include "evita/base/strings/atomic_string_factory.h"
-#include "gtest/gtest.h"
+#include "testing/gtest/include/gtest/gtest.h"
 
 namespace base {
 

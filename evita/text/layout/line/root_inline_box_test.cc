@@ -12,7 +12,7 @@
 #include "evita/text/layout/render_font_set.h"
 #include "evita/text/style/computed_style_builder.h"
 #include "evita/text/style/models/style.h"
-#include "gtest/gtest.h"
+#include "testing/gtest/include/gtest/gtest.h"
 
 namespace layout {
 

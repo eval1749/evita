@@ -5,7 +5,7 @@
 #include "evita/visuals/fonts/font_description.h"
 
 #include "evita/visuals/fonts/font_description_builder.h"
-#include "gtest/gtest.h"
+#include "testing/gtest/include/gtest/gtest.h"
 
 namespace visuals {
 

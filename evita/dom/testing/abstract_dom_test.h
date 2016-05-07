@@ -12,7 +12,7 @@
 #include "base/strings/string_piece.h"
 #include "evita/ginx/runner.h"
 #include "evita/ginx/v8.h"
-#include "gtest/gtest.h"
+#include "testing/gtest/include/gtest/gtest.h"
 
 namespace base {
 class FilePath;

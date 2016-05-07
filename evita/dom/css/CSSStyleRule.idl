@@ -3,11 +3,9 @@
 // found in the LICENSE file.
 
 [
-  JsNamespace=visuals,
-  ImplementedAs=JavaScript,
+  JsNamespace = visuals, ImplementedAs = JavaScript,
   Constructor(DOMString selectorText, CSSStyleDeclaration styke)
-]
-interface CSSStyleRule : CSSRule {
+] interface CSSStyleRule : CSSRule {
   attribute DOMString selectorText;
   readonly attribute CSSStyleDeclaration style;
 };

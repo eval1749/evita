@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/dom/visuals/css_style_sheet_handle.h"
+#include "evita/dom/css/css_style_sheet_handle.h"
 
 #include "base/logging.h"
 #include "evita/dom/bindings/exception_state.h"
 #include "evita/dom/converter.h"
+#include "evita/dom/css/css_style.h"
 #include "evita/dom/script_host.h"
-#include "evita/dom/visuals/css_style.h"
 #include "evita/ginx/runner.h"
 #include "evita/visuals/css/rule.h"
 #include "evita/visuals/css/style.h"

@@ -6,10 +6,10 @@ from optparse import OptionParser
 import os
 import sys
 
-# SCRIPT_DIR = evita/dom/visuals/css
+# SCRIPT_DIR = evita/dom/css/scripts
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 ROOT_DIR = os.path.normpath(os.path.join(SCRIPT_DIR, os.pardir, os.pardir,
-                                         os.pardir))
+                                         os.pardir, os.pardir))
 CSS_DIR = os.path.normpath(os.path.join(ROOT_DIR, 'evita', 'visuals', 'css'))
 THIRD_PARTY_DIR = os.path.normpath(os.path.join(ROOT_DIR, 'third_party'))
 sys.path.append(THIRD_PARTY_DIR)
@@ -18,7 +18,8 @@ sys.path.append(CSS_DIR)
 import jinja2
 from css_properties import parse_css_model
 
-TEMPLATES_DIR = os.path.normpath(os.path.join(SCRIPT_DIR, 'templates'))
+TEMPLATES_DIR = os.path.normpath(
+    os.path.join(SCRIPT_DIR, os.pardir, 'templates'))
 
 ######################################################################
 #

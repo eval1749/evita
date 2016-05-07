@@ -8,7 +8,7 @@
 #include <limits>
 #include <sstream>
 
-#include "evita/dom/visuals/css_value_parsers.h"
+#include "evita/dom/css/css_value_parsers.h"
 
 #include "base/strings/string_util.h"
 #include "base/strings/stringprintf.h"

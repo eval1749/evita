@@ -7,13 +7,6 @@ import("//evita/dom/testing/js_test.gni")
 
 source_set("visuals") {
   sources = [
-    "$target_gen_dir/css_value_simple_parsers.cc",
-    "css_style.cc",
-    "css_style.h",
-    "css_style_sheet_handle.cc",
-    "css_style_sheet_handle.h",
-    "css_value_parsers.cc",
-    "css_value_parsers.h",
     "node_handle.cc",
     "node_handle.h",
   ]
@@ -23,42 +16,12 @@ source_set("visuals") {
   ]
 
   deps = [
-    ":css_properties",
     ":visuals_externs",
-  ]
-}
-
-action("css_properties") {
-  script = "make_css_style.py"
-
-  inputs = [
-    "//evita/visuals/css/properties.in",
-    "//evita/visuals/css/css_properties.py",
-    "templates/CSSStyleDeclaration.idl",
-    "templates/css_style_declaration.js",
-    "templates/css_value_simple_parsers.cc",
-  ]
-
-  outputs = [
-    "$target_gen_dir/CSSStyleDeclaration.idl",
-    "$target_gen_dir/css_style_declaration.js",
-    "$target_gen_dir/css_value_simple_parsers.cc",
-  ]
-
-  args = [
-    "--output-directory",
-    rebase_path("$target_gen_dir"),
-    rebase_path("//evita/visuals/css/properties.in", root_build_dir),
   ]
 }
 
 js_module_externs("visuals_externs") {
   sources = [
-    "$target_gen_dir/CSSStyleDeclaration.idl",
-    "CSSRule.idl",
-    "CSSRuleBuilder.idl",
-    "CSSStyleRule.idl",
-    "CSSStyleSheet.idl",
     "DOMTokenList.idl",
     "Document.idl",
     "Element.idl",
@@ -67,7 +30,7 @@ js_module_externs("visuals_externs") {
     "Text.idl",
   ]
   deps = [
-    ":css_properties",
+    "//evita/dom/css:css_externs",
   ]
 }
 
@@ -75,7 +38,6 @@ js_test("test_files") {
   test_name = "visuals"
 
   data = [
-    "css_style_sheet_test.js",
     "dom_token_list_test.js",
     "node_test.js",
     "shape_test.js",

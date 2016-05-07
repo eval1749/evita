@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/dom/visuals/css_value_parsers.h"
+#include "evita/dom/css/css_value_parsers.h"
 
 #include "evita/base/maybe.h"
 #include "evita/visuals/css/values.h"

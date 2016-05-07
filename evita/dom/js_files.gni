@@ -57,19 +57,20 @@ js_lib_files = [
   "unicode/unicode.js",
 
   "visuals/visuals.js",
+
+  "$root_gen_dir/evita/dom/css/css_style_declaration.js",
+  "css/css_rule.js",
+  "css/css_style_rule.js",
+  "css/css_style_sheet.js",
+  "css/css_rule_builder.js",
+
   "visuals/node.js",
-  "$root_gen_dir/evita/dom/visuals/css_style_declaration.js",
-  "visuals/css_rule.js",
-  "visuals/css_style_rule.js",
-  "visuals/css_style_sheet.js",
   "visuals/dom_token_list.js",
   "visuals/element.js",
   "visuals/image.js",
   "visuals/shape.js",
   "visuals/text.js",
   "visuals/document.js",
-
-  "visuals/css_rule_builder.js",
 
   "windows/text_document_state.js",
   "windows/point.js",

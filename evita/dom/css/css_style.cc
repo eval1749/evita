@@ -4,13 +4,13 @@
 
 #include <sstream>
 
-#include "evita/dom/visuals/css_style.h"
+#include "evita/dom/css/css_style.h"
 
 #include "evita/base/maybe.h"
 #include "evita/dom/bindings/exception_state.h"
 #include "evita/dom/converter.h"
-#include "evita/dom/visuals/css_style_sheet_handle.h"
-#include "evita/dom/visuals/css_value_parsers.h"
+#include "evita/dom/css/css_style_sheet_handle.h"
+#include "evita/dom/css/css_value_parsers.h"
 #include "evita/visuals/css/properties.h"
 #include "evita/visuals/css/style.h"
 #include "evita/visuals/css/style_editor.h"

@@ -16,10 +16,12 @@ js_module("launchpad") {
     "//evita/dom/text/simple_text_document_set_observer_externs.js",
     "//evita/dom/text/text_document_externs.js",
     "//evita/dom/visuals/visuals_externs.js",
-    "$root_gen_dir/evita/dom/visuals/visuals_externs.js",
     "//evita/dom/windows/visual_window_externs.js",
+    "$root_gen_dir/evita/dom/css/css_externs.js",
+    "$root_gen_dir/evita/dom/visuals/visuals_externs.js",
   ]
   deps = [
+    "//evita/dom/css:css_externs",
     "//evita/dom/visuals:visuals_externs",
   ]
 }

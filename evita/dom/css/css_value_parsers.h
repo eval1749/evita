@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_DOM_VISUALS_CSS_VALUE_PARSERS_H_
-#define EVITA_DOM_VISUALS_CSS_VALUE_PARSERS_H_
+#ifndef EVITA_DOM_CSS_CSS_VALUE_PARSERS_H_
+#define EVITA_DOM_CSS_CSS_VALUE_PARSERS_H_
 
 #include "base/strings/string16.h"
 #include "base/strings/string_piece.h"
@@ -29,4 +29,4 @@ base::string16 UnparseString(const visuals::css::String& value);
 
 }  // namespace dom
 
-#endif  // EVITA_DOM_VISUALS_CSS_VALUE_PARSERS_H_
+#endif  // EVITA_DOM_CSS_CSS_VALUE_PARSERS_H_

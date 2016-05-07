@@ -84,6 +84,7 @@ source_set("core") {
     "//evita/dom/components/imaging",
     "//evita/dom/components/win_registry",
     "//evita/dom/components/win_resource",
+    "//evita/dom/css",
     "//evita/dom/encodings",
     "//evita/dom/forms",
     "//evita/dom/os",
@@ -156,7 +157,7 @@ js_module("global_module") {
   deps = [
     "//evita/dom/bindings:bindings_externs_js",
     "//evita/dom/components/highlights:token_state_machines",
-    "//evita/dom/visuals:css_properties",
+    "//evita/dom/css:css_properties",
   ]
 }
 
@@ -196,6 +197,7 @@ test("evita_dom_tests") {
     "//evita:application",
     "//evita/dom/base:test_files",
     "//evita/dom/components:test_files",
+    "//evita/dom/css:test_files",
     "//evita/dom/encodings:test_files",
     "//evita/dom/events:test_files",
     "//evita/dom/forms:test_files",

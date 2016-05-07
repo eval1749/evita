@@ -1,0 +1,77 @@
+# Copyright 2016 Project Vogue. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//evita/build/js_module_externs.gni")
+import("//evita/dom/testing/js_test.gni")
+
+source_set("css") {
+  sources = [
+    "$target_gen_dir/css_value_simple_parsers.cc",
+    "css_style.cc",
+    "css_style.h",
+    "css_style_sheet_handle.cc",
+    "css_style_sheet_handle.h",
+    "css_value_parsers.cc",
+    "css_value_parsers.h",
+  ]
+
+  public_deps = [
+    "//evita/visuals/css",
+  ]
+
+  deps = [
+    ":css_externs",
+    ":css_properties",
+  ]
+}
+
+action("css_properties") {
+  script = "scripts/make_css_style.py"
+
+  inputs = [
+    script,
+    "//evita/visuals/css/properties.in",
+    "//evita/visuals/css/css_properties.py",
+    "templates/CSSStyleDeclaration.idl",
+    "templates/css_style_declaration.js",
+    "templates/css_value_simple_parsers.cc",
+  ]
+
+  outputs = [
+    "$target_gen_dir/CSSStyleDeclaration.idl",
+    "$target_gen_dir/css_style_declaration.js",
+    "$target_gen_dir/css_value_simple_parsers.cc",
+  ]
+
+  args = [
+    "--output-directory",
+    rebase_path("$target_gen_dir"),
+    rebase_path("//evita/visuals/css/properties.in"),
+  ]
+}
+
+js_module_externs("css_externs") {
+  sources = [
+    "$target_gen_dir/CSSStyleDeclaration.idl",
+    "CSSRule.idl",
+    "CSSRuleBuilder.idl",
+    "CSSStyleRule.idl",
+    "CSSStyleSheet.idl",
+  ]
+  deps = [
+    ":css_properties",
+  ]
+}
+
+js_test("test_files") {
+  test_name = "css"
+
+  data = [
+    "css_style_sheet_test.js",
+  ]
+
+  deps = [
+    "//evita/dom/testing:test_support",
+  ]
+}

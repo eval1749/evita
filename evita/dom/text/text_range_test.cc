@@ -472,23 +472,6 @@ TEST_F(TextRangeTest, moveStartWhile) {
   EXPECT_SCRIPT_EQ("...|abc", "testIt('...|abc', 'x', -1)");
 }
 
-TEST_F(TextRangeTest, setSpelling) {
-  EXPECT_SCRIPT_VALID(
-      "var doc1 = TextDocument.new('spelling');"
-      "var range1 = new TextRange(doc1);"
-      "range1.text = 'foo bar baz';"
-      "range1.start = 4;"
-      "range1.end = 7;"
-      "range1.setSpelling(2);");
-  EXPECT_SCRIPT_EQ("", "doc1.spellingAt(0)");
-  EXPECT_SCRIPT_EQ("", "doc1.spellingAt(3)");
-  EXPECT_SCRIPT_EQ("misspelled", "doc1.spellingAt(4)");
-  EXPECT_SCRIPT_EQ("misspelled", "doc1.spellingAt(5)");
-  EXPECT_SCRIPT_EQ("misspelled", "doc1.spellingAt(6)");
-  EXPECT_SCRIPT_EQ("", "doc1.spellingAt(7)");
-  EXPECT_SCRIPT_EQ("", "doc1.spellingAt(8)");
-}
-
 TEST_F(TextRangeTest, set_start_end) {
   EXPECT_SCRIPT_VALID(
       "var doc1 = TextDocument.new('text');"

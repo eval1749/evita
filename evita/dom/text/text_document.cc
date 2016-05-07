@@ -70,8 +70,8 @@ base::string16 TextDocument::spelling_at(
   return base::string16();
 }
 
-base::string16 TextDocument::syntax_at(text::Offset offset,
-                                       ExceptionState* exception_state) const {
+base::string16 TextDocument::SyntaxAt(text::Offset offset,
+                                      ExceptionState* exception_state) const {
   if (!IsValidPosition(offset, exception_state))
     return base::string16();
   if (auto marker = buffer_->syntax_markers()->GetMarkerAt(offset))

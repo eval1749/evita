@@ -53,8 +53,8 @@ class TextDocument final : public ginx::Scriptable<TextDocument, EventTarget> {
   base::string16 spelling_at(text::Offset offset,
                              ExceptionState* exception_state) const;
   // Returns syntax at |offset|.
-  base::string16 syntax_at(text::Offset offset,
-                           ExceptionState* exception_state) const;
+  base::string16 SyntaxAt(text::Offset offset,
+                          ExceptionState* exception_state) const;
 
   bool CheckCanChange(ExceptionState* exception_state) const;
   void ClearUndo();

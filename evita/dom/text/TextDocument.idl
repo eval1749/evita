@@ -116,8 +116,7 @@
   [RaisesException] void setSyntax(TextOffset start, TextOffset end,
                                    DOMString syntax);
 
-  [ ImplementedAs = syntax_at, RaisesException ] DOMString syntaxAt(
-      TextOffset offset);
+  [RaisesException] DOMString syntaxAt(TextOffset offset);
 
   long undo(TextOffset offset);
 };

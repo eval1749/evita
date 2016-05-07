@@ -9,9 +9,6 @@
 
 namespace text {
 
-class Buffer;
-class Offset;
-class OffsetDelta;
 class StaticRange;
 
 //////////////////////////////////////////////////////////////////////

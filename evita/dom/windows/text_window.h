@@ -23,6 +23,7 @@ class TextView;
 }
 
 namespace text {
+class Buffer;
 class MarkerSet;
 }
 

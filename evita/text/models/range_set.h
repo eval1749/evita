@@ -11,6 +11,7 @@
 
 namespace text {
 
+class Buffer;
 class Range;
 class StaticRange;
 

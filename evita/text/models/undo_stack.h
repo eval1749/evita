@@ -13,6 +13,8 @@
 
 namespace text {
 
+class Buffer;
+class Offset;
 class StaticRange;
 class UndoStep;
 

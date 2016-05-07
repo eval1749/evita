@@ -107,8 +107,7 @@
 
   [ImplementedAs = StartUndoGroup] void startUndoGroup_(DOMString name);
 
-  [ ImplementedAs = spelling_at, RaisesException ] DOMString spellingAt(
-      TextOffset offset);
+  [RaisesException] DOMString spellingAt(TextOffset offset);
 
   [RaisesException] void setSpelling(TextOffset start, TextOffset end,
                                      long spelling);

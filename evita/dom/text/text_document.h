@@ -50,8 +50,8 @@ class TextDocument final : public ginx::Scriptable<TextDocument, EventTarget> {
   int revision() const;
   void set_read_only(bool read_only) const;
   // Returns spelling at |offset|.
-  base::string16 spelling_at(text::Offset offset,
-                             ExceptionState* exception_state) const;
+  base::string16 SpellingAt(text::Offset offset,
+                            ExceptionState* exception_state) const;
   // Returns syntax at |offset|.
   base::string16 SyntaxAt(text::Offset offset,
                           ExceptionState* exception_state) const;

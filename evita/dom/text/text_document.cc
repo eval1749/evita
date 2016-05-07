@@ -60,9 +60,8 @@ void TextDocument::set_read_only(bool read_only) const {
   buffer_->SetReadOnly(read_only);
 }
 
-base::string16 TextDocument::spelling_at(
-    text::Offset offset,
-    ExceptionState* exception_state) const {
+base::string16 TextDocument::SpellingAt(text::Offset offset,
+                                        ExceptionState* exception_state) const {
   if (!IsValidPosition(offset, exception_state))
     return base::string16();
   if (auto marker = buffer_->spelling_markers()->GetMarkerAt(offset))

@@ -192,7 +192,7 @@ testing.test('TextDocument.replace', function(t) {
 testing.test('TextDocument.setSpelling', function(t) {
   const doc = new TextDocument();
   doc.replace(0, 0, 'foo bar baz');
-  doc.setSpelling(4, 7, 2);
+  doc.setSpelling(4, 7, 'misspelled');
 
   t.expect(spellingMarkersOf(doc)).toEqual('....mmm....');
 });

@@ -16,92 +16,76 @@ enum RangeCase {
 };
 
 [
-    RaisesException=Constructor,
-    CustomConstructor((TextDocument or TextRange) document_or_range),
-    CustomConstructor((TextDocument or TextRange) document_or_range, long offset),
-    CustomConstructor((TextDocument or TextRange) document_or_range, long start_offset,
-                      long end_offset),
-]
-interface TextRange {
+  RaisesException = Constructor,
+  CustomConstructor((TextDocument or TextRange)document_or_range),
+  CustomConstructor((TextDocument or TextRange)document_or_range, long offset),
+  CustomConstructor((TextDocument or TextRange)document_or_range,
+                    long start_offset,
+                    long end_offset),
+] interface TextRange {
   readonly attribute boolean collapsed;
   readonly attribute TextDocument document;
 
-  [RaisesException=Setter]
-  attribute long end;
+  [RaisesException = Setter] attribute long end;
 
-  [ImplementedAs=JavaScript]
-  readonly attribute long length;
+  [ImplementedAs = JavaScript] readonly attribute long length;
 
-  [RaisesException=Setter]
-  attribute long start;
+  [RaisesException = Setter] attribute long start;
 
-  [RaisesException=Setter]
-  attribute DOMString text;
+  [RaisesException = Setter] attribute DOMString text;
 
   // TODO(yosin) We should make |analyzeCase()| as global function
-  [ImplementedAs=JavaScript]
-  RangeCase analyzeCase();
+  [ImplementedAs = JavaScript] RangeCase analyzeCase();
 
   // TODO(yosin) We should make |capitalized()| as global function
-  [ImplementedAs=JavaScript]
-  TextRange capitalize();
+  [ImplementedAs = JavaScript] TextRange capitalize();
 
-  [RaisesException]
-  TextRange collapseTo(long offset);
+  [RaisesException] TextRange collapseTo(long offset);
 
-  [ImplementedAs=JavaScript]
-  TextRange delete(Unit unit, optional long count);
+  [ImplementedAs = JavaScript] TextRange delete (Unit unit,
+                                                 optional long count);
 
-  [ImplementedAs=JavaScript]
-  TextRange endOf(Unit unit, optional Alter alter);
+  [ImplementedAs = JavaScript] TextRange endOf(Unit unit, optional Alter alter);
 
-  [RaisesException]
-  void insertBefore(DOMString text);
+  [RaisesException] void insertBefore(DOMString text);
 
-  [ImplementedAs=JavaScript]
-  DOMString[]? match(RegularExpression regexp);
+  [ImplementedAs = JavaScript] DOMString[] ? match(RegularExpression regexp);
 
-  [ImplementedAs=JavaScript]
-  TextRange move(Unit unit, optional long count);
+  [ImplementedAs = JavaScript] TextRange move(Unit unit, optional long count);
 
-  [ImplementedAs=JavaScript]
-  TextRange moveEnd(Unit unit, optional long count);
+  [ImplementedAs = JavaScript] TextRange moveEnd(Unit unit,
+                                                 optional long count);
 
-  [ImplementedAs=JavaScript]
-  TextRange moveEndWhile(DOMString char_set, optional long count);
+  [ImplementedAs = JavaScript] TextRange moveEndWhile(DOMString char_set,
+                                                      optional long count);
 
-  [ImplementedAs=JavaScript]
-  TextRange moveStart(Unit unit, optional long count);
+  [ImplementedAs = JavaScript] TextRange moveStart(Unit unit,
+                                                   optional long count);
 
-  [ImplementedAs=JavaScript]
-  TextRange moveStartWhile(DOMString char_set, optional long count);
+  [ImplementedAs = JavaScript] TextRange moveStartWhile(DOMString char_set,
+                                                        optional long count);
 
-  [ImplementedAs=JavaScript]
-  //  @param {string|!function(string, ...):string} replacement
-  DOMString[]? replace(RegularExpression regexp, Object replacement);
+  [ImplementedAs = JavaScript]
+      //  @param {string|!function(string, ...):string} replacement
+      DOMString[]
+      ? replace(RegularExpression regexp, Object replacement);
 
-  [RaisesException]
-  void setSpelling(long spelling);
+  [RaisesException] void setSpelling(DOMString spelling);
 
-  [RaisesException]
-  void setSyntax(DOMString syntax);
+  [RaisesException] void setSyntax(DOMString syntax);
 
-  [ImplementedAs=JavaScript]
-  TextRange startOf(Unit unit, optional Alter alter);
+  [ImplementedAs = JavaScript] TextRange startOf(Unit unit,
+                                                 optional Alter alter);
 
   // TODO(yosin) We should make |toLocaleLowerCase()| as global function
-  [ImplementedAs=JavaScript]
-  TextRange toLocaleLowerCase();
+  [ImplementedAs = JavaScript] TextRange toLocaleLowerCase();
 
   // TODO(yosin) We should make |toLocaleUpperCase()| as global function
-  [ImplementedAs=JavaScript]
-  TextRange toLocaleUpperCase();
+  [ImplementedAs = JavaScript] TextRange toLocaleUpperCase();
 
   // TODO(yosin) We should make |toLowerCase()| as global function
-  [ImplementedAs=JavaScript]
-  TextRange toLowerCase();
+  [ImplementedAs = JavaScript] TextRange toLowerCase();
 
   // TODO(yosin) We should make |toUpperCase()| as global function
-  [ImplementedAs=JavaScript]
-  TextRange toUpperCase();
+  [ImplementedAs = JavaScript] TextRange toUpperCase();
 };

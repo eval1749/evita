@@ -165,28 +165,12 @@ void TextDocument::Replace(text::Offset start,
 
 void TextDocument::SetSpelling(text::Offset start,
                                text::Offset end,
-                               int spelling_code,
+                               const base::string16& spelling,
                                ExceptionState* exception_state) {
-  struct Local {
-    static base::AtomicString MapToSpelling(int spelling_code) {
-      switch (spelling_code) {
-        case text::Spelling::None:
-          return base::AtomicString();
-        case text::Spelling::Corrected:
-          return css::StyleSelector::normal();
-        case text::Spelling::Misspelled:
-          return css::StyleSelector::misspelled();
-        case text::Spelling::BadGrammar:
-          return css::StyleSelector::bad_grammar();
-      }
-      return base::AtomicString();
-    }
-  };
   if (!IsValidNonEmptyRange(start, end, exception_state))
     return;
   buffer()->spelling_markers()->InsertMarker(
-      text::StaticRange(*buffer(), start, end),
-      Local::MapToSpelling(spelling_code));
+      text::StaticRange(*buffer(), start, end), base::AtomicString(spelling));
 }
 
 void TextDocument::SetSyntax(text::Offset start,

@@ -55,7 +55,8 @@ class TextRange final : public ginx::Scriptable<TextRange> {
       int start,
       int end,
       ExceptionState* exception_state);
-  void SetSpelling(int spelling, ExceptionState* exception_state) const;
+  void SetSpelling(const base::string16& spelling,
+                   ExceptionState* exception_state) const;
   void SetSyntax(const base::string16& syntax,
                  ExceptionState* exception_state) const;
 

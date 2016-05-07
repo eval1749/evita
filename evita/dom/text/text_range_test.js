@@ -41,7 +41,7 @@ testing.test('TextRange.setSpelling', function(t) {
   const doc = new TextDocument();
   doc.replace(0, 0, 'foo bar baz');
   const range = new TextRange(doc, 4, 7);
-  range.setSpelling(2);
+  range.setSpelling('misspelled');
 
   t.expect(spellingMarkersOf(doc)).toEqual('....mmm....');
 });

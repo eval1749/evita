@@ -75,7 +75,7 @@ class TextDocument final : public ginx::Scriptable<TextDocument, EventTarget> {
   text::Offset Redo(text::Offset position);
   void SetSpelling(text::Offset start,
                    text::Offset end,
-                   int spelling,
+                   const base::string16& spelling,
                    ExceptionState* exception_state);
   void SetSyntax(text::Offset start,
                  text::Offset end,

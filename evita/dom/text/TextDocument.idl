@@ -110,7 +110,7 @@
   [RaisesException] DOMString spellingAt(TextOffset offset);
 
   [RaisesException] void setSpelling(TextOffset start, TextOffset end,
-                                     long spelling);
+                                     DOMString spelling);
 
   [RaisesException] void setSyntax(TextOffset start, TextOffset end,
                                    DOMString syntax);

@@ -9,13 +9,13 @@ goog.require('unicode');
 
 goog.scope(function() {
 /**
- * @enum {number}
+ * @enum {string}
  */
 const Spelling = {
-  NONE: 0,
-  CORRECT: 1,
-  MISSPELLED: 2,
-  DEBUG: 3  // green wave
+  NONE: '',
+  CORRECT: 'correct',
+  MISSPELLED: 'misspelled',
+  DEBUG: 'debug',
 };
 
 /** @const @type {number} */

@@ -116,7 +116,7 @@ TextRange* TextRange::NewTextRange(
   return new TextRange(document, start, end);
 }
 
-void TextRange::SetSpelling(int spelling_code,
+void TextRange::SetSpelling(const base::string16& spelling_code,
                             ExceptionState* exception_state) const {
   if (collapsed()) {
     exception_state->ThrowError("Can't set spelling for collapsed range.");

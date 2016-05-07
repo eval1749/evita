@@ -29,8 +29,11 @@ js_module_externs("visuals_externs") {
     "Node.idl",
     "Text.idl",
   ]
+  references = [
+    "$root_gen_dir/evita/dom/css/CSSStyleDeclaration.idl",
+  ]
   deps = [
-    "//evita/dom/css:css_externs",
+    "//evita/dom/css:css_properties",
   ]
 }
 

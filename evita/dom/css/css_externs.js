@@ -3,8 +3,3 @@
 // found in the LICENSE file.
 
 goog.provide('css');
-
-// TODO(eval1749): We should teach IDL to JS externs about JavaScript namespace
-// of |CSSStyleDeclaration| for "Element.idl".
-/** @constructor */
-var CSSStyleDeclaration = css.CSSStyleDeclaration;

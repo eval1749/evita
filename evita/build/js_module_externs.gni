@@ -7,15 +7,25 @@ import("//evita/build/compiled_idl.gni")
 # Parameters:
 #   deps (optional)
 #   externs (optional)
+#       A list of JS externs into final output.
 #   output_dir (optional, default is "${target_gen_dir}"
 #   output_name (optional, default "${target_name}.js")
+#   references (optional)
+#       A list of IDL files used in |sources|. This tells JavaScript namespace
+#       to compiler.
 #   sources (required)
 #
 # Example:
 #   js_module_externs("foo_externs") {
-#     sources = [
+#     sources = [       # Files in |sources| goes "foo_externs.js"
 #       "Foo.idl",
 #       "Bar.idl","
+#     ]
+#     references = [    # Files in |references| aren't in "foo_externs.js"
+#       "Baz.idl",      # interface Bar has JSNamespace attribute
+#     ]
+#     externs = [       # Additional JS externs
+#       "foo_externs.js",
 #     ]
 #     deps = [
 #       "//foo/bar",
@@ -46,26 +56,31 @@ template("js_module_externs") {
     _output_name = target_name + ".js"
   }
 
-  if (defined(invoker.externs)) {
-    externs = invoker.externs
-  } else {
-    externs = []
+  idl_files = invoker.sources
+  if (defined(invoker.references)) {
+      # Additional IDL files to specify JavaScript namespace of interfaces.
+      idl_files += invoker.references
   }
 
+  # |idl_js_externs| holds files which content into final output "*_externs.js"
   idl_js_externs = process_file_template(
           invoker.sources,
           [ "$target_gen_dir/{{source_name_part}}_externs.js" ])
 
+  if (defined(invoker.externs)) {
+    idl_js_externs += invoker.externs
+  }
+
   compiled_idl("compiled_idl") {
     visibility = [ ":*" ]
-    sources = invoker.sources
+    sources = idl_files
     deps = target_deps
   }
 
   action_foreach("js_externs_individual") {
     visibility = [ ":*" ]
     script = "//evita/dom/bindings/scripts/idl_to_js_externs.py"
-    sources = invoker.sources
+    sources = idl_files
     inputs = [
       "//evita/dom/bindings/scripts/idl_to_js_externs.py",
       "//evita/dom/bindings/scripts/code_generator_js.py",
@@ -95,9 +110,9 @@ template("js_module_externs") {
 
   action(target_name) {
     output_name = "${_output_dir}/${_output_name}"
-    response_file_contents = rebase_path(externs + idl_js_externs)
+    response_file_contents = rebase_path(idl_js_externs)
     script = "//evita/dom/bindings/scripts/concatenate.py"
-    inputs = [ script ] + externs + idl_js_externs
+    inputs = [ script ] + idl_js_externs
     outputs = [
       output_name,
     ]

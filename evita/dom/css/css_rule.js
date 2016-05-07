@@ -16,7 +16,7 @@ class CSSRule {
     /** @const @type {CSSRule} */
     this.parentRule_ = null;
 
-    /** @type {visuals.CSSStyleSheet} */
+    /** @type {css.CSSStyleSheet} */
     this.parentStyleSheet_ = null;
   }
 
@@ -26,7 +26,7 @@ class CSSRule {
   /** @return {CSSRule} */
   get parentRule() { return this.parentRule_; }
 
-  /** @return {visuals.CSSStyleSheet} */
+  /** @return {css.CSSStyleSheet} */
   get parentStyleSheet() { return this.parentStyleSheet_; }
 
   /** @return {number} */
@@ -43,5 +43,5 @@ class CSSRule {
 }
 
 /** @constructor */
-visuals.CSSRule = CSSRule;
+css.CSSRule = CSSRule;
 });

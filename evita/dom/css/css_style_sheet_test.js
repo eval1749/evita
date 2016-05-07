@@ -2,20 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-goog.require('visuals');
+goog.require('css');
 
 testing.test('CSSStyleSheet', function(t) {
   /** @constructor */
-  const CSSRule = visuals.CSSRule;
+  const CSSRule = css.CSSRule;
 
   /** @constructor */
-  const CSSStyleDeclaration = visuals.CSSStyleDeclaration;
+  const CSSStyleDeclaration = css.CSSStyleDeclaration;
 
   /** @constructor */
-  const CSSStyleRule = visuals.CSSStyleRule;
+  const CSSStyleRule = css.CSSStyleRule;
 
   /** @constructor */
-  const CSSStyleSheet = visuals.CSSStyleSheet;
+  const CSSStyleSheet = css.CSSStyleSheet;
 
   const styleSheet = new CSSStyleSheet();
   const bodyStyle = new CSSStyleDeclaration();

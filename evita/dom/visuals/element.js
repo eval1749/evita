@@ -7,10 +7,10 @@ goog.provide('visuals.Element');
 goog.scope(function() {
 
 /** @constructor */
-const CSSStyleDeclaration = visuals.CSSStyleDeclaration;
+const CSSStyleDeclaration = css.CSSStyleDeclaration;
 
 /** @constructor */
-const CSSStyleObserver = visuals.CSSStyleObserver;
+const CSSStyleObserver = css.CSSStyleObserver;
 
 /** @constructor */
 const DOMTokenList = visuals.DOMTokenList;

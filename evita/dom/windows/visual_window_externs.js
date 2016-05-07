@@ -5,7 +5,7 @@
 /** @type {!visuals.Document} */
 VisualWindow.prototype.document;
 
-/** @type {!visuals.CSSStyleSheet} */
+/** @type {!css.CSSStyleSheet} */
 VisualWindow.prototype.styleSheet;
 
 /**
@@ -18,7 +18,7 @@ VisualWindow.prototype.hitTest = function(pointX, pointY) {};
 
 /**
  * @param {!visuals.Document} document
- * @param {!visuals.CSSStyleSheet} styleSheet
+ * @param {!css.CSSStyleSheet} styleSheet
  * @return {!VisualWindow}
  */
 VisualWindow.newWindow = function(document, styleSheet) {};

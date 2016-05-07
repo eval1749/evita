@@ -12,10 +12,10 @@ goog.require('windows');
 goog.scope(function() {
 
 /** @constructor */
-const CSSRuleBuilder = visuals.CSSRuleBuilder;
+const CSSRuleBuilder = css.CSSRuleBuilder;
 
 /** @constructor */
-const CSSStyleSheet = visuals.CSSStyleSheet;
+const CSSStyleSheet = css.CSSStyleSheet;
 
 /** @constructor */
 const Document = visuals.Document;

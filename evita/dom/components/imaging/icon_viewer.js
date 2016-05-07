@@ -6,8 +6,8 @@ goog.provide('imaging.iconViewer');
 
 goog.scope(function() {
 
-const CSSRuleBuilder = visuals.CSSRuleBuilder;
-const CSSStyleSheet = visuals.CSSStyleSheet;
+const CSSRuleBuilder = css.CSSRuleBuilder;
+const CSSStyleSheet = css.CSSStyleSheet;
 const Document = visuals.Document;
 
 /** @return {!Document} */

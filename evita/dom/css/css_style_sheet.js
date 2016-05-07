@@ -2,12 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-goog.provide('visuals.CSSStyleSheet');
-
 goog.scope(function() {
 
 /** @constructor */
-const CSSRule = visuals.CSSRule;
+const CSSRule = css.CSSRule;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -93,9 +91,9 @@ class CSSStyleSheet {
 }
 
 /** @constructor */
-visuals.CSSStyleSheet = CSSStyleSheet;
+css.CSSStyleSheet = CSSStyleSheet;
 });
 
 // TODO(eval1749): Export for |VisualWindow|.
 /** @constructor */
-var CSSStyleSheet = visuals.CSSStyleSheet;
+var CSSStyleSheet = css.CSSStyleSheet;

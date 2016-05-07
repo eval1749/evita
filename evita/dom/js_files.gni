@@ -56,14 +56,14 @@ js_lib_files = [
   "trace_logger.js",
   "unicode/unicode.js",
 
-  "visuals/visuals.js",
-
+  "css/css.js",
   "$root_gen_dir/evita/dom/css/css_style_declaration.js",
   "css/css_rule.js",
   "css/css_style_rule.js",
   "css/css_style_sheet.js",
   "css/css_rule_builder.js",
 
+  "visuals/visuals.js",
   "visuals/node.js",
   "visuals/dom_token_list.js",
   "visuals/element.js",

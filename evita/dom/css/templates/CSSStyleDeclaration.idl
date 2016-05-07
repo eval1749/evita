@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 [
-  JsNamespace=visuals,
+  JsNamespace=css,
   ImplementedAs=JavaScript,
 ]
 interface CSSStyleDeclaration {

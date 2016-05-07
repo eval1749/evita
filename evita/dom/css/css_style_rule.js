@@ -5,14 +5,14 @@
 goog.scope(function() {
 
 /** @constructor */
-const CSSRule = visuals.CSSRule;
+const CSSRule = css.CSSRule;
 
 /** @constructor */
-const CSSStyleDeclaration = visuals.CSSStyleDeclaration;
+const CSSStyleDeclaration = css.CSSStyleDeclaration;
 
 /**
  * CSSStyleRule
- * @implements {visuals.CSSStyleObserver}
+ * @implements {css.CSSStyleObserver}
  */
 class CSSStyleRule extends CSSRule {
   /**
@@ -64,9 +64,9 @@ class CSSStyleRule extends CSSRule {
 }
 
 /** @constructor */
-visuals.CSSStyleRule = CSSStyleRule;
+css.CSSStyleRule = CSSStyleRule;
 
 });
 
 /** @constructor */
-var CSSStyleRule = visuals.CSSStyleRule;
+var CSSStyleRule = css.CSSStyleRule;

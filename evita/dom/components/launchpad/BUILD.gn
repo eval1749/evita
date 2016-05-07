@@ -12,6 +12,7 @@ js_module("launchpad") {
     "//evita/dom/base/base_externs.js",
     "//evita/dom/base/base64_externs.js",
     "//evita/dom/components/imaging/imaging_externs.js",
+    "//evita/dom/css/css_externs.js",
     "//evita/dom/jslib/windows_externs.js",
     "//evita/dom/text/simple_text_document_set_observer_externs.js",
     "//evita/dom/text/text_document_externs.js",

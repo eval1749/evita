@@ -5,7 +5,7 @@
 goog.scope(function() {
 
 /** @constructor */
-const CSSStyleObserver = visuals.CSSStyleObserver;
+const CSSStyleObserver = css.CSSStyleObserver;
 
 /** @const @type {!Array.<string>} */
 const CSS_PROPERTY_NAMES = [
@@ -181,5 +181,5 @@ class CSSStyleDeclaration {
 }
 
 /** @constructor */
-visuals.CSSStyleDeclaration = CSSStyleDeclaration;
+css.CSSStyleDeclaration = CSSStyleDeclaration;
 });

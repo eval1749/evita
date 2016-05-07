@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 [
-  JsNamespace = visuals, ImplementedAs = JavaScript, Constructor()
+  JsNamespace = css, ImplementedAs = JavaScript, Constructor()
 ] interface CSSStyleSheet {
   readonly attribute CSSRule[] cssRules;
   readonly attribute DOMString type;

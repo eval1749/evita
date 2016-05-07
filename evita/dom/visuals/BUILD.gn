@@ -3,6 +3,7 @@
 # found in the LICENSE file.
 
 import("//evita/build/js_module_externs.gni")
+import("//evita/dom/testing/js_test.gni")
 
 source_set("visuals") {
   sources = [
@@ -70,12 +71,8 @@ js_module_externs("visuals_externs") {
   ]
 }
 
-source_set("test_files") {
-  testonly = true
-
-  sources = [
-    "visuals_test.cc",
-  ]
+js_test("test_files") {
+  test_name = "visuals"
 
   data = [
     "css_style_sheet_test.js",

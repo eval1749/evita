@@ -178,6 +178,11 @@ class CSSStyleDeclaration {
     this.rawStyle_.set(id, newValue);
     this.notifyChanged();
   }
+
+  /** @override */
+  toString() {
+    return `CSSStyleDeclaration({${this.cssText}})`;
+  }
 }
 
 /** @constructor */

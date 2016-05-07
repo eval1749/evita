@@ -61,6 +61,12 @@ class CSSStyleRule extends CSSRule {
     console.assert(this.index_ >= 0);
     this.parentStyleSheet_.didChangeCSSRule(this.index_);
   }
+
+  /** @override */
+  toString() {
+    return `CSSStyleRule({selector: '${this.selectorText}',` +
+           ` style: ${this.style_})`;
+  }
 }
 
 /** @constructor */

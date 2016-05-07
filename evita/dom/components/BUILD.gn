@@ -33,6 +33,7 @@ js_test("test_files") {
     "imaging/imaging_test.js",
     "modes/modes_test.js",
     "repl/console_test.js",
+    "repl/stringify_test.js",
     "win_resource/win_resource_test.js",
   ]
 }

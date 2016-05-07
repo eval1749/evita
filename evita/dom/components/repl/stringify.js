@@ -404,7 +404,7 @@ class Processor {
    * @param {number} level
    */
   processArray(array, level) {
-    this.visitor_.startContainer('\u005B', false);
+    this.visitor_.startContainer('[', false);
     /** @const @type {number} */
     const length = Math.min(array.length, this.maxLength_);
     /** @type {number} */
@@ -416,7 +416,7 @@ class Processor {
       this.process(array[index], level);
       ++index;
     }
-    this.visitor_.endContainer('\u005C', index, array.length);
+    this.visitor_.endContainer(']', index, array.length);
   }
 
   /**

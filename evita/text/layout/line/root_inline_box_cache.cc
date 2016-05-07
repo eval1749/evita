@@ -172,9 +172,9 @@ void RootInlineBoxCache::DidInsertBefore(const text::StaticRange& range) {
 }
 
 // text::MarkerSetObserver
-void RootInlineBoxCache::DidChangeMarker(text::Offset start, text::Offset end) {
+void RootInlineBoxCache::DidChangeMarker(const text::StaticRange& range) {
   TRACE_EVENT0("layout", "RootInlineBoxCache::DidChangeMarker");
-  RemoveOverwapLines(text::StaticRange(buffer_, start, end));
+  RemoveOverwapLines(range);
 }
 
 }  // namespace layout

@@ -186,25 +186,28 @@ void Editor::Update(Marker* marker, Offset new_start, Offset new_end) {
 //
 class Notifier final {
  public:
-  explicit Notifier(base::ObserverList<MarkerSetObserver>* observers);
+  Notifier(const Buffer& buffer,
+           base::ObserverList<MarkerSetObserver>* observers);
   ~Notifier();
 
   void NotifyChange(Offset start, Offset end);
 
  private:
+  const Buffer& buffer_;
   std::vector<std::pair<Offset, Offset>> changes_;
   base::ObserverList<MarkerSetObserver>* const observers_;
 
   DISALLOW_COPY_AND_ASSIGN(Notifier);
 };
 
-Notifier::Notifier(base::ObserverList<MarkerSetObserver>* observers)
-    : observers_(observers) {}
+Notifier::Notifier(const Buffer& buffer,
+                   base::ObserverList<MarkerSetObserver>* observers)
+    : buffer_(buffer), observers_(observers) {}
 
 Notifier::~Notifier() {
   for (const auto& change : changes_) {
-    FOR_EACH_OBSERVER(MarkerSetObserver, *observers_,
-                      DidChangeMarker(change.first, change.second));
+    const auto& range = StaticRange(buffer_, change.first, change.second);
+    FOR_EACH_OBSERVER(MarkerSetObserver, *observers_, DidChangeMarker(range));
   }
 }
 
@@ -284,7 +287,7 @@ void MarkerSet::Impl::InsertMarker(const StaticRange& range,
   const auto end = range.end();
 
   SimpleEditor editor(&markers_);
-  Notifier notifier(&observers_);
+  Notifier notifier(buffer_, &observers_);
 
   // Step 1: Collect markers in range; we'll remove them
   std::vector<Marker*> markers;

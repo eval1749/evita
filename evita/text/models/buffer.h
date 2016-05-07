@@ -105,7 +105,7 @@ class Buffer final : public BufferCore, public MarkerSetObserver {
   void UpdateChangeTick();
 
   // Implements MarkerSetObserver
-  void DidChangeMarker(Offset start, Offset end) final;
+  void DidChangeMarker(const StaticRange& range) final;
 
   base::ObserverList<BufferMutationObserver> observers_;
   std::unique_ptr<LineNumberCache> line_number_cache_;

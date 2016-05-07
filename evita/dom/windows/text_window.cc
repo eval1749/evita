@@ -554,8 +554,8 @@ void TextWindow::DidInsertBefore(const text::StaticRange& range) {
 }
 
 // text::MarkerSetObserver
-void TextWindow::DidChangeMarker(text::Offset start, text::Offset end) {
-  text_view_->DidChangeStyle(text::StaticRange(*buffer(), start, end));
+void TextWindow::DidChangeMarker(const text::StaticRange& range) {
+  text_view_->DidChangeStyle(range);
   RequestAnimationFrame();
 }
 

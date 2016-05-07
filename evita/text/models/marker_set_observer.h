@@ -7,7 +7,7 @@
 
 namespace text {
 
-class Offset;
+class StaticRange;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -17,7 +17,7 @@ class MarkerSetObserver {
  public:
   virtual ~MarkerSetObserver();
 
-  virtual void DidChangeMarker(Offset start, Offset end) = 0;
+  virtual void DidChangeMarker(const StaticRange& range) = 0;
 
  protected:
   MarkerSetObserver();

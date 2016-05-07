@@ -52,7 +52,7 @@ class RootInlineBoxCache final : public text::BufferMutationObserver,
   void DidInsertBefore(const text::StaticRange& range) final;
 
   // text::MarkerSetObserver
-  void DidChangeMarker(text::Offset start, text::Offset end) final;
+  void DidChangeMarker(const text::StaticRange& range) final;
 
   gfx::RectF bounds_;
   const text::Buffer& buffer_;

@@ -113,7 +113,7 @@ class TextWindow final : public ginx::Scriptable<TextWindow, Window>,
   void DidInsertBefore(const text::StaticRange& range) final;
 
   // text::MarkerSetObserver
-  void DidChangeMarker(text::Offset start, text::Offset end) final;
+  void DidChangeMarker(const text::StaticRange& range) final;
 
   // text::SelectionChangeObserver
   void DidChangeSelection() final;

@@ -178,10 +178,8 @@ void Buffer::UpdateChangeTick() {
 }
 
 // MarkerSetObserver
-void Buffer::DidChangeMarker(Offset start, Offset end) {
-  DCHECK_LT(start, end);
+void Buffer::DidChangeMarker(const StaticRange& range) {
   ++version_;
-  const auto& range = StaticRange(*this, start, end);
   FOR_EACH_OBSERVER(BufferMutationObserver, observers_, DidChangeStyle(range));
 }
 

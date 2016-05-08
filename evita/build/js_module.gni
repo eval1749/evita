@@ -9,9 +9,10 @@ import("//tools/grit/grit_rule.gni")
 # JavaScript source files.
 #
 # Parameters:
-#   externs (options)
+#   externs (optional)
 #       A list of JavaScript extern files in addition to DOM global objects.
 #   is_global (optional, default is false)
+#   output_name (optional, default is target_name)
 #   sources (required)
 #
 # Example:
@@ -41,8 +42,14 @@ template("js_module") {
     target_deps = []
   }
 
-  checked_js = "${target_name}_checked.js"
-  module_obj = "$target_out_dir/${target_name}.jsobj"
+  if (defined(invoker.output_name)) {
+    output_name = invoker.output_name
+  } else {
+    output_name = target_name
+  }
+
+  checked_js = "${output_name}_checked.js"
+  module_obj = "$target_out_dir/${output_name}.jsobj"
 
   checked_js_module(checked_js) {
     forward_variables_from(invoker,
@@ -50,7 +57,7 @@ template("js_module") {
                              "externs",
                              "is_global",
                            ])
-    output_name = invoker.target_name
+    output_name = output_name
     sources = invoker.sources
     deps = target_deps
   }

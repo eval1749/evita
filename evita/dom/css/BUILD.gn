@@ -2,6 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//evita/build/js_module.gni")
 import("//evita/build/js_module_externs.gni")
 import("//evita/dom/testing/js_test.gni")
 
@@ -19,7 +20,35 @@ source_set("css") {
   public_deps = [
     "//evita/visuals/css",
   ]
+  deps = [
+    ":css_properties",
+  ]
+}
 
+js_module("module") {
+  output_name = "css"
+  files = [
+    "css.js",
+    "parser/css_token.js",
+    "parser/css_tokenizer.js",
+    "$target_gen_dir/css_property.js",
+    "$target_gen_dir/css_value.js",
+    "parser/css_property_builder.js",
+    "parser/css_property_parser.js",
+    "$target_gen_dir/css_style_declaration.js",
+    "css_rule.js",
+    "css_style_rule.js",
+    "css_style_sheet.js",
+    "css_rule_builder.js",
+    "parser/css_parser.js",
+  ]
+  externs = [
+    "//evita/dom/base/base_externs.js",
+    "//evita/dom/base/logging_externs.js",
+    "//evita/dom/base/logger_externs.js",
+    "//evita/dom/unicode/unicode_enums.js",
+    "//evita/dom/unicode/unicode_externs.js",
+  ]
   deps = [
     ":css_externs",
     ":css_properties",

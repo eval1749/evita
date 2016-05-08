@@ -47,7 +47,7 @@ bool Global::LoadGlobalScript(ginx::Runner* runner) {
 
 bool Global::LoadModule(ginx::Runner* runner, base::StringPiece name) {
   const auto& archive =
-      base::ResourceBundle::GetInstance()->GetRawDatResource(COMPONETNS_JSLIB);
+      base::ResourceBundle::GetInstance()->GetRawDatResource(MODULES_JSLIB);
   if (!archive.data()) {
     LOG(FATAL) << "No javascript library in resource.";
     return false;

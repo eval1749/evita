@@ -2,6 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//evita/build/js_library.gni")
 import("//evita/build/js_module.gni")
 import("//evita/dom/idl_files.gni")
 import("//evita/dom/js_files.gni")
@@ -35,8 +36,33 @@ grit("resources") {
   ]
   deps = [
     ":global_module",
-    "//evita/dom/components",
+    ":modules",
     "//evita/dom/global:global_strings",
+  ]
+}
+
+js_library("modules") {
+  sources = [
+    "${target_out_dir}/components/commands/commands.jsobj",
+    "${target_out_dir}/components/dynamic_abbrev/dynamic_abbrev.jsobj",
+    "${target_out_dir}/components/find_and_replace/find_and_replace.jsobj",
+    "${target_out_dir}/components/highlights/highlights.jsobj",
+    "${target_out_dir}/components/launchpad/launchpad.jsobj",
+    "${target_out_dir}/components/modes/modes.jsobj",
+    "${target_out_dir}/components/spell_checker/spell_checker.jsobj",
+    "${target_out_dir}/css/css.jsobj",
+    "${target_out_dir}/visuals/visuals.jsobj",
+  ]
+  deps = [
+    "components/commands",
+    "components/dynamic_abbrev",
+    "components/find_and_replace",
+    "components/highlights",
+    "components/launchpad",
+    "components/modes",
+    "components/spell_checker",
+    "css:module",
+    "visuals:module",
   ]
 }
 

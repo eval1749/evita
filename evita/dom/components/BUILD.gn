@@ -2,29 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//evita/build/js_library.gni")
 import("//evita/dom/testing/js_test.gni")
-
-js_library("components") {
-  sources = [
-    "${target_out_dir}/commands/commands.jsobj",
-    "${target_out_dir}/dynamic_abbrev/dynamic_abbrev.jsobj",
-    "${target_out_dir}/find_and_replace/find_and_replace.jsobj",
-    "${target_out_dir}/highlights/highlights.jsobj",
-    "${target_out_dir}/launchpad/launchpad.jsobj",
-    "${target_out_dir}/modes/modes.jsobj",
-    "${target_out_dir}/spell_checker/spell_checker.jsobj",
-  ]
-  deps = [
-    "commands",
-    "dynamic_abbrev",
-    "find_and_replace",
-    "highlights",
-    "launchpad",
-    "modes",
-    "spell_checker",
-  ]
-}
 
 js_test("test_files") {
   test_name = "components"

@@ -4,6 +4,8 @@
 
 goog.provide('visuals.Element');
 
+goog.require('css.CSSStyleDeclaration');
+
 goog.scope(function() {
 
 /** @constructor */
@@ -94,7 +96,7 @@ class Element extends Node {
   reloadRawStyle(newRawStyle) {
     if (!this.style_) {
       this.rawStyle_ = new Map();
-      this.style_ = new CSSStyleDeclaration(this.rawStyle_, this);
+      this.style_ = CSSStyleDeclaration.createInternal(this.rawStyle_, this);
     }
     this.rawStyle_.clear();
     for (const key of newRawStyle.keys())

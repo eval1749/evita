@@ -9,8 +9,8 @@
     <includes>
       <include file="${target_out_dir}/global_module.jsobj"
                name="GLOBAL_MODULE_JSOBJ" type="BINDATA"/>
-      <include file="${target_out_dir}/components/components.jslib"
-               name="COMPONETNS_JSLIB" type="BINDATA"/>
+      <include file="${target_out_dir}/modules.jslib"
+               name="MODULES_JSLIB" type="BINDATA"/>
     </includes>
   </release>
 </grit>

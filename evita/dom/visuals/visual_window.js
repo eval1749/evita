@@ -24,7 +24,7 @@ function hitTest(point_x, point_y) {
 
 /**
  * @param {!Document} document
- * @param {!CSSStyleSheet} styleSheet
+ * @param {!css.CSSStyleSheet} styleSheet
  * @return {!VisualWindow}
  */
 function newWindow(document, styleSheet) {
@@ -44,7 +44,7 @@ function getDocument() {
 
 /**
  * @this {!VisualWindow}
- * @return {!CSSStyleSheet}
+ * @return {!css.CSSStyleSheet}
  */
 function getStyleSheet() {
   return this.styleSheet_;
@@ -66,7 +66,7 @@ Object.defineProperties(VisualWindow, {
 /** @type {!TextDocument} */
 VisualWindow.prototype.document;
 
-/** @type {!CSSStyleSheet} */
+/** @type {!css.CSSStyleSheet} */
 VisualWindow.prototype.styleSheet;
 
 /**
@@ -78,7 +78,7 @@ VisualWindow.prototype.hitTest;
 
 /**
  * @param {!Document} document
- * @param {!CSSStyleSheet} styleSheet
+ * @param {!css.CSSStyleSheet} styleSheet
  * @return {!VisualWindow}
  */
 VisualWindow.newWindow;

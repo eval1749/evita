@@ -2,6 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//evita/build/js_module.gni")
 import("//evita/build/js_module_externs.gni")
 import("//evita/dom/testing/js_test.gni")
 
@@ -16,7 +17,31 @@ source_set("visuals") {
   ]
 
   deps = [
+    ":module",
+  ]
+}
+
+js_module("module") {
+  output_name = "visuals"
+  files = [
+    "visuals.js",
+    "node.js",
+    "dom_token_list.js",
+    "element.js",
+    "image.js",
+    "shape.js",
+    "text.js",
+    "document.js",
+    "visual_window.js",
+  ]
+  externs = [
+    "//evita/dom/css/css_externs.js",
+    "$root_gen_dir/evita/dom/css/css_externs.js",
+    "//evita/dom/css/css_internal_externs.js",
+  ]
+  deps = [
     ":visuals_externs",
+    "//evita/dom/css:css_externs",
   ]
 }
 
@@ -29,9 +54,7 @@ js_module_externs("visuals_externs") {
     "Node.idl",
     "Text.idl",
   ]
-  references = [
-    "$root_gen_dir/evita/dom/css/CSSStyleDeclaration.idl",
-  ]
+  references = [ "$root_gen_dir/evita/dom/css/CSSStyleDeclaration.idl" ]
   deps = [
     "//evita/dom/css:css_properties",
   ]

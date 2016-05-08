@@ -16,6 +16,8 @@ js_lib_files = [
   "base/singleton.js",
   "base/strings/string_util.js",
 
+  "unicode/unicode.js",
+
   "text/simple_mutation_observer.js",
 
   "bracket.js",
@@ -54,30 +56,6 @@ js_lib_files = [
   "text/regular_expression.js",
   "timers/timer.js",
   "trace_logger.js",
-  "unicode/unicode.js",
-
-  "css/css.js",
-  "css/parser/css_token.js",
-  "css/parser/css_tokenizer.js",
-  "$root_gen_dir/evita/dom/css/css_property.js",
-  "$root_gen_dir/evita/dom/css/css_value.js",
-  "css/parser/css_property_builder.js",
-  "css/parser/css_property_parser.js",
-  "$root_gen_dir/evita/dom/css/css_style_declaration.js",
-  "css/css_rule.js",
-  "css/css_style_rule.js",
-  "css/css_style_sheet.js",
-  "css/css_rule_builder.js",
-  "css/parser/css_parser.js",
-
-  "visuals/visuals.js",
-  "visuals/node.js",
-  "visuals/dom_token_list.js",
-  "visuals/element.js",
-  "visuals/image.js",
-  "visuals/shape.js",
-  "visuals/text.js",
-  "visuals/document.js",
 
   "windows/text_document_state.js",
   "windows/point.js",
@@ -85,7 +63,6 @@ js_lib_files = [
   "windows/tab_data.js",
   "windows/text_selection.js",
   "windows/text_window.js",
-  "windows/visual_window.js",
   "windows/window.js",
 
   "components/imaging/icon_util_win.js",

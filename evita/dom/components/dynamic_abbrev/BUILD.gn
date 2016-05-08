@@ -5,7 +5,5 @@
 import("//evita/build/js_module.gni")
 
 js_module("dynamic_abbrev") {
-  sources = [
-    "dynamic_abbrev.js",
-  ]
+  files = [ "dynamic_abbrev.js" ]
 }

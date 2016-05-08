@@ -5,9 +5,7 @@
 import("//evita/build/js_module.gni")
 
 js_module("launchpad") {
-  sources = [
-    "launchpad.js",
-  ]
+  files = [ "launchpad.js" ]
   externs = [
     "//evita/dom/base/base_externs.js",
     "//evita/dom/base/base64_externs.js",

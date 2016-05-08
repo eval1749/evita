@@ -5,9 +5,7 @@
 import("//evita/build/js_module.gni")
 
 js_module("spell_checker") {
-  sources = [
-    "spell_checker.js",
-  ]
+  files = [ "spell_checker.js" ]
   externs = [
     "//evita/dom/jslib/task_scheduler_externs.js",
     "//evita/dom/text/text_externs.js",

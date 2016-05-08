@@ -166,16 +166,16 @@ source_set("v8_helper") {
 # TODO(eval1749): We should move "global_module" to "//evita/dom/global"
 js_module("global_module") {
   is_global = true
-  sources = [
-              "global.js",
-              "goog.js",
-              "closure_compiler_workaround.js",
-              "enums.js",
-              "events/event_enums.js",
-              "strings_en_US.js",
-              "unicode/unicode_enums.js",
-              "windows/window_enums.js",
-            ] + js_lib_files
+  files = [
+            "global.js",
+            "goog.js",
+            "closure_compiler_workaround.js",
+            "enums.js",
+            "events/event_enums.js",
+            "strings_en_US.js",
+            "unicode/unicode_enums.js",
+            "windows/window_enums.js",
+          ] + js_lib_files
   externs = [
     "//evita/dom/components/clipboard/clipboard_externs.js",
     "//evita/dom/os/os_externs.js",

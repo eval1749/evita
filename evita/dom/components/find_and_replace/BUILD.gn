@@ -5,7 +5,7 @@
 import("//evita/build/js_module.gni")
 
 js_module("find_and_replace") {
-  sources = [
+  files = [
     "find_and_replace.js",
     "find_and_replace_commands.js",
   ]
@@ -15,6 +15,7 @@ js_module("find_and_replace") {
     #"//evita/dom/text/simple_text_document_set_observer_externs.js",
     #"//evita/dom/text/simple_mutation_observer_externs.js",
     "//evita/dom/text/text_document_externs.js",
+
     # TODO(eval1749): We should move strings to resource.
     "//evita/dom/strings_en_US.js",
     "//evita/dom/unicode/unicode_enums.js",

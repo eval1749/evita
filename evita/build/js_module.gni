@@ -15,8 +15,6 @@ import("//tools/grit/grit_rule.gni")
 #       A list of JavaScript files into module pack.
 #   is_global (optional, default is false)
 #   output_name (optional, default is target_name)
-#   sources (optional)
-#       Deprecated. Use "file" instead.
 #
 # Note: Since "gn format" sorts contents of "sources" variable and order of
 # files in module is important, we should not use "sources" to specify files
@@ -40,13 +38,9 @@ import("//tools/grit/grit_rule.gni")
 #     ]
 #   }
 template("js_module") {
-  if (defined(invoker.files)) {
-    files = invoker.files
-  } else {
-    assert(defined(invoker.sources),
-           "Need sources in $target_name listing the js files.")
-    files = invoker.sources
-  }
+  assert(defined(invoker.files),
+         "Need files in $target_name listing the js files.")
+  files = invoker.files
 
   if (defined(invoker.deps)) {
     target_deps = invoker.deps

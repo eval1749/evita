@@ -11,9 +11,16 @@ import("//tools/grit/grit_rule.gni")
 # Parameters:
 #   externs (optional)
 #       A list of JavaScript extern files in addition to DOM global objects.
+#   files (optional)
+#       A list of JavaScript files into module pack.
 #   is_global (optional, default is false)
 #   output_name (optional, default is target_name)
-#   sources (required)
+#   sources (optional)
+#       Deprecated. Use "file" instead.
+#
+# Note: Since "gn format" sorts contents of "sources" variable and order of
+# files in module is important, we should not use "sources" to specify files
+# into a module.
 #
 # Example:
 #   Make "${target_out_dir}/foo_module.bin" containing "foo.js", "foo_init.js",
@@ -33,8 +40,13 @@ import("//tools/grit/grit_rule.gni")
 #     ]
 #   }
 template("js_module") {
-  assert(defined(invoker.sources),
-         "Need sources in $target_name listing the js files.")
+  if (defined(invoker.files)) {
+    files = invoker.files
+  } else {
+    assert(defined(invoker.sources),
+           "Need sources in $target_name listing the js files.")
+    files = invoker.sources
+  }
 
   if (defined(invoker.deps)) {
     target_deps = invoker.deps
@@ -58,15 +70,15 @@ template("js_module") {
                              "is_global",
                            ])
     output_name = output_name
-    sources = invoker.sources
+    sources = files
     deps = target_deps
   }
 
   action(target_name) {
-    response_file_contents = rebase_path(invoker.sources)
+    response_file_contents = rebase_path(files)
     output_name = "$module_obj"
     script = "//evita/build/scripts/make_js_module_obj.py"
-    inputs = invoker.sources
+    inputs = files
     outputs = [
       output_name,
     ]

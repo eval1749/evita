@@ -5,8 +5,6 @@
 import("//evita/build/js_module.gni")
 
 js_module("highlights") {
-  # Note: To avoid alphabetical sort of |sources| by "gn format", we use
-  # auxiliary variable to |file| to keep file order in module object file.
   files = [
     "highlights.js",
     "painter.js",
@@ -41,7 +39,6 @@ js_module("highlights") {
     "langs/xml_painter.js",
     "langs/html_painter.js",
   ]
-  sources = files
   externs = [
     "//evita/dom/base/ordered_set_externs.js",
     "//evita/dom/base/logger_externs.js",

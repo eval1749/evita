@@ -75,6 +75,7 @@ js_test("test_files") {
     "css_property_test.js",
     "css_style_sheet_test.js",
     "css_value_test.js",
+    "parser/css_property_parser_test.js",
     "parser/css_tokenizer_test.js",
   ]
 

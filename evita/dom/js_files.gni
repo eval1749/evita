@@ -61,6 +61,8 @@ js_lib_files = [
   "css/parser/css_tokenizer.js",
   "$root_gen_dir/evita/dom/css/css_property.js",
   "$root_gen_dir/evita/dom/css/css_value.js",
+  "css/parser/css_property_builder.js",
+  "css/parser/css_property_parser.js",
   "$root_gen_dir/evita/dom/css/css_style_declaration.js",
   "css/css_rule.js",
   "css/css_style_rule.js",

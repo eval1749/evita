@@ -4,6 +4,8 @@
 
 goog.provide('imaging.iconViewer');
 
+goog.require('css');
+
 goog.scope(function() {
 
 const CSSRuleBuilder = css.CSSRuleBuilder;
@@ -37,24 +39,19 @@ function createDocument() {
 
 /** @return {!CSSStyleSheet} */
 function createStyleSheet() {
-  const styleSheet = new CSSStyleSheet();
-  styleSheet.appendRule(
-      CSSRuleBuilder.selector('body')
-          .display('block')
-          .fontSize(13)
-          .margin(0, 4, 0, 4)
-          .padding(0, 4, 0, 4)
-          .build());
-  styleSheet.appendRule(CSSRuleBuilder.selector('icon').padding(2).build());
-  styleSheet.appendRule(
-      CSSRuleBuilder.selector('icons').display('block').build());
-  styleSheet.appendRule(
-      CSSRuleBuilder.selector('iconImage').height(40).width(40).build());
-  styleSheet.appendRule(
-      CSSRuleBuilder.selector('iconName').display('block').build());
-  styleSheet.appendRule(
-      CSSRuleBuilder.selector('row').display('block').build());
-  return styleSheet;
+  /** @const @type {string} */
+  const cssText = 'body {\n' +
+      '  display: block;\n' +
+      '  font-size: 13;\n' +
+      '  margin: 0 4 0 4;\n' +
+      '  padding: 0 4 0 4\n' +
+      '}\n' +
+      'icon { padding: 2 }\n' +
+      'icons { display: block }\n' +
+      'iconImage { height: 40; width: 40 }\n' +
+      'iconName { display: block }\n' +
+      'row { display: block }\n';
+  return css.Parser.parse(cssText);
 }
 
 //////////////////////////////////////////////////////////////////////

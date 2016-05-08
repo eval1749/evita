@@ -153,7 +153,10 @@ class Parser extends base.Logger {
         continue;
       switch (state) {
         case 'start':
-          if (token.type === Token.Type.IDENT) {
+          if (token.type === Token.Type.IDENT ||
+              token.type === Token.Type.COLON ||
+              token.type === Token.Type.DCOLON ||
+              token.type === Token.Type.DOT) {
             state = 'selector';
             selectorBuilder.start(token);
             continue;

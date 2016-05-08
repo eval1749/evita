@@ -33,6 +33,14 @@ testing.test('css.Parser.basic', function(t) {
   t.expect(querySelector(styleSheet, 'bar')).toEqual('bar { color: blue; }');
 });
 
+testing.test('css.Parser.classSelector', function(t) {
+  /** @const @type {!CSSStyleSheet} */
+  const styleSheet = Parser.parse('.hover { color: blue}');
+  t.expect(styleSheet.cssRules.length).toEqual(1);
+  t.expect(querySelector(styleSheet, '.hover'))
+      .toEqual('.hover { color: blue; }');
+});
+
 testing.test('css.Parser.notMerge', function(t) {
   /** @const @type {!CSSStyleSheet} */
   const styleSheet = Parser.parse(
@@ -40,6 +48,22 @@ testing.test('css.Parser.notMerge', function(t) {
       'foo {color: blue; background-color: green}');
   t.expect(styleSheet.cssRules.length, "Selectors aren't merged").toEqual(2);
   t.expect(querySelector(styleSheet, 'foo')).toEqual('foo { color: red; }');
+});
+
+testing.test('css.Parser.pseudoClass', function(t) {
+  /** @const @type {!CSSStyleSheet} */
+  const styleSheet = Parser.parse(':hover { color: blue}');
+  t.expect(styleSheet.cssRules.length).toEqual(1);
+  t.expect(querySelector(styleSheet, ':hover'))
+      .toEqual(':hover { color: blue; }');
+});
+
+testing.test('css.Parser.pseudoElement', function(t) {
+  /** @const @type {!CSSStyleSheet} */
+  const styleSheet = Parser.parse('div ::first-letter { color: blue}');
+  t.expect(styleSheet.cssRules.length).toEqual(1);
+  t.expect(querySelector(styleSheet, 'div::first-letter'))
+      .toEqual('div::first-letter { color: blue; }');
 });
 
 });

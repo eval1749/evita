@@ -37,7 +37,9 @@ class CSSStyleDeclaration {
   get cssText() {
     const properties = [];
     for (const id of this.rawStyle_.keys()) {
+      /** @const @type {string} */
       const name = Property.nameOf(id);
+      /** @const @type {string} */
       const value = this.propertyValueOf_(id);
       properties.push(`${name}: ${value};`);
     }

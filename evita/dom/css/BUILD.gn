@@ -39,7 +39,6 @@ js_module("module") {
     "css_rule.js",
     "css_style_rule.js",
     "css_style_sheet.js",
-    "css_rule_builder.js",
     "parser/css_parser.js",
   ]
   externs = [
@@ -88,7 +87,6 @@ js_module_externs("css_externs") {
   sources = [
     "$target_gen_dir/CSSStyleDeclaration.idl",
     "CSSRule.idl",
-    "CSSRuleBuilder.idl",
     "CSSStyleRule.idl",
     "CSSStyleSheet.idl",
   ]

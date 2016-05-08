@@ -170,6 +170,15 @@ class CSSStyleDeclaration {
   toString() {
     return `CSSStyleDeclaration({${this.cssText}})`;
   }
+
+  /**
+   * @param {!Map<number, string>} rawStyle
+   * @param {!CSSStyleObserver} observer
+   * @return {!CSSStyleDeclaration}
+   */
+  static createInternal(rawStyle, observer) {
+    return new CSSStyleDeclaration(rawStyle, observer);
+  }
 }
 
 /** @constructor */

@@ -2,13 +2,25 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/** @const @type {!Object} */
 var goog = {};
 
-/** @param {string} name */
-goog.require = function(name) {
-  if (name in global)
-    return;
-  Editor.loadModule(name);
+/** @param {string} fullName */
+goog.require = function(fullName) {
+  /** @const @type {!Array<string>} */
+  const modulePath = [];
+  /** @type {!Object} */
+  let runner = global;
+  for (const name of fullName.split('.')) {
+    modulePath.push(name);
+    if (!(name in runner)) {
+      Editor.loadModule(modulePath.join('.'));
+      if (!(name in runner))
+        throw new Error(`No such module ${modulePath.join('.')}`);
+    }
+    runner = runner[name];
+  }
+  return runner;
 };
 
 /** @param {string} qualifiedName */

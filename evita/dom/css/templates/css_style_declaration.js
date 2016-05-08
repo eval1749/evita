@@ -5,6 +5,7 @@
 goog.provide('css.CSSStyleDeclaration');
 
 goog.require('css.Property');
+goog.require('css.PropertyParser');
 goog.require('unicode');
 
 goog.scope(function() {
@@ -43,7 +44,16 @@ class CSSStyleDeclaration {
     return properties.join(' ');
   }
 
-  // TODO(eval1749): NYI CSSStyleDeclaration.prototype.cssText setter
+  /**
+   * @param {string} text
+   */
+  set cssText(text) {
+    [...this.rawStyle_.keys()].forEach(id => this.removePropertyById(id));
+    /** @const @type {!css.PropertyParser} */
+    const parser = new css.PropertyParser();
+    for (const property of parser.parse(text))
+      this.setPropertyValue_(property.id, property.value);
+  }
 
 {% for property in properties %}
   /** @return {string} */

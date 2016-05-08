@@ -20,8 +20,7 @@ testing.test('css.Value.basic', function(t) {
   t.expect(Value.isValidFor('#112233', 'color'), 'rgb').toEqual(true);
   t.expect(Value.isValidFor('#11223344', 'color'), 'rgba').toEqual(true);
   t.expect(Value.isValidFor('red', 'color')).toEqual(true);
-  // TODO(eval1749): We should use "currentcolor" as keyword of color.
-  t.expect(Value.isValidFor('current-color', 'color')).toEqual(true);
+  t.expect(Value.isValidFor('currentcolor', 'color')).toEqual(true);
   t.expect(Value.isValidFor('transparent', 'color')).toEqual(true);
 });
 

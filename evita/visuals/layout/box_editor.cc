@@ -32,7 +32,7 @@ namespace {
 gfx::FloatColor ResolveColor(const css::Style& style, const css::Value& value) {
   if (value.is_color())
     return value.as_color_value().value();
-  if (value.is_current_color())
+  if (value.is_currentcolor())
     return style.color().as_color_value().value();
   NOTREACHED() << value;
   return gfx::FloatColor();

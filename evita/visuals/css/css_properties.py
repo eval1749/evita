@@ -224,8 +224,7 @@ class Model(object):
             {
                 'Name': capitalize(keyword),
                 'name': keyword.replace('-', '_'),
-                'text': keyword if keyword != 'current-color'
-                else 'currentColor',
+                'text': keyword,
             }
             for keyword in sorted(keyword for keyword in keywords)
         ]

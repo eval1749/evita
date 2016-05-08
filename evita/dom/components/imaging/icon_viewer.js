@@ -69,7 +69,10 @@ class IconViewer {
     this.window_ = null;
   }
 
-  /** @param {string} fileName */
+  /**
+   * @public
+   * @param {string} fileName
+   */
   run(fileName) {
     this.setupDocument(fileName);
     if (this.window_ !== null)
@@ -146,10 +149,16 @@ class IconViewer {
           iconImage.appendChild(image);
         });
   }
+
+  /**
+   * @public
+   * @param {string} fileName
+   */
+  static run(fileName) { return new IconViewer().run(fileName); }
 }
 
 // Usage:
-// new imaging.IconViewe().run('icon file name');
+// imaging.IconViewer.run('icon file name');
 
 /** @constructor */
 imaging.IconViewer = IconViewer;

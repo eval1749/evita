@@ -85,6 +85,8 @@ Token.Type = {
   STRING: 22,
   TILDE: 23,
   URL: 24,
+  DOT: 25,
+  DCOLON: 26,
 };
 
 /** @constructor */

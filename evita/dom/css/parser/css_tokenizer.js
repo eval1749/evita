@@ -51,7 +51,6 @@ const kPunctuationMap = new Map();
 kPunctuationMap.set(Unicode.ASTERISK, Token.Type.DELIM);
 kPunctuationMap.set(Unicode.DOLLAR_SIGN, Token.Type.DELIM);
 kPunctuationMap.set(Unicode.CIRCUMFLEX_ACCENT, Token.Type.DELIM);
-kPunctuationMap.set(Unicode.COLON, Token.Type.COLON);
 kPunctuationMap.set(Unicode.COMMA, Token.Type.COMMA);
 kPunctuationMap.set(Unicode.LEFT_CURLY_BRACKET, Token.Type.LBRACE);
 kPunctuationMap.set(Unicode.LEFT_PARENTHESIS, Token.Type.LPAREN);
@@ -137,6 +136,11 @@ class Tokenizer extends base.Logger {
           tokenStart = offset;
           if (charCode === Unicode.APOSTROPHE) {
             state = 'string1';
+            continue;
+          }
+          if (charCode === Unicode.COLON) {
+            tokenType = Token.Type.COLON;
+            state = ':';
             continue;
           }
           if (charCode === Unicode.COMMERCIAL_AT) {
@@ -289,7 +293,7 @@ class Tokenizer extends base.Logger {
             state = 'digit.';
             continue;
           }
-          yield newToken(Token.Type.DELIM, source, tokenStart, offset);
+          yield newToken(Token.Type.DOT, source, tokenStart, offset);
           state = 'start';
           --offset;
           continue;
@@ -343,6 +347,17 @@ class Tokenizer extends base.Logger {
             continue;
           }
           yield newToken(Token.Type.OTHER, source, tokenStart, offset);
+          state = 'start';
+          --offset;
+          continue;
+        case ':':
+          if (charCode === Unicode.COLON) {
+            yield newToken(Token.Type.DCOLON, source, tokenStart, offset + 1);
+            tokenType = Token.Type.END;
+            state = 'start';
+            continue;
+          }
+          yield newToken(Token.Type.COLON, source, tokenStart, offset);
           state = 'start';
           --offset;
           continue;

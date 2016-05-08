@@ -70,12 +70,13 @@ testing.test('css.Tokenizer.common', function(t) {
 });
 
 testing.test('css.Tokenizer.delimiter', function(t) {
-  t.expect(testTokenize('.hover')).toEqual('DELIM IDENT END');
+  t.expect(testTokenize('.hover')).toEqual('DOT IDENT END');
   t.expect(testTokenize('&amp')).toEqual('OTHER IDENT END');
   t.expect(testTokenize('%name')).toEqual('OTHER IDENT END');
   t.expect(testTokenize('+name')).toEqual('DELIM IDENT END');
   t.expect(testTokenize('/name')).toEqual('OTHER IDENT END');
   t.expect(testTokenize(':name')).toEqual('COLON IDENT END');
+  t.expect(testTokenize('::name')).toEqual('DCOLON IDENT END');
   t.expect(testTokenize('<name')).toEqual('DELIM IDENT END');
   t.expect(testTokenize('=name')).toEqual('OTHER IDENT END');
   t.expect(testTokenize('>name')).toEqual('OTHER IDENT END');

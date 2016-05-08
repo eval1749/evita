@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+goog.provide('css.CSSStyleRule');
+
 goog.scope(function() {
 
 /** @constructor */
@@ -65,7 +67,7 @@ class CSSStyleRule extends CSSRule {
   /** @override */
   toString() {
     return `CSSStyleRule({selector: '${this.selectorText}',` +
-           ` style: ${this.style_})`;
+        ` style: ${this.style_})`;
   }
 }
 

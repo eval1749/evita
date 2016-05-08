@@ -9,11 +9,11 @@ import string
 import sys
 from css_properties import parse_css_model
 
-# module_path = evita/visuals/css
+# module_path = evita/visuals/css/scripts
 module_path = os.path.dirname(os.path.realpath(__file__))
 
 root_path = os.path.normpath(os.path.join(module_path, os.pardir, os.pardir,
-                                          os.pardir))
+                                          os.pardir, os.pardir))
 third_party_dir = os.path.normpath(os.path.join(root_path, 'third_party'))
 
 # jinja2 is in chromium's third_party directory.
@@ -22,7 +22,8 @@ third_party_dir = os.path.normpath(os.path.join(root_path, 'third_party'))
 sys.path.insert(1, third_party_dir)
 import jinja2
 
-templates_dir = os.path.normpath(os.path.join(module_path, 'templates'))
+templates_dir = os.path.normpath(
+    os.path.join(module_path, os.pardir, 'templates'))
 
 USE_CLANG_FORMAT = False
 

@@ -32,7 +32,7 @@ action("css_properties") {
   inputs = [
     script,
     "//evita/visuals/css/properties.in",
-    "//evita/visuals/css/css_properties.py",
+    "//evita/visuals/css/scripts/css_properties.py",
     "templates/CSSStyleDeclaration.idl",
     "templates/css_property.js",
     "templates/css_style_declaration.js",

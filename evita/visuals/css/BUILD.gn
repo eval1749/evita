@@ -60,12 +60,12 @@ action("properties") {
     "values/*",
   ]
 
-  script = "make_properties.py"
+  script = "scripts/make_properties.py"
 
   inputs = [
-    "css_properties.py",
+    script,
+    "scripts/css_properties.py",
     "properties.in",
-    "make_properties.py",
     "templates/properties.cc",
     "templates/properties.h",
     "templates/properties_forward.h",

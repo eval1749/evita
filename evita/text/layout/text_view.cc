@@ -94,18 +94,6 @@ text::Offset TextView::ComputeVisibleEnd() const {
   return block_->ComputeVisibleEnd();
 }
 
-void TextView::DidChangeStyle(const text::StaticRange& range) {
-  block_->DidChangeStyle(range);
-}
-
-void TextView::DidDeleteAt(const text::StaticRange& range) {
-  block_->DidDeleteAt(range);
-}
-
-void TextView::DidInsertBefore(const text::StaticRange& range) {
-  block_->DidInsertBefore(range);
-}
-
 void TextView::Format(text::Offset text_offset) {
   block_->Format(text_offset);
 }

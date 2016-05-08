@@ -10,6 +10,8 @@
 
 #include "base/memory/ref_counted.h"
 #include "evita/gfx/rect_f.h"
+#include "evita/text/models/buffer_mutation_observer.h"
+#include "evita/text/models/marker_set_observer.h"
 #include "evita/text/models/offset.h"
 #include "evita/text/style/computed_style.h"
 
@@ -29,7 +31,8 @@ class RootInlineBoxCache;
 //
 // BlockFlow
 //
-class BlockFlow final {
+class BlockFlow final : public text::BufferMutationObserver,
+                        public text::MarkerSetObserver {
  public:
   BlockFlow(const text::Buffer& buffer, const text::MarkerSet& markers);
   ~BlockFlow();
@@ -48,11 +51,6 @@ class BlockFlow final {
   // Returns start of line offset containing |text_offset|.
   text::Offset ComputeStartOfLine(text::Offset text_offset);
   text::Offset ComputeVisibleEnd() const;
-
-  // Callback for buffer mutation observer
-  void DidChangeStyle(const text::StaticRange& range);
-  void DidDeleteAt(const text::StaticRange& range);
-  void DidInsertBefore(const text::StaticRange& range);
 
   void Format(text::Offset text_offset);
   // Returns true if text format is taken place.
@@ -86,6 +84,14 @@ class BlockFlow final {
   bool IsShowEndOfDocument() const;
   void MarkDirty();
   void Prepend(RootInlineBox* line);
+
+  // text::BufferMutationObserver
+  void DidChangeStyle(const text::StaticRange& range) final;
+  void DidDeleteAt(const text::StaticRange& range) final;
+  void DidInsertBefore(const text::StaticRange& range) final;
+
+  // text::MarkerSetObserver
+  void DidChangeMarker(const text::StaticRange& range) final;
 
   gfx::RectF bounds_;
   bool dirty_line_point_ = true;

@@ -30,9 +30,14 @@ BlockFlow::BlockFlow(const text::Buffer& text_buffer,
       text_buffer_(text_buffer),
       text_line_cache_(new RootInlineBoxCache(text_buffer, markers)) {
   DCHECK_EQ(&text_buffer, &markers.buffer());
+  markers_.AddObserver(this);
+  text_buffer_.AddObserver(this);
 }
 
-BlockFlow::~BlockFlow() {}
+BlockFlow::~BlockFlow() {
+  markers_.RemoveObserver(this);
+  text_buffer_.RemoveObserver(this);
+}
 
 text::Offset BlockFlow::text_end() const {
   return lines_.back()->text_end();
@@ -107,32 +112,6 @@ text::Offset BlockFlow::ComputeVisibleEnd() const {
       return line->text_end();
   }
   return lines_.front()->text_end();
-}
-
-void BlockFlow::DidChangeStyle(const text::StaticRange& range) {
-  MarkDirty();
-}
-
-void BlockFlow::DidDeleteAt(const text::StaticRange& range) {
-  MarkDirty();
-  if (view_start_ <= range.start()) {
-    // |view_start_| is before deleted range.
-    return;
-  }
-  if (view_start_ <= range.end()) {
-    // |view_start_| is in deleted range.
-    view_start_ = range.start();
-    return;
-  }
-  // |view_start_| is after deleted range.
-  view_start_ -= range.length();
-}
-
-void BlockFlow::DidInsertBefore(const text::StaticRange& range) {
-  MarkDirty();
-  if (view_start_ <= range.start())
-    return;
-  view_start_ = view_start_ + range.length();
 }
 
 bool BlockFlow::DiscardFirstLine() {
@@ -489,6 +468,38 @@ void BlockFlow::SetZoom(float new_zoom) {
 
 bool BlockFlow::ShouldFormat() const {
   return lines_.empty();
+}
+
+// text::BufferMutationObserver
+void BlockFlow::DidChangeStyle(const text::StaticRange& range) {
+  MarkDirty();
+}
+
+void BlockFlow::DidDeleteAt(const text::StaticRange& range) {
+  MarkDirty();
+  if (view_start_ <= range.start()) {
+    // |view_start_| is before deleted range.
+    return;
+  }
+  if (view_start_ <= range.end()) {
+    // |view_start_| is in deleted range.
+    view_start_ = range.start();
+    return;
+  }
+  // |view_start_| is after deleted range.
+  view_start_ -= range.length();
+}
+
+void BlockFlow::DidInsertBefore(const text::StaticRange& range) {
+  MarkDirty();
+  if (view_start_ <= range.start())
+    return;
+  view_start_ = view_start_ + range.length();
+}
+
+// text::MarkerSetObserver
+void BlockFlow::DidChangeMarker(const text::StaticRange& range) {
+  MarkDirty();
 }
 
 }  // namespace layout

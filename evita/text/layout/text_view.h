@@ -61,9 +61,6 @@ class TextView final {
   // Returns fully visible end offset or end of line position if there is only
   // one line.
   text::Offset ComputeVisibleEnd() const;
-  void DidChangeStyle(const text::StaticRange& range);
-  void DidDeleteAt(const text::StaticRange& range);
-  void DidInsertBefore(const text::StaticRange& range);
   void Format(text::Offset text_offset);
   // Returns true if text format is taken place.
   bool FormatIfNeeded();

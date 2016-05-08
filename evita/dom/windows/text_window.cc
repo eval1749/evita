@@ -539,23 +539,19 @@ void TextWindow::DidPressScrollBar() {
 
 // text::BufferMutationObserver
 void TextWindow::DidChangeStyle(const text::StaticRange& range) {
-  text_view_->DidChangeStyle(range);
   RequestAnimationFrame();
 }
 
 void TextWindow::DidDeleteAt(const text::StaticRange& range) {
-  text_view_->DidDeleteAt(range);
   RequestAnimationFrame();
 }
 
 void TextWindow::DidInsertBefore(const text::StaticRange& range) {
-  text_view_->DidInsertBefore(range);
   RequestAnimationFrame();
 }
 
 // text::MarkerSetObserver
 void TextWindow::DidChangeMarker(const text::StaticRange& range) {
-  text_view_->DidChangeStyle(range);
   RequestAnimationFrame();
 }
 

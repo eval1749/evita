@@ -5,14 +5,12 @@
 goog.provide('launchpad');
 
 goog.require('base');
+goog.require('css');
 goog.require('imaging');
 goog.require('visuals');
 goog.require('windows');
 
 goog.scope(function() {
-
-/** @constructor */
-const CSSRuleBuilder = css.CSSRuleBuilder;
 
 /** @constructor */
 const CSSStyleSheet = css.CSSStyleSheet;
@@ -609,54 +607,59 @@ class TextDocumentModel {
  * @return {!CSSStyleSheet}
  */
 function createStyleSheet() {
-  /** @const @type {!CSSStyleSheet} */
-  const styleSheet = new CSSStyleSheet();
-  styleSheet.appendRule(
-      CSSRuleBuilder.selector('body')
-          .display('block')
-          .fontSize(13)
-          .margin(0, 4, 0, 4)
-          .padding(0, 4, 0, 4)
-          .build());
-  // TODO(eval1749): We should set text trimming for cells.
-  styleSheet.appendRule(
-      CSSRuleBuilder.selector('header').display('inline').build());
-  styleSheet.appendRule(
-      CSSRuleBuilder.selector('headerCell')
-          .display('inline')
-          .padding(3)
-          .border('#888', 0, 0, 0, 1)
-          .build());
-  styleSheet.appendRule(
-      CSSRuleBuilder.selector('cell').display('inline').padding(3).build());
-  styleSheet.appendRule(
-      CSSRuleBuilder.selector('icon').height(20).width(20).build());
-  styleSheet.appendRule(
-      CSSRuleBuilder.selector('list').display('block').build());
-  styleSheet.appendRule(
-      CSSRuleBuilder.selector('row')
-          .display('block')
-          .border('#fff', 1)
-          .build());
-  styleSheet.appendRule(
-      // TODO(eval1749): We should use "rgba(r, g, b, a)" instead of hex-form.
-      CSSRuleBuilder.selector('.hover')
-          .backgroundColor('#3399FF10')
-          .border('#3399FF30', 1)
-          .build());
-  styleSheet.appendRule(
-      // TODO(eval1749): We should use "rgba(r, g, b, a)" instead of hex-form.
-      CSSRuleBuilder.selector('.inactiveSelected')
-          .backgroundColor('#BFCDBF33')  // rgba(191, 205, 191, 0.2)
-          .border('#BFCDBF', 1)
-          .build());
-  styleSheet.appendRule(
-      // TODO(eval1749): We should use "rgba(r, g, b, a)" instead of hex-form.
-      CSSRuleBuilder.selector('.activeSelected')
-          .backgroundColor('#3399FF33')  // rgba(51, 153, 255, 0.2)
-          .border('#3399FF30', 1)
-          .build());
-  return styleSheet;
+  // TODO(eval1749): We should move |cssText| to string resource.
+  /** @const @type {string} */
+  const cssText = 'body {\n' +
+      '  display: block;\n' +
+      '  font-size: 13;\n' +
+      '  margin: 0 4 0 4;\n' +
+      '  padding: 0 4 0 4;\n' +
+      '}\n' +
+      '\n' +
+      'header {\n' +
+      '  display: inline;\n' +
+      '}\n' +
+      '\n' +
+      'headerCell {\n' +
+      ' display: inline;\n' +
+      ' padding: 3;\n' +
+      ' border: #888 0 0 0 1;\n' +
+      '}\n' +
+      '\n' +
+      'cell {\n' +
+      '  display: inline;\n' +
+      '  padding: 3;\n' +
+      '}\n' +
+      '\n' +
+      'icon {\n' +
+      '  height: 20;\n' +
+      '  width: 20;\n' +
+      '}\n' +
+      '\n' +
+      'list {\n' +
+      '  display: block;\n' +
+      '}\n' +
+      '\n' +
+      'row {\n' +
+      '  display: block;\n' +
+      '  border: #fff 1;\n' +
+      '}\n' +
+      '\n' +
+      '.hover {\n' +
+      '  background-color: #3399FF10;\n' +
+      '  border: #3399FF30 1;\n' +
+      '}\n' +
+      '\n' +
+      '.inactiveSelected {\n' +
+      '  background-color: #BFCDBF33;  /* rgba(191, 205, 191, 0.2) */\n' +
+      '  border: #BFCDBF 1\n' +
+      '}\n' +
+      '\n' +
+      '.activeSelected {\n' +
+      '  background-color: #3399FF33; /* rgba(51, 153, 255, 0.2) */\n' +
+      '  border: #3399FF30 1;\n' +
+      '}';
+  return css.Parser.parse(cssText);
 }
 
 /** @const @type {!CSSStyleSheet} */
@@ -674,7 +677,6 @@ class LaunchPad {
     this.lastHover_ = null;
     /** @private @type {!ListModel} */
     this.model_ = new ListModel();
-    /** @private @type {!CSSStyleSheet} */
     /** @private @const @type {!VisualWindow} */
     this.window_ = VisualWindow.newWindow(this.model_.document, styleSheet);
 

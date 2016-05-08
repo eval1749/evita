@@ -78,15 +78,13 @@ Token.Type = {
   NUMBER: 15,
   OTHER: 16,
   PERCENT: 17,
-  PLUS: 18,
-  RBRACE: 19,
-  RBRACKET: 20,
-  RPAREN: 21,
-  SEMICOLON: 22,
-  SLASH: 23,
-  STRING: 24,
-  TILDE: 25,
-  URL: 26,
+  RBRACE: 18,
+  RBRACKET: 19,
+  RPAREN: 20,
+  SEMICOLON: 21,
+  STRING: 22,
+  TILDE: 23,
+  URL: 24,
 };
 
 /** @constructor */

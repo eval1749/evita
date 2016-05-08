@@ -23,6 +23,9 @@ function testTokenize(source) {
 
 testing.test('css.Tokenizer.basic', function(t) {
   t.expect(testTokenize('foo')).toEqual('IDENT END');
+  t.expect(testTokenize('_foo')).toEqual('IDENT END');
+  t.expect(testTokenize('-foo')).toEqual('IDENT END');
+  t.expect(testTokenize('--foo')).toEqual('IDENT END');
   t.expect(testTokenize('foo(')).toEqual('FUNCTION END');
   t.expect(testTokenize('123')).toEqual('NUMBER END');
   t.expect(testTokenize('12.3')).toEqual('NUMBER END');
@@ -42,7 +45,7 @@ testing.test('css.Tokenizer.basic', function(t) {
   t.expect(testTokenize('"string"')).toEqual('STRING END');
   t.expect(testTokenize("'string'")).toEqual('STRING END');
   t.expect(testTokenize('/* comment */')).toEqual('END');
-  t.expect(testTokenize('+')).toEqual('PLUS END');
+  t.expect(testTokenize('+')).toEqual('DELIM END');
   t.expect(testTokenize('~')).toEqual('TILDE END');
   t.expect(testTokenize('|')).toEqual('BAR END');
   t.expect(testTokenize('(')).toEqual('LPAREN END');
@@ -62,7 +65,22 @@ testing.test('css.Tokenizer.common', function(t) {
   t.expect(testTokenize('rgb(50%, 50%, 30%)'))
       .toEqual('FUNCTION PERCENT COMMA PERCENT COMMA PERCENT RPAREN END');
   t.expect(testTokenize('rgba(1, 2, 3, 0.1)'))
-      .toEqual('FUNCTION NUMBER COMMA NUMBER COMMA NUMBER COMMA NUMBER RPAREN END');
+      .toEqual(
+          'FUNCTION NUMBER COMMA NUMBER COMMA NUMBER COMMA NUMBER RPAREN END');
+});
+
+testing.test('css.Tokenizer.delimiter', function(t) {
+  t.expect(testTokenize('.hover')).toEqual('DELIM IDENT END');
+  t.expect(testTokenize('&amp')).toEqual('OTHER IDENT END');
+  t.expect(testTokenize('%name')).toEqual('OTHER IDENT END');
+  t.expect(testTokenize('+name')).toEqual('DELIM IDENT END');
+  t.expect(testTokenize('/name')).toEqual('OTHER IDENT END');
+  t.expect(testTokenize(':name')).toEqual('COLON IDENT END');
+  t.expect(testTokenize('<name')).toEqual('DELIM IDENT END');
+  t.expect(testTokenize('=name')).toEqual('OTHER IDENT END');
+  t.expect(testTokenize('>name')).toEqual('OTHER IDENT END');
+  t.expect(testTokenize('?name')).toEqual('OTHER IDENT END');
+  t.expect(testTokenize('~name')).toEqual('TILDE IDENT END');
 });
 
 testing.test('css.Tokenizer.error', function(t) {

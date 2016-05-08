@@ -18,3 +18,12 @@ css.CSSStyleObserver = function() {};
  * @param {!css.CSSStyleDeclaration} style
  */
 css.CSSStyleObserver.didChangeCSSStyle = function(style) {};
+
+/** @constructor */
+css.Parser = function() {};
+
+/**
+ * @param {string} source
+ * @return {!css.CSSStyleSheet}
+ */
+css.Parser.parse = function(source) {};

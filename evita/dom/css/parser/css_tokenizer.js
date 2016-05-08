@@ -10,22 +10,59 @@ goog.require('unicode');
 
 goog.scope(function() {
 
+// Punctuation mapping:
+//  '!'     other
+//  '"'     string
+//  '#'     hash or delim
+//  '$'     delim
+//  '%'     other
+//  '&'     other
+//  '\''    string
+//  '('     lparen
+//  ')'     rparen
+//  '*'     delim
+//  '+'     number or delim
+//  ','     comma
+//  '-'     number or delim
+//  '.'     number or delim
+//  '/'     other
+//  ':'     colon
+//  ';'     semicolon
+//  '<'     delim
+//  '='     other
+//  '>'     other
+//  '?'     other
+//  '@'     at-keyword delim
+//  '`'     other
+//  '['     left-bracket
+//  '\\'    escape or delm
+//  ']'     right-bracket
+//  '_'     other
+//  '{'     left-brace
+//  '|'     bar
+//  '}'     right-brace
+//  '~'     tilde
+
 /** @constructor */
 const Token = css.Token;
 
 /** @const @type {!Map<number, !Token.Type>} */
-const kOperatorMap = new Map();
-kOperatorMap.set(Unicode.COLON, Token.Type.COLON);
-kOperatorMap.set(Unicode.COMMA, Token.Type.COMMA);
-kOperatorMap.set(Unicode.LEFT_CURLY_BRACKET, Token.Type.LBRACE);
-kOperatorMap.set(Unicode.LEFT_PARENTHESIS, Token.Type.LPAREN);
-kOperatorMap.set(Unicode.LEFT_SQUARE_BRACKET, Token.Type.LBRACKET);
-kOperatorMap.set(Unicode.RIGHT_CURLY_BRACKET, Token.Type.RBRACE);
-kOperatorMap.set(Unicode.RIGHT_PARENTHESIS, Token.Type.RPAREN);
-kOperatorMap.set(Unicode.RIGHT_SQUARE_BRACKET, Token.Type.RBRACKET);
-kOperatorMap.set(Unicode.SEMICOLON, Token.Type.SEMICOLON);
-kOperatorMap.set(Unicode.VERTICAL_LINE, Token.Type.BAR);
-kOperatorMap.set(Unicode.TILDE, Token.Type.TILDE);
+const kPunctuationMap = new Map();
+kPunctuationMap.set(Unicode.ASTERISK, Token.Type.DELIM);
+kPunctuationMap.set(Unicode.DOLLAR_SIGN, Token.Type.DELIM);
+kPunctuationMap.set(Unicode.CIRCUMFLEX_ACCENT, Token.Type.DELIM);
+kPunctuationMap.set(Unicode.COLON, Token.Type.COLON);
+kPunctuationMap.set(Unicode.COMMA, Token.Type.COMMA);
+kPunctuationMap.set(Unicode.LEFT_CURLY_BRACKET, Token.Type.LBRACE);
+kPunctuationMap.set(Unicode.LEFT_PARENTHESIS, Token.Type.LPAREN);
+kPunctuationMap.set(Unicode.LEFT_SQUARE_BRACKET, Token.Type.LBRACKET);
+kPunctuationMap.set(Unicode.LESS_THAN_SIGN, Token.Type.DELIM);
+kPunctuationMap.set(Unicode.RIGHT_CURLY_BRACKET, Token.Type.RBRACE);
+kPunctuationMap.set(Unicode.RIGHT_PARENTHESIS, Token.Type.RPAREN);
+kPunctuationMap.set(Unicode.RIGHT_SQUARE_BRACKET, Token.Type.RBRACKET);
+kPunctuationMap.set(Unicode.SEMICOLON, Token.Type.SEMICOLON);
+kPunctuationMap.set(Unicode.VERTICAL_LINE, Token.Type.BAR);
+kPunctuationMap.set(Unicode.TILDE, Token.Type.TILDE);
 
 /**
  * @param {number} charCode
@@ -103,14 +140,17 @@ class Tokenizer extends base.Logger {
             continue;
           }
           if (charCode === Unicode.COMMERCIAL_AT) {
+            tokenType = Token.Type.DELIM;
             state = '@';
             continue;
           }
           if (charCode === Unicode.FULL_STOP) {
-            state = 'digit.';
+            tokenType = Token.Type.DELIM;
+            state = '.';
             continue;
           }
           if (charCode === Unicode.NUMBER_SIGN) {
+            tokenType = Token.Type.DELIM;
             state = '#';
             continue;
           }
@@ -119,6 +159,7 @@ class Tokenizer extends base.Logger {
             continue;
           }
           if (charCode === Unicode.SOLIDUS) {
+            tokenType = Token.Type.DELIM;
             state = '/';
             continue;
           }
@@ -127,11 +168,12 @@ class Tokenizer extends base.Logger {
             continue;
           }
           if (charCode === Unicode.HYPHEN_MINUS) {
+            tokenType = Token.Type.DELIM;
             state = '-';
             continue;
           }
           if (charCode === Unicode.PLUS_SIGN) {
-            tokenType = Token.Type.PLUS;
+            tokenType = Token.Type.DELIM;
             state = '+';
             continue;
           }
@@ -145,11 +187,11 @@ class Tokenizer extends base.Logger {
             state = 'ident';
             continue;
           }
-          if (kOperatorMap.has(charCode)) {
-            tokenType = Token.Type.END;
+          if (kPunctuationMap.has(charCode)) {
             /** @const {!Token.Type} */
-            const type = kOperatorMap.get(charCode) || Token.Type.INVALID;
+            const type = kPunctuationMap.get(charCode) || Token.Type.INVALID;
             yield newToken(/** @type {!Token.Type} */ (type), source, offset);
+            tokenType = Token.Type.END;
             continue;
           }
           tokenType = Token.Type.END;
@@ -242,7 +284,26 @@ class Tokenizer extends base.Logger {
           state = 'start';
           --offset;
           continue;
+        case '.':
+          if (isDigitChar(charCode)) {
+            state = 'digit.';
+            continue;
+          }
+          yield newToken(Token.Type.DELIM, source, tokenStart, offset);
+          state = 'start';
+          --offset;
+          continue;
         case '#':
+          if (isNameChar(charCode)) {
+            tokenType = Token.Type.HASH;
+            state = '#name';
+            continue
+          }
+          yield newToken(Token.Type.DELIM, source, tokenStart, offset);
+          state = 'start';
+          --offset;
+          continue;
+        case '#name':
           if (isNameChar(charCode)) {
             tokenType = Token.Type.HASH;
             continue
@@ -257,7 +318,7 @@ class Tokenizer extends base.Logger {
             state = 'digit';
             continue;
           }
-          yield newToken(Token.Type.PLUS, source, tokenStart, offset);
+          yield newToken(Token.Type.DELIM, source, tokenStart, offset);
           state = 'start';
           --offset;
           continue;
@@ -265,6 +326,11 @@ class Tokenizer extends base.Logger {
           if (isDigitChar(charCode)) {
             tokenType = Token.Type.NUMBER;
             state = 'digit';
+            continue;
+          }
+          if (isNameChar(charCode)) {
+            tokenType = Token.Type.IDENT;
+            state = 'ident';
             continue;
           }
           yield newToken(Token.Type.INVALID, source, tokenStart, offset);
@@ -276,7 +342,7 @@ class Tokenizer extends base.Logger {
             state = 'comment';
             continue;
           }
-          yield newToken(Token.Type.SLASH, source, tokenStart, offset);
+          yield newToken(Token.Type.OTHER, source, tokenStart, offset);
           state = 'start';
           --offset;
           continue;
@@ -285,7 +351,7 @@ class Tokenizer extends base.Logger {
             tokenType = Token.Type.AT;
             continue
           }
-          yield newToken(Token.Type.AT, source, tokenStart, offset);
+          yield newToken(Token.Type.DELIM, source, tokenStart, offset);
           state = 'start';
           --offset;
           continue;

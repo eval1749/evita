@@ -2,30 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+goog.provide('css.CSSStyleDeclaration');
+
+goog.require('css.Property');
+goog.require('unicode');
+
 goog.scope(function() {
 
 /** @constructor */
+const Property = css.Property;
+
+/** @constructor */
 const CSSStyleObserver = css.CSSStyleObserver;
-
-/** @const @type {!Array.<string>} */
-const CSS_PROPERTY_NAMES = [
-  "invalid",
-{% for property in properties %}
-  {{property.text}},
-{% endfor %}
-];
-
-/** @const @type {!Map<string, number>} */
-const CSS_PROPERTY_NAME_ID_MAP = (function() {
-  /** @const @type {!Map<string, number>} */
-  const map = new Map();
-  let id = 0;
-  for (const name of CSS_PROPERTY_NAMES) {
-    map.set(name, id);
-    ++id;
-  }
-  return map;
-})();
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -48,7 +36,7 @@ class CSSStyleDeclaration {
   get cssText() {
     const properties = [];
     for (const id of this.rawStyle_.keys()) {
-      const name = CSSStyleDeclaration.propertyNameOf_(id);
+      const name = Property.nameOf(id);
       const value = this.propertyValueOf_(id);
       properties.push(`${name}: ${value};`);
     }
@@ -84,7 +72,7 @@ class CSSStyleDeclaration {
    */
   getPropertyValue(name) {
     /** @const @type {number} */
-    const id = CSSStyleDeclaration.propertyIdOf_(name);
+    const id = Property.idOf(name);
     if (id < 0)
       return '';
     return this.rawStyle_.get(id) || '';
@@ -107,37 +95,24 @@ class CSSStyleDeclaration {
   }
 
   /**
-   * @private
-   * @param {number} id
-   * @return {string}
-   */
-  static propertyNameOf_(id) {
-    return CSS_PROPERTY_NAMES[id];
-  }
-
-  /**
-   * @private
-   * @param {string} name
-   * @return {number}
-   */
-  static propertyIdOf_(name) {
-    return CSS_PROPERTY_NAME_ID_MAP.get(name) || -1;
-  }
-
-  /**
    * @param {string} name
    * @return {string}
    */
   removeProperty(name) {
     /** @const @type {number} */
-    const id = CSSStyleDeclaration.propertyIdOf_(name);
+    const id = Property.idOf(name);
     if (id < 0)
       return '';
     /** @const @type {string} */
     const value = this.rawStyle_.get(id) || '';
+    this.removePropertyById(id);
+    return value;
+  }
+
+  /** @param {number} id */
+  removePropertyById(id) {
     this.rawStyle_.delete(id);
     this.notifyChanged();
-    return value;
   }
 
   /**
@@ -163,7 +138,7 @@ class CSSStyleDeclaration {
    */
   setPropertyValue(name, newValue) {
     /** @const @type {number} */
-    const id = CSSStyleDeclaration.propertyIdOf_(name);
+    const id = Property.idOf(name);
     if (id < 0)
       return;
     this.setPropertyValue_(id, newValue);

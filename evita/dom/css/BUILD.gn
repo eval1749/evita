@@ -34,13 +34,17 @@ action("css_properties") {
     "//evita/visuals/css/properties.in",
     "//evita/visuals/css/css_properties.py",
     "templates/CSSStyleDeclaration.idl",
+    "templates/css_property.js",
     "templates/css_style_declaration.js",
+    "templates/css_value.js",
     "templates/css_value_simple_parsers.cc",
   ]
 
   outputs = [
     "$target_gen_dir/CSSStyleDeclaration.idl",
+    "$target_gen_dir/css_property.js",
     "$target_gen_dir/css_style_declaration.js",
+    "$target_gen_dir/css_value.js",
     "$target_gen_dir/css_value_simple_parsers.cc",
   ]
 
@@ -68,7 +72,9 @@ js_test("test_files") {
   test_name = "css"
 
   data = [
+    "css_property_test.js",
     "css_style_sheet_test.js",
+    "css_value_test.js",
     "parser/css_tokenizer_test.js",
   ]
 

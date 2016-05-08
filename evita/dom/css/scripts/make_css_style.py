@@ -53,7 +53,9 @@ class Generator(object):
     def generate(self, model):
         template_names = [
             'CSSStyleDeclaration.idl',
+            'css_property.js',
             'css_style_declaration.js',
+            'css_value.js',
             'css_value_simple_parsers.cc',
         ]
         context = self.make_context(model)

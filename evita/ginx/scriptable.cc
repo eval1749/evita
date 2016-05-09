@@ -24,7 +24,7 @@ void AbstractScriptable::Bind(v8::Isolate* isolate,
                                             wrapper_info());
   wrapper->SetAlignedPointerInInternalField(gin::kEncodedValueIndex, this);
   wrapper_.Reset(isolate, wrapper);
-  wrapper_.SetWeak(this, WeakCallback);
+  wrapper_.SetWeak(this, WeakCallback, v8::WeakCallbackType::kParameter);
   gc::Collector::instance()->AddToRootSet(this);
 }
 
@@ -43,7 +43,7 @@ v8::Local<v8::Object> AbstractScriptable::GetWrapper(
 }
 
 void AbstractScriptable::WeakCallback(
-    const v8::WeakCallbackData<v8::Object, AbstractScriptable>& data) {
+    const v8::WeakCallbackInfo<AbstractScriptable>& data) {
   auto const wrappable = data.GetParameter();
   wrappable->wrapper_.Reset();
   gc::Collector::instance()->RemoveFromRootSet(wrappable);

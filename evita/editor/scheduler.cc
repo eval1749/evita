@@ -198,9 +198,11 @@ void Scheduler::ScheduleNextFrame() {
       delay);
 }
 
+// Called when main thread is ready.
+// Note: script thread may schedule tasks before main thread is ready.
 void Scheduler::Start() {
   TRACE_EVENT0("scheduler", "Scheduler::Start");
-  DCHECK_EQ(State::Waiting, state_);
+  DCHECK_NE(State::Running, state_);
 }
 
 }  // namespace editor

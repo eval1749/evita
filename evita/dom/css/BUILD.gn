@@ -19,6 +19,7 @@ source_set("css") {
 
   public_deps = [
     "//evita/visuals/css",
+    "//v8",
   ]
   deps = [
     ":css_properties",

@@ -43,14 +43,6 @@ namespace v8Strings {
 void Init(v8::Isolate* isolate);
 }
 
-base::string16 V8ToString(v8::Local<v8::Value> value) {
-  v8::String::Value string_value(value);
-  if (!string_value.length())
-    return base::string16();
-  return base::string16(reinterpret_cast<base::char16*>(*string_value),
-                        static_cast<size_t>(string_value.length()));
-}
-
 namespace {
 
 void DidRejectPromise(v8::PromiseRejectMessage reject_message) {
@@ -85,7 +77,7 @@ v8::Local<v8::Object> GetClassObject(v8::Isolate* isolate,
   auto const name = object->GetConstructorName();
   auto const value = isolate->GetCurrentContext()->Global()->Get(name);
   if (value.IsEmpty() || !value->IsFunction()) {
-    LOG(0) << "No such class " << V8ToString(name) << ".";
+    LOG(0) << "No such class " << *v8::String::Utf8Value(name) << ".";
     return v8::Local<v8::Object>();
   }
   return value->ToObject();
@@ -145,24 +137,27 @@ void GcPrologueCallback(v8::Isolate* isolate,
 void MessageCallback(v8::Local<v8::Message> message,
                      v8::Local<v8::Value> error) {
   auto text = base::StringPrintf(
-      L"Exception: %ls\n"
-      L"Source: %ls\n"
-      L"Source name: %ls(%d)\n",
-      V8ToString(error).c_str(), V8ToString(message->GetSourceLine()).c_str(),
-      V8ToString(message->GetScriptResourceName()).c_str(),
+      "Exception: %s\n"
+      "Source: %s\n"
+      "Source name: %s(%d)\n",
+      *v8::String::Utf8Value(error),
+      *v8::String::Utf8Value(message->GetSourceLine()),
+      *v8::String::Utf8Value(message->GetScriptResourceName()),
       message->GetLineNumber());
   auto const stack_trace = message->GetStackTrace();
   if (!stack_trace.IsEmpty()) {
-    text += L"Stack trace:\n";
+    text += "Stack trace:\n";
     auto const length = static_cast<size_t>(stack_trace->GetFrameCount());
     for (auto index = 0u; index < length; ++index) {
       auto const frame = stack_trace->GetFrame(index);
-      text += base::StringPrintf(
-          L"  at %ls (%ls(%d))\n", V8ToString(frame->GetFunctionName()).c_str(),
-          V8ToString(frame->GetScriptName()).c_str(), frame->GetLineNumber());
+      text +=
+          base::StringPrintf("  at %s (%s(%d))\n",
+                             *v8::String::Utf8Value(frame->GetFunctionName()),
+                             *v8::String::Utf8Value(frame->GetScriptName()),
+                             frame->GetLineNumber());
     }
   }
-  MessageBox(text, MB_ICONERROR);
+  MessageBox(base::UTF8ToUTF16(text), MB_ICONERROR);
 }
 
 void PopulateEnviromentStrings(ginx::Runner* runner) {
@@ -193,9 +188,10 @@ v8::Local<v8::Object> ToMethodObject(v8::Isolate* isolate,
                                      v8::Eternal<v8::String> method_name) {
   auto const value = js_class->Get(method_name.Get(isolate));
   if (value.IsEmpty() || !value->IsFunction()) {
-    LOG(0) << "Object " << V8ToString(js_class) << " has no method '"
-           << V8ToString(method_name.Get(isolate)) << "', it has "
-           << V8ToString(js_class->GetPropertyNames()) << ".";
+    LOG(0) << "Object " << *v8::String::Utf8Value(js_class)
+           << " has no method '"
+           << *v8::String::Utf8Value(method_name.Get(isolate)) << "', it has "
+           << *v8::String::Utf8Value(js_class->GetPropertyNames()) << ".";
     return v8::Local<v8::Object>();
   }
   return value->ToObject();
@@ -440,37 +436,40 @@ v8::Local<v8::ObjectTemplate> ScriptHost::GetGlobalTemplate(
 void ScriptHost::UnhandledException(ginx::Runner*,
                                     const v8::TryCatch& try_catch) {
   ASSERT_DOM_LOCKED();
-  base::string16 text;
+  std::string text;
   auto const error = try_catch.Exception();
   auto const message = try_catch.Message();
   if (!message.IsEmpty()) {
     text = base::StringPrintf(
-        L"Exception: %ls\n"
-        L"Source: %ls\n"
-        L"Source name: %ls(%d)\n",
-        V8ToString(error).c_str(), V8ToString(message->GetSourceLine()).c_str(),
-        V8ToString(message->GetScriptResourceName()).c_str(),
+        "Exception: %s\n"
+        "Source: %s\n"
+        "Source name: %s(%d)\n",
+        *v8::String::Utf8Value(error),
+        *v8::String::Utf8Value(message->GetSourceLine()),
+        *v8::String::Utf8Value(message->GetScriptResourceName()),
         message->GetLineNumber());
     auto const stack_trace = message->GetStackTrace();
     if (!stack_trace.IsEmpty()) {
-      text += L"Stack trace:\n";
+      text += "Stack trace:\n";
       auto const length = static_cast<size_t>(stack_trace->GetFrameCount());
       for (auto index = 0u; index < length; ++index) {
         auto const frame = stack_trace->GetFrame(index);
-        text += base::StringPrintf(L"  at %ls (%ls(%d))\n",
-                                   V8ToString(frame->GetFunctionName()).c_str(),
-                                   V8ToString(frame->GetScriptName()).c_str(),
-                                   frame->GetLineNumber());
+        text +=
+            base::StringPrintf("  at %s (%s(%d))\n",
+                               *v8::String::Utf8Value(frame->GetFunctionName()),
+                               *v8::String::Utf8Value(frame->GetScriptName()),
+                               frame->GetLineNumber());
       }
     }
   } else if (try_catch.HasTerminated()) {
-    text = L"Script execution is terminated.";
+    text = "Script execution is terminated.";
   } else if (message.IsEmpty()) {
-    text = L"No details";
+    text = "No details";
   }
 
   if (state_ != domapi::ScriptHostState::Running) {
-    ::MessageBoxW(nullptr, text.c_str(), L"Evita Start up Error", MB_ICONERROR);
+    ::MessageBoxW(nullptr, base::UTF8ToUTF16(text).c_str(),
+                  L"Evita Start up Error", MB_ICONERROR);
     state_ = domapi::ScriptHostState::Error;
     return;
   }

@@ -40,8 +40,6 @@ namespace dom {
 
 using ::testing::_;
 
-base::string16 V8ToString(v8::Local<v8::Value> value);
-
 namespace {
 ginx::Runner* static_runner;
 AbstractDomTest* static_current_test;
@@ -105,8 +103,7 @@ AbstractDomTest::RunnerDelegate::GetGlobalTemplate(ginx::Runner* runner) {
 void AbstractDomTest::RunnerDelegate::UnhandledException(
     ginx::Runner*,
     const v8::TryCatch& try_catch) {
-  test_instance_->exception_ =
-      base::UTF16ToUTF8(V8ToString(try_catch.Exception()));
+  test_instance_->exception_ = *v8::String::Utf8Value(try_catch.Exception());
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -205,7 +202,7 @@ std::string AbstractDomTest::EvalScript(const base::StringPiece& script_text,
     UnhandledException(runner_.get(), try_catch);
     return exception_;
   }
-  return base::UTF16ToUTF8(V8ToString(result));
+  return *v8::String::Utf8Value(result);
 }
 
 // static

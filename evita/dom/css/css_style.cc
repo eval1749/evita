@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include <sstream>
+#include <string>
 
 #include "evita/dom/css/css_style.h"
 
@@ -26,8 +27,6 @@ using CssPropertyId = visuals::css::PropertyId;
 using CssStyle = visuals::css::Style;
 using CssStyleEditor = visuals::css::StyleEditor;
 
-base::string16 V8ToString(v8::Local<v8::Value> value);
-
 namespace {
 
 Maybe<base::string16> GetRawProperty(v8::Local<v8::Context> context,
@@ -40,7 +39,9 @@ Maybe<base::string16> GetRawProperty(v8::Local<v8::Context> context,
   v8::Local<v8::Value> value = map->Get(context, key).ToLocalChecked();
   if (value.IsEmpty())
     return base::Nothing<base::string16>();
-  return base::Just<base::string16>(V8ToString(value));
+  const auto& string = v8::String::Value(value);
+  return base::Just<base::string16>(base::string16(
+      reinterpret_cast<const wchar_t*>(*string), string.length()));
 }
 
 void SetRawProperty(v8::Local<v8::Context> context,

@@ -15,18 +15,6 @@
 
 namespace dom {
 
-namespace {
-
-base::string16 V8ToString(v8::Local<v8::Value> value) {
-  v8::String::Value string_value(value);
-  if (!string_value.length())
-    return base::string16();
-  return base::string16(reinterpret_cast<base::char16*>(*string_value),
-                        static_cast<size_t>(string_value.length()));
-}
-
-}  // namespace
-
 //////////////////////////////////////////////////////////////////////
 //
 // ExceptionState
@@ -97,9 +85,9 @@ void ExceptionState::ThrowArityError(int min_arity,
 void ExceptionState::ThrowArgumentError(const char* expected_type,
                                         v8::Local<v8::Value> value,
                                         int index) {
-  ThrowTypeError(base::StringPrintf("Expect arguments[%d] as '%s' but '%ls'",
+  ThrowTypeError(base::StringPrintf("Expect arguments[%d] as '%s' but '%s'",
                                     index, expected_type,
-                                    V8ToString(value).c_str()));
+                                    *v8::String::Utf8Value(value)));
 }
 
 void ExceptionState::ThrowError(base::StringPiece detail) {
@@ -143,9 +131,9 @@ void ExceptionState::ThrowRangeError(base::StringPiece detail) {
 }
 
 void ExceptionState::ThrowReceiverError(v8::Local<v8::Value> value) {
-  ThrowTypeError(base::StringPrintf("Expect receiver as %s but %ls.",
+  ThrowTypeError(base::StringPrintf("Expect receiver as %s but %s.",
                                     interface_name_.as_string().c_str(),
-                                    V8ToString(value).c_str()));
+                                    *v8::String::Utf8Value(value)));
 }
 
 void ExceptionState::ThrowTypeError(base::StringPiece detail) {

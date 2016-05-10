@@ -10,8 +10,6 @@
 
 namespace dom {
 
-base::string16 V8ToString(v8::Local<v8::Value> value);
-
 Dictionary::Dictionary() {}
 
 Dictionary::~Dictionary() {}
@@ -34,13 +32,13 @@ bool Dictionary::Init(v8::Isolate* isolate, v8::Local<v8::Value> dict) {
     switch (result) {
       case HandleResult::CanNotConvert:
         isolate->ThrowException(v8::Exception::TypeError(gin::StringToV8(
-            isolate, base::StringPrintf(L"Bad value for %ls",
-                                        V8ToString(key).c_str()))));
+            isolate, base::StringPrintf("Bad value for %s",
+                                        *v8::String::Utf8Value(key)))));
         return false;
       case HandleResult::NotFound:
         isolate->ThrowException(v8::Exception::TypeError(gin::StringToV8(
-            isolate,
-            base::StringPrintf(L"Invalid key: %ls", V8ToString(key).c_str()))));
+            isolate, base::StringPrintf("Invalid key: %s",
+                                        *v8::String::Utf8Value(key)))));
         return false;
       case HandleResult::Succeeded:
         break;

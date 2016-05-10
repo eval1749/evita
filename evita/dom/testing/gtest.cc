@@ -10,8 +10,6 @@
 
 namespace dom {
 
-base::string16 V8ToString(v8::Local<v8::Value> value);
-
 namespace {
 
 void ExpectEqual(const v8::Local<v8::Value> expected,
@@ -33,14 +31,14 @@ void Fail(const std::string& description) {
 }
 
 void Log(gin::Arguments* args) {
-  base::string16 message;
+  std::string message;
   for (;;) {
     v8::Local<v8::Value> value;
     if (!args->GetNext(&value))
       break;
     if (!message.empty())
-      message += L" ";
-    message += V8ToString(value);
+      message += " ";
+    message += *v8::String::Utf8Value(value);
   }
   LOG(0) << message;
 }

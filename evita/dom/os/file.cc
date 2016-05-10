@@ -17,10 +17,6 @@
 #include "evita/ginx/runner.h"
 #include "gin/array_buffer.h"
 
-namespace dom {
-base::string16 V8ToString(v8::Local<v8::Value> value);
-}
-
 namespace gin {
 v8::Local<v8::Value> Converter<domapi::FileId>::ToV8(
     v8::Isolate* isolate,

@@ -4,21 +4,40 @@
 #include "evita/ginx/constructor_template.h"
 
 #include "base/strings/stringprintf.h"
+#include "evita/ginx/converter.h"
 #include "evita/ginx/per_isolate_data.h"
 #include "evita/ginx/scriptable.h"
 
 namespace ginx {
 namespace internal {
+
+base::string16 AsString(v8::Local<v8::Value> value) {
+  v8::String::Value string_value(value);
+  if (!string_value.length())
+    return base::string16();
+  return base::string16(reinterpret_cast<base::char16*>(*string_value),
+                        static_cast<size_t>(string_value.length()));
+}
+
 void FinishConstructCall(const v8::FunctionCallbackInfo<v8::Value>& info,
                          AbstractScriptable* impl) {
-  auto wrapper = info.Holder();
-  auto wrapper2 = info.This();
   if (!impl) {
     // Constructor may throw an exception.
     return;
   }
+  const auto& wrapper = info.Holder();
   impl->Bind(info.GetIsolate(), wrapper);
-  info.GetReturnValue().Set(wrapper);
+
+  const auto& context = info.GetIsolate()->GetCurrentContext();
+  // TODO(eval1749): Should we have string "prototype" in another place?
+  const auto& prototype_str = gin::StringToV8(info.GetIsolate(), "prototype");
+  const auto& prototype =
+      info.NewTarget().As<v8::Function>()->Get(prototype_str);
+  const auto& couldSetPrototype = wrapper->SetPrototype(context, prototype);
+  if (couldSetPrototype.IsNothing()) {
+    DVLOG(0) << "SetPrototype failed";
+    return;
+  }
 }
 
 bool IsValidConstructCall(const v8::FunctionCallbackInfo<v8::Value>& info) {

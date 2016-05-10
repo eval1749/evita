@@ -33,16 +33,6 @@ namespace dom {
 
 namespace {
 
-base::string16 V8ToString(v8::Local<v8::Value> value) {
-  if (value.IsEmpty())
-    return L"(empty)";
-  v8::String::Value string_value(value);
-  if (!string_value.length())
-    return base::string16();
-  return base::string16(reinterpret_cast<base::char16*>(*string_value),
-                        static_cast<size_t>(string_value.length()));
-}
-
 ViewEventTarget* FromEventTargetId(domapi::EventTargetId event_target_id) {
   auto const target = ViewEventTargetSet::instance()->Find(event_target_id);
   if (!target)

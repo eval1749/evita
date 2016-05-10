@@ -298,10 +298,7 @@ v8::Local<v8::Promise> Editor::MessageBox(Window* maybe_window,
 
 v8::Local<v8::Object> Editor::RunScript(const base::string16& script_text,
                                         const base::string16& file_name) {
-  if (file_name == L"*javascript*") {
-    SuppressMessageBoxScope suppress_messagebox_scope;
-    return RunScriptInternal(script_text, file_name);
-  }
+  SuppressMessageBoxScope suppress_message_box_scope;
   return RunScriptInternal(script_text, file_name);
 }
 

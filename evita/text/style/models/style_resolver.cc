@@ -16,7 +16,7 @@ namespace css {
 
 namespace {
 void InstallSyntaxColor(StyleSheet* style_sheet,
-                        const base::AtomicString& selector,
+                        base::AtomicString selector,
                         const Color& color) {
   Style style;
   style.set_color(color);
@@ -24,7 +24,7 @@ void InstallSyntaxColor(StyleSheet* style_sheet,
 }
 
 void InstallTextDecoration(StyleSheet* style_sheet,
-                           const base::AtomicString& selector,
+                           base::AtomicString selector,
                            TextDecoration text_decoration) {
   Style style;
   style.set_text_decoration(text_decoration);
@@ -196,7 +196,7 @@ const Style& StyleResolver::Resolve(const base::string16& selector) const {
   return Resolve(base::AtomicString(selector));
 }
 
-const Style& StyleResolver::Resolve(const base::AtomicString& selector) const {
+const Style& StyleResolver::Resolve(base::AtomicString selector) const {
   const auto cache = style_cache_.find(selector);
   if (cache != style_cache_.end())
     return *cache->second;
@@ -216,7 +216,7 @@ const Style& StyleResolver::ResolveWithoutDefaults(
 }
 
 const Style& StyleResolver::ResolveWithoutDefaults(
-    const base::AtomicString& selector) const {
+    base::AtomicString selector) const {
   const auto cache = partial_style_cache_.find(selector);
   if (cache != partial_style_cache_.end())
     return *cache->second;

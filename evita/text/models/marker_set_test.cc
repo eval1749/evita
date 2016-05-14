@@ -29,7 +29,7 @@ class MarkerSetTest : public ::testing::Test {
     return marker ? *marker : Marker();
   }
 
-  void InsertMarker(int start, int end, const base::AtomicString& type);
+  void InsertMarker(int start, int end, base::AtomicString type);
   void RemoveMarker(int start, int end);
 
   const base::AtomicString Correct;
@@ -50,9 +50,7 @@ MarkerSetTest::MarkerSetTest()
   buffer_->InsertBefore(Offset(0), base::string16(999, 'x'));
 }
 
-void MarkerSetTest::InsertMarker(int start,
-                                 int end,
-                                 const base::AtomicString& type) {
+void MarkerSetTest::InsertMarker(int start, int end, base::AtomicString type) {
   marker_set()->InsertMarker(StaticRange(*buffer_, Offset(start), Offset(end)),
                              type);
 }

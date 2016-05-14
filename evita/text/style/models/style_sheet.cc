@@ -23,8 +23,7 @@ void StyleSheet::AddRule(const base::string16& selector, const Style& style) {
   return AddRule(base::AtomicString(selector), style);
 }
 
-void StyleSheet::AddRule(const base::AtomicString& selector,
-                         const Style& style) {
+void StyleSheet::AddRule(base::AtomicString selector, const Style& style) {
   auto new_style = std::make_unique<Style>(style);
   auto const new_style_ptr = new_style.get();
   selector_map_.emplace(selector, std::move(new_style));
@@ -36,7 +35,7 @@ const Style* StyleSheet::Find(const base::string16& selector) const {
   return Find(base::AtomicString(selector));
 }
 
-const Style* StyleSheet::Find(const base::AtomicString& selector) const {
+const Style* StyleSheet::Find(base::AtomicString selector) const {
   auto it = selector_map_.find(selector);
   return it == selector_map_.end() ? nullptr : it->second.get();
 }

@@ -32,10 +32,10 @@ class StyleResolver final : private StyleSheetObserver {
   void RemoveStyleSheet(const StyleSheet* style_sheet);
 
   const Style& Resolve(const base::string16& selector) const;
-  const Style& Resolve(const base::AtomicString& selector) const;
+  const Style& Resolve(base::AtomicString selector) const;
 
   const Style& ResolveWithoutDefaults(const base::string16& selector) const;
-  const Style& ResolveWithoutDefaults(const base::AtomicString& selector) const;
+  const Style& ResolveWithoutDefaults(base::AtomicString selector) const;
 
  private:
   using StyleCache =

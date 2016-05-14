@@ -33,8 +33,8 @@ class SimpleEditor final {
   explicit SimpleEditor(Markers* markers);
   ~SimpleEditor() = default;
 
-  Marker* Insert(Offset start, Offset end, const base::AtomicString& type);
-  void InsertOrMerge(Offset start, Offset end, const base::AtomicString& type);
+  Marker* Insert(Offset start, Offset end, base::AtomicString type);
+  void InsertOrMerge(Offset start, Offset end, base::AtomicString type);
   void Remove(Marker* marker);
   // Splits |marker| to end with |offset| and returns newly created |Marker|
   // starts with |marker->start()| and ends with |offset|.
@@ -50,7 +50,7 @@ SimpleEditor::SimpleEditor(Markers* markers) : markers_(markers) {}
 
 Marker* SimpleEditor::Insert(Offset start,
                              Offset end,
-                             const base::AtomicString& type) {
+                             base::AtomicString type) {
   DCHECK_LT(start, end);
   DCHECK(!type.empty());
   DCHECK(markers_->find(end) == markers_->end()) << "Offset " << end
@@ -66,7 +66,7 @@ Marker* SimpleEditor::Insert(Offset start,
 // Note: There are no markers between |start| and |end|.
 void SimpleEditor::InsertOrMerge(Offset start,
                                  Offset end,
-                                 const base::AtomicString& type) {
+                                 base::AtomicString type) {
   const auto& before = markers_->lower_bound(start);
   const auto can_merge_before = before != markers_->end() &&
                                 before->second->end() == start &&
@@ -121,7 +121,7 @@ class Editor final {
   explicit Editor(Markers* markers);
   ~Editor();
 
-  void Insert(Offset start, Offset end, const base::AtomicString& type);
+  void Insert(Offset start, Offset end, base::AtomicString type);
   void Remove(Marker* marker);
   void Update(Marker* marker, Offset new_start, Offset new_end);
 
@@ -161,7 +161,7 @@ Editor::~Editor() {
     editor.Insert(insert.start, insert.end, insert.type);
 }
 
-void Editor::Insert(Offset start, Offset end, const base::AtomicString& type) {
+void Editor::Insert(Offset start, Offset end, base::AtomicString type) {
   inserts_.push_back(InsertOperation{start, end, type});
 }
 
@@ -235,7 +235,7 @@ class MarkerSet::Impl final : public BufferMutationObserver {
   void AddObserver(MarkerSetObserver* observer);
   const Marker* GetMarkerAt(Offset offset) const;
   const Marker* GetLowerBoundMarker(Offset offset) const;
-  void InsertMarker(const StaticRange& range, const base::AtomicString& type);
+  void InsertMarker(const StaticRange& range, base::AtomicString type);
   void RemoveObserver(MarkerSetObserver* observer);
 
  private:
@@ -282,7 +282,7 @@ const Marker* MarkerSet::Impl::GetLowerBoundMarker(Offset offset) const {
 }
 
 void MarkerSet::Impl::InsertMarker(const StaticRange& range,
-                                   const base::AtomicString& type) {
+                                   base::AtomicString type) {
   const auto start = range.start();
   const auto end = range.end();
 
@@ -429,7 +429,7 @@ const Marker* MarkerSet::GetLowerBoundMarker(Offset offset) const {
 
 // Insert marker from |start| to |end|, exclusive.
 void MarkerSet::InsertMarker(const StaticRange& range,
-                             const base::AtomicString& type) {
+                             base::AtomicString type) {
   impl_->InsertMarker(range, type);
 }
 

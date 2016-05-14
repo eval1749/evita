@@ -23,7 +23,7 @@ class Marker final {
  public:
   class Editor;
 
-  Marker(Offset start, Offset end, const base::AtomicString& type);
+  Marker(Offset start, Offset end, base::AtomicString type);
   Marker(const Marker& other);
   Marker();
   ~Marker();
@@ -35,7 +35,7 @@ class Marker final {
 
   Offset end() const { return end_; }
   Offset start() const { return start_; }
-  const base::AtomicString& type() const { return type_; }
+  base::AtomicString type() const { return type_; }
 
   bool Contains(Offset offset) const;
 
@@ -59,7 +59,7 @@ class Marker::Editor final {
   void SetEnd(Offset new_end);
   void SetRange(Offset start, Offset end);
   void SetStart(Offset new_start);
-  void SetType(const base::AtomicString& type);
+  void SetType(base::AtomicString type);
 
  private:
   Marker* const marker_;

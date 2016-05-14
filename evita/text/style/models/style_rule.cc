@@ -6,8 +6,7 @@
 
 namespace css {
 
-StyleRule::StyleRule(const base::AtomicString& selector,
-                     const css::Style* style)
+StyleRule::StyleRule(base::AtomicString selector, const css::Style* style)
     : selector_(selector), style_(style) {}
 
 StyleRule::~StyleRule() {}

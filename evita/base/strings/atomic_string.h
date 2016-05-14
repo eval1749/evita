@@ -69,7 +69,7 @@ namespace std {
 //
 template <>
 struct std::hash<base::AtomicString> {
-  size_t operator()(const base::AtomicString& atomic_string) const {
+  size_t operator()(base::AtomicString atomic_string) const {
     return atomic_string.hash_value();
   }
 };

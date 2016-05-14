@@ -45,7 +45,7 @@ class MarkerSet final {
   const Marker* GetLowerBoundMarker(Offset offset) const;
 
   // Insert marker to |range| with |type|.
-  void InsertMarker(const StaticRange& range, const base::AtomicString& type);
+  void InsertMarker(const StaticRange& range, base::AtomicString type);
 
   // Remove |observer|
   void RemoveObserver(MarkerSetObserver* observer) const;

@@ -14,7 +14,7 @@ class Style;
 
 class StyleRule final {
  public:
-  StyleRule(const base::AtomicString& selector, const Style* style);
+  StyleRule(base::AtomicString selector, const Style* style);
   ~StyleRule();
 
   const base::AtomicString& selector() const { return selector_; }

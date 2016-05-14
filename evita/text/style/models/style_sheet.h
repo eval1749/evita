@@ -29,9 +29,9 @@ class StyleSheet final {
 
   void AddObserver(StyleSheetObserver* observer) const;
   void AddRule(const base::string16& selector, const Style& style);
-  void AddRule(const base::AtomicString& selector, const Style& style);
+  void AddRule(base::AtomicString selector, const Style& style);
   const Style* Find(const base::string16& selector) const;
-  const Style* Find(const base::AtomicString& selector) const;
+  const Style* Find(base::AtomicString selector) const;
   void RemoveObserver(StyleSheetObserver* observer) const;
 
  private:

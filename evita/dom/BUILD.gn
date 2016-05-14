@@ -4,7 +4,6 @@
 
 import("//evita/build/js_library.gni")
 import("//evita/build/js_module.gni")
-import("//evita/dom/idl_files.gni")
 import("//evita/dom/js_files.gni")
 import("//testing/test.gni")
 import("//tools/grit/grit_rule.gni")
@@ -89,13 +88,6 @@ source_set("core") {
     "view_event_handler_impl.h",
   ]
 
-  sources +=
-      process_file_template(interface_idl_files + dictionary_idl_files,
-                            [
-                              "$bindings_gen_dir/ginx_{{source_name_part}}.cc",
-                              "$bindings_gen_dir/ginx_{{source_name_part}}.h",
-                            ])
-
   deps = [
     ":dom_v8_strings_cc",
     ":global_module",
@@ -129,7 +121,7 @@ source_set("core") {
 
   include_dirs = [
     root_gen_dir,
-    bindings_gen_dir,
+    "$target_gen_dir/bindings",
   ]
 }
 

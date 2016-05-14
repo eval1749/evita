@@ -13,7 +13,12 @@ source_set("bindings") {
     "platform_error.h",
   ]
 
-  sources += interface_idl_files + dictionary_idl_files
+  sources +=
+      process_file_template(interface_idl_files + dictionary_idl_files,
+                            [
+                              "$bindings_gen_dir/ginx_{{source_name_part}}.cc",
+                              "$bindings_gen_dir/ginx_{{source_name_part}}.h",
+                            ])
 
   public_deps = [
     ":bindings_cc",

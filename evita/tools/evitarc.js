@@ -100,11 +100,11 @@ Mode.registerExtension('e', 'c#');
 
     // Chromium
     'DCHECK', 'DCHECK_EQ', 'DCHECK_NE', 'DCHECK_LE', 'DCHECK_LT', 'DCHECK_GE',
-    'DCHECK_GT', 'FOR_EACH_OBSERVER', 'NOTREACHED', 'arraysize', 'base::Bind',
-    'base::Callback', 'base::Closure', 'base::checked_cast', 'base::char16',
-    'base::string16', 'base::StringPiece', 'base::StringPiece16',
-    'base::StringPrintf', 'base::Time', 'base::TimeDelta', 'base::TimeTicks',
-    'base::Unretained', 'scoped_refptr',
+    'DCHECK_GT', 'DISALLOW_COPY_AND_ASSIGN', 'FOR_EACH_OBSERVER', 'NOTREACHED',
+    'arraysize', 'base::Bind', 'base::Callback', 'base::Closure',
+    'base::checked_cast', 'base::char16', 'base::string16', 'base::StringPiece',
+    'base::StringPiece16', 'base::StringPrintf', 'base::Time',
+    'base::TimeDelta', 'base::TimeTicks', 'base::Unretained', 'scoped_refptr',
 
     // v8
     'v8::ArrayBuffer', 'v8::Context', 'v8::EscapableHandleScope', 'v8::Eternal',
@@ -114,9 +114,10 @@ Mode.registerExtension('e', 'c#');
     'v8::TryCatch', 'v8::Undefined', 'v8::UniquePersistent', 'v8::Value',
 
     // Vogue
-    'domapi::EventType', 'gfx::Canvas::AxisAlignedClipScope', 'gfx::Brush',
-    'gfx::Canvas', 'gfx::ColorF', 'gfx::Canvas::DrawingScope', 'gfx::Point',
-    'gfx::PointF', 'gfx::Rect', 'gfx::RectF', 'gfx::Size', 'gfx::SizeF',
+    'base::AtomicString', 'domapi::EventType',
+    'gfx::Canvas::AxisAlignedClipScope', 'gfx::Brush', 'gfx::Canvas',
+    'gfx::ColorF', 'gfx::Canvas::DrawingScope', 'gfx::Point', 'gfx::PointF',
+    'gfx::Rect', 'gfx::RectF', 'gfx::Size', 'gfx::SizeF',
 ].forEach((keyword) => { HighlightEngine.keywordsFor('c++').add(keyword); });
 
 // JavaScript keywords

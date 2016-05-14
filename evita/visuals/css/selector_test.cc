@@ -5,15 +5,23 @@
 #include <algorithm>
 #include <set>
 #include <sstream>
+#include <vector>
 
 #include "base/strings/string16.h"
 #include "evita/visuals/css/selector_builder.h"
+#include "evita/visuals/css/selector_parser.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
 namespace visuals {
 namespace css {
 
 namespace {
+base::string16 AsParseError(base::StringPiece16 text) {
+  Selector::Parser parser;
+  parser.Parse(text);
+  return parser.error().as_string();
+}
+
 std::string AsString(const std::vector<Selector>& selectors) {
   std::ostringstream ostream;
   auto delimiter = "{";
@@ -23,6 +31,28 @@ std::string AsString(const std::vector<Selector>& selectors) {
   }
   ostream << '}';
   return ostream.str();
+}
+
+Selector AsSelector(base::StringPiece16 tag_name,
+                    base::StringPiece16 id,
+                    const std::vector<base::StringPiece16>& class_names) {
+  Selector::Builder builder;
+  if (!tag_name.empty())
+    builder.SetTagName(tag_name);
+  if (!id.empty())
+    builder.SetId(id);
+  for (auto class_name : class_names)
+    builder.AddClass(class_name);
+  return builder.Build();
+}
+
+Selector AsSelector(base::StringPiece16 tag_name,
+                    const std::vector<base::StringPiece16>& class_names) {
+  return AsSelector(tag_name, L"", class_names);
+}
+
+Selector AsSelector(base::StringPiece16 tag_name) {
+  return AsSelector(tag_name, L"", {});
 }
 
 std::string AsString(const Selector& selector) {
@@ -122,6 +152,56 @@ TEST(CssSelctorTest, Less) {
   EXPECT_EQ(selector3, actual[3]);
   EXPECT_EQ(selector1, actual[4]);
   EXPECT_EQ(selector0, actual[5]);
+}
+
+TEST(CssSelctorTest, Parser) {
+  EXPECT_EQ(Selector(), Selector::Parser().Parse(L""));
+  EXPECT_EQ(AsSelector(L"foo"), Selector::Parser().Parse(L"foo"));
+  EXPECT_EQ(AsSelector(L"foo", L"bar", {}),
+            Selector::Parser().Parse(L"foo#bar"));
+  EXPECT_EQ(AsSelector(L"foo", {L"a"}), Selector::Parser().Parse(L"foo.a"));
+  EXPECT_EQ(AsSelector(L"foo", {L":hover"}),
+            Selector::Parser().Parse(L"foo:hover"));
+  EXPECT_EQ(AsSelector(L"foo", L"bar", {L"abc"}),
+            Selector::Parser().Parse(L"foo#bar.abc"));
+  EXPECT_EQ(AsSelector(L"foo", L"bar", {L"abc", L"def"}),
+            Selector::Parser().Parse(L"foo#bar.abc.def"));
+  EXPECT_EQ(AsSelector(L"::selector"), Selector::Parser().Parse(L"::selector"));
+  EXPECT_EQ(AsSelector(L"::selector", {L":active"}),
+            Selector::Parser().Parse(L"::selector:active"));
+}
+
+TEST(CssSelctorTest, ParseError) {
+  EXPECT_EQ(L"Bad tag name", AsParseError(L"!"));
+
+  EXPECT_EQ(L"Empty id", AsParseError(L"#"));
+  EXPECT_EQ(L"Empty id", AsParseError(L"#."));
+  EXPECT_EQ(L"Empty id", AsParseError(L"#:"));
+  EXPECT_EQ(L"Bad id", AsParseError(L"#!"));
+  EXPECT_EQ(L"Bad id", AsParseError(L"##"));
+
+  EXPECT_EQ(L"Empty class", AsParseError(L":"));
+  EXPECT_EQ(L"Empty pseudo-element", AsParseError(L"::"));
+  EXPECT_EQ(L"Empty pseudo-element", AsParseError(L":::"));
+  EXPECT_EQ(L"Empty pseudo-element", AsParseError(L"::#"));
+  EXPECT_EQ(L"Empty pseudo-element", AsParseError(L"::."));
+  EXPECT_EQ(L"Bad tag name", AsParseError(L"::!"));
+
+  EXPECT_EQ(L"Bad tag name", AsParseError(L"foo!"));
+  EXPECT_EQ(L"Empty id", AsParseError(L"foo#"));
+  EXPECT_EQ(L"Empty class", AsParseError(L"foo."));
+  EXPECT_EQ(L"Empty pseudo-class", AsParseError(L"foo:"));
+  EXPECT_EQ(L"Empty pseudo-class", AsParseError(L"foo::"));
+
+  EXPECT_EQ(L"Empty class", AsParseError(L"."));
+  EXPECT_EQ(L"Empty class", AsParseError(L".."));
+  EXPECT_EQ(L"Bad class", AsParseError(L".#"));
+  EXPECT_EQ(L"Bad class", AsParseError(L".!"));
+  EXPECT_EQ(L"Empty class", AsParseError(L".:"));
+
+  EXPECT_EQ(L"Empty class", AsParseError(L".ab."));
+  EXPECT_EQ(L"Empty pseudo-class", AsParseError(L".ab:"));
+  EXPECT_EQ(L"Bad class", AsParseError(L".ab#"));
 }
 
 TEST(CssSelctorTest, Printer) {

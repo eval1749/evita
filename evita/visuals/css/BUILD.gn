@@ -36,6 +36,8 @@ source_set("css") {
     "selector.h",
     "selector_builder.cc",
     "selector_builder.h",
+    "selector_parser.cc",
+    "selector_parser.h",
     "style.cc",
     "style.h",
     "style_builder.cc",

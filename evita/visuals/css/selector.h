@@ -20,6 +20,7 @@ namespace css {
 class Selector final {
  public:
   class Builder;
+  class Parser;
 
   Selector(const Selector& other);
   Selector(Selector&& other);

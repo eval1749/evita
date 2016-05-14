@@ -76,7 +76,7 @@ right: auto <length> <percentage>
 
 # Text Decoration
 text-decoration-color: <color>
-text-decoration-line: none underlie overline line-through blink
+text-decoration-line: none underline overline line-through blink
 text-decoration-style: solid double dotted dashed wavy
 
 top: auto <length> <percentage>

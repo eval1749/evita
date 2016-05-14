@@ -11,6 +11,7 @@
 #include "base/observer_list.h"
 #include "base/strings/string16.h"
 #include "base/strings/string_piece.h"
+#include "evita/base/strings/atomic_string.h"
 #include "evita/text/style/models/style_sheet_observer.h"
 
 namespace base {
@@ -35,7 +36,7 @@ class StyleSheet final {
 
  private:
   using StyleMap =
-      std::unordered_map<const base::StringPiece16*, std::unique_ptr<Style>>;
+      std::unordered_map<base::AtomicString, std::unique_ptr<Style>>;
 
   base::ObserverList<StyleSheetObserver> observers_;
   StyleMap selector_map_;

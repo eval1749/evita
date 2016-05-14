@@ -5,7 +5,6 @@
 #include "evita/text/style/models/style_resolver.h"
 
 #include "base/logging.h"
-#include "evita/base/strings/atomic_string.h"
 #include "evita/text/style/models/style.h"
 #include "evita/text/style/models/style_rule.h"
 #include "evita/text/style/models/style_selector.h"
@@ -173,11 +172,11 @@ void StyleResolver::InvalidateCache(const StyleRule* rule) {
   if (rule->selector() == StyleSelector::defaults()) {
     ClearCache();
   } else {
-    const auto& it = style_cache_.find(rule->selector().key());
+    const auto& it = style_cache_.find(rule->selector());
     if (it != style_cache_.end())
       style_cache_.erase(it);
 
-    auto it2 = partial_style_cache_.find(rule->selector().key());
+    auto it2 = partial_style_cache_.find(rule->selector());
     if (it2 != partial_style_cache_.end())
       partial_style_cache_.erase(it);
   }
@@ -198,7 +197,7 @@ const Style& StyleResolver::Resolve(const base::string16& selector) const {
 }
 
 const Style& StyleResolver::Resolve(const base::AtomicString& selector) const {
-  const auto cache = style_cache_.find(selector.key());
+  const auto cache = style_cache_.find(selector);
   if (cache != style_cache_.end())
     return *cache->second;
 
@@ -207,7 +206,7 @@ const Style& StyleResolver::Resolve(const base::AtomicString& selector) const {
     style.Merge(Resolve(StyleSelector::defaults()));
   auto new_style = std::make_unique<Style>(style);
   const auto new_style_ptr = new_style.get();
-  style_cache_[selector.key()] = std::move(new_style);
+  style_cache_[selector] = std::move(new_style);
   return *new_style_ptr;
 }
 
@@ -218,7 +217,7 @@ const Style& StyleResolver::ResolveWithoutDefaults(
 
 const Style& StyleResolver::ResolveWithoutDefaults(
     const base::AtomicString& selector) const {
-  const auto cache = partial_style_cache_.find(selector.key());
+  const auto cache = partial_style_cache_.find(selector);
   if (cache != partial_style_cache_.end())
     return *cache->second;
 
@@ -228,7 +227,7 @@ const Style& StyleResolver::ResolveWithoutDefaults(
       new_style->OverrideBy(*style);
   }
   const auto new_style_ptr = new_style.get();
-  style_cache_[selector.key()] = std::move(new_style);
+  style_cache_[selector] = std::move(new_style);
   return *new_style_ptr;
 }
 

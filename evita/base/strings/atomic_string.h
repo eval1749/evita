@@ -36,7 +36,7 @@ class EVITA_BASE_EXPORT AtomicString final {
 
   base::string16 as_string() const;
   bool empty() const { return value_->empty(); }
-  const base::StringPiece16* key() const { return value_; }
+  size_t hash_value() const { return reinterpret_cast<size_t>(value_); }
   base::StringPiece16 value() const { return *value_; }
 
   static AtomicString NewUniqueString(const base::char16* format);
@@ -70,7 +70,7 @@ namespace std {
 template <>
 struct std::hash<base::AtomicString> {
   size_t operator()(const base::AtomicString& atomic_string) const {
-    return base::StringPiece16Hash()(atomic_string.value());
+    return atomic_string.hash_value();
   }
 };
 

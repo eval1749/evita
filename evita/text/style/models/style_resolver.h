@@ -11,6 +11,7 @@
 
 #include "base/strings/string16.h"
 #include "base/strings/string_piece.h"
+#include "evita/base/strings/atomic_string.h"
 #include "evita/text/style/models/style_sheet_observer.h"
 
 namespace base {
@@ -37,8 +38,8 @@ class StyleResolver final : private StyleSheetObserver {
   const Style& ResolveWithoutDefaults(const base::AtomicString& selector) const;
 
  private:
-  typedef std::unordered_map<const base::StringPiece16*, std::unique_ptr<Style>>
-      StyleCache;
+  using StyleCache =
+      std::unordered_map<base::AtomicString, std::unique_ptr<Style>>;
 
   void ClearCache();
   void InvalidateCache(const StyleRule* rule);

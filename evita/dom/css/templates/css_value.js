@@ -59,13 +59,14 @@ const RE_NUMBER = new RegExp(`^${NUMBER}$`);
 const RE_PERCENTAGE = new RegExp(`^${NUMBER}%$`);
 
 /** @const @type {!RegExp} */
-const RE_COLOR = new RegExp('^\w+\(.*?\)$');
+const RE_COLOR = new RegExp('^\\w+\\(.*?\\)$');
 
 /**
  * @const @type {!Set<string>}
  * Note: This table should be matched with C++ one.
  */
 const COLOR_NAMES = new Set([
+  'currentcolor',
   'aliceblue',  // #F0F8FF 240,248,255
   'antiquewhite',  // #FAEBD7 250,235,215
   'aqua',  // #00FFFF 255,255

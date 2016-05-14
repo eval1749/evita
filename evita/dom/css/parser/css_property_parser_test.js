@@ -23,11 +23,17 @@ function sample(text) {
 }
 
 testing.test('css.PropertyParser.basic', function(t) {
-  t.expect(sample('color: red')).toEqual('color: red');
   t.expect(
        sample('font-family: Arial, Helvetica'),
        'font-family takes a list of font family name')
       .toEqual('font-family: Arial,Helvetica');
+});
+
+testing.test('css.PropertyParser.color', function(t) {
+  t.expect(sample('color: red')).toEqual('color: red');
+  t.expect(sample('color: currentcolor')).toEqual('color: currentcolor');
+  t.expect(sample('color: foo')).toEqual('');
+  t.expect(sample('color: rgb(1, 2, 3)')).toEqual('');
 });
 
 testing.test('css.PropertyParser.shorthand', function(t) {

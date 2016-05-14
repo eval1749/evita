@@ -45,6 +45,16 @@ testing.test('css.PropertyParser.shorthand', function(t) {
           "padding-bottom: 2px;padding-left: 2px;padding-right: 2px;padding-top: 2px");
 });
 
+testing.test('css.PropertyParser.text-decoration', function(t) {
+  t.expect(sample('text-decoration: underline'))
+      .toEqual('text-decoration-line: underline');
+  t.expect(sample('text-decoration: underline wavy'))
+      .toEqual('text-decoration-line: underline;text-decoration-style: wavy');
+  t.expect(sample('text-decoration: red solid blink'))
+      .toEqual(
+          'text-decoration-color: red;text-decoration-line: blink;text-decoration-style: solid');
+});
+
 testing.test('css.PropertyParser.text-decoration-line', function(t) {
   t.expect(sample('text-decoration-line: blink'))
       .toEqual('text-decoration-line: blink');

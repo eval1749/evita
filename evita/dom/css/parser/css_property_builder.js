@@ -28,7 +28,18 @@ const Value = css.Value;
 const kDummyToken = new Token(Token.Type.INVALID, '', 0, 0);
 
 /** @const @type {!Array<string>} */
+const kColorStyleWidth = ['color', 'style', 'width'];
+
+/** @const @type {!Array<string>} */
 const kSidePrefixes = ['-bottom', '-left', '-right', '-top'];
+
+/** @const @type {!Map<string, !Array<string>>} */
+const kShorthandMap = new Map();
+kShorthandMap.set('border-bottom', kColorStyleWidth);
+kShorthandMap.set('border-left', kColorStyleWidth);
+kShorthandMap.set('border-right', kColorStyleWidth);
+kShorthandMap.set('border-top', kColorStyleWidth);
+kShorthandMap.set('text-decoration', ['color', 'line', 'style']);
 
 // TODO(eval1749): Support function, e.g. rgba(1, 2, 3)
 class PropertyBuilder extends base.Logger {
@@ -56,21 +67,28 @@ class PropertyBuilder extends base.Logger {
    * @return {!Array<!Property>}
    */
   end() {
+    console.assert(this.values_.length > 0, this.name_);
     /** @const @type {!Token} */
     const name = this.name_;
     /** @const @type {!Array<!Token>} */
     const values = this.values_;
     this.name_ = kDummyToken;
     this.values_ = [];
-    // TODO(eval1749): Support more shorthand property
     switch (name.text) {
-      case 'border':
-        return this.handleBorder(name, values, kSidePrefixes);
-      case 'border-bottom':
-      case 'border-left':
-      case 'border-right':
-      case 'border-top':
-        return this.handleBorder(name, values, ['']);
+      case 'border': {
+        /** @const @type {!Array<!Property>} */
+        const result = [];
+        for (const suffix of kSidePrefixes) {
+          /** const @type {string} */
+          const propertyName = `${name.text}${suffix}`;
+          /** const @type {!Array<!Property>} */
+          const properties =
+              this.handleShorthand(propertyName, values, kColorStyleWidth);
+          for (const property of properties)
+            result.push(property);
+        }
+        return result;
+      }
       case 'border-color':
       case 'border-style':
       case 'border-width':
@@ -81,48 +99,17 @@ class PropertyBuilder extends base.Logger {
         return [new Property(
             name.text, values.map(token => token.text).join(''))];
     }
-    return [new Property(name.text, values[0].text)];
-  }
-
-  /**
-   * @private
-   * @param {!Token} name
-   * @param {!Array<!Token>} values
-   * @param {!Array<string>} suffixes
-   * @return {!Array<!Property>}
-   *
-   * Syntax:
-   *  border: <line-width> || <line-style> || <color>
-   *  border-top: <line-width> || <line-style> || <color>
-   *  border-right: <line-width> || <line-style> || <color>
-   *  border-bottom: <line-width> || <line-style> || <color>
-   *  border-left: <line-width> || <line-style> || <color>
-   */
-  handleBorder(name, values, suffixes) {
-    /** @const @type {!Map<string, string>} */
-    const valueMap = new Map();
-    /** @const @type {!Set<string>} */
-    const typeSet = new Set(['color', 'style', 'width']);
-    for (const value of values) {
-      for (const type of typeSet) {
-        this.log(
-            0, name.text, value.text, type,
-            Value.isValidFor(value.text, `border-top-${type}`));
-        if (Value.isValidFor(value.text, `border-top-${type}`)) {
-          if (!valueMap.has(type))
-            valueMap.set(type, value.text);
-          typeSet.delete(type);
-          break;
-        }
-      }
-    }
-    /** @type {!Array<!Property>} */
-    const result = [];
-    for (const[type, value] of valueMap) {
-      for (const suffix of suffixes)
-        result.push(new Property(`${name.text}${suffix}-${type}`, value));
-    }
-    return result;
+    /** @type {!Array<string>} */
+    const types = kShorthandMap.get(name.text) || [];
+    if (types.length > 0)
+      return this.handleShorthand(name.text, values, types);
+    /** @const @type {string} */
+    const propertyName = name.text;
+    /** @const @type {string} */
+    const propertyValue = values[0].text;
+    if (!Value.isValidFor(propertyValue, propertyName))
+      return [];
+    return [new Property(propertyName, propertyValue)];
   }
 
   /**
@@ -154,6 +141,35 @@ class PropertyBuilder extends base.Logger {
         ];
     }
     return [];
+  }
+
+  /**
+   * @private
+   * @param {string} name
+   * @param {!Array<!Token>} values
+   * @param {!Array<!string>} types
+   * @return {!Array<!Property>}
+   */
+  handleShorthand(name, values, types) {
+    /** @type {!Array<!Property>} */
+    const result = [];
+    /** @const @type {!Set<string>} */
+    const typeSet = new Set(types);
+    for (const value of values) {
+      for (const type of typeSet) {
+        /** @const @type {string} */
+        const propertyName = `${name}-${type}`;
+        /** @const @type {boolean} */
+        const isValidValue = Value.isValidFor(value.text, propertyName);
+        this.log(1, 'handleShorthand', propertyName, value, isValidValue);
+        if (!isValidValue)
+          continue;
+        result.push(new Property(propertyName, value.text));
+        typeSet.delete(type);
+        break;
+      }
+    }
+    return result;
   }
 
   /**

@@ -487,12 +487,7 @@ function findTextDocument(name) {
  * @return {!Array.<!TextDocument>}
  */
 function listTextDocument() {
-  // TODO(eval1749): Once closure compiler support spreading, we should write
-  // |return [... documentNameMap.values()];|
-  const result = [];
-  for (let document of documentNameMap.values())
-    result.push(document);
-  return result;
+  return [...documentNameMap.values()];
 }
 
 /**

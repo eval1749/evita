@@ -33,6 +33,7 @@ class EVITA_BASE_EXPORT AtomicString final {
   bool operator!=(const AtomicString& other) const;
   bool operator!=(base::StringPiece16 other) const;
   bool operator<(const AtomicString& other) const;
+  bool operator>(const AtomicString& other) const;
 
   base::string16 as_string() const;
   bool empty() const { return value_->empty(); }

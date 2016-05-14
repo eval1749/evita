@@ -52,6 +52,10 @@ bool AtomicString::operator<(const AtomicString& other) const {
   return value_ < other.value_;
 }
 
+bool AtomicString::operator>(const AtomicString& other) const {
+  return value_ > other.value_;
+}
+
 base::string16 AtomicString::as_string() const {
   return value_->as_string();
 }

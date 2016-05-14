@@ -32,6 +32,10 @@ source_set("css") {
     "property_set_editor.h",
     "rule.cc",
     "rule.h",
+    "selector.cc",
+    "selector.h",
+    "selector_builder.cc",
+    "selector_builder.h",
     "style.cc",
     "style.h",
     "style_builder.cc",
@@ -106,6 +110,7 @@ source_set("test_files") {
 
   sources = [
     "property_set_test.cc",
+    "selector_test.cc",
     "style_test.cc",
   ]
 

@@ -7,14 +7,14 @@ vars = {
   'github.git': 'https://github.com',
 
   'autopep8_revision': '9eb1121f357077c7d71fc770e25d3678f906a401',
-  'base_revision': '6347c81b939a327ad94d5eac5a1bbe1651c5df8b',
+  'base_revision': 'af2c378b4691b74b940fb653a8e2117bf258c5b0',
   'build_revision': 'b9f715e76c74cb252f60796f4276888cd5b4b5fb',
-  'buildtools_revision': '731bdb2af8b5839450605ddebdcf5de749cf9d17',
+  'buildtools_revision': 'e9fb74175ea7c3f251baad24d9ebe03c01ed5aba',
   'cygwin_revision': 'c89e446b273697fadf3a10ff1007a97c0b7de6df',
   'gmock_revision': '0421b6f358139f02e102c9c332ce19a33faf75be', # from svn revision 566
   'grit_revision': 'ca656d011aa8e71fdd6ea24eccc550f9871dfdb4',
   'gtest_revision': '6f8a66431cb592dad629028a50b3dd418a408c87',
-  'gyp_revision': '02b145a1a4f4e1c62e8bae06045caf852d9ef17f',
+  'gyp_revision': 'bce1c7793010574d88d7915e2d55395213ac63d1',
   'icu_revision': 'c291cde264469b20ca969ce8832088acb21e0c48',
   'idl_parser_revision': 'c485a6622358fa5c760daed78108212d70318ffd',
   'pep8_revision': '4dc42d842274ba27d2724e76eb83ff69e7db226f',

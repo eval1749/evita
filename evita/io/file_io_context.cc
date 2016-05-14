@@ -45,8 +45,6 @@ void Resolve(const base::Callback<void(domapi::FileId)>& resolve,
 }
 
 FileIoContext::FileIoContext(HANDLE handle) : file_handle_(handle) {
-  handler = this;
-  overlapped = {0};
   editor::Application::instance()->io_manager()->RegisterIoHandler(
       file_handle_.get(), this);
 }

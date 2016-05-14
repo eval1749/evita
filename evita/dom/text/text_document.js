@@ -570,7 +570,7 @@ Object.defineProperties(TextDocument, {
   add: {value: addTextDocument},
   addObserver: {value: addObserver},
   find: {value: findTextDocument},
-  list: {get: () => listTextDocument()},
+  list: {get: listTextDocument},
   new: {value: newTextDocument},
   remove: {value: removeTextDocument},
   removeObserver: {value: removeObserver},

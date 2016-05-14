@@ -41,6 +41,16 @@ testing.test('css.Parser.classSelector', function(t) {
       .toEqual('.hover { color: blue; }');
 });
 
+testing.test('css.Parser.empty', function(t) {
+  /** @const @type {!CSSStyleSheet} */
+  const styleSheet = Parser.parse(
+      'foo {} ' +
+      'foo {color: red;}');
+  t.expect(styleSheet.cssRules.length, "Empty style doesn't in style sheet")
+      .toEqual(1);
+  t.expect(querySelector(styleSheet, 'foo')).toEqual('foo { color: red; }');
+});
+
 testing.test('css.Parser.notMerge', function(t) {
   /** @const @type {!CSSStyleSheet} */
   const styleSheet = Parser.parse(

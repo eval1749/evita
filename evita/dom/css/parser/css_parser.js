@@ -59,11 +59,13 @@ class RuleBuilder extends base.Logger {
    */
   end() {
     console.assert(this.selectorText_ !== '');
+    /** @const @type {string} */
+    const selectorText = this.selectorText_;
+    this.selectorText_ = '';
     if (this.properties_.size === 0)
       return null;
     /** @const @type {!css.CSSStyleRule} */
-    const rule = new css.CSSStyleRule(this.selectorText_, this.style_);
-    this.selectorText_ = '';
+    const rule = new css.CSSStyleRule(selectorText, this.style_);
     return rule;
   }
 
@@ -71,7 +73,7 @@ class RuleBuilder extends base.Logger {
    * @param {string} selectorText
    */
   start(selectorText) {
-    console.assert(this.selectorText_ === '');
+    console.assert(this.selectorText_ === '', this.selectorText_);
     this.selectorText_ = selectorText;
     this.properties_.clear();
     this.style_ = new css.CSSStyleDeclaration();

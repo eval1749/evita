@@ -36,9 +36,14 @@ class Selector final {
   // Returns true if |this| selector is more specific than |other|.
   bool operator<(const Selector& other) const;
 
-  base::AtomicString tag_name() const { return tag_name_; }
+  bool has_classes() const { return !classes_.empty(); }
+  bool has_id() const { return !id_.empty(); }
+  bool has_tag_name() const { return !tag_name_.empty(); }
   base::AtomicString id() const { return id_; }
+  base::AtomicString tag_name() const { return tag_name_; }
   const std::set<base::AtomicString>& classes() const { return classes_; }
+
+  bool IsMoreSpecific(const Selector& other) const;
 
   // Returns true if set of elements selected by |this| selector is subset of
   // elements selected by |other|.

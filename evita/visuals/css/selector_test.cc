@@ -55,6 +55,11 @@ std::string AsString(const std::vector<Selector>& selectors) {
   return std::move(ostream.str());
 }
 
+const Selector& MoreSpecific(const Selector& selector1,
+                             const Selector& selector2) {
+  return selector1.IsMoreSpecific(selector2) ? selector1 : selector2;
+}
+
 Selector Parse(base::StringPiece16 text) {
   return std::move(Selector::Parser().Parse(text));
 }
@@ -104,6 +109,20 @@ TEST(CssSelctorTest, Equals) {
   EXPECT_TRUE(selector3 == selector33);
   EXPECT_TRUE(selector4 == selector44);
   EXPECT_TRUE(selector5 == selector55);
+}
+
+TEST(CssSelctorTest, IsMoreSpecific) {
+  EXPECT_EQ(Parse(L"*"), MoreSpecific(Parse(L"*"), Parse(L"*")));
+  EXPECT_EQ(Parse(L"foo"), MoreSpecific(Parse(L"foo"), Parse(L"*")));
+  EXPECT_EQ(Parse(L"foo"), MoreSpecific(Parse(L"foo"), Parse(L"foo")));
+  EXPECT_EQ(Parse(L"#bar"), MoreSpecific(Parse(L"foo"), Parse(L"#bar")));
+  EXPECT_EQ(Parse(L"foo#bar"), MoreSpecific(Parse(L"foo#bar"), Parse(L"#bar")));
+  EXPECT_EQ(Parse(L"foo#bar"),
+            MoreSpecific(Parse(L"foo#bar"), Parse(L"foo.c1")));
+  EXPECT_EQ(Parse(L"foo.c1"), MoreSpecific(Parse(L"foo.c1"), Parse(L"foo")));
+  EXPECT_EQ(Parse(L"foo.c2"), MoreSpecific(Parse(L"foo.c1"), Parse(L"foo.c2")));
+  EXPECT_EQ(Parse(L"foo.c1.c2"),
+            MoreSpecific(Parse(L"foo.c1.c2"), Parse(L"foo.c2")));
 }
 
 TEST(CssSelctorTest, IsSubsetOf) {

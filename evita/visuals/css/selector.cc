@@ -82,10 +82,20 @@ bool Selector::operator<(const Selector& other) const {
   return false;
 }
 
-bool Selector::IsSubsetOf(const Selector& other) const {
-  if (tag_name_ != other.tag_name_ && !other.tag_name_.empty())
+bool Selector::IsMoreSpecific(const Selector& other) const {
+  if (id_ != other.id_)
+    return !other.has_id();
+  if (classes_.size() != other.classes_.size())
+    return classes_.size() >= other.classes_.size();
+  if (tag_name_ == other.tag_name_)
     return false;
-  if (id_ != other.id_ && !other.id_.empty())
+  return has_tag_name();
+}
+
+bool Selector::IsSubsetOf(const Selector& other) const {
+  if (tag_name_ != other.tag_name_ && other.has_tag_name())
+    return false;
+  if (id_ != other.id_ && other.has_id())
     return false;
   return std::includes(classes_.begin(), classes_.end(), other.classes_.begin(),
                        other.classes_.end());

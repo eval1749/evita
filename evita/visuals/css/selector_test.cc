@@ -60,6 +60,11 @@ std::string AsString(const Selector& selector) {
   ostream << selector;
   return ostream.str();
 }
+
+Selector Parse(base::StringPiece16 text) {
+  return Selector::Parser().Parse(text);
+}
+
 }  // namespace
 
 TEST(CssSelctorTest, Equals) {
@@ -155,24 +160,21 @@ TEST(CssSelctorTest, Less) {
 }
 
 TEST(CssSelctorTest, Parser) {
-  EXPECT_EQ(Selector(), Selector::Parser().Parse(L""));
-  EXPECT_EQ(Selector(), Selector::Parser().Parse(L"*"));
-  EXPECT_EQ(AsSelector(L"", L"bar", {}), Selector::Parser().Parse(L"*#bar"));
-  EXPECT_EQ(AsSelector(L"", {L"abc"}), Selector::Parser().Parse(L"*.abc"));
-  EXPECT_EQ(AsSelector(L"", {L":hover"}), Selector::Parser().Parse(L"*:hover"));
-  EXPECT_EQ(AsSelector(L"foo"), Selector::Parser().Parse(L"foo"));
-  EXPECT_EQ(AsSelector(L"foo", L"bar", {}),
-            Selector::Parser().Parse(L"foo#bar"));
-  EXPECT_EQ(AsSelector(L"foo", {L"a"}), Selector::Parser().Parse(L"foo.a"));
-  EXPECT_EQ(AsSelector(L"foo", {L":hover"}),
-            Selector::Parser().Parse(L"foo:hover"));
-  EXPECT_EQ(AsSelector(L"foo", L"bar", {L"abc"}),
-            Selector::Parser().Parse(L"foo#bar.abc"));
+  EXPECT_EQ(Selector(), Parse(L""));
+  EXPECT_EQ(Selector(), Parse(L"*"));
+  EXPECT_EQ(AsSelector(L"", L"bar", {}), Parse(L"*#bar"));
+  EXPECT_EQ(AsSelector(L"", {L"abc"}), Parse(L"*.abc"));
+  EXPECT_EQ(AsSelector(L"", {L":hover"}), Parse(L"*:hover"));
+  EXPECT_EQ(AsSelector(L"foo"), Parse(L"foo"));
+  EXPECT_EQ(AsSelector(L"foo", L"bar", {}), Parse(L"foo#bar"));
+  EXPECT_EQ(AsSelector(L"foo", {L"a"}), Parse(L"foo.a"));
+  EXPECT_EQ(AsSelector(L"foo", {L":hover"}), Parse(L"foo:hover"));
+  EXPECT_EQ(AsSelector(L"foo", L"bar", {L"abc"}), Parse(L"foo#bar.abc"));
   EXPECT_EQ(AsSelector(L"foo", L"bar", {L"abc", L"def"}),
-            Selector::Parser().Parse(L"foo#bar.abc.def"));
-  EXPECT_EQ(AsSelector(L"::selector"), Selector::Parser().Parse(L"::selector"));
+            Parse(L"foo#bar.abc.def"));
+  EXPECT_EQ(AsSelector(L"::selector"), Parse(L"::selector"));
   EXPECT_EQ(AsSelector(L"::selector", {L":active"}),
-            Selector::Parser().Parse(L"::selector:active"));
+            Parse(L"::selector:active"));
 }
 
 TEST(CssSelctorTest, ParseError) {

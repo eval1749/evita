@@ -156,6 +156,10 @@ TEST(CssSelctorTest, Less) {
 
 TEST(CssSelctorTest, Parser) {
   EXPECT_EQ(Selector(), Selector::Parser().Parse(L""));
+  EXPECT_EQ(Selector(), Selector::Parser().Parse(L"*"));
+  EXPECT_EQ(AsSelector(L"", L"bar", {}), Selector::Parser().Parse(L"*#bar"));
+  EXPECT_EQ(AsSelector(L"", {L"abc"}), Selector::Parser().Parse(L"*.abc"));
+  EXPECT_EQ(AsSelector(L"", {L":hover"}), Selector::Parser().Parse(L"*:hover"));
   EXPECT_EQ(AsSelector(L"foo"), Selector::Parser().Parse(L"foo"));
   EXPECT_EQ(AsSelector(L"foo", L"bar", {}),
             Selector::Parser().Parse(L"foo#bar"));
@@ -173,6 +177,11 @@ TEST(CssSelctorTest, Parser) {
 
 TEST(CssSelctorTest, ParseError) {
   EXPECT_EQ(L"Bad tag name", AsParseError(L"!"));
+
+  EXPECT_EQ(L"Bad tag name", AsParseError(L"*a"));
+  EXPECT_EQ(L"Empty id", AsParseError(L"*#"));
+  EXPECT_EQ(L"Empty class", AsParseError(L"*."));
+  EXPECT_EQ(L"Empty pseudo-class", AsParseError(L"*:"));
 
   EXPECT_EQ(L"Empty id", AsParseError(L"#"));
   EXPECT_EQ(L"Empty id", AsParseError(L"#."));

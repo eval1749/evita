@@ -37,6 +37,7 @@ Selector Parser::Error(base::StringPiece16 error, size_t position) {
 Selector Parser::Parse(base::StringPiece16 text) {
   Builder builder;
   enum {
+    kAsterisk,
     kClass,
     kColon,
     kId,
@@ -48,6 +49,23 @@ Selector Parser::Parse(base::StringPiece16 text) {
     const auto ch = text[index];
     const auto length = index - start;
     switch (state) {
+      case kAsterisk:
+        if (ch == '.') {
+          start = index + 1;
+          state = kClass;
+          continue;
+        }
+        if (ch == ':') {
+          start = index;
+          state = kClass;
+          continue;
+        }
+        if (ch == '#') {
+          start = index + 1;
+          state = kId;
+          continue;
+        }
+        return Error(L"Bad tag name", index);
       case kClass:
         if (ch == '.' || ch == ':') {
           if (length == 0)
@@ -96,13 +114,17 @@ Selector Parser::Parse(base::StringPiece16 text) {
           continue;
         }
         if (ch == '.') {
-          start = index  + 1;
+          start = index + 1;
           state = kClass;
           continue;
         }
         if (ch == '#') {
           start = index + 1;
           state = kId;
+          continue;
+        }
+        if (ch == '*') {
+          state = kAsterisk;
           continue;
         }
         if (!IsNameChar(ch))
@@ -139,6 +161,8 @@ Selector Parser::Parse(base::StringPiece16 text) {
   }
   const auto length = text.length() - start;
   switch (state) {
+    case kAsterisk:
+      break;
     case kClass:
       if (length == 0)
         return Error(L"Empty class", text.length());

@@ -126,6 +126,52 @@ TEST(CssSelctorTest, Equals) {
   EXPECT_TRUE(selector5 == selector55);
 }
 
+TEST(CssSelctorTest, IsSubsetOf) {
+  EXPECT_TRUE(Parse(L"*").IsSubsetOf(Parse(L"*")));
+  EXPECT_FALSE(Parse(L"*").IsSubsetOf(Parse(L"*#bar")));
+  EXPECT_FALSE(Parse(L"*").IsSubsetOf(Parse(L"*.c1")));
+  EXPECT_FALSE(Parse(L"*").IsSubsetOf(Parse(L"foo")));
+  EXPECT_FALSE(Parse(L"*").IsSubsetOf(Parse(L"foo#bar")));
+  EXPECT_FALSE(Parse(L"*").IsSubsetOf(Parse(L"foo.c1")));
+  EXPECT_FALSE(Parse(L"*").IsSubsetOf(Parse(L"foo.c1.c2")));
+  EXPECT_FALSE(Parse(L"*").IsSubsetOf(Parse(L"foo:hover")));
+
+  EXPECT_TRUE(Parse(L"foo").IsSubsetOf(Parse(L"*")));
+  EXPECT_FALSE(Parse(L"foo").IsSubsetOf(Parse(L"*#bar")));
+  EXPECT_FALSE(Parse(L"foo").IsSubsetOf(Parse(L"*.c1")));
+  EXPECT_TRUE(Parse(L"foo").IsSubsetOf(Parse(L"foo")));
+  EXPECT_FALSE(Parse(L"foo").IsSubsetOf(Parse(L"foo#bar")));
+  EXPECT_FALSE(Parse(L"foo").IsSubsetOf(Parse(L"foo.c1")));
+  EXPECT_FALSE(Parse(L"foo").IsSubsetOf(Parse(L"foo:hover")));
+
+  EXPECT_TRUE(Parse(L"foo#bar").IsSubsetOf(Parse(L"*")));
+  EXPECT_TRUE(Parse(L"foo#bar").IsSubsetOf(Parse(L"*#bar")));
+  EXPECT_FALSE(Parse(L"foo#bar").IsSubsetOf(Parse(L"*.c1")));
+  EXPECT_TRUE(Parse(L"foo#bar").IsSubsetOf(Parse(L"foo")));
+  EXPECT_TRUE(Parse(L"foo#bar").IsSubsetOf(Parse(L"foo#bar")));
+  EXPECT_FALSE(Parse(L"foo#bar").IsSubsetOf(Parse(L"foo.c1")));
+  EXPECT_FALSE(Parse(L"foo#bar").IsSubsetOf(Parse(L"foo.c1.c2")));
+  EXPECT_FALSE(Parse(L"foo#bar").IsSubsetOf(Parse(L"foo:hover")));
+
+  EXPECT_TRUE(Parse(L"foo.c1").IsSubsetOf(Parse(L"*")));
+  EXPECT_FALSE(Parse(L"foo.c1").IsSubsetOf(Parse(L"*#bar")));
+  EXPECT_TRUE(Parse(L"foo.c1").IsSubsetOf(Parse(L"*.c1")));
+  EXPECT_TRUE(Parse(L"foo.c1").IsSubsetOf(Parse(L"foo")));
+  EXPECT_FALSE(Parse(L"foo.c1").IsSubsetOf(Parse(L"foo#bar")));
+  EXPECT_TRUE(Parse(L"foo.c1").IsSubsetOf(Parse(L"foo.c1")));
+  EXPECT_FALSE(Parse(L"foo.c1").IsSubsetOf(Parse(L"foo.c1.c2")));
+  EXPECT_FALSE(Parse(L"foo.c1").IsSubsetOf(Parse(L"foo:hover")));
+
+  EXPECT_TRUE(Parse(L"foo.c1.c2").IsSubsetOf(Parse(L"*")));
+  EXPECT_FALSE(Parse(L"foo.c1.c2").IsSubsetOf(Parse(L"*#bar")));
+  EXPECT_TRUE(Parse(L"foo.c1.c2").IsSubsetOf(Parse(L"*.c1")));
+  EXPECT_TRUE(Parse(L"foo.c1.c2").IsSubsetOf(Parse(L"foo")));
+  EXPECT_FALSE(Parse(L"foo.c1.c2").IsSubsetOf(Parse(L"foo#bar")));
+  EXPECT_TRUE(Parse(L"foo.c1.c2").IsSubsetOf(Parse(L"foo.c1")));
+  EXPECT_TRUE(Parse(L"foo.c1.c2").IsSubsetOf(Parse(L"foo.c1.c2")));
+  EXPECT_FALSE(Parse(L"foo.c1.c2").IsSubsetOf(Parse(L"foo:hover")));
+}
+
 TEST(CssSelctorTest, Less) {
   Selector selector0;
   const auto& selector1 = Selector::Builder().SetTagName(L"foo").Build();

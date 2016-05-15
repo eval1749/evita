@@ -40,6 +40,10 @@ class Selector final {
   base::AtomicString id() const { return id_; }
   const std::set<base::AtomicString>& classes() const { return classes_; }
 
+  // Returns true if set of elements selected by |this| selector is subset of
+  // elements selected by |other|.
+  bool IsSubsetOf(const Selector& other) const;
+
  private:
   std::set<base::AtomicString> classes_;
   base::AtomicString id_;

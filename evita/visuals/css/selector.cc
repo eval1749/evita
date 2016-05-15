@@ -79,6 +79,15 @@ bool Selector::operator<(const Selector& other) const {
   return false;
 }
 
+bool Selector::IsSubsetOf(const Selector& other) const {
+  if (tag_name_ != other.tag_name_ && !other.tag_name_.empty())
+    return false;
+  if (id_ != other.id_ && !other.id_.empty())
+    return false;
+  return std::includes(classes_.begin(), classes_.end(), other.classes_.begin(),
+                       other.classes_.end());
+}
+
 std::ostream& operator<<(std::ostream& ostream, const Selector& selector) {
   if (!selector.tag_name().empty())
     ostream << selector.tag_name();

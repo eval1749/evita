@@ -19,18 +19,7 @@ namespace {
 base::string16 AsParseError(base::StringPiece16 text) {
   Selector::Parser parser;
   parser.Parse(text);
-  return parser.error().as_string();
-}
-
-std::string AsString(const std::vector<Selector>& selectors) {
-  std::ostringstream ostream;
-  auto delimiter = "{";
-  for (const auto& selector : selectors) {
-    ostream << delimiter << selector;
-    delimiter = ", ";
-  }
-  ostream << '}';
-  return ostream.str();
+  return std::move(parser.error().as_string());
 }
 
 Selector AsSelector(base::StringPiece16 tag_name,
@@ -43,16 +32,27 @@ Selector AsSelector(base::StringPiece16 tag_name,
     builder.SetId(id);
   for (auto class_name : class_names)
     builder.AddClass(class_name);
-  return builder.Build();
+  return std::move(builder.Build());
 }
 
 Selector AsSelector(base::StringPiece16 tag_name,
                     const std::vector<base::StringPiece16>& class_names) {
-  return AsSelector(tag_name, L"", class_names);
+  return std::move(AsSelector(tag_name, L"", class_names));
 }
 
 Selector AsSelector(base::StringPiece16 tag_name) {
-  return AsSelector(tag_name, L"", {});
+  return std::move(AsSelector(tag_name, L"", {}));
+}
+
+std::string AsString(const std::vector<Selector>& selectors) {
+  std::ostringstream ostream;
+  auto delimiter = "{";
+  for (const auto& selector : selectors) {
+    ostream << delimiter << selector;
+    delimiter = ", ";
+  }
+  ostream << '}';
+  return std::move(ostream.str());
 }
 
 Selector Parse(base::StringPiece16 text) {

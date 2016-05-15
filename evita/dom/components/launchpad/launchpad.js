@@ -648,6 +648,7 @@ function createStyleSheet() {
       '}\n' +
       'row:hover {\n' +
       '  background-color: #3399FF33;\n' +
+      '  border: solid #3399FF33 1;\n' +
       '}';
   return css.Parser.parse(cssText);
 }

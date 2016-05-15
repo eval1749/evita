@@ -615,53 +615,39 @@ function createStyleSheet() {
       '  margin: 0 4 0 4;\n' +
       '  padding: 0 4 0 4;\n' +
       '}\n' +
-      '\n' +
       'header {\n' +
       '  display: inline;\n' +
       '}\n' +
-      '\n' +
       'headerCell {\n' +
       ' display: inline;\n' +
       ' padding: 3;\n' +
       ' border: #888 0 0 0 1;\n' +
       '}\n' +
-      '\n' +
       'cell {\n' +
       '  display: inline;\n' +
       '  padding: 3;\n' +
       '}\n' +
-      '\n' +
       'icon {\n' +
       '  height: 20;\n' +
       '  width: 20;\n' +
       '}\n' +
-      '\n' +
       'list {\n' +
       '  display: block;\n' +
       '}\n' +
-      '\n' +
       'row {\n' +
       '  display: block;\n' +
       '  border: solid #fff 1;\n' +
       '}\n' +
-      '\n' +
-      'row:hover {\n' +
-      '  background-color: #3399FF33;\n' +
-      '}\n' +
-      '\n' +
       '.inactiveSelected {\n' +
       '  background-color: #BFCDBF4C;  /* rgba(191, 205, 191, 0.3) */\n' +
       '  border: solid #BFCDBF 1\n' +
       '}\n' +
-      '\n' +
       '.activeSelected {\n' +
       '  background-color: #3399FF4C; /* rgba(51, 153, 255, 0.3) */\n' +
-      '  border: solid #3399FF30 1;\n' +
+      '  border: solid #3399FF 1;\n' +
       '}\n' +
-      '\n' +
-      '.activeSelected:hover {\n' +
-      '  background-color: #3399FF4C; /* rgba(51, 153, 255, 0.3) */\n' +
-      '  border: solid #3399FF30 1;\n' +
+      'row:hover {\n' +
+      '  background-color: #3399FF33;\n' +
       '}';
   return css.Parser.parse(cssText);
 }

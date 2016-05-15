@@ -44,6 +44,8 @@ class Selector final {
   // elements selected by |other|.
   bool IsSubsetOf(const Selector& other) const;
 
+  base::string16 ToString() const;
+
  private:
   std::set<base::AtomicString> classes_;
   base::AtomicString id_;

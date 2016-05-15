@@ -55,12 +55,6 @@ Selector AsSelector(base::StringPiece16 tag_name) {
   return AsSelector(tag_name, L"", {});
 }
 
-std::string AsString(const Selector& selector) {
-  std::ostringstream ostream;
-  ostream << selector;
-  return ostream.str();
-}
-
 Selector Parse(base::StringPiece16 text) {
   return std::move(Selector::Parser().Parse(text));
 }
@@ -240,17 +234,17 @@ TEST(CssSelctorTest, ParseError) {
   EXPECT_EQ(L"Bad class", AsParseError(L".ab#"));
 }
 
-TEST(CssSelctorTest, Printer) {
-  EXPECT_EQ("", AsString(Selector()));
-  EXPECT_EQ("foo", AsString(Parse(L"foo")));
-  EXPECT_EQ("#bar", AsString(Parse(L"#bar")));
-  EXPECT_EQ(".c1", AsString(Parse(L".c1")));
-  EXPECT_EQ(":hover", AsString(Parse(L":hover")));
-  EXPECT_EQ("foo#bar", AsString(Parse(L"foo#bar")));
-  EXPECT_EQ("foo#bar.c1", AsString(Parse(L"foo#bar.c1")));
-  EXPECT_EQ("foo.c1", AsString(Parse(L"foo.c1")));
-  EXPECT_EQ("foo.c1.c2", AsString(Parse(L"foo.c1.c2")));
-  EXPECT_EQ("foo.c1:hover", AsString(Parse(L"foo.c1:hover")));
+TEST(CssSelctorTest, ToString) {
+  EXPECT_EQ(L"", Selector().ToString());
+  EXPECT_EQ(L"foo", Parse(L"foo").ToString());
+  EXPECT_EQ(L"#bar", Parse(L"#bar").ToString());
+  EXPECT_EQ(L".c1", Parse(L".c1").ToString());
+  EXPECT_EQ(L":hover", Parse(L":hover").ToString());
+  EXPECT_EQ(L"foo#bar", Parse(L"foo#bar").ToString());
+  EXPECT_EQ(L"foo#bar.c1", Parse(L"foo#bar.c1").ToString());
+  EXPECT_EQ(L"foo.c1", Parse(L"foo.c1").ToString());
+  EXPECT_EQ(L"foo.c1.c2", Parse(L"foo.c1.c2").ToString());
+  EXPECT_EQ(L"foo.c1:hover", Parse(L"foo.c1:hover").ToString());
 }
 
 }  // namespace css

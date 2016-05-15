@@ -4,8 +4,11 @@
 
 #include <algorithm>
 #include <ostream>
+#include <vector>
 
 #include "evita/visuals/css/selector.h"
+
+#include "base/strings/string_util.h"
 
 namespace visuals {
 namespace css {
@@ -88,17 +91,24 @@ bool Selector::IsSubsetOf(const Selector& other) const {
                        other.classes_.end());
 }
 
-std::ostream& operator<<(std::ostream& ostream, const Selector& selector) {
-  if (!selector.tag_name().empty())
-    ostream << selector.tag_name();
-  if (!selector.id().empty())
-    ostream << "#" << selector.id();
-  for (auto class_name : selector.classes()) {
-    if (class_name.value()[0] != ':')
-      ostream << '.';
-    ostream << class_name;
+base::string16 Selector::ToString() const {
+  std::vector<base::string16> strings;
+  if (!tag_name_.empty())
+    strings.emplace_back(tag_name_.value().as_string());
+  if (!id_.empty()) {
+    strings.emplace_back(L"#");
+    strings.emplace_back(id_.value().as_string());
   }
-  return ostream;
+  for (auto class_name : classes_) {
+    if (class_name.value()[0] != ':')
+      strings.emplace_back(L".");
+    strings.emplace_back(class_name.value().as_string());
+  }
+  return base::JoinString(strings, base::StringPiece16());
+}
+
+std::ostream& operator<<(std::ostream& ostream, const Selector& selector) {
+  return ostream << selector.ToString();
 }
 
 }  // namespace css

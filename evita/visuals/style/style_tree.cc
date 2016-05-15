@@ -14,6 +14,7 @@
 #include "evita/visuals/css/media.h"
 #include "evita/visuals/css/media_state.h"
 #include "evita/visuals/css/properties.h"
+#include "evita/visuals/css/selector_builder.h"
 #include "evita/visuals/css/style.h"
 #include "evita/visuals/css/style_editor.h"
 #include "evita/visuals/css/style_sheet.h"
@@ -55,6 +56,17 @@ void InheritStyle(css::Style* style, const css::Style& parent_style) {
   FOR_EACH_INHERITABLE_PROPERTY(V)
 #undef V
 }
+
+css::Selector MakeSelectorForElement(const ElementNode& element) {
+  css::Selector::Builder builder;
+  builder.SetTagName(element.tag_name());
+  if (!element.id().empty())
+    builder.SetId(element.id());
+  for (auto class_name : element.class_list())
+    builder.AddClass(class_name);
+  return std::move(builder.Build());
+}
+
 }  // namespace
 
 //////////////////////////////////////////////////////////////////////
@@ -200,11 +212,9 @@ std::unique_ptr<css::Style> StyleTree::Impl::ComputeStyleForElement(
   const auto inline_style = element.inline_style();
   auto style = inline_style ? std::make_unique<css::Style>(*inline_style)
                             : std::make_unique<css::Style>();
+  const auto& selector = MakeSelectorForElement(element);
   for (const auto& style_sheet : compiled_style_sheets_) {
-    auto matched = style_sheet->Match(element);
-    if (!matched)
-      continue;
-    css::StyleEditor().Merge(style.get(), *matched);
+    style_sheet->Merge(style.get(), selector);
   }
   InheritStyle(style.get(), ComputedStyleOf(*element.parent()));
   css::StyleEditor().Merge(style.get(), initial_style());

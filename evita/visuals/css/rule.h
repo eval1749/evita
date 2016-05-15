@@ -8,8 +8,7 @@
 #include <memory>
 
 #include "base/macros.h"
-#include "base/strings/string16.h"
-#include "base/strings/string_piece.h"
+#include "evita/visuals/css/selector.h"
 
 namespace visuals {
 namespace css {
@@ -22,15 +21,17 @@ class Style;
 //
 class Rule final {
  public:
-  Rule(base::StringPiece16 selector, std::unique_ptr<Style> style);
+  Rule(const Selector& selector, std::unique_ptr<Style> style);
   ~Rule();
 
-  const base::string16& selector() const { return selector_; }
+  const Selector& selector() const { return selector_; }
   const Style& style() const { return *style_; }
 
+  bool operator<(const Rule& other) const;
+
  private:
-  const base::string16 selector_;
-  std::unique_ptr<Style> style_;
+  const Selector selector_;
+  const std::unique_ptr<Style> style_;
 
   DISALLOW_COPY_AND_ASSIGN(Rule);
 };

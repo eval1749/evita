@@ -13,10 +13,14 @@ namespace css {
 //
 // Rule
 //
-Rule::Rule(base::StringPiece16 selector, std::unique_ptr<Style> style)
-    : selector_(selector.as_string()), style_(std::move(style)) {}
+Rule::Rule(const Selector& selector, std::unique_ptr<Style> style)
+    : selector_(selector), style_(std::move(style)) {}
 
-Rule::~Rule() {}
+Rule::~Rule() = default;
+
+bool Rule::operator<(const Rule& other) const {
+  return selector_ < other.selector_;
+}
 
 }  // namespace css
 }  // namespace visuals

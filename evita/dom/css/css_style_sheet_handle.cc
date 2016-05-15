@@ -11,11 +11,13 @@
 #include "evita/dom/script_host.h"
 #include "evita/ginx/runner.h"
 #include "evita/visuals/css/rule.h"
+#include "evita/visuals/css/selector_parser.h"
 #include "evita/visuals/css/style.h"
 #include "evita/visuals/css/style_sheet.h"
 
 namespace dom {
 
+using CssSelector = visuals::css::Selector;
 using CssStyle = visuals::css::Style;
 
 //////////////////////////////////////////////////////////////////////
@@ -28,8 +30,12 @@ CSSStyleSheetHandle::~CSSStyleSheetHandle() {}
 
 // Bindings implementations
 void CSSStyleSheetHandle::AppendStyleRule(CSSStyleSheetHandle* handle,
-                                          const base::string16& selector,
+                                          const base::string16& selector_text,
                                           v8::Local<v8::Map> raw_style) {
+  CssSelector::Parser parser;
+  const auto& selector = parser.Parse(selector_text);
+  if (!parser.error().empty())
+    return;
   const auto& runner = ScriptHost::instance()->runner();
   const auto& context = runner->context();
   auto style = CSSStyle::ConvertFromV8(context, raw_style);
@@ -45,9 +51,13 @@ void CSSStyleSheetHandle::DeleteRule(CSSStyleSheetHandle* handle, int index) {
 }
 
 void CSSStyleSheetHandle::InsertStyleRule(CSSStyleSheetHandle* handle,
-                                          const base::string16& selector,
+                                          const base::string16& selector_text,
                                           v8::Local<v8::Map> raw_style,
                                           int index) {
+  CssSelector::Parser parser;
+  const auto& selector = parser.Parse(selector_text);
+  if (!parser.error().empty())
+    return;
   const auto& runner = ScriptHost::instance()->runner();
   const auto& context = runner->context();
   auto style = CSSStyle::ConvertFromV8(context, raw_style);
@@ -70,7 +80,7 @@ v8::Local<v8::Map> CSSStyleSheetHandle::RuleAt(
   const auto& map = CSSStyle::ConvertToV8(context, rule->style());
   return runner_scope.Escape(
       map->Set(context, gin::ConvertToV8(isolate, -1),
-               gin::ConvertToV8(isolate, rule->selector()))
+               gin::ConvertToV8(isolate, rule->selector().ToString()))
           .ToLocalChecked());
 }
 

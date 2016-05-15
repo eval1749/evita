@@ -11,13 +11,13 @@
 
 #include "base/macros.h"
 #include "base/observer_list.h"
-#include "base/strings/string_piece.h"
 #include "evita/gc/collectable.h"
 
 namespace visuals {
 namespace css {
 
 class Rule;
+class Selector;
 class Style;
 class StyleSheetObserver;
 
@@ -34,10 +34,9 @@ class StyleSheet final : public gc::Collectable<StyleSheet> {
 
   const std::vector<Rule*>& rules() const { return rules_; }
 
-  void AppendRule(base::StringPiece16 selector,
-                  std::unique_ptr<css::Style> style);
+  void AppendRule(const Selector& selector, std::unique_ptr<css::Style> style);
   void AddObserver(StyleSheetObserver* observer) const;
-  void InsertRule(base::StringPiece16 selector,
+  void InsertRule(const Selector& selector,
                   std::unique_ptr<css::Style> style,
                   size_t index);
   void RemoveObserver(StyleSheetObserver* observer) const;

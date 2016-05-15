@@ -7,12 +7,27 @@
 #include "base/strings/string16.h"
 #include "evita/base/strings/atomic_string.h"
 #include "evita/visuals/css/rule.h"
+#include "evita/visuals/css/selector_builder.h"
 #include "evita/visuals/css/style.h"
 #include "evita/visuals/css/style_editor.h"
 #include "evita/visuals/css/style_sheet.h"
 #include "evita/visuals/dom/element.h"
 
 namespace visuals {
+
+//////////////////////////////////////////////////////////////////////
+//
+// CompiledStyleSheet::Entry
+//
+CompiledStyleSheet::Entry::Entry(size_t passedPosition,
+                                 std::unique_ptr<css::Style> passedStyle)
+    : position(passedPosition), style(std::move(passedStyle)) {}
+
+CompiledStyleSheet::Entry::Entry(Entry&& other)
+    : position(other.position), style(std::move(other.style)) {}
+
+CompiledStyleSheet::Entry::Entry() : position(0) {}
+CompiledStyleSheet::Entry::~Entry() = default;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -34,54 +49,74 @@ void CompiledStyleSheet::AddObserver(css::StyleSheetObserver* observer) const {
 }
 
 void CompiledStyleSheet::CompileRule(const css::Rule& rule) {
-  if (rule.selector()[0] == '#') {
-    const auto& id = AtomicString(rule.selector().substr(1));
-    const auto& insert_id = id_map_.emplace(id, &rule.style());
-    DCHECK(insert_id.second);
+  const auto it = rules_.find(rule.selector());
+  if (it != rules_.end()) {
+    css::StyleEditor().Merge(it->second.style.get(), rule.style());
     return;
   }
-
-  if (rule.selector()[0] == '.') {
-    const auto& class_name = AtomicString(rule.selector().substr(1));
-    const auto& insert_class =
-        class_name_map_.emplace(class_name, &rule.style());
-    DCHECK(insert_class.second);
-    return;
-  }
-
-  const auto& tag_name = AtomicString(rule.selector());
-  const auto& insert_tag = tag_name_map_.emplace(tag_name, &rule.style());
-  DCHECK(insert_tag.second);
+  rules_.emplace(
+      rule.selector(),
+      std::move(Entry(rules_.size(),
+                      std::move(std::make_unique<css::Style>(rule.style())))));
 }
 
-std::unique_ptr<css::Style> CompiledStyleSheet::Match(
-    const ElementNode& element) const {
-  auto matched = false;
-  css::Style style;
-  if (!element.id().empty()) {
-    const auto& id_it = id_map_.find(element.id());
-    if (id_it != id_map_.end()) {
-      matched = true;
-      style = *id_it->second;
-    }
+CompiledStyleSheet::RuleMap::const_iterator CompiledStyleSheet::FindFirstMatch(
+    const css::Selector& selector) const {
+  auto runner = rules_.lower_bound(selector);
+  while (runner != rules_.end()) {
+    if (selector.IsSubsetOf(runner->first))
+      return runner;
+    ++runner;
   }
+  return runner;
+}
 
-  for (const auto& class_name : element.class_list()) {
-    const auto& class_name_it = class_name_map_.find(class_name);
-    if (class_name_it != class_name_map_.end()) {
-      css::StyleEditor().Merge(&style, *class_name_it->second);
-      matched = true;
+void CompiledStyleSheet::Merge(css::Style* style,
+                               const css::Selector& selector) const {
+  DCHECK(selector.has_tag_name()) << selector;
+  auto tag_runner = FindFirstMatch(selector);
+  auto any_runner =
+      FindFirstMatch(css::Selector::Builder::CopyWithoutTagName(selector));
+  while (tag_runner != rules_.end() && any_runner != rules_.end()) {
+    if (tag_runner == any_runner) {
+      any_runner = rules_.end();
+      break;
     }
+    if (!selector.IsSubsetOf(tag_runner->first))
+      break;
+    if (!selector.IsSubsetOf(any_runner->first))
+      break;
+    // Apply more specific rule. If we can't determine more specific rule,
+    // we use first appeared rule[1].
+    // Example:
+    //  .c1 { color: red; }
+    //  .c2 { color: blue; }
+    // When we have above style sheet, color of an element selected by
+    // "foo.c1.c2" is "red", since ".c1" and ".c2" are same specificity but
+    // ".c1" is appeared before ".c2".
+    // [1] https://www.w3.org/TR/css3-selectors/#specificity
+    if (tag_runner->first.IsMoreSpecific(any_runner->first) &&
+        (!any_runner->first.IsMoreSpecific(tag_runner->first) ||
+         tag_runner->second.position < any_runner->second.position)) {
+      css::StyleEditor().Merge(style, *tag_runner->second.style);
+      ++tag_runner;
+      continue;
+    }
+    css::StyleEditor().Merge(style, *any_runner->second.style);
+    ++any_runner;
   }
-
-  const auto& tag_name_it = tag_name_map_.find(element.tag_name());
-  if (tag_name_it != tag_name_map_.end()) {
-    css::StyleEditor().Merge(&style, *tag_name_it->second);
-    matched = true;
+  while (tag_runner != rules_.end()) {
+    if (!selector.IsSubsetOf(tag_runner->first))
+      break;
+    css::StyleEditor().Merge(style, *tag_runner->second.style);
+    ++tag_runner;
   }
-  if (!matched)
-    return std::unique_ptr<css::Style>();
-  return std::make_unique<css::Style>(style);
+  while (any_runner != rules_.end()) {
+    if (!selector.IsSubsetOf(any_runner->first))
+      break;
+    css::StyleEditor().Merge(style, *any_runner->second.style);
+    ++any_runner;
+  }
 }
 
 void CompiledStyleSheet::RemoveObserver(

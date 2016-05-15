@@ -14,6 +14,7 @@
 #include "evita/ui/events/event.h"
 #include "evita/visuals/css/media_state.h"
 #include "evita/visuals/css/media_type.h"
+#include "evita/visuals/css/selector_parser.h"
 #include "evita/visuals/css/style.h"
 #include "evita/visuals/css/style_builder.h"
 #include "evita/visuals/css/style_sheet.h"
@@ -38,6 +39,10 @@ namespace {
 
 const auto kMargin = 8;
 const auto kBorder = 1;
+
+css::Selector ParseSelector(base::StringPiece16 text) {
+  return css::Selector::Parser().Parse(text);
+}
 
 Document* LoadDocument() {
   const auto document = NodeTreeBuilder()
@@ -92,7 +97,7 @@ Document* LoadDocument() {
 css::StyleSheet* LoadStyleSheet() {
   const auto style_sheet = new css::StyleSheet();
   style_sheet->AppendRule(
-      L"#hover",
+      ParseSelector(L"#hover"),
       std::move(
           css::StyleBuilder()
               .SetPosition(css::Position::Absolute())
@@ -102,16 +107,16 @@ css::StyleSheet* LoadStyleSheet() {
               .SetBorder(css::ColorValue::Rgba(51, 153, 255, 1.0f), 1)
               .Build()));
   style_sheet->AppendRule(
-      L"input",
+      ParseSelector(L"input"),
       std::move(css::StyleBuilder()
                     .SetBorder(css::ColorValue::Rgba(128, 128, 128), 1)
                     .SetPadding(2)
                     .SetWidth(300)
                     .Build()));
   style_sheet->AppendRule(
-      L"list",
+      ParseSelector(L"list"),
       std::move(css::StyleBuilder().SetDisplay(css::Display::Block()).Build()));
-  style_sheet->AppendRule(L"list_item",
+  style_sheet->AppendRule(ParseSelector(L"list_item"),
                           std::move(css::StyleBuilder()
                                         .SetColor(0, 0, 0)
                                         .SetDisplay(css::Display::Block())
@@ -121,16 +126,19 @@ css::StyleSheet* LoadStyleSheet() {
                                         .SetPaddingLeft(5)
                                         .Build()));
   style_sheet->AppendRule(
-      L"main",
+      ParseSelector(L"main"),
       std::move(css::StyleBuilder().SetDisplay(css::Display::Block()).Build()));
-  style_sheet->AppendRule(L"name",
+  style_sheet->AppendRule(ParseSelector(L"name"),
                           std::move(css::StyleBuilder().SetWidth(150).Build()));
   style_sheet->AppendRule(
-      L"size", std::move(css::StyleBuilder().SetMarginRight(5).Build()));
+      ParseSelector(L"size"),
+      std::move(css::StyleBuilder().SetMarginRight(5).Build()));
   style_sheet->AppendRule(
-      L"status", std::move(css::StyleBuilder().SetMarginRight(5).Build()));
+      ParseSelector(L"status"),
+      std::move(css::StyleBuilder().SetMarginRight(5).Build()));
   style_sheet->AppendRule(
-      L"file", std::move(css::StyleBuilder().SetMarginRight(5).Build()));
+      ParseSelector(L"file"),
+      std::move(css::StyleBuilder().SetMarginRight(5).Build()));
   return style_sheet;
 }
 

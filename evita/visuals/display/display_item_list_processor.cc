@@ -21,6 +21,7 @@
 #include "evita/gfx/brush.h"
 #include "evita/gfx/canvas.h"
 #include "evita/gfx/color_f.h"
+#include "evita/gfx/stroke_style.h"
 #include "evita/gfx/text_format.h"
 #include "evita/visuals/display/public/display_item_list.h"
 #include "evita/visuals/display/public/display_item_visitor.h"
@@ -122,14 +123,42 @@ void PaintVisitor::VisitDrawBitmap(DrawBitmapDisplayItem* item) {
 }
 
 void PaintVisitor::VisitDrawLine(DrawLineDisplayItem* item) {
-  canvas_->DrawLine(gfx::Brush(canvas_, ToColorF(item->color())),
-                    ToPointF(item->point1()), ToPointF(item->point2()),
+  const auto& brush = gfx::Brush(canvas_, ToColorF(item->color()));
+#if 1
+  canvas_->DrawLine(brush, ToPointF(item->point1()), ToPointF(item->point2()),
                     item->thickness());
+#else
+  if (item->thickness() != 1) {
+    canvas_->DrawLine(brush, ToPointF(item->point1()), ToPointF(item->point2()),
+                      item->thickness());
+    return;
+  }
+  gfx::StrokeStyle style;
+  style.set_stroke_transform(gfx::StrokeTransform::Hairline);
+  style.Realize(canvas_);
+  (*canvas_)->DrawLine(ToPointF(item->point1()), ToPointF(item->point2()),
+                       brush, 1.0f, style);
+#endif
 }
 
 void PaintVisitor::VisitDrawRect(DrawRectDisplayItem* item) {
-  canvas_->DrawRectangle(gfx::Brush(canvas_, ToColorF(item->color())),
-                         ToRectF(item->bounds()), item->thickness());
+  DCHECK_EQ(item->bounds().bottom(), std::ceil(item->bounds().bottom()));
+  DCHECK_EQ(item->bounds().x(), std::ceil(item->bounds().x()));
+  DCHECK_EQ(item->bounds().right(), std::ceil(item->bounds().right()));
+  DCHECK_EQ(item->bounds().y(), std::ceil(item->bounds().y()));
+  const auto& brush = gfx::Brush(canvas_, ToColorF(item->color()));
+#if 1
+  canvas_->DrawRectangle(brush, ToRectF(item->bounds()), item->thickness());
+#else
+  if (item->thickness() != 1) {
+    canvas_->DrawRectangle(brush, ToRectF(item->bounds()), item->thickness());
+    return;
+  }
+  gfx::StrokeStyle style;
+  style.set_stroke_transform(gfx::StrokeTransform::Hairline);
+  style.Realize(canvas_);
+  (*canvas_)->DrawRectangle(ToRectF(item->bounds()), brush, 1.0f, style);
+#endif
 }
 
 void PaintVisitor::VisitDrawText(DrawTextDisplayItem* item) {

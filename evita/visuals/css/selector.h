@@ -32,6 +32,8 @@ class Selector final {
 
   bool operator==(const Selector& other) const;
   bool operator!=(const Selector& other) const;
+
+  // Returns true if |this| selector is more specific than |other|.
   bool operator<(const Selector& other) const;
 
   base::AtomicString tag_name() const { return tag_name_; }

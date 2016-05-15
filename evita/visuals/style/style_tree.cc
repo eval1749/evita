@@ -109,6 +109,7 @@ class StyleTree::Impl final {
   void DidChangeFocusedNode(Node* focused_node);
   void DidChangeHoveredNode(Node* hovered_node);
   void MarkDirty(const Node& node);
+  void MarkInclusiveAncestorsDirty(const Node& node);
   void RemoveObserver(StyleTreeObserver* observer);
   void UpdateIfNeeded();
 
@@ -254,9 +255,9 @@ css::Selector StyleTree::Impl::MakeSelectorForElement(
     builder.SetId(element.id());
   for (auto class_name : element.class_list())
     builder.AddClass(class_name);
-  if (element == focused_node_)
+  if (focused_node_ && element.Contains(*focused_node_))
     builder.AddClass(base::AtomicString(L":focus"));
-  if (element == hovered_node_)
+  if (hovered_node_ && element.Contains(*hovered_node_))
     builder.AddClass(base::AtomicString(L":hover"));
   return std::move(builder.Build());
 }
@@ -269,6 +270,16 @@ void StyleTree::Impl::MarkDirty(const Node& node) {
     if (item->is_child_dirty)
       return;
     item->is_child_dirty = true;
+  }
+}
+
+void StyleTree::Impl::MarkInclusiveAncestorsDirty(const Node& node) {
+  state_ = StyleTreeState::Dirty;
+  GetOrNewItem(node)->is_dirty = true;
+  for (const auto& ancestor : Node::Ancestors(node)) {
+    const auto item = GetOrNewItem(*ancestor);
+    item->is_child_dirty = true;
+    item->is_dirty = true;
   }
 }
 
@@ -391,7 +402,9 @@ void StyleTree::Impl::UpdateIfNeeded() {
   state_ = StyleTreeState::Updating;
   Context context;
   UpdateDocumentStyleIfNeeded(&context);
-  DCHECK(context.is_updated);
+  // TODO(eval1749): Once |DidChange{Focused,Hovered|Node()| check selectors,
+  // we should enable below |DCHECK()|.
+  // DCHECK(context.is_updated);
   state_ = StyleTreeState::Clean;
 }
 
@@ -514,6 +527,11 @@ void StyleTree::MarkDirty(const Node& node) {
   impl_->MarkDirty(node);
 }
 
+void StyleTree::MarkInclusiveAncestorsDirty(const Node& node) {
+  lifecycle()->StartOver();
+  impl_->MarkInclusiveAncestorsDirty(node);
+}
+
 void StyleTree::RemoveObserver(StyleTreeObserver* observer) const {
   impl_->RemoveObserver(observer);
 }
@@ -617,30 +635,22 @@ void StyleTree::DidSetTextData(const Text& text,
 // UserActionSource::Observer
 void StyleTree::DidChangeFocusedNode(Node* new_focused_node) {
   if (impl_->focused_node()) {
-    // TODO(eval1749): We should not mark |focused_node_| if it doesn't have
-    // rule for ":focus".
-    MarkDirty(*impl_->focused_node());
+    MarkInclusiveAncestorsDirty(*impl_->focused_node());
   }
   impl_->DidChangeFocusedNode(new_focused_node);
   if (!new_focused_node)
     return;
-  // TODO(eval1749): We should not mark |focused_node_| if it doesn't have
-  // rule for ":focus".
-  MarkDirty(*new_focused_node);
+  MarkInclusiveAncestorsDirty(*new_focused_node);
 }
 
 void StyleTree::DidChangeHoveredNode(Node* new_hovered_node) {
   if (impl_->hovered_node()) {
-    // TODO(eval1749): We should not mark |focused_node_| if it doesn't have
-    // rule for ":focus".
-    MarkDirty(*impl_->hovered_node());
+    MarkInclusiveAncestorsDirty(*impl_->hovered_node());
   }
   impl_->DidChangeHoveredNode(new_hovered_node);
   if (!new_hovered_node)
     return;
-  // TODO(eval1749): We should not mark |focused_node_| if it doesn't have
-  // rule for ":hover".
-  MarkDirty(*new_hovered_node);
+  MarkInclusiveAncestorsDirty(*new_hovered_node);
 }
 
 }  // namespace visuals

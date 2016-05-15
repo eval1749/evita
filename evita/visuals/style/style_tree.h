@@ -67,6 +67,7 @@ class StyleTree final : public ViewLifecycleClient,
 
   void Clear();
   void MarkDirty(const Node& node);
+  void MarkInclusiveAncestorsDirty(const Node& node);
 
   // css::MediaObserver
   void DidChangeViewportSize() final;

@@ -642,22 +642,26 @@ function createStyleSheet() {
       '\n' +
       'row {\n' +
       '  display: block;\n' +
-      '  border: #fff 1;\n' +
+      '  border: solid #fff 1;\n' +
       '}\n' +
       '\n' +
-      '.hover {\n' +
-      '  background-color: #3399FF10;\n' +
-      '  border: #3399FF30 1;\n' +
+      'row:hover {\n' +
+      '  background-color: #3399FF33;\n' +
       '}\n' +
       '\n' +
       '.inactiveSelected {\n' +
-      '  background-color: #BFCDBF33;  /* rgba(191, 205, 191, 0.2) */\n' +
-      '  border: #BFCDBF 1\n' +
+      '  background-color: #BFCDBF4C;  /* rgba(191, 205, 191, 0.3) */\n' +
+      '  border: solid #BFCDBF 1\n' +
       '}\n' +
       '\n' +
       '.activeSelected {\n' +
-      '  background-color: #3399FF33; /* rgba(51, 153, 255, 0.2) */\n' +
-      '  border: #3399FF30 1;\n' +
+      '  background-color: #3399FF4C; /* rgba(51, 153, 255, 0.3) */\n' +
+      '  border: solid #3399FF30 1;\n' +
+      '}\n' +
+      '\n' +
+      '.activeSelected:hover {\n' +
+      '  background-color: #3399FF4C; /* rgba(51, 153, 255, 0.3) */\n' +
+      '  border: solid #3399FF30 1;\n' +
       '}';
   return css.Parser.parse(cssText);
 }
@@ -673,8 +677,6 @@ class LaunchPad {
   constructor() {
     /** @private @type {boolean} */
     this.hasFocus_ = true;
-    /** @private @type {Element} */
-    this.lastHover_ = null;
     /** @private @type {!ListModel} */
     this.model_ = new ListModel();
     /** @private @const @type {!VisualWindow} */
@@ -701,10 +703,6 @@ class LaunchPad {
         Event.Names.KEYDOWN, this.onKeyDown.bind(this));
     this.window_.addEventListener(
         Event.Names.MOUSEDOWN, this.onMouseDown.bind(this));
-    this.window_.addEventListener(
-        Event.Names.MOUSELEAVE, this.onMouseLeave.bind(this));
-    this.window_.addEventListener(
-        Event.Names.MOUSEMOVE, this.onMouseMove.bind(this));
   }
 
   /** @return {!VisualWindow} */
@@ -774,10 +772,6 @@ class LaunchPad {
   //
   /** @private */
   onBlur() {
-    if (this.lastHover_) {
-      this.lastHover_.classList.remove('hover');
-      this.lastHover_ = null;
-    }
     this.hasFocus_ = false;
     this.updateSelected();
   }
@@ -794,7 +788,6 @@ class LaunchPad {
 
   /** @private */
   onFocus() {
-    this.lastHover_ = null;
     this.hasFocus_ = true;
     this.updateSelected();
   }
@@ -839,27 +832,6 @@ class LaunchPad {
     else
       this.selection_.collapseTo(row);
     this.updateSelected();
-  }
-
-  /** @private @param {!MouseEvent} event */
-  onMouseLeave(event) {
-    if (!this.lastHover_)
-      return;
-    this.lastHover_.classList.remove('hover');
-    this.lastHover_ = null;
-  }
-
-  /** @private @param {!MouseEvent} event */
-  onMouseMove(event) {
-    /** @type {?Element} */
-    const hover = this.findRowAtPoint(event.clientX, event.clientY);
-    if (hover === this.lastHover_)
-      return;
-    if (this.lastHover_)
-      this.lastHover_.classList.remove('hover');
-    if (hover)
-      hover.classList.add('hover');
-    this.lastHover_ = hover;
   }
 }
 

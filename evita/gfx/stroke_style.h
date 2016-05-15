@@ -35,6 +35,12 @@ enum class LineJoin {
   MiterOrBevel = D2D1_LINE_JOIN_MITER_OR_BEVEL,
 };
 
+enum class StrokeTransform {
+  Normal = D2D1_STROKE_TRANSFORM_TYPE_NORMAL,
+  Fixed = D2D1_STROKE_TRANSFORM_TYPE_FIXED,
+  Hairline = D2D1_STROKE_TRANSFORM_TYPE_HAIRLINE,
+};
+
 class StrokeStyle final {
  public:
   StrokeStyle();
@@ -49,13 +55,14 @@ class StrokeStyle final {
   void set_dash_offset(float offset);
   void set_dash_style(DashStyle dash_style);
   void set_line_join(LineJoin line_join);
+  void set_stroke_transform(StrokeTransform transform);
 
   void Realize(Canvas* canvas);
 
  private:
   std::vector<float> dashes_;
-  common::ComPtr<ID2D1StrokeStyle> platform_style_;
-  D2D1_STROKE_STYLE_PROPERTIES properties_;
+  common::ComPtr<ID2D1StrokeStyle1> platform_style_;
+  D2D1_STROKE_STYLE_PROPERTIES1 properties_;
 
   DISALLOW_COPY_AND_ASSIGN(StrokeStyle);
 };

@@ -17,6 +17,7 @@ StrokeStyle::StrokeStyle() {
   properties_.miterLimit = 0.0f;
   properties_.dashStyle = D2D1_DASH_STYLE_SOLID;
   properties_.dashOffset = 0.0f;
+  properties_.transformType = D2D1_STROKE_TRANSFORM_TYPE_NORMAL;
 }
 
 StrokeStyle::~StrokeStyle() {}
@@ -54,11 +55,19 @@ void StrokeStyle::set_line_join(LineJoin line_join) {
   properties_.lineJoin = static_cast<D2D1_LINE_JOIN>(line_join);
 }
 
+void StrokeStyle::set_stroke_transform(StrokeTransform transform) {
+  DCHECK(!is_realized());
+  properties_.transformType =
+      static_cast<D2D1_STROKE_TRANSFORM_TYPE>(transform);
+}
+
 void StrokeStyle::Realize(Canvas* canvas) {
   DCHECK(!is_realized());
-  COM_VERIFY(canvas->GetD2D1Factory()->CreateStrokeStyle(
-      properties_, dashes_.data(), static_cast<UINT>(dashes_.size()),
-      &platform_style_));
+  common::ComPtr<ID2D1Factory1> factory1;
+  COM_VERIFY(factory1.QueryFrom(canvas->GetD2D1Factory()));
+  COM_VERIFY(factory1->CreateStrokeStyle(properties_, dashes_.data(),
+                                         static_cast<UINT>(dashes_.size()),
+                                         &platform_style_));
 }
 
 }  // namespace gfx

@@ -49,8 +49,10 @@ class CompiledStyleSheetSet final : public css::StyleSheetObserver {
     std::unique_ptr<css::Style> style;
   };
 
+  using CacheMap = std::map<css::Selector, std::unique_ptr<css::Style>>;
   using RuleMap = std::map<css::Selector, Entry>;
 
+  void ClearCache();
   void CompileStyleSheetsIfNeeded();
   void CompileRule(const css::Rule& rule);
   RuleMap::const_iterator FindFirstMatch(const css::Selector& selector) const;
@@ -59,8 +61,9 @@ class CompiledStyleSheetSet final : public css::StyleSheetObserver {
   void DidInsertRule(const css::Rule& new_rule, size_t index);
   void DidRemoveRule(const css::Rule& old_rule, size_t index);
 
+  mutable CacheMap cached_matches_;
   mutable base::ObserverList<css::StyleSheetObserver> observers_;
-  RuleMap rules_;
+  mutable RuleMap rules_;
   const std::vector<css::StyleSheet*> style_sheets_;
 
   DISALLOW_COPY_AND_ASSIGN(CompiledStyleSheetSet);

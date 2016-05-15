@@ -50,6 +50,11 @@ void CompiledStyleSheetSet::AddObserver(
   observers_.AddObserver(observer);
 }
 
+void CompiledStyleSheetSet::ClearCache() {
+  cached_matches_.clear();
+  rules_.clear();
+}
+
 void CompiledStyleSheetSet::CompileStyleSheetsIfNeeded() {
   if (!rules_.empty())
     return;
@@ -82,10 +87,20 @@ CompiledStyleSheetSet::FindFirstMatch(const css::Selector& selector) const {
   return runner;
 }
 
-void CompiledStyleSheetSet::Merge(css::Style* style,
+void CompiledStyleSheetSet::Merge(css::Style* passed_style,
                                   const css::Selector& selector) const {
   DCHECK(!selector.is_universal()) << selector;
   const_cast<CompiledStyleSheetSet*>(this)->CompileStyleSheetsIfNeeded();
+
+  {
+    const auto& present = cached_matches_.find(selector);
+    if (present != cached_matches_.end()) {
+      css::StyleEditor().Merge(passed_style, *present->second);
+      return;
+    }
+  }
+
+  auto style = std::make_unique<css::Style>();
   auto tag_runner = FindFirstMatch(selector);
   auto any_runner =
       FindFirstMatch(css::Selector::Builder::AsUniversalSelector(selector));
@@ -110,25 +125,29 @@ void CompiledStyleSheetSet::Merge(css::Style* style,
     if (tag_runner->first.IsMoreSpecific(any_runner->first) &&
         (!any_runner->first.IsMoreSpecific(tag_runner->first) ||
          tag_runner->second.position < any_runner->second.position)) {
-      css::StyleEditor().Merge(style, *tag_runner->second.style);
+      css::StyleEditor().Merge(style.get(), *tag_runner->second.style);
       ++tag_runner;
       continue;
     }
-    css::StyleEditor().Merge(style, *any_runner->second.style);
+    css::StyleEditor().Merge(style.get(), *any_runner->second.style);
     ++any_runner;
   }
   while (tag_runner != rules_.end()) {
     if (!selector.IsSubsetOf(tag_runner->first))
       break;
-    css::StyleEditor().Merge(style, *tag_runner->second.style);
+    css::StyleEditor().Merge(style.get(), *tag_runner->second.style);
     ++tag_runner;
   }
   while (any_runner != rules_.end()) {
     if (!selector.IsSubsetOf(any_runner->first))
       break;
-    css::StyleEditor().Merge(style, *any_runner->second.style);
+    css::StyleEditor().Merge(style.get(), *any_runner->second.style);
     ++any_runner;
   }
+  css::StyleEditor().Merge(passed_style, *style);
+  const auto& result = cached_matches_.emplace(selector, std::move(style));
+  DCHECK(result.second) << "Cached matches should not have entry of "
+                        << selector;
 }
 
 void CompiledStyleSheetSet::RemoveObserver(
@@ -139,14 +158,14 @@ void CompiledStyleSheetSet::RemoveObserver(
 // css::StyleSheetObserver
 void CompiledStyleSheetSet::DidInsertRule(const css::Rule& new_rule,
                                           size_t index) {
-  rules_.clear();
+  ClearCache();
   FOR_EACH_OBSERVER(css::StyleSheetObserver, observers_,
                     DidInsertRule(new_rule, index));
 }
 
 void CompiledStyleSheetSet::DidRemoveRule(const css::Rule& old_rule,
                                           size_t index) {
-  rules_.clear();
+  ClearCache();
   FOR_EACH_OBSERVER(css::StyleSheetObserver, observers_,
                     DidRemoveRule(old_rule, index));
 }

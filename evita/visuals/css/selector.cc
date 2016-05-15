@@ -89,11 +89,11 @@ bool Selector::IsMoreSpecific(const Selector& other) const {
     return classes_.size() >= other.classes_.size();
   if (tag_name_ == other.tag_name_)
     return false;
-  return has_tag_name();
+  return is_universal();
 }
 
 bool Selector::IsSubsetOf(const Selector& other) const {
-  if (tag_name_ != other.tag_name_ && other.has_tag_name())
+  if (tag_name_ != other.tag_name_ && other.is_universal())
     return false;
   if (id_ != other.id_ && other.has_id())
     return false;

@@ -73,7 +73,7 @@ CompiledStyleSheet::RuleMap::const_iterator CompiledStyleSheet::FindFirstMatch(
 
 void CompiledStyleSheet::Merge(css::Style* style,
                                const css::Selector& selector) const {
-  DCHECK(selector.has_tag_name()) << selector;
+  DCHECK(selector.is_universal()) << selector;
   auto tag_runner = FindFirstMatch(selector);
   auto any_runner =
       FindFirstMatch(css::Selector::Builder::CopyWithoutTagName(selector));

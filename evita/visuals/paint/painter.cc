@@ -201,6 +201,25 @@ void PaintVisitor::PaintBorderINeeded(const Box& box) {
     return;
 #endif
   const auto& border = box.border();
+  if (border.IsSimple()) {
+    const auto& color = border.top_color();
+    const auto height = box.bounds().height();
+    const auto size = border.top();
+    const auto width = box.bounds().width();
+    builder_.AddNew<DrawRectDisplayItem>(
+        gfx::FloatRect(box.bounds().size() - gfx::FloatSize(1.0f, 1.0f)), color,
+        size);
+    AddDirtyBounds(gfx::FloatRect(gfx::FloatSize(width, 1.0f)));
+    AddDirtyBounds(
+        gfx::FloatRect(gfx::FloatPoint(), gfx::FloatSize(1.0f, height)));
+    AddDirtyBounds(
+        gfx::FloatRect(box.bounds().top_right() - gfx::FloatSize(1.0f, 0.0f),
+                       gfx::FloatSize(1.0f, height)));
+    AddDirtyBounds(
+        gfx::FloatRect(box.bounds().bottom_left() - gfx::FloatSize(0.0f, 1.0f),
+                       gfx::FloatSize(width, 1.0f)));
+    return;
+  }
   if (border.top()) {
     FillRectAndMark(
         gfx::FloatRect(gfx::FloatPoint(),

@@ -108,10 +108,6 @@ void View::ScheduleForcePaint() {
   box_tree_->ScheduleForcePaint();
 }
 
-void View::Start() {
-  ViewLifecycle::Scope(lifecycle_.get(), ViewLifecycle::State::Started);
-}
-
 void View::UpdateLayoutIfNeeded() {
   TRACE_EVENT0("visuals", "View::UpdateLayoutIfNeeded");
   UpdateStyleIfNeeded();

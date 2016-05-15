@@ -55,7 +55,6 @@ class View final : public ViewLifecycleObserver {
   HitTestResult HitTest(const gfx::FloatPoint& point);
   std::unique_ptr<DisplayItemList> Paint();
   void ScheduleForcePaint();
-  void Start();
   void RemoveObserver(ViewObserver* observer) const;
 
  private:

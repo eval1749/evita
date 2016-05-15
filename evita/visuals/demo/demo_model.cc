@@ -190,7 +190,6 @@ Selection* DemoModel::selection() {
 
 void DemoModel::AttachWindow(DemoWindow* window) {
   window_ = window;
-  view_->Start();
   selection()->Collapse(document_->GetElementById(L"input")->first_child(), 1);
 }
 

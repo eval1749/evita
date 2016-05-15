@@ -9,6 +9,7 @@
 
 #include "evita/dom/windows/window.h"
 
+#include "base/observer_list.h"
 #include "evita/gfx/base/geometry/float_size.h"
 #include "evita/visuals/css/media.h"
 #include "evita/visuals/view/public/user_action_source.h"
@@ -73,6 +74,10 @@ class VisualWindow final : public ginx::Scriptable<VisualWindow, Window>,
   visuals::css::MediaType media_type() const final;
   gfx::FloatSize viewport_size() const final;
 
+  // visuals::UserActionSource
+  void AddObserver(UserActionSource::Observer* observer) const final;
+  void RemoveObserver(UserActionSource::Observer* observer) const final;
+
   // visuals::ViewObserver
   void DidChangeView() final;
 
@@ -82,6 +87,8 @@ class VisualWindow final : public ginx::Scriptable<VisualWindow, Window>,
   void DidShowWindow() final;
 
   int animation_request_id_ = 0;
+  visuals::Node* hovered_node_ = nullptr;
+  mutable base::ObserverList<UserActionSource::Observer> observers_;
   const std::unique_ptr<visuals::View> view_;
   gfx::FloatSize viewport_size_;
 

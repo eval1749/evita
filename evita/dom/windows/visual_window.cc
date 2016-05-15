@@ -105,6 +105,13 @@ bool VisualWindow::HandleMouseEvent(const domapi::MouseEvent& event) {
     return false;
   script_host()->view_delegate()->SetCursor(window_id(),
                                             domapi::CursorId::Pointer);
+  const auto& point = gfx::FloatPoint(event.client_x, event.client_y);
+  const auto& found = view_->HitTest(point);
+  if (hovered_node_ == found.node())
+    return false;
+  hovered_node_ = found.node();
+  FOR_EACH_OBSERVER(UserActionSource::Observer, observers_,
+                    DidChangeHoveredNode(hovered_node_));
   return false;
 }
 
@@ -119,6 +126,15 @@ visuals::css::MediaType VisualWindow::media_type() const {
 
 gfx::FloatSize VisualWindow::viewport_size() const {
   return viewport_size_;
+}
+
+// visuals::UserActionSource
+void VisualWindow::AddObserver(UserActionSource::Observer* observer) const {
+  observers_.AddObserver(observer);
+}
+
+void VisualWindow::RemoveObserver(UserActionSource::Observer* observer) const {
+  observers_.RemoveObserver(observer);
 }
 
 // visuals::ViewObserver

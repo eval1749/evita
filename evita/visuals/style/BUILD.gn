@@ -4,8 +4,8 @@
 
 source_set("style") {
   sources = [
-    "compiled_style_sheet.cc",
-    "compiled_style_sheet.h",
+    "compiled_style_sheet_set.cc",
+    "compiled_style_sheet_set.h",
     "style_tree.cc",
     "style_tree.h",
     "style_tree_observer.cc",
@@ -23,7 +23,7 @@ source_set("style") {
 source_set("test_files") {
   testonly = true
   sources = [
-    "compiled_style_sheet_test.cc",
+    "compiled_style_sheet_set_test.cc",
     "style_tree_test.cc",
   ]
 

@@ -26,7 +26,7 @@
 #include "evita/visuals/dom/image.h"
 #include "evita/visuals/dom/shape.h"
 #include "evita/visuals/dom/text.h"
-#include "evita/visuals/style/compiled_style_sheet.h"
+#include "evita/visuals/style/compiled_style_sheet_set.h"
 #include "evita/visuals/style/style_tree_observer.h"
 #include "evita/visuals/view/public/selection.h"
 #include "evita/visuals/view/public/view_lifecycle.h"
@@ -139,7 +139,7 @@ class StyleTree::Impl final {
   void UpdateShape(Context* context, const Shape& shape);
   void UpdateText(Context* context, const Text& text);
 
-  std::vector<std::unique_ptr<CompiledStyleSheet>> compiled_style_sheets_;
+  std::unique_ptr<CompiledStyleSheetSet> compiled_style_sheet_set_;
   const Document& document_;
   // |initial_style_| is computed from media provided values.
   std::unique_ptr<css::Style> initial_style_;
@@ -157,10 +157,9 @@ class StyleTree::Impl final {
 StyleTree::Impl::Impl(const Document& document,
                       const css::Media& media,
                       const std::vector<css::StyleSheet*>& style_sheets)
-    : document_(document), media_(media) {
-  for (const auto& style_sheet : style_sheets)
-    compiled_style_sheets_.emplace_back(new CompiledStyleSheet(*style_sheet));
-}
+    : compiled_style_sheet_set_(new CompiledStyleSheetSet(style_sheets)),
+      document_(document),
+      media_(media) {}
 
 bool StyleTree::Impl::is_dirty() const {
   DCHECK_NE(StyleTreeState::Updating, state_);
@@ -213,9 +212,7 @@ std::unique_ptr<css::Style> StyleTree::Impl::ComputeStyleForElement(
   auto style = inline_style ? std::make_unique<css::Style>(*inline_style)
                             : std::make_unique<css::Style>();
   const auto& selector = MakeSelectorForElement(element);
-  for (const auto& style_sheet : compiled_style_sheets_) {
-    style_sheet->Merge(style.get(), selector);
-  }
+  compiled_style_sheet_set_->Merge(style.get(), selector);
   InheritStyle(style.get(), ComputedStyleOf(*element.parent()));
   css::StyleEditor().Merge(style.get(), initial_style());
   DCHECK(style->has_display()) << "A style must have display property. "

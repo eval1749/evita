@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/visuals/style/compiled_style_sheet.h"
+#include "evita/visuals/style/compiled_style_sheet_set.h"
 
 #include "base/strings/string16.h"
 #include "evita/base/strings/atomic_string.h"
@@ -17,38 +17,49 @@ namespace visuals {
 
 //////////////////////////////////////////////////////////////////////
 //
-// CompiledStyleSheet::Entry
+// CompiledStyleSheetSet::Entry
 //
-CompiledStyleSheet::Entry::Entry(size_t passedPosition,
-                                 std::unique_ptr<css::Style> passedStyle)
+CompiledStyleSheetSet::Entry::Entry(size_t passedPosition,
+                                    std::unique_ptr<css::Style> passedStyle)
     : position(passedPosition), style(std::move(passedStyle)) {}
 
-CompiledStyleSheet::Entry::Entry(Entry&& other)
+CompiledStyleSheetSet::Entry::Entry(Entry&& other)
     : position(other.position), style(std::move(other.style)) {}
 
-CompiledStyleSheet::Entry::Entry() : position(0) {}
-CompiledStyleSheet::Entry::~Entry() = default;
+CompiledStyleSheetSet::Entry::Entry() : position(0) {}
+CompiledStyleSheetSet::Entry::~Entry() = default;
 
 //////////////////////////////////////////////////////////////////////
 //
 // StyleSheet
 //
-CompiledStyleSheet::CompiledStyleSheet(const css::StyleSheet& style_sheet)
-    : style_sheet_(style_sheet) {
-  for (const auto& rule : style_sheet_.rules())
-    CompileRule(*rule);
-  style_sheet_.AddObserver(this);
+CompiledStyleSheetSet::CompiledStyleSheetSet(
+    const std::vector<css::StyleSheet*>& style_sheets)
+    : style_sheets_(style_sheets) {
+  for (const auto& style_sheet : style_sheets_)
+    style_sheet->AddObserver(this);
 }
 
-CompiledStyleSheet::~CompiledStyleSheet() {
-  style_sheet_.RemoveObserver(this);
+CompiledStyleSheetSet::~CompiledStyleSheetSet() {
+  for (const auto& style_sheet : style_sheets_)
+    style_sheet->RemoveObserver(this);
 }
 
-void CompiledStyleSheet::AddObserver(css::StyleSheetObserver* observer) const {
+void CompiledStyleSheetSet::AddObserver(
+    css::StyleSheetObserver* observer) const {
   observers_.AddObserver(observer);
 }
 
-void CompiledStyleSheet::CompileRule(const css::Rule& rule) {
+void CompiledStyleSheetSet::CompileStyleSheetsIfNeeded() {
+  if (!rules_.empty())
+    return;
+  for (const auto& style_sheet : style_sheets_) {
+    for (const auto& rule : style_sheet->rules())
+      CompileRule(*rule);
+  }
+}
+
+void CompiledStyleSheetSet::CompileRule(const css::Rule& rule) {
   const auto it = rules_.find(rule.selector());
   if (it != rules_.end()) {
     css::StyleEditor().Merge(it->second.style.get(), rule.style());
@@ -60,8 +71,8 @@ void CompiledStyleSheet::CompileRule(const css::Rule& rule) {
                       std::move(std::make_unique<css::Style>(rule.style())))));
 }
 
-CompiledStyleSheet::RuleMap::const_iterator CompiledStyleSheet::FindFirstMatch(
-    const css::Selector& selector) const {
+CompiledStyleSheetSet::RuleMap::const_iterator
+CompiledStyleSheetSet::FindFirstMatch(const css::Selector& selector) const {
   auto runner = rules_.lower_bound(selector);
   while (runner != rules_.end()) {
     if (selector.IsSubsetOf(runner->first))
@@ -71,9 +82,10 @@ CompiledStyleSheet::RuleMap::const_iterator CompiledStyleSheet::FindFirstMatch(
   return runner;
 }
 
-void CompiledStyleSheet::Merge(css::Style* style,
-                               const css::Selector& selector) const {
+void CompiledStyleSheetSet::Merge(css::Style* style,
+                                  const css::Selector& selector) const {
   DCHECK(selector.is_universal()) << selector;
+  const_cast<CompiledStyleSheetSet*>(this)->CompileStyleSheetsIfNeeded();
   auto tag_runner = FindFirstMatch(selector);
   auto any_runner =
       FindFirstMatch(css::Selector::Builder::AsUniversalSelector(selector));
@@ -119,20 +131,22 @@ void CompiledStyleSheet::Merge(css::Style* style,
   }
 }
 
-void CompiledStyleSheet::RemoveObserver(
+void CompiledStyleSheetSet::RemoveObserver(
     css::StyleSheetObserver* observer) const {
   observers_.RemoveObserver(observer);
 }
 
 // css::StyleSheetObserver
-void CompiledStyleSheet::DidInsertRule(const css::Rule& new_rule,
-                                       size_t index) {
+void CompiledStyleSheetSet::DidInsertRule(const css::Rule& new_rule,
+                                          size_t index) {
+  rules_.clear();
   FOR_EACH_OBSERVER(css::StyleSheetObserver, observers_,
                     DidInsertRule(new_rule, index));
 }
 
-void CompiledStyleSheet::DidRemoveRule(const css::Rule& old_rule,
-                                       size_t index) {
+void CompiledStyleSheetSet::DidRemoveRule(const css::Rule& old_rule,
+                                          size_t index) {
+  rules_.clear();
   FOR_EACH_OBSERVER(css::StyleSheetObserver, observers_,
                     DidRemoveRule(old_rule, index));
 }

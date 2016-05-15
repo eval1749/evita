@@ -4,7 +4,7 @@
 
 #include <memory>
 
-#include "evita/visuals/style/compiled_style_sheet.h"
+#include "evita/visuals/style/compiled_style_sheet_set.h"
 
 #include "evita/visuals/css/properties.h"
 #include "evita/visuals/css/selector_builder.h"
@@ -19,8 +19,9 @@
 
 namespace visuals {
 
-std::unique_ptr<css::Style> ComputeStyle(const CompiledStyleSheet& style_sheet,
-                                         const ElementNode& element) {
+std::unique_ptr<css::Style> ComputeStyle(
+    const CompiledStyleSheetSet& style_sheet,
+    const ElementNode& element) {
   css::Selector::Builder builder;
   builder.SetTagName(element.tag_name());
   if (!element.id().empty())
@@ -36,7 +37,7 @@ css::Selector ParseSelector(base::StringPiece16 text) {
   return css::Selector::Parser().Parse(text);
 }
 
-TEST(CompiledStyleSheetTest, Basic) {
+TEST(CompiledStyleSheetSetTest, Basic) {
   const auto style_sheet = new css::StyleSheet();
   style_sheet->AppendRule(
       ParseSelector(L"tag"),
@@ -47,7 +48,7 @@ TEST(CompiledStyleSheetTest, Basic) {
                           css::StyleBuilder().SetColor(1, 1, 0).Build());
   style_sheet->AppendRule(ParseSelector(L"#id"),
                           css::StyleBuilder().SetColor(0, 0, 1).Build());
-  CompiledStyleSheet compiled(*style_sheet);
+  CompiledStyleSheetSet compiled({style_sheet});
 
   const auto document = NodeTreeBuilder()
                             .Begin(L"tag")

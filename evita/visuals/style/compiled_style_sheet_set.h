@@ -2,11 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_VISUALS_STYLE_COMPILED_STYLE_SHEET_H_
-#define EVITA_VISUALS_STYLE_COMPILED_STYLE_SHEET_H_
+#ifndef EVITA_VISUALS_STYLE_COMPILED_STYLE_SHEET_SET_H_
+#define EVITA_VISUALS_STYLE_COMPILED_STYLE_SHEET_SET_H_
 
 #include <map>
 #include <memory>
+#include <vector>
 
 #include "base/macros.h"
 #include "base/observer_list.h"
@@ -24,12 +25,13 @@ class StyleSheet;
 
 //////////////////////////////////////////////////////////////////////
 //
-// CompiledStyleSheet
+// CompiledStyleSheetSet
 //
-class CompiledStyleSheet final : public css::StyleSheetObserver {
+class CompiledStyleSheetSet final : public css::StyleSheetObserver {
  public:
-  explicit CompiledStyleSheet(const css::StyleSheet& style_sheet);
-  ~CompiledStyleSheet();
+  explicit CompiledStyleSheetSet(
+      const std::vector<css::StyleSheet*>& style_sheets);
+  ~CompiledStyleSheetSet();
 
   void AddObserver(css::StyleSheetObserver* observer) const;
   void Merge(css::Style* style, const css::Selector& selector) const;
@@ -49,6 +51,7 @@ class CompiledStyleSheet final : public css::StyleSheetObserver {
 
   using RuleMap = std::map<css::Selector, Entry>;
 
+  void CompileStyleSheetsIfNeeded();
   void CompileRule(const css::Rule& rule);
   RuleMap::const_iterator FindFirstMatch(const css::Selector& selector) const;
 
@@ -58,11 +61,11 @@ class CompiledStyleSheet final : public css::StyleSheetObserver {
 
   mutable base::ObserverList<css::StyleSheetObserver> observers_;
   RuleMap rules_;
-  const css::StyleSheet& style_sheet_;
+  const std::vector<css::StyleSheet*> style_sheets_;
 
-  DISALLOW_COPY_AND_ASSIGN(CompiledStyleSheet);
+  DISALLOW_COPY_AND_ASSIGN(CompiledStyleSheetSet);
 };
 
 }  // namespace visuals
 
-#endif  // EVITA_VISUALS_STYLE_COMPILED_STYLE_SHEET_H_
+#endif  // EVITA_VISUALS_STYLE_COMPILED_STYLE_SHEET_SET_H_

@@ -84,7 +84,7 @@ CompiledStyleSheetSet::FindFirstMatch(const css::Selector& selector) const {
 
 void CompiledStyleSheetSet::Merge(css::Style* style,
                                   const css::Selector& selector) const {
-  DCHECK(selector.is_universal()) << selector;
+  DCHECK(!selector.is_universal()) << selector;
   const_cast<CompiledStyleSheetSet*>(this)->CompileStyleSheetsIfNeeded();
   auto tag_runner = FindFirstMatch(selector);
   auto any_runner =

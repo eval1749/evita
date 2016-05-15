@@ -39,7 +39,7 @@ class Selector final {
   bool has_classes() const { return !classes_.empty(); }
   bool has_id() const { return !id_.empty(); }
   base::AtomicString id() const { return id_; }
-  bool is_universal() const { return !tag_name_.empty(); }
+  bool is_universal() const { return tag_name_.empty(); }
   base::AtomicString tag_name() const { return tag_name_; }
   const std::set<base::AtomicString>& classes() const { return classes_; }
 

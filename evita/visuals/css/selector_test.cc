@@ -275,6 +275,23 @@ TEST(CssSelctorTest, ParseError) {
   EXPECT_EQ(L"Bad class", AsParseError(L".ab#"));
 }
 
+TEST(CssSelctorTest, is_universal) {
+  EXPECT_TRUE(Parse(L"*").is_universal());
+  EXPECT_TRUE(Parse(L"*#bar").is_universal());
+  EXPECT_TRUE(Parse(L"*.c1").is_universal());
+  EXPECT_TRUE(Parse(L"*.c1.c2").is_universal());
+  EXPECT_TRUE(Parse(L"*:hover").is_universal());
+  EXPECT_TRUE(Parse(L"#bar").is_universal());
+  EXPECT_TRUE(Parse(L".c1").is_universal());
+  EXPECT_TRUE(Parse(L".c1.c2").is_universal());
+  EXPECT_TRUE(Parse(L":hover").is_universal());
+  EXPECT_FALSE(Parse(L"foo").is_universal());
+  EXPECT_FALSE(Parse(L"foo#bar").is_universal());
+  EXPECT_FALSE(Parse(L"foo.c1").is_universal());
+  EXPECT_FALSE(Parse(L"foo.c1.c2").is_universal());
+  EXPECT_FALSE(Parse(L"foo:hover").is_universal());
+}
+
 TEST(CssSelctorTest, ToString) {
   EXPECT_EQ(L"", Selector().ToString());
   EXPECT_EQ(L"foo", Parse(L"foo").ToString());

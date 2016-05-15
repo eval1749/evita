@@ -54,14 +54,13 @@ TEST_F(StyleTreeTest, Basic) {
   lifecycle.FinishShutdown();
 }
 
-TEST_F(StyleTreeTest, Inheritance) {
+TEST_F(StyleTreeTest, ComputedStyleOfText) {
   const auto& kColorRed = css::Color(css::ColorValue(1, 0, 0));
   const auto& document =
       NodeTreeBuilder()
           .Begin(L"body")
           .SetInlineStyle(*css::StyleBuilder().SetColor(kColorRed).Build())
-          .Begin(L"foo")
-          .End(L"foo")
+          .AddText(L"Hello world!")
           .End(L"body")
           .Build();
   const auto body = document->first_child()->as<Element>();
@@ -78,13 +77,14 @@ TEST_F(StyleTreeTest, Inheritance) {
   lifecycle.FinishShutdown();
 }
 
-TEST_F(StyleTreeTest, ComputedStyleOfText) {
+TEST_F(StyleTreeTest, Inheritance) {
   const auto& kColorRed = css::Color(css::ColorValue(1, 0, 0));
   const auto& document =
       NodeTreeBuilder()
           .Begin(L"body")
           .SetInlineStyle(*css::StyleBuilder().SetColor(kColorRed).Build())
-          .AddText(L"Hello world!")
+          .Begin(L"foo")
+          .End(L"foo")
           .End(L"body")
           .Build();
   const auto body = document->first_child()->as<Element>();

@@ -17,8 +17,8 @@ class UserActionSource {
    public:
     virtual ~Observer();
 
-    virtual void DidChangeFocusedNode(const Node* new_focused_node) = 0;
-    virtual void DidChangeHoveredNode(const Node* new_hovered_node) = 0;
+    virtual void DidChangeFocusedNode(Node* new_focused_node) = 0;
+    virtual void DidChangeHoveredNode(Node* new_hovered_node) = 0;
 
    protected:
     Observer();

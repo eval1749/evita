@@ -8,6 +8,7 @@
 #include <memory>
 
 #include "base/macros.h"
+#include "base/observer_list.h"
 #include "evita/gc/member.h"
 #include "evita/gfx/base/geometry/float_size.h"
 #include "evita/ui/animation/animation_frame_handler.h"
@@ -58,6 +59,10 @@ class DemoModel final : public css::Media,
   void DidBeginAnimationFrame(const base::TimeTicks& time) final;
   const char* GetAnimationFrameType() const final;
 
+  // visuals::UserActionSource
+  void AddObserver(UserActionSource::Observer* observer) const final;
+  void RemoveObserver(UserActionSource::Observer* observer) const final;
+
   // ViewObserver
   void DidChangeView() final;
 
@@ -70,6 +75,8 @@ class DemoModel final : public css::Media,
   void DidSetFocus() final;
 
   const gc::Member<Document> document_;
+  Node* hovered_node_ = nullptr;
+  mutable base::ObserverList<UserActionSource::Observer> observers_;
   const gc::Member<css::StyleSheet> style_sheet_;
   gfx::FloatSize viewport_size_;
   std::unique_ptr<View> view_;

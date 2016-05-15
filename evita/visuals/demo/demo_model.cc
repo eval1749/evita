@@ -85,24 +85,15 @@ Document* LoadDocument() {
           *css::StyleBuilder().SetDisplay(css::Display::None()).Build());
     }
   }
-  NodeTreeBuilder(list)
-      .Begin(L"list_item", L"hover")
-      .SetInlineStyle(*css::StyleBuilder().SetLeft(0).SetTop(-1000).Build())
-      .AddText(L" ")
-      .End(L"list_item")
-      .Finish(list);
   return document;
 }
 
 css::StyleSheet* LoadStyleSheet() {
   const auto style_sheet = new css::StyleSheet();
   style_sheet->AppendRule(
-      ParseSelector(L"#hover"),
+      ParseSelector(L"list_item:hover"),
       std::move(
           css::StyleBuilder()
-              .SetPosition(css::Position::Absolute())
-              .SetLeft(20)
-              .SetTop(300)
               .SetBackgroundColor(css::ColorValue::Rgba(51, 153, 255, 0.1f))
               .SetBorder(css::ColorValue::Rgba(51, 153, 255, 1.0f), 1)
               .Build()));
@@ -252,6 +243,15 @@ const char* DemoModel::GetAnimationFrameType() const {
   return "DemoModel";
 }
 
+// visuals::UserActionSource
+void DemoModel::AddObserver(UserActionSource::Observer* observer) const {
+  observers_.AddObserver(observer);
+}
+
+void DemoModel::RemoveObserver(UserActionSource::Observer* observer) const {
+  observers_.RemoveObserver(observer);
+}
+
 // ViewObserver
 void DemoModel::DidChangeView() {
   RequestAnimationFrame();
@@ -269,14 +269,11 @@ void DemoModel::DidKillFocus() {
 
 void DemoModel::DidMoveMouse(const gfx::FloatPoint& point) {
   const auto line = FindListItem(point);
-  if (!line)
+  if (hovered_node_ == line)
     return;
-  const auto hover = document_->GetElementById(L"hover");
-  const auto hover_point = view_->ComputeBorderBoxQuad(*line).point1();
-  NodeEditor().SetInlineStyle(hover, *css::StyleBuilder()
-                                          .SetTop(hover_point.y())
-                                          .SetLeft(hover_point.x())
-                                          .Build());
+  hovered_node_ = line;
+  FOR_EACH_OBSERVER(UserActionSource::Observer, observers_,
+                    DidChangeHoveredNode(hovered_node_));
 }
 
 void DemoModel::DidPressKey(int key_code) {
@@ -307,16 +304,10 @@ void DemoModel::DidPressKey(int key_code) {
   }
 }
 
+// Print box tree if mouse pressed on "list_item".
 void DemoModel::DidPressMouse(const gfx::FloatPoint& point) {
-  const auto line = FindListItem(point);
-  if (!line)
+  if (!FindListItem(point))
     return;
-  const auto hover = document_->GetElementById(L"hover");
-  const auto hover_point = view_->ComputeBorderBoxQuad(*line).point1();
-  NodeEditor().SetInlineStyle(hover, *css::StyleBuilder()
-                                          .SetTop(hover_point.y())
-                                          .SetLeft(hover_point.x())
-                                          .Build());
   PrintBox(view_->box_tree());
 }
 

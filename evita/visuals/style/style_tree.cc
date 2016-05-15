@@ -29,7 +29,6 @@
 #include "evita/visuals/style/compiled_style_sheet_set.h"
 #include "evita/visuals/style/style_tree_observer.h"
 #include "evita/visuals/view/public/selection.h"
-#include "evita/visuals/view/public/user_action_source.h"
 #include "evita/visuals/view/public/view_lifecycle.h"
 
 namespace visuals {
@@ -56,16 +55,6 @@ void InheritStyle(css::Style* style, const css::Style& parent_style) {
     css::StyleEditor().Set##Name(style, parent_style.name());
   FOR_EACH_INHERITABLE_PROPERTY(V)
 #undef V
-}
-
-css::Selector MakeSelectorForElement(const ElementNode& element) {
-  css::Selector::Builder builder;
-  builder.SetTagName(element.tag_name());
-  if (!element.id().empty())
-    builder.SetId(element.id());
-  for (auto class_name : element.class_list())
-    builder.AddClass(class_name);
-  return std::move(builder.Build());
 }
 
 }  // namespace
@@ -103,11 +92,12 @@ class StyleTree::Impl final {
  public:
   Impl(const Document& document,
        const css::Media& media,
-       const UserActionSource& user_action_source,
        const std::vector<css::StyleSheet*>& style_sheets);
   ~Impl() = default;
 
   const Document& document() const { return document_; }
+  Node* focused_node() const { return focused_node_; }
+  Node* hovered_node() const { return hovered_node_; }
   const css::Style& initial_style() const { return *initial_style_; }
   bool is_dirty() const;
   const css::Media& media() const { return media_; }
@@ -116,6 +106,8 @@ class StyleTree::Impl final {
   void AddObserver(StyleTreeObserver* observer);
   void Clear();
   const css::Style& ComputedStyleOf(const Node& node) const;
+  void DidChangeFocusedNode(Node* focused_node);
+  void DidChangeHoveredNode(Node* hovered_node);
   void MarkDirty(const Node& node);
   void RemoveObserver(StyleTreeObserver* observer);
   void UpdateIfNeeded();
@@ -131,6 +123,7 @@ class StyleTree::Impl final {
       const ElementNode& element) const;
   Item* GetOrNewItem(const Node& element);
   void IncrementVersionIfNeeded(Context* context);
+  css::Selector MakeSelectorForElement(const ElementNode& element) const;
   void UpdateAsAnonymousInlineBox(Context* context, const Node& node);
   void UpdateChildren(Context* context, const ContainerNode& element);
   void UpdateDocumentStyleIfNeeded(Context* context);
@@ -143,6 +136,8 @@ class StyleTree::Impl final {
 
   std::unique_ptr<CompiledStyleSheetSet> compiled_style_sheet_set_;
   const Document& document_;
+  Node* focused_node_ = nullptr;
+  Node* hovered_node_ = nullptr;
   // |initial_style_| is computed from media provided values.
   std::unique_ptr<css::Style> initial_style_;
   // TODO(eval1749): We should share |css::Style| objects for elements which
@@ -151,7 +146,6 @@ class StyleTree::Impl final {
   const css::Media& media_;
   base::ObserverList<StyleTreeObserver> observers_;
   StyleTreeState state_ = StyleTreeState::Dirty;
-  const UserActionSource& user_action_source_;
   int version_ = 0;
 
   DISALLOW_COPY_AND_ASSIGN(Impl);
@@ -159,12 +153,10 @@ class StyleTree::Impl final {
 
 StyleTree::Impl::Impl(const Document& document,
                       const css::Media& media,
-                      const UserActionSource& user_action_source,
                       const std::vector<css::StyleSheet*>& style_sheets)
     : compiled_style_sheet_set_(new CompiledStyleSheetSet(style_sheets)),
       document_(document),
-      media_(media),
-      user_action_source_(user_action_source) {}
+      media_(media) {}
 
 bool StyleTree::Impl::is_dirty() const {
   DCHECK_NE(StyleTreeState::Updating, state_);
@@ -225,6 +217,17 @@ std::unique_ptr<css::Style> StyleTree::Impl::ComputeStyleForElement(
   return std::move(style);
 }
 
+// UserActionSource::Observer
+void StyleTree::Impl::DidChangeFocusedNode(Node* focused_node) {
+  DCHECK_NE(focused_node_, focused_node);
+  focused_node_ = focused_node;
+}
+
+void StyleTree::Impl::DidChangeHoveredNode(Node* hovered_node) {
+  DCHECK_NE(hovered_node_, hovered_node);
+  hovered_node_ = hovered_node;
+}
+
 Item* StyleTree::Impl::GetOrNewItem(const Node& node) {
   const auto& it = item_map_.find(&node);
   if (it != item_map_.end())
@@ -241,6 +244,21 @@ void StyleTree::Impl::IncrementVersionIfNeeded(Context* context) {
     return;
   context->is_updated = true;
   ++version_;
+}
+
+css::Selector StyleTree::Impl::MakeSelectorForElement(
+    const ElementNode& element) const {
+  css::Selector::Builder builder;
+  builder.SetTagName(element.tag_name());
+  if (!element.id().empty())
+    builder.SetId(element.id());
+  for (auto class_name : element.class_list())
+    builder.AddClass(class_name);
+  if (element == focused_node_)
+    builder.AddClass(base::AtomicString(L":focus"));
+  if (element == hovered_node_)
+    builder.AddClass(base::AtomicString(L":hover"));
+  return std::move(builder.Build());
 }
 
 void StyleTree::Impl::MarkDirty(const Node& node) {
@@ -409,14 +427,13 @@ StyleTree::StyleTree(ViewLifecycle* lifecycle,
                      const UserActionSource& user_action_source,
                      const std::vector<css::StyleSheet*>& style_sheets)
     : ViewLifecycleClient(lifecycle),
-      impl_(new Impl(lifecycle->document(),
-                     lifecycle->media(),
-                     user_action_source,
-                     style_sheets)),
+      impl_(new Impl(lifecycle->document(), lifecycle->media(), style_sheets)),
       selection_style_(new css::Style()),
-      style_sheets_(style_sheets) {
+      style_sheets_(style_sheets),
+      user_action_source_(user_action_source) {
   document().AddObserver(this);
   media().AddObserver(this);
+  user_action_source_.AddObserver(this);
   for (const auto& style_sheet : style_sheets_)
     style_sheet->AddObserver(this);
 }
@@ -426,6 +443,7 @@ StyleTree::~StyleTree() {
     style_sheet->RemoveObserver(this);
   document().RemoveObserver(this);
   media().RemoveObserver(this);
+  user_action_source_.RemoveObserver(this);
 }
 
 const css::Style& StyleTree::initial_style() const {
@@ -594,6 +612,35 @@ void StyleTree::DidSetTextData(const Text& text,
                                const base::string16& old_data) {
   // TODO(eval1749): When does |Text| node change affect style tree?
   lifecycle()->StartOver();
+}
+
+// UserActionSource::Observer
+void StyleTree::DidChangeFocusedNode(Node* new_focused_node) {
+  if (impl_->focused_node()) {
+    // TODO(eval1749): We should not mark |focused_node_| if it doesn't have
+    // rule for ":focus".
+    MarkDirty(*impl_->focused_node());
+  }
+  impl_->DidChangeFocusedNode(new_focused_node);
+  if (!new_focused_node)
+    return;
+  // TODO(eval1749): We should not mark |focused_node_| if it doesn't have
+  // rule for ":focus".
+  MarkDirty(*new_focused_node);
+}
+
+void StyleTree::DidChangeHoveredNode(Node* new_hovered_node) {
+  if (impl_->hovered_node()) {
+    // TODO(eval1749): We should not mark |focused_node_| if it doesn't have
+    // rule for ":focus".
+    MarkDirty(*impl_->hovered_node());
+  }
+  impl_->DidChangeHoveredNode(new_hovered_node);
+  if (!new_hovered_node)
+    return;
+  // TODO(eval1749): We should not mark |focused_node_| if it doesn't have
+  // rule for ":hover".
+  MarkDirty(*new_hovered_node);
 }
 
 }  // namespace visuals

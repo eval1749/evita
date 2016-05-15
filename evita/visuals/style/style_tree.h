@@ -13,6 +13,7 @@
 #include "evita/visuals/css/media_observer.h"
 #include "evita/visuals/css/style_sheet_observer.h"
 #include "evita/visuals/dom/document_observer.h"
+#include "evita/visuals/view/public/user_action_source.h"
 #include "evita/visuals/view/public/view_lifecycle_client.h"
 
 namespace visuals {
@@ -38,7 +39,8 @@ class UserActionSource;
 class StyleTree final : public ViewLifecycleClient,
                         public css::MediaObserver,
                         public css::StyleSheetObserver,
-                        public DocumentObserver {
+                        public DocumentObserver,
+                        public UserActionSource::Observer {
  public:
   StyleTree(ViewLifecycle* lifecycle,
             const UserActionSource& user_action_source,
@@ -99,9 +101,14 @@ class StyleTree final : public ViewLifecycleClient,
                       const base::string16& new_data,
                       const base::string16& old_data) final;
 
+  // UserActionSource::Observer
+  void DidChangeFocusedNode(Node* focused_node) final;
+  void DidChangeHoveredNode(Node* hovered_node) final;
+
   std::unique_ptr<Impl> impl_;
   const std::vector<css::StyleSheet*> style_sheets_;
   const std::unique_ptr<css::Style> selection_style_;
+  const UserActionSource& user_action_source_;
 
   DISALLOW_COPY_AND_ASSIGN(StyleTree);
 };

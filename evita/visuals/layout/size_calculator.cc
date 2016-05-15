@@ -76,11 +76,11 @@ void ExtrinsicSizeVisitor::ComputeWithSimpleMethod(const Box& box) {
 }
 
 void ExtrinsicSizeVisitor::ReturnSize(float width, float height) {
-  ReturnSize(gfx::FloatSize(width, height));
+  ReturnSize(gfx::FloatSize(std::ceil(width), std::ceil(height)));
 }
 
 void ExtrinsicSizeVisitor::ReturnSize(const gfx::FloatSize& size) {
-  result_ = size;
+  result_ = gfx::FloatSize(std::ceil(size.width()), std::ceil(size.height()));
 }
 
 // BoxVisitor

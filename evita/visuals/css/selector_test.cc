@@ -62,37 +62,23 @@ std::string AsString(const Selector& selector) {
 }
 
 Selector Parse(base::StringPiece16 text) {
-  return Selector::Parser().Parse(text);
+  return std::move(Selector::Parser().Parse(text));
 }
 
 }  // namespace
 
 TEST(CssSelctorTest, Equals) {
   Selector selector0;
-  const auto& selector1 = Selector::Builder().SetTagName(L"foo").Build();
-  const auto& selector11 = Selector::Builder().SetTagName(L"foo").Build();
-  const auto& selector2 = Selector::Builder().SetTagName(L"bar").Build();
-  const auto& selector22 = Selector::Builder().SetTagName(L"bar").Build();
-  const auto& selector3 =
-      Selector::Builder().SetTagName(L"foo").SetId(L"1").Build();
-  const auto& selector33 =
-      Selector::Builder().SetTagName(L"foo").SetId(L"1").Build();
-  const auto& selector4 =
-      Selector::Builder().SetTagName(L"foo").SetId(L"1").AddClass(L"a").Build();
-  const auto& selector44 =
-      Selector::Builder().SetTagName(L"foo").SetId(L"1").AddClass(L"a").Build();
-  const auto& selector5 = Selector::Builder()
-                              .SetTagName(L"foo")
-                              .SetId(L"1")
-                              .AddClass(L"a")
-                              .AddClass(L"b")
-                              .Build();
-  const auto& selector55 = Selector::Builder()
-                               .SetTagName(L"foo")
-                               .SetId(L"1")
-                               .AddClass(L"a")
-                               .AddClass(L"b")
-                               .Build();
+  const auto& selector1 = Parse(L"foo");
+  const auto& selector11 = Parse(L"foo");
+  const auto& selector2 = Parse(L"bar");
+  const auto& selector22 = Parse(L"bar");
+  const auto& selector3 = Parse(L"foo.c1");
+  const auto& selector33 = Parse(L"foo.c1");
+  const auto& selector4 = Parse(L"foo#bar.c1");
+  const auto& selector44 = Parse(L"foo#bar.c1");
+  const auto& selector5 = Parse(L"foo#bar.c1.c2");
+  const auto& selector55 = Parse(L"foo#bar.c1.c2");
 
   EXPECT_TRUE(selector0 == selector0);
   EXPECT_TRUE(selector0 != selector1);
@@ -174,18 +160,11 @@ TEST(CssSelctorTest, IsSubsetOf) {
 
 TEST(CssSelctorTest, Less) {
   Selector selector0;
-  const auto& selector1 = Selector::Builder().SetTagName(L"foo").Build();
-  const auto& selector2 = Selector::Builder().SetTagName(L"bar").Build();
-  const auto& selector3 =
-      Selector::Builder().SetTagName(L"foo").SetId(L"1").Build();
-  const auto& selector4 =
-      Selector::Builder().SetTagName(L"foo").SetId(L"1").AddClass(L"a").Build();
-  const auto& selector5 = Selector::Builder()
-                              .SetTagName(L"foo")
-                              .SetId(L"1")
-                              .AddClass(L"a")
-                              .AddClass(L"b")
-                              .Build();
+  const auto& selector1 = Parse(L"foo");
+  const auto& selector2 = Parse(L"bar");
+  const auto& selector3 = Parse(L"foo#bar");
+  const auto& selector4 = Parse(L"foo#bar.c1");
+  const auto& selector5 = Parse(L"foo#bar.c1.c2");
 
   std::set<Selector> set;
   set.insert(selector0);
@@ -209,15 +188,15 @@ TEST(CssSelctorTest, Parser) {
   EXPECT_EQ(Selector(), Parse(L""));
   EXPECT_EQ(Selector(), Parse(L"*"));
   EXPECT_EQ(AsSelector(L"", L"bar", {}), Parse(L"*#bar"));
-  EXPECT_EQ(AsSelector(L"", {L"abc"}), Parse(L"*.abc"));
+  EXPECT_EQ(AsSelector(L"", {L"c1"}), Parse(L"*.c1"));
   EXPECT_EQ(AsSelector(L"", {L":hover"}), Parse(L"*:hover"));
   EXPECT_EQ(AsSelector(L"foo"), Parse(L"foo"));
   EXPECT_EQ(AsSelector(L"foo", L"bar", {}), Parse(L"foo#bar"));
   EXPECT_EQ(AsSelector(L"foo", {L"a"}), Parse(L"foo.a"));
   EXPECT_EQ(AsSelector(L"foo", {L":hover"}), Parse(L"foo:hover"));
-  EXPECT_EQ(AsSelector(L"foo", L"bar", {L"abc"}), Parse(L"foo#bar.abc"));
-  EXPECT_EQ(AsSelector(L"foo", L"bar", {L"abc", L"def"}),
-            Parse(L"foo#bar.abc.def"));
+  EXPECT_EQ(AsSelector(L"foo", L"bar", {L"c1"}), Parse(L"foo#bar.c1"));
+  EXPECT_EQ(AsSelector(L"foo", L"bar", {L"c1", L"c2"}),
+            Parse(L"foo#bar.c1.c2"));
   EXPECT_EQ(AsSelector(L"::selector"), Parse(L"::selector"));
   EXPECT_EQ(AsSelector(L"::selector", {L":active"}),
             Parse(L"::selector:active"));
@@ -263,32 +242,15 @@ TEST(CssSelctorTest, ParseError) {
 
 TEST(CssSelctorTest, Printer) {
   EXPECT_EQ("", AsString(Selector()));
-  EXPECT_EQ("foo", AsString(Selector::Builder().SetTagName(L"foo").Build()));
-  EXPECT_EQ("#bar", AsString(Selector::Builder().SetId(L"bar").Build()));
-  EXPECT_EQ(".a", AsString(Selector::Builder().AddClass(L"a").Build()));
-  EXPECT_EQ(":hover",
-            AsString(Selector::Builder().AddClass(L":hover").Build()));
-  EXPECT_EQ(
-      "foo#bar",
-      AsString(Selector::Builder().SetTagName(L"foo").SetId(L"bar").Build()));
-  EXPECT_EQ("foo#bar.a", AsString(Selector::Builder()
-                                      .SetTagName(L"foo")
-                                      .SetId(L"bar")
-                                      .AddClass(L"a")
-                                      .Build()));
-  EXPECT_EQ(
-      "foo.a",
-      AsString(Selector::Builder().SetTagName(L"foo").AddClass(L"a").Build()));
-  EXPECT_EQ("foo.a.b", AsString(Selector::Builder()
-                                    .SetTagName(L"foo")
-                                    .AddClass(L"b")
-                                    .AddClass(L"a")
-                                    .Build()));
-  EXPECT_EQ("foo.a:hover", AsString(Selector::Builder()
-                                        .SetTagName(L"foo")
-                                        .AddClass(L":hover")
-                                        .AddClass(L"a")
-                                        .Build()));
+  EXPECT_EQ("foo", AsString(Parse(L"foo")));
+  EXPECT_EQ("#bar", AsString(Parse(L"#bar")));
+  EXPECT_EQ(".c1", AsString(Parse(L".c1")));
+  EXPECT_EQ(":hover", AsString(Parse(L":hover")));
+  EXPECT_EQ("foo#bar", AsString(Parse(L"foo#bar")));
+  EXPECT_EQ("foo#bar.c1", AsString(Parse(L"foo#bar.c1")));
+  EXPECT_EQ("foo.c1", AsString(Parse(L"foo.c1")));
+  EXPECT_EQ("foo.c1.c2", AsString(Parse(L"foo.c1.c2")));
+  EXPECT_EQ("foo.c1:hover", AsString(Parse(L"foo.c1:hover")));
 }
 
 }  // namespace css

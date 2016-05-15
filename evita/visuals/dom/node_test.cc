@@ -12,6 +12,25 @@
 
 namespace visuals {
 
+TEST(NodeTest, Contains) {
+  const auto& document = NodeTreeBuilder()
+                             .Begin(L"block")
+                             .AddText(L"foo")
+                             .AddText(L"bar")
+                             .End(L"block")
+                             .Build();
+  const auto main = document->first_child()->as<ContainerNode>();
+  const auto text1 = main->first_child();
+  const auto text2 = main->last_child();
+
+  EXPECT_TRUE(document->Contains(*document));
+  EXPECT_TRUE(document->Contains(*main));
+  EXPECT_TRUE(main->Contains(*main));
+  EXPECT_TRUE(main->Contains(*text1));
+  EXPECT_TRUE(main->Contains(*text2));
+  EXPECT_FALSE(text1->Contains(*text2));
+}
+
 TEST(NodeTest, IsDescendantOf) {
   const auto& document = NodeTreeBuilder()
                              .Begin(L"block")

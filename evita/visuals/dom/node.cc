@@ -56,6 +56,10 @@ bool Node::operator!=(const Node* other) const {
   return !operator==(other);
 }
 
+bool Node::Contains(const Node& other) const {
+  return other == this || other.IsDescendantOf(*this);
+}
+
 bool Node::InDocument() const {
   for (const auto& runner : Node::AncestorsOrSelf(*this)) {
     if (runner->is<Document>())

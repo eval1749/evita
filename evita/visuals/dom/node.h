@@ -70,13 +70,13 @@ class Node : public base::Castable<Node>, public gc::Collectable<Node> {
   ContainerNode* parent() const { return parent_; }
 
   virtual void Accept(NodeVisitor* visitor) = 0;
+  // Returns true if |other| is inclusive descendant of |this|.
+  bool Contains(const Node& other) const;
   bool InDocument() const;
   bool IsDescendantOf(const Node& other) const;
 
  protected:
-  Node(Document* document,
-       base::AtomicString node_name,
-       base::AtomicString id);
+  Node(Document* document, base::AtomicString node_name, base::AtomicString id);
   Node(Document* document,
        base::StringPiece16 node_name,
        base::StringPiece16 id);

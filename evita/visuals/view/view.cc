@@ -38,10 +38,12 @@ bool ShouldNotifyViewChange(ViewLifecycle::State new_state,
 //
 View::View(const Document& document,
            const css::Media& media,
+           const UserActionSource& user_action_source,
            const std::vector<css::StyleSheet*>& style_sheets)
     : lifecycle_(new ViewLifecycle(document, media)),
       selection_(new Selection(lifecycle_.get())),
-      style_tree_(new StyleTree(lifecycle_.get(), style_sheets)),
+      style_tree_(
+          new StyleTree(lifecycle_.get(), user_action_source, style_sheets)),
       box_tree_(new BoxTree(lifecycle_.get(), *selection_, *style_tree_)) {
   lifecycle_->AddObserver(this);
 }

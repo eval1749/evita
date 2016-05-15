@@ -11,6 +11,7 @@
 #include "evita/visuals/dom/document.h"
 #include "evita/visuals/dom/element.h"
 #include "evita/visuals/dom/node_tree_builder.h"
+#include "evita/visuals/view/public/user_action_source.h"
 #include "evita/visuals/view/public/view_lifecycle.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
@@ -20,7 +21,7 @@ namespace visuals {
 //
 // StyleTreeTest
 //
-class StyleTreeTest : public ::testing::Test {
+class StyleTreeTest : public ::testing::Test, public visuals::UserActionSource {
  protected:
   StyleTreeTest() = default;
   ~StyleTreeTest() override = default;
@@ -42,7 +43,7 @@ TEST_F(StyleTreeTest, Basic) {
   const auto body = document->first_child()->as<Element>();
   ViewLifecycle lifecycle(*document, mock_media());
   ViewLifecycle::Scope(&lifecycle, ViewLifecycle::State::Started);
-  StyleTree style_tree(&lifecycle, {});
+  StyleTree style_tree(&lifecycle, *this, {});
   style_tree.UpdateIfNeeded();
 
   EXPECT_EQ(style_tree.initial_style(), style_tree.ComputedStyleOf(*body));
@@ -66,7 +67,7 @@ TEST_F(StyleTreeTest, Inheritance) {
   const auto body = document->first_child()->as<Element>();
   ViewLifecycle lifecycle(*document, mock_media());
   ViewLifecycle::Scope(&lifecycle, ViewLifecycle::State::Started);
-  StyleTree style_tree(&lifecycle, {});
+  StyleTree style_tree(&lifecycle, *this, {});
   style_tree.UpdateIfNeeded();
 
   EXPECT_EQ(kColorRed, style_tree.ComputedStyleOf(*body).color());
@@ -89,7 +90,7 @@ TEST_F(StyleTreeTest, ComputedStyleOfText) {
   const auto body = document->first_child()->as<Element>();
   ViewLifecycle lifecycle(*document, mock_media());
   ViewLifecycle::Scope(&lifecycle, ViewLifecycle::State::Started);
-  StyleTree style_tree(&lifecycle, {});
+  StyleTree style_tree(&lifecycle, *this, {});
   style_tree.UpdateIfNeeded();
 
   EXPECT_EQ(kColorRed, style_tree.ComputedStyleOf(*body).color());

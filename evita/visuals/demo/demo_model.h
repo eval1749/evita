@@ -14,6 +14,7 @@
 #include "evita/visuals/css/media.h"
 #include "evita/visuals/css/media_state.h"
 #include "evita/visuals/demo/demo_window.h"
+#include "evita/visuals/view/public/user_action_source.h"
 #include "evita/visuals/view/view_observer.h"
 
 namespace visuals {
@@ -34,6 +35,7 @@ class StyleSheet;
 //
 class DemoModel final : public css::Media,
                         public ui::AnimationFrameHandler,
+                        public visuals::UserActionSource,
                         public ViewObserver,
                         public WindowEventHandler {
  public:

@@ -34,7 +34,7 @@ VisualWindow::VisualWindow(ScriptHost* script_host,
                            visuals::Document* document,
                            visuals::css::StyleSheet* style_sheet)
     : Scriptable(script_host),
-      view_(new visuals::View(*document, *this, {style_sheet})) {
+      view_(new visuals::View(*document, *this, *this, {style_sheet})) {
   script_host->view_delegate()->CreateVisualWindow(window_id());
   view_->AddObserver(this);
 }

@@ -21,6 +21,7 @@
 #include "evita/visuals/layout/text_box.h"
 #include "evita/visuals/style/style_tree.h"
 #include "evita/visuals/view/public/selection.h"
+#include "evita/visuals/view/public/user_action_source.h"
 #include "evita/visuals/view/public/view_lifecycle.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
@@ -79,7 +80,7 @@ std::string BoxTreeToString(const BoxTree& box_tree) {
 //
 // MockView
 //
-class MockView final {
+class MockView final : public UserActionSource {
  public:
   MockView(const Document& document, const css::Media& media);
   ~MockView();
@@ -102,7 +103,7 @@ class MockView final {
 MockView::MockView(const Document& document, const css::Media& media)
     : lifecycle_(new ViewLifecycle(document, media)),
       selection_(new Selection(lifecycle_.get())),
-      style_tree_(new StyleTree(lifecycle_.get(), {})),
+      style_tree_(new StyleTree(lifecycle_.get(), *this, {})),
       box_tree_(new BoxTree(lifecycle_.get(), *selection_, *style_tree_)) {
   ViewLifecycle::Scope(lifecycle_.get(), ViewLifecycle::State::Started);
   style_tree_->UpdateIfNeeded();

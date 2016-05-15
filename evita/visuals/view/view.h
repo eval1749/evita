@@ -22,6 +22,7 @@ class Document;
 class Node;
 class Selection;
 class StyleTree;
+class UserActionSource;
 class ViewLifecycle;
 class ViewObserver;
 
@@ -38,6 +39,7 @@ class View final : public ViewLifecycleObserver {
  public:
   View(const Document& document,
        const css::Media& media,
+       const UserActionSource& user_action_source,
        const std::vector<css::StyleSheet*>& style_sheets);
   ~View() final;
 

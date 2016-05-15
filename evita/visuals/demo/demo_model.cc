@@ -176,7 +176,7 @@ void PrintPaint(const DisplayItemList& list) {
 DemoModel::DemoModel()
     : document_(LoadDocument()),
       style_sheet_(LoadStyleSheet()),
-      view_(new View(*document_, *this, {style_sheet_})) {
+      view_(new View(*document_, *this, *this, {style_sheet_})) {
   view_->AddObserver(this);
 }
 

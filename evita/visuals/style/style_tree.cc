@@ -29,6 +29,7 @@
 #include "evita/visuals/style/compiled_style_sheet_set.h"
 #include "evita/visuals/style/style_tree_observer.h"
 #include "evita/visuals/view/public/selection.h"
+#include "evita/visuals/view/public/user_action_source.h"
 #include "evita/visuals/view/public/view_lifecycle.h"
 
 namespace visuals {
@@ -102,6 +103,7 @@ class StyleTree::Impl final {
  public:
   Impl(const Document& document,
        const css::Media& media,
+       const UserActionSource& user_action_source,
        const std::vector<css::StyleSheet*>& style_sheets);
   ~Impl() = default;
 
@@ -149,6 +151,7 @@ class StyleTree::Impl final {
   const css::Media& media_;
   base::ObserverList<StyleTreeObserver> observers_;
   StyleTreeState state_ = StyleTreeState::Dirty;
+  const UserActionSource& user_action_source_;
   int version_ = 0;
 
   DISALLOW_COPY_AND_ASSIGN(Impl);
@@ -156,10 +159,12 @@ class StyleTree::Impl final {
 
 StyleTree::Impl::Impl(const Document& document,
                       const css::Media& media,
+                      const UserActionSource& user_action_source,
                       const std::vector<css::StyleSheet*>& style_sheets)
     : compiled_style_sheet_set_(new CompiledStyleSheetSet(style_sheets)),
       document_(document),
-      media_(media) {}
+      media_(media),
+      user_action_source_(user_action_source) {}
 
 bool StyleTree::Impl::is_dirty() const {
   DCHECK_NE(StyleTreeState::Updating, state_);
@@ -401,9 +406,13 @@ void StyleTree::Impl::UpdateText(Context* context, const Text& text) {
 // StyleTree
 //
 StyleTree::StyleTree(ViewLifecycle* lifecycle,
+                     const UserActionSource& user_action_source,
                      const std::vector<css::StyleSheet*>& style_sheets)
     : ViewLifecycleClient(lifecycle),
-      impl_(new Impl(lifecycle->document(), lifecycle->media(), style_sheets)),
+      impl_(new Impl(lifecycle->document(),
+                     lifecycle->media(),
+                     user_action_source,
+                     style_sheets)),
       selection_style_(new css::Style()),
       style_sheets_(style_sheets) {
   document().AddObserver(this);

@@ -28,6 +28,7 @@ class ElementNode;
 class Node;
 class Selection;
 class StyleTreeObserver;
+class UserActionSource;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -40,6 +41,7 @@ class StyleTree final : public ViewLifecycleClient,
                         public DocumentObserver {
  public:
   StyleTree(ViewLifecycle* lifecycle,
+            const UserActionSource& user_action_source,
             const std::vector<css::StyleSheet*>& style_sheets);
   ~StyleTree() final;
 

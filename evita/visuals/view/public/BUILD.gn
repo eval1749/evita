@@ -12,6 +12,8 @@ source_set("public") {
     "selection_model.h",
     "selection_observer.cc",
     "selection_observer.h",
+    "user_action_source.cc",
+    "user_action_source.h",
     "view_lifecycle.cc",
     "view_lifecycle.h",
     "view_lifecycle_client.cc",

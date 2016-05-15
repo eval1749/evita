@@ -11,6 +11,7 @@
 
 #include "evita/gfx/base/geometry/float_size.h"
 #include "evita/visuals/css/media.h"
+#include "evita/visuals/view/public/user_action_source.h"
 #include "evita/visuals/view/view_observer.h"
 
 namespace visuals {
@@ -37,6 +38,7 @@ class VisualWindowClass;
 //
 class VisualWindow final : public ginx::Scriptable<VisualWindow, Window>,
                            public visuals::css::Media,
+                           public visuals::UserActionSource,
                            public visuals::ViewObserver {
   DECLARE_SCRIPTABLE_OBJECT(VisualWindow);
 

@@ -20,8 +20,8 @@ int last_sequence_id;
 // Node
 //
 Node::Node(Document* document,
-           const base::AtomicString& node_name,
-           const base::AtomicString& id)
+           base::AtomicString node_name,
+           base::AtomicString id)
     : document_(document),
       id_(id),
       sequence_id_(++last_sequence_id),
@@ -32,7 +32,7 @@ Node::Node(Document* document,
            base::StringPiece16 id)
     : Node(document, base::AtomicString(node_name), base::AtomicString(id)) {}
 
-Node::Node(Document* document, const base::AtomicString& node_name)
+Node::Node(Document* document, base::AtomicString node_name)
     : Node(document, node_name, base::AtomicString()) {}
 
 Node::Node(Document* document, base::StringPiece16 node_name)

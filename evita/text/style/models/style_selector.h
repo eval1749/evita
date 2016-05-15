@@ -12,34 +12,34 @@ namespace css {
 
 class StyleSelector {
  public:
-  static const base::AtomicString& active_selection();
-  static const base::AtomicString& bad_grammar();
-  static const base::AtomicString& comment();
-  static const base::AtomicString& defaults();
-  static const base::AtomicString& end_of_file_marker();
-  static const base::AtomicString& end_of_line_marker();
-  static const base::AtomicString& html_attribute_name();
-  static const base::AtomicString& html_attribute_value();
-  static const base::AtomicString& html_comment();
-  static const base::AtomicString& html_element_name();
-  static const base::AtomicString& html_entity();
-  static const base::AtomicString& identifier();
-  static const base::AtomicString& ime_inactive1();
-  static const base::AtomicString& ime_inactive2();
-  static const base::AtomicString& ime_input();
-  static const base::AtomicString& ime_active1();
-  static const base::AtomicString& ime_active2();
-  static const base::AtomicString& inactive_selection();
-  static const base::AtomicString& keyword();
-  static const base::AtomicString& keyword2();
-  static const base::AtomicString& label();
-  static const base::AtomicString& line_wrap_marker();
-  static const base::AtomicString& literal();
-  static const base::AtomicString& misspelled();
-  static const base::AtomicString& normal();
-  static const base::AtomicString& operators();
-  static const base::AtomicString& string_literal();
-  static const base::AtomicString& tab_marker();
+  static base::AtomicString active_selection();
+  static base::AtomicString bad_grammar();
+  static base::AtomicString comment();
+  static base::AtomicString defaults();
+  static base::AtomicString end_of_file_marker();
+  static base::AtomicString end_of_line_marker();
+  static base::AtomicString html_attribute_name();
+  static base::AtomicString html_attribute_value();
+  static base::AtomicString html_comment();
+  static base::AtomicString html_element_name();
+  static base::AtomicString html_entity();
+  static base::AtomicString identifier();
+  static base::AtomicString ime_inactive1();
+  static base::AtomicString ime_inactive2();
+  static base::AtomicString ime_input();
+  static base::AtomicString ime_active1();
+  static base::AtomicString ime_active2();
+  static base::AtomicString inactive_selection();
+  static base::AtomicString keyword();
+  static base::AtomicString keyword2();
+  static base::AtomicString label();
+  static base::AtomicString line_wrap_marker();
+  static base::AtomicString literal();
+  static base::AtomicString misspelled();
+  static base::AtomicString normal();
+  static base::AtomicString operators();
+  static base::AtomicString string_literal();
+  static base::AtomicString tab_marker();
 
  private:
   DISALLOW_IMPLICIT_CONSTRUCTORS(StyleSelector);

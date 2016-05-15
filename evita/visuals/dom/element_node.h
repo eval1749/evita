@@ -29,7 +29,7 @@ class ElementNode : public ContainerNode {
     return class_list_;
   }
   const css::Style* inline_style() const { return inline_style_.get(); }
-  const base::AtomicString& tag_name() const { return node_name(); }
+  base::AtomicString tag_name() const { return node_name(); }
 
  protected:
   ElementNode(Document* document,

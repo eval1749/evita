@@ -7,7 +7,7 @@
 namespace css {
 
 #define DEFINE_STYLE_SELECTOR(name)                                \
-  const base::AtomicString& StyleSelector::name() {                \
+  base::AtomicString StyleSelector::name() {                \
     CR_DEFINE_STATIC_LOCAL(base::AtomicString, name, (L## #name)); \
     return name;                                                   \
   }

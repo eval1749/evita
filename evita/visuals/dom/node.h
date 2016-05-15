@@ -62,9 +62,9 @@ class Node : public base::Castable<Node>, public gc::Collectable<Node> {
   Document* document() const { return document_; }
 
   // Node identifiers
-  const base::AtomicString& id() const { return id_; }
+  base::AtomicString id() const { return id_; }
   int sequence_id() const { return sequence_id_; }
-  const base::AtomicString& node_name() const { return node_name_; }
+  base::AtomicString node_name() const { return node_name_; }
 
   // Node tree related values
   ContainerNode* parent() const { return parent_; }
@@ -75,12 +75,12 @@ class Node : public base::Castable<Node>, public gc::Collectable<Node> {
 
  protected:
   Node(Document* document,
-       const base::AtomicString& node_name,
-       const base::AtomicString& id);
+       base::AtomicString node_name,
+       base::AtomicString id);
   Node(Document* document,
        base::StringPiece16 node_name,
        base::StringPiece16 id);
-  Node(Document* document, const base::AtomicString& node_name);
+  Node(Document* document, base::AtomicString node_name);
   Node(Document* document, base::StringPiece16 node_name);
 
  private:

@@ -54,9 +54,11 @@ Canvas::AxisAlignedClipScope::AxisAlignedClipScope(
   (*canvas_)->PushAxisAlignedClip(bounds, alias_mode);
 }
 
+// TODO(eval1749): It seems |D2D1_ANTIALIAS_MODE_ALIASED| is faster than
+// |D2D1_ANTIALIAS_MODE_PER_PRIMITIVE|. We need to have more investigation.
 Canvas::AxisAlignedClipScope::AxisAlignedClipScope(Canvas* canvas,
                                                    const RectF& bounds)
-    : AxisAlignedClipScope(canvas, bounds, D2D1_ANTIALIAS_MODE_PER_PRIMITIVE) {}
+    : AxisAlignedClipScope(canvas, bounds, D2D1_ANTIALIAS_MODE_ALIASED) {}
 
 Canvas::AxisAlignedClipScope::~AxisAlignedClipScope() {
   (*canvas_)->PopAxisAlignedClip();
@@ -160,6 +162,7 @@ void Canvas::DidLostRenderTarget() {
   should_clear_ = true;
   SizeF dpi;
   GetRenderTarget()->GetDpi(&dpi.width, &dpi.height);
+  GetRenderTarget()->SetAntialiasMode(D2D1_ANTIALIAS_MODE_ALIASED);
   UpdateDpi(dpi);
   FOR_EACH_OBSERVER(CanvasObserver, observers_, DidRecreateCanvas());
 }

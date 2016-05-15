@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <vector>
-
 #include "evita/visuals/css/selector_builder.h"
 
 namespace visuals {
@@ -29,11 +27,9 @@ Builder& Builder::AddClass(base::StringPiece16 class_name) {
 
 Selector Builder::Build() {
   Selector selector;
-  selector.classes_ = std::move(
-      std::vector<base::AtomicString>(classes_.begin(), classes_.end()));
+  selector.classes_ = std::move(classes_);
   selector.id_ = id_;
   selector.tag_name_ = tag_name_;
-  classes_.empty();
   id_ = base::AtomicString();
   tag_name_ = base::AtomicString();
   return selector;

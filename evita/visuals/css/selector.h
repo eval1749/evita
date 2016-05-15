@@ -6,7 +6,7 @@
 #define EVITA_VISUALS_CSS_SELECTOR_H_
 
 #include <iosfwd>
-#include <vector>
+#include <set>
 
 #include "evita/base/strings/atomic_string.h"
 
@@ -36,10 +36,10 @@ class Selector final {
 
   base::AtomicString tag_name() const { return tag_name_; }
   base::AtomicString id() const { return id_; }
-  const std::vector<base::AtomicString> classes() const { return classes_; }
+  const std::set<base::AtomicString>& classes() const { return classes_; }
 
  private:
-  std::vector<base::AtomicString> classes_;
+  std::set<base::AtomicString> classes_;
   base::AtomicString id_;
   base::AtomicString tag_name_;
 };

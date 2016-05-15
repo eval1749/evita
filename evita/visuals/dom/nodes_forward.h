@@ -24,7 +24,6 @@ namespace visuals {
   V(Node)
 
 // Forward declarations
-using AtomicString = base::AtomicString;
 class Node;
 #define V(name) class name;
 FOR_EACH_VISUAL_NODE(V)

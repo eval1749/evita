@@ -44,8 +44,9 @@ class ElementTest : public ::testing::Test, public DocumentObserver {
 
  private:
   // DocumentObserver
-  void DidAddClass(const ElementNode& element, AtomicString class_name);
-  void DidRemoveClass(const ElementNode& element, AtomicString class_name);
+  void DidAddClass(const ElementNode& element, base::AtomicString class_name);
+  void DidRemoveClass(const ElementNode& element,
+                      base::AtomicString class_name);
 
   std::vector<base::string16> added_classes_;
   std::vector<base::string16> removed_classes_;
@@ -54,12 +55,12 @@ class ElementTest : public ::testing::Test, public DocumentObserver {
 };
 
 void ElementTest::DidAddClass(const ElementNode& element,
-                              AtomicString class_name) {
+                              base::AtomicString class_name) {
   added_classes_.push_back(class_name.as_string());
 }
 
 void ElementTest::DidRemoveClass(const ElementNode& element,
-                                 AtomicString class_name) {
+                                 base::AtomicString class_name) {
   removed_classes_.push_back(class_name.as_string());
 }
 

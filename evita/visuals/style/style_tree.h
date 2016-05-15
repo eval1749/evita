@@ -73,7 +73,8 @@ class StyleTree final : public ViewLifecycleClient,
   void DidRemoveRule(const css::Rule& rule, size_t index) final;
 
   // DocumentObserver
-  void DidAddClass(const ElementNode& element, AtomicString class_name) final;
+  void DidAddClass(const ElementNode& element,
+                   base::AtomicString class_name) final;
   void DidAppendChild(const ContainerNode& parent, const Node& child) final;
   void DidChangeInlineStyle(const ElementNode& element,
                             const css::Style* old_style) final;
@@ -81,7 +82,8 @@ class StyleTree final : public ViewLifecycleClient,
                        const Node& child,
                        const Node& ref_child) final;
   void DidRemoveChild(const ContainerNode& parent, const Node& child) final;
-  void DidRemoveClass(const ElementNode& element, AtomicString name) final;
+  void DidRemoveClass(const ElementNode& element,
+                      base::AtomicString name) final;
   void DidReplaceChild(const ContainerNode& parent,
                        const Node& child,
                        const Node& ref_child) final;

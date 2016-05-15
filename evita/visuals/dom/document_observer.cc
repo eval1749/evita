@@ -16,7 +16,7 @@ DocumentObserver::DocumentObserver() {}
 DocumentObserver::~DocumentObserver() {}
 
 void DocumentObserver::DidAddClass(const ElementNode& element,
-                                   AtomicString new_class) {}
+                                   base::AtomicString new_class) {}
 void DocumentObserver::DidAppendChild(const ContainerNode& parent,
                                       const Node& child) {}
 void DocumentObserver::DidChangeInlineStyle(const ElementNode& element,
@@ -27,7 +27,7 @@ void DocumentObserver::DidInsertBefore(const ContainerNode& parent,
 void DocumentObserver::DidRemoveChild(const ContainerNode& parent,
                                       const Node& child) {}
 void DocumentObserver::DidRemoveClass(const ElementNode& element,
-                                      AtomicString old_name) {}
+                                      base::AtomicString old_name) {}
 void DocumentObserver::DidReplaceChild(const ContainerNode& parent,
                                        const Node& new_child,
                                        const Node& old_child) {

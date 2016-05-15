@@ -26,11 +26,11 @@ class NodeEditor final {
   ~NodeEditor();
 
   void AppendChild(ContainerNode* container, Node* new_child);
-  void AddClass(ElementNode* element, AtomicString class_name);
+  void AddClass(ElementNode* element, base::AtomicString class_name);
   void AddClass(ElementNode* element, base::StringPiece16 class_name);
   void InsertBefore(ContainerNode* container, Node* new_child, Node* ref_child);
   void RemoveChild(ContainerNode* container, Node* old_child);
-  void RemoveClass(ElementNode* element, AtomicString class_name);
+  void RemoveClass(ElementNode* element, base::AtomicString class_name);
   void RemoveClass(ElementNode* element, base::StringPiece16 class_name);
   void ReplaceChild(ContainerNode* container, Node* new_child, Node* old_child);
   void SetImageData(Image* image, const ImageData& data);

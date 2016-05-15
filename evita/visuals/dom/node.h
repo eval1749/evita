@@ -62,9 +62,9 @@ class Node : public base::Castable<Node>, public gc::Collectable<Node> {
   Document* document() const { return document_; }
 
   // Node identifiers
-  const AtomicString& id() const { return id_; }
+  const base::AtomicString& id() const { return id_; }
   int sequence_id() const { return sequence_id_; }
-  const AtomicString& node_name() const { return node_name_; }
+  const base::AtomicString& node_name() const { return node_name_; }
 
   // Node tree related values
   ContainerNode* parent() const { return parent_; }
@@ -75,12 +75,12 @@ class Node : public base::Castable<Node>, public gc::Collectable<Node> {
 
  protected:
   Node(Document* document,
-       const AtomicString& node_name,
-       const AtomicString& id);
+       const base::AtomicString& node_name,
+       const base::AtomicString& id);
   Node(Document* document,
        base::StringPiece16 node_name,
        base::StringPiece16 id);
-  Node(Document* document, const AtomicString& node_name);
+  Node(Document* document, const base::AtomicString& node_name);
   Node(Document* document, base::StringPiece16 node_name);
 
  private:
@@ -90,9 +90,9 @@ class Node : public base::Castable<Node>, public gc::Collectable<Node> {
   Document* document_;
   // User specified string identifier of this node. Multiple nodes can have
   // same string id.
-  const AtomicString id_;
+  const base::AtomicString id_;
   Node* next_sibling_ = nullptr;
-  const AtomicString node_name_;
+  const base::AtomicString node_name_;
   ContainerNode* parent_ = nullptr;
   Node* previous_sibling_ = nullptr;
   const int sequence_id_;

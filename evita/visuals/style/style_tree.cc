@@ -526,7 +526,7 @@ void StyleTree::DidRemoveRule(const css::Rule& rule, size_t index) {
 
 // DocumentObserver
 void StyleTree::DidAddClass(const ElementNode& element,
-                            AtomicString class_name) {
+                            base::AtomicString class_name) {
   // TODO(eval1749): Implement shortcut for
   //  - position:absolute + left/top
   //  - background color change
@@ -561,7 +561,7 @@ void StyleTree::DidRemoveChild(const ContainerNode& parent, const Node& child) {
 }
 
 void StyleTree::DidRemoveClass(const ElementNode& element,
-                               AtomicString class_name) {
+                               base::AtomicString class_name) {
   MarkDirty(element);
 }
 

@@ -30,10 +30,12 @@ namespace visuals {
 NodeEditor::NodeEditor() {}
 NodeEditor::~NodeEditor() {}
 
-void NodeEditor::AddClass(ElementNode* element, AtomicString class_name) {
-  const auto& it = std::find_if(
-      element->class_list_.begin(), element->class_list_.end(),
-      [class_name](AtomicString present) { return class_name == present; });
+void NodeEditor::AddClass(ElementNode* element, base::AtomicString class_name) {
+  const auto& it =
+      std::find_if(element->class_list_.begin(), element->class_list_.end(),
+                   [class_name](base::AtomicString present) {
+                     return class_name == present;
+                   });
   if (it != element->class_list_.end())
     return;
   element->class_list_.emplace_back(class_name);
@@ -45,7 +47,7 @@ void NodeEditor::AddClass(ElementNode* element, AtomicString class_name) {
 
 void NodeEditor::AddClass(ElementNode* element,
                           base::StringPiece16 class_name) {
-  AddClass(element, AtomicString(class_name));
+  AddClass(element, base::AtomicString(class_name));
 }
 
 void NodeEditor::AppendChild(ContainerNode* container, Node* new_child) {
@@ -136,10 +138,13 @@ void NodeEditor::RemoveChild(ContainerNode* container, Node* old_child) {
                     DidRemoveChild(*container, *old_child));
 }
 
-void NodeEditor::RemoveClass(ElementNode* element, AtomicString class_name) {
-  auto destination = std::find_if(
-      element->class_list_.begin(), element->class_list_.end(),
-      [class_name](AtomicString present) { return class_name == present; });
+void NodeEditor::RemoveClass(ElementNode* element,
+                             base::AtomicString class_name) {
+  auto destination =
+      std::find_if(element->class_list_.begin(), element->class_list_.end(),
+                   [class_name](base::AtomicString present) {
+                     return class_name == present;
+                   });
   if (destination == element->class_list_.end())
     return;
   for (auto source = std::next(destination);
@@ -156,7 +161,7 @@ void NodeEditor::RemoveClass(ElementNode* element, AtomicString class_name) {
 
 void NodeEditor::RemoveClass(ElementNode* element,
                              base::StringPiece16 class_name) {
-  RemoveClass(element, AtomicString(class_name));
+  RemoveClass(element, base::AtomicString(class_name));
 }
 
 void NodeEditor::ReplaceChild(ContainerNode* container,

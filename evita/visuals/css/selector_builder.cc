@@ -36,7 +36,7 @@ Selector Builder::Build() {
 }
 
 // style
-Selector Builder::CopyWithoutTagName(const Selector& selector) {
+Selector Builder::AsUniversalSelector(const Selector& selector) {
   Builder builder;
   if (!selector.id().empty())
     builder.SetId(selector.id());

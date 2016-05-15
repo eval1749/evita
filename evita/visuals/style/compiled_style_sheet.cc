@@ -76,7 +76,7 @@ void CompiledStyleSheet::Merge(css::Style* style,
   DCHECK(selector.is_universal()) << selector;
   auto tag_runner = FindFirstMatch(selector);
   auto any_runner =
-      FindFirstMatch(css::Selector::Builder::CopyWithoutTagName(selector));
+      FindFirstMatch(css::Selector::Builder::AsUniversalSelector(selector));
   while (tag_runner != rules_.end() && any_runner != rules_.end()) {
     if (tag_runner == any_runner) {
       any_runner = rules_.end();

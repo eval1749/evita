@@ -31,6 +31,9 @@ class Selector::Builder {
   Builder& SetTagName(base::AtomicString tag_name);
   Builder& SetTagName(base::StringPiece16 tag_name);
 
+  // Return universal selector from typed selector |selector|.
+  static Selector CopyWithoutTagName(const Selector& selector);
+
  private:
   std::set<base::AtomicString> classes_;
   base::AtomicString id_;

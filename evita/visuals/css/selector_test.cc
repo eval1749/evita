@@ -64,7 +64,29 @@ Selector Parse(base::StringPiece16 text) {
   return std::move(Selector::Parser().Parse(text));
 }
 
+Selector CopyWithoutTagName(base::StringPiece16 text) {
+  return std::move(Selector::Builder::CopyWithoutTagName(Parse(text)));
+}
+
 }  // namespace
+
+TEST(CssSelctorTest, CopyWithoutTagName) {
+  EXPECT_EQ(Parse(L""), CopyWithoutTagName(L"foo"));
+  EXPECT_EQ(Parse(L"#bar"), CopyWithoutTagName(L"foo#bar"));
+  EXPECT_EQ(Parse(L"#bar.c1"), CopyWithoutTagName(L"foo#bar.c1"));
+  EXPECT_EQ(Parse(L".c1"), CopyWithoutTagName(L"foo.c1"));
+  EXPECT_EQ(Parse(L".c1.c2"), CopyWithoutTagName(L"foo.c1.c2"));
+  EXPECT_EQ(Parse(L""), CopyWithoutTagName(L"*"));
+  EXPECT_EQ(Parse(L"#bar"), CopyWithoutTagName(L"*#bar"));
+  EXPECT_EQ(Parse(L"#bar.c1"), CopyWithoutTagName(L"*#bar.c1"));
+  EXPECT_EQ(Parse(L".c1"), CopyWithoutTagName(L"*.c1"));
+  EXPECT_EQ(Parse(L".c1.c2"), CopyWithoutTagName(L"*.c1.c2"));
+  EXPECT_EQ(Parse(L""), CopyWithoutTagName(L""));
+  EXPECT_EQ(Parse(L"#bar"), CopyWithoutTagName(L"#bar"));
+  EXPECT_EQ(Parse(L"#bar.c1"), CopyWithoutTagName(L"#bar.c1"));
+  EXPECT_EQ(Parse(L".c1"), CopyWithoutTagName(L".c1"));
+  EXPECT_EQ(Parse(L".c1.c2"), CopyWithoutTagName(L".c1.c2"));
+}
 
 TEST(CssSelctorTest, Equals) {
   Selector selector0;

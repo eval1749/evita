@@ -202,9 +202,11 @@ void PaintVisitor::PaintBorderINeeded(const Box& box) {
 #endif
   const auto& border = box.border();
   if (border.IsSimple()) {
+    const auto size = border.top();
+    if (size == 0)
+      return;
     const auto& color = border.top_color();
     const auto height = box.bounds().height();
-    const auto size = border.top();
     const auto width = box.bounds().width();
     builder_.AddNew<DrawRectDisplayItem>(
         gfx::FloatRect(box.bounds().size() - gfx::FloatSize(1.0f, 1.0f)), color,

@@ -109,6 +109,7 @@ css::StyleSheet* LoadStyleSheet() {
       std::move(css::StyleBuilder().SetDisplay(css::Display::Block()).Build()));
   style_sheet->AppendRule(ParseSelector(L"list_item"),
                           std::move(css::StyleBuilder()
+                                        .SetBorder(css::ColorValue::Rgba(255, 255, 255), 1)
                                         .SetColor(0, 0, 0)
                                         .SetDisplay(css::Display::Block())
                                         .SetPaddingTop(2)

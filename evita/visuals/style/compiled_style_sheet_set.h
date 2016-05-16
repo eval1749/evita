@@ -38,6 +38,8 @@ class CompiledStyleSheetSet final : public css::StyleSheetObserver {
   void RemoveObserver(css::StyleSheetObserver* observer) const;
 
  private:
+  friend class CompiledStyleSheetSetTest;
+
   struct Entry {
     Entry(size_t passedPosition, std::unique_ptr<css::Style> passedStyle);
     Entry(const Entry& other) = delete;

@@ -19,6 +19,8 @@
 
 namespace visuals {
 
+namespace {
+
 std::unique_ptr<css::Style> ComputeStyle(
     const CompiledStyleSheetSet& style_sheet,
     const ElementNode& element) {
@@ -37,7 +39,29 @@ css::Selector ParseSelector(base::StringPiece16 text) {
   return css::Selector::Parser().Parse(text);
 }
 
-TEST(CompiledStyleSheetSetTest, Basic) {
+}  // namespace
+
+class CompiledStyleSheetSetTest : public ::testing::Test {
+ protected:
+  CompiledStyleSheetSetTest() = default;
+  ~CompiledStyleSheetSetTest() override = default;
+
+  css::Selector FirstMatch(const CompiledStyleSheetSet& style_sheet,
+                           const css::Selector& selector) const;
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(CompiledStyleSheetSetTest);
+};
+
+css::Selector CompiledStyleSheetSetTest::FirstMatch(
+    const CompiledStyleSheetSet& style_sheet,
+    const css::Selector& selector) const {
+  const_cast<CompiledStyleSheetSet&>(style_sheet).CompileStyleSheetsIfNeeded();
+  const auto& it = style_sheet.FindFirstMatch(selector);
+  return it == style_sheet.rules_.end() ? css::Selector() : it->first;
+}
+
+TEST_F(CompiledStyleSheetSetTest, Basic) {
   const auto style_sheet = new css::StyleSheet();
   style_sheet->AppendRule(
       ParseSelector(L"tag"),
@@ -94,7 +118,22 @@ TEST(CompiledStyleSheetSetTest, Basic) {
   EXPECT_EQ(css::Height(css::Length(20)), tag_id_style->height());
 }
 
-TEST(CompiledStyleSheetSetTest, Hover) {
+TEST_F(CompiledStyleSheetSetTest, FindFirstMatch) {
+  const auto style_sheet = new css::StyleSheet();
+  style_sheet->AppendRule(
+      ParseSelector(L"tag"),
+      css::StyleBuilder().SetColor(1, 0, 0).SetHeight(20).Build());
+  style_sheet->AppendRule(ParseSelector(L".c1"),
+                          css::StyleBuilder().SetColor(0, 0, 1).Build());
+  style_sheet->AppendRule(ParseSelector(L".c2"),
+                          css::StyleBuilder().SetColor(0, 1, 0).Build());
+  CompiledStyleSheetSet compiled({style_sheet});
+
+  EXPECT_EQ(ParseSelector(L".c1"),
+            FirstMatch(compiled, ParseSelector(L".c1:hover")));
+}
+
+TEST_F(CompiledStyleSheetSetTest, Hover) {
   const auto style_sheet = new css::StyleSheet();
   style_sheet->AppendRule(
       ParseSelector(L"tag"),

@@ -107,16 +107,17 @@ css::StyleSheet* LoadStyleSheet() {
   style_sheet->AppendRule(
       ParseSelector(L"list"),
       std::move(css::StyleBuilder().SetDisplay(css::Display::Block()).Build()));
-  style_sheet->AppendRule(ParseSelector(L"list_item"),
-                          std::move(css::StyleBuilder()
-                                        .SetBorder(css::ColorValue::Rgba(255, 255, 255), 1)
-                                        .SetColor(0, 0, 0)
-                                        .SetDisplay(css::Display::Block())
-                                        .SetPaddingTop(2)
-                                        .SetPaddingRight(5)
-                                        .SetPaddingBottom(2)
-                                        .SetPaddingLeft(5)
-                                        .Build()));
+  style_sheet->AppendRule(
+      ParseSelector(L"list_item"),
+      std::move(css::StyleBuilder()
+                    .SetBorder(css::ColorValue::Rgba(255, 255, 255), 1)
+                    .SetColor(0, 0, 0)
+                    .SetDisplay(css::Display::Block())
+                    .SetPaddingTop(2)
+                    .SetPaddingRight(5)
+                    .SetPaddingBottom(2)
+                    .SetPaddingLeft(5)
+                    .Build()));
   style_sheet->AppendRule(
       ParseSelector(L"main"),
       std::move(css::StyleBuilder().SetDisplay(css::Display::Block()).Build()));
@@ -307,9 +308,10 @@ void DemoModel::DidPressKey(int key_code) {
 
 // Print box tree if mouse pressed on "list_item".
 void DemoModel::DidPressMouse(const gfx::FloatPoint& point) {
-  if (!FindListItem(point))
+  const auto& found = view_->HitTest(point);
+  if (!found)
     return;
-  PrintBox(view_->box_tree());
+  std::cout << "Box at " << point << " is " << found.node() << std::endl;
 }
 
 void DemoModel::DidSetFocus() {

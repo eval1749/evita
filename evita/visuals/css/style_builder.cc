@@ -41,12 +41,16 @@ StyleBuilder& StyleBuilder::Set(PropertyId id, const Value& value) {
 }
 
 StyleBuilder& StyleBuilder::SetBorder(const ColorValue& color, float width) {
+  SetBorderBottomStyle(BorderBottomStyle::Solid());
   SetBorderBottomWidth(width);
   SetBorderBottomColor(color);
+  SetBorderLeftStyle(BorderLeftStyle::Solid());
   SetBorderLeftWidth(width);
   SetBorderLeftColor(color);
+  SetBorderRightStyle(BorderRightStyle::Solid());
   SetBorderRightWidth(width);
   SetBorderRightColor(color);
+  SetBorderTopStyle(BorderTopStyle::Solid());
   SetBorderTopWidth(width);
   SetBorderTopColor(color);
   return *this;

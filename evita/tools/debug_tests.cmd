@@ -2,17 +2,30 @@
 setlocal
 call ..\setenv.cmd
 if "%outdir%"=="" goto no_outdir
-set exedir=%outdir%\Debug
 
-set which=%1
-set pattern=%2
 set options=--single-process-tests --gtest_break_on_failure --gtest_throw_on_failure
 
+set config=%1
+if "%config%"=="" goto usage
+if "%config%"=="debug" (shift && goto has_config)
+if "%config%"=="release" (shift && goto has_config)
+if "%config%"=="official" (shift && goto has_config)
+set config=debug
+:has_config
+set which=%1
+set pattern=%2
 if "%which%"=="" goto usage
-if "%pattern%"=="" goto usage
 
+if "%which%"=="d" set which=dom
+if "%which%"=="g" set which=geometry
+if "%which%"=="l" set which=layout
+if "%which%"=="t" set which=text
+if "%which%"=="v" set which=visuals
+
+set exedir=%outdir%\%config%
 set target=%exedir%\evita_%which%_tests.exe
 if not exist %target% goto not_fond
+
 start devenv.exe /debugexe %target% %options% --gtest_filter=%pattern%
 
 endlocal

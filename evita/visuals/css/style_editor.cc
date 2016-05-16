@@ -39,6 +39,11 @@ void StyleEditor::Set(Style* style, PropertyId id, const Value& value) {
 void StyleEditor::SetBorder(Style* style,
                             const gfx::FloatColor& color,
                             float width) {
+  SetBorderBottomStyle(style, BorderBottomStyle::Solid());
+  SetBorderLeftStyle(style, BorderLeftStyle::Solid());
+  SetBorderRightStyle(style, BorderRightStyle::Solid());
+  SetBorderTopStyle(style, BorderTopStyle::Solid());
+
   SetBorderBottomWidth(style, width);
   SetBorderLeftWidth(style, width);
   SetBorderRightWidth(style, width);

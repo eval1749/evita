@@ -38,7 +38,13 @@ std::ostream& operator<<(std::ostream& ostream, D2D1_TEXT_ANTIALIAS_MODE mode) {
 namespace gfx {
 
 namespace {
+
 int global_bitmap_id;
+
+// TODO(eval1749): It seems |D2D1_ANTIALIAS_MODE_ALIASED| is faster than
+// |D2D1_ANTIALIAS_MODE_PER_PRIMITIVE|. We need to have more investigation.
+const D2D1_ANTIALIAS_MODE kAntialiasMode = D2D1_ANTIALIAS_MODE_PER_PRIMITIVE;
+
 }  // namespace
 
 //////////////////////////////////////////////////////////////////////
@@ -54,11 +60,9 @@ Canvas::AxisAlignedClipScope::AxisAlignedClipScope(
   (*canvas_)->PushAxisAlignedClip(bounds, alias_mode);
 }
 
-// TODO(eval1749): It seems |D2D1_ANTIALIAS_MODE_ALIASED| is faster than
-// |D2D1_ANTIALIAS_MODE_PER_PRIMITIVE|. We need to have more investigation.
 Canvas::AxisAlignedClipScope::AxisAlignedClipScope(Canvas* canvas,
                                                    const RectF& bounds)
-    : AxisAlignedClipScope(canvas, bounds, D2D1_ANTIALIAS_MODE_ALIASED) {}
+    : AxisAlignedClipScope(canvas, bounds, kAntialiasMode) {}
 
 Canvas::AxisAlignedClipScope::~AxisAlignedClipScope() {
   (*canvas_)->PopAxisAlignedClip();
@@ -162,7 +166,7 @@ void Canvas::DidLostRenderTarget() {
   should_clear_ = true;
   SizeF dpi;
   GetRenderTarget()->GetDpi(&dpi.width, &dpi.height);
-  GetRenderTarget()->SetAntialiasMode(D2D1_ANTIALIAS_MODE_ALIASED);
+  GetRenderTarget()->SetAntialiasMode(kAntialiasMode);
   UpdateDpi(dpi);
   FOR_EACH_OBSERVER(CanvasObserver, observers_, DidRecreateCanvas());
 }

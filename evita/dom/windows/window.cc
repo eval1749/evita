@@ -173,6 +173,7 @@ void Window::DidChangeBounds(int clientLeft,
   const auto& new_bounds =
       gfx::FloatRect(gfx::FloatPoint(clientLeft, clientTop),
                      gfx::FloatPoint(clientRight, clientBottom));
+  DCHECK(!new_bounds.IsEmpty());
   if (bounds_ == new_bounds)
     return;
   bounds_ = new_bounds;

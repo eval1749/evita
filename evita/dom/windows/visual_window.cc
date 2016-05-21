@@ -144,6 +144,7 @@ void VisualWindow::DidChangeView() {
 
 // Window
 void VisualWindow::DidChangeBounds(int left, int top, int right, int bottom) {
+  Window::DidChangeBounds(left, top, right, bottom);
   viewport_size_ = gfx::FloatSize(right - left, bottom - top);
   visuals::css::Media::DidChangeViewportSize();
 }

@@ -30,16 +30,9 @@
 #include "evita/visuals/view/public/selection.h"
 #include "evita/visuals/view/public/view_lifecycle.h"
 
-// TODO(eval1749): Drawing rectangle with thickness doesn't work as expected.
-// I get 1 pixel vertical line for 4 pixel border.
-#define USE_SIMPLE_BORDER 0
-
 namespace visuals {
 
 namespace {
-
-#if USE_SIMPLE_BORDER
-#endif
 
 bool IsBackgroundChanged(const Box& box) {
   return box.IsBackgroundChanged() || box.IsOriginChanged() ||
@@ -201,52 +194,50 @@ void PaintVisitor::PaintBorderINeeded(const Box& box) {
     return;
 #endif
   const auto& border = box.border();
+  const auto height = box.bounds().height();
+  const auto width = box.bounds().width();
   if (border.IsSimple()) {
     const auto size = border.top();
     if (size == 0)
       return;
     const auto& color = border.top_color();
-    const auto height = box.bounds().height();
-    const auto width = box.bounds().width();
     builder_.AddNew<DrawRectDisplayItem>(
-        gfx::FloatRect(box.bounds().size() - gfx::FloatSize(1.0f, 1.0f)), color,
-        size);
-    AddDirtyBounds(gfx::FloatRect(gfx::FloatSize(width, 1.0f)));
-    AddDirtyBounds(
-        gfx::FloatRect(gfx::FloatPoint(), gfx::FloatSize(1.0f, height)));
-    AddDirtyBounds(
-        gfx::FloatRect(box.bounds().top_right() - gfx::FloatSize(1.0f, 0.0f),
-                       gfx::FloatSize(1.0f, height)));
-    AddDirtyBounds(
-        gfx::FloatRect(box.bounds().bottom_left() - gfx::FloatSize(0.0f, 1.0f),
-                       gfx::FloatSize(width, 1.0f)));
+        gfx::FloatRect(gfx::FloatPoint(size / 2, size / 2),
+                       gfx::FloatSize(width - size, height - size)),
+        color, size);
+    // top edge
+    AddDirtyBounds(gfx::FloatRect(gfx::FloatSize(size, width)));
+    // bottom edge
+    AddDirtyBounds(gfx::FloatRect(gfx::FloatPoint(0, height - width),
+                                  gfx::FloatPoint(width, height - width)));
+    // left edge
+    AddDirtyBounds(gfx::FloatRect(gfx::FloatSize(width, height)));
+    // right edge
+    AddDirtyBounds(gfx::FloatRect(gfx::FloatPoint(width - size, 0),
+                                  gfx::FloatSize(width, height)));
     return;
   }
-  if (border.top()) {
-    FillRectAndMark(
-        gfx::FloatRect(gfx::FloatPoint(),
-                       gfx::FloatSize(box.bounds().width(), border.top())),
-        border.top_color(), is_border_changed);
+  if (const auto size = border.top()) {
+    FillRectAndMark(gfx::FloatRect(gfx::FloatPoint(size / 2, size / 2),
+                                   gfx::FloatSize(width - size, size)),
+                    border.top_color(), is_border_changed);
   }
-  if (border.left()) {
-    FillRectAndMark(
-        gfx::FloatRect(gfx::FloatPoint(),
-                       gfx::FloatSize(border.left(), box.bounds().height())),
-        border.left_color(), is_border_changed);
+  if (const auto size = border.left()) {
+    FillRectAndMark(gfx::FloatRect(gfx::FloatPoint(size / 2, size / 2),
+                                   gfx::FloatSize(size, height)),
+                    border.left_color(), is_border_changed);
   }
-  if (border.right()) {
+  if (const auto size = border.right()) {
     FillRectAndMark(
         gfx::FloatRect(
-            gfx::FloatPoint(box.bounds().width() - border.right(), 0),
-            gfx::FloatSize(border.right(), box.bounds().height())),
+            gfx::FloatPoint(box.bounds().width() - size / 2, size / 2),
+            gfx::FloatSize(size, height - size)),
         border.right_color(), is_border_changed);
   }
-  if (border.bottom()) {
-    FillRectAndMark(
-        gfx::FloatRect(
-            gfx::FloatPoint(0, box.bounds().height() - border.bottom()),
-            gfx::FloatSize(box.bounds().width(), border.bottom())),
-        border.bottom_color(), is_border_changed);
+  if (const auto size = border.bottom()) {
+    FillRectAndMark(gfx::FloatRect(gfx::FloatPoint(size / 2, height - size / 2),
+                                   gfx::FloatSize(width - size, size)),
+                    border.bottom_color(), is_border_changed);
   }
 }
 

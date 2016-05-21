@@ -142,10 +142,6 @@ void PaintVisitor::VisitDrawLine(DrawLineDisplayItem* item) {
 }
 
 void PaintVisitor::VisitDrawRect(DrawRectDisplayItem* item) {
-  DCHECK_EQ(item->bounds().bottom(), std::ceil(item->bounds().bottom()));
-  DCHECK_EQ(item->bounds().x(), std::ceil(item->bounds().x()));
-  DCHECK_EQ(item->bounds().right(), std::ceil(item->bounds().right()));
-  DCHECK_EQ(item->bounds().y(), std::ceil(item->bounds().y()));
   const auto& brush = gfx::Brush(canvas_, ToColorF(item->color()));
 #if 1
   canvas_->DrawRectangle(brush, ToRectF(item->bounds()), item->thickness());

@@ -34,6 +34,8 @@ function createStyleSheet() {
       '  display: block;\n' +
       '  margin: 0 4 0 4;\n' +
       '}\n' +
+      'div { display: inline; margin: 10; width: 80; height: 50;}\n' +
+      ':hover { border-color: #0f0; }\n' +
       '.border1 { border: 1 solid #00f; }\n' +  // 83×53
       '.border2 { border: 2 solid #00f; }\n' +  // 85×55
       '.border3 { border: 3 solid #00f; }\n' +
@@ -42,8 +44,7 @@ function createStyleSheet() {
       '.border6 { border: 6 solid #00f; }\n' +
       '.border7 { border: 7 solid #00f; }\n' +
       '.border8 { border: 8 solid #00f; }\n' +
-      '.border9 { border: 9 solid #00f; }\n' +
-      'div { display: inline; margin: 10; width: 80; height: 50;}\n';
+      '.border9 { border: 9 solid #00f; }\n';
   return css.Parser.parse(cssText);
 }
 

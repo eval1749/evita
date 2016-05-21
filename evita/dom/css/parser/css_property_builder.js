@@ -90,11 +90,14 @@ class PropertyBuilder extends base.Logger {
         return result;
       }
       case 'border-color':
+        return this.handleRepeat1to4('border', '-color', values);
       case 'border-style':
+        return this.handleRepeat1to4('border', '-style', values);
       case 'border-width':
+        return this.handleRepeat1to4('border', '-width', values);
       case 'margin':
       case 'padding':
-        return this.handleRepeat1to4(name, values);
+        return this.handleRepeat1to4(name.text, '', values);
       case 'font-family':
         return [new Property(
             name.text, values.map(token => token.text).join(''))];
@@ -114,7 +117,8 @@ class PropertyBuilder extends base.Logger {
 
   /**
    * @private
-   * @param {!Token} name
+   * @param {string} prefix
+   * @param {string} suffix
    * @param {!Array<!Token>} values
    * @return {!Array<!Property>}
    *
@@ -124,20 +128,20 @@ class PropertyBuilder extends base.Logger {
    *
    *  <line-width> = <length> | thin | medium | thick
    */
-  handleRepeat1to4(name, values) {
-    this.log(0, name, values);
+  handleRepeat1to4(prefix, suffix, values) {
+    this.log(0, prefix, suffix, values);
     switch (values.length) {
       case 1:
-        return this.handleRepeat1to4(name, [values[0], values[0]]);
+        return this.handleRepeat1to4(prefix, suffix, [values[0], values[0]]);
       case 2:
         return this.handleRepeat1to4(
-            name, [values[0], values[1], values[0], values[1]]);
+            prefix, suffix, [values[0], values[1], values[0], values[1]]);
       case 4:
         return [
-          new Property(`${name.text}-top`, values[0].text),
-          new Property(`${name.text}-right`, values[1].text),
-          new Property(`${name.text}-bottom`, values[2].text),
-          new Property(`${name.text}-left`, values[3].text),
+          new Property(`${prefix}-top${suffix}`, values[0].text),
+          new Property(`${prefix}-right${suffix}`, values[1].text),
+          new Property(`${prefix}-bottom${suffix}`, values[2].text),
+          new Property(`${prefix}-left${suffix}`, values[3].text),
         ];
     }
     return [];

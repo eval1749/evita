@@ -7,6 +7,7 @@
 
 #include <map>
 #include <memory>
+#include <set>
 #include <vector>
 
 #include "base/macros.h"
@@ -47,17 +48,28 @@ class CompiledStyleSheetSet final : public css::StyleSheetObserver {
     Entry();
     ~Entry();
 
+    bool operator<(const Entry& other) const;
+
     size_t position;
     std::unique_ptr<css::Style> style;
   };
 
   using CacheMap = std::map<css::Selector, std::unique_ptr<css::Style>>;
   using RuleMap = std::map<css::Selector, Entry>;
+  using Rule = RuleMap::const_iterator;
+
+  struct RuleLess {
+    bool operator()(const Rule& rule1, const Rule& rule2) const;
+  };
+  using MatchSet = std::set<Rule, RuleLess>;
 
   void ClearCache();
   void CompileStyleSheetsIfNeeded();
   void CompileRule(const css::Rule& rule);
-  RuleMap::const_iterator FindFirstMatch(const css::Selector& selector) const;
+  MatchSet Match(const css::Selector& selector) const;
+  void MatchOne(MatchSet* match_set,
+                const css::Selector& needle,
+                const css::Selector& selector) const;
 
   // css::StyleSheetObserver
   void DidInsertRule(const css::Rule& new_rule, size_t index);

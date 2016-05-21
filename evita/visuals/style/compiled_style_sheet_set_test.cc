@@ -46,19 +46,22 @@ class CompiledStyleSheetSetTest : public ::testing::Test {
   CompiledStyleSheetSetTest() = default;
   ~CompiledStyleSheetSetTest() override = default;
 
-  css::Selector FirstMatch(const CompiledStyleSheetSet& style_sheet,
-                           const css::Selector& selector) const;
+  std::vector<css::Selector> Match(const CompiledStyleSheetSet& style_sheet,
+                                   const css::Selector& selector) const;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(CompiledStyleSheetSetTest);
 };
 
-css::Selector CompiledStyleSheetSetTest::FirstMatch(
+std::vector<css::Selector> CompiledStyleSheetSetTest::Match(
     const CompiledStyleSheetSet& style_sheet,
     const css::Selector& selector) const {
   const_cast<CompiledStyleSheetSet&>(style_sheet).CompileStyleSheetsIfNeeded();
-  const auto& it = style_sheet.FindFirstMatch(selector);
-  return it == style_sheet.rules_.end() ? css::Selector() : it->first;
+  const auto& matched = style_sheet.Match(selector);
+  std::vector<css::Selector> result;
+  for (const auto& rule : matched)
+    result.emplace_back(rule->first);
+  return std::move(result);
 }
 
 TEST_F(CompiledStyleSheetSetTest, Basic) {
@@ -97,28 +100,27 @@ TEST_F(CompiledStyleSheetSetTest, Basic) {
   const auto tag_id = document->GetElementById(L"id");
 
   const auto& tag_style = ComputeStyle(compiled, *tag);
-  const auto& tag_c1_style = ComputeStyle(compiled, *tag_c1);
-  const auto& tag_c1c2_style = ComputeStyle(compiled, *tag_c1c2);
-  const auto& tag_c1c3_style = ComputeStyle(compiled, *tag_c1c3);
-  const auto& tag_id_style = ComputeStyle(compiled, *tag_id);
-
   EXPECT_EQ(css::Color(css::ColorValue(1, 0, 0)), tag_style->color());
   EXPECT_EQ(css::Height(css::Length(20)), tag_style->height());
 
+  const auto& tag_c1_style = ComputeStyle(compiled, *tag_c1);
   EXPECT_EQ(css::Color(css::ColorValue(0, 1, 0)), tag_c1_style->color());
   EXPECT_EQ(css::Height(css::Length(20)), tag_c1_style->height());
 
+  const auto& tag_c1c2_style = ComputeStyle(compiled, *tag_c1c2);
   EXPECT_EQ(css::Color(css::ColorValue(1, 1, 0)), tag_c1c2_style->color());
   EXPECT_EQ(css::Height(css::Length(20)), tag_c1c2_style->height());
 
+  const auto& tag_c1c3_style = ComputeStyle(compiled, *tag_c1c3);
   EXPECT_EQ(css::Color(css::ColorValue(0, 1, 0)), tag_c1c3_style->color());
-  EXPECT_EQ(css::Height(css::Length(20)), tag_c1c2_style->height());
+  EXPECT_EQ(css::Height(css::Length(20)), tag_c1c3_style->height());
 
+  const auto& tag_id_style = ComputeStyle(compiled, *tag_id);
   EXPECT_EQ(css::Color(css::ColorValue(0, 0, 1)), tag_id_style->color());
   EXPECT_EQ(css::Height(css::Length(20)), tag_id_style->height());
 }
 
-TEST_F(CompiledStyleSheetSetTest, FindFirstMatch) {
+TEST_F(CompiledStyleSheetSetTest, Match) {
   const auto style_sheet = new css::StyleSheet();
   style_sheet->AppendRule(
       ParseSelector(L"tag"),
@@ -127,10 +129,31 @@ TEST_F(CompiledStyleSheetSetTest, FindFirstMatch) {
                           css::StyleBuilder().SetColor(0, 0, 1).Build());
   style_sheet->AppendRule(ParseSelector(L".c2"),
                           css::StyleBuilder().SetColor(0, 1, 0).Build());
+  style_sheet->AppendRule(ParseSelector(L".c1.c2"),
+                          css::StyleBuilder().SetColor(1, 1, 0).Build());
   CompiledStyleSheetSet compiled({style_sheet});
 
-  EXPECT_EQ(ParseSelector(L".c1"),
-            FirstMatch(compiled, ParseSelector(L".c1:hover")));
+  EXPECT_EQ(std::vector<css::Selector>{ParseSelector(L"tag")},
+            Match(compiled, ParseSelector(L"tag")));
+  EXPECT_EQ(std::vector<css::Selector>{ParseSelector(L".c1")},
+            Match(compiled, ParseSelector(L".c1")));
+  EXPECT_EQ(std::vector<css::Selector>{ParseSelector(L".c2")},
+            Match(compiled, ParseSelector(L".c2")));
+  EXPECT_EQ((std::vector<css::Selector>{ParseSelector(L".c1"),
+                                        ParseSelector(L"tag")}),
+            Match(compiled, ParseSelector(L"tag.c1")));
+  EXPECT_EQ((std::vector<css::Selector>{
+                ParseSelector(L".c1.c2"), ParseSelector(L".c1"),
+                ParseSelector(L".c2"), ParseSelector(L"tag")}),
+            Match(compiled, ParseSelector(L"tag.c1.c2")));
+  EXPECT_EQ((std::vector<css::Selector>{ParseSelector(L".c1.c2"),
+                                        ParseSelector(L".c1"),
+                                        ParseSelector(L".c2")}),
+            Match(compiled, ParseSelector(L".c1.c2")));
+  EXPECT_EQ((std::vector<css::Selector>{ParseSelector(L".c1")}),
+            Match(compiled, ParseSelector(L".c1.c3")));
+  EXPECT_EQ(std::vector<css::Selector>{ParseSelector(L".c1")},
+            Match(compiled, ParseSelector(L".c1:hover")));
 }
 
 TEST_F(CompiledStyleSheetSetTest, Hover) {

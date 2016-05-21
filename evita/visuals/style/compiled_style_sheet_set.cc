@@ -31,7 +31,32 @@ CompiledStyleSheetSet::Entry::~Entry() = default;
 
 //////////////////////////////////////////////////////////////////////
 //
-// StyleSheet
+// CompiledStyleSheetSet::RuleLess
+//
+// Apply more specific rule. If we can't determine more specific rule,
+// we use first appeared rule[1].
+// Example:
+//  .c1 { color: red; }
+//  .c2 { color: blue; }
+// When we have above style sheet, color of an element selected by
+// "foo.c1.c2" is "red", since ".c1" and ".c2" are same specificity but
+// ".c1" is appeared before ".c2".
+// [1] https://www.w3.org/TR/css3-selectors/#specificity
+bool CompiledStyleSheetSet::RuleLess::operator()(const Rule& result1,
+                                                 const Rule& result2) const {
+  DVLOG(1) << "RuleLess: " << result1->first << ' ' << result2->first << ' '
+           << result1->first.IsMoreSpecific(result2->first) << ' '
+           << result2->first.IsMoreSpecific(result1->first);
+  const auto more_specific1 = result1->first.IsMoreSpecific(result2->first);
+  const auto more_specific2 = result2->first.IsMoreSpecific(result1->first);
+  if (more_specific1 != more_specific2)
+    return more_specific1;
+  return result1->second.position < result2->second.position;
+}
+
+//////////////////////////////////////////////////////////////////////
+//
+// CompiledStyleSheetSet
 //
 CompiledStyleSheetSet::CompiledStyleSheetSet(
     const std::vector<css::StyleSheet*>& style_sheets)
@@ -62,6 +87,11 @@ void CompiledStyleSheetSet::CompileStyleSheetsIfNeeded() {
     for (const auto& rule : style_sheet->rules())
       CompileRule(*rule);
   }
+  if (DLOG_IS_ON(INFO) && VLOG_IS_ON(1)) {
+    DVLOG(1) << "Compiled Rules";
+    for (const auto& entry : rules_)
+      DVLOG(1) << "  " << entry.second.position << ": " << entry.first;
+  }
 }
 
 void CompiledStyleSheetSet::CompileRule(const css::Rule& rule) {
@@ -76,15 +106,110 @@ void CompiledStyleSheetSet::CompileRule(const css::Rule& rule) {
                       std::move(std::make_unique<css::Style>(rule.style())))));
 }
 
-CompiledStyleSheetSet::RuleMap::const_iterator
-CompiledStyleSheetSet::FindFirstMatch(const css::Selector& selector) const {
-  auto runner = rules_.lower_bound(selector);
+// Returns true if this function adds class to |builder|.
+static bool AddClass(css::Selector::Builder* builder,
+                     const css::Selector& selector,
+                     size_t start) {
+  const auto& classes = selector.classes();
+  DCHECK_LE(start, classes.size());
+  if (start == classes.size())
+    return false;
+  size_t index = 0;
+  for (const auto& class_name : classes) {
+    if (index == start) {
+      builder->AddClass(class_name);
+      return true;
+    }
+    ++index;
+  }
+  NOTREACHED();
+  return false;
+}
+
+CompiledStyleSheetSet::MatchSet CompiledStyleSheetSet::Match(
+    const css::Selector& selector) const {
+  DVLOG(1) << "Match: " << selector;
+  MatchSet matched;
+  MatchOne(&matched, css::Selector(), selector);
+  for (size_t index = 0; index <= selector.classes().size(); ++index) {
+    if (!selector.is_universal() && selector.has_id()) {
+      css::Selector::Builder builder;
+      builder.SetTagName(selector.tag_name()).SetId(selector.id());
+      if (index == 0)
+        MatchOne(&matched, builder.Build(), selector);
+      if (AddClass(&builder, selector, index))
+        MatchOne(&matched, builder.Build(), selector);
+    }
+
+    if (!selector.is_universal()) {
+      css::Selector::Builder builder;
+      builder.SetTagName(selector.tag_name());
+      if (index == 0)
+        MatchOne(&matched, builder.Build(), selector);
+      if (AddClass(&builder, selector, index))
+        MatchOne(&matched, builder.Build(), selector);
+    }
+
+    if (selector.has_id()) {
+      css::Selector::Builder builder;
+      builder.SetId(selector.id());
+      if (index == 0)
+        MatchOne(&matched, builder.Build(), selector);
+      if (AddClass(&builder, selector, index))
+        MatchOne(&matched, builder.Build(), selector);
+    }
+
+    css::Selector::Builder builder;
+    if (!AddClass(&builder, selector, index))
+      continue;
+    MatchOne(&matched, builder.Build(), selector);
+  }
+  return std::move(matched);
+}
+
+static bool StartsWith(const css::Selector& selector1,
+                       const css::Selector& selector2) {
+  if (selector1.tag_name() != selector2.tag_name())
+    return false;
+  if (selector1.id() != selector2.id())
+    return false;
+  if (selector2.classes().empty())
+    return selector1.classes().empty();
+  if (selector1.classes().size() < selector2.classes().size())
+    return false;
+  auto classes1 = selector1.classes().begin();
+  for (const auto& class2 : selector2.classes()) {
+    if (*classes1 != class2)
+      return false;
+    ++classes1;
+  }
+  return true;
+}
+
+void CompiledStyleSheetSet::MatchOne(MatchSet* match_set,
+                                     const css::Selector& needle,
+                                     const css::Selector& selector) const {
+  DVLOG(1) << "  MatchOne: needle=" << needle;
+  auto runner = rules_.lower_bound(needle);
   while (runner != rules_.end()) {
-    if (selector.IsSubsetOf(runner->first))
-      return runner;
+    if (!StartsWith(runner->first, needle)) {
+      DVLOG(1) << "    " << runner->first << " doesn't start with " << needle;
+      return;
+    }
+    if (selector.IsSubsetOf(runner->first)) {
+      DVLOG(1) << "    " << runner->first;
+      const auto& result = match_set->emplace(runner);
+      if (!result.second) {
+        DVLOG(1) << "  Matched Rules:";
+        for (const auto& rule : *match_set)
+          DVLOG(1) << "    " << rule->first;
+        NOTREACHED();
+      }
+    } else {
+      DVLOG(1) << "    skip " << runner->first;
+    }
     ++runner;
   }
-  return runner;
 }
 
 void CompiledStyleSheetSet::Merge(css::Style* passed_style,
@@ -100,50 +225,13 @@ void CompiledStyleSheetSet::Merge(css::Style* passed_style,
     }
   }
 
+  DVLOG(1) << "CompiledStyleSheetSet::Merge: " << selector;
+
+  const auto& matched = Match(selector);
   auto style = std::make_unique<css::Style>();
-  auto tag_runner = FindFirstMatch(selector);
-  auto any_runner =
-      FindFirstMatch(css::Selector::Builder::AsUniversalSelector(selector));
-  while (tag_runner != rules_.end() && any_runner != rules_.end()) {
-    if (tag_runner == any_runner) {
-      any_runner = rules_.end();
-      break;
-    }
-    if (!selector.IsSubsetOf(tag_runner->first))
-      break;
-    if (!selector.IsSubsetOf(any_runner->first))
-      break;
-    // Apply more specific rule. If we can't determine more specific rule,
-    // we use first appeared rule[1].
-    // Example:
-    //  .c1 { color: red; }
-    //  .c2 { color: blue; }
-    // When we have above style sheet, color of an element selected by
-    // "foo.c1.c2" is "red", since ".c1" and ".c2" are same specificity but
-    // ".c1" is appeared before ".c2".
-    // [1] https://www.w3.org/TR/css3-selectors/#specificity
-    if (tag_runner->first.IsMoreSpecific(any_runner->first) &&
-        (!any_runner->first.IsMoreSpecific(tag_runner->first) ||
-         tag_runner->second.position < any_runner->second.position)) {
-      css::StyleEditor().Merge(style.get(), *tag_runner->second.style);
-      ++tag_runner;
-      continue;
-    }
-    css::StyleEditor().Merge(style.get(), *any_runner->second.style);
-    ++any_runner;
-  }
-  while (tag_runner != rules_.end()) {
-    if (!selector.IsSubsetOf(tag_runner->first))
-      break;
-    css::StyleEditor().Merge(style.get(), *tag_runner->second.style);
-    ++tag_runner;
-  }
-  while (any_runner != rules_.end()) {
-    if (!selector.IsSubsetOf(any_runner->first))
-      break;
-    css::StyleEditor().Merge(style.get(), *any_runner->second.style);
-    ++any_runner;
-  }
+  for (const auto& rule : matched)
+    css::StyleEditor().Merge(style.get(), *rule->second.style);
+
   css::StyleEditor().Merge(passed_style, *style);
   const auto& result = cached_matches_.emplace(selector, std::move(style));
   DCHECK(result.second) << "Cached matches should not have entry of "

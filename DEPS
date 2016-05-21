@@ -15,7 +15,7 @@ vars = {
   'grit_revision': 'ca656d011aa8e71fdd6ea24eccc550f9871dfdb4',
   'gtest_revision': '6f8a66431cb592dad629028a50b3dd418a408c87',
   'gyp_revision': 'bce1c7793010574d88d7915e2d55395213ac63d1',
-  'icu_revision': 'c291cde264469b20ca969ce8832088acb21e0c48',
+  'icu_revision': '54f86bb1d1d02968576d21c16d7134ec35c30fbc',
   'idl_parser_revision': 'c485a6622358fa5c760daed78108212d70318ffd',
   'pep8_revision': '4dc42d842274ba27d2724e76eb83ff69e7db226f',
   'ply_revision': '4a6baf95860033d4c69d3e3087696b30c687622c',

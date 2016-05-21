@@ -17,6 +17,8 @@ namespace gfx {
 FloatSize::FloatSize(const std::pair<float, float> pair)
     : FloatSize(pair.first, pair.second) {}
 
+FloatSize::FloatSize(float size) : FloatSize(size, size) {}
+
 FloatSize::FloatSize(float width, float height)
     : height_(height), width_(width) {
   DCHECK_GE(height_, 0.0f);

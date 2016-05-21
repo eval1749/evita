@@ -19,6 +19,7 @@ namespace gfx {
 class GFX_EXPORT FloatSize final {
  public:
   explicit FloatSize(const std::pair<float, float> pair);
+  explicit FloatSize(float size);
   FloatSize(float width, float height);
   FloatSize(const FloatSize& other);
   FloatSize();

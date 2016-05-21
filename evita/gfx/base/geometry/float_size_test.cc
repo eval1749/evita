@@ -7,6 +7,14 @@
 
 namespace gfx {
 
+TEST(FloatSizeTest, Constructors) {
+  EXPECT_EQ(FloatSize(0, 0), FloatSize());
+  EXPECT_EQ(FloatSize(0, 0), FloatSize(0));
+  EXPECT_EQ(FloatSize(1, 1), FloatSize(1, 1));
+  EXPECT_EQ(FloatSize(1, 1), FloatSize(1));
+  EXPECT_EQ(FloatSize(1, 2), FloatSize(1, 2));
+}
+
 TEST(FloatSizeTest, Equals) {
   EXPECT_TRUE(FloatSize(0, 0) == FloatSize(0, 0));
   EXPECT_TRUE(FloatSize(1, 2) == FloatSize(1, 2));

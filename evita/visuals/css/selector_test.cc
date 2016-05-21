@@ -235,6 +235,9 @@ TEST(CssSelctorTest, Parser) {
   EXPECT_EQ(AsSelector(L"::selector"), Parse(L"::selector"));
   EXPECT_EQ(AsSelector(L"::selector", {L":active"}),
             Parse(L"::selector:active"));
+  EXPECT_EQ(AsSelector(L"a9"), Parse(L"a9"));
+  EXPECT_EQ(AsSelector(L"Zero"), Parse(L"Zero"));
+  EXPECT_EQ(AsSelector(L"zoo"), Parse(L"zoo"));
 }
 
 TEST(CssSelctorTest, ParseError) {

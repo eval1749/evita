@@ -11,14 +11,22 @@ namespace visuals {
 namespace css {
 
 namespace {
+bool IsNameStartChar(base::char16 ch) {
+  if (ch >= '0' && ch <= '9')
+    return true;
+  if (ch >= 'A' && ch <= 'Z')
+    return true;
+  if (ch >= 'a' && ch <= 'z')
+    return true;
+  if (ch == '-' || ch == '_')
+    return true;
+  return ch >= 0x80;
+}
+
 bool IsNameChar(base::char16 ch) {
-  if (ch >= '0' && ch < '9')
+  if (ch >= '0' && ch <= '9')
     return true;
-  if (ch >= 'A' && ch < 'Z')
-    return true;
-  if (ch >= 'a' && ch < 'z')
-    return true;
-  return ch == '-' || ch == '_';
+  return IsNameStartChar(ch);
 }
 }  // namespace
 
@@ -34,6 +42,8 @@ Selector Parser::Error(base::StringPiece16 error, size_t position) {
   return Selector();
 }
 
+// TODO(eval1749): Support escape in <ident-token>[1]
+// [1] https://www.w3.org/TR/css-syntax-3/
 Selector Parser::Parse(base::StringPiece16 text) {
   Builder builder;
   enum {
@@ -127,7 +137,7 @@ Selector Parser::Parse(base::StringPiece16 text) {
           state = kAsterisk;
           continue;
         }
-        if (!IsNameChar(ch))
+        if (!IsNameStartChar(ch))
           return Error(L"Bad tag name", index);
         start = index;
         state = kTagName;

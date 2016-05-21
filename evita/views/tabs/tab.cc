@@ -350,8 +350,9 @@ void Tab::OnDraw(gfx::Canvas* canvas) {
       sink->Close();
     }
 
-    gfx::Brush strokeBrush(canvas, gfx::ColorF(0, 0, 0, 0.7f));
-    (*canvas)->DrawGeometry(geometry, strokeBrush);
+    gfx::Brush strokeBrush(canvas, gfx::ColorF(0, 0, 0, 0.4f));
+    // Top half of 1px lines are clipped.
+    (*canvas)->DrawGeometry(geometry, strokeBrush, 2.0f);
   }
   DrawIcon(canvas);
   DrawLabel(canvas);

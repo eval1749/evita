@@ -107,7 +107,7 @@ void TabStripAnimator::Action::Cancel() {
 
   if (!animation_)
     return;
-  animation_->CancelAnimation();
+  animation_->FinishAnimation();
 }
 
 int TabStripAnimator::Action::FindTab(TabContent* tab_content) const {
@@ -194,9 +194,14 @@ SelectTabAction::SelectTabAction(TabStripAnimator* tab_strip_animator,
 ui::Animatable* SelectTabAction::CreateAnimation() {
   old_tab_content_ = active_tab_content();
   DCHECK_NE(old_tab_content_, new_tab_content_);
-  const auto old_layer = old_tab_content_ ? old_tab_content_->layer() : nullptr;
   const auto new_layer = new_tab_content_->layer();
   DCHECK(!new_layer->parent_layer());
+  if (!old_tab_content_)
+    return ui::LayerAnimation::CreateSlideIn(layer(), new_layer, nullptr);
+  const auto old_layer = old_tab_content_->layer();
+  if (!old_layer->parent_layer())
+    layer()->AppendLayer(old_layer);
+  old_tab_content_origin_ = old_layer->origin();
   return ui::LayerAnimation::CreateSlideIn(layer(), new_layer, old_layer);
 }
 

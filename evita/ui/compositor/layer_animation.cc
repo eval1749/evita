@@ -297,7 +297,7 @@ SlideInAnimation::SlideInAnimation(Layer* parent_layer,
   if (!old_layer_)
     return;
   DCHECK_EQ(old_layer_->parent_layer(), parent_layer);
-  DCHECK_EQ(old_layer_->origin(), new_layer_->origin());
+  new_layer_->SetOrigin(old_layer_->origin());
   old_layer_->DidRegisterAnimation(this);
 }
 
@@ -325,15 +325,15 @@ void SlideInAnimation::Animate(const base::TimeTicks& now) {
 
 void SlideInAnimation::FinalizeAnimation() {
   LayerAnimation::FinalizeAnimation();
-  new_layer_->SetOrigin(animation_origin_->end_value());
-  if (old_layer_) {
-    old_layer_->parent_layer()->RemoveLayer(old_layer_);
-    // Restore |old_layer_| to position before animation.
-    old_layer_->SetOrigin(new_layer_->origin());
-  }
   if (animation_origin_)
+    new_layer_->SetOrigin(animation_origin_->end_value());
+  else
+    parent_layer_->AppendLayer(new_layer_);
+  if (!old_layer_)
     return;
-  parent_layer_->AppendLayer(new_layer_);
+  old_layer_->parent_layer()->RemoveLayer(old_layer_);
+  // Restore |old_layer_| to position before animation.
+  old_layer_->SetOrigin(new_layer_->origin());
 }
 
 //////////////////////////////////////////////////////////////////////

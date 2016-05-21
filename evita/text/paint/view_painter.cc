@@ -34,7 +34,7 @@ gfx::RectF RoundBounds(const gfx::RectF& bounds) {
 //
 ViewPainter::ViewPainter(const View& layout_view) : layout_view_(layout_view) {}
 
-ViewPainter::~ViewPainter() {}
+ViewPainter::~ViewPainter() = default;
 
 std::unique_ptr<ViewPaintCache> ViewPainter::Paint(
     gfx::Canvas* canvas,

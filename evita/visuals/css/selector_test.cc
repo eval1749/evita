@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "base/strings/string16.h"
+#include "base/strings/utf_string_conversions.h"
 #include "evita/visuals/css/selector_builder.h"
 #include "evita/visuals/css/selector_parser.h"
 #include "testing/gtest/include/gtest/gtest.h"
@@ -60,46 +61,46 @@ const Selector& MoreSpecific(const Selector& selector1,
   return selector1.IsMoreSpecific(selector2) ? selector1 : selector2;
 }
 
-Selector Parse(base::StringPiece16 text) {
-  return std::move(Selector::Parser().Parse(text));
+Selector Parse(base::StringPiece text) {
+  return std::move(Selector::Parser().Parse(base::UTF8ToUTF16(text)));
 }
 
-Selector AsUniversalSelector(base::StringPiece16 text) {
+Selector AsUniversalSelector(base::StringPiece text) {
   return std::move(Selector::Builder::AsUniversalSelector(Parse(text)));
 }
 
 }  // namespace
 
 TEST(CssSelctorTest, AsUniversalSelector) {
-  EXPECT_EQ(Parse(L""), AsUniversalSelector(L"foo"));
-  EXPECT_EQ(Parse(L"#bar"), AsUniversalSelector(L"foo#bar"));
-  EXPECT_EQ(Parse(L"#bar.c1"), AsUniversalSelector(L"foo#bar.c1"));
-  EXPECT_EQ(Parse(L".c1"), AsUniversalSelector(L"foo.c1"));
-  EXPECT_EQ(Parse(L".c1.c2"), AsUniversalSelector(L"foo.c1.c2"));
-  EXPECT_EQ(Parse(L""), AsUniversalSelector(L"*"));
-  EXPECT_EQ(Parse(L"#bar"), AsUniversalSelector(L"*#bar"));
-  EXPECT_EQ(Parse(L"#bar.c1"), AsUniversalSelector(L"*#bar.c1"));
-  EXPECT_EQ(Parse(L".c1"), AsUniversalSelector(L"*.c1"));
-  EXPECT_EQ(Parse(L".c1.c2"), AsUniversalSelector(L"*.c1.c2"));
-  EXPECT_EQ(Parse(L""), AsUniversalSelector(L""));
-  EXPECT_EQ(Parse(L"#bar"), AsUniversalSelector(L"#bar"));
-  EXPECT_EQ(Parse(L"#bar.c1"), AsUniversalSelector(L"#bar.c1"));
-  EXPECT_EQ(Parse(L".c1"), AsUniversalSelector(L".c1"));
-  EXPECT_EQ(Parse(L".c1.c2"), AsUniversalSelector(L".c1.c2"));
+  EXPECT_EQ(Parse(""), AsUniversalSelector("foo"));
+  EXPECT_EQ(Parse("#bar"), AsUniversalSelector("foo#bar"));
+  EXPECT_EQ(Parse("#bar.c1"), AsUniversalSelector("foo#bar.c1"));
+  EXPECT_EQ(Parse(".c1"), AsUniversalSelector("foo.c1"));
+  EXPECT_EQ(Parse(".c1.c2"), AsUniversalSelector("foo.c1.c2"));
+  EXPECT_EQ(Parse(""), AsUniversalSelector("*"));
+  EXPECT_EQ(Parse("#bar"), AsUniversalSelector("*#bar"));
+  EXPECT_EQ(Parse("#bar.c1"), AsUniversalSelector("*#bar.c1"));
+  EXPECT_EQ(Parse(".c1"), AsUniversalSelector("*.c1"));
+  EXPECT_EQ(Parse(".c1.c2"), AsUniversalSelector("*.c1.c2"));
+  EXPECT_EQ(Parse(""), AsUniversalSelector(""));
+  EXPECT_EQ(Parse("#bar"), AsUniversalSelector("#bar"));
+  EXPECT_EQ(Parse("#bar.c1"), AsUniversalSelector("#bar.c1"));
+  EXPECT_EQ(Parse(".c1"), AsUniversalSelector(".c1"));
+  EXPECT_EQ(Parse(".c1.c2"), AsUniversalSelector(".c1.c2"));
 }
 
 TEST(CssSelctorTest, Equals) {
   Selector selector0;
-  const auto& selector1 = Parse(L"foo");
-  const auto& selector11 = Parse(L"foo");
-  const auto& selector2 = Parse(L"bar");
-  const auto& selector22 = Parse(L"bar");
-  const auto& selector3 = Parse(L"foo.c1");
-  const auto& selector33 = Parse(L"foo.c1");
-  const auto& selector4 = Parse(L"foo#bar.c1");
-  const auto& selector44 = Parse(L"foo#bar.c1");
-  const auto& selector5 = Parse(L"foo#bar.c1.c2");
-  const auto& selector55 = Parse(L"foo#bar.c1.c2");
+  const auto& selector1 = Parse("foo");
+  const auto& selector11 = Parse("foo");
+  const auto& selector2 = Parse("bar");
+  const auto& selector22 = Parse("bar");
+  const auto& selector3 = Parse("foo.c1");
+  const auto& selector33 = Parse("foo.c1");
+  const auto& selector4 = Parse("foo#bar.c1");
+  const auto& selector44 = Parse("foo#bar.c1");
+  const auto& selector5 = Parse("foo#bar.c1.c2");
+  const auto& selector55 = Parse("foo#bar.c1.c2");
 
   EXPECT_TRUE(selector0 == selector0);
   EXPECT_TRUE(selector0 != selector1);
@@ -134,121 +135,119 @@ TEST(CssSelctorTest, Equals) {
 }
 
 TEST(CssSelctorTest, IsMoreSpecific) {
-  EXPECT_EQ(Parse(L"*"), MoreSpecific(Parse(L"*"), Parse(L"*")));
-  EXPECT_EQ(Parse(L"foo"), MoreSpecific(Parse(L"foo"), Parse(L"*")));
-  EXPECT_EQ(Parse(L"foo"), MoreSpecific(Parse(L"foo"), Parse(L"foo")));
-  EXPECT_EQ(Parse(L"#bar"), MoreSpecific(Parse(L"foo"), Parse(L"#bar")));
-  EXPECT_EQ(Parse(L"foo#bar"), MoreSpecific(Parse(L"foo#bar"), Parse(L"#bar")));
-  EXPECT_EQ(Parse(L"foo#bar"),
-            MoreSpecific(Parse(L"foo#bar"), Parse(L"foo.c1")));
-  EXPECT_EQ(Parse(L"foo.c1"), MoreSpecific(Parse(L"foo.c1"), Parse(L"foo")));
-  EXPECT_EQ(Parse(L"foo.c2"), MoreSpecific(Parse(L"foo.c1"), Parse(L"foo.c2")));
-  EXPECT_EQ(Parse(L"foo.c1.c2"),
-            MoreSpecific(Parse(L"foo.c1.c2"), Parse(L"foo.c2")));
+  EXPECT_EQ(Parse("*"), MoreSpecific(Parse("*"), Parse("*")));
+  EXPECT_EQ(Parse("foo"), MoreSpecific(Parse("foo"), Parse("*")));
+  EXPECT_EQ(Parse("foo"), MoreSpecific(Parse("foo"), Parse("foo")));
+  EXPECT_EQ(Parse("#bar"), MoreSpecific(Parse("foo"), Parse("#bar")));
+  EXPECT_EQ(Parse("foo#bar"), MoreSpecific(Parse("foo#bar"), Parse("#bar")));
+  EXPECT_EQ(Parse("foo#bar"), MoreSpecific(Parse("foo#bar"), Parse("foo.c1")));
+  EXPECT_EQ(Parse("foo.c1"), MoreSpecific(Parse("foo.c1"), Parse("foo")));
+  EXPECT_EQ(Parse("foo.c2"), MoreSpecific(Parse("foo.c1"), Parse("foo.c2")));
+  EXPECT_EQ(Parse("foo.c1.c2"),
+            MoreSpecific(Parse("foo.c1.c2"), Parse("foo.c2")));
 
-  EXPECT_TRUE(Parse(L".c1").IsMoreSpecific(Parse(L"tag")))
+  EXPECT_TRUE(Parse(".c1").IsMoreSpecific(Parse("tag")))
       << "Class selector is more specific than type selector.";
-  EXPECT_FALSE(Parse(L"tag").IsMoreSpecific(Parse(L".c1")))
+  EXPECT_FALSE(Parse("tag").IsMoreSpecific(Parse(".c1")))
       << "Class selector is more specific than type selector.";
 
-  EXPECT_FALSE(Parse(L".c1").IsMoreSpecific(Parse(L".c2")))
+  EXPECT_FALSE(Parse(".c1").IsMoreSpecific(Parse(".c2")))
       << "We can't determine specificity for '.c1' and '.c2'.";
-  EXPECT_FALSE(Parse(L".c2").IsMoreSpecific(Parse(L".c1")))
+  EXPECT_FALSE(Parse(".c2").IsMoreSpecific(Parse(".c1")))
       << "We can't determine specificity for '.c1' and '.c2'.";
 }
 
 TEST(CssSelctorTest, IsSubsetOf) {
-  EXPECT_TRUE(Parse(L"*").IsSubsetOf(Parse(L"*")));
-  EXPECT_FALSE(Parse(L"*").IsSubsetOf(Parse(L"*#bar")));
-  EXPECT_FALSE(Parse(L"*").IsSubsetOf(Parse(L"*.c1")));
-  EXPECT_FALSE(Parse(L"*").IsSubsetOf(Parse(L"foo")));
-  EXPECT_FALSE(Parse(L"*").IsSubsetOf(Parse(L"foo#bar")));
-  EXPECT_FALSE(Parse(L"*").IsSubsetOf(Parse(L"foo.c1")));
-  EXPECT_FALSE(Parse(L"*").IsSubsetOf(Parse(L"foo.c1.c2")));
-  EXPECT_FALSE(Parse(L"*").IsSubsetOf(Parse(L"foo:hover")));
+  EXPECT_TRUE(Parse("*").IsSubsetOf(Parse("*")));
+  EXPECT_FALSE(Parse("*").IsSubsetOf(Parse("*#bar")));
+  EXPECT_FALSE(Parse("*").IsSubsetOf(Parse("*.c1")));
+  EXPECT_FALSE(Parse("*").IsSubsetOf(Parse("foo")));
+  EXPECT_FALSE(Parse("*").IsSubsetOf(Parse("foo#bar")));
+  EXPECT_FALSE(Parse("*").IsSubsetOf(Parse("foo.c1")));
+  EXPECT_FALSE(Parse("*").IsSubsetOf(Parse("foo.c1.c2")));
+  EXPECT_FALSE(Parse("*").IsSubsetOf(Parse("foo:hover")));
 
-  EXPECT_TRUE(Parse(L"foo").IsSubsetOf(Parse(L"*")));
-  EXPECT_FALSE(Parse(L"foo").IsSubsetOf(Parse(L"*#bar")));
-  EXPECT_FALSE(Parse(L"foo").IsSubsetOf(Parse(L"*.c1")));
-  EXPECT_TRUE(Parse(L"foo").IsSubsetOf(Parse(L"foo")));
-  EXPECT_FALSE(Parse(L"foo").IsSubsetOf(Parse(L"foo#bar")));
-  EXPECT_FALSE(Parse(L"foo").IsSubsetOf(Parse(L"foo.c1")));
-  EXPECT_FALSE(Parse(L"foo").IsSubsetOf(Parse(L"foo:hover")));
+  EXPECT_TRUE(Parse("foo").IsSubsetOf(Parse("*")));
+  EXPECT_FALSE(Parse("foo").IsSubsetOf(Parse("*#bar")));
+  EXPECT_FALSE(Parse("foo").IsSubsetOf(Parse("*.c1")));
+  EXPECT_TRUE(Parse("foo").IsSubsetOf(Parse("foo")));
+  EXPECT_FALSE(Parse("foo").IsSubsetOf(Parse("foo#bar")));
+  EXPECT_FALSE(Parse("foo").IsSubsetOf(Parse("foo.c1")));
+  EXPECT_FALSE(Parse("foo").IsSubsetOf(Parse("foo:hover")));
 
-  EXPECT_TRUE(Parse(L"foo#bar").IsSubsetOf(Parse(L"*")));
-  EXPECT_TRUE(Parse(L"foo#bar").IsSubsetOf(Parse(L"*#bar")));
-  EXPECT_FALSE(Parse(L"foo#bar").IsSubsetOf(Parse(L"*.c1")));
-  EXPECT_TRUE(Parse(L"foo#bar").IsSubsetOf(Parse(L"foo")));
-  EXPECT_TRUE(Parse(L"foo#bar").IsSubsetOf(Parse(L"foo#bar")));
-  EXPECT_FALSE(Parse(L"foo#bar").IsSubsetOf(Parse(L"foo.c1")));
-  EXPECT_FALSE(Parse(L"foo#bar").IsSubsetOf(Parse(L"foo.c1.c2")));
-  EXPECT_FALSE(Parse(L"foo#bar").IsSubsetOf(Parse(L"foo:hover")));
+  EXPECT_TRUE(Parse("foo#bar").IsSubsetOf(Parse("*")));
+  EXPECT_TRUE(Parse("foo#bar").IsSubsetOf(Parse("*#bar")));
+  EXPECT_FALSE(Parse("foo#bar").IsSubsetOf(Parse("*.c1")));
+  EXPECT_TRUE(Parse("foo#bar").IsSubsetOf(Parse("foo")));
+  EXPECT_TRUE(Parse("foo#bar").IsSubsetOf(Parse("foo#bar")));
+  EXPECT_FALSE(Parse("foo#bar").IsSubsetOf(Parse("foo.c1")));
+  EXPECT_FALSE(Parse("foo#bar").IsSubsetOf(Parse("foo.c1.c2")));
+  EXPECT_FALSE(Parse("foo#bar").IsSubsetOf(Parse("foo:hover")));
 
-  EXPECT_TRUE(Parse(L"foo.c1").IsSubsetOf(Parse(L"*")));
-  EXPECT_FALSE(Parse(L"foo.c1").IsSubsetOf(Parse(L"*#bar")));
-  EXPECT_TRUE(Parse(L"foo.c1").IsSubsetOf(Parse(L"*.c1")));
-  EXPECT_TRUE(Parse(L"foo.c1").IsSubsetOf(Parse(L"foo")));
-  EXPECT_FALSE(Parse(L"foo.c1").IsSubsetOf(Parse(L"foo#bar")));
-  EXPECT_TRUE(Parse(L"foo.c1").IsSubsetOf(Parse(L"foo.c1")));
-  EXPECT_FALSE(Parse(L"foo.c1").IsSubsetOf(Parse(L"foo.c1.c2")));
-  EXPECT_FALSE(Parse(L"foo.c1").IsSubsetOf(Parse(L"foo:hover")));
+  EXPECT_TRUE(Parse("foo.c1").IsSubsetOf(Parse("*")));
+  EXPECT_FALSE(Parse("foo.c1").IsSubsetOf(Parse("*#bar")));
+  EXPECT_TRUE(Parse("foo.c1").IsSubsetOf(Parse("*.c1")));
+  EXPECT_TRUE(Parse("foo.c1").IsSubsetOf(Parse("foo")));
+  EXPECT_FALSE(Parse("foo.c1").IsSubsetOf(Parse("foo#bar")));
+  EXPECT_TRUE(Parse("foo.c1").IsSubsetOf(Parse("foo.c1")));
+  EXPECT_FALSE(Parse("foo.c1").IsSubsetOf(Parse("foo.c1.c2")));
+  EXPECT_FALSE(Parse("foo.c1").IsSubsetOf(Parse("foo:hover")));
 
-  EXPECT_TRUE(Parse(L"foo.c1.c2").IsSubsetOf(Parse(L"*")));
-  EXPECT_FALSE(Parse(L"foo.c1.c2").IsSubsetOf(Parse(L"*#bar")));
-  EXPECT_TRUE(Parse(L"foo.c1.c2").IsSubsetOf(Parse(L"*.c1")));
-  EXPECT_TRUE(Parse(L"foo.c1.c2").IsSubsetOf(Parse(L"foo")));
-  EXPECT_FALSE(Parse(L"foo.c1.c2").IsSubsetOf(Parse(L"foo#bar")));
-  EXPECT_TRUE(Parse(L"foo.c1.c2").IsSubsetOf(Parse(L"foo.c1")));
-  EXPECT_TRUE(Parse(L"foo.c1.c2").IsSubsetOf(Parse(L"foo.c1.c2")));
-  EXPECT_FALSE(Parse(L"foo.c1.c2").IsSubsetOf(Parse(L"foo:hover")));
+  EXPECT_TRUE(Parse("foo.c1.c2").IsSubsetOf(Parse("*")));
+  EXPECT_FALSE(Parse("foo.c1.c2").IsSubsetOf(Parse("*#bar")));
+  EXPECT_TRUE(Parse("foo.c1.c2").IsSubsetOf(Parse("*.c1")));
+  EXPECT_TRUE(Parse("foo.c1.c2").IsSubsetOf(Parse("foo")));
+  EXPECT_FALSE(Parse("foo.c1.c2").IsSubsetOf(Parse("foo#bar")));
+  EXPECT_TRUE(Parse("foo.c1.c2").IsSubsetOf(Parse("foo.c1")));
+  EXPECT_TRUE(Parse("foo.c1.c2").IsSubsetOf(Parse("foo.c1.c2")));
+  EXPECT_FALSE(Parse("foo.c1.c2").IsSubsetOf(Parse("foo:hover")));
 }
 
 TEST(CssSelctorTest, Less) {
   std::set<Selector> set;
-  set.insert(Parse(L""));
-  set.insert(Parse(L"foo"));
-  set.insert(Parse(L"bar"));
-  set.insert(Parse(L"foo#id1"));
-  set.insert(Parse(L"foo#id1.c1"));
-  set.insert(Parse(L"foo#id1.c1.c2"));
-  set.insert(Parse(L"foo.c2"));
-  set.insert(Parse(L"foo.c2.c3"));
+  set.insert(Parse(""));
+  set.insert(Parse("foo"));
+  set.insert(Parse("bar"));
+  set.insert(Parse("foo#id1"));
+  set.insert(Parse("foo#id1.c1"));
+  set.insert(Parse("foo#id1.c1.c2"));
+  set.insert(Parse("foo.c2"));
+  set.insert(Parse("foo.c2.c3"));
 
   EXPECT_EQ((std::vector<css::Selector>{
-                Parse(L""), Parse(L"foo.c2.c3"), Parse(L"foo.c2"),
-                Parse(L"foo"), Parse(L"foo#id1.c1.c2"), Parse(L"foo#id1.c1"),
-                Parse(L"foo#id1"), Parse(L"bar")}),
+                Parse(""), Parse("foo.c2.c3"), Parse("foo.c2"), Parse("foo"),
+                Parse("foo#id1.c1.c2"), Parse("foo#id1.c1"), Parse("foo#id1"),
+                Parse("bar")}),
             std::vector<Selector>(set.begin(), set.end()));
 
-  EXPECT_FALSE(Parse(L"zoo") < Parse(L".c1"));
-  EXPECT_FALSE(Parse(L"zoo") < Parse(L":hover"));
-  EXPECT_TRUE(Parse(L":hover.c1") < Parse(L".c1"));
-  EXPECT_FALSE(Parse(L".c1") < Parse(L":hover.c1"));
+  EXPECT_FALSE(Parse("zoo") < Parse(".c1"));
+  EXPECT_FALSE(Parse("zoo") < Parse(":hover"));
+  EXPECT_TRUE(Parse(":hover.c1") < Parse(".c1"));
+  EXPECT_FALSE(Parse(".c1") < Parse(":hover.c1"));
 
-  EXPECT_FALSE(Parse(L".c1.c2") < Parse(L".c1.c2"));
-  EXPECT_TRUE(Parse(L".c1.c2") < Parse(L".c1"));
-  EXPECT_TRUE(Parse(L".c1.c2") < Parse(L".c2"));
+  EXPECT_FALSE(Parse(".c1.c2") < Parse(".c1.c2"));
+  EXPECT_TRUE(Parse(".c1.c2") < Parse(".c1"));
+  EXPECT_TRUE(Parse(".c1.c2") < Parse(".c2"));
 }
 
 TEST(CssSelctorTest, Parser) {
-  EXPECT_EQ(Selector(), Parse(L""));
-  EXPECT_EQ(Selector(), Parse(L"*"));
-  EXPECT_EQ(AsSelector(L"", L"bar", {}), Parse(L"*#bar"));
-  EXPECT_EQ(AsSelector(L"", {L"c1"}), Parse(L"*.c1"));
-  EXPECT_EQ(AsSelector(L"", {L":hover"}), Parse(L"*:hover"));
-  EXPECT_EQ(AsSelector(L"foo"), Parse(L"foo"));
-  EXPECT_EQ(AsSelector(L"foo", L"bar", {}), Parse(L"foo#bar"));
-  EXPECT_EQ(AsSelector(L"foo", {L"a"}), Parse(L"foo.a"));
-  EXPECT_EQ(AsSelector(L"foo", {L":hover"}), Parse(L"foo:hover"));
-  EXPECT_EQ(AsSelector(L"foo", L"bar", {L"c1"}), Parse(L"foo#bar.c1"));
-  EXPECT_EQ(AsSelector(L"foo", L"bar", {L"c1", L"c2"}),
-            Parse(L"foo#bar.c1.c2"));
-  EXPECT_EQ(AsSelector(L"::selector"), Parse(L"::selector"));
+  EXPECT_EQ(Selector(), Parse(""));
+  EXPECT_EQ(Selector(), Parse("*"));
+  EXPECT_EQ(AsSelector(L"", L"bar", {}), Parse("*#bar"));
+  EXPECT_EQ(AsSelector(L"", {L"c1"}), Parse("*.c1"));
+  EXPECT_EQ(AsSelector(L"", {L":hover"}), Parse("*:hover"));
+  EXPECT_EQ(AsSelector(L"foo"), Parse("foo"));
+  EXPECT_EQ(AsSelector(L"foo", L"bar", {}), Parse("foo#bar"));
+  EXPECT_EQ(AsSelector(L"foo", {L"a"}), Parse("foo.a"));
+  EXPECT_EQ(AsSelector(L"foo", {L":hover"}), Parse("foo:hover"));
+  EXPECT_EQ(AsSelector(L"foo", L"bar", {L"c1"}), Parse("foo#bar.c1"));
+  EXPECT_EQ(AsSelector(L"foo", L"bar", {L"c1", L"c2"}), Parse("foo#bar.c1.c2"));
+  EXPECT_EQ(AsSelector(L"::selector"), Parse("::selector"));
   EXPECT_EQ(AsSelector(L"::selector", {L":active"}),
-            Parse(L"::selector:active"));
-  EXPECT_EQ(AsSelector(L"a9"), Parse(L"a9"));
-  EXPECT_EQ(AsSelector(L"Zero"), Parse(L"Zero"));
-  EXPECT_EQ(AsSelector(L"zoo"), Parse(L"zoo"));
+            Parse("::selector:active"));
+  EXPECT_EQ(AsSelector(L"a9"), Parse("a9"));
+  EXPECT_EQ(AsSelector(L"Zero"), Parse("Zero"));
+  EXPECT_EQ(AsSelector(L"zoo"), Parse("zoo"));
 }
 
 TEST(CssSelctorTest, ParseError) {
@@ -290,33 +289,33 @@ TEST(CssSelctorTest, ParseError) {
 }
 
 TEST(CssSelctorTest, is_universal) {
-  EXPECT_TRUE(Parse(L"*").is_universal());
-  EXPECT_TRUE(Parse(L"*#bar").is_universal());
-  EXPECT_TRUE(Parse(L"*.c1").is_universal());
-  EXPECT_TRUE(Parse(L"*.c1.c2").is_universal());
-  EXPECT_TRUE(Parse(L"*:hover").is_universal());
-  EXPECT_TRUE(Parse(L"#bar").is_universal());
-  EXPECT_TRUE(Parse(L".c1").is_universal());
-  EXPECT_TRUE(Parse(L".c1.c2").is_universal());
-  EXPECT_TRUE(Parse(L":hover").is_universal());
-  EXPECT_FALSE(Parse(L"foo").is_universal());
-  EXPECT_FALSE(Parse(L"foo#bar").is_universal());
-  EXPECT_FALSE(Parse(L"foo.c1").is_universal());
-  EXPECT_FALSE(Parse(L"foo.c1.c2").is_universal());
-  EXPECT_FALSE(Parse(L"foo:hover").is_universal());
+  EXPECT_TRUE(Parse("*").is_universal());
+  EXPECT_TRUE(Parse("*#bar").is_universal());
+  EXPECT_TRUE(Parse("*.c1").is_universal());
+  EXPECT_TRUE(Parse("*.c1.c2").is_universal());
+  EXPECT_TRUE(Parse("*:hover").is_universal());
+  EXPECT_TRUE(Parse("#bar").is_universal());
+  EXPECT_TRUE(Parse(".c1").is_universal());
+  EXPECT_TRUE(Parse(".c1.c2").is_universal());
+  EXPECT_TRUE(Parse(":hover").is_universal());
+  EXPECT_FALSE(Parse("foo").is_universal());
+  EXPECT_FALSE(Parse("foo#bar").is_universal());
+  EXPECT_FALSE(Parse("foo.c1").is_universal());
+  EXPECT_FALSE(Parse("foo.c1.c2").is_universal());
+  EXPECT_FALSE(Parse("foo:hover").is_universal());
 }
 
 TEST(CssSelctorTest, ToString) {
   EXPECT_EQ(L"", Selector().ToString());
-  EXPECT_EQ(L"foo", Parse(L"foo").ToString());
-  EXPECT_EQ(L"#bar", Parse(L"#bar").ToString());
-  EXPECT_EQ(L".c1", Parse(L".c1").ToString());
-  EXPECT_EQ(L":hover", Parse(L":hover").ToString());
-  EXPECT_EQ(L"foo#bar", Parse(L"foo#bar").ToString());
-  EXPECT_EQ(L"foo#bar.c1", Parse(L"foo#bar.c1").ToString());
-  EXPECT_EQ(L"foo.c1", Parse(L"foo.c1").ToString());
-  EXPECT_EQ(L"foo.c1.c2", Parse(L"foo.c1.c2").ToString());
-  EXPECT_EQ(L"foo.c1:hover", Parse(L"foo.c1:hover").ToString());
+  EXPECT_EQ(L"foo", Parse("foo").ToString());
+  EXPECT_EQ(L"#bar", Parse("#bar").ToString());
+  EXPECT_EQ(L".c1", Parse(".c1").ToString());
+  EXPECT_EQ(L":hover", Parse(":hover").ToString());
+  EXPECT_EQ(L"foo#bar", Parse("foo#bar").ToString());
+  EXPECT_EQ(L"foo#bar.c1", Parse("foo#bar.c1").ToString());
+  EXPECT_EQ(L"foo.c1", Parse("foo.c1").ToString());
+  EXPECT_EQ(L"foo.c1.c2", Parse("foo.c1.c2").ToString());
+  EXPECT_EQ(L"foo.c1:hover", Parse("foo.c1:hover").ToString());
 }
 
 }  // namespace css

@@ -13,6 +13,8 @@ source_set("public") {
     "line/inline_box_visitor.h",
     "line/root_inline_box.cc",
     "line/root_inline_box.h",
+    "ruler.cc",
+    "ruler.h",
     "selection.cc",
     "selection.h",
     "view.cc",

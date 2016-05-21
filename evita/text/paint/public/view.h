@@ -20,8 +20,9 @@ class RootInlineBox;
 
 namespace paint {
 
-class Selection;
 class RootInlineBox;
+class Ruler;
+class Selection;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -34,7 +35,7 @@ class View final : public base::RefCounted<View> {
        const std::vector<RootInlineBox*>& lines,
        scoped_refptr<Selection> selection,
        const gfx::ColorF& bgcolor,
-       const gfx::RectF& ruler_bounds,
+       const Ruler& ruler,
        const Caret& caret);
   ~View();
 
@@ -42,7 +43,7 @@ class View final : public base::RefCounted<View> {
   const gfx::RectF& bounds() const { return bounds_; }
   const Caret& caret() const { return *caret_; }
   const std::vector<RootInlineBox*>& lines() const { return lines_; }
-  const gfx::RectF& ruler_bounds() const { return ruler_bounds_; }
+  const Ruler& ruler() const { return *ruler_; }
   scoped_refptr<Selection> selection() const { return selection_; }
   int layout_version() const { return layout_version_; }
 
@@ -52,7 +53,7 @@ class View final : public base::RefCounted<View> {
   const std::unique_ptr<Caret> caret_;
   const int layout_version_;
   const std::vector<RootInlineBox*> lines_;
-  const gfx::RectF ruler_bounds_;
+  const std::unique_ptr<Ruler> ruler_;
   const scoped_refptr<Selection> selection_;
 
   DISALLOW_COPY_AND_ASSIGN(View);

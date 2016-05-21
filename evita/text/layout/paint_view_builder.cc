@@ -20,6 +20,7 @@
 #include "evita/text/models/buffer.h"
 #include "evita/text/paint/public/line/inline_box.h"
 #include "evita/text/paint/public/line/root_inline_box.h"
+#include "evita/text/paint/public/ruler.h"
 #include "evita/text/paint/public/selection.h"
 #include "evita/text/paint/public/view.h"
 #include "evita/text/style/computed_style.h"
@@ -139,19 +140,20 @@ std::unordered_set<gfx::RectF> CalculateSelectionBoundsSet(
   return bounds_set;
 }
 
-gfx::RectF ComputeRulerBounds(const BlockFlow& block) {
+paint::Ruler ComputeRuler(const BlockFlow& block) {
   // TODO(eval1749): We should expose show/hide and ruler settings to both
   // script and UI.
   auto style = block.text_buffer().GetDefaultStyle();
   style.set_font_size(style.font_size() * block.zoom());
   const auto font = FontSet::GetFont(style, 'x');
 
+  // TODO(eval1749): We should get ruler color from CSS.
+  const auto color = gfx::ColorF(0, 0, 0, 0.3f);
   const auto& bounds = block.bounds();
   const auto num_columns = 81;
   const auto width_of_M = font->GetCharWidth('M');
   const auto ruler_x = ::floor(bounds.left + width_of_M * num_columns);
-  return gfx::RectF(gfx::PointF(ruler_x, bounds.top),
-                    gfx::SizeF(1.0f, bounds.height()));
+  return paint::Ruler(ruler_x, 1, color);
 }
 
 paint::RootInlineBox* CreatePaintRootInlineBox(const RootInlineBox& line) {
@@ -182,7 +184,7 @@ scoped_refptr<paint::View> PaintViewBuilder::Build(
   // rather than every |Format| call.
   const auto& bgcolor =
       ColorToColorF(block.text_buffer().GetDefaultStyle().bgcolor());
-  const auto& ruler_bounds = ComputeRulerBounds(block);
+  const auto& ruler = ComputeRuler(block);
   const auto& selection =
       TextFormatter::FormatSelection(block.text_buffer(), selection_model);
   const auto& selection_bounds_set =
@@ -195,7 +197,7 @@ scoped_refptr<paint::View> PaintViewBuilder::Build(
   return new paint::View(block.version(), block.bounds(), lines,
                          make_scoped_refptr(new paint::Selection(
                              selection.color(), selection_bounds_set)),
-                         bgcolor, ruler_bounds, caret);
+                         bgcolor, ruler, caret);
 }
 
 }  // namespace layout

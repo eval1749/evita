@@ -11,6 +11,7 @@
 #include "evita/gfx/canvas.h"
 #include "evita/text/paint/public/caret.h"
 #include "evita/text/paint/public/line/root_inline_box.h"
+#include "evita/text/paint/public/ruler.h"
 #include "evita/text/paint/public/selection.h"
 #include "evita/text/paint/public/view.h"
 #include "evita/text/paint/root_inline_box_list_painter.h"
@@ -82,11 +83,14 @@ void ViewPainter::PaintCaretIfNeeded(gfx::Canvas* canvas) {
 }
 
 void ViewPainter::PaintRuler(gfx::Canvas* canvas) {
-  const auto& ruler_bounds = layout_view_.ruler_bounds();
-  gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, ruler_bounds);
-  // TODO(eval1749): We should get ruler color from CSS.
-  gfx::Brush brush(canvas, gfx::ColorF(0, 0, 0, 0.3f));
-  canvas->DrawRectangle(brush, ruler_bounds);
+  const auto& bounds = layout_view_.bounds();
+  const auto& ruler = layout_view_.ruler();
+  gfx::Brush brush(canvas, ruler.color());
+  const auto size = ruler.size();
+  const auto x_point = ruler.x_point();
+  canvas->DrawLine(
+      brush, gfx::PointF(x_point + size / 2, bounds.top + size / 2),
+      gfx::PointF(x_point + size / 2, bounds.bottom - size / 2), size);
 }
 
 void ViewPainter::PaintSelection(gfx::Canvas* canvas) {

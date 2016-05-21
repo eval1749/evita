@@ -93,8 +93,10 @@ void RootInlineBoxListPainter::DrawDirtyRect(const gfx::RectF& rect,
   if (views::switches::text_window_display_paint) {
 #if USE_OVERLAY
     canvas_->FillRectangle(gfx::Brush(canvas_, red, green, blue, 0.1f), rect);
-    canvas_->DrawRectangle(gfx::Brush(canvas_, red, green, blue, 0.5f), rect,
-                           0.5f);
+    canvas_->DrawRectangle(
+        gfx::Brush(canvas_, red, green, blue, 0.5f),
+        gfx::RectF(gfx::PointF(rect.left + 0.5f, rect.top + 0.5f),
+                   gfx::PointF(rect.right - 0.5f, rect.bottom - 0.5f)));
 #else
     auto marker_rect = rect;
     marker_rect.left += kMarkerLeftMargin;

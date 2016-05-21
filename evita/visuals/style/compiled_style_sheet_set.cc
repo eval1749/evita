@@ -116,14 +116,11 @@ static bool AddClass(css::Selector::Builder* builder,
     return false;
   size_t index = 0;
   for (const auto& class_name : classes) {
-    if (index == start) {
+    if (index >= start)
       builder->AddClass(class_name);
-      return true;
-    }
     ++index;
   }
-  NOTREACHED();
-  return false;
+  return true;
 }
 
 CompiledStyleSheetSet::MatchSet CompiledStyleSheetSet::Match(
@@ -173,17 +170,11 @@ static bool StartsWith(const css::Selector& selector1,
     return false;
   if (selector1.id() != selector2.id())
     return false;
-  if (selector2.classes().empty())
-    return selector1.classes().empty();
-  if (selector1.classes().size() < selector2.classes().size())
+  if (selector1.classes().empty() || selector2.classes().empty())
+    return selector1.classes().empty() == selector2.classes().empty();
+  if (selector1.classes().size() > selector2.classes().size())
     return false;
-  auto classes1 = selector1.classes().begin();
-  for (const auto& class2 : selector2.classes()) {
-    if (*classes1 != class2)
-      return false;
-    ++classes1;
-  }
-  return true;
+  return *selector1.classes().begin() == *selector2.classes().begin();
 }
 
 void CompiledStyleSheetSet::MatchOne(MatchSet* match_set,
@@ -193,7 +184,8 @@ void CompiledStyleSheetSet::MatchOne(MatchSet* match_set,
   auto runner = rules_.lower_bound(needle);
   while (runner != rules_.end()) {
     if (!StartsWith(runner->first, needle)) {
-      DVLOG(1) << "    " << runner->first << " doesn't start with " << needle;
+      DVLOG(1) << "    exit " << runner->first << " doesn't start with "
+               << needle;
       return;
     }
     if (selector.IsSubsetOf(runner->first)) {

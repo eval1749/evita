@@ -63,29 +63,37 @@ bool Selector::operator!=(const Selector& other) const {
 }
 
 // Returns true |this| comes before |other| in lexicographical order.
+// Example:
+//  *
+//  foo
+//  foo#id1.c1.c2
+//  foo#id1.c1
+//  foo#id1.c2.c3
+//  foo#id1.c2
+//  bar
 bool Selector::operator<(const Selector& other) const {
   // Check tag name
   if (tag_name_ != other.tag_name_)
-    return tag_name_ > other.tag_name_;
+    return tag_name_ < other.tag_name_;
 
   // Check id
   if (id_ != other.id_)
-    return id_ > other.id_;
+    return id_ < other.id_;
 
   // Check classes
   auto other_classes = other.classes_.begin();
   for (const auto& this_class : classes_) {
     if (other_classes == other.classes_.end()) {
       // |classes_| is longer than |other.classes_|.
-      return false;
+      return true;
     }
     const auto& other_class = *other_classes;
     if (this_class != other_class)
-      return this_class > other_class;
+      return this_class < other_class;
     ++other_classes;
   }
   // |classes_| equals to or shorter than |other.classes_|.
-  return other_classes != other.classes_.end();
+  return false;
 }
 
 bool Selector::IsMoreSpecific(const Selector& other) const {

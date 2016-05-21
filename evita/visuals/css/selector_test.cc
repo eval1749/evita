@@ -147,14 +147,14 @@ TEST(CssSelctorTest, IsMoreSpecific) {
             MoreSpecific(Parse(L"foo.c1.c2"), Parse(L"foo.c2")));
 
   EXPECT_TRUE(Parse(L".c1").IsMoreSpecific(Parse(L"tag")))
-    << "Class selector is more specific than type selector.";
+      << "Class selector is more specific than type selector.";
   EXPECT_FALSE(Parse(L"tag").IsMoreSpecific(Parse(L".c1")))
-    << "Class selector is more specific than type selector.";
+      << "Class selector is more specific than type selector.";
 
   EXPECT_FALSE(Parse(L".c1").IsMoreSpecific(Parse(L".c2")))
-    << "We can't determine specificity for '.c1' and '.c2'.";
+      << "We can't determine specificity for '.c1' and '.c2'.";
   EXPECT_FALSE(Parse(L".c2").IsMoreSpecific(Parse(L".c1")))
-    << "We can't determine specificity for '.c1' and '.c2'.";
+      << "We can't determine specificity for '.c1' and '.c2'.";
 }
 
 TEST(CssSelctorTest, IsSubsetOf) {
@@ -204,37 +204,30 @@ TEST(CssSelctorTest, IsSubsetOf) {
 }
 
 TEST(CssSelctorTest, Less) {
-  Selector selector0;
-  const auto& selector1 = Parse(L"foo");
-  const auto& selector2 = Parse(L"bar");
-  const auto& selector3 = Parse(L"foo#bar");
-  const auto& selector4 = Parse(L"foo#bar.c1");
-  const auto& selector5 = Parse(L"foo#bar.c1.c2");
-
   std::set<Selector> set;
-  set.insert(selector0);
-  set.insert(selector1);
-  set.insert(selector2);
-  set.insert(selector3);
-  set.insert(selector4);
-  set.insert(selector5);
+  set.insert(Parse(L""));
+  set.insert(Parse(L"foo"));
+  set.insert(Parse(L"bar"));
+  set.insert(Parse(L"foo#id1"));
+  set.insert(Parse(L"foo#id1.c1"));
+  set.insert(Parse(L"foo#id1.c1.c2"));
+  set.insert(Parse(L"foo.c2"));
+  set.insert(Parse(L"foo.c2.c3"));
 
-  const auto& actual = std::vector<Selector>(set.begin(), set.end());
-  ASSERT_EQ(6u, actual.size()) << AsString(actual);
-  EXPECT_EQ(selector2, actual[0]);
-  EXPECT_EQ(selector3, actual[1]);
-  EXPECT_EQ(selector4, actual[2]);
-  EXPECT_EQ(selector5, actual[3]);
-  EXPECT_EQ(selector1, actual[4]);
-  EXPECT_EQ(selector0, actual[5]);
+  EXPECT_EQ((std::vector<css::Selector>{
+                Parse(L""), Parse(L"foo.c2.c3"), Parse(L"foo.c2"),
+                Parse(L"foo"), Parse(L"foo#id1.c1.c2"), Parse(L"foo#id1.c1"),
+                Parse(L"foo#id1"), Parse(L"bar")}),
+            std::vector<Selector>(set.begin(), set.end()));
 
-  EXPECT_TRUE(Parse(L"zoo") < Parse(L".c1"));
-  EXPECT_TRUE(Parse(L"zoo") < Parse(L":hover"));
-  EXPECT_FALSE(Parse(L":hover.c1") < Parse(L".c1"));
-  EXPECT_TRUE(Parse(L".c1") < Parse(L":hover.c1"));
+  EXPECT_FALSE(Parse(L"zoo") < Parse(L".c1"));
+  EXPECT_FALSE(Parse(L"zoo") < Parse(L":hover"));
+  EXPECT_TRUE(Parse(L":hover.c1") < Parse(L".c1"));
+  EXPECT_FALSE(Parse(L".c1") < Parse(L":hover.c1"));
 
+  EXPECT_FALSE(Parse(L".c1.c2") < Parse(L".c1.c2"));
   EXPECT_TRUE(Parse(L".c1.c2") < Parse(L".c1"));
-  EXPECT_FALSE(Parse(L".c1.c2") < Parse(L".c2"));
+  EXPECT_TRUE(Parse(L".c1.c2") < Parse(L".c2"));
 }
 
 TEST(CssSelctorTest, Parser) {

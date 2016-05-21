@@ -145,6 +145,16 @@ TEST(CssSelctorTest, IsMoreSpecific) {
   EXPECT_EQ(Parse(L"foo.c2"), MoreSpecific(Parse(L"foo.c1"), Parse(L"foo.c2")));
   EXPECT_EQ(Parse(L"foo.c1.c2"),
             MoreSpecific(Parse(L"foo.c1.c2"), Parse(L"foo.c2")));
+
+  EXPECT_TRUE(Parse(L".c1").IsMoreSpecific(Parse(L"tag")))
+    << "Class selector is more specific than type selector.";
+  EXPECT_FALSE(Parse(L"tag").IsMoreSpecific(Parse(L".c1")))
+    << "Class selector is more specific than type selector.";
+
+  EXPECT_FALSE(Parse(L".c1").IsMoreSpecific(Parse(L".c2")))
+    << "We can't determine specificity for '.c1' and '.c2'.";
+  EXPECT_FALSE(Parse(L".c2").IsMoreSpecific(Parse(L".c1")))
+    << "We can't determine specificity for '.c1' and '.c2'.";
 }
 
 TEST(CssSelctorTest, IsSubsetOf) {
@@ -212,11 +222,19 @@ TEST(CssSelctorTest, Less) {
   const auto& actual = std::vector<Selector>(set.begin(), set.end());
   ASSERT_EQ(6u, actual.size()) << AsString(actual);
   EXPECT_EQ(selector2, actual[0]);
-  EXPECT_EQ(selector5, actual[1]);
+  EXPECT_EQ(selector3, actual[1]);
   EXPECT_EQ(selector4, actual[2]);
-  EXPECT_EQ(selector3, actual[3]);
+  EXPECT_EQ(selector5, actual[3]);
   EXPECT_EQ(selector1, actual[4]);
   EXPECT_EQ(selector0, actual[5]);
+
+  EXPECT_TRUE(Parse(L"zoo") < Parse(L".c1"));
+  EXPECT_TRUE(Parse(L"zoo") < Parse(L":hover"));
+  EXPECT_FALSE(Parse(L":hover.c1") < Parse(L".c1"));
+  EXPECT_TRUE(Parse(L".c1") < Parse(L":hover.c1"));
+
+  EXPECT_TRUE(Parse(L".c1.c2") < Parse(L".c1"));
+  EXPECT_FALSE(Parse(L".c1.c2") < Parse(L".c2"));
 }
 
 TEST(CssSelctorTest, Parser) {

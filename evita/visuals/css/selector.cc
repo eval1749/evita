@@ -62,34 +62,40 @@ bool Selector::operator!=(const Selector& other) const {
   return !operator==(other);
 }
 
-// Returns true if this |classes_| is longer than |other|'s.
+// Returns true |this| comes before |other| in lexicographical order.
 bool Selector::operator<(const Selector& other) const {
+  // Check tag name
   if (tag_name_ != other.tag_name_)
     return tag_name_ > other.tag_name_;
+
+  // Check id
   if (id_ != other.id_)
     return id_ > other.id_;
+
+  // Check classes
   auto other_classes = other.classes_.begin();
-  for (auto element : classes_) {
-    if (other_classes == other.classes_.end())
-      return true;
-    auto other_element = *other_classes;
-    if (element != other_element) {
-      return element > other_element;
+  for (const auto& this_class : classes_) {
+    if (other_classes == other.classes_.end()) {
+      // |classes_| is longer than |other.classes_|.
+      return false;
     }
+    const auto& other_class = *other_classes;
+    if (this_class != other_class)
+      return this_class > other_class;
     ++other_classes;
   }
-  // |classes_| is equal to or shorter than |other.classes_|.
-  return false;
+  // |classes_| equals to or shorter than |other.classes_|.
+  return other_classes != other.classes_.end();
 }
 
 bool Selector::IsMoreSpecific(const Selector& other) const {
   if (id_ != other.id_)
     return !other.has_id();
   if (classes_.size() != other.classes_.size())
-    return classes_.size() >= other.classes_.size();
+    return classes_.size() > other.classes_.size();
   if (tag_name_ == other.tag_name_)
     return false;
-  return !is_universal();
+  return other.is_universal();
 }
 
 bool Selector::IsSubsetOf(const Selector& other) const {

@@ -52,7 +52,8 @@ void Animatable::FinalizeAnimation() {
 }
 
 void Animatable::FinishAnimation() {
-  FinalizeAnimation();
+  if (!is_finished_)
+    FinalizeAnimation();
   DCHECK(is_finished_);
   if (animator_)
     return;

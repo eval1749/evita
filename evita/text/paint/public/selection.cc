@@ -6,8 +6,8 @@
 
 namespace paint {
 
-Selection::Selection(const gfx::ColorF color,
-                     const std::unordered_set<gfx::RectF> bounds_set)
+Selection::Selection(const gfx::ColorF& color,
+                     const std::unordered_set<gfx::RectF>& bounds_set)
     : bounds_set_(bounds_set), color_(color) {}
 
 Selection::~Selection() {}

@@ -124,37 +124,13 @@ void PaintVisitor::VisitDrawBitmap(DrawBitmapDisplayItem* item) {
 
 void PaintVisitor::VisitDrawLine(DrawLineDisplayItem* item) {
   const auto& brush = gfx::Brush(canvas_, ToColorF(item->color()));
-#if 1
   canvas_->DrawLine(brush, ToPointF(item->point1()), ToPointF(item->point2()),
                     item->thickness());
-#else
-  if (item->thickness() != 1) {
-    canvas_->DrawLine(brush, ToPointF(item->point1()), ToPointF(item->point2()),
-                      item->thickness());
-    return;
-  }
-  gfx::StrokeStyle style;
-  style.set_stroke_transform(gfx::StrokeTransform::Hairline);
-  style.Realize(canvas_);
-  (*canvas_)->DrawLine(ToPointF(item->point1()), ToPointF(item->point2()),
-                       brush, 1.0f, style);
-#endif
 }
 
 void PaintVisitor::VisitDrawRect(DrawRectDisplayItem* item) {
   const auto& brush = gfx::Brush(canvas_, ToColorF(item->color()));
-#if 1
   canvas_->DrawRectangle(brush, ToRectF(item->bounds()), item->thickness());
-#else
-  if (item->thickness() != 1) {
-    canvas_->DrawRectangle(brush, ToRectF(item->bounds()), item->thickness());
-    return;
-  }
-  gfx::StrokeStyle style;
-  style.set_stroke_transform(gfx::StrokeTransform::Hairline);
-  style.Realize(canvas_);
-  (*canvas_)->DrawRectangle(ToRectF(item->bounds()), brush, 1.0f, style);
-#endif
 }
 
 void PaintVisitor::VisitDrawText(DrawTextDisplayItem* item) {

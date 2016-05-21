@@ -33,16 +33,6 @@ Selector Builder::Build() {
   return std::move(selector);
 }
 
-// style
-Selector Builder::AsUniversalSelector(const Selector& selector) {
-  Builder builder;
-  if (!selector.id().empty())
-    builder.SetId(selector.id());
-  for (auto class_name : selector.classes())
-    builder.AddClass(class_name);
-  return std::move(builder.Build());
-}
-
 Builder& Builder::SetId(base::AtomicString id) {
   DCHECK(!id.empty());
   DCHECK_NE(id.value()[0], '#');

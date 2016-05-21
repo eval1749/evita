@@ -65,29 +65,7 @@ Selector Parse(base::StringPiece text) {
   return std::move(Selector::Parser().Parse(base::UTF8ToUTF16(text)));
 }
 
-Selector AsUniversalSelector(base::StringPiece text) {
-  return std::move(Selector::Builder::AsUniversalSelector(Parse(text)));
-}
-
 }  // namespace
-
-TEST(CssSelctorTest, AsUniversalSelector) {
-  EXPECT_EQ(Parse(""), AsUniversalSelector("foo"));
-  EXPECT_EQ(Parse("#bar"), AsUniversalSelector("foo#bar"));
-  EXPECT_EQ(Parse("#bar.c1"), AsUniversalSelector("foo#bar.c1"));
-  EXPECT_EQ(Parse(".c1"), AsUniversalSelector("foo.c1"));
-  EXPECT_EQ(Parse(".c1.c2"), AsUniversalSelector("foo.c1.c2"));
-  EXPECT_EQ(Parse(""), AsUniversalSelector("*"));
-  EXPECT_EQ(Parse("#bar"), AsUniversalSelector("*#bar"));
-  EXPECT_EQ(Parse("#bar.c1"), AsUniversalSelector("*#bar.c1"));
-  EXPECT_EQ(Parse(".c1"), AsUniversalSelector("*.c1"));
-  EXPECT_EQ(Parse(".c1.c2"), AsUniversalSelector("*.c1.c2"));
-  EXPECT_EQ(Parse(""), AsUniversalSelector(""));
-  EXPECT_EQ(Parse("#bar"), AsUniversalSelector("#bar"));
-  EXPECT_EQ(Parse("#bar.c1"), AsUniversalSelector("#bar.c1"));
-  EXPECT_EQ(Parse(".c1"), AsUniversalSelector(".c1"));
-  EXPECT_EQ(Parse(".c1.c2"), AsUniversalSelector(".c1.c2"));
-}
 
 TEST(CssSelctorTest, Equals) {
   Selector selector0;

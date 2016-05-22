@@ -6,7 +6,7 @@
 
 #include "base/logging.h"
 
-namespace css {
+namespace xcss {
 
 namespace {
 uint32_t PackRgbToUint32(int red, int green, int blue) {
@@ -38,10 +38,10 @@ size_t Color::Hash() const {
   return std::hash<uint32_t>()(rgb_) ^ std::hash<float>()(alpha_);
 }
 
-}  // namespace css
+}  // namespace xcss
 
 namespace std {
-size_t hash<css::Color>::operator()(const css::Color& color) const {
+size_t hash<xcss::Color>::operator()(const xcss::Color& color) const {
   return color.Hash();
 }
 }  // namespace std

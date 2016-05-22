@@ -9,7 +9,7 @@
 #include "evita/text/style/models/style_rule.h"
 #include "evita/text/style/models/style_selector.h"
 
-namespace css {
+namespace xcss {
 
 StyleSheet::StyleSheet() {}
 
@@ -44,4 +44,4 @@ void StyleSheet::RemoveObserver(StyleSheetObserver* observer) const {
   const_cast<StyleSheet*>(this)->observers_.RemoveObserver(observer);
 }
 
-}  // namespace css
+}  // namespace xcss

@@ -18,7 +18,7 @@ namespace base {
 class AtomicString;
 }
 
-namespace css {
+namespace xcss {
 
 class Style;
 
@@ -44,6 +44,6 @@ class StyleSheet final {
   DISALLOW_COPY_AND_ASSIGN(StyleSheet);
 };
 
-}  // namespace css
+}  // namespace xcss
 
 #endif  // EVITA_TEXT_STYLE_MODELS_STYLE_SHEET_H_

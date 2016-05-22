@@ -4,11 +4,11 @@
 
 #include "evita/text/style/models/style_rule.h"
 
-namespace css {
+namespace xcss {
 
-StyleRule::StyleRule(base::AtomicString selector, const css::Style* style)
+StyleRule::StyleRule(base::AtomicString selector, const xcss::Style* style)
     : selector_(selector), style_(style) {}
 
 StyleRule::~StyleRule() {}
 
-}  // namespace css
+}  // namespace xcss

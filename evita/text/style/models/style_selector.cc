@@ -4,10 +4,10 @@
 
 #include "evita/text/style/models/style_selector.h"
 
-namespace css {
+namespace xcss {
 
 #define DEFINE_STYLE_SELECTOR(name)                                \
-  base::AtomicString StyleSelector::name() {                \
+  base::AtomicString StyleSelector::name() {                       \
     CR_DEFINE_STATIC_LOCAL(base::AtomicString, name, (L## #name)); \
     return name;                                                   \
   }
@@ -41,4 +41,4 @@ DEFINE_STYLE_SELECTOR(operators)
 DEFINE_STYLE_SELECTOR(string_literal)
 DEFINE_STYLE_SELECTOR(tab_marker)
 
-}  // namespace css
+}  // namespace xcss

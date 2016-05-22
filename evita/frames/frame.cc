@@ -210,7 +210,7 @@ void Frame::CreateNativeWindow() const {
       WS_EX_APPWINDOW | WS_EX_NOPARENTNOTIFY | WS_EX_WINDOWEDGE | WS_EX_LAYERED;
   DWORD const dwStyle = WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN | WS_VISIBLE;
 
-  const auto& font = *layout::FontSet::GetFont(*css::Style::Default(), 'x');
+  const auto& font = *layout::FontSet::GetFont(*xcss::Style::Default(), 'x');
   gfx::SizeF size(font.GetCharWidth('M') * cColumns, font.height() * cRows);
   gfx::RectF rect(gfx::PointF(), gfx::Direct2DFactory::AlignToPixel(size));
 

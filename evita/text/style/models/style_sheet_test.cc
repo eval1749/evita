@@ -25,25 +25,25 @@ class StyleSheetTest : public ::testing::Test {
 };
 
 TEST_F(StyleSheetTest, Resolve_default) {
-  css::StyleSheet style_sheet;
-  css::StyleResolver style_resolver;
+  xcss::StyleSheet style_sheet;
+  xcss::StyleResolver style_resolver;
   style_resolver.AddStyleSheet(&style_sheet);
-  const auto& style1 = style_resolver.Resolve(css::StyleSelector::defaults());
-  EXPECT_EQ(css::FontStyle::Normal, style1.font_style());
-  EXPECT_EQ(css::FontWeight::Normal, style1.font_weight());
+  const auto& style1 = style_resolver.Resolve(xcss::StyleSelector::defaults());
+  EXPECT_EQ(xcss::FontStyle::Normal, style1.font_style());
+  EXPECT_EQ(xcss::FontWeight::Normal, style1.font_weight());
 }
 
 TEST_F(StyleSheetTest, Resolve_some) {
-  css::StyleSheet style_sheet;
-  style_sheet.AddRule(css::StyleSelector::active_selection(),
-                      css::Style(css::Color(1, 2, 3), css::Color(4, 5, 6)));
-  css::StyleResolver style_resolver;
+  xcss::StyleSheet style_sheet;
+  style_sheet.AddRule(xcss::StyleSelector::active_selection(),
+                      xcss::Style(xcss::Color(1, 2, 3), xcss::Color(4, 5, 6)));
+  xcss::StyleResolver style_resolver;
   style_resolver.AddStyleSheet(&style_sheet);
   const auto& style1 =
-      style_resolver.Resolve(css::StyleSelector::active_selection());
-  EXPECT_EQ(css::Color(1, 2, 3), style1.color());
-  EXPECT_EQ(css::Color(4, 5, 6), style1.bgcolor());
-  EXPECT_EQ(css::FontStyle::Normal, style1.font_style());
+      style_resolver.Resolve(xcss::StyleSelector::active_selection());
+  EXPECT_EQ(xcss::Color(1, 2, 3), style1.color());
+  EXPECT_EQ(xcss::Color(4, 5, 6), style1.bgcolor());
+  EXPECT_EQ(xcss::FontStyle::Normal, style1.font_style());
 }
 
 }  // namespace

@@ -8,7 +8,7 @@
 
 namespace layout {
 
-gfx::ColorF ColorToColorF(const css::Color& color) {
+gfx::ColorF ColorToColorF(const xcss::Color& color) {
   return gfx::ColorF(static_cast<float>(color.red()) / 255,
                      static_cast<float>(color.green()) / 255,
                      static_cast<float>(color.blue()) / 255, color.alpha());
@@ -24,8 +24,8 @@ ComputedStyle::ComputedStyle(const ComputedStyle& other)
 
 ComputedStyle::ComputedStyle()
     : font_(nullptr),
-      text_decoration_line_(css::TextDecorationLine::None),
-      text_decoration_style_(css::TextDecorationStyle::Solid) {}
+      text_decoration_line_(xcss::TextDecorationLine::None),
+      text_decoration_style_(xcss::TextDecorationStyle::Solid) {}
 
 ComputedStyle::~ComputedStyle() {}
 
@@ -51,9 +51,9 @@ size_t hash<layout::ComputedStyle>::operator()(
   result ^= std::hash<gfx::ColorF>()(style.color());
   result ^= std::hash<gfx::Font>()(style.font());
   result ^= std::hash<gfx::ColorF>()(style.text_decoration_color());
-  result ^= std::hash<css::TextDecorationLine>()(style.text_decoration_line());
+  result ^= std::hash<xcss::TextDecorationLine>()(style.text_decoration_line());
   result ^=
-      std::hash<css::TextDecorationStyle>()(style.text_decoration_style());
+      std::hash<xcss::TextDecorationStyle>()(style.text_decoration_style());
   return result;
 }
 }  // namespace std

@@ -4,10 +4,10 @@
 
 #include "evita/text/style/models/style_sheet_observer.h"
 
-namespace css {
+namespace xcss {
 
 StyleSheetObserver::StyleSheetObserver() {}
 
 StyleSheetObserver::~StyleSheetObserver() {}
 
-}  // namespace css
+}  // namespace xcss

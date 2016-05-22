@@ -21,13 +21,13 @@ class ComputedStyle::Builder {
 
   ComputedStyle Build();
 
-  Builder& Load(const css::Style& model, const gfx::Font& font);
+  Builder& Load(const xcss::Style& model, const gfx::Font& font);
   Builder& SetBackgroundColor(const gfx::ColorF& color);
   Builder& SetColor(const gfx::ColorF& color);
   Builder& SetFont(const gfx::Font& font);
   Builder& SetTextDecorationColor(const gfx::ColorF& color);
-  Builder& SetTextDecorationLine(css::TextDecorationLine line);
-  Builder& SetTextDecorationStyle(css::TextDecorationStyle style);
+  Builder& SetTextDecorationLine(xcss::TextDecorationLine line);
+  Builder& SetTextDecorationStyle(xcss::TextDecorationStyle style);
 
  private:
   ComputedStyle style_;

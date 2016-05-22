@@ -16,11 +16,11 @@
 namespace {
 
 gfx::FontProperties ComputeFontProperties(const base::string16& family_name,
-                                          const css::Style& style) {
+                                          const xcss::Style& style) {
   gfx::FontProperties font_props;
-  font_props.bold = css::FontWeight::Bold == style.font_weight();
+  font_props.bold = xcss::FontWeight::Bold == style.font_weight();
   font_props.font_size_pt = style.font_size();
-  font_props.italic = css::FontStyle::Italic == style.font_style();
+  font_props.italic = xcss::FontStyle::Italic == style.font_style();
   font_props.family_name = family_name;
   return font_props;
 }
@@ -87,7 +87,7 @@ const gfx::Font* FontSet::FindFont(base::char16 sample) const {
   return nullptr;
 }
 
-const FontSet& FontSet::Get(const css::Style& style) {
+const FontSet& FontSet::Get(const xcss::Style& style) {
   FontList fonts;
   for (auto const font_family : style.font_families()) {
     const auto font_props = ComputeFontProperties(font_family, style);
@@ -97,7 +97,7 @@ const FontSet& FontSet::Get(const css::Style& style) {
   return FontSet::Cache::instance()->GetOrCreate(fonts);
 }
 
-const gfx::Font* FontSet::GetFont(const css::Style& style,
+const gfx::Font* FontSet::GetFont(const xcss::Style& style,
                                   base::char16 sample) {
   return Get(style).FindFont(sample);
 }

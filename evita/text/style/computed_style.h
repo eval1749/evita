@@ -38,10 +38,10 @@ class ComputedStyle {
   const gfx::ColorF& text_decoration_color() const {
     return text_decoration_color_;
   }
-  css::TextDecorationLine text_decoration_line() const {
+  xcss::TextDecorationLine text_decoration_line() const {
     return text_decoration_line_;
   }
-  css::TextDecorationStyle text_decoration_style() const {
+  xcss::TextDecorationStyle text_decoration_style() const {
     return text_decoration_style_;
   }
 
@@ -52,11 +52,11 @@ class ComputedStyle {
   gfx::ColorF color_;
   const gfx::Font* font_;
   gfx::ColorF text_decoration_color_;
-  css::TextDecorationLine text_decoration_line_;
-  css::TextDecorationStyle text_decoration_style_;
+  xcss::TextDecorationLine text_decoration_line_;
+  xcss::TextDecorationStyle text_decoration_style_;
 };
 
-gfx::ColorF ColorToColorF(const css::Color& color);
+gfx::ColorF ColorToColorF(const xcss::Color& color);
 
 }  // namespace layout
 

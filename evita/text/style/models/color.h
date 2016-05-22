@@ -8,7 +8,7 @@
 #include <stdint.h>
 #include <functional>
 
-namespace css {
+namespace xcss {
 
 // Color
 class Color final {
@@ -33,12 +33,12 @@ class Color final {
   float alpha_;
 };
 
-}  // namespace css
+}  // namespace xcss
 
 namespace std {
 template <>
-struct hash<css::Color> {
-  size_t operator()(const css::Color& color) const;
+struct hash<xcss::Color> {
+  size_t operator()(const xcss::Color& color) const;
 };
 }  // namespace std
 

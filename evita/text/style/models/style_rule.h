@@ -8,7 +8,7 @@
 #include "base/macros.h"
 #include "evita/base/strings/atomic_string.h"
 
-namespace css {
+namespace xcss {
 
 class Style;
 
@@ -27,6 +27,6 @@ class StyleRule final {
   DISALLOW_COPY_AND_ASSIGN(StyleRule);
 };
 
-}  // namespace css
+}  // namespace xcss
 
 #endif  // EVITA_TEXT_STYLE_MODELS_STYLE_RULE_H_

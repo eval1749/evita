@@ -18,7 +18,7 @@ namespace base {
 class AtomicString;
 }
 
-namespace css {
+namespace xcss {
 
 class Style;
 class StyleSheet;
@@ -44,7 +44,7 @@ class StyleResolver final : private StyleSheetObserver {
   void ClearCache();
   void InvalidateCache(const StyleRule* rule);
 
-  // css::StyleSheetObserver
+  // xcss::StyleSheetObserver
   void DidAddRule(const StyleRule* rule) override;
   void DidRemoveRule(const StyleRule* rule) override;
 
@@ -55,6 +55,6 @@ class StyleResolver final : private StyleSheetObserver {
   DISALLOW_COPY_AND_ASSIGN(StyleResolver);
 };
 
-}  // namespace css
+}  // namespace xcss
 
 #endif  // EVITA_TEXT_STYLE_MODELS_STYLE_RESOLVER_H_

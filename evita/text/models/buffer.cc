@@ -33,7 +33,7 @@ Buffer::Buffer()
     : line_number_cache_(new LineNumberCache(*this)),
       ranges_(new RangeSet(this)),
       spelling_markers_(new MarkerSet(*this)),
-      style_resolver_(new css::StyleResolver()),
+      style_resolver_(new xcss::StyleResolver()),
       syntax_markers_(new MarkerSet(*this)),
       undo_stack_(new UndoStack(this)) {
   spelling_markers_->AddObserver(this);
@@ -106,8 +106,8 @@ void Buffer::EndUndoGroup(const base::string16& name) {
   undo_stack_->EndUndoGroup(name);
 }
 
-const css::Style& Buffer::GetDefaultStyle() const {
-  return *css::Style::Default();
+const xcss::Style& Buffer::GetDefaultStyle() const {
+  return *xcss::Style::Default();
 }
 
 LineAndColumn Buffer::GetLineAndColumn(Offset offset) const {

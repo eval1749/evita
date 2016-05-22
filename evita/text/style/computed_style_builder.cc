@@ -15,7 +15,7 @@ ComputedStyle Builder::Build() {
   return style_;
 }
 
-Builder& Builder::Load(const css::Style& model, const gfx::Font& font) {
+Builder& Builder::Load(const xcss::Style& model, const gfx::Font& font) {
   SetBackgroundColor(ColorToColorF(model.bgcolor()));
   SetColor(ColorToColorF(model.color()));
   SetFont(font);
@@ -50,12 +50,12 @@ Builder& Builder::SetTextDecorationColor(const gfx::ColorF& color) {
   return *this;
 }
 
-Builder& Builder::SetTextDecorationLine(css::TextDecorationLine line) {
+Builder& Builder::SetTextDecorationLine(xcss::TextDecorationLine line) {
   style_.text_decoration_line_ = line;
   return *this;
 }
 
-Builder& Builder::SetTextDecorationStyle(css::TextDecorationStyle style) {
+Builder& Builder::SetTextDecorationStyle(xcss::TextDecorationStyle style) {
   style_.text_decoration_style_ = style;
   return *this;
 }

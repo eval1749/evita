@@ -8,7 +8,7 @@
 #include "base/macros.h"
 #include "evita/base/strings/atomic_string.h"
 
-namespace css {
+namespace xcss {
 
 class StyleSelector {
  public:
@@ -45,6 +45,6 @@ class StyleSelector {
   DISALLOW_IMPLICIT_CONSTRUCTORS(StyleSelector);
 };
 
-}  // namespace css
+}  // namespace xcss
 
 #endif  // EVITA_TEXT_STYLE_MODELS_STYLE_SELECTOR_H_

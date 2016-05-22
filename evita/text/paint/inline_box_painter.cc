@@ -193,7 +193,7 @@ void PaintVisitor::VisitInlineTextBox(InlineTextBox* inline_box) {
   DrawText(canvas_, style.font(), text_brush, text_rect,
            inline_box->characters());
 
-  if (style.text_decoration_line() != css::TextDecorationLine::Underline)
+  if (style.text_decoration_line() != xcss::TextDecorationLine::Underline)
     return;
 
   const auto baseline = text_rect.bottom - inline_box->descent();
@@ -201,18 +201,18 @@ void PaintVisitor::VisitInlineTextBox(InlineTextBox* inline_box) {
   const auto& brush = gfx::Brush(canvas_, style.text_decoration_color());
   const auto& font = inline_box->font();
   switch (style.text_decoration_style()) {
-    case css::TextDecorationStyle::Dashed:
-    case css::TextDecorationStyle::Dotted:
-    case css::TextDecorationStyle::Double:
+    case xcss::TextDecorationStyle::Dashed:
+    case xcss::TextDecorationStyle::Dotted:
+    case xcss::TextDecorationStyle::Double:
       DrawLine(canvas_, font, text_brush, rect_.left, underline, rect_.right,
                underline, 2.0f);
       return;
 
-    case css::TextDecorationStyle::Solid:
+    case xcss::TextDecorationStyle::Solid:
       DrawHLine(canvas_, font, brush, rect_.left, rect_.right, underline);
       return;
 
-    case css::TextDecorationStyle::Wavy:
+    case xcss::TextDecorationStyle::Wavy:
       DrawWave(canvas_, font, brush, rect_, baseline);
       return;
   }

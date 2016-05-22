@@ -10,7 +10,7 @@
 #include "base/macros.h"
 #include "base/strings/string16.h"
 
-namespace css {
+namespace xcss {
 class Style;
 }
 
@@ -28,7 +28,8 @@ class FontSet {
  public:
   using FontList = std::vector<const gfx::Font*>;
 
-  static const gfx::Font* GetFont(const css::Style& style, base::char16 sample);
+  static const gfx::Font* GetFont(const xcss::Style& style,
+                                  base::char16 sample);
 
  private:
   class Cache;
@@ -38,7 +39,7 @@ class FontSet {
   ~FontSet();
 
   const gfx::Font* FindFont(base::char16 sample) const;
-  static const FontSet& Get(const css::Style& style);
+  static const FontSet& Get(const xcss::Style& style);
 
   FontList fonts_;
 

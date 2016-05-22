@@ -96,13 +96,13 @@ gfx::RectF CaretBoundsOf(int origin_x, int origin_y, int height) {
 }
 
 ComputedStyle CreateStyle() {
-  css::Style css_style;
-  css_style.set_bgcolor(css::Color());
-  css_style.set_color(css::Color());
+  xcss::Style css_style;
+  css_style.set_bgcolor(xcss::Color());
+  css_style.set_color(xcss::Color());
   css_style.set_font_family(L"Consolas");
-  css_style.set_font_weight(css::FontWeight::Normal);
+  css_style.set_font_weight(xcss::FontWeight::Normal);
   css_style.set_font_size(10);
-  css_style.set_font_style(css::FontStyle::Normal);
+  css_style.set_font_style(xcss::FontStyle::Normal);
   const auto& font = FontSet::GetFont(css_style, 'x');
   return ComputedStyle::Builder().Load(css_style, *font).Build();
 }

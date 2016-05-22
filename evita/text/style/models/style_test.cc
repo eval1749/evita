@@ -5,7 +5,7 @@
 #include "evita/text/style/models/style.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
-namespace css {
+namespace xcss {
 
 TEST(CssStyle, IsSubsetOf) {
   Style style1;
@@ -30,4 +30,4 @@ TEST(CssStyle, IsSubsetOf) {
   EXPECT_TRUE(style2.IsSubsetOf(style1)) << "style2 doesn't have bgcolor";
 }
 
-}  // namespace css
+}  // namespace xcss

@@ -7,7 +7,7 @@
 
 #include "base/macros.h"
 
-namespace css {
+namespace xcss {
 
 class StyleRule;
 
@@ -24,6 +24,6 @@ class StyleSheetObserver {
   DISALLOW_COPY_AND_ASSIGN(StyleSheetObserver);
 };
 
-}  // namespace css
+}  // namespace xcss
 
 #endif  // EVITA_TEXT_STYLE_MODELS_STYLE_SHEET_OBSERVER_H_

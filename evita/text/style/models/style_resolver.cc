@@ -12,7 +12,7 @@
 
 #define USE_SELETION_OVERLAY 1
 
-namespace css {
+namespace xcss {
 
 namespace {
 void InstallSyntaxColor(StyleSheet* style_sheet,
@@ -31,8 +31,8 @@ StyleSheet* GetDefaultStyleSheet() {
   Style default_style(Color(0, 0, 0), Color(255, 255, 255));
   default_style.set_font_family(L"Consolas, Meiryo");
   default_style.set_font_size(10);
-  default_style.set_font_style(css::FontStyle::Normal);
-  default_style.set_font_weight(css::FontWeight::Normal);
+  default_style.set_font_style(xcss::FontStyle::Normal);
+  default_style.set_font_weight(xcss::FontWeight::Normal);
   default_style_sheet.AddRule(StyleSelector::defaults(), default_style);
 
   Style marker_style;
@@ -76,14 +76,14 @@ StyleSheet* GetDefaultStyleSheet() {
   // Spelling
   Style red_wave;
   red_wave.set_text_decoration_color(Color(255, 0, 0));
-  red_wave.set_text_decoration_line(css::TextDecorationLine::Underline);
-  red_wave.set_text_decoration_style(css::TextDecorationStyle::Wavy);
+  red_wave.set_text_decoration_line(xcss::TextDecorationLine::Underline);
+  red_wave.set_text_decoration_style(xcss::TextDecorationStyle::Wavy);
   default_style_sheet.AddRule(StyleSelector::misspelled(), red_wave);
 
   Style green_wave;
   green_wave.set_text_decoration_color(Color(0, 255, 0));
-  green_wave.set_text_decoration_line(css::TextDecorationLine::Underline);
-  green_wave.set_text_decoration_style(css::TextDecorationStyle::Wavy);
+  green_wave.set_text_decoration_line(xcss::TextDecorationLine::Underline);
+  green_wave.set_text_decoration_style(xcss::TextDecorationStyle::Wavy);
   default_style_sheet.AddRule(StyleSelector::bad_grammar(), green_wave);
 
   // Syntax
@@ -241,7 +241,7 @@ const Style& StyleResolver::ResolveWithoutDefaults(
   return *new_style_ptr;
 }
 
-// css::StyleSheetObserver
+// xcss::StyleSheetObserver
 void StyleResolver::DidAddRule(const StyleRule* rule) {
   InvalidateCache(rule);
 }
@@ -250,4 +250,4 @@ void StyleResolver::DidRemoveRule(const StyleRule* rule) {
   InvalidateCache(rule);
 }
 
-}  // namespace css
+}  // namespace xcss

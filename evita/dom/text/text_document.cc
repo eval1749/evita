@@ -75,7 +75,7 @@ base::string16 TextDocument::SyntaxAt(text::Offset offset,
     return base::string16();
   if (auto marker = buffer_->syntax_markers()->GetMarkerAt(offset))
     return marker->type().as_string();
-  return css::StyleSelector::normal().as_string();
+  return xcss::StyleSelector::normal().as_string();
 }
 
 bool TextDocument::CheckCanChange(ExceptionState* exception_state) const {

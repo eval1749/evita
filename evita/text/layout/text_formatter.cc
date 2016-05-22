@@ -52,13 +52,13 @@ float AlignWidthToPixel(float width) {
   return width;
 }
 
-gfx::ColorF CssColorToColorF(const css::Color& color) {
+gfx::ColorF CssColorToColorF(const xcss::Color& color) {
   return gfx::ColorF(static_cast<float>(color.red()) / 255,
                      static_cast<float>(color.green()) / 255,
                      static_cast<float>(color.blue()) / 255, color.alpha());
 }
 
-const gfx::Font* GetFont(const css::Style& style) {
+const gfx::Font* GetFont(const xcss::Style& style) {
   return FontSet::GetFont(style, 'x');
 }
 
@@ -70,12 +70,12 @@ base::char16 IntToHex(int k) {
   return static_cast<base::char16>(k - 10 + 'A');
 }
 
-ComputedStyle MakeComputedStyle(const css::Style& model,
+ComputedStyle MakeComputedStyle(const xcss::Style& model,
                                 const gfx::Font& font) {
   return ComputedStyle::Builder().Load(model, font).Build();
 }
 
-ComputedStyle MakeComputedStyle(const css::Style& style) {
+ComputedStyle MakeComputedStyle(const xcss::Style& style) {
   return MakeComputedStyle(style, *GetFont(style));
 }
 
@@ -93,7 +93,7 @@ class TextFormatter::TextScanner final {
 
   base::AtomicString highlight() const;
   base::AtomicString spelling() const;
-  const css::StyleResolver* style_resolver() const {
+  const xcss::StyleResolver* style_resolver() const {
     return buffer_.style_resolver();
   }
   base::AtomicString syntax() const;
@@ -253,7 +253,7 @@ std::unique_ptr<RootInlineBox> TextFormatter::FormatLine() {
 bool TextFormatter::FormatChar(LineBuilder* line_builder,
                                base::char16 char_code) {
   const auto offset = text_scanner_->text_offset();
-  css::Style style;
+  xcss::Style style;
 
   const auto spelling = text_scanner_->spelling();
   if (!spelling.empty()) {
@@ -273,13 +273,13 @@ bool TextFormatter::FormatChar(LineBuilder* line_builder,
         text_scanner_->style_resolver()->ResolveWithoutDefaults(highlight));
   }
 
-  style.Merge(
-      text_scanner_->style_resolver()->Resolve(css::StyleSelector::defaults()));
+  style.Merge(text_scanner_->style_resolver()->Resolve(
+      xcss::StyleSelector::defaults()));
   style.set_font_size(style.font_size() * zoom_);
 
   if (char_code == 0x09) {
     style.OverrideBy(text_scanner_->style_resolver()->ResolveWithoutDefaults(
-        css::StyleSelector::end_of_file_marker()));
+        xcss::StyleSelector::end_of_file_marker()));
     const auto font = FontSet::GetFont(style, 'x');
     const auto widthTab =
         AlignWidthToPixel(font->GetCharWidth(' ')) * kTabWidth;
@@ -301,7 +301,7 @@ bool TextFormatter::FormatChar(LineBuilder* line_builder,
 
   if (!font) {
     style.OverrideBy(text_scanner_->style_resolver()->ResolveWithoutDefaults(
-        css::StyleSelector::end_of_file_marker()));
+        xcss::StyleSelector::end_of_file_marker()));
     const auto font2 = FontSet::GetFont(style, 'u');
     base::string16 string;
     if (char_code < 0x20) {
@@ -331,11 +331,11 @@ bool TextFormatter::FormatChar(LineBuilder* line_builder,
 void TextFormatter::FormatMarker(LineBuilder* line_builder,
                                  TextMarker marker_name,
                                  text::OffsetDelta length) {
-  css::Style style;
-  style.Merge(
-      text_scanner_->style_resolver()->Resolve(css::StyleSelector::defaults()));
+  xcss::Style style;
+  style.Merge(text_scanner_->style_resolver()->Resolve(
+      xcss::StyleSelector::defaults()));
   style.OverrideBy(text_scanner_->style_resolver()->ResolveWithoutDefaults(
-      css::StyleSelector::end_of_line_marker()));
+      xcss::StyleSelector::end_of_line_marker()));
   style.set_font_size(style.font_size() * zoom_);
 
   const auto font = FontSet::GetFont(style, 'x');
@@ -353,8 +353,8 @@ TextSelection TextFormatter::FormatSelection(
     const text::Buffer& buffer,
     const TextSelectionModel& selection_model) {
   const auto& style = buffer.style_resolver()->ResolveWithoutDefaults(
-      selection_model.disabled() ? css::StyleSelector::inactive_selection()
-                                 : css::StyleSelector::active_selection());
+      selection_model.disabled() ? xcss::StyleSelector::inactive_selection()
+                                 : xcss::StyleSelector::active_selection());
   return TextSelection(selection_model, CssColorToColorF(style.bgcolor()));
 }
 

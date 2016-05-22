@@ -11,7 +11,7 @@
 #include "base/strings/string16.h"
 #include "evita/text/style/models/color.h"
 
-namespace css {
+namespace xcss {
 
 typedef float FontSize;
 
@@ -148,12 +148,12 @@ class Style final {
   TextDecorationStyle text_decoration_style_ = TextDecorationStyle::Solid;
 };
 
-}  // namespace css
+}  // namespace xcss
 
 namespace std {
 template <>
-struct hash<css::Style> {
-  size_t operator()(const css::Style& style) const;
+struct hash<xcss::Style> {
+  size_t operator()(const xcss::Style& style) const;
 };
 }  // namespace std
 

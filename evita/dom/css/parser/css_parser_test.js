@@ -76,4 +76,11 @@ testing.test('css.Parser.pseudoElement', function(t) {
       .toEqual('div::first-letter { color: blue; }');
 });
 
+testing.test('css.Parser.universalTypeSelector', function(t) {
+  /** @const @type {!CSSStyleSheet} */
+  const styleSheet = Parser.parse('* { color: red }');
+  t.expect(styleSheet.cssRules.length).toEqual(1);
+  t.expect(querySelector(styleSheet, '*')).toEqual('* { color: red; }');
+});
+
 });

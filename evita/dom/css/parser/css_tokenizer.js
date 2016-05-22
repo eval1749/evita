@@ -138,6 +138,11 @@ class Tokenizer extends base.Logger {
             state = 'string1';
             continue;
           }
+          if (charCode === Unicode.ASTERISK) {
+            yield newToken(Token.Type.ASTERISK, source, offset);
+            tokenType = Token.Type.END;
+            continue;
+          }
           if (charCode === Unicode.COLON) {
             tokenType = Token.Type.COLON;
             state = ':';
@@ -194,7 +199,7 @@ class Tokenizer extends base.Logger {
           if (kPunctuationMap.has(charCode)) {
             /** @const {!Token.Type} */
             const type = kPunctuationMap.get(charCode) || Token.Type.INVALID;
-            yield newToken(/** @type {!Token.Type} */ (type), source, offset);
+            yield newToken(type, source, offset);
             tokenType = Token.Type.END;
             continue;
           }

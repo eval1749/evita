@@ -11,6 +11,7 @@
 #include "base/trace_event/trace_event.h"
 #include "evita/base/strings/atomic_string.h"
 #include "evita/dom/bindings/exception_state.h"
+#include "evita/dom/css/css_style_sheet_handle.h"
 #include "evita/dom/promise_resolver.h"
 #include "evita/dom/public/cursor.h"
 #include "evita/dom/public/scroll_bar_orientation.h"
@@ -52,6 +53,8 @@ using layout::TextSelectionModel;
 using paint::CaretState;
 
 namespace {
+
+css::StyleSheet* s_default_style_sheet;
 
 const auto kBlinkInterval = 16 * 20;  // milliseconds
 
@@ -195,7 +198,9 @@ void Caret::Update(const gfx::FloatRect& new_bounds,
 //
 // TextWindow
 //
-TextWindow::TextWindow(ScriptHost* script_host, TextRange* selection_range)
+TextWindow::TextWindow(ScriptHost* script_host,
+                       TextRange* selection_range,
+                       css::StyleSheet* style_sheet)
     : Scriptable(script_host),
       caret_(new Caret(this)),
       markers_(new text::MarkerSet(*selection_range->document()->buffer())),
@@ -209,6 +214,14 @@ TextWindow::TextWindow(ScriptHost* script_host, TextRange* selection_range)
   selection_->text_selection()->AddObserver(this);
   script_host->view_delegate()->CreateTextWindow(window_id());
 }
+
+TextWindow::TextWindow(ScriptHost* script_host,
+                       TextRange* selection_range,
+                       CSSStyleSheetHandle* handle)
+    : TextWindow(script_host, selection_range, handle->value()) {}
+
+TextWindow::TextWindow(ScriptHost* script_host, TextRange* selection_range)
+    : TextWindow(script_host, selection_range, s_default_style_sheet) {}
 
 TextWindow::~TextWindow() {
   document()->buffer()->RemoveObserver(this);
@@ -464,6 +477,11 @@ void TextWindow::RequestAnimationFrame() {
 
 void TextWindow::Scroll(int direction) {
   SmallScroll(0, direction);
+}
+
+// static
+void TextWindow::SetDefaultStyleSheet(CSSStyleSheetHandle* handle) {
+  s_default_style_sheet = handle->value();
 }
 
 void TextWindow::SetMarker(text::Offset start,

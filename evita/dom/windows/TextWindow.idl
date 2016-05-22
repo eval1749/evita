@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-[ CallWith = ScriptHost, Constructor(TextRange range) ] interface TextWindow
-    : Window {
+[
+  CallWith = ScriptHost,
+  Constructor(TextRange range, optional CSSStyleSheetHandle handle),
+] interface TextWindow : Window {
   readonly attribute TextDocument document;
   readonly attribute TextSelection selection;
 
@@ -28,4 +30,6 @@
 
   [RaisesException] void setMarker(TextOffset start, TextOffset end,
                                    DOMString marker);
+
+  static void setDefaultStyleSheet(CSSStyleSheetHandle handle);
 };

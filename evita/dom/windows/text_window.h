@@ -18,6 +18,10 @@
 #include "evita/ui/animation/animation_frame_handler.h"
 #include "evita/ui/controls/scroll_bar_observer.h"
 
+namespace css {
+class StyleSheet;
+}
+
 namespace layout {
 class TextView;
 }
@@ -28,6 +32,7 @@ class MarkerSet;
 }
 
 namespace dom {
+class CSSStyleSheetHandle;
 class ExceptionState;
 class ScrollBar;
 class TextDocument;
@@ -57,7 +62,9 @@ class TextWindow final : public ginx::Scriptable<TextWindow, Window>,
  private:
   friend class bindings::TextWindowClass;
 
-  TextWindow(ScriptHost* script_host, TextRange* selection_range);
+  TextWindow(ScriptHost* script_host,
+             TextRange* selection_range,
+             css::StyleSheet* style_sheet);
 
   text::Buffer* buffer() const;
 
@@ -78,6 +85,10 @@ class TextWindow final : public ginx::Scriptable<TextWindow, Window>,
   void UpdateScrollBar();
 
   // bindings
+  TextWindow(ScriptHost* script_host,
+             TextRange* selection_range,
+             CSSStyleSheetHandle* style_sheet_handle);
+  TextWindow(ScriptHost* script_host, TextRange* selection_range);
   TextDocument* document() const;
   TextSelection* selection() const { return selection_; }
   float zoom() const;
@@ -98,6 +109,7 @@ class TextWindow final : public ginx::Scriptable<TextWindow, Window>,
   TextWindow* NewTextWindow(TextRange* range);
   void Reconvert(const base::string16& text);
   void Scroll(int direction);
+  static void SetDefaultStyleSheet(CSSStyleSheetHandle* handle);
   void SetMarker(text::Offset start,
                  text::Offset end,
                  const base::string16& marker,

@@ -170,12 +170,14 @@ js_module("global_module") {
           ] + js_lib_files
   externs = [
     "//evita/dom/components/clipboard/clipboard_externs.js",
+    "//evita/dom/css/css_externs.js",
     "//evita/dom/os/os_externs.js",
+    "$root_gen_dir/evita/dom/css/css_externs.js",
   ]
   deps = [
     "//evita/dom/bindings:bindings_externs_js",
     "//evita/dom/components/highlights:token_state_machines",
-    "//evita/dom/css:css_properties",
+    "//evita/dom/css:css_externs",
   ]
 }
 

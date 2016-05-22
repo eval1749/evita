@@ -79,6 +79,9 @@ js_lib_files = [
   "components/repl/js_completer.js",
   "components/repl/js_console_commands.js",
 
+  # Depends on conolse.assert
+  "text/default_style_sheet.js",
+
   "jslib/install_stringify.js",
 
   "testing/test.js",

@@ -115,6 +115,8 @@ bool Selector::IsSubsetOf(const Selector& other) const {
 }
 
 base::string16 Selector::ToString() const {
+  if (*this == Selector())
+    return L"*";
   std::vector<base::string16> strings;
   if (!tag_name_.empty())
     strings.emplace_back(tag_name_.value().as_string());

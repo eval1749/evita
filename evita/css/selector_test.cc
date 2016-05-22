@@ -283,7 +283,7 @@ TEST(CssSelctorTest, is_universal) {
 }
 
 TEST(CssSelctorTest, ToString) {
-  EXPECT_EQ(L"", Selector().ToString());
+  EXPECT_EQ(L"*", Selector().ToString());
   EXPECT_EQ(L"foo", Parse("foo").ToString());
   EXPECT_EQ(L"#bar", Parse("#bar").ToString());
   EXPECT_EQ(L".c1", Parse(".c1").ToString());

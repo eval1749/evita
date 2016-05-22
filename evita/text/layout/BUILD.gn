@@ -39,6 +39,8 @@ test("evita_layout_tests") {
   sources = [
     "block_flow_test.cc",
     "text_formatter_test.cc",
+    "text_layout_test_base.cc",
+    "text_layout_test_base.h",
   ]
 
   deps = [

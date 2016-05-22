@@ -6,6 +6,8 @@
 #include <cmath>
 #include <numeric>
 
+#include "evita/text/layout/text_layout_test_base.h"
+
 #include "evita/base/strings/atomic_string.h"
 #include "evita/gfx/font.h"
 #include "evita/gfx/rect_conversions.h"
@@ -18,7 +20,6 @@
 #include "evita/text/models/marker_set.h"
 #include "evita/text/models/static_range.h"
 #include "evita/text/style/computed_style_builder.h"
-#include "testing/gtest/include/gtest/gtest.h"
 
 namespace layout {
 
@@ -26,51 +27,16 @@ namespace layout {
 //
 // TextFormatterTest
 //
-class TextFormatterTest : public ::testing::Test {
+class TextFormatterTest : public TextLayoutTestBase {
  protected:
-  TextFormatterTest();
+  TextFormatterTest() = default;
   ~TextFormatterTest() override = default;
 
-  const gfx::RectF& bounds() const { return bounds_; }
-  void set_bounds(const gfx::RectF& bounds) { bounds_ = bounds; }
-  text::Buffer* buffer() const { return buffer_.get(); }
-  text::MarkerSet* markers() const { return markers_.get(); }
-  gfx::PointF origin() const { return bounds_.origin(); }
-  float zoom() const { return zoom_; }
-  void set_zoom(float zoom) { zoom_ = zoom; }
-
-  TextFormatContext FormatContextFor(text::Offset line_start,
-                                     text::Offset offset) const;
-  TextFormatContext FormatContextFor(text::Offset offset) const;
   float WidthOf(const ComputedStyle& style, const base::string16& text) const;
 
  private:
-  gfx::RectF bounds_;
-  const std::unique_ptr<text::Buffer> buffer_;
-  const std::unique_ptr<text::MarkerSet> markers_;
-  float zoom_;
-
   DISALLOW_COPY_AND_ASSIGN(TextFormatterTest);
 };
-
-TextFormatterTest::TextFormatterTest()
-    : bounds_(gfx::PointF(300, 200), gfx::SizeF(100, 50)),
-      buffer_(new text::Buffer()),
-      markers_(new text::MarkerSet(*buffer_)),
-      zoom_(1.0f) {}
-
-TextFormatContext TextFormatterTest::FormatContextFor(
-    text::Offset line_start,
-    text::Offset offset) const {
-  return TextFormatContext(*buffer_, *markers_, line_start, offset, bounds_,
-                           zoom_);
-}
-
-TextFormatContext TextFormatterTest::FormatContextFor(
-    text::Offset offset) const {
-  const auto line_start = buffer_->ComputeStartOfLine(offset);
-  return FormatContextFor(line_start, offset);
-}
 
 float TextFormatterTest::WidthOf(const ComputedStyle& style,
                                  const base::string16& text) const {

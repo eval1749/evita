@@ -5,6 +5,8 @@
 #include <memory>
 #include <vector>
 
+#include "evita/text/layout/text_layout_test_base.h"
+
 #include "base/strings/string16.h"
 #include "evita/base/strings/atomic_string.h"
 #include "evita/text/layout/line/root_inline_box.h"
@@ -14,7 +16,6 @@
 #include "evita/text/models/buffer.h"
 #include "evita/text/models/marker_set.h"
 #include "evita/text/models/static_range.h"
-#include "testing/gtest/include/gtest/gtest.h"
 
 namespace layout {
 
@@ -22,58 +23,33 @@ namespace layout {
 //
 // RootInlineBoxCacheTest
 //
-class RootInlineBoxCacheTest : public ::testing::Test {
+class RootInlineBoxCacheTest : public TextLayoutTestBase {
  protected:
   RootInlineBoxCacheTest();
   ~RootInlineBoxCacheTest() override = default;
 
-  const gfx::RectF& bounds() const { return bounds_; }
-  text::Buffer* buffer() const { return buffer_.get(); }
   RootInlineBoxCache* cache() const { return cache_.get(); }
-  text::MarkerSet* markers() const { return markers_.get(); }
   const std::vector<RootInlineBox*> lines() const { return lines_; }
-  float zoom() const { return zoom_; }
 
-  TextFormatContext FormatContextFor(text::Offset line_start,
-                                     text::Offset offset) const;
-  TextFormatContext FormatContextFor(text::Offset offset) const;
   void PopulateCache(const base::string16& text);
   void SetBounds(const gfx::RectF& new_bounds);
 
  private:
-  gfx::RectF bounds_;
-  const std::unique_ptr<text::Buffer> buffer_;
-  const std::unique_ptr<text::MarkerSet> markers_;
   // |cache_| takes |buffer_| and |markers_|.
   const std::unique_ptr<RootInlineBoxCache> cache_;
   std::vector<RootInlineBox*> lines_;
-  float zoom_ = 1.0f;
 
   DISALLOW_COPY_AND_ASSIGN(RootInlineBoxCacheTest);
 };
 
 RootInlineBoxCacheTest::RootInlineBoxCacheTest()
-    : bounds_(gfx::PointF(), gfx::SizeF(640.0f, 480.0f)),
-      buffer_(new text::Buffer()),
-      markers_(new text::MarkerSet(*buffer_)),
-      cache_(new RootInlineBoxCache(*buffer_, *markers_)) {}
-
-TextFormatContext RootInlineBoxCacheTest::FormatContextFor(
-    text::Offset line_start,
-    text::Offset offset) const {
-  return TextFormatContext(*buffer_, *markers_, line_start, offset, bounds_,
-                           zoom_);
-}
-
-TextFormatContext RootInlineBoxCacheTest::FormatContextFor(
-    text::Offset offset) const {
-  const auto line_start = buffer_->ComputeStartOfLine(offset);
-  return FormatContextFor(line_start, offset);
+    : cache_(new RootInlineBoxCache(*buffer(), *markers())) {
+  set_bounds(gfx::RectF(gfx::SizeF(640.0f, 480.0f)));
 }
 
 void RootInlineBoxCacheTest::PopulateCache(const base::string16& text) {
   buffer()->InsertBefore(text::Offset(), text);
-  cache_->Invalidate(bounds_, zoom_);
+  cache_->Invalidate(bounds(), zoom());
   TextFormatter formatter(FormatContextFor(text::Offset(0)));
   for (;;) {
     const auto line = cache_->Register(formatter.FormatLine());
@@ -84,8 +60,8 @@ void RootInlineBoxCacheTest::PopulateCache(const base::string16& text) {
 }
 
 void RootInlineBoxCacheTest::SetBounds(const gfx::RectF& new_bounds) {
-  bounds_ = new_bounds;
-  cache_->Invalidate(bounds_, zoom_);
+  set_bounds(new_bounds);
+  cache_->Invalidate(new_bounds, zoom());
 }
 
 TEST_F(RootInlineBoxCacheTest, DidChangeStyle) {

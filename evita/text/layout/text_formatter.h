@@ -22,18 +22,14 @@ namespace layout {
 class InlineBox;
 class LineBuilder;
 class RootInlineBox;
+class TextFormatContext;
 enum class TextMarker;
 class TextSelection;
 class TextSelectionModel;
 
 class TextFormatter final {
  public:
-  TextFormatter(const text::Buffer& buffer,
-                text::Offset line_start,
-                text::Offset text_offset,
-                const text::MarkerSet& markers,
-                const gfx::RectF& bounds,
-                float zoom);
+  explicit TextFormatter(const TextFormatContext& context);
   ~TextFormatter();
 
   text::Offset text_offset() const;

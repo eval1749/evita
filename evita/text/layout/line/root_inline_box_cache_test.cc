@@ -9,6 +9,7 @@
 #include "evita/base/strings/atomic_string.h"
 #include "evita/text/layout/line/root_inline_box.h"
 #include "evita/text/layout/line/root_inline_box_cache.h"
+#include "evita/text/layout/text_format_context.h"
 #include "evita/text/layout/text_formatter.h"
 #include "evita/text/models/buffer.h"
 #include "evita/text/models/marker_set.h"
@@ -33,6 +34,9 @@ class RootInlineBoxCacheTest : public ::testing::Test {
   const std::vector<RootInlineBox*> lines() const { return lines_; }
   float zoom() const { return zoom_; }
 
+  TextFormatContext FormatContextFor(text::Offset line_start,
+                                     text::Offset offset) const;
+  TextFormatContext FormatContextFor(text::Offset offset) const;
   void PopulateCache(const base::string16& text);
   void SetBounds(const gfx::RectF& new_bounds);
 
@@ -54,11 +58,23 @@ RootInlineBoxCacheTest::RootInlineBoxCacheTest()
       markers_(new text::MarkerSet(*buffer_)),
       cache_(new RootInlineBoxCache(*buffer_, *markers_)) {}
 
+TextFormatContext RootInlineBoxCacheTest::FormatContextFor(
+    text::Offset line_start,
+    text::Offset offset) const {
+  return TextFormatContext(*buffer_, *markers_, line_start, offset, bounds_,
+                           zoom_);
+}
+
+TextFormatContext RootInlineBoxCacheTest::FormatContextFor(
+    text::Offset offset) const {
+  const auto line_start = buffer_->ComputeStartOfLine(offset);
+  return FormatContextFor(line_start, offset);
+}
+
 void RootInlineBoxCacheTest::PopulateCache(const base::string16& text) {
   buffer()->InsertBefore(text::Offset(), text);
   cache_->Invalidate(bounds_, zoom_);
-  TextFormatter formatter(*buffer(), text::Offset(0), text::Offset(0),
-                          *markers(), bounds_, zoom_);
+  TextFormatter formatter(FormatContextFor(text::Offset(0)));
   for (;;) {
     const auto line = cache_->Register(formatter.FormatLine());
     lines_.push_back(line);

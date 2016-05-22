@@ -12,6 +12,7 @@
 #include "common/memory/singleton.h"
 #include "evita/gfx/direct2d_factory_win.h"
 #include "evita/gfx/font.h"
+#include "evita/text/layout/text_format_context.h"
 #include "evita/text/models/buffer.h"
 #include "evita/text/models/marker.h"
 #include "evita/text/models/marker_set.h"
@@ -19,8 +20,7 @@
 #include "evita/text/style/models/style_resolver.h"
 #include "evita/text/style/models/style_selector.h"
 // TODO(eval1749): We should have "evita/text/layout/public/text_marker.h" to
-// avoid
-// include "inline_box.h" in "text_formatter.cc".
+// avoid include "inline_box.h" in "text_formatter.cc".
 #include "evita/text/layout/line/inline_box.h"
 #include "evita/text/layout/line/line_builder.h"
 #include "evita/text/layout/line/root_inline_box.h"
@@ -193,21 +193,17 @@ void TextFormatter::TextScanner::Next() {
 //
 // TextFormatter
 //
-TextFormatter::TextFormatter(const text::Buffer& text_buffer,
-                             text::Offset line_start,
-                             text::Offset text_offset,
-                             const text::MarkerSet& markers,
-                             const gfx::RectF& bounds,
-                             float zoom)
-    : bounds_(bounds),
-      default_computed_style_(MakeComputedStyle(text_buffer.GetDefaultStyle())),
-      line_start_(line_start),
-      text_scanner_(new TextScanner(text_buffer, markers)),
-      zoom_(zoom) {
+TextFormatter::TextFormatter(const TextFormatContext& context)
+    : bounds_(context.bounds()),
+      default_computed_style_(
+          MakeComputedStyle(context.buffer().GetDefaultStyle())),
+      line_start_(context.line_start()),
+      text_scanner_(new TextScanner(context.buffer(), context.markers())),
+      zoom_(context.zoom()) {
   DCHECK(!bounds_.empty());
   DCHECK_GT(zoom_, 0.0f);
-  DCHECK_EQ(line_start, text_buffer.ComputeStartOfLine(text_offset));
-  text_scanner_->set_text_offset(text_offset);
+  DCHECK_EQ(line_start_, context.buffer().ComputeStartOfLine(context.offset()));
+  text_scanner_->set_text_offset(context.offset());
 }
 
 TextFormatter::~TextFormatter() {}

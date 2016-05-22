@@ -12,6 +12,7 @@
 #include "evita/text/layout/line/inline_box.h"
 #include "evita/text/layout/line/root_inline_box.h"
 #include "evita/text/layout/render_font_set.h"
+#include "evita/text/layout/text_format_context.h"
 #include "evita/text/layout/text_formatter.h"
 #include "evita/text/models/buffer.h"
 #include "evita/text/models/marker_set.h"
@@ -30,20 +31,46 @@ class TextFormatterTest : public ::testing::Test {
   TextFormatterTest();
   ~TextFormatterTest() override = default;
 
+  const gfx::RectF& bounds() const { return bounds_; }
+  void set_bounds(const gfx::RectF& bounds) { bounds_ = bounds; }
   text::Buffer* buffer() const { return buffer_.get(); }
   text::MarkerSet* markers() const { return markers_.get(); }
+  gfx::PointF origin() const { return bounds_.origin(); }
+  float zoom() const { return zoom_; }
+  void set_zoom(float zoom) { zoom_ = zoom; }
 
+  TextFormatContext FormatContextFor(text::Offset line_start,
+                                     text::Offset offset) const;
+  TextFormatContext FormatContextFor(text::Offset offset) const;
   float WidthOf(const ComputedStyle& style, const base::string16& text) const;
 
  private:
+  gfx::RectF bounds_;
   const std::unique_ptr<text::Buffer> buffer_;
   const std::unique_ptr<text::MarkerSet> markers_;
+  float zoom_;
 
   DISALLOW_COPY_AND_ASSIGN(TextFormatterTest);
 };
 
 TextFormatterTest::TextFormatterTest()
-    : buffer_(new text::Buffer()), markers_(new text::MarkerSet(*buffer_)) {}
+    : bounds_(gfx::PointF(300, 200), gfx::SizeF(100, 50)),
+      buffer_(new text::Buffer()),
+      markers_(new text::MarkerSet(*buffer_)),
+      zoom_(1.0f) {}
+
+TextFormatContext TextFormatterTest::FormatContextFor(
+    text::Offset line_start,
+    text::Offset offset) const {
+  return TextFormatContext(*buffer_, *markers_, line_start, offset, bounds_,
+                           zoom_);
+}
+
+TextFormatContext TextFormatterTest::FormatContextFor(
+    text::Offset offset) const {
+  const auto line_start = buffer_->ComputeStartOfLine(offset);
+  return FormatContextFor(line_start, offset);
+}
 
 float TextFormatterTest::WidthOf(const ComputedStyle& style,
                                  const base::string16& text) const {
@@ -52,13 +79,9 @@ float TextFormatterTest::WidthOf(const ComputedStyle& style,
 
 TEST_F(TextFormatterTest, FormatLineBasic) {
   buffer()->InsertBefore(text::Offset(0), L"foo");
-  const auto& origin = gfx::PointF(300.0f, 200.0f);
-  const auto& bounds = gfx::RectF(origin, gfx::SizeF(100.0f, 50.0f));
-
-  TextFormatter formatter1(*buffer(), text::Offset(0), text::Offset(0),
-                           *markers(), bounds, 1.0f);
+  TextFormatter formatter1(FormatContextFor(text::Offset(0)));
   const auto line1 = formatter1.FormatLine();
-  line1->set_origin(origin);
+  line1->set_origin(origin());
   const auto height = line1->height();
 
   ASSERT_EQ(3, line1->boxes().size());
@@ -75,12 +98,12 @@ TEST_F(TextFormatterTest, FormatLineBasic) {
       line1->boxes().begin(), line1->boxes().end(), 0.0f,
       [](float max, InlineBox* box) { return std::max(max, box->descent()); });
   const auto boxes_height = boxes_ascent + boxes_descent;
-  EXPECT_EQ(gfx::RectF(origin, gfx::SizeF(boxes_width, boxes_height)),
+  EXPECT_EQ(gfx::RectF(origin(), gfx::SizeF(boxes_width, boxes_height)),
             line1->bounds());
   EXPECT_EQ(
-      gfx::RectF(gfx::PointF(origin.x + line1->boxes()[0]->width() +
+      gfx::RectF(gfx::PointF(origin().x + line1->boxes()[0]->width() +
                                  WidthOf(line1->boxes()[1]->style(), L"f"),
-                             origin.y),
+                             origin().y),
                  gfx::SizeF(1.0f, line1->boxes()[1]->height())),
       line1->HitTestTextPosition(text::Offset(1)));
 
@@ -88,10 +111,9 @@ TEST_F(TextFormatterTest, FormatLineBasic) {
   buffer()->syntax_markers()->InsertMarker(
       text::StaticRange(*buffer(), text::Offset(1), text::Offset(2)),
       base::AtomicString(L"keyword"));
-  TextFormatter formatter2(*buffer(), text::Offset(0), text::Offset(0),
-                           *markers(), bounds, 1.0f);
+  TextFormatter formatter2(FormatContextFor(text::Offset(0)));
   const auto line2 = formatter2.FormatLine();
-  line2->set_origin(origin);
+  line2->set_origin(origin());
   ASSERT_EQ(5, line2->boxes().size());
   EXPECT_TRUE(line2->boxes()[0]->is<InlineFillerBox>());
   EXPECT_TRUE(line2->boxes()[1]->is<InlineTextBox>());
@@ -114,11 +136,7 @@ TEST_F(TextFormatterTest, FormatLineMarker) {
   markers()->InsertMarker(
       text::StaticRange(*buffer(), text::Offset(4), text::Offset(5)),
       base::AtomicString(L"keyword"));
-  const auto& origin = gfx::PointF(300.0f, 200.0f);
-  const auto& bounds = gfx::RectF(origin, gfx::SizeF(100.0f, 50.0f));
-
-  TextFormatter formatter1(*buffer(), text::Offset(0), text::Offset(0),
-                           *markers(), bounds, 1.0f);
+  TextFormatter formatter1(FormatContextFor(text::Offset(0)));
   const auto line1 = formatter1.FormatLine();
   EXPECT_EQ(5, line1->boxes().size());
   EXPECT_EQ(text::OffsetDelta(1), line1->boxes()[2]->start())
@@ -129,13 +147,9 @@ TEST_F(TextFormatterTest, FormatLineMarker) {
 
 TEST_F(TextFormatterTest, FormatLineMissingCharacter) {
   buffer()->InsertBefore(text::Offset(0), L"f\uFFFFo");
-  const auto& origin = gfx::PointF(10.0f, 200.0f);
-  const auto& bounds = gfx::RectF(origin, gfx::SizeF(100.0f, 50.0f));
-
-  TextFormatter formatter1(*buffer(), text::Offset(0), text::Offset(0),
-                           *markers(), bounds, 1.0f);
+  TextFormatter formatter1(FormatContextFor(text::Offset(0)));
   const auto line1 = formatter1.FormatLine();
-  line1->set_origin(origin);
+  line1->set_origin(origin());
   ASSERT_EQ(5, line1->boxes().size()) << "line width is " << line1->width();
   EXPECT_TRUE(line1->boxes()[0]->is<InlineFillerBox>());
   EXPECT_TRUE(line1->boxes()[1]->is<InlineTextBox>());
@@ -152,15 +166,14 @@ TEST_F(TextFormatterTest, FormatLineMissingCharacter) {
       line1->boxes().begin(), line1->boxes().end(), 0.0f,
       [](float max, InlineBox* box) { return std::max(max, box->descent()); });
   const auto boxes_height = boxes_ascent + boxes_descent;
-  EXPECT_EQ(gfx::RectF(origin, gfx::SizeF(boxes_width, boxes_height)),
+  EXPECT_EQ(gfx::RectF(origin(), gfx::SizeF(boxes_width, boxes_height)),
             line1->bounds());
 }
 
 TEST_F(TextFormatterTest, FormatLineWrap) {
   buffer()->InsertBefore(text::Offset(0), L"0123456");
-  const auto& bounds = gfx::RectF(gfx::SizeF(40.0f, 50.0f));
-  TextFormatter formatter1(*buffer(), text::Offset(0), text::Offset(0),
-                           *markers(), bounds, 1.0f);
+  set_bounds(gfx::RectF(gfx::SizeF(40.0f, 50.0f)));
+  TextFormatter formatter1(FormatContextFor(text::Offset(0)));
   // View:
   //    012>
   //    345>

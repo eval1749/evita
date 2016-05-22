@@ -23,6 +23,7 @@ class StaticRange;
 
 namespace layout {
 
+class TextFormatContext;
 class TextFormatter;
 class RootInlineBox;
 class RootInlineBoxCache;
@@ -80,6 +81,9 @@ class BlockFlow final : public text::BufferMutationObserver,
   void EnsureLinePoints();
   void EnsureTextLineCache();
   RootInlineBox* FindLineContainng(text::Offset offset) const;
+  TextFormatContext FormatContextFor(text::Offset line_start,
+                                     text::Offset offset) const;
+  TextFormatContext FormatContextFor(text::Offset offset) const;
   RootInlineBox* FormatLine(TextFormatter* formatter);
   bool IsShowEndOfDocument() const;
   void MarkDirty();

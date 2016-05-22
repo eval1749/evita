@@ -9,14 +9,18 @@
 
 #include "base/macros.h"
 #include "base/observer_list.h"
+#include "evita/css/media.h"
+#include "evita/css/media_state.h"
 #include "evita/gc/member.h"
 #include "evita/gfx/base/geometry/float_size.h"
 #include "evita/ui/animation/animation_frame_handler.h"
-#include "evita/visuals/css/media.h"
-#include "evita/visuals/css/media_state.h"
 #include "evita/visuals/demo/demo_window.h"
 #include "evita/visuals/view/public/user_action_source.h"
 #include "evita/visuals/view/view_observer.h"
+
+namespace css {
+class StyleSheet;
+}
 
 namespace visuals {
 
@@ -25,10 +29,6 @@ class Document;
 class ElementNode;
 class Selection;
 class View;
-
-namespace css {
-class StyleSheet;
-}
 
 //////////////////////////////////////////////////////////////////////
 //

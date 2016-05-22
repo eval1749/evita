@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 #include "evita/visuals/layout/box_finder.h"
-#include "evita/visuals/css/style.h"
-#include "evita/visuals/css/style_builder.h"
-#include "evita/visuals/css/values.h"
+#include "evita/css/style.h"
+#include "evita/css/style_builder.h"
+#include "evita/css/values.h"
 #include "evita/visuals/dom/document.h"
 #include "evita/visuals/dom/element.h"
 #include "evita/visuals/dom/node_tree_builder.h"

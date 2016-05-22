@@ -6,12 +6,12 @@
 
 #include "evita/visuals/style/compiled_style_sheet_set.h"
 
-#include "evita/visuals/css/properties.h"
-#include "evita/visuals/css/selector_builder.h"
-#include "evita/visuals/css/selector_parser.h"
-#include "evita/visuals/css/style.h"
-#include "evita/visuals/css/style_builder.h"
-#include "evita/visuals/css/style_sheet.h"
+#include "evita/css/properties.h"
+#include "evita/css/selector_builder.h"
+#include "evita/css/selector_parser.h"
+#include "evita/css/style.h"
+#include "evita/css/style_builder.h"
+#include "evita/css/style_sheet.h"
 #include "evita/visuals/dom/document.h"
 #include "evita/visuals/dom/element.h"
 #include "evita/visuals/dom/node_tree_builder.h"

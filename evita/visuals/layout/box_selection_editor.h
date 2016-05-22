@@ -6,7 +6,7 @@
 #define EVITA_VISUALS_LAYOUT_BOX_SELECTION_EDITOR_H_
 
 #include "base/macros.h"
-#include "evita/visuals/css/values.h"
+#include "evita/css/values.h"
 
 namespace gfx {
 class FloatColor;

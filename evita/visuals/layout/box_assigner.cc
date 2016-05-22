@@ -4,7 +4,7 @@
 
 #include "evita/visuals/layout/box_assigner.h"
 
-#include "evita/visuals/css/style.h"
+#include "evita/css/style.h"
 #include "evita/visuals/dom/document.h"
 #include "evita/visuals/dom/element.h"
 #include "evita/visuals/dom/image.h"

@@ -10,19 +10,19 @@
 #include <vector>
 
 #include "base/macros.h"
-#include "evita/visuals/css/media_observer.h"
-#include "evita/visuals/css/style_sheet_observer.h"
+#include "evita/css/media_observer.h"
+#include "evita/css/style_sheet_observer.h"
 #include "evita/visuals/dom/document_observer.h"
 #include "evita/visuals/view/public/user_action_source.h"
 #include "evita/visuals/view/public/view_lifecycle_client.h"
-
-namespace visuals {
 
 namespace css {
 class Media;
 class Style;
 class StyleSheet;
 }
+
+namespace visuals {
 
 class Document;
 class ElementNode;

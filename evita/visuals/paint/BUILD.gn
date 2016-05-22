@@ -14,8 +14,8 @@ source_set("paint") {
 
   deps = [
     "//base",
+    "//evita/css",
     "//evita/gfx/base",
-    "//evita/visuals/css",
     "//evita/visuals/layout",
     "//evita/visuals/view/public",
   ]

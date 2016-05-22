@@ -9,6 +9,11 @@
 #include "base/strings/string_piece.h"
 #include "evita/visuals/layout/box_forward.h"
 
+namespace css {
+class Display;
+class Style;
+}
+
 namespace gfx {
 class FloatColor;
 class FloatRect;
@@ -22,11 +27,6 @@ class FontDescription;
 class ImageData;
 class ShapeData;
 class TextFormat;
-
-namespace css {
-class Display;
-class Style;
-}
 
 //////////////////////////////////////////////////////////////////////
 //

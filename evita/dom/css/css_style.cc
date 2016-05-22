@@ -8,30 +8,25 @@
 #include "evita/dom/css/css_style.h"
 
 #include "evita/base/maybe.h"
+#include "evita/css/properties.h"
+#include "evita/css/style.h"
+#include "evita/css/style_editor.h"
+#include "evita/css/values.h"
 #include "evita/dom/bindings/exception_state.h"
 #include "evita/dom/converter.h"
 #include "evita/dom/css/css_style_sheet_handle.h"
 #include "evita/dom/css/css_value_parsers.h"
-#include "evita/visuals/css/properties.h"
-#include "evita/visuals/css/style.h"
-#include "evita/visuals/css/style_editor.h"
-#include "evita/visuals/css/values.h"
 
 namespace dom {
 
 template <typename T>
 using Maybe = base::Maybe<T>;
 
-using CssProperty = visuals::css::Property;
-using CssPropertyId = visuals::css::PropertyId;
-using CssStyle = visuals::css::Style;
-using CssStyleEditor = visuals::css::StyleEditor;
-
 namespace {
 
 Maybe<base::string16> GetRawProperty(v8::Local<v8::Context> context,
                                      v8::Local<v8::Map> map,
-                                     CssPropertyId property_id) {
+                                     css::PropertyId property_id) {
   v8::Local<v8::Value> key =
       gin::ConvertToV8(context->GetIsolate(), static_cast<int>(property_id));
   if (!map->Has(context, key).FromMaybe(false))
@@ -46,7 +41,7 @@ Maybe<base::string16> GetRawProperty(v8::Local<v8::Context> context,
 
 void SetRawProperty(v8::Local<v8::Context> context,
                     v8::Local<v8::Map> map,
-                    const CssProperty& property,
+                    const css::Property& property,
                     ExceptionState* exception_state) {
   const auto& isolate = context->GetIsolate();
   const auto& result =
@@ -66,20 +61,20 @@ void SetRawProperty(v8::Local<v8::Context> context,
 //
 
 // static
-std::unique_ptr<CssStyle> CSSStyle::ConvertFromV8(
+std::unique_ptr<css::Style> CSSStyle::ConvertFromV8(
     v8::Local<v8::Context> context,
     v8::Local<v8::Map> raw_style) {
-  auto style = std::make_unique<CssStyle>();
-#define V(Name, name, type, ...)                                          \
-  {                                                                       \
-    Maybe<base::string16> maybe_##name##_text =                           \
-        GetRawProperty(context, raw_style, CssPropertyId::Name);          \
-    if (maybe_##name##_text.IsJust()) {                                   \
-      Maybe<visuals::css::type> maybe_##name =                            \
-          Parse##type(maybe_##name##_text.FromJust());                    \
-      if (maybe_##name.IsJust())                                          \
-        CssStyleEditor().Set##Name(style.get(), maybe_##name.FromJust()); \
-    }                                                                     \
+  auto style = std::make_unique<css::Style>();
+#define V(Name, name, type, ...)                                            \
+  {                                                                         \
+    Maybe<base::string16> maybe_##name##_text =                             \
+        GetRawProperty(context, raw_style, css::PropertyId::Name);          \
+    if (maybe_##name##_text.IsJust()) {                                     \
+      Maybe<css::type> maybe_##name =                                       \
+          Parse##type(maybe_##name##_text.FromJust());                      \
+      if (maybe_##name.IsJust())                                            \
+        css::StyleEditor().Set##Name(style.get(), maybe_##name.FromJust()); \
+    }                                                                       \
   }
   FOR_EACH_VISUAL_CSS_PROPERTY(V)
 #undef V
@@ -88,7 +83,7 @@ std::unique_ptr<CssStyle> CSSStyle::ConvertFromV8(
 
 // static
 v8::Local<v8::Map> CSSStyle::ConvertToV8(v8::Local<v8::Context> context,
-                                         const CssStyle& style) {
+                                         const css::Style& style) {
   const auto& map = v8::Map::New(context->GetIsolate());
   for (const auto& property : style.properties()) {
     ExceptionState exception_state(ExceptionState::Situation::PropertySet,

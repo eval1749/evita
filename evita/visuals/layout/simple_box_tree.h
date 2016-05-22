@@ -13,6 +13,12 @@
 #include "evita/gc/member.h"
 #include "evita/visuals/view/public/view_lifecycle.h"
 
+namespace css {
+class Media;
+class MockMedia;
+class Style;
+}
+
 namespace visuals {
 
 class Box;
@@ -20,12 +26,6 @@ class ContainerBox;
 class Document;
 class ViewLifecycle;
 class RootBox;
-
-namespace css {
-class Media;
-class MockMedia;
-class Style;
-}
 
 //////////////////////////////////////////////////////////////////////
 //

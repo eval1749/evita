@@ -10,10 +10,8 @@
 #include "base/macros.h"
 #include "evita/ginx/v8.h"
 
-namespace visuals {
 namespace css {
 class Style;
-}
 }
 
 namespace dom {
@@ -24,13 +22,12 @@ namespace dom {
 //
 class CSSStyle final {
  public:
-  using CssStyle = visuals::css::Style;
-
-  static std::unique_ptr<CssStyle> ConvertFromV8(v8::Local<v8::Context> context,
-                                                 v8::Local<v8::Map> raw_style);
+  static std::unique_ptr<css::Style> ConvertFromV8(
+      v8::Local<v8::Context> context,
+      v8::Local<v8::Map> raw_style);
 
   static v8::Local<v8::Map> ConvertToV8(v8::Local<v8::Context> context,
-                                        const CssStyle& style);
+                                        const css::Style& style);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(CSSStyle);

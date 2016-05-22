@@ -8,7 +8,7 @@
 
 #include "base/logging.h"
 #include "base/observer_list.h"
-#include "evita/visuals/css/style.h"
+#include "evita/css/style.h"
 #include "evita/visuals/dom/ancestors.h"
 #include "evita/visuals/dom/ancestors_or_self.h"
 #include "evita/visuals/dom/descendants_or_self.h"

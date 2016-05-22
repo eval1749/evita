@@ -11,7 +11,7 @@ SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 ROOT_DIR = os.path.normpath(os.path.join(SCRIPT_DIR, os.pardir, os.pardir,
                                          os.pardir, os.pardir))
 CSS_SCRIPT_DIR = os.path.normpath(os.path.join(
-    ROOT_DIR, 'evita', 'visuals', 'css', 'scripts'))
+    ROOT_DIR, 'evita', 'css', 'scripts'))
 THIRD_PARTY_DIR = os.path.normpath(os.path.join(ROOT_DIR, 'third_party'))
 sys.path.append(THIRD_PARTY_DIR)
 sys.path.append(CSS_SCRIPT_DIR)

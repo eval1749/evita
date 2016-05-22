@@ -9,7 +9,7 @@
 
 #include "evita/visuals/layout/content_box.h"
 
-#include "evita/visuals/css/values.h"
+#include "evita/css/values.h"
 #include "evita/visuals/dom/shape_data.h"
 
 namespace visuals {

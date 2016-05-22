@@ -60,8 +60,8 @@ source_set("layout") {
   deps = [
     ":values",
     "//base",
+    "//evita/css",
     "//evita/gfx/base",
-    "//evita/visuals/css",
     "//evita/visuals/dom",
     "//evita/visuals/fonts",
     "//evita/visuals/imaging",

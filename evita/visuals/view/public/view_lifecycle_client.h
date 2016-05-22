@@ -7,14 +7,14 @@
 
 #include "base/macros.h"
 
+namespace css {
+class Media;
+}
+
 namespace visuals {
 
 class Document;
 class ViewLifecycle;
-
-namespace css {
-class Media;
-}
 
 //////////////////////////////////////////////////////////////////////
 //

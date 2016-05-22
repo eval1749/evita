@@ -5,20 +5,20 @@
 #include "evita/dom/css/css_value_parsers.h"
 
 #include "evita/base/maybe.h"
-#include "evita/visuals/css/values.h"
+#include "evita/css/values.h"
 
 namespace dom {
 
 template <typename T> using Maybe = base::Maybe<T>;
 
 {% for type in types if not type.is_primitive %}
-using {{type.Name}} = visuals::css::{{type.Name}};
+using {{type.Name}} = css::{{type.Name}};
 {% endfor %}
 
-using ColorValue = visuals::css::ColorValue;
-using Length = visuals::css::Length;
-using Percentage = visuals::css::Percentage;
-using String = visuals::css::String;
+using ColorValue = css::ColorValue;
+using Length = css::Length;
+using Percentage = css::Percentage;
+using String = css::String;
 
 //////////////////////////////////////////////////////////////////////
 //

@@ -9,7 +9,7 @@
 #include "evita/visuals/layout/box_editor.h"
 
 #include "base/logging.h"
-#include "evita/visuals/css/style.h"
+#include "evita/css/style.h"
 #include "evita/visuals/fonts/font_description_builder.h"
 #include "evita/visuals/fonts/text_format_factory.h"
 #include "evita/visuals/fonts/text_layout.h"

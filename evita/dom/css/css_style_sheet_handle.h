@@ -9,10 +9,8 @@
 
 #include "evita/ginx/scriptable.h"
 
-namespace visuals {
 namespace css {
 class StyleSheet;
-}
 }
 
 namespace dom {
@@ -31,11 +29,9 @@ class CSSStyleSheetHandle final : public ginx::Scriptable<CSSStyleSheetHandle> {
   DECLARE_SCRIPTABLE_OBJECT(CSSStyleSheetHandle);
 
  public:
-  using CssStyleSheet = visuals::css::StyleSheet;
-
   ~CSSStyleSheetHandle() final;
 
-  CssStyleSheet* value() const { return object_.get(); }
+  css::StyleSheet* value() const { return object_.get(); }
 
  private:
   friend class bindings::CSSStyleSheetHandleClass;
@@ -56,7 +52,7 @@ class CSSStyleSheetHandle final : public ginx::Scriptable<CSSStyleSheetHandle> {
                                    int index,
                                    ExceptionState* exception_state);
 
-  std::unique_ptr<CssStyleSheet> object_;
+  std::unique_ptr<css::StyleSheet> object_;
 
   DISALLOW_COPY_AND_ASSIGN(CSSStyleSheetHandle);
 };

@@ -7,6 +7,9 @@
 #include "base/logging.h"
 #include "base/strings/stringprintf.h"
 #include "base/trace_event/trace_event.h"
+#include "evita/css/media_state.h"
+#include "evita/css/media_type.h"
+#include "evita/css/style_sheet.h"
 #include "evita/dom/bindings/exception_state.h"
 #include "evita/dom/css/css_style_sheet_handle.h"
 #include "evita/dom/public/cursor.h"
@@ -16,9 +19,6 @@
 #include "evita/dom/scheduler/scheduler.h"
 #include "evita/dom/script_host.h"
 #include "evita/dom/visuals/node_handle.h"
-#include "evita/visuals/css/media_state.h"
-#include "evita/visuals/css/media_type.h"
-#include "evita/visuals/css/style_sheet.h"
 #include "evita/visuals/display/public/display_item_list.h"
 #include "evita/visuals/dom/document.h"
 #include "evita/visuals/view/public/selection.h"
@@ -32,7 +32,7 @@ namespace dom {
 //
 VisualWindow::VisualWindow(ScriptHost* script_host,
                            visuals::Document* document,
-                           visuals::css::StyleSheet* style_sheet)
+                           css::StyleSheet* style_sheet)
     : Scriptable(script_host),
       view_(new visuals::View(*document, *this, *this, {style_sheet})) {
   script_host->view_delegate()->CreateVisualWindow(window_id());
@@ -115,13 +115,13 @@ bool VisualWindow::HandleMouseEvent(const domapi::MouseEvent& event) {
   return false;
 }
 
-// visuals::css::Media
-visuals::css::MediaState VisualWindow::media_state() const {
-  return visuals::css::MediaState::Interactive;
+// css::Media
+css::MediaState VisualWindow::media_state() const {
+  return css::MediaState::Interactive;
 }
 
-visuals::css::MediaType VisualWindow::media_type() const {
-  return visuals::css::MediaType::Screen;
+css::MediaType VisualWindow::media_type() const {
+  return css::MediaType::Screen;
 }
 
 gfx::FloatSize VisualWindow::viewport_size() const {
@@ -146,7 +146,7 @@ void VisualWindow::DidChangeView() {
 void VisualWindow::DidChangeBounds(int left, int top, int right, int bottom) {
   Window::DidChangeBounds(left, top, right, bottom);
   viewport_size_ = gfx::FloatSize(right - left, bottom - top);
-  visuals::css::Media::DidChangeViewportSize();
+  css::Media::DidChangeViewportSize();
 }
 
 void VisualWindow::DidDestroyWindow() {

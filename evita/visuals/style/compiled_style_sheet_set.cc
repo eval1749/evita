@@ -6,11 +6,11 @@
 
 #include "base/strings/string16.h"
 #include "evita/base/strings/atomic_string.h"
-#include "evita/visuals/css/rule.h"
-#include "evita/visuals/css/selector_builder.h"
-#include "evita/visuals/css/style.h"
-#include "evita/visuals/css/style_editor.h"
-#include "evita/visuals/css/style_sheet.h"
+#include "evita/css/rule.h"
+#include "evita/css/selector_builder.h"
+#include "evita/css/style.h"
+#include "evita/css/style_editor.h"
+#include "evita/css/style_sheet.h"
 #include "evita/visuals/dom/element.h"
 
 namespace visuals {

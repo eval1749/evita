@@ -5,7 +5,7 @@
 #include "evita/visuals/layout/simple_box_tree.h"
 
 #include "base/logging.h"
-#include "evita/visuals/css/mock_media.h"
+#include "evita/css/mock_media.h"
 #include "evita/visuals/dom/document.h"
 #include "evita/visuals/layout/box_editor.h"
 #include "evita/visuals/layout/root_box.h"

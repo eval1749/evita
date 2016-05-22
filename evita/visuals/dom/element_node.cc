@@ -4,7 +4,7 @@
 
 #include "evita/visuals/dom/element_node.h"
 
-#include "evita/visuals/css/style.h"
+#include "evita/css/style.h"
 
 namespace visuals {
 

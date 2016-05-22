@@ -213,6 +213,7 @@ test("evita_dom_tests") {
     # TODO(eval1749): We should not have "application" dependency on
     # "evita_dom_test".
     "//evita:application",
+    "//evita/css",
     "//evita/dom/base:test_files",
     "//evita/dom/components:test_files",
     "//evita/dom/css:test_files",
@@ -226,7 +227,6 @@ test("evita_dom_tests") {
     "//evita/dom/unicode:test_files",
     "//evita/dom/visuals:test_files",
     "//evita/dom/windows:test_files",
-    "//evita/visuals/css",
     "//evita/visuals/display:public",
   ]
 }

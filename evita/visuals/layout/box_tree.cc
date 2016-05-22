@@ -10,8 +10,8 @@
 
 #include "base/logging.h"
 #include "base/trace_event/trace_event.h"
-#include "evita/visuals/css/media.h"
-#include "evita/visuals/css/style.h"
+#include "evita/css/media.h"
+#include "evita/css/style.h"
 #include "evita/visuals/dom/descendants_or_self.h"
 #include "evita/visuals/dom/document.h"
 #include "evita/visuals/dom/element.h"

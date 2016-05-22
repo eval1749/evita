@@ -4,13 +4,13 @@
 
 #include "evita/dom/visuals/node_handle.h"
 
+#include "evita/css/style.h"
 #include "evita/dom/bindings/exception_state.h"
 #include "evita/dom/components/imaging/image_data.h"
 #include "evita/dom/converter.h"
 #include "evita/dom/css/css_style.h"
 #include "evita/dom/script_host.h"
 #include "evita/ginx/runner.h"
-#include "evita/visuals/css/style.h"
 #include "evita/visuals/dom/document.h"
 #include "evita/visuals/dom/element.h"
 #include "evita/visuals/dom/image.h"

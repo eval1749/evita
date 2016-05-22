@@ -9,11 +9,11 @@
 
 #include "evita/visuals/dom/container_node.h"
 
-namespace visuals {
-
 namespace css {
 class Style;
 }
+
+namespace visuals {
 
 //////////////////////////////////////////////////////////////////////
 //

@@ -13,16 +13,16 @@
 #include "base/macros.h"
 #include "base/strings/string_piece.h"
 
+namespace css {
+class Style;
+}
+
 namespace visuals {
 
 class ContainerNode;
 class Document;
 class ElementNode;
 class Node;
-
-namespace css {
-class Style;
-}
 
 //////////////////////////////////////////////////////////////////////
 //

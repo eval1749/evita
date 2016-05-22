@@ -9,7 +9,7 @@
 #include <memory>
 
 #include "base/macros.h"
-#include "evita/visuals/css/media_observer.h"
+#include "evita/css/media_observer.h"
 #include "evita/visuals/dom/document_observer.h"
 #include "evita/visuals/style/style_tree_observer.h"
 #include "evita/visuals/view/public/selection_model.h"

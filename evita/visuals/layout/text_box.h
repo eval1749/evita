@@ -8,7 +8,7 @@
 #include <memory>
 
 #include "base/strings/string_piece.h"
-#include "evita/visuals/css/values.h"
+#include "evita/css/values.h"
 #include "evita/visuals/layout/content_box.h"
 
 namespace visuals {

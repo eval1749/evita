@@ -12,23 +12,14 @@
 
 #include "base/strings/string_util.h"
 #include "base/strings/stringprintf.h"
-#include "evita/visuals/css/values.h"
-#include "evita/visuals/css/values/color_value.h"
-#include "evita/visuals/css/values/ref_counted_string.h"
+#include "evita/css/values.h"
+#include "evita/css/values/color_value.h"
+#include "evita/css/values/ref_counted_string.h"
 
 namespace dom {
 
 template <typename T>
 using Maybe = base::Maybe<T>;
-
-#define V(Name, name, text) using Css##Name = visuals::css::Name;
-FOR_EACH_VISUAL_CSS_VALUE(V)
-#undef V
-
-using CssColorValue = visuals::css::ColorValue;
-using CssLength = visuals::css::Length;
-using CssPercentage = visuals::css::Percentage;
-using CssString = visuals::css::String;
 
 namespace {
 
@@ -50,9 +41,9 @@ Maybe<int> ParseHex(base::StringPiece16 text) {
 
 }  // namespace
 
-Maybe<CssColorValue> ParseColorValue(base::StringPiece16 text) {
+Maybe<css::ColorValue> ParseColorValue(base::StringPiece16 text) {
   if (text.size() == 0)
-    return base::Nothing<CssColorValue>();
+    return base::Nothing<css::ColorValue>();
   if (text[0] == '#') {
     if (text.size() == 4) {
       // #rgb
@@ -61,12 +52,13 @@ Maybe<CssColorValue> ParseColorValue(base::StringPiece16 text) {
       const auto& maybe_blue = ParseHex(text.substr(3, 1));
       if (maybe_red.IsNothing() || maybe_green.IsNothing() ||
           maybe_blue.IsNothing()) {
-        return base::Nothing<CssColorValue>();
+        return base::Nothing<css::ColorValue>();
       }
       auto const red = DoubleHex(maybe_red.FromJust());
       auto const green = DoubleHex(maybe_green.FromJust());
       auto const blue = DoubleHex(maybe_blue.FromJust());
-      return base::Just<CssColorValue>(CssColorValue::Rgba(red, green, blue));
+      return base::Just<css::ColorValue>(
+          css::ColorValue::Rgba(red, green, blue));
     }
     if (text.size() == 7) {
       // #rrggbb
@@ -75,12 +67,13 @@ Maybe<CssColorValue> ParseColorValue(base::StringPiece16 text) {
       const auto& maybe_blue = ParseHex(text.substr(5, 2));
       if (maybe_red.IsNothing() || maybe_green.IsNothing() ||
           maybe_blue.IsNothing()) {
-        return base::Nothing<CssColorValue>();
+        return base::Nothing<css::ColorValue>();
       }
       auto const red = maybe_red.FromJust();
       auto const green = maybe_green.FromJust();
       auto const blue = maybe_blue.FromJust();
-      return base::Just<CssColorValue>(CssColorValue::Rgba(red, green, blue));
+      return base::Just<css::ColorValue>(
+          css::ColorValue::Rgba(red, green, blue));
     }
     // TODO(eval1749): Once we support "rgba(red, green, blue, alpha)", this
     // syntax should be removed.
@@ -92,24 +85,24 @@ Maybe<CssColorValue> ParseColorValue(base::StringPiece16 text) {
       const auto& maybe_alpha = ParseHex(text.substr(7, 2));
       if (maybe_red.IsNothing() || maybe_green.IsNothing() ||
           maybe_blue.IsNothing() || maybe_alpha.IsNothing()) {
-        return base::Nothing<CssColorValue>();
+        return base::Nothing<css::ColorValue>();
       }
       auto const red = maybe_red.FromJust();
       auto const green = maybe_green.FromJust();
       auto const blue = maybe_blue.FromJust();
       auto const alpha = maybe_alpha.FromJust() / 255.0f;
-      return base::Just<CssColorValue>(
-          CssColorValue::Rgba(red, green, blue, alpha));
+      return base::Just<css::ColorValue>(
+          css::ColorValue::Rgba(red, green, blue, alpha));
     }
   }
   if (text == L"transparent")
-    return base::Just<CssColorValue>(CssColorValue());
+    return base::Just<css::ColorValue>(css::ColorValue());
   // TODO(eval1749): Parse color name
   // TODO(eval1749): Parse 'rgba(red, green, blue, alpha)
-  return base::Nothing<CssColorValue>();
+  return base::Nothing<css::ColorValue>();
 }
 
-Maybe<CssLength> ParseLength(base::StringPiece16 text) {
+Maybe<css::Length> ParseLength(base::StringPiece16 text) {
   enum class State {
     AfterDecimalPoint,
     DecimalPoint,
@@ -136,11 +129,11 @@ Maybe<CssLength> ParseLength(base::StringPiece16 text) {
           state = State::Digit;
           break;
         }
-        return base::Nothing<CssLength>();
+        return base::Nothing<css::Length>();
       case State::Digit:
         if (base::IsAsciiDigit(code)) {
           if (u64 > std::numeric_limits<uint64_t>::max() / 10)
-            return base::Nothing<CssLength>();
+            return base::Nothing<css::Length>();
           u64 *= 10;
           u64 += code - '0';
           break;
@@ -149,12 +142,12 @@ Maybe<CssLength> ParseLength(base::StringPiece16 text) {
           state = State::DecimalPoint;
           break;
         }
-        return base::Nothing<CssLength>();
+        return base::Nothing<css::Length>();
       case State::DecimalPoint:
         if (!base::IsAsciiDigit(code))
-          return base::Nothing<CssLength>();
+          return base::Nothing<css::Length>();
         if (u64 > std::numeric_limits<uint64_t>::max() / 10)
-          return base::Nothing<CssLength>();
+          return base::Nothing<css::Length>();
         --exponent;
         u64 *= 10;
         u64 += code - '0';
@@ -162,35 +155,35 @@ Maybe<CssLength> ParseLength(base::StringPiece16 text) {
         break;
       case State::AfterDecimalPoint:
         if (!base::IsAsciiDigit(code))
-          return base::Nothing<CssLength>();
+          return base::Nothing<css::Length>();
         if (u64 > std::numeric_limits<uint64_t>::max() / 10)
-          return base::Nothing<CssLength>();
+          return base::Nothing<css::Length>();
         --exponent;
         u64 *= 10;
         u64 += code - '0';
         break;
       default:
         NOTREACHED() << "Invalid state " << static_cast<int>(state);
-        return base::Nothing<CssLength>();
+        return base::Nothing<css::Length>();
     }
   }
   if (exponent >= 0) {
     const auto f32 = static_cast<float>(u64) * std::pow(10.0f, exponent);
-    return base::Just<CssLength>(CssLength(sign * f32));
+    return base::Just<css::Length>(css::Length(sign * f32));
   }
   const auto f32 = static_cast<float>(u64) / std::pow(10.0f, -exponent);
-  return base::Just<CssLength>(CssLength(sign * f32));
+  return base::Just<css::Length>(css::Length(sign * f32));
 }
 
-Maybe<CssPercentage> ParsePercentage(base::StringPiece16 text) {
-  return base::Nothing<CssPercentage>();
+Maybe<css::Percentage> ParsePercentage(base::StringPiece16 text) {
+  return base::Nothing<css::Percentage>();
 }
 
-Maybe<CssString> ParseString(base::StringPiece16 text) {
-  return base::Just<CssString>(CssString(text));
+Maybe<css::String> ParseString(base::StringPiece16 text) {
+  return base::Just<css::String>(css::String(text));
 }
 
-base::string16 UnparseColorValue(const CssColorValue& color) {
+base::string16 UnparseColorValue(const css::ColorValue& color) {
   const auto red = static_cast<int>(color.value().red() * 255);
   const auto green = static_cast<int>(color.value().green() * 255);
   const auto blue = static_cast<int>(color.value().blue() * 255);
@@ -202,15 +195,15 @@ base::string16 UnparseColorValue(const CssColorValue& color) {
   return base::StringPrintf(L"rgba(%d, %d, %d, %f)", red, green, blue, alpha);
 }
 
-base::string16 UnparseLength(const visuals::css::Length& value) {
+base::string16 UnparseLength(const css::Length& value) {
   return base::StringPrintf(L"%f", value.number());
 }
 
-base::string16 UnparsePercentage(const visuals::css::Percentage& value) {
+base::string16 UnparsePercentage(const css::Percentage& value) {
   return base::StringPrintf(L"%f%%", value.value());
 }
 
-base::string16 UnparseString(const visuals::css::String& value) {
+base::string16 UnparseString(const css::String& value) {
   if (!value.value())
     return base::string16();
   return value.data().as_string();

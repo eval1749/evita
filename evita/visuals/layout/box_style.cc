@@ -6,9 +6,9 @@
 
 #include "evita/visuals/layout/box.h"
 
-#include "evita/visuals/css/properties.h"
-#include "evita/visuals/css/style.h"
-#include "evita/visuals/css/style_builder.h"
+#include "evita/css/properties.h"
+#include "evita/css/style.h"
+#include "evita/css/style_builder.h"
 #include "evita/visuals/layout/border.h"
 #include "evita/visuals/layout/box_visitor.h"
 #include "evita/visuals/layout/image_box.h"

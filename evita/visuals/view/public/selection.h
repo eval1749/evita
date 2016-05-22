@@ -6,13 +6,17 @@
 #define EVITA_VISUALS_VIEW_PUBLIC_SELECTION_H_
 
 #include "base/observer_list.h"
-#include "evita/visuals/css/media_observer.h"
+#include "evita/css/media_observer.h"
 #include "evita/visuals/dom/document_observer.h"
 #include "evita/visuals/view/public/selection_model.h"
 #include "evita/visuals/view/public/view_lifecycle_client.h"
 
 namespace base {
 class RepeatingTimer;
+}
+
+namespace css {
+class Media;
 }
 
 namespace visuals {
@@ -23,10 +27,6 @@ class SelectionEdtior;
 class SelectionModel;
 class SelectionObserver;
 class ViewLifecycle;
-
-namespace css {
-class Media;
-}
 
 //////////////////////////////////////////////////////////////////////
 //

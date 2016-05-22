@@ -3,10 +3,10 @@
 // found in the LICENSE file.
 
 #include "evita/visuals/paint/painter.h"
+#include "evita/css/style.h"
+#include "evita/css/style_builder.h"
 #include "evita/gfx/base/colors/float_color.h"
 #include "evita/gfx/base/geometry/float_rect.h"
-#include "evita/visuals/css/style.h"
-#include "evita/visuals/css/style_builder.h"
 #include "evita/visuals/display/display_item_list_builder.h"
 #include "evita/visuals/display/public/display_item_list.h"
 #include "evita/visuals/display/public/display_items.h"

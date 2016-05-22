@@ -6,8 +6,8 @@
 
 #include "base/logging.h"
 #include "base/timer/timer.h"
-#include "evita/visuals/css/media.h"
-#include "evita/visuals/css/media_state.h"
+#include "evita/css/media.h"
+#include "evita/css/media_state.h"
 #include "evita/visuals/dom/document.h"
 #include "evita/visuals/view/public/selection_model.h"
 #include "evita/visuals/view/public/selection_observer.h"

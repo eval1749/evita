@@ -12,17 +12,17 @@
 
 #include "base/macros.h"
 #include "base/observer_list.h"
-#include "evita/visuals/css/selector.h"
-#include "evita/visuals/css/style_sheet_observer.h"
-
-namespace visuals {
-
-class ElementNode;
+#include "evita/css/selector.h"
+#include "evita/css/style_sheet_observer.h"
 
 namespace css {
 class Style;
 class StyleSheet;
 }
+
+namespace visuals {
+
+class ElementNode;
 
 //////////////////////////////////////////////////////////////////////
 //

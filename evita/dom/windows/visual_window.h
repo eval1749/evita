@@ -10,18 +10,19 @@
 #include "evita/dom/windows/window.h"
 
 #include "base/observer_list.h"
+#include "evita/css/media.h"
 #include "evita/gfx/base/geometry/float_size.h"
-#include "evita/visuals/css/media.h"
 #include "evita/visuals/view/public/user_action_source.h"
 #include "evita/visuals/view/view_observer.h"
 
-namespace visuals {
 namespace css {
 class StyleSheet;
 }
+
+namespace visuals {
 class Document;
 class View;
-}  // namespace visuals
+}
 
 namespace dom {
 
@@ -38,7 +39,7 @@ class VisualWindowClass;
 // VisualWindow
 //
 class VisualWindow final : public ginx::Scriptable<VisualWindow, Window>,
-                           public visuals::css::Media,
+                           public css::Media,
                            public visuals::UserActionSource,
                            public visuals::ViewObserver {
   DECLARE_SCRIPTABLE_OBJECT(VisualWindow);
@@ -51,7 +52,7 @@ class VisualWindow final : public ginx::Scriptable<VisualWindow, Window>,
 
   VisualWindow(ScriptHost* script_host,
                visuals::Document* document,
-               visuals::css::StyleSheet* style_sheet);
+               css::StyleSheet* style_sheet);
 
   const visuals::Document& document() const;
 
@@ -69,9 +70,9 @@ class VisualWindow final : public ginx::Scriptable<VisualWindow, Window>,
   // ViewEventTarget
   bool HandleMouseEvent(const domapi::MouseEvent& event) final;
 
-  // visuals::css::Media
-  visuals::css::MediaState media_state() const final;
-  visuals::css::MediaType media_type() const final;
+  // css::Media
+  css::MediaState media_state() const final;
+  css::MediaType media_type() const final;
   gfx::FloatSize viewport_size() const final;
 
   // visuals::UserActionSource

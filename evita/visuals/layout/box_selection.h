@@ -5,8 +5,8 @@
 #ifndef EVITA_VISUALS_LAYOUT_BOX_SELECTION_H_
 #define EVITA_VISUALS_LAYOUT_BOX_SELECTION_H_
 
+#include "evita/css/values.h"
 #include "evita/gfx/base/colors/float_color.h"
-#include "evita/visuals/css/values.h"
 
 namespace visuals {
 

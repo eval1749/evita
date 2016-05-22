@@ -7,11 +7,11 @@
 
 #include "base/macros.h"
 
-namespace visuals {
-
 namespace css {
 class Style;
 }
+
+namespace visuals {
 
 class ElementNode;
 

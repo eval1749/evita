@@ -10,23 +10,23 @@
 
 #include "base/macros.h"
 #include "evita/base/castable.h"
+#include "evita/css/values.h"
 #include "evita/gfx/base/colors/float_color.h"
 #include "evita/gfx/base/geometry/float_rect.h"
-#include "evita/visuals/css/values.h"
 #include "evita/visuals/layout/border.h"
 #include "evita/visuals/layout/box_forward.h"
 #include "evita/visuals/layout/margin.h"
 #include "evita/visuals/layout/padding.h"
+
+namespace css {
+class Style;
+}
 
 namespace visuals {
 
 class BoxEditor;
 class Node;
 class RootBox;
-
-namespace css {
-class Style;
-}
 
 #define DECLARE_VISUAL_BOX_CLASS(self, super) \
   DECLARE_CASTABLE_CLASS(self, super)         \

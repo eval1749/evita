@@ -9,14 +9,14 @@
 #include "base/strings/string16.h"
 #include "evita/visuals/dom/nodes_forward.h"
 
+namespace css {
+class Style;
+}
+
 namespace visuals {
 
 class ImageData;
 class ShapeData;
-
-namespace css {
-class Style;
-}
 
 //////////////////////////////////////////////////////////////////////
 //

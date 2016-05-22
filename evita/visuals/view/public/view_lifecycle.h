@@ -10,6 +10,10 @@
 #include "base/macros.h"
 #include "base/observer_list.h"
 
+namespace css {
+class Media;
+}
+
 namespace visuals {
 
 #define FOR_EACH_TREE_LIFECYCLE_STATE(V) \
@@ -29,10 +33,6 @@ namespace visuals {
 
 class Document;
 class ViewLifecycleObserver;
-
-namespace css {
-class Media;
-}
 
 //////////////////////////////////////////////////////////////////////
 //

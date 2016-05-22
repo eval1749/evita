@@ -9,16 +9,16 @@
 
 #include "evita/visuals/dom/node_visitor.h"
 
+namespace css {
+class Style;
+}
+
 namespace visuals {
 
 class Box;
 class BoxMap;
 class ContainerBox;
 class RootBox;
-
-namespace css {
-class Style;
-}
 
 //////////////////////////////////////////////////////////////////////
 //

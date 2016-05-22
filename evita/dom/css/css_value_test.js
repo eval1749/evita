@@ -9,7 +9,7 @@ goog.scope(function() {
 
 const Value = css.Value;
 
-// See also "//evita/visuals/css/properties.in" for implemented CSS properties
+// See also "//evita/css/properties.in" for implemented CSS properties
 // and keywords.
 testing.test('css.Value.basic', function(t) {
   t.expect(Value.isValidFor('solid', 'border-top-style')).toEqual(true);

@@ -5,26 +5,23 @@
 #include "evita/dom/css/css_style_sheet_handle.h"
 
 #include "base/logging.h"
+#include "evita/css/rule.h"
+#include "evita/css/selector_parser.h"
+#include "evita/css/style.h"
+#include "evita/css/style_sheet.h"
 #include "evita/dom/bindings/exception_state.h"
 #include "evita/dom/converter.h"
 #include "evita/dom/css/css_style.h"
 #include "evita/dom/script_host.h"
 #include "evita/ginx/runner.h"
-#include "evita/visuals/css/rule.h"
-#include "evita/visuals/css/selector_parser.h"
-#include "evita/visuals/css/style.h"
-#include "evita/visuals/css/style_sheet.h"
 
 namespace dom {
-
-using CssSelector = visuals::css::Selector;
-using CssStyle = visuals::css::Style;
 
 //////////////////////////////////////////////////////////////////////
 //
 // CSSStyleSheetHandle
 //
-CSSStyleSheetHandle::CSSStyleSheetHandle() : object_(new CssStyleSheet()) {}
+CSSStyleSheetHandle::CSSStyleSheetHandle() : object_(new css::StyleSheet()) {}
 
 CSSStyleSheetHandle::~CSSStyleSheetHandle() {}
 
@@ -32,7 +29,7 @@ CSSStyleSheetHandle::~CSSStyleSheetHandle() {}
 void CSSStyleSheetHandle::AppendStyleRule(CSSStyleSheetHandle* handle,
                                           const base::string16& selector_text,
                                           v8::Local<v8::Map> raw_style) {
-  CssSelector::Parser parser;
+  css::Selector::Parser parser;
   const auto& selector = parser.Parse(selector_text);
   if (!parser.error().empty())
     return;
@@ -54,7 +51,7 @@ void CSSStyleSheetHandle::InsertStyleRule(CSSStyleSheetHandle* handle,
                                           const base::string16& selector_text,
                                           v8::Local<v8::Map> raw_style,
                                           int index) {
-  CssSelector::Parser parser;
+  css::Selector::Parser parser;
   const auto& selector = parser.Parse(selector_text);
   if (!parser.error().empty())
     return;

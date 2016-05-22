@@ -5,7 +5,7 @@
 #include <ostream>
 
 #include "base/strings/stringprintf.h"
-#include "evita/visuals/css/style.h"
+#include "evita/css/style.h"
 #include "evita/visuals/dom/image_data.h"
 #include "evita/visuals/dom/shape_data.h"
 #include "evita/visuals/layout/box_tree.h"

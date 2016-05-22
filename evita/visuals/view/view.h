@@ -14,6 +14,11 @@
 #include "evita/visuals/view/public/hit_test_result.h"
 #include "evita/visuals/view/public/view_lifecycle_observer.h"
 
+namespace css {
+class Media;
+class StyleSheet;
+}
+
 namespace visuals {
 
 class BoxTree;
@@ -25,11 +30,6 @@ class StyleTree;
 class UserActionSource;
 class ViewLifecycle;
 class ViewObserver;
-
-namespace css {
-class Media;
-class StyleSheet;
-}
 
 //////////////////////////////////////////////////////////////////////
 //

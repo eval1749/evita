@@ -18,16 +18,23 @@ ComputedStyle::ComputedStyle(const ComputedStyle& other)
     : bgcolor_(other.bgcolor_),
       color_(other.color_),
       font_(other.font_),
-      text_decoration_(other.text_decoration_) {}
+      text_decoration_color_(other.text_decoration_color_),
+      text_decoration_line_(other.text_decoration_line_),
+      text_decoration_style_(other.text_decoration_style_) {}
 
 ComputedStyle::ComputedStyle()
-    : font_(nullptr), text_decoration_(css::TextDecoration::None) {}
+    : font_(nullptr),
+      text_decoration_line_(css::TextDecorationLine::None),
+      text_decoration_style_(css::TextDecorationStyle::Solid) {}
 
 ComputedStyle::~ComputedStyle() {}
 
 bool ComputedStyle::operator==(const ComputedStyle& other) const {
   return bgcolor_ == other.bgcolor_ && color_ == other.color_ &&
-         font_ == other.font_ && text_decoration_ == other.text_decoration_;
+         font_ == other.font_ &&
+         text_decoration_color_ == other.text_decoration_color_ &&
+         text_decoration_line_ == other.text_decoration_line_ &&
+         text_decoration_style_ == other.text_decoration_style_;
 }
 
 bool ComputedStyle::operator!=(const ComputedStyle& other) const {
@@ -43,7 +50,10 @@ size_t hash<layout::ComputedStyle>::operator()(
   result ^= std::hash<gfx::ColorF>()(style.bgcolor());
   result ^= std::hash<gfx::ColorF>()(style.color());
   result ^= std::hash<gfx::Font>()(style.font());
-  result ^= std::hash<css::TextDecoration>()(style.text_decoration());
+  result ^= std::hash<gfx::ColorF>()(style.text_decoration_color());
+  result ^= std::hash<css::TextDecorationLine>()(style.text_decoration_line());
+  result ^=
+      std::hash<css::TextDecorationStyle>()(style.text_decoration_style());
   return result;
 }
 }  // namespace std

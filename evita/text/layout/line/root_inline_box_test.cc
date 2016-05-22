@@ -103,7 +103,6 @@ ComputedStyle CreateStyle() {
   css_style.set_font_weight(css::FontWeight::Normal);
   css_style.set_font_size(10);
   css_style.set_font_style(css::FontStyle::Normal);
-  css_style.set_text_decoration(css::TextDecoration::None);
   const auto& font = FontSet::GetFont(css_style, 'x');
   return ComputedStyle::Builder().Load(css_style, *font).Build();
 }

@@ -184,52 +184,40 @@ void PaintVisitor::VisitInlineMarkerBox(InlineMarkerBox* inline_box) {
 
 void PaintVisitor::VisitInlineTextBox(InlineTextBox* inline_box) {
   DCHECK(!inline_box->characters().empty());
+  const auto& style = inline_box->style();
   auto const text_rect =
       gfx::RectF(gfx::PointF(rect_.left, rect_.top + inline_box->top()),
                  gfx::SizeF(rect_.width(), inline_box->height()));
   FillBackground(canvas_, rect_, *inline_box);
-  gfx::Brush text_brush(canvas_, inline_box->style().color());
-  DrawText(canvas_, inline_box->style().font(), text_brush, text_rect,
+  gfx::Brush text_brush(canvas_, style.color());
+  DrawText(canvas_, style.font(), text_brush, text_rect,
            inline_box->characters());
 
-  auto const baseline = text_rect.bottom - inline_box->descent();
-  auto const underline = baseline + inline_box->font().underline();
+  if (style.text_decoration_line() != css::TextDecorationLine::Underline)
+    return;
+
+  const auto baseline = text_rect.bottom - inline_box->descent();
+  const auto underline = baseline + inline_box->font().underline();
+  const auto& brush = gfx::Brush(canvas_, style.text_decoration_color());
   const auto& font = inline_box->font();
-  switch (inline_box->style().text_decoration()) {
-    case css::TextDecoration::ImeInput:
-      DrawWave(canvas_, font, text_brush, rect_, underline);
-      break;
-
-    case css::TextDecoration::ImeInactiveA:
-      DrawHLine(canvas_, font, text_brush, rect_.left, rect_.right, underline);
-      break;
-
-    case css::TextDecoration::ImeInactiveB:
-      DrawHLine(canvas_, font, text_brush, rect_.left, rect_.right, underline);
-      break;
-
-    case css::TextDecoration::ImeActive:
+  switch (style.text_decoration_style()) {
+    case css::TextDecorationStyle::Dashed:
+    case css::TextDecorationStyle::Dotted:
+    case css::TextDecorationStyle::Double:
       DrawLine(canvas_, font, text_brush, rect_.left, underline, rect_.right,
                underline, 2.0f);
-      break;
+      return;
 
-    case css::TextDecoration::None:
-      break;
+    case css::TextDecorationStyle::Solid:
+      DrawHLine(canvas_, font, brush, rect_.left, rect_.right, underline);
+      return;
 
-    case css::TextDecoration::GreenWave:
-      DrawWave(canvas_, font, gfx::Brush(canvas_, gfx::ColorF::Green), rect_,
-               baseline);
-      break;
-
-    case css::TextDecoration::RedWave:
-      DrawWave(canvas_, font, gfx::Brush(canvas_, gfx::ColorF::Red), rect_,
-               baseline);
-      break;
-
-    case css::TextDecoration::Underline:
-      DrawHLine(canvas_, font, text_brush, rect_.left, rect_.right, underline);
-      break;
+    case css::TextDecorationStyle::Wavy:
+      DrawWave(canvas_, font, brush, rect_, baseline);
+      return;
   }
+  NOTREACHED() << "We should handle text-decoration-style: "
+               << static_cast<int>(style.text_decoration_style());
 }
 
 void PaintVisitor::VisitInlineUnicodeBox(InlineUnicodeBox* inline_box) {

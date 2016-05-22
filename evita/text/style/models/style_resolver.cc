@@ -23,14 +23,6 @@ void InstallSyntaxColor(StyleSheet* style_sheet,
   style_sheet->AddRule(selector, style);
 }
 
-void InstallTextDecoration(StyleSheet* style_sheet,
-                           base::AtomicString selector,
-                           TextDecoration text_decoration) {
-  Style style;
-  style.set_text_decoration(text_decoration);
-  style_sheet->AddRule(selector, style);
-}
-
 StyleSheet* GetDefaultStyleSheet() {
   CR_DEFINE_STATIC_LOCAL(StyleSheet, default_style_sheet, ());
   if (default_style_sheet.Find(StyleSelector::defaults()))
@@ -41,7 +33,6 @@ StyleSheet* GetDefaultStyleSheet() {
   default_style.set_font_size(10);
   default_style.set_font_style(css::FontStyle::Normal);
   default_style.set_font_weight(css::FontWeight::Normal);
-  default_style.set_text_decoration(css::TextDecoration::None);
   default_style_sheet.AddRule(StyleSelector::defaults(), default_style);
 
   Style marker_style;
@@ -84,11 +75,15 @@ StyleSheet* GetDefaultStyleSheet() {
 
   // Spelling
   Style red_wave;
-  red_wave.set_text_decoration(css::TextDecoration::RedWave);
+  red_wave.set_text_decoration_color(Color(255, 0, 0));
+  red_wave.set_text_decoration_line(css::TextDecorationLine::Underline);
+  red_wave.set_text_decoration_style(css::TextDecorationStyle::Wavy);
   default_style_sheet.AddRule(StyleSelector::misspelled(), red_wave);
 
   Style green_wave;
-  green_wave.set_text_decoration(css::TextDecoration::GreenWave);
+  green_wave.set_text_decoration_color(Color(0, 255, 0));
+  green_wave.set_text_decoration_line(css::TextDecorationLine::Underline);
+  green_wave.set_text_decoration_style(css::TextDecorationStyle::Wavy);
   default_style_sheet.AddRule(StyleSelector::bad_grammar(), green_wave);
 
   // Syntax
@@ -120,19 +115,34 @@ StyleSheet* GetDefaultStyleSheet() {
                      Color(163, 21, 21));
 
   // IME
-  InstallTextDecoration(&default_style_sheet, StyleSelector::ime_inactive1(),
-                        TextDecoration::ImeInactiveA);
-  InstallTextDecoration(&default_style_sheet, StyleSelector::ime_inactive2(),
-                        TextDecoration::ImeInactiveB);
-  InstallTextDecoration(&default_style_sheet, StyleSelector::ime_input(),
-                        TextDecoration::ImeInput);
-  InstallTextDecoration(&default_style_sheet, StyleSelector::ime_active1(),
-                        TextDecoration::ImeActive);
+  {
+    Style style;
+    style.set_text_decoration_line(TextDecorationLine::Underline);
+    style.set_text_decoration_style(TextDecorationStyle::Solid);
+    default_style_sheet.AddRule(StyleSelector::ime_inactive1(), style);
+  }
+  {
+    Style style;
+    style.set_text_decoration_line(TextDecorationLine::Underline);
+    style.set_text_decoration_style(TextDecorationStyle::Solid);
+    default_style_sheet.AddRule(StyleSelector::ime_inactive2(), style);
+  }
+  {
+    Style style;
+    style.set_text_decoration_line(TextDecorationLine::Underline);
+    style.set_text_decoration_style(TextDecorationStyle::Wavy);
+    default_style_sheet.AddRule(StyleSelector::ime_input(), style);
+  }
+  {
+    Style style;
+    style.set_text_decoration_line(TextDecorationLine::Underline);
+    style.set_text_decoration_style(TextDecorationStyle::Double);
+    default_style_sheet.AddRule(StyleSelector::ime_active1(), style);
+  }
   {
     Style style;
     style.set_bgcolor(Color(51, 153, 255));
     style.set_color(Color(255, 255, 255));
-    style.set_text_decoration(TextDecoration::None);
     default_style_sheet.AddRule(StyleSelector::ime_active2(), style);
   }
 

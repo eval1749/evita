@@ -19,7 +19,14 @@ Builder& Builder::Load(const css::Style& model, const gfx::Font& font) {
   SetBackgroundColor(ColorToColorF(model.bgcolor()));
   SetColor(ColorToColorF(model.color()));
   SetFont(font);
-  SetTextDecoration(model.text_decoration());
+  if (model.has_text_decoration_color())
+    SetTextDecorationColor(ColorToColorF(model.text_decoration_color()));
+  else
+    SetTextDecorationColor(style_.color_);
+  if (model.has_text_decoration_line())
+    SetTextDecorationLine(model.text_decoration_line());
+  if (model.has_text_decoration_style())
+    SetTextDecorationStyle(model.text_decoration_style());
   return *this;
 }
 
@@ -38,8 +45,18 @@ Builder& Builder::SetFont(const gfx::Font& font) {
   return *this;
 }
 
-Builder& Builder::SetTextDecoration(css::TextDecoration decoration) {
-  style_.text_decoration_ = decoration;
+Builder& Builder::SetTextDecorationColor(const gfx::ColorF& color) {
+  style_.text_decoration_color_ = color;
+  return *this;
+}
+
+Builder& Builder::SetTextDecorationLine(css::TextDecorationLine line) {
+  style_.text_decoration_line_ = line;
+  return *this;
+}
+
+Builder& Builder::SetTextDecorationStyle(css::TextDecorationStyle style) {
+  style_.text_decoration_style_ = style;
   return *this;
 }
 

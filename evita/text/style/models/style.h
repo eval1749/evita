@@ -25,27 +25,31 @@ enum class FontWeight {
   Bold,
 };
 
-enum class TextDecoration {
+enum class TextDecorationLine {
   None,
-  GreenWave,
-  RedWave,
   Underline,
-  ImeInput,      // dotted underline
-  ImeActive,     // 2 pixel underline
-  ImeInactiveA,  // 1 pixel underline
-  ImeInactiveB,  // 1 pixel underline
+};
+
+enum class TextDecorationStyle {
+  Dashed,
+  Dotted,
+  Double,
+  Solid,
+  Wavy,
 };
 
 // name, CapitalName, type
-#define FOR_EACH_CSS_PROPERTY(V)      \
-  V(bgcolor, BgColor, Color)          \
-  V(color, Color, Color)              \
-  V(font_family, FontFamily)          \
-  V(font_size, FontSize)              \
-  V(font_style, FontStyle)            \
-  V(font_weight, FontWeight)          \
-  V(marker_color, MarkerColor, Color) \
-  V(text_decoration, TextDecoration, TextDecoration)
+#define FOR_EACH_CSS_PROPERTY(V)                                  \
+  V(bgcolor, BgColor, Color)                                      \
+  V(color, Color, Color)                                          \
+  V(font_family, FontFamily)                                      \
+  V(font_size, FontSize)                                          \
+  V(font_style, FontStyle)                                        \
+  V(font_weight, FontWeight)                                      \
+  V(marker_color, MarkerColor, Color)                             \
+  V(text_decoration_color, TextDecorationColor, Color)            \
+  V(text_decoration_line, TextDecorationLine, TextDecorationLine) \
+  V(text_decoration_style, TextDecorationStyle, TextDecorationStyle)
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -90,11 +94,23 @@ class Style final {
   bool has_marker_color() const { return (masks_ & Mask_MarkerColor) != 0; }
   void set_marker_color(Color marker_color);
 
-  TextDecoration text_decoration() const;
-  bool has_text_decoration() const {
-    return (masks_ & Mask_TextDecoration) != 0;
+  Color text_decoration_color() const;
+  bool has_text_decoration_color() const {
+    return (masks_ & Mask_TextDecorationColor) != 0;
   }
-  void set_text_decoration(TextDecoration text_decoration);
+  void set_text_decoration_color(Color color);
+
+  TextDecorationLine text_decoration_line() const;
+  bool has_text_decoration_line() const {
+    return (masks_ & Mask_TextDecorationLine) != 0;
+  }
+  void set_text_decoration_line(TextDecorationLine text_decorationLine);
+
+  TextDecorationStyle text_decoration_style() const;
+  bool has_text_decoration_style() const {
+    return (masks_ & Mask_TextDecorationStyle) != 0;
+  }
+  void set_text_decoration_style(TextDecorationStyle text_decorationStyle);
 
   static Style* Default();
 
@@ -111,8 +127,12 @@ class Style final {
     Mask_FontStyle = 1 << 4,
     Mask_FontWeight = 1 << 5,
     Mask_MarkerColor = 1 << 6,
-    Mask_TextDecoration = 1 << 7,
+    Mask_TextDecorationColor = 1 << 7,
+    Mask_TextDecorationLine = 1 << 8,
+    Mask_TextDecorationStyle = 1 << 9,
   };
+
+  void Prepare() const;
 
   Color bgcolor_;
   Color color_;
@@ -123,8 +143,9 @@ class Style final {
   FontWeight font_weight_;
   Color marker_color_;
   int masks_;
-  TextDecoration text_decoration_;
-  void Prepare() const;
+  Color text_decoration_color_;
+  TextDecorationLine text_decoration_line_ = TextDecorationLine::None;
+  TextDecorationStyle text_decoration_style_ = TextDecorationStyle::Solid;
 };
 
 }  // namespace css

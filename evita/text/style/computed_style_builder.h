@@ -25,7 +25,9 @@ class ComputedStyle::Builder {
   Builder& SetBackgroundColor(const gfx::ColorF& color);
   Builder& SetColor(const gfx::ColorF& color);
   Builder& SetFont(const gfx::Font& font);
-  Builder& SetTextDecoration(css::TextDecoration decoration);
+  Builder& SetTextDecorationColor(const gfx::ColorF& color);
+  Builder& SetTextDecorationLine(css::TextDecorationLine line);
+  Builder& SetTextDecorationStyle(css::TextDecorationStyle style);
 
  private:
   ComputedStyle style_;

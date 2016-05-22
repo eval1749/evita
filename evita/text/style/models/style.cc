@@ -75,7 +75,9 @@ Style::Style(const Style& other)
       font_weight_(other.font_weight_),
       marker_color_(other.marker_color_),
       masks_(other.masks_),
-      text_decoration_(other.text_decoration_) {}
+      text_decoration_color_(other.text_decoration_color_),
+      text_decoration_line_(other.text_decoration_line_),
+      text_decoration_style_(other.text_decoration_style_) {}
 
 Style::Style() : masks_(0) {}
 
@@ -96,7 +98,14 @@ bool Style::operator==(const Style& other) const {
     return false;
   if (has_marker_color() && marker_color_ != other.marker_color_)
     return false;
-  if (has_text_decoration() && text_decoration_ != other.text_decoration_)
+  if (has_text_decoration_color() &&
+      text_decoration_color_ != other.text_decoration_color_)
+    return false;
+  if (has_text_decoration_line() &&
+      text_decoration_line_ != other.text_decoration_line_)
+    return false;
+  if (has_text_decoration_style() &&
+      text_decoration_style_ != other.text_decoration_style_)
     return false;
   return !has_font_family() || font_family_ == other.font_family_;
 }
@@ -182,14 +191,34 @@ void Style::set_marker_color(Color color) {
   masks_ |= Mask_MarkerColor;
 }
 
-TextDecoration Style::text_decoration() const {
-  DCHECK(has_text_decoration());
-  return text_decoration_;
+Color Style::text_decoration_color() const {
+  DCHECK(has_text_decoration_color());
+  return text_decoration_color_;
 }
 
-void Style::set_text_decoration(TextDecoration text_decoration) {
-  text_decoration_ = text_decoration;
-  masks_ |= Mask_TextDecoration;
+void Style::set_text_decoration_color(Color text_decoration) {
+  text_decoration_color_ = text_decoration;
+  masks_ |= Mask_TextDecorationColor;
+}
+
+TextDecorationLine Style::text_decoration_line() const {
+  DCHECK(has_text_decoration_line());
+  return text_decoration_line_;
+}
+
+void Style::set_text_decoration_line(TextDecorationLine text_decoration) {
+  text_decoration_line_ = text_decoration;
+  masks_ |= Mask_TextDecorationLine;
+}
+
+TextDecorationStyle Style::text_decoration_style() const {
+  DCHECK(has_text_decoration_style());
+  return text_decoration_style_;
+}
+
+void Style::set_text_decoration_style(TextDecorationStyle text_decoration) {
+  text_decoration_style_ = text_decoration;
+  masks_ |= Mask_TextDecorationStyle;
 }
 
 Style* Style::Default() {
@@ -212,7 +241,8 @@ Style* Style::Default() {
     default_style.set_font_size(10);
     default_style.set_font_style(FontStyle::Normal);
     default_style.set_font_weight(FontWeight::Normal);
-    default_style.set_text_decoration(TextDecoration::None);
+    default_style.set_text_decoration_line(TextDecorationLine::None);
+    default_style.set_text_decoration_style(TextDecorationStyle::Solid);
     default_style.Prepare();
   }
 
@@ -252,8 +282,12 @@ void Style::Merge(const Style& other) {
     set_font_weight(other.font_weight());
   if (!has_marker_color() && other.has_marker_color())
     set_marker_color(other.marker_color());
-  if (!has_text_decoration() && other.has_text_decoration())
-    set_text_decoration(other.text_decoration());
+  if (!has_text_decoration_color() && other.has_text_decoration_color())
+    set_text_decoration_color(other.text_decoration_color());
+  if (!has_text_decoration_line() && other.has_text_decoration_line())
+    set_text_decoration_line(other.text_decoration_line());
+  if (!has_text_decoration_style() && other.has_text_decoration_style())
+    set_text_decoration_style(other.text_decoration_style());
 }
 
 void Style::OverrideBy(const Style& other) {
@@ -274,8 +308,12 @@ void Style::OverrideBy(const Style& other) {
     set_font_weight(other.font_weight());
   if (other.has_marker_color())
     set_marker_color(other.marker_color());
-  if (other.has_text_decoration())
-    set_text_decoration(other.text_decoration());
+  if (other.has_text_decoration_color())
+    set_text_decoration_color(other.text_decoration_color());
+  if (other.has_text_decoration_line())
+    set_text_decoration_line(other.text_decoration_line());
+  if (other.has_text_decoration_style())
+    set_text_decoration_style(other.text_decoration_style());
 }
 
 void Style::Prepare() const {
@@ -317,9 +355,19 @@ size_t hash<css::Style>::operator()(const css::Style& style) const {
     result <<= 1;
     result ^= std::hash<css::Color>()(style.marker_color());
   }
-  if (style.has_text_decoration()) {
+  if (style.has_text_decoration_color()) {
     result <<= 1;
-    result ^= std::hash<css::TextDecoration>()(style.text_decoration());
+    result ^= std::hash<css::Color>()(style.text_decoration_color());
+  }
+  if (style.has_text_decoration_line()) {
+    result <<= 1;
+    result ^=
+        std::hash<css::TextDecorationLine>()(style.text_decoration_line());
+  }
+  if (style.has_text_decoration_style()) {
+    result <<= 1;
+    result ^=
+        std::hash<css::TextDecorationStyle>()(style.text_decoration_style());
   }
   return result;
 }

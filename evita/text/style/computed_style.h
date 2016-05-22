@@ -35,7 +35,15 @@ class ComputedStyle {
   const gfx::ColorF& color() const { return color_; }
   const gfx::Font& font() const { return *font_; }
   void set_fond(const gfx::Font& font) { font_ = &font; }
-  css::TextDecoration text_decoration() const { return text_decoration_; }
+  const gfx::ColorF& text_decoration_color() const {
+    return text_decoration_color_;
+  }
+  css::TextDecorationLine text_decoration_line() const {
+    return text_decoration_line_;
+  }
+  css::TextDecorationStyle text_decoration_style() const {
+    return text_decoration_style_;
+  }
 
  private:
   ComputedStyle();
@@ -43,7 +51,9 @@ class ComputedStyle {
   gfx::ColorF bgcolor_;
   gfx::ColorF color_;
   const gfx::Font* font_;
-  css::TextDecoration text_decoration_;
+  gfx::ColorF text_decoration_color_;
+  css::TextDecorationLine text_decoration_line_;
+  css::TextDecorationStyle text_decoration_style_;
 };
 
 gfx::ColorF ColorToColorF(const css::Color& color);

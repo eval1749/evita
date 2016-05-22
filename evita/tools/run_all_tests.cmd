@@ -10,9 +10,6 @@ if "%config%"=="" set config=debug
 
 set exedir=%outdir%\%config%
 set tests=base dom gfx layout regex text visuals
-set test_log=%TEMP%\evita_all_tests.txt
-echo. > %test_log%
-
 echo exedir=%exedir% tests=%tests%
 
 set start=%TIME%
@@ -25,8 +22,9 @@ for %%x in (%tests%) do (
   set test_log=%TEMP%\evita_%%x_tests.log
   !test_exe! ^
       --single-process-tests ^
-      --test-launcher-retry-limit=1 > %test_log% 2>&1
-  grep -E -e "PASSED|CRASHED|FAIL|Fatal|FATAL" %test_log%
+      --test-launcher-retry-limit=1 > !test_log! 2>&1
+  echo    ERRORLEVEL=%ERRORLEVEL% !test_log!
+  grep -E -e "PASSED|CRASHED|FAIL|Fatal|FATAL" !test_log!
 )
 
 set end=%TIME%

@@ -13,7 +13,6 @@
 #include "evita/gfx/rect_conversions.h"
 #include "evita/text/layout/line/inline_box.h"
 #include "evita/text/layout/line/root_inline_box.h"
-#include "evita/text/layout/render_font_set.h"
 #include "evita/text/layout/text_format_context.h"
 #include "evita/text/layout/text_formatter.h"
 #include "evita/text/models/buffer.h"
@@ -40,7 +39,7 @@ class TextFormatterTest : public TextLayoutTestBase {
 
 float TextFormatterTest::WidthOf(const ComputedStyle& style,
                                  const base::string16& text) const {
-  return ::ceil(style.font().GetTextWidth(text));
+  return ::ceil(style.fonts()[0]->GetTextWidth(text));
 }
 
 TEST_F(TextFormatterTest, FormatLineBasic) {

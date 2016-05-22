@@ -206,7 +206,8 @@ TextWindow::TextWindow(ScriptHost* script_host,
       markers_(new text::MarkerSet(*selection_range->document()->buffer())),
       selection_(new TextSelection(this, selection_range)),
       text_view_(new layout::TextView(*selection_range->document()->buffer(),
-                                      *markers_)),
+                                      *markers_,
+                                      style_sheet)),
       vertical_scroll_bar_(
           new ScrollBar(domapi::ScrollBarOrientation::Vertical, this, this)) {
   document()->buffer()->AddObserver(this);

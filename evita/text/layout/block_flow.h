@@ -27,6 +27,7 @@ class TextFormatContext;
 class TextFormatter;
 class RootInlineBox;
 class RootInlineBoxCache;
+class StyleTree;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -35,13 +36,16 @@ class RootInlineBoxCache;
 class BlockFlow final : public text::BufferMutationObserver,
                         public text::MarkerSetObserver {
  public:
-  BlockFlow(const text::Buffer& buffer, const text::MarkerSet& markers);
+  BlockFlow(const text::Buffer& buffer,
+            const text::MarkerSet& markers,
+            const StyleTree& style_tree);
   ~BlockFlow();
 
   const gfx::RectF& bounds() const { return bounds_; }
   int version() const { return version_; }
   const std::list<RootInlineBox*>& lines() const { return lines_; }
   gfx::PointF origin() const { return bounds_.origin(); }
+  const StyleTree& style_tree() const { return style_tree_; }
   const text::Buffer& text_buffer() const { return text_buffer_; }
   text::Offset text_end() const;
   text::Offset text_start() const;
@@ -102,6 +106,7 @@ class BlockFlow final : public text::BufferMutationObserver,
   std::list<RootInlineBox*> lines_;
   float lines_height_ = 0.0f;
   const text::MarkerSet& markers_;
+  const StyleTree& style_tree_;
   const text::Buffer& text_buffer_;
   std::unique_ptr<RootInlineBoxCache> text_line_cache_;
   int version_ = 0;

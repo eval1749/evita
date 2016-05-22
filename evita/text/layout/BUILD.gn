@@ -10,8 +10,6 @@ source_set("layout") {
     "block_flow.h",
     "paint_view_builder.cc",
     "paint_view_builder.h",
-    "render_font_set.cc",
-    "render_font_set.h",
     "render_selection.cc",
     "render_selection.h",
     "scroll_bar.cc",

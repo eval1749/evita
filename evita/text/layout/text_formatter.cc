@@ -9,31 +9,31 @@
 
 #include "base/logging.h"
 #include "base/trace_event/trace_event.h"
-#include "common/memory/singleton.h"
+#include "evita/css/selector.h"
+#include "evita/css/selector_builder.h"
 #include "evita/gfx/direct2d_factory_win.h"
 #include "evita/gfx/font.h"
+#include "evita/gfx/font_face.h"
 #include "evita/text/layout/text_format_context.h"
 #include "evita/text/models/buffer.h"
 #include "evita/text/models/marker.h"
 #include "evita/text/models/marker_set.h"
-#include "evita/text/style/models/style.h"
-#include "evita/text/style/models/style_resolver.h"
-#include "evita/text/style/models/style_selector.h"
 // TODO(eval1749): We should have "evita/text/layout/public/text_marker.h" to
 // avoid include "inline_box.h" in "text_formatter.cc".
 #include "evita/text/layout/line/inline_box.h"
 #include "evita/text/layout/line/line_builder.h"
 #include "evita/text/layout/line/root_inline_box.h"
-#include "evita/text/layout/render_font_set.h"
 #include "evita/text/layout/render_selection.h"
 #include "evita/text/models/spelling.h"
 #include "evita/text/style/computed_style.h"
 #include "evita/text/style/computed_style_builder.h"
+#include "evita/text/style/style_tree.h"
 
 namespace layout {
 
 namespace {
 
+// TODO(eval1749): We should retrieve |kLeftMargin| from CSS.
 const float kLeftMargin = 10.0f;
 const auto kMinHeight = 1.0f;
 const int kTabWidth = 4;
@@ -52,14 +52,10 @@ float AlignWidthToPixel(float width) {
   return width;
 }
 
-gfx::ColorF CssColorToColorF(const xcss::Color& color) {
-  return gfx::ColorF(static_cast<float>(color.red()) / 255,
-                     static_cast<float>(color.green()) / 255,
-                     static_cast<float>(color.blue()) / 255, color.alpha());
-}
-
-const gfx::Font* GetFont(const xcss::Style& style) {
-  return FontSet::GetFont(style, 'x');
+const ComputedStyle& ComputeDefaultStyle(const StyleTree& style_tree) {
+  const auto& selector =
+      css::Selector::Builder().SetTagName(L"default").Build();
+  return style_tree.ComputedStyleOf(selector);
 }
 
 base::char16 IntToHex(int k) {
@@ -70,21 +66,12 @@ base::char16 IntToHex(int k) {
   return static_cast<base::char16>(k - 10 + 'A');
 }
 
-ComputedStyle MakeComputedStyle(const xcss::Style& model,
-                                const gfx::Font& font) {
-  return ComputedStyle::Builder().Load(model, font).Build();
-}
-
-ComputedStyle MakeComputedStyle(const xcss::Style& style) {
-  return MakeComputedStyle(style, *GetFont(style));
-}
-
 }  // namespace
 
 //////////////////////////////////////////////////////////////////////
 //
 // TextScanner
-// Enumerator for characters and markes
+// Enumerator for characters and markers
 //
 class TextFormatter::TextScanner final {
  public:
@@ -93,9 +80,6 @@ class TextFormatter::TextScanner final {
 
   base::AtomicString highlight() const;
   base::AtomicString spelling() const;
-  const xcss::StyleResolver* style_resolver() const {
-    return buffer_.style_resolver();
-  }
   base::AtomicString syntax() const;
   text::Offset text_offset() const { return text_offset_; }
   void set_text_offset(text::Offset new_text_offset) {
@@ -195,9 +179,9 @@ void TextFormatter::TextScanner::Next() {
 //
 TextFormatter::TextFormatter(const TextFormatContext& context)
     : bounds_(context.bounds()),
-      default_computed_style_(
-          MakeComputedStyle(context.buffer().GetDefaultStyle())),
+      default_computed_style_(ComputeDefaultStyle(context.style_tree())),
       line_start_(context.line_start()),
+      style_tree_(context.style_tree()),
       text_scanner_(new TextScanner(context.buffer(), context.markers())),
       zoom_(context.zoom()) {
   DCHECK(!bounds_.empty());
@@ -212,17 +196,32 @@ text::Offset TextFormatter::text_offset() const {
   return text_scanner_->text_offset();
 }
 
+const ComputedStyle& TextFormatter::ComputedStyleOf(
+    const css::Selector& selector) const {
+  return style_tree_.ComputedStyleOf(selector);
+}
+
 void TextFormatter::DidFormat(const RootInlineBox* line) {
   line_start_ = line->IsEndOfLine() ? line->text_end() : line->line_start();
   text_scanner_->set_text_offset(line->text_end());
+}
+
+const gfx::Font* TextFormatter::FontFor(const ComputedStyle& style,
+                                        base::char16 char_code) const {
+  DCHECK(!style.fonts().empty());
+  for (const auto& font : style.fonts()) {
+    if (font->HasCharacter(char_code))
+      return font;
+  }
+  return nullptr;
 }
 
 std::unique_ptr<RootInlineBox> TextFormatter::FormatLine() {
   TRACE_EVENT0("views", "TextFormatter::FormatLine");
   DCHECK(!bounds_.empty());
 
-  LineBuilder line_builder(default_computed_style_, line_start_,
-                           text_scanner_->text_offset(), bounds_.width());
+  LineBuilder line_builder(line_start_, text_scanner_->text_offset(),
+                           bounds_.width());
   line_builder.AddFillerBox(default_computed_style_, kLeftMargin, kMinHeight,
                             text_scanner_->text_offset());
   for (;;) {
@@ -252,110 +251,102 @@ std::unique_ptr<RootInlineBox> TextFormatter::FormatLine() {
 
 bool TextFormatter::FormatChar(LineBuilder* line_builder,
                                base::char16 char_code) {
-  const auto offset = text_scanner_->text_offset();
-  xcss::Style style;
-
-  const auto spelling = text_scanner_->spelling();
-  if (!spelling.empty()) {
-    style.Merge(
-        text_scanner_->style_resolver()->ResolveWithoutDefaults(spelling));
+  css::Selector::Builder selectorBuilder;
+  if (char_code < 0x20 || char_code == 0xFEFF) {
+    // TODO(eval1749): We should have global selector type name somewhere to
+    // avoid constructor |base::AtomicString| here.
+    selectorBuilder.SetTagName(base::AtomicString(L"marker"));
+  } else {
+    const auto& syntax = text_scanner_->syntax();
+    if (syntax.empty())
+      selectorBuilder.SetTagName(base::AtomicString(L"normal"));
+    else
+      selectorBuilder.SetTagName(syntax);
   }
 
-  const auto syntax = text_scanner_->syntax();
-  if (!syntax.empty()) {
-    style.Merge(
-        text_scanner_->style_resolver()->ResolveWithoutDefaults(syntax));
-  }
+  const auto& spelling = text_scanner_->spelling();
+  if (!spelling.empty())
+    selectorBuilder.AddClass(spelling);
 
   const auto highlight = text_scanner_->highlight();
-  if (!highlight.empty()) {
-    style.Merge(
-        text_scanner_->style_resolver()->ResolveWithoutDefaults(highlight));
-  }
-
-  style.Merge(text_scanner_->style_resolver()->Resolve(
-      xcss::StyleSelector::defaults()));
-  style.set_font_size(style.font_size() * zoom_);
+  if (!highlight.empty())
+    selectorBuilder.AddClass(highlight);
 
   if (char_code == 0x09) {
-    style.OverrideBy(text_scanner_->style_resolver()->ResolveWithoutDefaults(
-        xcss::StyleSelector::end_of_file_marker()));
-    const auto font = FontSet::GetFont(style, 'x');
-    const auto widthTab =
-        AlignWidthToPixel(font->GetCharWidth(' ')) * kTabWidth;
-    const auto current_x = line_builder->current_x();
-    const auto x2 = (current_x + widthTab - kLeftMargin) / widthTab * widthTab;
-    const auto width = (x2 + kLeftMargin) - current_x;
-    if (!line_builder->HasRoomFor(width))
-      return false;
-    const auto height = AlignHeightToPixel(font->height());
-    line_builder->AddMarkerBox(MakeComputedStyle(style, *font), width, height,
-                               offset, offset + text::OffsetDelta(1),
-                               TextMarker::Tab);
-    return true;
+    const auto& style = ComputedStyleOf(selectorBuilder.Build());
+    return FormatTab(line_builder, style);
   }
 
-  const auto font = char_code < 0x20 || char_code == 0xFEFF
-                        ? nullptr
-                        : FontSet::GetFont(style, char_code);
-
-  if (!font) {
-    style.OverrideBy(text_scanner_->style_resolver()->ResolveWithoutDefaults(
-        xcss::StyleSelector::end_of_file_marker()));
-    const auto font2 = FontSet::GetFont(style, 'u');
-    base::string16 string;
-    if (char_code < 0x20) {
-      string.push_back('^');
-      string.push_back(static_cast<base::char16>(char_code + 0x40));
-    } else {
-      string.push_back('u');
-      string.push_back(IntToHex((char_code >> 12) & 15));
-      string.push_back(IntToHex((char_code >> 8) & 15));
-      string.push_back(IntToHex((char_code >> 4) & 15));
-      string.push_back(IntToHex((char_code >> 0) & 15));
-    }
-
-    const auto width = font2->GetTextWidth(string) + 4;
-    if (!line_builder->HasRoomFor(width))
-      return false;
-    const auto height = AlignHeightToPixel(font2->height()) + 4;
-    line_builder->AddCodeUnitBox(MakeComputedStyle(style, *font2), width,
-                                 height, offset, string);
-    return true;
+  if (char_code < 0x20 || char_code == 0xFEFF) {
+    selectorBuilder.AddClass(base::AtomicString(L"control"));
+    const auto& style = ComputedStyleOf(selectorBuilder.Build());
+    return FormatMissing(line_builder, style, char_code);
   }
 
-  return line_builder->TryAddChar(MakeComputedStyle(style, *font), offset,
-                                  char_code);
+  const auto& style = ComputedStyleOf(selectorBuilder.Build());
+  if (const auto* font = FontFor(style, char_code)) {
+    return line_builder->TryAddChar(style, *font, text_scanner_->text_offset(),
+                                    char_code);
+  }
+
+  selectorBuilder.AddClass(base::AtomicString(L"missing"));
+  const auto& style2 = ComputedStyleOf(selectorBuilder.Build());
+  return FormatMissing(line_builder, style2, char_code);
 }
 
 void TextFormatter::FormatMarker(LineBuilder* line_builder,
                                  TextMarker marker_name,
                                  text::OffsetDelta length) {
-  xcss::Style style;
-  style.Merge(text_scanner_->style_resolver()->Resolve(
-      xcss::StyleSelector::defaults()));
-  style.OverrideBy(text_scanner_->style_resolver()->ResolveWithoutDefaults(
-      xcss::StyleSelector::end_of_line_marker()));
-  style.set_font_size(style.font_size() * zoom_);
-
-  const auto font = FontSet::GetFont(style, 'x');
+  css::Selector::Builder selectorBuilder;
+  selectorBuilder.SetTagName(base::AtomicString(L"marker"));
+  const auto& style = ComputedStyleOf(selectorBuilder.Build());
+  const auto* font = FontFor(style, 'x');
   const auto width = AlignWidthToPixel(font->GetCharWidth('x'));
   const auto height = AlignHeightToPixel(font->height());
-  line_builder->AddMarkerBox(MakeComputedStyle(style, *font), width, height,
-                             text_scanner_->text_offset(),
-                             text_scanner_->text_offset() + length,
-                             marker_name);
+  const auto offset = text_scanner_->text_offset();
+  line_builder->AddMarkerBox(style, *font, width, height, offset,
+                             offset + length, marker_name);
 }
 
-// TODO(eval1749): We should move |TextFormatter::FormatSelection()| somewhere
-// other than her.
-TextSelection TextFormatter::FormatSelection(
-    const text::Buffer& buffer,
-    const TextSelectionModel& selection_model) {
-  const auto& style = buffer.style_resolver()->ResolveWithoutDefaults(
-      selection_model.disabled() ? xcss::StyleSelector::inactive_selection()
-                                 : xcss::StyleSelector::active_selection());
-  return TextSelection(selection_model, CssColorToColorF(style.bgcolor()));
+bool TextFormatter::FormatMissing(LineBuilder* line_builder,
+                                  const ComputedStyle& style,
+                                  base::char16 char_code) {
+  const auto* font = FontFor(style, 'u');
+  base::string16 string;
+  if (char_code < 0x20) {
+    string.push_back('^');
+    string.push_back(static_cast<base::char16>(char_code + 0x40));
+  } else {
+    string.push_back('u');
+    string.push_back(IntToHex((char_code >> 12) & 15));
+    string.push_back(IntToHex((char_code >> 8) & 15));
+    string.push_back(IntToHex((char_code >> 4) & 15));
+    string.push_back(IntToHex((char_code >> 0) & 15));
+  }
+
+  const auto width = font->GetTextWidth(string) + 4;
+  if (!line_builder->HasRoomFor(width))
+    return false;
+  const auto height = AlignHeightToPixel(font->height()) + 4;
+  const auto offset = text_scanner_->text_offset();
+  line_builder->AddCodeUnitBox(style, *font, width, height, offset, string);
+  return true;
+}
+
+bool TextFormatter::FormatTab(LineBuilder* line_builder,
+                              const ComputedStyle& style) {
+  const auto* font = FontFor(style, 'x');
+  const auto widthTab = AlignWidthToPixel(font->GetCharWidth(' ')) * kTabWidth;
+  const auto current_x = line_builder->current_x();
+  const auto x2 = (current_x + widthTab - kLeftMargin) / widthTab * widthTab;
+  const auto width = (x2 + kLeftMargin) - current_x;
+  if (!line_builder->HasRoomFor(width))
+    return false;
+  const auto height = AlignHeightToPixel(font->height());
+  const auto offset = text_scanner_->text_offset();
+  line_builder->AddMarkerBox(style, *font, width, height, offset,
+                             offset + text::OffsetDelta(1), TextMarker::Tab);
+  return true;
 }
 
 }  // namespace layout

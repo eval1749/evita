@@ -26,8 +26,10 @@ namespace layout {
 // BlockFlow
 //
 BlockFlow::BlockFlow(const text::Buffer& text_buffer,
-                     const text::MarkerSet& markers)
+                     const text::MarkerSet& markers,
+                     const StyleTree& style_tree)
     : markers_(markers),
+      style_tree_(style_tree),
       text_buffer_(text_buffer),
       text_line_cache_(new RootInlineBoxCache(text_buffer, markers)) {
   DCHECK_EQ(&text_buffer, &markers.buffer());
@@ -211,8 +213,8 @@ void BlockFlow::Format(text::Offset text_offset) {
 
 TextFormatContext BlockFlow::FormatContextFor(text::Offset line_start,
                                               text::Offset offset) const {
-  return TextFormatContext(text_buffer_, markers_, line_start, offset, bounds_,
-                           zoom_);
+  return TextFormatContext(text_buffer_, markers_, style_tree_, line_start,
+                           offset, bounds_, zoom_);
 }
 
 TextFormatContext BlockFlow::FormatContextFor(text::Offset offset) const {

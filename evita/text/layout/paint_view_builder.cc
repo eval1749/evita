@@ -9,12 +9,12 @@
 
 #include "base/logging.h"
 #include "base/trace_event/trace_event.h"
+#include "evita/css/selector_builder.h"
 #include "evita/gfx/font.h"
 #include "evita/text/layout/block_flow.h"
 #include "evita/text/layout/line/inline_box.h"
 #include "evita/text/layout/line/inline_box_visitor.h"
 #include "evita/text/layout/line/root_inline_box.h"
-#include "evita/text/layout/render_font_set.h"
 #include "evita/text/layout/render_selection.h"
 #include "evita/text/layout/text_formatter.h"
 #include "evita/text/models/buffer.h"
@@ -24,6 +24,7 @@
 #include "evita/text/paint/public/selection.h"
 #include "evita/text/paint/public/view.h"
 #include "evita/text/style/computed_style.h"
+#include "evita/text/style/style_tree.h"
 #include "evita/ui/animation/animatable_window.h"
 #include "evita/ui/base/ime/text_input_client.h"
 
@@ -68,23 +69,23 @@ void PaintInlineBoxBuilder::VisitInlineFillerBox(InlineFillerBox* box) {
 void PaintInlineBoxBuilder::VisitInlineMarkerBox(InlineMarkerBox* box) {
   DCHECK(!paint_box_);
   paint_box_ = new paint::InlineMarkerBox(
-      box->style(), box->width(), box->height(),
+      box->style(), box->font(), box->width(), box->height(),
       static_cast<paint::TextMarker>(box->marker_name()), line_height_,
       line_descent_);
 }
 
 void PaintInlineBoxBuilder::VisitInlineTextBox(InlineTextBox* box) {
   DCHECK(!paint_box_);
-  paint_box_ =
-      new paint::InlineTextBox(box->style(), box->width(), box->height(),
-                               box->characters(), line_height_, line_descent_);
+  paint_box_ = new paint::InlineTextBox(box->style(), box->font(), box->width(),
+                                        box->height(), box->characters(),
+                                        line_height_, line_descent_);
 }
 
 void PaintInlineBoxBuilder::VisitInlineUnicodeBox(InlineUnicodeBox* box) {
   DCHECK(!paint_box_);
-  paint_box_ = new paint::InlineUnicodeBox(box->style(), box->width(),
-                                           box->height(), box->characters(),
-                                           line_height_, line_descent_);
+  paint_box_ = new paint::InlineUnicodeBox(
+      box->style(), box->font(), box->width(), box->height(), box->characters(),
+      line_height_, line_descent_);
 }
 
 gfx::RectF RoundBounds(const gfx::RectF& bounds) {
@@ -140,20 +141,28 @@ std::unordered_set<gfx::RectF> CalculateSelectionBoundsSet(
   return bounds_set;
 }
 
-paint::Ruler ComputeRuler(const BlockFlow& block) {
+gfx::ColorF ComputeBackgroundColor(const StyleTree& style_tree) {
+  css::Selector::Builder selector;
+  selector.SetTagName(base::AtomicString(L"::default"));
+  const auto& style = style_tree.ComputedStyleOf(selector.Build());
+  return style.bgcolor();
+}
+
+paint::Ruler ComputeRuler(const StyleTree& style_tree, const BlockFlow& block) {
   // TODO(eval1749): We should expose show/hide and ruler settings to both
   // script and UI.
-  auto style = block.text_buffer().GetDefaultStyle();
-  style.set_font_size(style.font_size() * block.zoom());
-  const auto font = FontSet::GetFont(style, 'x');
-
-  // TODO(eval1749): We should get ruler color from CSS.
-  const auto color = gfx::ColorF(0, 0, 0, 0.3f);
+  css::Selector::Builder selector;
+  selector.SetTagName(base::AtomicString(L"::ruler"));
+  const auto& style = style_tree.ComputedStyleOf(selector.Build());
+  // TODO(eval1749): We should consider zoom.
+  const auto font = style.fonts()[0];
   const auto& bounds = block.bounds();
   const auto num_columns = 81;
   const auto width_of_M = font->GetCharWidth('M');
   const auto ruler_x = ::floor(bounds.left + width_of_M * num_columns);
-  return paint::Ruler(ruler_x, 1, color);
+  // TODO(eval1749): We should get width or ruler from CSS.
+  const auto width = 1.0f;
+  return paint::Ruler(ruler_x, width, style.color());
 }
 
 paint::RootInlineBox* CreatePaintRootInlineBox(const RootInlineBox& line) {
@@ -164,6 +173,18 @@ paint::RootInlineBox* CreatePaintRootInlineBox(const RootInlineBox& line) {
   for (const auto& box : line.boxes())
     boxes.push_back(builder.Build(*box));
   return new paint::RootInlineBox(boxes, line.bounds());
+}
+
+TextSelection FormatSelection(const StyleTree& style_tree,
+                              const TextSelectionModel& selection_model) {
+  css::Selector::Builder selector;
+  selector.SetTagName(base::AtomicString(L"::selection"));
+  if (selection_model.disabled())
+    selector.AddClass(base::AtomicString(L":inactive"));
+  else
+    selector.AddClass(base::AtomicString(L":active"));
+  const auto& style = style_tree.ComputedStyleOf(selector.Build());
+  return TextSelection(selection_model, style.bgcolor());
 }
 
 }  // namespace
@@ -182,11 +203,9 @@ scoped_refptr<paint::View> PaintViewBuilder::Build(
   TRACE_EVENT0("view", "PaintViewBuilder::Build");
   // TODO(eval1749): We should recompute default style when style is changed,
   // rather than every |Format| call.
-  const auto& bgcolor =
-      ColorToColorF(block.text_buffer().GetDefaultStyle().bgcolor());
-  const auto& ruler = ComputeRuler(block);
-  const auto& selection =
-      TextFormatter::FormatSelection(block.text_buffer(), selection_model);
+  const auto& bgcolor = ComputeBackgroundColor(block.style_tree());
+  const auto& ruler = ComputeRuler(block.style_tree(), block);
+  const auto& selection = FormatSelection(block.style_tree(), selection_model);
   const auto& selection_bounds_set =
       CalculateSelectionBoundsSet(block.lines(), selection, block.bounds());
 

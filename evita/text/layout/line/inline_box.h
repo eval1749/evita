@@ -81,7 +81,7 @@ class InlineBox : public base::Castable<InlineBox> {
   const float height_;
   const float left_;
   const text::OffsetDelta start_;
-  const ComputedStyle style_;
+  const ComputedStyle& style_;
   const float width_;
 
   DISALLOW_COPY_AND_ASSIGN(InlineBox);
@@ -138,6 +138,7 @@ class InlineMarkerBox final : public InlineBox, public WithFont {
 
  public:
   InlineMarkerBox(const ComputedStyle& style,
+                  const gfx::Font& font,
                   float left,
                   float width,
                   float height,
@@ -173,6 +174,7 @@ class InlineTextBoxBase : public InlineBox, public WithFont {
 
  protected:
   InlineTextBoxBase(const ComputedStyle& style,
+                    const gfx::Font& font,
                     float left,
                     float width,
                     float height,
@@ -199,6 +201,7 @@ class InlineTextBox final : public InlineTextBoxBase {
 
  public:
   InlineTextBox(const ComputedStyle& style,
+                const gfx::Font& font,
                 float left,
                 float width,
                 float height,
@@ -223,6 +226,7 @@ class InlineUnicodeBox final : public InlineTextBoxBase {
 
  public:
   InlineUnicodeBox(const ComputedStyle& style,
+                   const gfx::Font& font,
                    float left,
                    float width,
                    float height,

@@ -16,6 +16,9 @@
 
 namespace paint {
 
+using TextDecorationLine = layout::TextDecorationLine;
+using TextDecorationStyle = layout::TextDecorationStyle;
+
 namespace {
 
 void DrawHLine(gfx::Canvas* canvas,
@@ -185,34 +188,33 @@ void PaintVisitor::VisitInlineMarkerBox(InlineMarkerBox* inline_box) {
 void PaintVisitor::VisitInlineTextBox(InlineTextBox* inline_box) {
   DCHECK(!inline_box->characters().empty());
   const auto& style = inline_box->style();
+  const auto& font = inline_box->font();
   auto const text_rect =
       gfx::RectF(gfx::PointF(rect_.left, rect_.top + inline_box->top()),
                  gfx::SizeF(rect_.width(), inline_box->height()));
   FillBackground(canvas_, rect_, *inline_box);
   gfx::Brush text_brush(canvas_, style.color());
-  DrawText(canvas_, style.font(), text_brush, text_rect,
-           inline_box->characters());
+  DrawText(canvas_, font, text_brush, text_rect, inline_box->characters());
 
-  if (style.text_decoration_line() != xcss::TextDecorationLine::Underline)
+  if (style.text_decoration_line() != TextDecorationLine::Underline)
     return;
 
   const auto baseline = text_rect.bottom - inline_box->descent();
-  const auto underline = baseline + inline_box->font().underline();
+  const auto underline = baseline + font.underline();
   const auto& brush = gfx::Brush(canvas_, style.text_decoration_color());
-  const auto& font = inline_box->font();
   switch (style.text_decoration_style()) {
-    case xcss::TextDecorationStyle::Dashed:
-    case xcss::TextDecorationStyle::Dotted:
-    case xcss::TextDecorationStyle::Double:
+    case TextDecorationStyle::Dashed:
+    case TextDecorationStyle::Dotted:
+    case TextDecorationStyle::Double:
       DrawLine(canvas_, font, text_brush, rect_.left, underline, rect_.right,
                underline, 2.0f);
       return;
 
-    case xcss::TextDecorationStyle::Solid:
+    case TextDecorationStyle::Solid:
       DrawHLine(canvas_, font, brush, rect_.left, rect_.right, underline);
       return;
 
-    case xcss::TextDecorationStyle::Wavy:
+    case TextDecorationStyle::Wavy:
       DrawWave(canvas_, font, brush, rect_, baseline);
       return;
   }
@@ -225,11 +227,12 @@ void PaintVisitor::VisitInlineUnicodeBox(InlineUnicodeBox* inline_box) {
       gfx::RectF(gfx::PointF(rect_.left, rect_.top + inline_box->top()),
                  gfx::SizeF(rect_.width(), inline_box->height())) -
       gfx::SizeF(1, 1);
+  const auto& font = inline_box->font();
   const auto& style = inline_box->style();
   FillBackground(canvas_, rect_, *inline_box);
   gfx::Canvas::AxisAlignedClipScope clip_scope(canvas_, text_rect);
   gfx::Brush text_brush(canvas_, style.color());
-  DrawText(canvas_, style.font(), text_brush, text_rect - gfx::SizeF(2, 2),
+  DrawText(canvas_, font, text_brush, text_rect - gfx::SizeF(2, 2),
            inline_box->characters());
   canvas_->DrawRectangle(text_brush, text_rect - gfx::SizeF(1, 1));
 }

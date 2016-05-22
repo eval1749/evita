@@ -7,11 +7,10 @@
 #include <vector>
 
 #include "evita/gfx/font.h"
+#include "evita/gfx/font_face.h"
 #include "evita/text/layout/line/inline_box.h"
 #include "evita/text/layout/line/root_inline_box.h"
-#include "evita/text/layout/render_font_set.h"
 #include "evita/text/style/computed_style_builder.h"
-#include "evita/text/style/models/style.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
 namespace layout {
@@ -42,6 +41,7 @@ class LineBuilder final {
   float ascent_ = 0;
   std::vector<InlineBox*> boxes_;
   float descent_ = 0;
+  const gfx::Font& font_;
   float left_ = 0;
   text::OffsetDelta offset_;
   text::Offset start_;
@@ -51,7 +51,7 @@ class LineBuilder final {
 };
 
 LineBuilder::LineBuilder(text::Offset start, const ComputedStyle& style)
-    : style_(style), start_(start) {
+    : font_(*style.fonts()[0]), style_(style), start_(start) {
   AddBoxInternal(
       new InlineFillerBox(style_, 0, kLeadingWidth, 10, text::OffsetDelta(0)));
 }
@@ -67,21 +67,21 @@ void LineBuilder::AddBoxInternal(InlineBox* box) {
 void LineBuilder::AddCodeUnit(const base::char16 code_unit) {
   const auto next_offset = offset_ + text::OffsetDelta(1);
   base::string16 text = L"uFFFF";
-  AddBoxInternal(new InlineUnicodeBox(
-      style_, left_, WidthOf(text), style_.font().height() + 4, offset_, text));
+  AddBoxInternal(new InlineUnicodeBox(style_, font_, left_, WidthOf(text),
+                                      font_.height() + 4, offset_, text));
 }
 
 void LineBuilder::AddMarker(TextMarker marker) {
   const auto next_offset =
       marker == TextMarker::LineWrap ? offset_ : offset_ + text::OffsetDelta(1);
-  AddBoxInternal(new InlineMarkerBox(style_, left_, WidthOf(L"x"),
-                                     style_.font().height(), offset_,
-                                     next_offset, marker));
+  AddBoxInternal(new InlineMarkerBox(style_, font_, left_, WidthOf(L"x"),
+                                     font_.height(), offset_, next_offset,
+                                     marker));
 }
 
 void LineBuilder::AddText(const base::string16& text) {
-  AddBoxInternal(new InlineTextBox(style_, left_, WidthOf(text),
-                                   style_.font().height(), offset_, text));
+  AddBoxInternal(new InlineTextBox(style_, font_, left_, WidthOf(text),
+                                   font_.height(), offset_, text));
 }
 
 std::unique_ptr<RootInlineBox> LineBuilder::Build() const {
@@ -95,20 +95,20 @@ gfx::RectF CaretBoundsOf(int origin_x, int origin_y, int height) {
       gfx::SizeF(1.0f, static_cast<float>(height)));
 }
 
-ComputedStyle CreateStyle() {
-  xcss::Style css_style;
-  css_style.set_bgcolor(xcss::Color());
-  css_style.set_color(xcss::Color());
-  css_style.set_font_family(L"Consolas");
-  css_style.set_font_weight(xcss::FontWeight::Normal);
-  css_style.set_font_size(10);
-  css_style.set_font_style(xcss::FontStyle::Normal);
-  const auto& font = FontSet::GetFont(css_style, 'x');
-  return ComputedStyle::Builder().Load(css_style, *font).Build();
+std::unique_ptr<ComputedStyle> CreateStyle() {
+  gfx::FontProperties props;
+  props.family_name = L"Consolas";
+  props.font_size_pt = 10;
+  const auto& font = gfx::Font::Get(props);
+  return ComputedStyle::Builder()
+      .SetBackgroundColor(gfx::ColorF(1, 1, 1))
+      .SetColor(gfx::ColorF(0, 0, 0))
+      .SetFonts({&font})
+      .Build();
 }
 
 float LineBuilder::WidthOf(const base::string16& text) const {
-  return ::ceil(style_.font().GetTextWidth(text));
+  return ::ceil(font_.GetTextWidth(text));
 }
 
 }  // namespace
@@ -122,14 +122,14 @@ class RootInlineBoxTest : public ::testing::Test {
   RootInlineBoxTest();
   ~RootInlineBoxTest() override = default;
 
-  const ComputedStyle& style() const { return style_; }
+  const ComputedStyle& style() const { return *style_; }
 
   gfx::PointF PointFor(const RootInlineBox& line,
                        const std::vector<base::string16>& texts) const;
   float WidthOf(const base::string16& text) const;
 
  private:
-  ComputedStyle style_;
+  const std::unique_ptr<ComputedStyle> style_;
 
   DISALLOW_COPY_AND_ASSIGN(RootInlineBoxTest);
 };
@@ -146,7 +146,7 @@ gfx::PointF RootInlineBoxTest::PointFor(
 }
 
 float RootInlineBoxTest::WidthOf(const base::string16& text) const {
-  return ::ceil(style_.font().GetTextWidth(text));
+  return ::ceil(style().fonts()[0]->GetTextWidth(text));
 }
 
 TEST_F(RootInlineBoxTest, HitTestPoint) {

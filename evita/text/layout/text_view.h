@@ -16,6 +16,10 @@ namespace base {
 class TimeTicks;
 }
 
+namespace css {
+class StyleSheet;
+}
+
 namespace paint {
 class Caret;
 class View;
@@ -35,6 +39,7 @@ class AnimatableWindow;
 namespace layout {
 
 class BlockFlow;
+class StyleTree;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -44,7 +49,9 @@ class TextView final {
   using CaretDisplayItem = paint::Caret;
 
  public:
-  TextView(const text::Buffer& buffer, const text::MarkerSet& markers);
+  TextView(const text::Buffer& buffer,
+           const text::MarkerSet& markers,
+           css::StyleSheet* style_sheet);
   ~TextView();
 
   const BlockFlow& block() const { return *block_; }
@@ -77,9 +84,12 @@ class TextView final {
  private:
   void ScrollToPosition(text::Offset offset);
 
-  std::unique_ptr<BlockFlow> block_;
   const text::Buffer& buffer_;
   text::Offset caret_offset_;
+  std::unique_ptr<StyleTree> style_tree_;
+
+  // |block_| depends on |style_tree_|.
+  std::unique_ptr<BlockFlow> block_;
 
   DISALLOW_COPY_AND_ASSIGN(TextView);
 };

@@ -12,6 +12,14 @@
 #include "evita/text/models/offset.h"
 #include "evita/text/style/computed_style.h"
 
+namespace css {
+class Selector;
+}
+
+namespace gfx {
+class Font;
+}
+
 namespace text {
 class Buffer;
 class MarkerSet;
@@ -22,6 +30,7 @@ namespace layout {
 class InlineBox;
 class LineBuilder;
 class RootInlineBox;
+class StyleTree;
 class TextFormatContext;
 enum class TextMarker;
 class TextSelection;
@@ -37,21 +46,25 @@ class TextFormatter final {
   void DidFormat(const RootInlineBox* line);
   std::unique_ptr<RootInlineBox> FormatLine();
 
-  static TextSelection FormatSelection(
-      const text::Buffer& buffer,
-      const TextSelectionModel& selection_model);
-
  private:
   class TextScanner;
 
+  const ComputedStyle& ComputedStyleOf(const css::Selector& selector) const;
+  const gfx::Font* FontFor(const ComputedStyle& style,
+                           base::char16 char_code) const;
   bool FormatChar(LineBuilder* line_builder, base::char16 char_code);
   void FormatMarker(LineBuilder* line_buffer,
                     TextMarker marker_name,
                     text::OffsetDelta length);
+  bool FormatMissing(LineBuilder* line_builder,
+                     const ComputedStyle& style,
+                     base::char16 char_code);
+  bool FormatTab(LineBuilder* line_builder, const ComputedStyle& style);
 
   const gfx::RectF bounds_;
-  ComputedStyle default_computed_style_;
+  const ComputedStyle& default_computed_style_;
   text::Offset line_start_;
+  const StyleTree& style_tree_;
   std::unique_ptr<TextScanner> text_scanner_;
   const float zoom_;
 

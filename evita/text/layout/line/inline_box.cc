@@ -86,14 +86,15 @@ WithFont::~WithFont() {}
 // InlineMarkerBox
 //
 InlineMarkerBox::InlineMarkerBox(const ComputedStyle& style,
+                                 const gfx::Font& font,
                                  float left,
                                  float width,
                                  float height,
                                  text::OffsetDelta start,
                                  text::OffsetDelta end,
                                  TextMarker marker_name)
-    : InlineBox(style, left, width, height, start, end, style.font().descent()),
-      WithFont(style.font()),
+    : InlineBox(style, left, width, height, start, end, font.descent()),
+      WithFont(font),
       marker_name_(marker_name) {}
 
 InlineMarkerBox::~InlineMarkerBox() {}
@@ -112,14 +113,15 @@ gfx::RectF InlineMarkerBox::HitTestTextPosition(text::OffsetDelta offset,
 // InlineTextBoxBase
 //
 InlineTextBoxBase::InlineTextBoxBase(const ComputedStyle& style,
+                                     const gfx::Font& font,
                                      float left,
                                      float width,
                                      float height,
                                      text::OffsetDelta start,
                                      text::OffsetDelta end,
                                      const base::string16& characters)
-    : InlineBox(style, left, width, height, start, end, style.font().descent()),
-      WithFont(style.font()),
+    : InlineBox(style, left, width, height, start, end, font.descent()),
+      WithFont(font),
       characters_(characters) {}
 
 InlineTextBoxBase::~InlineTextBoxBase() {}
@@ -129,7 +131,7 @@ text::OffsetDelta InlineTextBoxBase::HitTestPoint(float x) const {
   if (x >= width())
     return end();
   for (auto k = 1u; k <= characters_.length(); ++k) {
-    auto const cx = style().font().GetTextWidth(characters_.data(), k);
+    auto const cx = font().GetTextWidth(characters_.data(), k);
     if (x < cx)
       return start() + text::OffsetDelta(static_cast<int>(k - 1));
   }
@@ -141,12 +143,14 @@ text::OffsetDelta InlineTextBoxBase::HitTestPoint(float x) const {
 // InlineTextBox
 //
 InlineTextBox::InlineTextBox(const ComputedStyle& style,
+                             const gfx::Font& font,
                              float left,
                              float width,
                              float height,
                              text::OffsetDelta start,
                              const base::string16& characters)
     : InlineTextBoxBase(style,
+                        font,
                         left,
                         width,
                         height,
@@ -177,12 +181,14 @@ gfx::RectF InlineTextBox::HitTestTextPosition(text::OffsetDelta offset,
 // InlineUnicodeBox
 //
 InlineUnicodeBox::InlineUnicodeBox(const ComputedStyle& style,
+                                   const gfx::Font& font,
                                    float left,
                                    float width,
                                    float height,
                                    text::OffsetDelta start,
                                    const base::string16& characters)
     : InlineTextBoxBase(style,
+                        font,
                         left,
                         width,
                         height,

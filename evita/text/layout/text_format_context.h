@@ -15,10 +15,13 @@ class MarkerSet;
 
 namespace layout {
 
+class StyleTree;
+
 class TextFormatContext {
  public:
   TextFormatContext(const text::Buffer& buffer,
                     const text::MarkerSet& markers,
+                    const StyleTree& style_tree,
                     text::Offset line_start,
                     text::Offset offset,
                     const gfx::RectF& bounds,
@@ -33,6 +36,7 @@ class TextFormatContext {
   const text::Offset line_start() const { return line_start_; }
   const text::MarkerSet& markers() const { return markers_; }
   const text::Offset offset() const { return offset_; }
+  const StyleTree& style_tree() const { return style_tree_; }
   float zoom() const { return zoom_; }
 
  private:
@@ -41,6 +45,7 @@ class TextFormatContext {
   const text::Offset line_start_;
   const text::MarkerSet& markers_;
   const text::Offset offset_;
+  const StyleTree& style_tree_;
   const float zoom_;
 };
 

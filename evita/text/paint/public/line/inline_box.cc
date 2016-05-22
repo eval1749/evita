@@ -51,13 +51,13 @@ float InlineBox::top() const {
 // InlineBox
 bool InlineBox::Equal(const InlineBox* other) const {
   return other->class_name() == class_name() && other->width_ == width_ &&
-         other->line_height_ == line_height_ && other->style_ == style_;
+         other->line_height_ == line_height_ && &other->style_ == &style_;
 }
 
 size_t InlineBox::Hash() const {
   auto hash_code = static_cast<size_t>(width_);
   hash_code ^= static_cast<size_t>(line_height_);
-  hash_code ^= std::hash<ComputedStyle>()(style_);
+  hash_code ^= std::hash<const ComputedStyle*>()(&style_);
   return hash_code;
 }
 
@@ -94,6 +94,7 @@ WithFont::~WithFont() {}
 // InlineMarkerBox
 //
 InlineMarkerBox::InlineMarkerBox(const ComputedStyle& style,
+                                 const gfx::Font& font,
                                  float width,
                                  float height,
                                  TextMarker marker_name,
@@ -102,17 +103,17 @@ InlineMarkerBox::InlineMarkerBox(const ComputedStyle& style,
     : InlineBox(style,
                 width,
                 height,
-                style.font().descent(),
+                font.descent(),
                 line_height,
                 line_descent),
-      WithFont(style.font()),
+      WithFont(font),
       marker_name_(marker_name) {}
 
 InlineMarkerBox::~InlineMarkerBox() {}
 
 // InlineBox
 InlineBox* InlineMarkerBox::Copy() const {
-  return new InlineMarkerBox(style(), width(), height(), marker_name_,
+  return new InlineMarkerBox(style(), font(), width(), height(), marker_name_,
                              line_height(), line_descent());
 }
 
@@ -136,6 +137,7 @@ size_t InlineMarkerBox::Hash() const {
 // InlineTextBoxBase
 //
 InlineTextBoxBase::InlineTextBoxBase(const ComputedStyle& style,
+                                     const gfx::Font& font,
                                      float width,
                                      float height,
                                      const base::string16& characters,
@@ -144,10 +146,10 @@ InlineTextBoxBase::InlineTextBoxBase(const ComputedStyle& style,
     : InlineBox(style,
                 width,
                 height,
-                style.font().descent(),
+                font.descent(),
                 line_height,
                 line_descent),
-      WithFont(style.font()),
+      WithFont(font),
       characters_(characters) {}
 
 InlineTextBoxBase::~InlineTextBoxBase() {}
@@ -169,12 +171,14 @@ size_t InlineTextBoxBase::Hash() const {
 // InlineTextBox
 //
 InlineTextBox::InlineTextBox(const ComputedStyle& style,
+                             const gfx::Font& font,
                              float width,
                              float height,
                              const base::string16& characters,
                              float line_height,
                              float line_descent)
     : InlineTextBoxBase(style,
+                        font,
                         width,
                         height,
                         characters,
@@ -184,7 +188,7 @@ InlineTextBox::InlineTextBox(const ComputedStyle& style,
 InlineTextBox::~InlineTextBox() {}
 
 InlineBox* InlineTextBox::Copy() const {
-  return new InlineTextBox(style(), width(), height(), characters(),
+  return new InlineTextBox(style(), font(), width(), height(), characters(),
                            line_height(), line_descent());
 }
 
@@ -193,12 +197,14 @@ InlineBox* InlineTextBox::Copy() const {
 // InlineUnicodeBox
 //
 InlineUnicodeBox::InlineUnicodeBox(const ComputedStyle& style,
+                                   const gfx::Font& font,
                                    float width,
                                    float height,
                                    const base::string16& characters,
                                    float line_height,
                                    float line_descent)
     : InlineTextBoxBase(style,
+                        font,
                         width,
                         height,
                         characters,
@@ -209,7 +215,7 @@ InlineUnicodeBox::~InlineUnicodeBox() {}
 
 // InlineBox
 InlineBox* InlineUnicodeBox::Copy() const {
-  return new InlineUnicodeBox(style(), width(), height(), characters(),
+  return new InlineUnicodeBox(style(), font(), width(), height(), characters(),
                               line_height(), line_descent());
 }
 

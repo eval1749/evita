@@ -66,7 +66,6 @@ void RootInlineBoxCacheTest::SetBounds(const gfx::RectF& new_bounds) {
 
 TEST_F(RootInlineBoxCacheTest, DidChangeStyle) {
   PopulateCache(L"foo\nbar\nbaz");
-  xcss::Style style(xcss::Color(255, 0, 0), xcss::Color(255, 255, 255));
   buffer()->syntax_markers()->InsertMarker(
       text::StaticRange(*buffer(), text::Offset(1), text::Offset(2)),
       base::AtomicString(L"keyword"));

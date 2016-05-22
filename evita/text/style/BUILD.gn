@@ -8,10 +8,13 @@ source_set("style") {
     "computed_style.h",
     "computed_style_builder.cc",
     "computed_style_builder.h",
+    "style_tree.cc",
+    "style_tree.h",
   ]
 
   deps = [
     "models",
+    "//evita/css",
     "//evita/gfx",
   ]
 }

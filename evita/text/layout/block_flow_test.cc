@@ -2,13 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <memory>
 #include <vector>
 
+#include "evita/text/layout/text_layout_test_base.h"
+
+#include "evita/css/style_sheet.h"
 #include "evita/editor/dom_lock.h"
 #include "evita/text/layout/block_flow.h"
 #include "evita/text/models/buffer.h"
 #include "evita/text/models/marker_set.h"
+#include "evita/text/style/style_tree.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
 namespace layout {
@@ -27,33 +30,26 @@ gfx::RectF CaretBoundsOf(int origin_x, int origin_y, int height) {
 //
 // BlockFlowTest
 //
-class BlockFlowTest : public ::testing::Test {
+class BlockFlowTest : public TextLayoutTestBase {
  protected:
   BlockFlowTest();
   ~BlockFlowTest() override;
 
   BlockFlow* block() const { return block_.get(); }
-  text::Buffer* buffer() const { return buffer_.get(); }
-  text::MarkerSet* markers() const { return markers_.get(); }
 
   text::Offset HitTestPoint(const gfx::PointF& view_point) const;
 
  private:
-  const std::unique_ptr<text::Buffer> buffer_;
-  const std::unique_ptr<text::MarkerSet> markers_;
-
-  // |BlockFlow| constructor takes |buffer_| and |markers_|.
   const std::unique_ptr<BlockFlow> block_;
 
   DISALLOW_COPY_AND_ASSIGN(BlockFlowTest);
 };
 
 BlockFlowTest::BlockFlowTest()
-    : buffer_(new text::Buffer()),
-      markers_(new text::MarkerSet(*buffer_)),
-      block_(new BlockFlow(*buffer_, *markers_)) {
-  block()->SetBounds(
+    : block_(new BlockFlow(*buffer(), *markers(), style_tree())) {
+  set_bounds(
       gfx::RectF(gfx::PointF(300.0f, 200.0f), gfx::SizeF(100.0f, 150.0f)));
+  block()->SetBounds(bounds());
   editor::DomLock::GetInstance()->Acquire(FROM_HERE);
 }
 

@@ -32,13 +32,11 @@ float AlignHeightToPixel(float height) {
 
 }  // namespace
 
-LineBuilder::LineBuilder(const ComputedStyle& style,
-                         text::Offset line_start,
+LineBuilder::LineBuilder(text::Offset line_start,
                          text::Offset text_start,
                          float line_width)
     : line_start_(line_start),
       line_width_(line_width),
-      style_(style),
       text_start_(text_start) {}
 
 LineBuilder::~LineBuilder() {}
@@ -51,12 +49,13 @@ void LineBuilder::AddBoxInternal(InlineBox* box) {
 }
 
 void LineBuilder::AddCodeUnitBox(const ComputedStyle& style,
+                                 const gfx::Font& font,
                                  float width,
                                  float height,
                                  text::Offset offset,
                                  const base::string16& text) {
   AddTextBoxIfNeeded();
-  AddBoxInternal(new InlineUnicodeBox(style, current_x_, width, height,
+  AddBoxInternal(new InlineUnicodeBox(style, font, current_x_, width, height,
                                       offset - text_start_, text));
 }
 
@@ -67,16 +66,18 @@ void LineBuilder::AddFillerBox(const ComputedStyle& style,
   AddTextBoxIfNeeded();
   AddBoxInternal(new InlineFillerBox(style, current_x_, width, height,
                                      offset - text_start_));
+  font_ = style.fonts()[0];
 }
 
 void LineBuilder::AddMarkerBox(const ComputedStyle& style,
+                               const gfx::Font& font,
                                float width,
                                float height,
                                text::Offset start,
                                text::Offset end,
                                TextMarker marker_name) {
   AddTextBoxIfNeeded();
-  AddBoxInternal(new InlineMarkerBox(style, current_x_, width, height,
+  AddBoxInternal(new InlineMarkerBox(style, font, current_x_, width, height,
                                      start - text_start_, end - text_start_,
                                      marker_name));
 }
@@ -86,7 +87,7 @@ void LineBuilder::AddTextBoxIfNeeded() {
     return;
   DCHECK_GT(pending_text_width_, 0.0f);
   AddBoxInternal(new InlineTextBox(
-      style_, current_x_, pending_text_width_, ::ceil(style_.font().height()),
+      *style_, *font_, current_x_, pending_text_width_, ::ceil(font_->height()),
       current_offset_ - text_start_,
       base::string16(pending_text_.data(), pending_text_.size())));
   pending_text_.clear();
@@ -109,20 +110,22 @@ bool LineBuilder::HasRoomFor(float width) const {
   DCHECK(!boxes_.empty());
   if (boxes_.size() == 1 && pending_text_.empty())
     return true;
-  const auto marker_width = ::ceil(style_.font().GetCharWidth('M'));
+  const auto marker_width = ::ceil(font_->GetCharWidth('M'));
   return current_x_ + pending_text_width_ + width + marker_width < line_width_;
 }
 
 bool LineBuilder::TryAddChar(const ComputedStyle& style,
+                             const gfx::Font& font,
                              text::Offset offset,
                              base::char16 char_code) {
-  if (style_ != style) {
+  if (font_ != &font || style_ != &style) {
     AddTextBoxIfNeeded();
-    style_ = style;
+    font_ = &font;
+    style_ = &style;
   }
   if (pending_text_.empty())
     current_offset_ = offset;
-  auto const width = style.font().GetCharWidth(char_code);
+  auto const width = font_->GetCharWidth(char_code);
   if (!HasRoomFor(width))
     return false;
   pending_text_.push_back(char_code);

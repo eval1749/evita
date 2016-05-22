@@ -16,6 +16,7 @@
 #include "evita/text/paint/public/selection.h"
 #include "evita/text/paint/public/view.h"
 #include "evita/text/paint/view_painter.h"
+#include "evita/text/style/style_tree.h"
 
 namespace layout {
 
@@ -46,10 +47,13 @@ gfx::RectF RoundBounds(const gfx::RectF& bounds) {
 //
 // TextView
 //
-TextView::TextView(const text::Buffer& buffer, const text::MarkerSet& markers)
-    : block_(new BlockFlow(buffer, markers)),
+TextView::TextView(const text::Buffer& buffer,
+                   const text::MarkerSet& markers,
+                   css::StyleSheet* style_sheet)
+    : style_tree_(new StyleTree({style_sheet})),
       buffer_(buffer),
-      caret_offset_(text::Offset::Invalid()) {}
+      caret_offset_(text::Offset::Invalid()),
+      block_(new BlockFlow(buffer, markers, *style_tree_)) {}
 
 TextView::~TextView() {}
 
@@ -144,6 +148,7 @@ void TextView::SetBounds(const gfx::RectF& new_bounds) {
 void TextView::SetZoom(float new_zoom) {
   DCHECK_GT(new_zoom, 0.0f);
   block_->SetZoom(new_zoom);
+  style_tree_->SetZoom(new_zoom);
 }
 
 void TextView::Update(const TextSelectionModel& selection_model) {

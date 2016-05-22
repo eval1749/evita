@@ -29,8 +29,6 @@
 #include "evita/gfx/dx_device.h"
 #include "evita/gfx/font.h"
 #include "evita/gfx/rect_conversions.h"
-#include "evita/text/layout/render_font_set.h"
-#include "evita/text/style/models/style.h"
 #include "evita/ui/animation/animator.h"
 #include "evita/ui/compositor/root_layer.h"
 #include "evita/ui/events/event.h"
@@ -210,8 +208,10 @@ void Frame::CreateNativeWindow() const {
       WS_EX_APPWINDOW | WS_EX_NOPARENTNOTIFY | WS_EX_WINDOWEDGE | WS_EX_LAYERED;
   DWORD const dwStyle = WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN | WS_VISIBLE;
 
-  const auto& font = *layout::FontSet::GetFont(*xcss::Style::Default(), 'x');
-  gfx::SizeF size(font.GetCharWidth('M') * cColumns, font.height() * cRows);
+  // TODO(eval1749): We should take window size somewhere.
+  const auto font_height = 15;
+  const auto width_of_m = 8;
+  gfx::SizeF size(width_of_m * cColumns, font_height * cRows);
   gfx::RectF rect(gfx::PointF(), gfx::Direct2DFactory::AlignToPixel(size));
 
   RECT raw_original_bounds(gfx::ToEnclosingRect(rect));

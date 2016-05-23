@@ -13,7 +13,6 @@ source_set("style") {
   ]
 
   deps = [
-    "models",
     "//evita/css",
     "//evita/gfx",
   ]

@@ -45,7 +45,6 @@ source_set("models") {
     "//common",
     "//evita/base",
     "//evita/text/encodings",
-    "//evita/text/style/models",
   ]
 }
 

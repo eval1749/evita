@@ -29,7 +29,6 @@ source_set("layout") {
     "//evita/text/models",
     "//evita/text/paint/public",
     "//evita/text/style",
-    "//evita/text/style/models",
   ]
 }
 

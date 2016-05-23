@@ -16,6 +16,5 @@ test("evita_text_tests") {
     "//base/test:run_all_unittests",
     "//evita/text/encodings:tests",
     "//evita/text/models:tests",
-    "//evita/text/style/models:tests",
   ]
 }

@@ -7,7 +7,6 @@
 
 #include "evita/gfx/color_f.h"
 #include "evita/text/models/offset.h"
-#include "evita/text/style/models/style.h"
 #include "evita/ui/base/selection_state.h"
 
 namespace layout {

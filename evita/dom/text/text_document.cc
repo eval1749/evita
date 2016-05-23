@@ -22,7 +22,6 @@
 #include "evita/text/models/offset.h"
 #include "evita/text/models/spelling.h"
 #include "evita/text/models/static_range.h"
-#include "evita/text/style/models/style_selector.h"
 
 namespace dom {
 
@@ -75,7 +74,7 @@ base::string16 TextDocument::SyntaxAt(text::Offset offset,
     return base::string16();
   if (auto marker = buffer_->syntax_markers()->GetMarkerAt(offset))
     return marker->type().as_string();
-  return xcss::StyleSelector::normal().as_string();
+  return L"normal";
 }
 
 bool TextDocument::CheckCanChange(ExceptionState* exception_state) const {

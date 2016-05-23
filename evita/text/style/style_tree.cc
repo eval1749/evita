@@ -13,7 +13,6 @@
 #include "evita/gfx/font_face.h"
 #include "evita/text/style/computed_style.h"
 #include "evita/text/style/computed_style_builder.h"
-#include "evita/text/style/models/style.h"
 #include "evita/visuals/style/compiled_style_sheet_set.h"
 
 namespace layout {

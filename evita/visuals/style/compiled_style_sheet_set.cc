@@ -5,6 +5,7 @@
 #include "evita/visuals/style/compiled_style_sheet_set.h"
 
 #include "base/strings/string16.h"
+#include "base/trace_event/trace_event.h"
 #include "evita/base/strings/atomic_string.h"
 #include "evita/css/rule.h"
 #include "evita/css/selector_builder.h"
@@ -217,6 +218,7 @@ void CompiledStyleSheetSet::Merge(css::Style* passed_style,
     }
   }
 
+  TRACE_EVENT0("visuals", "CompileStyleSheetSet::Merge");
   DVLOG(1) << "CompiledStyleSheetSet::Merge: " << selector;
 
   const auto& matched = Match(selector);

@@ -5,6 +5,7 @@
 #include "evita/text/style/style_tree.h"
 
 #include "base/strings/string_util.h"
+#include "base/trace_event/trace_event.h"
 #include "evita/css/selector.h"
 #include "evita/css/style.h"
 #include "evita/css/values.h"
@@ -175,6 +176,7 @@ const ComputedStyle& StyleTree::ComputedStyleOf(
   const auto& it = style_cache_.find(selector);
   if (it != style_cache_.end())
     return *it->second;
+  TRACE_EVENT0("view", "StyleTree::ComputedStyleOf");
   const auto& css_style = std::make_unique<css::Style>();
   style_sheet_set_->Merge(css_style.get(), selector);
   DCHECK(css_style->has_background_color()) << "No background-color for "

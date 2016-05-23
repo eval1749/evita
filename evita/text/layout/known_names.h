@@ -22,8 +22,11 @@ namespace layout {
 
 class KnownNames final {
  public:
+  KnownNames(const KnownNames& other) = delete;
   KnownNames();
   ~KnownNames() = default;
+
+  KnownNames& operator=(const KnownNames& other) = delete;
 
 #define V(string, name) \
   base::AtomicString name() const { return name##_; }

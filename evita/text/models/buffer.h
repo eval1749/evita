@@ -18,11 +18,6 @@
 #include "evita/text/models/buffer_mutation_observer.h"
 #include "evita/text/models/marker_set_observer.h"
 
-namespace xcss {
-class Style;
-class StyleResolver;
-}
-
 namespace text {
 
 class Buffer;
@@ -58,9 +53,6 @@ class Buffer final : public BufferCore, public MarkerSetObserver {
   int revision() const { return revision_; }
   MarkerSet* spelling_markers() const { return spelling_markers_.get(); }
   MarkerSet* syntax_markers() const { return syntax_markers_.get(); }
-  const xcss::StyleResolver* style_resolver() const {
-    return style_resolver_.get();
-  }
   int version() const { return version_; }
 
   bool CanRedo() const;
@@ -73,7 +65,6 @@ class Buffer final : public BufferCore, public MarkerSetObserver {
   // use |StaticRange| as parameter for |Delete()|.
   void Delete(Offset start, Offset end);
   void EndUndoGroup(const base::string16& name);
-  const xcss::Style& GetDefaultStyle() const;
   LineAndColumn GetLineAndColumn(Offset offset) const;
   UndoStack* GetUndo() const { return undo_stack_.get(); }
   bool IsReadOnly() const { return read_only_; }
@@ -112,7 +103,6 @@ class Buffer final : public BufferCore, public MarkerSetObserver {
   std::unique_ptr<MarkerSet> spelling_markers_;
   std::unique_ptr<MarkerSet> syntax_markers_;
   std::unique_ptr<RangeSet> ranges_;
-  std::unique_ptr<xcss::StyleResolver> style_resolver_;
   std::unique_ptr<UndoStack> undo_stack_;
 
   // |revision_| holds buffer revision, which incremented by one at each

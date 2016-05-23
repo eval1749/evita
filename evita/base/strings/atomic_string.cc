@@ -12,6 +12,13 @@
 
 namespace base {
 
+namespace {
+AtomicString GetEmptyAtomicString() {
+  CR_DEFINE_STATIC_LOCAL(AtomicString, static_empty_string, (L""));
+  return static_empty_string;
+}
+}  // namespace
+
 //////////////////////////////////////////////////////////////////////
 //
 // AtomicString
@@ -23,7 +30,7 @@ AtomicString::AtomicString(base::StringPiece16 value)
 
 AtomicString::AtomicString(const AtomicString& other) : value_(other.value_) {}
 
-AtomicString::AtomicString() : AtomicString(L"") {}
+AtomicString::AtomicString() : AtomicString(GetEmptyAtomicString()) {}
 
 AtomicString& AtomicString::operator=(const AtomicString& other) {
   value_ = other.value_;

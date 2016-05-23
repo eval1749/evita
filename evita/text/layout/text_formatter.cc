@@ -14,6 +14,7 @@
 #include "evita/gfx/direct2d_factory_win.h"
 #include "evita/gfx/font.h"
 #include "evita/gfx/font_face.h"
+#include "evita/text/layout/known_names.h"
 #include "evita/text/layout/text_format_context.h"
 #include "evita/text/models/buffer.h"
 #include "evita/text/models/marker.h"
@@ -253,13 +254,11 @@ bool TextFormatter::FormatChar(LineBuilder* line_builder,
                                base::char16 char_code) {
   css::Selector::Builder selectorBuilder;
   if (char_code < 0x20 || char_code == 0xFEFF) {
-    // TODO(eval1749): We should have global selector type name somewhere to
-    // avoid constructor |base::AtomicString| here.
-    selectorBuilder.SetTagName(base::AtomicString(L"marker"));
+    selectorBuilder.SetTagName(KNOWN_NAME_OF(marker));
   } else {
     const auto& syntax = text_scanner_->syntax();
     if (syntax.empty())
-      selectorBuilder.SetTagName(base::AtomicString(L"normal"));
+      selectorBuilder.SetTagName(KNOWN_NAME_OF(normal));
     else
       selectorBuilder.SetTagName(syntax);
   }
@@ -278,7 +277,7 @@ bool TextFormatter::FormatChar(LineBuilder* line_builder,
   }
 
   if (char_code < 0x20 || char_code == 0xFEFF) {
-    selectorBuilder.AddClass(base::AtomicString(L"control"));
+    selectorBuilder.AddClass(KNOWN_NAME_OF(control));
     const auto& style = ComputedStyleOf(selectorBuilder.Build());
     return FormatMissing(line_builder, style, char_code);
   }
@@ -289,7 +288,7 @@ bool TextFormatter::FormatChar(LineBuilder* line_builder,
                                     char_code);
   }
 
-  selectorBuilder.AddClass(base::AtomicString(L"missing"));
+  selectorBuilder.AddClass(KNOWN_NAME_OF(missing));
   const auto& style2 = ComputedStyleOf(selectorBuilder.Build());
   return FormatMissing(line_builder, style2, char_code);
 }
@@ -298,7 +297,7 @@ void TextFormatter::FormatMarker(LineBuilder* line_builder,
                                  TextMarker marker_name,
                                  text::OffsetDelta length) {
   css::Selector::Builder selectorBuilder;
-  selectorBuilder.SetTagName(base::AtomicString(L"marker"));
+  selectorBuilder.SetTagName(KNOWN_NAME_OF(marker));
   const auto& style = ComputedStyleOf(selectorBuilder.Build());
   const auto* font = FontFor(style, 'x');
   const auto width = AlignWidthToPixel(font->GetCharWidth('x'));

@@ -12,6 +12,7 @@
 #include "evita/css/selector_builder.h"
 #include "evita/gfx/font.h"
 #include "evita/text/layout/block_flow.h"
+#include "evita/text/layout/known_names.h"
 #include "evita/text/layout/line/inline_box.h"
 #include "evita/text/layout/line/inline_box_visitor.h"
 #include "evita/text/layout/line/root_inline_box.h"
@@ -143,7 +144,7 @@ std::unordered_set<gfx::RectF> CalculateSelectionBoundsSet(
 
 gfx::ColorF ComputeBackgroundColor(const StyleTree& style_tree) {
   css::Selector::Builder selector;
-  selector.SetTagName(base::AtomicString(L"::default"));
+  selector.SetTagName(KNOWN_NAME_OF(cc_default));
   const auto& style = style_tree.ComputedStyleOf(selector.Build());
   return style.bgcolor();
 }
@@ -152,7 +153,7 @@ paint::Ruler ComputeRuler(const StyleTree& style_tree, const BlockFlow& block) {
   // TODO(eval1749): We should expose show/hide and ruler settings to both
   // script and UI.
   css::Selector::Builder selector;
-  selector.SetTagName(base::AtomicString(L"::ruler"));
+  selector.SetTagName(KNOWN_NAME_OF(cc_ruler));
   const auto& style = style_tree.ComputedStyleOf(selector.Build());
   // TODO(eval1749): We should consider zoom.
   const auto font = style.fonts()[0];
@@ -178,11 +179,11 @@ paint::RootInlineBox* CreatePaintRootInlineBox(const RootInlineBox& line) {
 TextSelection FormatSelection(const StyleTree& style_tree,
                               const TextSelectionModel& selection_model) {
   css::Selector::Builder selector;
-  selector.SetTagName(base::AtomicString(L"::selection"));
+  selector.SetTagName(KNOWN_NAME_OF(cc_selection));
   if (selection_model.disabled())
-    selector.AddClass(base::AtomicString(L":inactive"));
+    selector.AddClass(KNOWN_NAME_OF(c_inactive));
   else
-    selector.AddClass(base::AtomicString(L":active"));
+    selector.AddClass(KNOWN_NAME_OF(c_active));
   const auto& style = style_tree.ComputedStyleOf(selector.Build());
   return TextSelection(selection_model, style.bgcolor());
 }

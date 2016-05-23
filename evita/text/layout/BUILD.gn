@@ -8,6 +8,8 @@ source_set("layout") {
   sources = [
     "block_flow.cc",
     "block_flow.h",
+    "known_names.cc",
+    "known_names.h",
     "paint_view_builder.cc",
     "paint_view_builder.h",
     "render_selection.cc",

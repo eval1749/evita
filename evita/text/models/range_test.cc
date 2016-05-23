@@ -11,7 +11,6 @@
 
 #include "evita/text/models/buffer.h"
 #include "evita/text/models/range.h"
-#include "evita/text/style/models/style.h"
 
 namespace text {
 

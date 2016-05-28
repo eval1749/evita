@@ -263,7 +263,3 @@ class Parser extends base.Logger {
 css.Parser = Parser;
 
 });
-
-// TODO(eval1749): We should get rid of following debug helper code fragment.
-var x = new css.Parser();
-x.verbose = 1;

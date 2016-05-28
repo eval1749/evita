@@ -421,7 +421,7 @@ class Token {
    */
   toString() {
     const text = asStringLiteral(this.document_.slice(this.start_, this.end_));
-    return `Token(${this.start_}, ${this.end_}, ${text}, '${this.syntax}')`;
+    return `Token(${this.start_}, ${this.end_}, '${this.syntax}', ${text})`;
   }
 
   /**

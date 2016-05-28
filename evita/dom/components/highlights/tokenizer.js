@@ -110,7 +110,7 @@ class Tokenizer extends Logger {
     this.painter_.didChangeTextDocument(headCount, tailCount, delta);
     this.rangeMap_.didChangeTextDocument(headCount, tailCount, delta);
     if (this.scanOffset_ < headCount) {
-      this.log(0, 'change occurred beyond processed area');
+      this.log(0, 'change occurred beyond processed area', this.scanOffset_);
       return;
     }
     /** @const @type {?StateRange} */
@@ -298,10 +298,6 @@ class Tokenizer extends Logger {
       if (currentRange && this.canUseRange(currentRange, state)) {
         // We've already processed |currentRange|, so we can skip it.
         lastRange = this.skipExistingRanges(currentRange, endOffset);
-        if (!lastRange) {
-          this.log(0, 'END skip until end of document at', endOffset);
-          return endOffset;
-        }
         if (lastRange.end >= scanEnd) {
           this.log(0, 'END skip beyond scanEnd', scanEnd, lastRange);
           return lastRange.end;
@@ -344,7 +340,7 @@ class Tokenizer extends Logger {
    * @private
    * @param {!StateRange} startRange
    * @param {number} endOffset
-   * @return {?StateRange}
+   * @return {!StateRange}
    */
   skipExistingRanges(startRange, endOffset) {
     /** @type {!StateRange} */
@@ -357,7 +353,7 @@ class Tokenizer extends Logger {
       console.assert(lastRange.token !== range.token, lastRange, range);
       lastRange = range;
     }
-    return null;
+    return lastRange;
   }
 
   /**

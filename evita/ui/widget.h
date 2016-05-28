@@ -63,6 +63,7 @@ class Widget : public EventTarget,
   HWND AssociatedHwnd() const;
   void DestroyWidget();
   gfx::RectF GetContentsBounds() const;
+  Widget* GetHostWidget() const;
   // Returns the bounds of the view in its own coordinates (i.e. position is
   // 0, 0). This function is useful for hit test.
   gfx::Rect GetLocalBounds() const;
@@ -151,7 +152,6 @@ class Widget : public EventTarget,
 
   void DispatchMouseExited();
   void DispatchPaintMessage();
-  Widget* GetHostWidget() const;
   LRESULT HandleKeyboardMessage(uint32_t message, WPARAM wParam, LPARAM lParam);
   bool HandleMouseMessage(const base::NativeEvent& native_event);
   HitTestResult HitTest(const gfx::Point& point) const;

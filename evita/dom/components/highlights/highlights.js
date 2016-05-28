@@ -131,7 +131,7 @@ class StateRange {
   toString() {
     const text = asStringLiteral(this.document_.slice(this.start_, this.end_));
     return `StateRange(${this.start_}, ${this.end_}, ${text}, ` +
-        `state:${this.state_}, ${this.token})`;
+        `s${this.state_}, ${this.token})`;
   }
 
   /**

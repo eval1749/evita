@@ -5,22 +5,25 @@
 goog.provide('highlights.Paint');
 goog.provide('highlights.KeywordPaint');
 
+goog.require('base.Logger');
 goog.require('highlights');
 
 goog.scope(function() {
 
+const Logger = base.Logger;
 const Token = highlights.Token;
 
 /*
  * |Painter| provides basic functionality for setting syntax for |TextDocument|
  * with |Token|.
  */
-class Painter {
+class Painter extends Logger {
   /**
    * @protected
    * @param {!TextDocument} document
    */
   constructor(document) {
+    super();
     /** @const @type {!TextDocument} */
     this.document_ = document;
   }

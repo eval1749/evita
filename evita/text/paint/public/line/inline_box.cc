@@ -85,8 +85,6 @@ InlineBox* InlineFillerBox::Copy() const {
 //
 WithFont::WithFont(const gfx::Font& font) : font_(font) {}
 
-WithFont::WithFont(const WithFont& other) : font_(other.font_) {}
-
 WithFont::~WithFont() {}
 
 //////////////////////////////////////////////////////////////////////

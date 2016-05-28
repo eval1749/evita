@@ -52,9 +52,9 @@ class PromiseResolver final
   void DoResolve(v8::Local<v8::Value> value);
 
   tracked_objects::Location from_here_;
-  ginx::ScopedPersistent<v8::Promise::Resolver> resolver_;
+  const ginx::ScopedPersistent<v8::Promise::Resolver> resolver_;
   base::WeakPtr<gin::Runner> runner_;
-  int const sequence_num_;
+  const int sequence_num_;
 
   DISALLOW_COPY_AND_ASSIGN(PromiseResolver);
 };

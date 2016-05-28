@@ -77,12 +77,10 @@ void PromiseResolver::DoReject(v8::Local<v8::Value> value) {
                          from_here_.function_name());
   CHECK(LivePromiseResolverSet::instance()->IsLive(this));
   CHECK(runner_);
-  if (!resolver_.IsEmpty()) {
-    const auto& isolate = runner()->isolate();
-    const auto& resolver = resolver_.NewLocal(isolate);
-    const auto& result = resolver->Reject(runner()->context(), value);
-    CHECK(result.IsJust());
-  }
+  const auto& isolate = runner()->isolate();
+  const auto& resolver = resolver_.NewLocal(isolate);
+  const auto& result = resolver->Reject(runner()->context(), value);
+  CHECK(result.IsJust());
   TRACE_EVENT_ASYNC_END1("script", "Promise", sequence_num_, "type", "reject");
 }
 
@@ -92,12 +90,10 @@ void PromiseResolver::DoResolve(v8::Local<v8::Value> value) {
                          from_here_.function_name());
   CHECK(LivePromiseResolverSet::instance()->IsLive(this));
   CHECK(runner_);
-  if (!resolver_.IsEmpty()) {
-    const auto& isolate = runner()->isolate();
-    const auto& resolver = resolver_.NewLocal(isolate);
-    const auto& result = resolver->Resolve(runner()->context(), value);
-    CHECK(result.IsJust());
-  }
+  const auto& isolate = runner()->isolate();
+  const auto& resolver = resolver_.NewLocal(isolate);
+  const auto& result = resolver->Resolve(runner()->context(), value);
+  CHECK(result.IsJust());
   TRACE_EVENT_ASYNC_END1("script", "Promise", sequence_num_, "type", "resolve");
 }
 

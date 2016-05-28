@@ -197,6 +197,33 @@ class StateRangeMap extends Logger {
   }
 
   /**
+   * @private
+   * @param {number} cleanEnd
+   */
+  adjustRangeContains(cleanEnd) {
+    const runner = this.lowerBound(cleanEnd);
+    if (runner === null)
+      return;
+    /** @const @type {!StateRange} */
+    const range = runner.data;
+    if (range.start >= cleanEnd)
+      return;
+    /** @const @type {!Token} */
+    const token = range.token;
+    if (token.end === cleanEnd) {
+      console.assert(token.end === range.end, range);
+      return;
+    }
+    // Shrink |range| since it crosses clean and dirty boundary:
+    // ....dirty....
+    //   >---<
+    this.log(0, 'adjustRangeContains', cleanEnd, range);
+    Token.setEnd(token, cleanEnd);
+    Token.setSyntax(token, '');
+    range.end = cleanEnd;
+  }
+
+  /**
    * @param {number} headCount
    * @param {number} tailCount
    * @param {number} delta
@@ -211,6 +238,7 @@ class StateRangeMap extends Logger {
     this.log(
         0, 'headCount', headCount, 'oldLength', oldLength, 'delta', delta,
         'cleanStart', cleanStart);
+    this.adjustRangeContains(headCount);
     for (;;) {
       let runner = this.lowerBound(headCount + 1);
       if (runner === null) {
@@ -219,6 +247,7 @@ class StateRangeMap extends Logger {
       }
       /** @const @type {!StateRange} */
       const range = runner.data;
+      console.assert(range.start >= headCount, headCount, range);
       if (range.start > cleanStart)
         return this.relocateRanges(runner, delta);
 
@@ -230,16 +259,6 @@ class StateRangeMap extends Logger {
       if (next && next.data.token === token) {
         // We remove ranges in same token.
         this.removeNode(next);
-        continue;
-      }
-
-      if (range.start < headCount) {
-        // Shrink |range| since it crosses clean and dirty boundary:
-        // ....dirty....
-        //   >---<
-        if (token.end === range.end)
-          Token.setEnd(token, headCount);
-        range.end = headCount;
         continue;
       }
       // Remove a range after clean.

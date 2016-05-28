@@ -358,14 +358,14 @@ testing.test('StateRangeMap', function(t) {
   t.expect(makeSample(0, 8, 10), 'insert at start')
       .toEqual('(13 15 cont) (15 17 etag) (17 18 etag) (18 19 etag)');
   t.expect(makeSample(2, 6, 1), 'insert before ">"@2')
-      .toEqual('(0 1 stag) (1 2 stag) (6 8 etag) (8 9 etag) (9 10 etag)');
+      .toEqual('(0 1 ) (1 2 ) (6 8 etag) (8 9 etag) (9 10 etag)');
   t.expect(makeSample(8, 1, 1), 'insert at end')
       .toEqual(
-          '(0 1 stag) (1 2 stag) (2 3 stag) (3 5 cont) (5 7 etag) (7 8 etag)');
+          '(0 1 stag) (1 2 stag) (2 3 stag) (3 5 cont) (5 7 ) (7 8 )');
   t.expect(makeSample(0, 7, -1), 'remove "<"@0')
       .toEqual('(2 4 cont) (4 6 etag) (6 7 etag) (7 8 etag)');
   t.expect(makeSample(2, 6, -1), 'remove ">"@2')
-      .toEqual('(0 1 stag) (1 2 stag) (4 6 etag) (6 7 etag) (7 8 etag)');
+      .toEqual('(0 1 ) (1 2 ) (4 6 etag) (6 7 etag) (7 8 etag)');
 });
 
 testing.test('XmlPainter', function(t) {

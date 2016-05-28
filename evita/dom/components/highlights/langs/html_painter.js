@@ -53,6 +53,12 @@ class HtmlPainter extends Painter {
     this.scriptPainter_.didLoadTextDocument();
   }
 
+  /** @override */
+  didChangeVerbose() {
+    this.cssPainter_.verbose = this.verbose;
+    this.scriptPainter_.verbose = this.verbose;
+  }
+
   /**
    * @private
    * @param {!Token} token

@@ -47,7 +47,8 @@ class TextMutationObserver final
   void Observe(TextDocument* document, const TextMutationObserverInit& options);
   std::vector<TextMutationRecord*> TakeRecords();
 
-  ginx::ScopedPersistent<v8::Function> callback_;
+  const ginx::ScopedPersistent<v8::Function> callback_;
+  ScriptHost* const script_host_;
   std::vector<std::unique_ptr<Tracker>> trackers_;
 
   DISALLOW_COPY_AND_ASSIGN(TextMutationObserver);

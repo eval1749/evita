@@ -28,7 +28,9 @@ namespace dom {
 class TextMutationObserver::Tracker final
     : public text::BufferMutationObserver {
  public:
-  Tracker(TextMutationObserver* observer, TextDocument* document);
+  Tracker(ScriptHost* script_host,
+          TextMutationObserver* observer,
+          TextDocument* document);
   ~Tracker() final;
 
   bool has_records() const { return number_of_mutations_ > 0; }
@@ -62,6 +64,7 @@ class TextMutationObserver::Tracker final
   int number_of_mutations_ = 0;
 
   TextMutationObserver* const observer_;
+  ScriptHost* const script_host_;
 
   // A number of unmodified characters from end of document.
   text::OffsetDelta tail_count_;
@@ -71,9 +74,13 @@ class TextMutationObserver::Tracker final
   DISALLOW_COPY_AND_ASSIGN(Tracker);
 };
 
-TextMutationObserver::Tracker::Tracker(TextMutationObserver* observer,
+TextMutationObserver::Tracker::Tracker(ScriptHost* script_host,
+                                       TextMutationObserver* observer,
                                        TextDocument* document)
-    : document_(document), observer_(observer), weak_factory_(this) {
+    : document_(document),
+      observer_(observer),
+      script_host_(script_host),
+      weak_factory_(this) {
   document_->buffer()->AddObserver(this);
   ResetSummary();
 }
@@ -128,7 +135,7 @@ void TextMutationObserver::Tracker::RunCallback() {
   is_scheduled_ = false;
   if (!has_records())
     return;
-  const auto runner = ScriptHost::instance()->runner();
+  const auto runner = script_host_->runner();
   ginx::Runner::Scope runner_scope(runner);
   const auto isolate = runner->isolate();
   v8::Local<v8::Value> records;
@@ -145,7 +152,7 @@ void TextMutationObserver::Tracker::ScheduleNotify() {
   if (is_scheduled_)
     return;
   is_scheduled_ = true;
-  ScriptHost::instance()->EnqueueMicroTask(std::make_unique<MicroTask>(
+  script_host_->EnqueueMicroTask(std::make_unique<MicroTask>(
       FROM_HERE, base::Bind(&Tracker::NotifyMutations, GetWeakPtr())));
 }
 
@@ -164,7 +171,7 @@ std::vector<TextMutationRecord*> TextMutationObserver::Tracker::TakeRecords() {
 //
 TextMutationObserver::TextMutationObserver(ScriptHost* script_host,
                                            v8::Local<v8::Function> callback)
-    : callback_(script_host->isolate(), callback) {}
+    : callback_(script_host->isolate(), callback), script_host_(script_host) {}
 
 TextMutationObserver::~TextMutationObserver() {}
 
@@ -175,7 +182,8 @@ void TextMutationObserver::Disconnect() {
 void TextMutationObserver::Observe(TextDocument* document,
                                    const TextMutationObserverInit& options) {
   DCHECK(options.summary());
-  trackers_.emplace_back(std::move(std::make_unique<Tracker>(this, document)));
+  trackers_.emplace_back(
+      std::move(std::make_unique<Tracker>(script_host_, this, document)));
 }
 
 std::vector<TextMutationRecord*> TextMutationObserver::TakeRecords() {

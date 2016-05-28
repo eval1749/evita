@@ -162,8 +162,9 @@ std::vector<TextMutationRecord*> TextMutationObserver::Tracker::TakeRecords() {
 //
 // TextMutationObserver
 //
-TextMutationObserver::TextMutationObserver(v8::Local<v8::Function> callback)
-    : callback_(v8::Isolate::GetCurrent(), callback) {}
+TextMutationObserver::TextMutationObserver(ScriptHost* script_host,
+                                           v8::Local<v8::Function> callback)
+    : callback_(script_host->isolate(), callback) {}
 
 TextMutationObserver::~TextMutationObserver() {}
 

@@ -14,6 +14,7 @@
 
 namespace dom {
 
+class ScriptHost;
 class TextDocument;
 class TextMutationObserverInit;
 class TextMutationRecord;
@@ -38,7 +39,8 @@ class TextMutationObserver final
  private:
   friend class bindings::TextMutationObserverClass;
 
-  explicit TextMutationObserver(v8::Local<v8::Function> callback);
+  TextMutationObserver(ScriptHost* script_host,
+                       v8::Local<v8::Function> callback);
 
   // Bindings
   void Disconnect();

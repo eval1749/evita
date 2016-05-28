@@ -2,11 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-callback MutationCallback = void (TextMutationRecord[] records,
-                                  TextMutationObserver observer);
+callback MutationCallback =
+    void(TextMutationRecord[] records, TextMutationObserver observer);
 
-[Constructor(MutationCallback callback)]
-interface TextMutationObserver {
+[
+  CallWith = ScriptHost, Constructor(MutationCallback callback)
+] interface TextMutationObserver {
   void disconnect();
   void observe(TextDocument document, TextMutationObserverInit options);
   TextMutationRecord[] takeRecords();

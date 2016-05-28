@@ -194,14 +194,20 @@ function handleCompositionEvent(window, event) {
     const spanEnd = range.start + end;
     switch (span.data) {
       case 0:  // ATTR_INPUT
-      case 4:  // ATTR_INPUT_ERROR
         window.setMarker(spanStart, spanEnd, 'ime_input');
         break;
       case 1:  // ATTR_TARGET_CONVERTED
+        window.setMarker(spanStart, spanEnd, 'ime_active1');
+        break;
       case 3:  // ATTR_TARGET_NOTCONVERTED
         window.setMarker(spanStart, spanEnd, 'ime_active2');
         break;
       case 2:  // ATTR_CONVERTED
+        window.setMarker(spanStart, spanEnd, 'ime_inactive1');
+        break;
+      case 4:  // ATTR_INPUT_ERROR
+        window.setMarker(spanStart, spanEnd, 'ime_input_error');
+        break;
       case 5:  // ATTR_FIXEDCONVERTED
         window.setMarker(spanStart, spanEnd, 'ime_inactive2');
         break;

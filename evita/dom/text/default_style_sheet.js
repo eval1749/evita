@@ -35,11 +35,12 @@ const cssText = [
   //
   // IME See "evita/dom/windows/text_window.js" for usage of IME classes.
   // See CSS Text Decoration Module
-  '.ime_active1 { text-decoration: underline double; }',
-  '.ime_active2 { background-color: #3399FF; color: #FFF; }',
+  '.ime_active1 { background-color: #3399FF; color: #FFF; }',
+  '.ime_active2 { text-decoration: underline double; }',
   '.ime_inactive1 { text-decoration: underline solid; }',
-  '.ime_inactive2 { text-decoration: underline solid; }',
+  '.ime_inactive2 { text-decoration: underline solid #0F0;}',
   '.ime_input { text-decoration: underline wavy; }',
+  '.ime_input_error { text-decoration: underline wavy #F00; }',
 
   //
   // Spelling

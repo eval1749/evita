@@ -65,8 +65,6 @@ class Tokenizer extends Logger {
     this.scanOffset_ = 0;
     /** @const @type {!StateRangeMap} */
     this.rangeMap_ = new StateRangeMap(document);
-    /** @type {number} */
-    this.verbose_ = 0;
   }
 
   /** @return {!TextDocument} */

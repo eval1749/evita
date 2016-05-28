@@ -31,8 +31,8 @@ class InputMethodContext final {
 
   operator HIMC() const { return handle_; }
 
+  int GetCursorOffset() const;
   std::vector<TextComposition::Span> GetSpans();
-  int GetCursorOffset();
   base::string16 GetText(int index);
   bool SetComposition(int index, uint8_t* bytes, size_t num_bytes);
 
@@ -53,6 +53,10 @@ InputMethodContext::InputMethodContext(HWND hwnd)
 InputMethodContext::~InputMethodContext() {
   if (handle_)
     ::ImmReleaseContext(hwnd_, handle_);
+}
+
+int InputMethodContext::GetCursorOffset() const {
+  return ::ImmGetCompositionString(handle_, GCS_CURSORPOS, nullptr, 0);
 }
 
 std::vector<TextComposition::Span> InputMethodContext::GetSpans() {
@@ -83,10 +87,6 @@ std::vector<TextComposition::Span> InputMethodContext::GetSpans() {
     spans.back().end = offset;
   }
   return std::move(spans);
-}
-
-int InputMethodContext::GetCursorOffset() {
-  return ::ImmGetCompositionString(handle_, GCS_CURSORPOS, nullptr, 0);
 }
 
 base::string16 InputMethodContext::GetText(int index) {

@@ -130,6 +130,12 @@ class Tokenizer extends Logger {
     this.dump();
   }
 
+  /** @override */
+  didChangeVerbose() {
+    this.painter_.verbose = this.verbose;
+    this.rangeMap_.verbose = this.verbose;
+  }
+
   /**
    * @public
    */

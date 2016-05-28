@@ -15,11 +15,19 @@ class Logger {
     this.verbose_ = 0;
   }
 
+  /** @protected */
+  didChangeVerbose() {}
+
   /** @public @return {number} */
   get verbose() { return this.verbose_; }
 
   /** @public @param {number} level */
-  set verbose(level) { this.verbose_ = level; }
+  set verbose(level) {
+    if (this.verbose_ === level)
+      return;
+    this.verbose_ = level;
+    this.didChangeVerbose();
+  }
 
   /**
    * @protected

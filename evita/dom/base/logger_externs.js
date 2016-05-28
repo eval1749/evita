@@ -10,6 +10,8 @@ base.Logger = function() {};
 /** @type {number} */
 base.Logger.prototype.verbose;
 
+base.Logger.prototype.didChangeVerbose = function() {};
+
 /**
  * @param {number} level
  * @param {...*} args

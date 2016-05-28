@@ -20,7 +20,6 @@
 #include "evita/dom/windows/text_window.h"
 #include "evita/editor/application.h"
 #include "evita/editor/dom_lock.h"
-#include "evita/editor/modal_message_loop_scope.h"
 #include "evita/editor/scheduler.h"
 #include "evita/editor/switch_set.h"
 #include "evita/editor/trace_log_controller.h"
@@ -336,7 +335,8 @@ void ViewDelegateImpl::MessageBox(domapi::WindowId window_id,
     safe_title += L" - ";
   safe_title += editor::Application::instance()->title();
   auto const hwnd = frame ? frame->AssociatedHwnd() : nullptr;
-  editor::ModalMessageLoopScope modal_message_loop_scope;
+  base::MessageLoop::ScopedNestableTaskAllower allow(
+      base::MessageLoop::current());
   auto const response = ::MessageBoxW(hwnd, message.c_str(), title.c_str(),
                                       static_cast<UINT>(flags));
   ScriptDelegate()->RunCallback(base::Bind(resolver.resolve, response));

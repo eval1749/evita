@@ -8,7 +8,6 @@ source_set("editor") {
     "application_proxy.cc",
     "application_proxy.h",
     "dom_lock.cc",
-    "modal_message_loop_scope.cc",
     "scheduler.cc",
     "scheduler.h",
     "switch_set.cc",

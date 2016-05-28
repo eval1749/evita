@@ -14,7 +14,9 @@
 #undef GetOpenFileName
 #undef GetSaveFileName
 
-#include "evita/editor/modal_message_loop_scope.h"
+#include "base/macros.h"
+#include "base/message_loop/message_loop.h"
+
 
 namespace views {
 
@@ -42,7 +44,8 @@ bool FileDialogBox::GetOpenFileName(Param* pParam) {
   oOfn.Flags |= OFN_FILEMUSTEXIST;
   oOfn.Flags |= OFN_PATHMUSTEXIST;
 
-  editor::ModalMessageLoopScope modal_mesage_loop_scope;
+  base::MessageLoop::ScopedNestableTaskAllower allow(
+      base::MessageLoop::current());
   if (!::GetOpenFileNameW(&oOfn))
     return false;
 
@@ -68,7 +71,8 @@ bool FileDialogBox::GetSaveFileName(Param* pParam) {
   oOfn.Flags |= OFN_OVERWRITEPROMPT;
   oOfn.Flags |= OFN_PATHMUSTEXIST;
   oOfn.Flags |= OFN_SHAREAWARE;
-  editor::ModalMessageLoopScope modal_mesage_loop_scope;
+  base::MessageLoop::ScopedNestableTaskAllower allow(
+      base::MessageLoop::current());
   if (!::GetSaveFileNameW(&oOfn))
     return false;
   pParam->m_pwszFile = oOfn.lpstrFile + oOfn.nFileOffset;

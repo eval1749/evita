@@ -24,8 +24,10 @@ class HtmlPainter extends Painter {
     super(document);
     /** @const @type {!Tokenizer} */
     this.cssPainter_ = highlights.createCssTokenizer(document);
+    this.cssPainter_.shouldPaintSkippedToken = true;
     /** @const @type {!Tokenizer} */
     this.scriptPainter_ = highlights.createJavaScriptTokenizer(document);
+    this.scriptPainter_.shouldPaintSkippedToken = true;
     /** @const @type {!TagPainter} */
     this.tagPainter_ = new TagPainter(document, staticHtmlKeywords);
   }

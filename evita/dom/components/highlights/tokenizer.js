@@ -59,6 +59,8 @@ class Tokenizer extends Logger {
     this.document_ = document;
     /** @const @type {!Painter} */
     this.painter_ = painter;
+    /** @type {boolean} */
+    this.shouldPaintSkippedToken_ = false;
     /** @const @type {!TokenStateMachine} */
     this.stateMachine_ = stateMachine;
     /** @type {number} */
@@ -76,6 +78,12 @@ class Tokenizer extends Logger {
    * For |HighlightEngine| printer.
    */
   get scanOffset() { return this.scanOffset_; }
+
+  /**
+   * @public
+   * @param {boolean} value
+   */
+  set shouldPaintSkippedToken(value) { this.shouldPaintSkippedToken_ = value; }
 
   /**
    * @private
@@ -146,6 +154,16 @@ class Tokenizer extends Logger {
   }
 
   /**
+   * @private
+   * @param {!Token} token
+   */
+  didSkipToken(token) {
+    if (!this.shouldPaintSkippedToken_)
+      return;
+    this.paintToken(token);
+  }
+
+  /**
    * @public
    * @param {number} hint
    */
@@ -203,8 +221,7 @@ class Tokenizer extends Logger {
   endToken(token) {
     if (token === null)
       return;
-    this.log(0, 'paint:', token);
-    this.painter_.paint(token);
+    this.paintToken(token);
   }
 
   /**
@@ -226,6 +243,15 @@ class Tokenizer extends Logger {
     this.log(
         0, 'LOOP', scanOffset, asStringLiteral(String.fromCharCode(charCode)),
         `s${state}`, token);
+  }
+
+  /**
+   * @private
+   * @param {!Token} token
+   */
+  paintToken(token) {
+    this.log(0, 'paint:', token);
+    this.painter_.paint(token);
   }
 
   /**
@@ -300,6 +326,7 @@ class Tokenizer extends Logger {
         lastRange = this.skipExistingRanges(currentRange, endOffset);
         if (lastRange.end >= scanEnd) {
           this.log(0, 'END skip beyond scanEnd', scanEnd, lastRange);
+          this.didSkipToken(lastRange.token);
           return lastRange.end;
         }
         this.log(0, 'skip after:', lastRange);
@@ -351,6 +378,7 @@ class Tokenizer extends Logger {
       if (!range)
         return lastRange;
       console.assert(lastRange.token !== range.token, lastRange, range);
+      this.didSkipToken(lastRange.token);
       lastRange = range;
     }
     return lastRange;

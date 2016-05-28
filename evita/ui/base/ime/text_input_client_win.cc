@@ -246,16 +246,24 @@ void TextInputClientWin::DidChangeCaretBounds() {
   if (!imc)
     return;
 
+  gfx::Point caret_origin(static_cast<int>(caret_bounds().left),
+                          static_cast<int>(caret_bounds().top));
+  const auto& desktop_caret_origin =
+      delegate()->GetClientWindow()->MapToDesktopPoint(caret_origin);
+  const auto& host_caret_origin =
+      delegate()->GetClientWindow()->GetHostWidget()->MapFromDesktopPoint(
+          desktop_caret_origin);
+
   // Set left top coordinate of IME candidate window.
-  CANDIDATEFORM param;
-  param.dwIndex = 0;
+  // See also: https://github.com/google/mozc/issues/361
+  CANDIDATEFORM param = {0};
   param.dwStyle = CFS_EXCLUDE;
-  param.ptCurrentPos.x = static_cast<int>(caret_bounds().left);
-  param.ptCurrentPos.y = static_cast<int>(caret_bounds().bottom);
-  param.rcArea.left = param.ptCurrentPos.x;
-  param.rcArea.top = static_cast<int>(caret_bounds().top);
-  param.rcArea.right = static_cast<int>(caret_bounds().right);
-  param.rcArea.bottom = param.ptCurrentPos.y;
+  param.rcArea.left = host_caret_origin.x();
+  param.rcArea.top = host_caret_origin.y();
+  param.rcArea.right =
+      param.rcArea.left + static_cast<int>(caret_bounds().width());
+  param.rcArea.bottom =
+      param.rcArea.top + +static_cast<int>(caret_bounds().height());
   WIN32_VERIFY(::ImmSetCandidateWindow(imc, &param));
 }
 

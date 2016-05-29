@@ -206,13 +206,10 @@ std::vector<DWRITE_GLYPH_METRICS> Font::FontImpl::GetGlyphMetrics(
 
 std::vector<DWRITE_GLYPH_METRICS> Font::FontImpl::GetGlyphMetrics(
     const std::vector<uint16_t> glyph_indexes) const {
-  DWRITE_MATRIX* const transform = nullptr;
-  const auto use_gdi_natural = false;
   const auto is_side_ways = false;
   std::vector<DWRITE_GLYPH_METRICS> metrics(glyph_indexes.size());
   COM_VERIFY((*font_face_)
-                 ->GetGdiCompatibleGlyphMetrics(
-                     em_size_, pixels_per_dip_, transform, use_gdi_natural,
+                 ->GetDesignGlyphMetrics(
                      &glyph_indexes[0],
                      static_cast<DWORD>(glyph_indexes.size()), &metrics[0],
                      is_side_ways));
@@ -221,9 +218,7 @@ std::vector<DWRITE_GLYPH_METRICS> Font::FontImpl::GetGlyphMetrics(
 
 DWRITE_FONT_METRICS Font::FontImpl::GetMetrics() const {
   DWRITE_FONT_METRICS metrics;
-  COM_VERIFY((*font_face_)
-                 ->GetGdiCompatibleMetrics(em_size_, pixels_per_dip_, nullptr,
-                                           &metrics));
+  (*font_face_)->GetMetrics(&metrics);
   return metrics;
 }
 

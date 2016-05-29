@@ -52,7 +52,7 @@ class Font::Cache final : public common::Singleton<Font::Cache> {
 };
 
 const Font& Font::Cache::GetOrCreate(const gfx::FontProperties& font_props) {
-  auto const present = map_.find(font_props);
+  const auto present = map_.find(font_props);
   if (present != map_.end())
     return *present->second;
   auto new_font = new Font(font_props);
@@ -95,8 +95,8 @@ class Font::FontImpl {
   DWRITE_FONT_METRICS GetMetrics() const;
 
   const std::unique_ptr<gfx::FontFace> font_face_;
-  float const em_size_;  // the logical size of the font in DIP units.
-  float const pixels_per_dip_;
+  const float em_size_;  // the logical size of the font in DIP units.
+  const float pixels_per_dip_;
   const DWRITE_FONT_METRICS metrics_;
 
   DISALLOW_COPY_AND_ASSIGN(FontImpl);
@@ -131,7 +131,7 @@ uint32_t Font::FontImpl::CalculateFixedWidth() const {
 
   const auto metrics =
       GetGlyphMetrics(cacheable_chars, arraysize(cacheable_chars));
-  auto const width = metrics[0].advanceWidth;
+  const auto width = metrics[0].advanceWidth;
   for (const auto metric : metrics) {
     if (width != metric.advanceWidth)
       return 0u;
@@ -207,8 +207,8 @@ std::vector<DWRITE_GLYPH_METRICS> Font::FontImpl::GetGlyphMetrics(
 std::vector<DWRITE_GLYPH_METRICS> Font::FontImpl::GetGlyphMetrics(
     const std::vector<uint16_t> glyph_indexes) const {
   DWRITE_MATRIX* const transform = nullptr;
-  auto const use_gdi_natural = false;
-  auto const is_side_ways = false;
+  const auto use_gdi_natural = false;
+  const auto is_side_ways = false;
   std::vector<DWRITE_GLYPH_METRICS> metrics(glyph_indexes.size());
   COM_VERIFY((*font_face_)
                  ->GetGdiCompatibleGlyphMetrics(
@@ -249,7 +249,7 @@ void Font::DrawText(gfx::Canvas* canvas,
                     const gfx::RectF& rect,
                     const base::char16* chars,
                     size_t num_chars) const {
-  auto const baseline = rect.origin() + gfx::SizeF(0.0f, metrics_.ascent);
+  const auto baseline = rect.origin() + gfx::SizeF(0.0f, metrics_.ascent);
   font_impl_->DrawText(canvas, text_brush, baseline, chars, num_chars);
 }
 

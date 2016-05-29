@@ -163,12 +163,9 @@ void TextInputClientWin::DidUpdateComposition(LPARAM lParam) {
   }
 
   if (lParam & GCS_RESULTSTR) {
-    // Text composition is finished.
-    set_has_composition(false);
     TextComposition composition;
     composition.set_text(imc.GetText(GCS_RESULTSTR));
     delegate()->DidCommitComposition(composition);
-    return;
   }
 
   set_has_composition(true);

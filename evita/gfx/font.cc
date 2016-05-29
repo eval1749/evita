@@ -158,7 +158,7 @@ void Font::FontImpl::DrawText(gfx::Canvas* canvas,
 
   std::vector<float> glyph_advances(num_chars);
   {
-    const auto glyph_metrics = GetGlyphMetrics(glyph_indexes);
+    const auto& glyph_metrics = GetGlyphMetrics(glyph_indexes);
     auto metrics_it = glyph_metrics.begin();
     for (auto& it : glyph_advances) {
       it = ConvertToDip(metrics_it->advanceWidth);
@@ -178,7 +178,7 @@ void Font::FontImpl::DrawText(gfx::Canvas* canvas,
 
   DCHECK(canvas->drawing());
   (*canvas)->DrawGlyphRun(baseline, &glyph_run, text_brush,
-                          DWRITE_MEASURING_MODE_GDI_CLASSIC);
+                          DWRITE_MEASURING_MODE_NATURAL);
 }
 
 std::vector<uint16_t> Font::FontImpl::GetGlyphIndexes(const base::char16* chars,
@@ -207,7 +207,7 @@ std::vector<DWRITE_GLYPH_METRICS> Font::FontImpl::GetGlyphMetrics(
 std::vector<DWRITE_GLYPH_METRICS> Font::FontImpl::GetGlyphMetrics(
     const std::vector<uint16_t> glyph_indexes) const {
   DWRITE_MATRIX* const transform = nullptr;
-  auto const use_gdi_natural = true;
+  auto const use_gdi_natural = false;
   auto const is_side_ways = false;
   std::vector<DWRITE_GLYPH_METRICS> metrics(glyph_indexes.size());
   COM_VERIFY((*font_face_)

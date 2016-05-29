@@ -29,6 +29,7 @@ class TextInputClientWin final : public TextInputClient,
   TextInputClientWin();
   void DidUpdateComposition(LPARAM lParam);
   HWND GetHwnd() const;
+  std::pair<LRESULT, bool> OnQueryCharPosition(IMECHARPOSITION* char_position);
 
   // ui::TextInputClient
   void CancelComposition(TextInputDelegate* requester) final;

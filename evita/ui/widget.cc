@@ -836,14 +836,10 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
     return 0;
   }
 
-  if (message >= WM_IME_STARTCOMPOSITION && message <= WM_IME_KEYLAST) {
-    auto result =
-        TextInputClientWin::instance()->OnImeMessage(message, wParam, lParam);
-    if (result.second)
-      return result.first;
-    return OnMessage(message, wParam, lParam);
-  }
-
+  auto result =
+      TextInputClientWin::instance()->OnImeMessage(message, wParam, lParam);
+  if (result.second)
+    return result.first;
   return OnMessage(message, wParam, lParam);
 }
 

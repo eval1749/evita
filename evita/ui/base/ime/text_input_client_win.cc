@@ -181,6 +181,33 @@ HWND TextInputClientWin::GetHwnd() const {
   return delegate()->GetClientWindow()->AssociatedHwnd();
 }
 
+// Note: to move caret inside target string, we should response
+// |IMR_QUERYCHARPOSITION| of |WM_IME_REQUEST|.
+std::pair<LRESULT, bool> TextInputClientWin::OnQueryCharPosition(
+    IMECHARPOSITION* char_position) {
+  if (char_position->dwSize != sizeof(*char_position))
+    return std::make_pair(0, false);
+  // TODO(eval1749): We should return point at |char_position.dwCharPos| rather
+  // than last caret point once we find the way to compute point for it.
+  gfx::Point caret_origin(static_cast<int>(caret_bounds().left),
+                          static_cast<int>(caret_bounds().top));
+  const auto& client = *delegate()->GetClientWindow();
+  const auto& caret_screen_origin = client.MapToDesktopPoint(caret_origin);
+  const auto& client_local_bounds = client.GetLocalBounds();
+  const auto& client_screen_origin =
+      client.MapToDesktopPoint(client_local_bounds.origin());
+  char_position->pt.x = caret_screen_origin.x();
+  char_position->pt.y = caret_screen_origin.y();
+  char_position->cLineHeight = static_cast<int>(caret_bounds().height());
+  char_position->rcDocument.left = client_screen_origin.x();
+  char_position->rcDocument.top = client_screen_origin.y();
+  char_position->rcDocument.right =
+      char_position->rcDocument.left + client_local_bounds.width();
+  char_position->rcDocument.bottom =
+      char_position->rcDocument.left + client_local_bounds.height();
+  return std::make_pair(1, true);
+}
+
 std::pair<LRESULT, bool> TextInputClientWin::OnImeMessage(uint32_t message,
                                                           WPARAM wParam,
                                                           LPARAM lParam) {
@@ -197,6 +224,9 @@ std::pair<LRESULT, bool> TextInputClientWin::OnImeMessage(uint32_t message,
       return std::make_pair(0, true);
 
     case WM_IME_REQUEST:
+      if (wParam == IMR_QUERYCHARPOSITION)
+        return OnQueryCharPosition(reinterpret_cast<IMECHARPOSITION*>(lParam));
+      DVLOG(0) << " WM_IME_REQUEST " << wParam;
       return std::make_pair(0, false);
 
     case WM_IME_SETCONTEXT: {

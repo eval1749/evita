@@ -248,12 +248,10 @@ class StateRangeMap extends Logger {
       /** @const @type {!StateRange} */
       const range = runner.data;
       console.assert(range.start >= headCount, headCount, range);
-      if (range.start > cleanStart)
-        return this.relocateRanges(runner, delta);
-
       /** @const @type {!Token} */
       const token = range.token;
-
+      if (range.start > cleanStart && range.end <= token.end)
+        return this.relocateRanges(runner, delta);
       /** @const @type {OrderedSetNode<!StateRange>} */
       const next = runner.next();
       if (next && next.data.token === token) {

@@ -286,6 +286,13 @@ class Tokenizer extends Logger {
     /** @type {?StateRange} */
     let lastRange = this.rangeMap_.rangeEndsAt(scanStart);
     this.log(0, 'start', 'lastRange:', lastRange);
+    if (lastRange && lastRange.token.syntax === '') {
+      /** @const @type {number} */
+      const state = lastRange.state;
+      /** @const @type {string} */
+      const syntax = this.stateMachine_.syntaxOf(state);
+      Token.setSyntax(lastRange.token, syntax);
+    }
 
     /** @type {?Token} */
     let token = null;

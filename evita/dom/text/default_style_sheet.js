@@ -32,6 +32,13 @@ const cssText = [
   // Bracket matching: rgba(238, 255, 65)
   '.bracket { background-color: #EEFF41; }',
 
+  // Other decorations
+  '.dashed { text-decoration: underline dashed; }',
+  '.dotted { text-decoration: underline dotted #F00; }',
+  '.double { text-decoration: underline double; }',
+  '.solid { text-decoration: underline solid; }',
+  '.wavy { text-decoration: underline wavy; }',
+
   //
   // IME See "evita/dom/windows/text_window.js" for usage of IME classes.
   // See CSS Text Decoration Module

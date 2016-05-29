@@ -57,13 +57,13 @@ void DrawWave(gfx::Canvas* canvas,
               const gfx::Font& font,
               const gfx::Brush& brush,
               const gfx::RectF& bounds,
-              float baseline) {
-  auto const wave = std::max(font.underline() * 1.3f, 2.0f);
+              float underline) {
   auto const pen_width = font.underline_thickness();
+  auto const wave = pen_width * 2;
   gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, bounds);
   for (auto x = bounds.left; x < bounds.right; x += wave) {
-    auto const bottom = baseline + wave;
-    auto const top = baseline;
+    auto const bottom = underline + pen_width;
+    auto const top = underline - pen_width;
     // top to bottom
     canvas->DrawLine(brush, gfx::PointF(x, top), gfx::PointF(x + wave, bottom),
                      pen_width);
@@ -215,7 +215,7 @@ void PaintVisitor::VisitInlineTextBox(InlineTextBox* inline_box) {
       return;
 
     case TextDecorationStyle::Wavy:
-      DrawWave(canvas_, font, brush, rect_, baseline);
+      DrawWave(canvas_, font, brush, rect_, underline);
       return;
   }
   NOTREACHED() << "We should handle text-decoration-style: "

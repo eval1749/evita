@@ -69,8 +69,8 @@ TEST_F(BlockFlowTest, HitTestPoint) {
   EXPECT_EQ(text::Offset(0), HitTestPoint(gfx::PointF(310, 200)));
   EXPECT_EQ(text::Offset(1), HitTestPoint(gfx::PointF(318, 200)));
   EXPECT_EQ(text::Offset(2), HitTestPoint(gfx::PointF(328, 200)));
-  EXPECT_EQ(text::Offset(4), HitTestPoint(gfx::PointF(310, 215)));
-  EXPECT_EQ(text::Offset(5), HitTestPoint(gfx::PointF(318, 215)));
+  EXPECT_EQ(text::Offset(4), HitTestPoint(gfx::PointF(310, 220)));
+  EXPECT_EQ(text::Offset(5), HitTestPoint(gfx::PointF(318, 220)));
 
   // Points outsize block
   EXPECT_EQ(text::Offset(0), HitTestPoint(gfx::PointF(0, 0)));
@@ -81,15 +81,15 @@ TEST_F(BlockFlowTest, HitTestTextPosition) {
   buffer()->InsertBefore(text::Offset(0), L"foo\nbar\nbarz\n");
   block()->Format(text::Offset(0));
 
-  EXPECT_EQ(CaretBoundsOf(310, 200, 15),
+  EXPECT_EQ(CaretBoundsOf(310, 200, 16),
             block()->HitTestTextPosition(text::Offset(0)));
-  EXPECT_EQ(CaretBoundsOf(317, 200, 15),
+  EXPECT_EQ(CaretBoundsOf(317, 200, 16),
             block()->HitTestTextPosition(text::Offset(1)));
-  EXPECT_EQ(CaretBoundsOf(331, 200, 15),
+  EXPECT_EQ(CaretBoundsOf(331, 200, 16),
             block()->HitTestTextPosition(text::Offset(3)));
-  EXPECT_EQ(CaretBoundsOf(310, 215, 15),
+  EXPECT_EQ(CaretBoundsOf(310, 216, 16),
             block()->HitTestTextPosition(text::Offset(4)));
-  EXPECT_EQ(CaretBoundsOf(317, 215, 15),
+  EXPECT_EQ(CaretBoundsOf(317, 216, 16),
             block()->HitTestTextPosition(text::Offset(5)));
 }
 

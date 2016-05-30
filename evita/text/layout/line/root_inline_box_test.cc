@@ -222,21 +222,21 @@ TEST_F(RootInlineBoxTest, HitTestTextPosition) {
   EXPECT_EQ(gfx::RectF(), root_box->HitTestTextPosition(text::Offset(90)))
       << "If RootInlineBox contains specified offset, HitTestTextPosition "
          "returns empty rectangle";
-  EXPECT_EQ(CaretBoundsOf(110, 200, 15),
+  EXPECT_EQ(CaretBoundsOf(110, 200, 16),
             root_box->HitTestTextPosition(text::Offset(100)));
-  EXPECT_EQ(CaretBoundsOf(117, 200, 15),
+  EXPECT_EQ(CaretBoundsOf(117, 200, 16),
             root_box->HitTestTextPosition(text::Offset(101)));
-  EXPECT_EQ(CaretBoundsOf(124, 200, 15),
+  EXPECT_EQ(CaretBoundsOf(124, 200, 16),
             root_box->HitTestTextPosition(text::Offset(102)));
-  EXPECT_EQ(CaretBoundsOf(131, 200, 15),
+  EXPECT_EQ(CaretBoundsOf(131, 200, 16),
             root_box->HitTestTextPosition(text::Offset(103)));
-  EXPECT_EQ(CaretBoundsOf(138, 200, 15),
+  EXPECT_EQ(CaretBoundsOf(138, 200, 16),
             root_box->HitTestTextPosition(text::Offset(104)));
-  EXPECT_EQ(CaretBoundsOf(145, 200, 15),
+  EXPECT_EQ(CaretBoundsOf(145, 200, 16),
             root_box->HitTestTextPosition(text::Offset(105)));
-  EXPECT_EQ(CaretBoundsOf(159, 200, 15),
+  EXPECT_EQ(CaretBoundsOf(159, 200, 16),
             root_box->HitTestTextPosition(text::Offset(107)));
-  EXPECT_EQ(CaretBoundsOf(173, 200, 15),
+  EXPECT_EQ(CaretBoundsOf(173, 200, 16),
             root_box->HitTestTextPosition(text::Offset(109)));
   EXPECT_EQ(gfx::RectF(), root_box->HitTestTextPosition(text::Offset(110)))
       << "root_box contains 100 to 109.";
@@ -250,11 +250,11 @@ TEST_F(RootInlineBoxTest, HitTestTextPositionCodeUnit) {
   builder.AddMarker(TextMarker::EndOfLine);
   const auto& root_box = builder.Build();
   root_box->set_origin(gfx::PointF(10.0f, 20.0f));
-  EXPECT_EQ(CaretBoundsOf(20, 24, 15),
+  EXPECT_EQ(CaretBoundsOf(20, 24, 16),
             root_box->HitTestTextPosition(text::Offset(100)));
-  EXPECT_EQ(CaretBoundsOf(27, 20, 19),
+  EXPECT_EQ(CaretBoundsOf(27, 20, 20),
             root_box->HitTestTextPosition(text::Offset(101)));
-  EXPECT_EQ(CaretBoundsOf(62, 24, 15),
+  EXPECT_EQ(CaretBoundsOf(62, 24, 16),
             root_box->HitTestTextPosition(text::Offset(102)));
 }
 

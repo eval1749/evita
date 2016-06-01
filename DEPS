@@ -20,7 +20,7 @@ vars = {
   'pep8_revision': '4dc42d842274ba27d2724e76eb83ff69e7db226f',
   'ply_revision': '4a6baf95860033d4c69d3e3087696b30c687622c',
   'testing_revision': 'eeea58b47f93e405eb138e4a9898cfffdd1f36d7',
-  'v8_revision': 'baec2d8bd7fe735a33452fb01b5736105ab62199', # 5.3.86
+  'v8_revision': 'f36d9c4e9ba91da8b11117eaaa92953444078004', # 5.3.89
   'zlib_revision': '4576304a4b9835aa8646c9735b079e1d96858633',
 }
 

@@ -28,9 +28,10 @@ if "%outdir%"=="" goto no_outdir
 : v8 should have  -DICU_UTIL_DATA_IMPL=ICU_UTIL_DATA_SHARE
 
 if exist src cd src
-call gn gen %outdir%\Debug --args="is_component_build=true is_debug=true is_win_fastlink=true"
-call gn gen %outdir%\Release --args="is_component_build=false is_debug=false is_win_fastlink=true"
-call gn gen %outdir%\Official --args="is_component_build=false is_debug=false is_win_fastlink=true is_official_build=true"
+set common_args= is_win_fastlink=true v8_use_external_startup_data=false
+call gn gen %outdir%\Debug --args="is_component_build=true is_debug=true %common_args%"
+call gn gen %outdir%\Release --args="is_component_build=false is_debug=false %common_args%"
+call gn gen %outdir%\Official --args="is_component_build=false is_debug=false is_official_build=true %common_args%"
 endlocal
 exit /b
 

@@ -383,12 +383,15 @@ class Tokenizer extends Logger {
       /** @type {?StateRange} */
       const range = this.rangeMap_.rangeStartsAt(lastRange.token.end);
       if (!range)
-        return lastRange;
+        break;
       console.assert(lastRange.token !== range.token, lastRange, range);
       this.didSkipToken(lastRange.token);
       lastRange = range;
     }
-    return lastRange;
+    /** @type {?StateRange} */
+    const endRange = this.rangeMap_.rangeEndsAt(lastRange.token.end);
+    console.assert(endRange, lastRange);
+    return /** @type {!StateRange} */ (endRange);
   }
 
   /**

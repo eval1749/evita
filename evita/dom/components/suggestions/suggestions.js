@@ -2,16 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Note: Expander should be in file scope. Although, when we use
+// Note: Session should be in file scope. Although, when we use
 // IIFE, immediately-invoked function expression, Closure compiler can't find
-// |Expander| type.
+// |Session| type.
 
-goog.provide('dynamic_abbrev');
+goog.provide('suggestions');
 
 goog.scope(function() {
 
-/** @const @type{string} */
-const PROPERTY_NAME = 'evita.DynamicAbbrev';
+/** @const @type {string} */
+const PROPERTY_NAME = 'evita.SuggestionSession';
 
 /**
  * @param {string} text
@@ -66,7 +66,7 @@ function findWordStartsWith(text, range, direction) {
   return false;
 }
 
-class Expander {
+class Session {
   /**
    * @public
    * @param {!TextDocument} document
@@ -86,15 +86,15 @@ class Expander {
 
   /**
    * @param {!TextDocument} document
-   * @return {!Expander}
+   * @return {!Session}
    */
   static getOrCreate(document) {
-    const expander = document.properties.get(PROPERTY_NAME);
-    if (expander)
-      return /** @type {!Expander} */ (expander);
-    const newExpander = new Expander(document);
-    document.properties.set(PROPERTY_NAME, newExpander);
-    return newExpander;
+    const session = document.properties.get(PROPERTY_NAME);
+    if (session)
+      return /** @type {!Session} */ (session);
+    const newSession = new Session(document);
+    document.properties.set(PROPERTY_NAME, newSession);
+    return newSession;
   }
 
   /**
@@ -180,7 +180,7 @@ class Expander {
     if (this.prefix === '')
       return false;
     if (this.lastSelectionRange !== selection.range) {
-      // Someone invokes expander in different window.
+      // Someone invokes session in different window.
       return false;
     }
     if (this.lastSelectionStart !== selection.range.start) {
@@ -198,12 +198,12 @@ class Expander {
 }
 
 /** @constructor */
-dynamic_abbrev.Expander = Expander;
+suggestions.Session = Session;
 
 Editor.bindKey(TextWindow, 'Ctrl+/', /** @this {!TextWindow} */ function() {
-  /** @const @type {!Expander} */
-  const expander = Expander.getOrCreate(this.document);
-  expander.expand(this.selection);
+  /** @const @type {!Session} */
+  const session = Session.getOrCreate(this.document);
+  session.expand(this.selection);
 });
 
 });

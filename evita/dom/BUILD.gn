@@ -43,23 +43,23 @@ grit("resources") {
 js_library("modules") {
   sources = [
     "${target_out_dir}/components/commands/commands.jsobj",
-    "${target_out_dir}/components/dynamic_abbrev/dynamic_abbrev.jsobj",
     "${target_out_dir}/components/find_and_replace/find_and_replace.jsobj",
     "${target_out_dir}/components/highlights/highlights.jsobj",
     "${target_out_dir}/components/launchpad/launchpad.jsobj",
     "${target_out_dir}/components/modes/modes.jsobj",
     "${target_out_dir}/components/spell_checker/spell_checker.jsobj",
+    "${target_out_dir}/components/suggestions/suggestions.jsobj",
     "${target_out_dir}/css/css.jsobj",
     "${target_out_dir}/visuals/visuals.jsobj",
   ]
   deps = [
     "components/commands",
-    "components/dynamic_abbrev",
     "components/find_and_replace",
     "components/highlights",
     "components/launchpad",
     "components/modes",
     "components/spell_checker",
+    "components/suggestions",
     "css:module",
     "visuals:module",
   ]

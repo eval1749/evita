@@ -125,10 +125,10 @@ function getLocation() {
   }
   const locations = getStack();
   let index = locations.findIndex(
-      (line) => { return line.indexOf('at Object.test \u0028') > 0; });
+      (line) => { return line.indexOf('at testing.test ') > 0; });
   if (index > 0) {
     const match =
-        new RegExp('at (.+?):(\\d+):(\\d+)$').exec(locations[index - 1]);
+        new RegExp('\\((.+?):(\\d+):(\\d+)\\)$').exec(locations[index]);
     if (match)
       return {fileName: match[1], lineNumber: match[2], column: match[3]};
   }

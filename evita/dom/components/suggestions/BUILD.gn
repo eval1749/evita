@@ -6,4 +6,5 @@ import("//evita/build/js_module.gni")
 
 js_module("suggestions") {
   files = [ "suggestions.js" ]
+  externs = [ "//evita/dom/base/logger_externs.js" ]
 }

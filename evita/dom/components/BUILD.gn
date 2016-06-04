@@ -12,6 +12,7 @@ js_test("test_files") {
     "modes/modes_test.js",
     "repl/console_test.js",
     "repl/stringify_test.js",
+    "suggestions/suggestions_test.js",
     "win_resource/win_resource_test.js",
   ]
 }

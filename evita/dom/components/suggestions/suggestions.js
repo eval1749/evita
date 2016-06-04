@@ -8,7 +8,11 @@
 
 goog.provide('suggestions');
 
+goog.require('base.Logger');
+
 goog.scope(function() {
+
+const Logger = base.Logger;
 
 /** @const @type {!Map<!TextDocument, !Session>} */
 const sessionMap = new Map();
@@ -35,9 +39,8 @@ function matchAt(text, document, offset) {
  * @return {boolean}
  */
 function findWordStartsWith(text, range, direction) {
-  if (text === '' || !direction)
-    return false;
-
+  console.assert(text !== '');
+  console.assert(direction !== 0);
   /** @const @type {!TextDocument} */
   const document = range.document;
   /** @const @type {number} */
@@ -53,125 +56,91 @@ function findWordStartsWith(text, range, direction) {
         return true;
     } while (range.start < maxStart);
     range.collapseTo(document.length);
-  } else if (direction < 0) {
-    do {
-      range.move(Unit.WORD, -1);
-      if (range.start + textLength > document.length)
-        break;
-      if (matchAt(text, document, range.start))
-        return true;
-    } while (range.start);
-    range.collapseTo(0);
+    return false;
   }
+  if (range.start === 0)
+    return false;
+  do {
+    range.move(Unit.WORD, -1);
+    if (range.start + textLength > document.length)
+      break;
+    if (matchAt(text, document, range.start))
+      return true;
+  } while (range.start);
+  range.collapseTo(0);
   return false;
 }
 
-class Session {
+class Session extends Logger {
   /**
    * @public
    * @param {!TextDocument} document
    */
   constructor(document) {
+    super();
     /** @const @type {!TextRange} */
     this.cursor = new TextRange(document);
     /** @type {number} */
-    this.direction = 0;
+    this.direction_ = 0;
+    /** @type {number} */
+    this.index_ = 0;
     /** @type {TextRange} */
     this.lastSelectionRange = null;
     /** @type {number} */
     this.lastSelectionStart = 0;
     /** @type {string} */
     this.prefix = '';
+    /** @type {!Array<string>} */
+    this.suggestions_ = [];
   }
 
   /**
    * @public
-   * @param {!TextSelection} selection
+   * @param {!TextRange} range
+   * @return {string}
    */
-  expand(selection) {
-    /** @const @type {!TextRange} */
-    const range = selection.range;
-    if (range.start !== range.end)
-      return;
-    this.startOrContinue(selection);
-
-    /** @type {string} */
-    let currentWord = range.text;
-    while (this.findCandidate(currentWord)) {
-      const newWord = this.cursor.text;
-      if (currentWord !== newWord) {
-        range.text = newWord;
-        range.collapseTo(range.end);
-        this.lastSelectionStart = range.start;
-        return;
+  expand(range) {
+    if (!range.collapsed)
+      return '';
+    this.startOrContinue(range);
+    if (this.suggestions_.length === this.index_) {
+      if (!this.updateSuggetions()) {
+        if (this.suggestions_.length === 0)
+          return `No word starts with "${this.prefix}"`;
+        if (this.suggestions_.length === 1)
+          return `No more words start with "${this.prefix}"`;
+        this.index_ = 0;
       }
     }
-
-    // Nothing changed.
+    /** @const @type {string} */
+    const suggestion = this.suggestions_[this.index_];
+    ++this.index_;
+    range.text = suggestion;
     range.collapseTo(range.end);
-    selection.window.status = currentWord ?
-        `No more words start with "${this.prefix}", ` +
-            `other than "${currentWord}"` :
-        `No word starts with "${this.prefix}"`;
+    this.lastSelectionStart = range.end;
+    return '';
   }
 
   /**
-   * @private
-   * @param {string} currentWord
-   * @return {boolean}
-   *
-   * Move |cursor| to the word starts with |prefix| except for |currentWord|.
-   */
-  findCandidate(currentWord) {
-    /** @type {!TextRange} */
-    const cursor = this.cursor;
-    /** @type {number} */
-    const originEnd = cursor.end;
-    /** @type {number} */
-    const originStart = cursor.start;
-    // Try current direction and opposite direction to find a candidate.
-    for (/** @type {number} */ let count = 0; count < 2; ++count) {
-      if (findWordStartsWith(this.prefix, cursor, this.direction)) {
-        cursor.endOf(Unit.WORD, Alter.EXTEND);
-        if (cursor.end === originEnd || cursor.start === originStart)
-          return false;
-        if (cursor.end - cursor.start === this.prefix.length)
-          continue;
-        if (cursor.text === currentWord)
-          continue;
-        return true;
-      }
-
-      // Continue find a candidate in opposite direction.
-      this.direction = -this.direction;
-      if (this.direction > 0)
-        cursor.collapseTo(this.lastSelectionRange.end);
-      else
-        cursor.collapseTo(this.lastSelectionRange.start);
-    }
-    return false;
-  }
-
-  /**
-   * @param {!TextSelection} selection
+   * @param {!TextRange} range
    * @return {boolean} False if we should start new session.
    * TODO(eval1749): Check this command and last command
    */
-  prepare(selection) {
+  prepare(range) {
     if (this.prefix === '')
       return false;
-    if (this.lastSelectionRange !== selection.range) {
+    if (this.lastSelectionRange !== range) {
       // Someone invokes session in different window.
       return false;
     }
-    if (this.lastSelectionStart !== selection.range.start) {
+    if (this.lastSelectionStart !== range.start) {
       // Selection is moved.
       return false;
     }
     // selection is at end of expanded word.
-    selection.range.moveStart(Unit.WORD, -1);
-    if (!selection.range.text.startsWith(this.prefix)) {
-      selection.range.collapseTo(selection.range.end);
+    range.moveStart(Unit.WORD, -1);
+    if (!range.text.startsWith(this.prefix)) {
+      range.collapseTo(range.end);
       return false;
     }
     return true;
@@ -179,20 +148,74 @@ class Session {
 
   /**
    * @private
-   * @param {!TextSelection} selection
+   * @param {!TextRange} range
    */
-  startOrContinue(selection) {
-    if (this.prepare(selection))
+  startOrContinue(range) {
+    if (this.prepare(range))
       return;
-    /** @const @type {!TextRange} */
-    const range = selection.range;
     this.cursor.collapseTo(range.start);
     this.cursor.moveStart(Unit.WORD, -1);
-    this.direction = -1;
+    this.direction_ = -1;
     this.prefix = this.cursor.text;
     this.lastSelectionRange = range;
     this.lastSelectionStart = range.start;
+    this.suggestions_ = [];
+    this.index_ = 0;
     range.start = this.cursor.start;
+  }
+
+  /** @override */
+  toString() { return `suggestions.Session(${this.cursor})`; }
+
+  /**
+   * @private
+   * @param {number} direction
+   * @return {boolean}
+   */
+  tryAddSuggestion(direction) {
+    /** @type {!TextRange} */
+    const cursor = this.cursor;
+    while (findWordStartsWith(this.prefix, cursor, direction)) {
+      cursor.endOf(Unit.WORD, Alter.EXTEND);
+      if (cursor.end - cursor.start === this.prefix.length)
+        continue;
+      /** @const @type {string} */
+      const newWord = cursor.text;
+      if (this.suggestions_.includes(newWord)) {
+        this.log(0, `skip "${newWord}" at`, cursor);
+        continue;
+      }
+      this.log(0, `found "${newWord}" at`, cursor);
+      this.suggestions_.push(newWord);
+      return true;
+    }
+    this.log(0, 'No more word in direction', this.direction_);
+    return false;
+  }
+
+  /**
+   * @private
+   * @return {boolean} True if suggestions is updated.
+   *
+   * Move |cursor| to the word starts with |prefix| except for |currentWord|.
+   */
+  updateSuggetions() {
+    switch (this.direction_) {
+      case 0:
+        return false;
+      case 1:
+        if (this.tryAddSuggestion(1))
+          return true;
+        this.direction_ = 0;
+        return false;
+      case -1:
+        if (this.tryAddSuggestion(-1))
+          return true;
+        this.direction_ = 1;
+        this.cursor.collapseTo(this.lastSelectionRange.end);
+        return this.updateSuggetions();
+    }
+    throw new Error(`Unexpected direction ${this.direction_}`);
   }
 
   /**
@@ -216,7 +239,11 @@ suggestions.Session = Session;
 Editor.bindKey(TextWindow, 'Ctrl+/', /** @this {!TextWindow} */ function() {
   /** @const @type {!Session} */
   const session = Session.getOrCreate(this.document);
-  session.expand(this.selection);
+  /** @const @type {string} */
+  const response = session.expand(this.selection.range);
+  if (response === '')
+    return;
+  this.status = response;
 });
 
 });

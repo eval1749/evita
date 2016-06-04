@@ -24,8 +24,8 @@ function encodeSyntax(syntax) {
 function testPaint(painterCreator, stateMachine, text) {
   const document = new TextDocument();
   const painter = painterCreator.call(this, document);
-  const tokenizer = new highlights.Tokenizer(document, painter, stateMachine);
   document.replace(0, 0, text);
+  const tokenizer = new highlights.Tokenizer(document, painter, stateMachine);
   tokenizer.doColor(document.length);
   const result = [];
   let tokenSyntax = '';

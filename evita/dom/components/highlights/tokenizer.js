@@ -57,6 +57,8 @@ class Tokenizer extends Logger {
 
     /** @const @type {!TextDocument} */
     this.document_ = document;
+    /** @type {number} */
+    this.documentLength_ = document.length;
     /** @const @type {!Painter} */
     this.painter_ = painter;
     /** @type {boolean} */
@@ -71,6 +73,11 @@ class Tokenizer extends Logger {
 
   /** @return {!TextDocument} */
   get document() { return this.document_; }
+
+  /** @return {number} */
+  get maxOffset() {
+    return Math.min(this.documentLength_, this.document.length);
+  }
 
   /**
    * @public
@@ -114,6 +121,7 @@ class Tokenizer extends Logger {
    * @param {number} delta
    */
   didChangeTextDocument(headCount, tailCount, delta) {
+    this.documentLength_ = this.document.length;
     this.log(0, 'didChangeTextDocument:', headCount, tailCount, delta);
     this.painter_.didChangeTextDocument(headCount, tailCount, delta);
     this.rangeMap_.didChangeTextDocument(headCount, tailCount, delta);
@@ -148,6 +156,7 @@ class Tokenizer extends Logger {
    * @public
    */
   didLoadTextDocument() {
+    this.documentLength_ = this.document.length;
     this.painter_.didLoadTextDocument();
     this.rangeMap_.didChangeTextDocument(0, 0, 0);
     this.scanOffset_ = 0;
@@ -169,7 +178,7 @@ class Tokenizer extends Logger {
    */
   doColor(hint) {
     /** @const @type {number} */
-    const end = this.document_.length;
+    const end = this.maxOffset;
     /** @const @type {number} */
     const scanEnd = Math.min(this.scanOffset_ + hint, end);
     this.scanOffset_ = this.processRange(this.scanOffset_, scanEnd, 0, end);
@@ -228,7 +237,7 @@ class Tokenizer extends Logger {
    * @public
    * @return {boolean}
    */
-  isFinished() { return this.scanOffset_ === this.document_.length; }
+  isFinished() { return this.scanOffset_ === this.maxOffset; }
 
   /**
    * @private

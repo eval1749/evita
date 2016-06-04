@@ -58,7 +58,16 @@ class HighlightEngine extends text.SimpleMutationObserverBase {
    * @param {number} delta
    */
   didChangeTextDocument(headCount, tailCount, delta) {
-    this.tokenizer_.didChangeTextDocument(headCount, tailCount, delta);
+    try {
+      this.tokenizer_.didChangeTextDocument(headCount, tailCount, delta);
+    } catch (error) {
+      const documentLength = this.document.length;
+      this.dump();
+      console.log(
+          'headCount', headCount, 'tailCount', tailCount, 'delta', delta,
+          'document.length', documentLength);
+      throw error;
+    }
     /**
      * @const @type {number}
      * Since average typing speed is greater than 100ms, we don't need to run

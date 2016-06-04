@@ -85,21 +85,15 @@ class Session {
   }
 
   /**
+   * @public
    * @param {!TextSelection} selection
    */
   expand(selection) {
+    /** @const @type {!TextRange} */
     const range = selection.range;
     if (range.start !== range.end)
       return;
-    if (!this.prepare(selection)) {
-      this.cursor.collapseTo(range.start);
-      this.cursor.moveStart(Unit.WORD, -1);
-      this.direction = -1;
-      this.prefix = this.cursor.text;
-      this.lastSelectionRange = range;
-      this.lastSelectionStart = range.start;
-      range.start = this.cursor.start;
-    }
+    this.startOrContinue(selection);
 
     /** @type {string} */
     let currentWord = range.text;
@@ -160,7 +154,7 @@ class Session {
 
   /**
    * @param {!TextSelection} selection
-   * @return {boolean}
+   * @return {boolean} False if we should start new session.
    * TODO(eval1749): Check this command and last command
    */
   prepare(selection) {
@@ -181,6 +175,24 @@ class Session {
       return false;
     }
     return true;
+  }
+
+  /**
+   * @private
+   * @param {!TextSelection} selection
+   */
+  startOrContinue(selection) {
+    if (this.prepare(selection))
+      return;
+    /** @const @type {!TextRange} */
+    const range = selection.range;
+    this.cursor.collapseTo(range.start);
+    this.cursor.moveStart(Unit.WORD, -1);
+    this.direction = -1;
+    this.prefix = this.cursor.text;
+    this.lastSelectionRange = range;
+    this.lastSelectionStart = range.start;
+    range.start = this.cursor.start;
   }
 
   /**

@@ -360,8 +360,7 @@ testing.test('StateRangeMap', function(t) {
   t.expect(makeSample(2, 6, 1), 'insert before ">"@2')
       .toEqual('(0 1 ) (1 2 ) (6 8 etag) (8 9 etag) (9 10 etag)');
   t.expect(makeSample(8, 1, 1), 'insert at end')
-      .toEqual(
-          '(0 1 stag) (1 2 stag) (2 3 stag) (3 5 cont) (5 7 ) (7 8 )');
+      .toEqual('(0 1 stag) (1 2 stag) (2 3 stag) (3 5 cont) (5 7 ) (7 8 )');
   t.expect(makeSample(0, 7, -1), 'remove "<"@0')
       .toEqual('(2 4 cont) (4 6 etag) (6 7 etag) (7 8 etag)');
   t.expect(makeSample(2, 6, -1), 'remove ">"@2')

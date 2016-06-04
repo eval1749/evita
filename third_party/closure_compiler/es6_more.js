@@ -4,6 +4,14 @@
 
 /**
  * @template T
+ * @param {T} searchElement
+ * @param {number=} opt_fromIndex
+ * @return {boolean}
+ */
+Array.prototype.includes = function(searchElement, opt_fromIndex) {};
+
+/**
+ * @template T
  * @return {!Generator<T>}
  */
 Array.prototype.values = function() {};

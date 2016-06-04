@@ -227,7 +227,7 @@ void Notifier::NotifyChange(Offset start, Offset end) {
 //
 class MarkerSet::Impl final : public BufferMutationObserver {
  public:
-  explicit Impl(const Buffer& buffer);
+  Impl(Kind kind, const Buffer& buffer);
   ~Impl() final;
 
   const Buffer& buffer() const { return buffer_; }
@@ -239,18 +239,22 @@ class MarkerSet::Impl final : public BufferMutationObserver {
   void RemoveObserver(MarkerSetObserver* observer);
 
  private:
+  bool is_fragile() const { return kind_ == Kind::Fragile; }
+
   // BufferMutationObserver
   void DidDeleteAt(const StaticRange& range) final;
   void DidInsertBefore(const StaticRange& range) final;
 
   Markers markers_;
   const Buffer& buffer_;
+  const Kind kind_;
   base::ObserverList<MarkerSetObserver> observers_;
 
   DISALLOW_COPY_AND_ASSIGN(Impl);
 };
 
-MarkerSet::Impl::Impl(const Buffer& buffer) : buffer_(buffer) {
+MarkerSet::Impl::Impl(Kind kind, const Buffer& buffer)
+    : buffer_(buffer), kind_(kind) {
   buffer_.AddObserver(this);
 }
 
@@ -374,6 +378,10 @@ void MarkerSet::Impl::DidDeleteAt(const StaticRange& range) {
     const auto marker = it->second.get();
     if (marker->end() <= range.start())
       break;
+    if (is_fragile()) {
+      editor.Remove(marker);
+      continue;
+    }
     const auto marker_end =
         marker->end() > range.end() ? marker->end() - length : range.start();
     if (marker->start() <= range.start()) {
@@ -395,6 +403,10 @@ void MarkerSet::Impl::DidInsertBefore(const StaticRange& range) {
     const auto marker = it->second.get();
     if (marker->end() < range.start())
       break;
+    if (is_fragile()) {
+      editor.Remove(marker);
+      continue;
+    }
     const auto marker_end = marker->end() + length;
     if (marker->start() < range.start()) {
       editor.Update(marker, marker->start(), marker_end);
@@ -407,7 +419,8 @@ void MarkerSet::Impl::DidInsertBefore(const StaticRange& range) {
 //////////////////////////////////////////////////////////////////////
 //
 // MarkSet
-MarkerSet::MarkerSet(const Buffer& buffer) : impl_(new Impl(buffer)) {}
+MarkerSet::MarkerSet(Kind kind, const Buffer& buffer)
+    : impl_(new Impl(kind, buffer)) {}
 
 MarkerSet::~MarkerSet() {}
 

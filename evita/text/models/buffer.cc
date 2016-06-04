@@ -30,8 +30,8 @@ namespace text {
 Buffer::Buffer()
     : line_number_cache_(new LineNumberCache(*this)),
       ranges_(new RangeSet(this)),
-      spelling_markers_(new MarkerSet(*this)),
-      syntax_markers_(new MarkerSet(*this)),
+      spelling_markers_(new MarkerSet(MarkerSet::Kind::Fragile, *this)),
+      syntax_markers_(new MarkerSet(MarkerSet::Kind::Sticky, *this)),
       undo_stack_(new UndoStack(this)) {
   spelling_markers_->AddObserver(this);
   syntax_markers_->AddObserver(this);

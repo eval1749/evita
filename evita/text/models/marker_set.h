@@ -28,7 +28,12 @@ class StaticRange;
 //
 class MarkerSet final {
  public:
-  explicit MarkerSet(const Buffer& buffer);
+  enum class Kind {
+    Fragile,
+    Sticky,
+  };
+
+  MarkerSet(Kind kind, const Buffer& buffer);
   ~MarkerSet();
 
   const Buffer& buffer() const;

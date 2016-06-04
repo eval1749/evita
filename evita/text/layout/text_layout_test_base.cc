@@ -42,7 +42,7 @@ css::StyleSheet* CreateStyleSheet() {
 TextLayoutTestBase::TextLayoutTestBase()
     : bounds_(gfx::PointF(300, 200), gfx::SizeF(100, 50)),
       buffer_(new text::Buffer()),
-      markers_(new text::MarkerSet(*buffer_)),
+      markers_(new text::MarkerSet(text::MarkerSet::Kind::Sticky, *buffer_)),
       style_sheet_(CreateStyleSheet()),
       style_tree_(new StyleTree({style_sheet_})) {}
 

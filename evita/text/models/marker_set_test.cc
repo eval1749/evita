@@ -29,6 +29,12 @@ class MarkerSetTest : public ::testing::Test {
     return marker ? *marker : Marker();
   }
 
+  Marker GetFragileAt(int offset) {
+    auto const marker = fragile_marker_set_.GetMarkerAt(Offset(offset));
+    return marker ? *marker : Marker();
+  }
+
+  void InsertFragileMarker(int start, int end, base::AtomicString type);
   void InsertMarker(int start, int end, base::AtomicString type);
   void RemoveMarker(int start, int end);
 
@@ -37,6 +43,7 @@ class MarkerSetTest : public ::testing::Test {
 
  private:
   const std::unique_ptr<Buffer> buffer_;
+  MarkerSet fragile_marker_set_;
   MarkerSet marker_set_;
 
   DISALLOW_COPY_AND_ASSIGN(MarkerSetTest);
@@ -46,8 +53,16 @@ MarkerSetTest::MarkerSetTest()
     : Correct(L"Correct"),
       Misspelled(L"Misspelled"),
       buffer_(new Buffer()),
-      marker_set_(*buffer_) {
+      fragile_marker_set_(MarkerSet::Kind::Fragile, *buffer_),
+      marker_set_(MarkerSet::Kind::Sticky, *buffer_) {
   buffer_->InsertBefore(Offset(0), base::string16(999, 'x'));
+}
+
+void MarkerSetTest::InsertFragileMarker(int start,
+                                        int end,
+                                        base::AtomicString type) {
+  fragile_marker_set_.InsertMarker(
+      StaticRange(*buffer_, Offset(start), Offset(end)), type);
 }
 
 void MarkerSetTest::InsertMarker(int start, int end, base::AtomicString type) {
@@ -114,7 +129,6 @@ TEST_F(MarkerSetTest, DeleteMarker_same) {
 TEST_F(MarkerSetTest, DeleteMarker_split) {
   // before: -CCCCCC--
   // insert: ---__--
-
   // after:  -CC__CC--
   InsertMarker(200, 400, Correct);
   RemoveMarker(250, 350);
@@ -135,6 +149,33 @@ TEST_F(MarkerSetTest, DidDeleteAt) {
   InsertMarker(5, 6, Misspelled);
   buffer()->Delete(Offset(5), Offset(6));
   EXPECT_EQ(Marker(Offset(0), Offset(5), Correct), GetAt(0));
+}
+
+TEST_F(MarkerSetTest, DidDeleteAtFragile) {
+  // before: --"foo"--
+  // delete: --"fo"---
+  InsertFragileMarker(0, 5, Correct);
+  buffer()->Delete(Offset(0), Offset(1));
+  EXPECT_EQ(Marker(), GetFragileAt(0))
+      << "Deleting a character in a fragile marker removes a fragile marker.";
+}
+
+TEST_F(MarkerSetTest, DidInsertAtFragile) {
+  // before: --"foo"--
+  // delete: --"fyoo"---
+  InsertFragileMarker(0, 5, Correct);
+  buffer()->InsertBefore(Offset(1), L"y");
+  EXPECT_EQ(Marker(), GetFragileAt(0))
+      << "Inserting a character in a fragile marker removes a fragile marker.";
+}
+
+TEST_F(MarkerSetTest, DidInsertAtSticky) {
+  // before: --"foo"--
+  // delete: --"fyoo"---
+  InsertMarker(0, 5, Correct);
+  buffer()->InsertBefore(Offset(1), L"y");
+  EXPECT_EQ(Marker(Offset(0), Offset(6), Correct), GetAt(0))
+      << "Inserting a character in a sticky marker extends a sticky marker.";
 }
 
 TEST_F(MarkerSetTest, GetMarkerAt) {

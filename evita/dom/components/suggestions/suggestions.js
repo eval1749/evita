@@ -10,8 +10,8 @@ goog.provide('suggestions');
 
 goog.scope(function() {
 
-/** @const @type {string} */
-const PROPERTY_NAME = 'evita.SuggestionSession';
+/** @const @type {!Map<!TextDocument, !Session>} */
+const sessionMap = new Map();
 
 /**
  * @param {string} text
@@ -82,19 +82,6 @@ class Session {
     this.lastSelectionStart = 0;
     /** @type {string} */
     this.prefix = '';
-  }
-
-  /**
-   * @param {!TextDocument} document
-   * @return {!Session}
-   */
-  static getOrCreate(document) {
-    const session = document.properties.get(PROPERTY_NAME);
-    if (session)
-      return /** @type {!Session} */ (session);
-    const newSession = new Session(document);
-    document.properties.set(PROPERTY_NAME, newSession);
-    return newSession;
   }
 
   /**
@@ -194,6 +181,20 @@ class Session {
       return false;
     }
     return true;
+  }
+
+  /**
+   * @param {!TextDocument} document
+   * @return {!Session}
+   */
+  static getOrCreate(document) {
+    /** @const @type {?Session} */
+    const session = sessionMap.get(document) || null;
+    if (session)
+      return /** @type {!Session} */ (session);
+    const newSession = new Session(document);
+    sessionMap.set(document, newSession);
+    return newSession;
   }
 }
 

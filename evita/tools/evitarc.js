@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-goog.require('dynamic_abbrev');
 goog.require('find_and_replace');
 goog.require('launchpad');
 goog.require('modes');
 goog.require('spell_checker');
+goog.require('suggestions');
 
 goog.scope(function() {
 

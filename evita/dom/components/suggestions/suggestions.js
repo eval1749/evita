@@ -19,8 +19,16 @@ Provider.prototype.isReady = function() {};
 /** @return {string} */
 Provider.prototype.next = function() {};
 
+/**
+ * @typedef {function(new:Provider, !Session)}
+ */
+var ProviderFactory
+
 /** @const @type {!Map<!TextDocument, !Session>} */
 const staticSessionMap = new Map();
+
+/** @const @type {!Array<!ProviderFactory>} */
+const staticProvider = [];
 
 /** @type {number} */
 let staticVerbose = 0;
@@ -350,10 +358,7 @@ class Session extends Logger {
     console.assert(this.words_.length === 1);
     if (this.prefix === '')
       return;
-    this.providers_ = [
-      new WordExtracter(this),
-      new SpellingProvider(this),
-    ];
+    this.providers_ = staticProvider.map(provider => new provider(this));
     this.didChangeVerbose();
   }
 
@@ -400,6 +405,14 @@ class Session extends Logger {
 
   /**
    * @public
+   * @param {!ProviderFactory} factory
+   */
+  static addProvider(factory) {
+    staticProvider.push(factory);
+  }
+
+  /**
+   * @public
    * @param {!TextRange} range
    * @return {string}
    */
@@ -425,6 +438,9 @@ class Session extends Logger {
    */
   static for (document) { return staticSessionMap.get(document) || null; }
 }
+
+Session.addProvider(WordExtracter);
+Session.addProvider(SpellingProvider);
 
 /** @this {!TextWindow} */
 function expandCommand() {

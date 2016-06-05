@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Note: Session should be in file scope. Although, when we use
-// IIFE, immediately-invoked function expression, Closure compiler can't find
-// |Session| type.
-
 goog.provide('suggestions');
 
 goog.require('base.Logger');
@@ -14,16 +10,30 @@ goog.scope(function() {
 
 const Logger = base.Logger;
 
+/** @interface */
+const Provider = function() {};
+
+/** @return {boolean} */
+Provider.prototype.isReady = function() {};
+
+/** @return {string} */
+Provider.prototype.next = function() {};
+
 /** @const @type {!Map<!TextDocument, !Session>} */
-const sessionMap = new Map();
+const staticSessionMap = new Map();
+
+/** @type {number} */
+let staticVerbose = 0;
 
 /**
  * @param {string} text
  * @param {!TextDocument} document
- * @param {number} offset
+ * @param {number} start
  * @return {boolean}
  */
-function matchAt(text, document, offset) {
+function matchAt(text, document, start) {
+  /** @type {number} */
+  let offset = start;
   for (/** @type {number} */ let k = 0; k < text.length; ++k) {
     if (document.charCodeAt(offset) !== text.charCodeAt(k))
       return false;
@@ -71,76 +81,255 @@ function findWordStartsWith(text, range, direction) {
   return false;
 }
 
-class Session extends Logger {
+/**
+ * @implements {Provider}
+ */
+class SpellingProvider extends Logger {
   /**
    * @public
-   * @param {!TextDocument} document
+   * @param {!Session} session
    */
-  constructor(document) {
+  constructor(session) {
     super();
-    /** @const @type {!TextRange} */
-    this.cursor = new TextRange(document);
-    /** @type {number} */
-    this.direction_ = 0;
-    /** @type {number} */
-    this.index_ = 0;
-    /** @type {TextRange} */
-    this.lastSelectionRange = null;
-    /** @type {number} */
-    this.lastSelectionStart = 0;
-    /** @type {string} */
-    this.prefix = '';
+    /** @type {boolean} */
+    this.isReady_ = session.prefix.length <= 3;
     /** @type {!Array<string>} */
-    this.suggestions_ = [];
+    this.words_ = [];
+    if (this.isReady_)
+      return;
+    Editor.getSpellingSuggestions(session.prefix).then(words => {
+      this.isReady_ = true;
+      this.words_ = words;
+    });
   }
 
   /**
-   * @public
-   * @param {!TextRange} range
+   * implements Provider.prototype.isReady
+   * @return {boolean}
+   */
+  isReady() { return this.isReady_; }
+
+  /**
+   * implements Provider.prototype.next
    * @return {string}
    */
-  expand(range) {
-    if (!range.collapsed)
+  next() {
+    console.assert(this.isReady);
+    if (this.words_.length === 0)
       return '';
-    this.startOrContinue(range);
-    if (this.suggestions_.length === this.index_) {
-      if (!this.updateSuggetions()) {
-        if (this.suggestions_.length === 0)
-          return `No word starts with "${this.prefix}"`;
-        if (this.suggestions_.length === 1)
-          return `No more words start with "${this.prefix}"`;
-        this.index_ = 0;
+    /** @const @type {string} */
+    const word = this.words_.shift();
+    this.log(1, `got '${word}'`);
+    return word;
+  }
+}
+
+/**
+ * @implements {Provider}
+ * Extracts words from text document starts with specified prefix.
+ */
+class WordExtracter extends Logger {
+  /**
+   * @public
+   * @param {!Session} session
+   */
+  constructor(session) {
+    super();
+    /** @const @type {number} */
+    this.anchor_ = session.anchor;
+    /** @const @type {!TextDocument} */
+    this.document_ = session.document;
+    /** @type {number} */
+    this.direction_ = -1;
+    /** @const @type {string} */
+    this.prefix_ = session.prefix;
+    /** @const @type {!TextRange} */
+    this.range_ = new TextRange(session.document, session.anchor);
+  }
+
+  /**
+   * @private
+   * @return {string}
+   */
+  extractBackward() {
+    /** @const @type {!TextRange} */
+    const range = this.range_;
+    range.collapseTo(range.start);
+    while (range.start > 0) {
+      range.move(Unit.WORD, -1);
+      if (matchAt(this.prefix_, this.document_, range.start)) {
+        range.endOf(Unit.WORD, Alter.EXTEND);
+        return range.text;
       }
     }
-    /** @const @type {string} */
-    const suggestion = this.suggestions_[this.index_];
-    ++this.index_;
-    range.text = suggestion;
-    range.collapseTo(range.end);
-    this.lastSelectionStart = range.end;
     return '';
   }
 
   /**
-   * @param {!TextRange} range
-   * @return {boolean} False if we should start new session.
-   * TODO(eval1749): Check this command and last command
+   * @private
+   * @return {string}
    */
-  prepare(range) {
-    if (this.prefix === '')
-      return false;
-    if (this.lastSelectionRange !== range) {
-      // Someone invokes session in different window.
-      return false;
+  extractForward() {
+    /** @const @type {!TextRange} */
+    const range = this.range_;
+    range.collapseTo(range.end);
+    /** @const @type {number} */
+    const maxOffset = this.document_.length - this.prefix_.length - 1;
+    while (range.start < maxOffset) {
+      if (matchAt(this.prefix_, this.document_, range.start)) {
+        range.endOf(Unit.WORD, Alter.EXTEND);
+        return range.text;
+      }
+      range.move(Unit.WORD, 1);
     }
-    if (this.lastSelectionStart !== range.start) {
-      // Selection is moved.
-      return false;
+    return '';
+  }
+
+  /**
+   * implements Provider.prototype.isReady
+   * @public
+   * @return {boolean}
+   */
+  isReady() { return true; }
+
+  /**
+   * implements Provider.prototype.next
+   * @public
+   * @return {string}
+   */
+  next() {
+    this.log(1, 'next', this.range_);
+    switch (this.direction_) {
+      case 0:
+        return '';
+      case 1: {
+        /** @type {string} */
+        const word = this.extractForward();
+        if (word !== '') {
+          this.log(1, 'next', `found '${word}'`);
+          return word;
+        }
+        this.direction_ = 0;
+        return '';
+      }
+      case -1: {
+        /** @type {string} */
+        const word = this.extractBackward();
+        if (word !== '') {
+          this.log(1, 'next', `found '${word}'`);
+          return word;
+        }
+        this.range_.collapseTo(this.anchor_);
+        this.range_.move(Unit.WORD, 1);
+        this.direction_ = 1;
+        return this.next();
+      }
     }
-    // selection is at end of expanded word.
+    throw new Error('Invalid direction', this);
+  }
+
+  /** @override */
+  toString() { return `WordExtracter(${this.direction_})`; }
+}
+
+class Session extends Logger {
+  /**
+   * @public
+   * @param {!TextRange} range
+   */
+  constructor(range) {
+    super();
+    console.assert(range.collapsed, range);
     range.moveStart(Unit.WORD, -1);
-    if (!range.text.startsWith(this.prefix)) {
-      range.collapseTo(range.end);
+    /** @const @type {number} */
+    this.anchor_ = range.start;
+    /** @const @type {!TextDocument} */
+    this.document_ = range.document;
+    /** @type {number} */
+    this.index_ = 0;
+    /** @type {!Array<!Provider>} */
+    this.providers_ = [];
+    /** @type {!TextRange} */
+    this.range_ = range;
+    /** @type {!Array<string>} */
+    this.words_ = [range.text];
+    range.collapseTo(range.end);
+  }
+
+  /** @return {number} */
+  get anchor() { return this.anchor_; }
+
+  /** @return {!TextDocument} */
+  get document() { return this.document_; }
+
+  /** @return {string} */
+  get lastWord() { return this.words_[this.index_]; }
+
+  /** @return {string} */
+  get prefix() { return this.words_[0]; }
+
+  /** @override */
+  didChangeVerbose() {
+    for (const provider of this.providers_)
+      provider.verbose = this.verbose;
+  }
+
+  /**
+   * @private
+   */
+  acceptSuggestion() {
+    console.assert(this.index_ < this.words_.length, this);
+    /** @const @type {string} */
+    const suggestion = this.words_[this.index_];
+    this.log(0, 'acceptSuggestion', `'${suggestion}'`);
+    this.document_.replace(this.anchor_, this.range_.end, suggestion);
+  }
+
+  /**
+   * @public
+   * @return {string}
+   */
+  advance() {
+    if (this.isFinishCollecting()) {
+      if (this.words_.length === 1)
+        return `No suggestion starts with "${this.prefix}"`;
+      this.index_ = (this.index_ + 1) % this.words_.length;
+      this.acceptSuggestion();
+      return `Suggestion ${this.index_ + 1}/${this.words_.length}`;
+    }
+    /** @type {string} */
+    const response = this.updateSuggetions();
+    if (response !== '')
+      return response;
+    this.index_ = (this.index_ + 1) % this.words_.length;
+    this.acceptSuggestion();
+    return `Suggestion is "${this.lastWord}".`;
+  }
+
+  /**
+   * @private
+   * @param {!TextRange} range
+   * @return {boolean} True if |this| session is active.
+   */
+  isActive(range) {
+    if (this.words_.length === 0) {
+      this.log(1, 'No word');
+      return false;
+    }
+    if (this.range_ !== range) {
+      this.log(1, 'Someone invokes session in different window.');
+      return false;
+    }
+    if (!this.range_.collapsed) {
+      this.log(1, 'Selection is moved.');
+      return false;
+    }
+    if (this.anchor_ !== range.end - this.lastWord.length) {
+      this.log(1, 'Selection is moved.');
+      return false;
+    }
+    if (!matchAt(this.lastWord, this.document_, this.anchor_)) {
+      this.log(1, 'Selection contains another word.');
       return false;
     }
     return true;
@@ -148,102 +337,105 @@ class Session extends Logger {
 
   /**
    * @private
-   * @param {!TextRange} range
+   * @return {boolean}
    */
-  startOrContinue(range) {
-    if (this.prepare(range))
+  isFinishCollecting() { return this.providers_.length === 0; }
+
+  /**
+   * @private
+   */
+  start() {
+    console.assert(this.index_ === 0);
+    console.assert(this.providers_.length === 0);
+    console.assert(this.words_.length === 1);
+    if (this.prefix === '')
       return;
-    this.cursor.collapseTo(range.start);
-    this.cursor.moveStart(Unit.WORD, -1);
-    this.direction_ = -1;
-    this.prefix = this.cursor.text;
-    this.lastSelectionRange = range;
-    this.lastSelectionStart = range.start;
-    this.suggestions_ = [];
-    this.index_ = 0;
-    range.start = this.cursor.start;
+    this.providers_ = [
+      new WordExtracter(this),
+      new SpellingProvider(this),
+    ];
+    this.didChangeVerbose();
   }
 
   /** @override */
-  toString() { return `suggestions.Session(${this.cursor})`; }
-
-  /**
-   * @private
-   * @param {number} direction
-   * @return {boolean}
-   */
-  tryAddSuggestion(direction) {
-    /** @type {!TextRange} */
-    const cursor = this.cursor;
-    while (findWordStartsWith(this.prefix, cursor, direction)) {
-      cursor.endOf(Unit.WORD, Alter.EXTEND);
-      if (cursor.end - cursor.start === this.prefix.length)
-        continue;
-      /** @const @type {string} */
-      const newWord = cursor.text;
-      if (this.suggestions_.includes(newWord)) {
-        this.log(0, `skip "${newWord}" at`, cursor);
-        continue;
-      }
-      this.log(0, `found "${newWord}" at`, cursor);
-      this.suggestions_.push(newWord);
-      return true;
-    }
-    this.log(0, 'No more word in direction', this.direction_);
-    return false;
+  toString() {
+    return `suggestions.Session('${this.document_.name}' '${this.prefix}'` +
+        ` range: ${this.anchor}, ${this.range_.end},` +
+        ` words: ${this.index_ + 1}/${this.words_.length})`;
   }
 
   /**
    * @private
-   * @return {boolean} True if suggestions is updated.
-   *
-   * Move |cursor| to the word starts with |prefix| except for |currentWord|.
+   * @return {string}
    */
   updateSuggetions() {
-    switch (this.direction_) {
-      case 0:
-        return false;
-      case 1:
-        if (this.tryAddSuggestion(1))
-          return true;
-        this.direction_ = 0;
-        return false;
-      case -1:
-        if (this.tryAddSuggestion(-1))
-          return true;
-        this.direction_ = 1;
-        this.cursor.collapseTo(this.lastSelectionRange.end);
-        return this.updateSuggetions();
+    if (this.isFinishCollecting()) {
+      if (this.words_.length > 1)
+        return `No more words start with "${this.prefix}"`;
+      return `No word starts with "${this.prefix}"`;
     }
-    throw new Error(`Unexpected direction ${this.direction_}`);
+    /** @type {!Provider} */
+    const provider = this.providers_[0];
+    if (!provider.isReady())
+      return 'Collecting suggestion ...';
+    for (;;) {
+      const suggestion = provider.next();
+      if (suggestion === '') {
+        this.providers_.shift();
+        return this.updateSuggetions();
+      }
+      if (this.words_.includes(suggestion))
+        continue;
+      this.log(0, 'updateSuggetions', `add '${suggestion}'`);
+      this.words_.push(suggestion);
+      return '';
+    }
+  }
+
+  /** @public @return {number} */
+  static get verbose() { return staticVerbose; }
+
+  /** @public @param {number} newVerbose */
+  static set verbose(newVerbose) { staticVerbose = newVerbose; }
+
+  /**
+   * @public
+   * @param {!TextRange} range
+   * @return {string}
+   */
+  static expand(range) {
+    if (!range.collapsed)
+      return '';
+    /** @const @type {?Session} */
+    const session = Session.for (range.document);
+    if (session && session.isActive(range))
+      return session.advance();
+    /** @const @type {!Session} */
+    const newSession = new Session(range);
+    staticSessionMap.set(range.document, newSession);
+    newSession.verbose = Session.verbose;
+    newSession.start();
+    return newSession.advance();
   }
 
   /**
+   * @private
    * @param {!TextDocument} document
-   * @return {!Session}
+   * @return {?Session}
    */
-  static getOrCreate(document) {
-    /** @const @type {?Session} */
-    const session = sessionMap.get(document) || null;
-    if (session)
-      return /** @type {!Session} */ (session);
-    const newSession = new Session(document);
-    sessionMap.set(document, newSession);
-    return newSession;
-  }
+  static for (document) { return staticSessionMap.get(document) || null; }
 }
+
+/** @this {!TextWindow} */
+function expandCommand() {
+  this.status = Session.expand(this.selection.range);
+}
+
+/** @interface */
+suggestions.Provider = Provider;
 
 /** @constructor */
 suggestions.Session = Session;
 
-Editor.bindKey(TextWindow, 'Ctrl+/', /** @this {!TextWindow} */ function() {
-  /** @const @type {!Session} */
-  const session = Session.getOrCreate(this.document);
-  /** @const @type {string} */
-  const response = session.expand(this.selection.range);
-  if (response === '')
-    return;
-  this.status = response;
-});
-
+Editor.bindKey(TextWindow, 'Ctrl+/', expandCommand);
 });

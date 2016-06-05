@@ -124,6 +124,22 @@ Mode.registerExtension('e', 'c#');
 ['goog', 'goog.provide', 'goog.require', 'goog.scope', ].forEach(
     (keyword) => { HighlightEngine.keywordsFor('javascript').add(keyword); });
 
+suggestions.Session.addProvider(class {
+  constructor(session) {
+    const mode = modes.Mode.modeOf(session.document);
+    this.words_ = [...highlights.HighlightEngine.keywordsFor(mode.id)]
+        .map(word => word.split(/[:.]+/).pop())
+        .filter(word => word.startsWith(session.prefix))
+  }
+
+  isReady() { return true; }
+  next() {
+    if (this.words_.length === 0)
+      return '';
+    return this.words_.shift();
+  }
+});
+
 // Report spell checker progress
 Editor.bindKey(TextWindow, 'Ctrl+Shift+M', function() {
   const document = this.document;

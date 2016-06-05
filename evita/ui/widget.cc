@@ -535,6 +535,7 @@ void Widget::ReleaseCapture() {
     return;
   capture_widget = nullptr;
   ::ReleaseCapture();
+  ::SetCursor(cursor_ ? cursor_ : ::LoadCursor(nullptr, IDC_ARROW));
 }
 
 void Widget::RequestFocus() {
@@ -598,6 +599,7 @@ void Widget::SetCapture() {
   if (capture_widget)
     return;
   ::SetCapture(*GetHostWidget()->native_window());
+  ::SetCursor(cursor_ ? cursor_ : ::LoadCursor(nullptr, IDC_ARROW));
   capture_widget = this;
 }
 

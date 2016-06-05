@@ -604,6 +604,14 @@ function getProperties() {
   return this.properties_;
 }
 
+/**
+ * @this {!TextDocument}
+ * @return {string}
+ */
+function toString() {
+  return `TextDocument('${this.name}')`;
+}
+
 Object.defineProperties(TextDocument.prototype, {
   fileName: {value: '', writable: true},
   keymap: {get: getKeymap},
@@ -626,6 +634,7 @@ Object.defineProperties(TextDocument.prototype, {
   lines: {get: lines},
   listWindows: {value: listWindows},
   renameTo: {value: renameTo},
+  toString: {value: toString},
   undoGroup: {value: undoGroup}
 });
 

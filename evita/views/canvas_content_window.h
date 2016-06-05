@@ -9,8 +9,6 @@
 
 #include "evita/views/content_window.h"
 
-class Frame;
-
 namespace gfx {
 class Canvas;
 }

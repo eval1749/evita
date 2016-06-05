@@ -23,4 +23,9 @@ void EventEditor::SetClickCount(MouseEvent* event, int count) {
   event->click_count_ = count;
 }
 
+void EventEditor::SetClientPoint(LocatedEvent* event,
+                                 const gfx::Point& client_point) {
+  event->client_point_ = client_point;
+}
+
 }  // namespace ui

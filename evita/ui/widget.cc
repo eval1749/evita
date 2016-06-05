@@ -321,7 +321,19 @@ static bool DispatchMouseEvent(Widget* widget, MouseEvent* event) {
                            event->type_name());
   TRACE_EVENT_WITH_FLOW1("input", "DispatchMouseEvent", event->id(),
                          TRACE_EVENT_FLAG_FLOW_OUT, "type", event->type_name());
-  return widget->DispatchEvent(event);
+  std::vector<Widget*> event_path;
+  for (const auto runner : base::tree::ancestors_or_self(widget)) {
+    if (runner->is<RootWidget>())
+      break;
+    event_path.emplace_back(runner);
+  }
+  for (const auto runner : event_path) {
+    EventEditor().SetClientPoint(
+        event, runner->MapFromDesktopPoint(event->screen_location()));
+    if (!runner->DispatchEvent(event))
+      return false;
+  }
+  return true;
 }
 
 bool Widget::HandleMouseMessage(const base::NativeEvent& native_event) {

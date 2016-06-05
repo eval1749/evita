@@ -351,6 +351,14 @@ function toLowerCase() {
 
 /**
  * @this {!TextRange}
+ * @return {string}
+ */
+function toString() {
+  return `TextRange('${this.document.name}', ${this.start}, ${this.end})`;
+}
+
+/**
+ * @this {!TextRange}
  * @return {!TextRange}
  */
 function toUpperCase() {

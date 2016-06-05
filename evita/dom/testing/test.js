@@ -84,7 +84,7 @@ class Fixture {
       if (equals(actual, expected[index]))
         return;
       this.succeeded_ = false;
-      this.description_ += 'actual: ' + stringify(actual) + ' expected: ' +
+      this.description_ += '; actual: ' + stringify(actual) + ' expected: ' +
           stringify(expected[index]);
     });
   }
@@ -125,12 +125,18 @@ function getLocation() {
   }
   const locations = getStack();
   let index = locations.findIndex(
-      (line) => { return line.indexOf('at testing.test ') > 0; });
+      (line) => { return line.indexOf(' at Object.test ') > 0; });
   if (index > 0) {
     const match =
-        new RegExp('\\((.+?):(\\d+):(\\d+)\\)$').exec(locations[index]);
+        new RegExp('\\((.+?):(\\d+):(\\d+)\\)$').exec(locations[index - 1]);
     if (match)
       return {fileName: match[1], lineNumber: match[2], column: match[3]};
+    const match2 =
+        new RegExp('at (.+?):(\\d+):(\\d+)$').exec(locations[index - 1]);
+    if (match2)
+      return {fileName: match2[1], lineNumber: match2[2], column: match2[3]};
+    console.log(locations[index - 1]);
+    return {fileName: '?', lineNumber: 0, column: 0};
   }
   console.log(index, locations);
   return {fileName: '?', lineNumber: 0, column: 0};

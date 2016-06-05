@@ -24,8 +24,8 @@ Provider.prototype.next = function() {};
  */
 var ProviderFactory
 
-/** @const @type {!Map<!TextDocument, !Session>} */
-const staticSessionMap = new Map();
+    /** @const @type {!Map<!TextDocument, !Session>} */
+    const staticSessionMap = new Map();
 
 /** @const @type {!Array<!ProviderFactory>} */
 const staticProvider = [];
@@ -43,7 +43,11 @@ function matchAt(text, document, start) {
   /** @type {number} */
   let offset = start;
   for (/** @type {number} */ let k = 0; k < text.length; ++k) {
-    if (document.charCodeAt(offset) !== text.charCodeAt(k))
+    /** @const @type {number} */
+    const code1 = base.toAsciiLowerCase(document.charCodeAt(offset));
+    /** @const @type {number} */
+    const code2 = base.toAsciiLowerCase(text.charCodeAt(k));
+    if (code1 !== code2)
       return false;
     ++offset;
   }
@@ -407,9 +411,7 @@ class Session extends Logger {
    * @public
    * @param {!ProviderFactory} factory
    */
-  static addProvider(factory) {
-    staticProvider.push(factory);
-  }
+  static addProvider(factory) { staticProvider.push(factory); }
 
   /**
    * @public

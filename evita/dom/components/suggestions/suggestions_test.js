@@ -37,11 +37,11 @@ class Sample {
 }
 
 testing.test('Suggestions.basic', (t) => {
-  const sample = new Sample('fun foo bar foo baz f| fox foot', ['funny']);
+  const sample = new Sample('Fun foo bar foo baz f| fox foot', ['funny']);
 
   t.expect(sample.advance()).toEqual(['foo', 'Suggestion is "foo".']);
   t.expect(sample.advance(), 'No duplicated suggestion').toEqual([
-    'fun', 'Suggestion is "fun".'
+    'Fun', 'Suggestion is "Fun".'
   ]);
   t.expect(sample.advance()).toEqual(['fox', 'Suggestion is "fox".']);
   t.expect(sample.advance()).toEqual(['foot', 'Suggestion is "foot".']);

@@ -174,10 +174,36 @@ class KeyEvent final : public Event {
 
 //////////////////////////////////////////////////////////////////////
 //
+// LocatedEvent
+//
+class LocatedEvent : public Event {
+  DECLARE_CASTABLE_CLASS(LocatedEvent, Event);
+
+ public:
+  ~LocatedEvent() override;
+
+  Point location() const { return client_point_; }
+  Point screen_location() const { return screen_point_; }
+
+ protected:
+  LocatedEvent(EventType type,
+               int flags,
+               const Point& client_point,
+               const Point& screen_point);
+
+ private:
+  friend class EventEditor;
+
+  Point client_point_;
+  Point screen_point_;
+};
+
+//////////////////////////////////////////////////////////////////////
+//
 // MouseEvent
 //
-class MouseEvent : public Event {
-  DECLARE_CASTABLE_CLASS(MouseEvent, Event);
+class MouseEvent : public LocatedEvent {
+  DECLARE_CASTABLE_CLASS(MouseEvent, LocatedEvent);
 
  public:
   MouseEvent(EventType type,
@@ -211,8 +237,6 @@ class MouseEvent : public Event {
   bool is_right_button() const { return button_ == MouseButton::Right; }
   bool is_other1_button() const { return button_ == MouseButton::Other1; }
   bool is_other2_button() const { return button_ == MouseButton::Other2; }
-  Point location() const { return client_point_; }
-  Point screen_location() const { return screen_point_; }
   bool shift_key() const {
     return (flags() & static_cast<int>(EventFlags::ShiftKey)) != 0;
   }
@@ -230,8 +254,6 @@ class MouseEvent : public Event {
   MouseButton button_;
   int buttons_;
   int click_count_;
-  Point client_point_;
-  Point screen_point_;
   EventTarget* target_;
 };
 

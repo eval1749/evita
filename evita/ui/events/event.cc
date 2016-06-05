@@ -156,6 +156,20 @@ bool KeyEvent::ConvertToRepeat(LPARAM lParam) {
 
 //////////////////////////////////////////////////////////////////////
 //
+// LocatedEvent
+//
+LocatedEvent::LocatedEvent(EventType type,
+                           int flags,
+                           const Point& client_point,
+                           const Point& screen_point)
+    : Event(type, flags),
+      client_point_(client_point),
+      screen_point_(screen_point) {}
+
+LocatedEvent::~LocatedEvent() = default;
+
+//////////////////////////////////////////////////////////////////////
+//
 // MouseEvent
 //
 MouseEvent::MouseEvent(EventType event_type,
@@ -165,12 +179,10 @@ MouseEvent::MouseEvent(EventType event_type,
                        EventTarget* event_target,
                        const gfx::Point& client_point,
                        const gfx::Point& screen_point)
-    : Event(event_type, flags),
+    : LocatedEvent(event_type, flags, client_point, screen_point),
       button_(button),
       buttons_(ConvertToButtons(flags)),
       click_count_(click_count),
-      client_point_(client_point),
-      screen_point_(screen_point),
       target_(event_target) {}
 
 MouseEvent::MouseEvent(const base::NativeEvent& native_event,

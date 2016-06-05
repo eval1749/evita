@@ -19,3 +19,9 @@ base.isAsciiWhitespace = function(charCode) {};
 
 /** @param {number} charCode @return {boolean} */
 base.isHexDigit = function(charCode) {};
+
+/** @param {number} charCode @return {number} */
+base.toAsciiLowerCase = function(charCode) {};
+
+/** @param {number} charCode @return {number} */
+base.toAsciiUpperCase = function(charCode) {};

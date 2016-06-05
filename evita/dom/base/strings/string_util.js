@@ -64,6 +64,26 @@ function isHexDigit(charCode) {
   return false;
 }
 
+/**
+ * @param {number} charCode
+ * @return {number}
+ */
+function toAsciiLowerCase(charCode) {
+  if (isAsciiUpperCase(charCode))
+    return charCode + 0x20;
+  return charCode;
+}
+
+/**
+ * @param {number} charCode
+ * @return {number}
+ */
+function toAsciiUpperCase(charCode) {
+  if (isAsciiLowerCase(charCode))
+    return charCode - 0x20;
+  return charCode;
+}
+
 /** @param {number} charCode @return {boolean} */
 base.isAsciiAlpha = isAsciiAlpha;
 
@@ -81,4 +101,10 @@ base.isAsciiWhitespace = isAsciiWhitespace;
 
 /** @param {number} charCode @return {boolean} */
 base.isHexDigit = isHexDigit;
+
+/** @param {number} charCode @return {number} */
+base.toAsciiLowerCase = toAsciiLowerCase;
+
+/** @param {number} charCode @return {number} */
+base.toAsciiUpperCase = toAsciiUpperCase;
 });

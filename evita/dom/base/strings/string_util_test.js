@@ -64,3 +64,17 @@ testing.test('base.isHexDigit', function(t) {
         .toEqual(hexDigits.has(charCode));
   }
 });
+
+testing.test('base.toAsciiLowerCase', function(t) {
+  t.expect(base.toAsciiLowerCase('A'.charCodeAt(0))).toEqual('a'.charCodeAt(0));
+  t.expect(base.toAsciiLowerCase('Z'.charCodeAt(0))).toEqual('z'.charCodeAt(0));
+  t.expect(base.toAsciiLowerCase('a'.charCodeAt(0))).toEqual('a'.charCodeAt(0));
+  t.expect(base.toAsciiLowerCase('z'.charCodeAt(0))).toEqual('z'.charCodeAt(0));
+});
+
+testing.test('base.toAsciiUpperCase', function(t) {
+  t.expect(base.toAsciiLowerCase('A'.charCodeAt(0))).toEqual('A'.charCodeAt(0));
+  t.expect(base.toAsciiLowerCase('Z'.charCodeAt(0))).toEqual('Z'.charCodeAt(0));
+  t.expect(base.toAsciiLowerCase('a'.charCodeAt(0))).toEqual('A'.charCodeAt(0));
+  t.expect(base.toAsciiLowerCase('z'.charCodeAt(0))).toEqual('Z'.charCodeAt(0));
+});

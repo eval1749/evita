@@ -46,6 +46,8 @@ class TextWindow final : public CanvasContentWindow,
   void Paint(std::unique_ptr<TextAreaDisplayItem> display_item);
 
  private:
+  class DragController;
+
   void UpdateBounds();
 
   // gfx::CanvasObserver
@@ -69,7 +71,11 @@ class TextWindow final : public CanvasContentWindow,
   void DidSetFocus(ui::Widget* last_focused) final;
   void DidShow() final;
   HCURSOR GetCursorAt(const gfx::Point& point) const final;
+  void OnMouseMoved(const ui::MouseEvent& event) final;
+  void OnMousePressed(const ui::MouseEvent& event) final;
+  void OnMouseReleased(const ui::MouseEvent& event) final;
 
+  std::unique_ptr<DragController> drag_controller_;
   MetricsView* const metrics_view_;
   gfx::RectF scroll_bar_bounds_;
   std::unique_ptr<paint::ViewPaintCache> view_paint_cache_;

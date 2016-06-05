@@ -29,6 +29,7 @@
 #include "evita/ui/base/ime/text_input_client.h"
 #include "evita/ui/compositor/compositor.h"
 #include "evita/ui/compositor/layer.h"
+#include "evita/ui/events/event.h"
 #include "evita/views/metrics_view.h"
 #include "evita/visuals/display/display_item_list_processor.h"
 #include "evita/visuals/display/public/display_item_list.h"
@@ -53,10 +54,73 @@ gfx::RectF ToRectF(const gfx::FloatRect& rect) {
 
 //////////////////////////////////////////////////////////////////////
 //
+// TextWindow::DragController
+//
+class TextWindow::DragController final {
+ public:
+  DragController(const DragController& other) = delete;
+  explicit DragController(TextWindow* owner);
+  ~DragController() = default;
+  DragController& operator=(const DragController& other) = delete;
+
+  // Returns true if |event| is processed.
+  bool OnMouseMoved(const ui::MouseEvent& event);
+  // Returns true if |event| is processed.
+  bool OnMousePressed(const ui::MouseEvent& event);
+  // Returns true if |event| is processed.
+  bool OnMouseReleased(const ui::MouseEvent& event);
+
+ private:
+  enum class State { None, Dragging };
+
+  MetricsView& metrics_view() { return *owner_.metrics_view_; }
+
+  gfx::Size anchor_;
+  TextWindow& owner_;
+  State state_ = State::None;
+};
+
+TextWindow::DragController::DragController(TextWindow* owner)
+    : owner_(*owner) {}
+
+bool TextWindow::DragController::OnMouseMoved(const ui::MouseEvent& event) {
+  if (state_ != State::Dragging)
+    return false;
+  metrics_view().SetBounds(
+      gfx::Rect(event.location() - anchor_, metrics_view().bounds().size()));
+  return true;
+}
+
+bool TextWindow::DragController::OnMousePressed(const ui::MouseEvent& event) {
+  if (!event.is_left_button() || event.click_count() != 0)
+    return false;
+  if (!metrics_view().bounds().Contains(event.location()))
+    return false;
+  DCHECK_EQ(state_, State::None);
+  state_ = State::Dragging;
+  anchor_ = event.location() - metrics_view().origin();
+  owner_.SetCursor(::LoadCursor(nullptr, IDC_SIZEALL));
+  owner_.SetCapture();
+  return true;
+}
+
+bool TextWindow::DragController::OnMouseReleased(const ui::MouseEvent& event) {
+  if (state_ != State::Dragging)
+    return false;
+  owner_.ReleaseCapture();
+  state_ = State::None;
+  owner_.SetCursor(nullptr);
+  return true;
+}
+
+//////////////////////////////////////////////////////////////////////
+//
 // TextWindow
 //
 TextWindow::TextWindow(WindowId window_id)
-    : CanvasContentWindow(window_id), metrics_view_(new MetricsView()) {
+    : CanvasContentWindow(window_id),
+      drag_controller_(new DragController(this)),
+      metrics_view_(new MetricsView()) {
   AppendChild(metrics_view_);
 }
 
@@ -189,6 +253,24 @@ HCURSOR TextWindow::GetCursorAt(const gfx::Point& point) const {
   if (scroll_bar_bounds_.Contains(gfx::PointF(point)))
     return ::LoadCursor(nullptr, IDC_ARROW);
   return ::LoadCursor(nullptr, IDC_IBEAM);
+}
+
+void TextWindow::OnMouseMoved(const ui::MouseEvent& event) {
+  if (drag_controller_->OnMouseMoved(event))
+    return;
+  CanvasContentWindow::OnMouseMoved(event);
+}
+
+void TextWindow::OnMousePressed(const ui::MouseEvent& event) {
+  if (drag_controller_->OnMousePressed(event))
+    return;
+  CanvasContentWindow::OnMousePressed(event);
+}
+
+void TextWindow::OnMouseReleased(const ui::MouseEvent& event) {
+  if (drag_controller_->OnMouseReleased(event))
+    return;
+  CanvasContentWindow::OnMouseReleased(event);
 }
 
 }  // namespace views

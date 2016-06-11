@@ -12,6 +12,7 @@
 #include "evita/gfx/color_f.h"
 #include "evita/gfx/rect_conversions.h"
 #include "evita/gfx/stroke_style.h"
+#include "evita/gfx/stroke_style_builder.h"
 #include "evita/ui/controls/scroll_bar_observer.h"
 #include "evita/ui/events/event.h"
 
@@ -307,11 +308,10 @@ void Arrow::PaintArrow(gfx::Canvas* canvas,
 
   // TODO(eval1749): Arrow stroke style should be singleton. Stroke style is
   // a device independent resource.
-  gfx::StrokeStyle stroke_style;
-  stroke_style.set_cap_style(gfx::CapStyle::Flat);
-  stroke_style.set_line_join(gfx::LineJoin::Miter);
-  stroke_style.Realize(canvas);
-
+  const auto& stroke_style = gfx::StrokeStyle::Builder()
+                                 .SetCapStyle(gfx::CapStyle::Flat)
+                                 .SetLineJoin(gfx::LineJoin::Miter)
+                                 .Build(canvas);
   gfx::Brush arrow_brush(canvas, color());
   (*canvas)->DrawGeometry(geometry, arrow_brush, pen_width, stroke_style);
 }

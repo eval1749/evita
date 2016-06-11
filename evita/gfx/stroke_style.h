@@ -5,8 +5,6 @@
 #ifndef EVITA_GFX_STROKE_STYLE_H_
 #define EVITA_GFX_STROKE_STYLE_H_
 
-#include <vector>
-
 #include "common/win/scoped_comptr.h"
 #include "evita/gfx/forward.h"
 
@@ -43,28 +41,21 @@ enum class StrokeTransform {
 
 class StrokeStyle final {
  public:
-  StrokeStyle();
+  class Builder;
+
+  StrokeStyle(const StrokeStyle& other);
+  StrokeStyle(StrokeStyle&& other);
   ~StrokeStyle();
 
   operator ID2D1StrokeStyle*() const;
 
-  bool is_realized() const { return platform_style_ != nullptr; }
-  void set_cap_style(CapStyle start_style, CapStyle end_cap_style);
-  void set_cap_style(CapStyle cap_style);
-  void set_dashes(const std::vector<float>& dashes);
-  void set_dash_offset(float offset);
-  void set_dash_style(DashStyle dash_style);
-  void set_line_join(LineJoin line_join);
-  void set_stroke_transform(StrokeTransform transform);
-
-  void Realize(Canvas* canvas);
+  StrokeStyle& operator=(const StrokeStyle& other);
+  StrokeStyle& operator=(StrokeStyle&& other);
 
  private:
-  std::vector<float> dashes_;
-  common::ComPtr<ID2D1StrokeStyle1> platform_style_;
-  D2D1_STROKE_STYLE_PROPERTIES1 properties_;
+  explicit StrokeStyle(common::ComPtr<ID2D1StrokeStyle1>&& platform_style);
 
-  DISALLOW_COPY_AND_ASSIGN(StrokeStyle);
+  common::ComPtr<ID2D1StrokeStyle1> platform_style_;
 };
 
 }  // namespace gfx

@@ -11,6 +11,7 @@
 #include "evita/gfx/canvas.h"
 #include "evita/gfx/font.h"
 #include "evita/gfx/stroke_style.h"
+#include "evita/gfx/stroke_style_builder.h"
 #include "evita/text/paint/public/line/inline_box.h"
 #include "evita/text/paint/public/line/inline_box_visitor.h"
 #include "evita/text/style/computed_style.h"
@@ -91,10 +92,10 @@ void DrawWave(gfx::Canvas* canvas,
   }
   sink->EndFigure(D2D1_FIGURE_END_OPEN);
   sink->Close();
-  gfx::StrokeStyle stroke_style;
-  stroke_style.set_cap_style(gfx::CapStyle::Round);
-  stroke_style.set_line_join(gfx::LineJoin::Round);
-  stroke_style.Realize(canvas);
+  const auto& stroke_style = gfx::StrokeStyle::Builder()
+                                 .SetCapStyle(gfx::CapStyle::Round)
+                                 .SetLineJoin(gfx::LineJoin::Round)
+                                 .Build(canvas);
   (*canvas)->DrawGeometry(geometry, brush, pen_width, stroke_style);
 }
 
@@ -229,21 +230,22 @@ void PaintVisitor::VisitInlineTextBox(InlineTextBox* inline_box) {
   const auto& brush = gfx::Brush(canvas_, style.text_decoration_color());
   switch (style.text_decoration_style()) {
     case TextDecorationStyle::Dashed: {
-      gfx::StrokeStyle stroke_style;
-      stroke_style.set_dash_style(gfx::DashStyle::Dash);
-      stroke_style.Realize(canvas_);
+      const auto& stroke_style = gfx::StrokeStyle::Builder()
+                                     .SetDashStyle(gfx::DashStyle::Dash)
+                                     .Build(canvas_);
       DrawHLine(canvas_, brush, rect_.left, rect_.right, underline, size,
                 stroke_style);
       return;
     }
 
     case TextDecorationStyle::Dotted: {
-      gfx::StrokeStyle stroke_style;
-      stroke_style.set_dash_style(gfx::DashStyle::Custom);
-      // TODO(eval1749): We should understand why |DashStyle::Dot| doesn't
-      // show anything. It dashes = {0.0f, 2.0f}.
-      stroke_style.set_dashes({1.0f, 2.0f});
-      stroke_style.Realize(canvas_);
+      const auto& stroke_style = gfx::StrokeStyle::Builder()
+                                     .SetDashStyle(gfx::DashStyle::Custom)
+                                     // TODO(eval1749): We should understand why
+                                     // |DashStyle::Dot| doesn't
+                                     // show anything. It dashes = {0.0f, 2.0f}.
+                                     .SetDashes({1.0f, 2.0f})
+                                     .Build(canvas_);
       DrawHLine(canvas_, brush, rect_.left, rect_.right, underline, size,
                 stroke_style);
       return;

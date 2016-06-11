@@ -47,6 +47,7 @@ class EditPane final : public views::TabContent {
  private:
   class SplitterController;
 
+  HCURSOR ComputeCursorAt(const gfx::Point& point) const;
   Frame* GetFrame();
 
   // ui::Widget
@@ -57,7 +58,6 @@ class EditPane final : public views::TabContent {
   void DidRemoveChildWidget(Widget* old_child) final;
   void DidSetFocus(ui::Widget* last_focused) final;
   void DidShow() final;
-  HCURSOR GetCursorAt(const gfx::Point& point) const final;
   void OnMouseMoved(const ui::MouseEvent&) final;
   void OnMousePressed(const ui::MouseEvent& event) final;
   void OnMouseReleased(const ui::MouseEvent& event) final;

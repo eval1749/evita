@@ -1252,6 +1252,30 @@ bool EditPane::has_more_than_one_child() const {
   return first_child() != last_child();
 }
 
+HCURSOR EditPane::ComputeCursorAt(const gfx::Point& point) const {
+  const auto result = root_box_->HitTest(gfx::PointF(point));
+  switch (result.type) {
+    case ::HitTestResult::HSplitter:
+    case ::HitTestResult::HSplitterBig: {
+      CR_DEFINE_STATIC_LOCAL(StockCursor, hsplit_cursor, (IDC_HSPLIT));
+      return hsplit_cursor;
+    }
+
+    case ::HitTestResult::VSplitter: {
+      CR_DEFINE_STATIC_LOCAL(StockCursor, vsplit_cursor, (IDC_VSPLIT));
+      return vsplit_cursor;
+    }
+
+    case ::HitTestResult::None:
+      return nullptr;
+
+    default: {
+      CR_DEFINE_STATIC_LOCAL(StockCursor, arrow_cursor, (IDC_ARROW));
+      return arrow_cursor;
+    }
+  }
+}
+
 // Returns the last active Box.
 ContentWindow* EditPane::GetActiveContent() const {
   const auto box = root_box_->GetActiveLeafBox();
@@ -1377,36 +1401,12 @@ void EditPane::DidShow() {
   root_box_->DidShow();
 }
 
-HCURSOR EditPane::GetCursorAt(const gfx::Point& point) const {
-  const auto result = root_box_->HitTest(gfx::PointF(point));
-  switch (result.type) {
-    case ::HitTestResult::HSplitter:
-    case ::HitTestResult::HSplitterBig: {
-      CR_DEFINE_STATIC_LOCAL(StockCursor, hsplit_cursor, (IDC_HSPLIT));
-      return hsplit_cursor;
-    }
-
-    case ::HitTestResult::VSplitter: {
-      CR_DEFINE_STATIC_LOCAL(StockCursor, vsplit_cursor, (IDC_VSPLIT));
-      return vsplit_cursor;
-    }
-
-    case ::HitTestResult::None:
-      return nullptr;
-
-    default: {
-      CR_DEFINE_STATIC_LOCAL(StockCursor, arrow_cursor, (IDC_ARROW));
-      return arrow_cursor;
-    }
-  }
-}
-
 void EditPane::OnMouseReleased(const ui::MouseEvent& event) {
   splitter_controller_->End(event.location());
 }
 
 void EditPane::OnMouseMoved(const ui::MouseEvent& event) {
-  SetCursor(GetCursorAt(event.location()));
+  SetCursor(ComputeCursorAt(event.location()));
   splitter_controller_->Move(event.location());
 }
 

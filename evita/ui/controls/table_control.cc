@@ -385,6 +385,7 @@ class ColumnCollection final : public ui::Widget, private PaintScheduler {
   int window_height() const;
 
  private:
+  HCURSOR ComputeCursorAt(const gfx::Point& point) const;
   Column* HitTest(const gfx::PointF& point);
   void UpdateHover(Column* column);
   void UpdateLayoutIfNeeded();
@@ -393,10 +394,10 @@ class ColumnCollection final : public ui::Widget, private PaintScheduler {
   void SchedulePaintCanvas() final;
 
   // ui::Widget
-  HCURSOR GetCursorAt(const gfx::Point& point) const final;
   void OnDraw(gfx::Canvas* canvas) final;
   void OnMouseEntered(const ui::MouseEvent& event) final;
   void OnMouseExited(const ui::MouseEvent& event) final;
+  void OnMouseMoved(const ui::MouseEvent& event) final;
 
   std::vector<Column*> columns_;
   float column_height_;
@@ -427,6 +428,17 @@ float ColumnCollection::canvas_width() const {
 
 int ColumnCollection::window_height() const {
   return static_cast<int>(column_height_ + kMarginBetweenHeaderAndRow);
+}
+
+HCURSOR ColumnCollection::ComputeCursorAt(const gfx::Point& point_in) const {
+  auto const point = gfx::PointF(point_in);
+  auto const column = const_cast<ColumnCollection*>(this)->HitTest(point);
+  if (!column)
+    return nullptr;
+  if (point.x < column->bounds().right - 5)
+    return nullptr;
+  // TODO(eval1749): We should use horizontal splitter cursor.
+  return ::LoadCursor(nullptr, IDC_SIZEWE);
 }
 
 Column* ColumnCollection::HitTest(const gfx::PointF& point) {
@@ -474,17 +486,6 @@ void ColumnCollection::SchedulePaintCanvas() {
 }
 
 // ui::Widget
-HCURSOR ColumnCollection::GetCursorAt(const gfx::Point& point_in) const {
-  auto const point = gfx::PointF(point_in);
-  auto const column = const_cast<ColumnCollection*>(this)->HitTest(point);
-  if (!column)
-    return nullptr;
-  if (point.x < column->bounds().right - 5)
-    return nullptr;
-  // TODO(eval1749): We should use horizontal splitter cursor.
-  return ::LoadCursor(nullptr, IDC_SIZEWE);
-}
-
 void ColumnCollection::OnDraw(gfx::Canvas* canvas) {
   auto const new_width = parent_node()->bounds().width();
   if (new_width != bounds().width())
@@ -500,6 +501,10 @@ void ColumnCollection::OnMouseExited(const ui::MouseEvent&) {
 
 void ColumnCollection::OnMouseEntered(const ui::MouseEvent& event) {
   UpdateHover(HitTest(gfx::PointF(event.location())));
+}
+
+void ColumnCollection::OnMouseMoved(const ui::MouseEvent& event) {
+  SetCursor(ComputeCursorAt(event.location()));
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -37,7 +37,10 @@ class ComPtr final {
   bool operator==(T* other) const { return ptr_ == other; }
   bool operator!=(const ComPtr& other) const { return ptr_ != other.ptr_; }
   bool operator!=(T* other) const { return ptr_ != other; }
-  ComPtr& operator=(const ComPtr& other) { reset(other.ptr_); }
+  ComPtr& operator=(const ComPtr& other) {
+    reset(other.ptr_);
+    return *this;
+  }
   ComPtr& operator=(ComPtr&& other) {
     if (ptr_)
       ptr_->Release();

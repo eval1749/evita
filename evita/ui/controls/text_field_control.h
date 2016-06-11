@@ -67,8 +67,8 @@ class TextFieldControl final : public Control, private CaretOwner {
 
   // ui::Widget
   void DidChangeBounds() final;
-  HCURSOR GetCursorAt(const gfx::Point& point) const final;
   void OnDraw(gfx::Canvas* canvas) final;
+  void OnMouseMoved(const ui::MouseEvent& event) final;
 
   const std::unique_ptr<View> view_;
 

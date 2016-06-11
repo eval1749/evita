@@ -491,13 +491,13 @@ void TextFieldControl::DidChangeBounds() {
   view_->SetBounds(GetContentsBounds());
 }
 
-HCURSOR TextFieldControl::GetCursorAt(const gfx::Point&) const {
-  return ::LoadCursor(nullptr, IDC_IBEAM);
-}
-
 void TextFieldControl::OnDraw(gfx::Canvas* canvas) {
   // TODO(eval1749): We should get current time from animation scheduler.
   view_->Animate(canvas, base::TimeTicks::Now());
+}
+
+void TextFieldControl::OnMouseMoved(const ui::MouseEvent& event) {
+  SetCursor(::LoadCursor(nullptr, IDC_IBEAM));
 }
 
 }  // namespace ui

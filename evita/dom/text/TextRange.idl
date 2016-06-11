@@ -77,9 +77,6 @@ enum RangeCase {
   [ImplementedAs = JavaScript] TextRange startOf(Unit unit,
                                                  optional Alter alter);
 
-  // TODO(yosin) We should make |toLocaleUpperCase()| as global function
-  [ImplementedAs = JavaScript] TextRange toLocaleUpperCase();
-
   // TODO(yosin) We should make |toLowerCase()| as global function
   [ImplementedAs = JavaScript] TextRange toLowerCase();
 

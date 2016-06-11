@@ -326,15 +326,6 @@ function startOf(unit, alter = Alter.MOVE) {
  * @this {!TextRange}
  * @return {!TextRange}
  */
-function toLocaleUpperCase() {
-  this.text = this.text.toLocaleUpperCase();
-  return this;
-}
-
-/**
- * @this {!TextRange}
- * @return {!TextRange}
- */
 function toLowerCase() {
   this.text = this.text.toLowerCase();
   return this;
@@ -371,7 +362,6 @@ Object.defineProperties(TextRange.prototype, {
   moveStart: {value: moveStart},
   moveStartWhile: {value: moveStartWhile},
   startOf: {value: startOf},
-  toLocaleUpperCase: {value: toLocaleUpperCase},
   toLowerCase: {value: toLowerCase},
   toUpperCase: {value: toUpperCase},
 });

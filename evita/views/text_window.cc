@@ -249,12 +249,6 @@ void TextWindow::DidShow() {
   canvas()->AddObserver(this);
 }
 
-HCURSOR TextWindow::GetCursorAt(const gfx::Point& point) const {
-  if (scroll_bar_bounds_.Contains(gfx::PointF(point)))
-    return ::LoadCursor(nullptr, IDC_ARROW);
-  return ::LoadCursor(nullptr, IDC_IBEAM);
-}
-
 void TextWindow::OnMouseMoved(const ui::MouseEvent& event) {
   if (drag_controller_->OnMouseMoved(event))
     return;

@@ -70,7 +70,6 @@ class TextWindow final : public CanvasContentWindow,
   void DidRealize() final;
   void DidSetFocus(ui::Widget* last_focused) final;
   void DidShow() final;
-  HCURSOR GetCursorAt(const gfx::Point& point) const final;
   void OnMouseMoved(const ui::MouseEvent& event) final;
   void OnMousePressed(const ui::MouseEvent& event) final;
   void OnMouseReleased(const ui::MouseEvent& event) final;

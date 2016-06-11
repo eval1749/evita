@@ -7,8 +7,8 @@
 #pragma warning(disable : 4100 4625 4626)
 #include "base/message_loop/message_loop.h"
 #pragma warning(pop)
-#include "common/win/singleton_hwnd.h"
 #include "common/win/point.h"
+#include "common/win/singleton_hwnd.h"
 #include "common/win/size.h"
 
 namespace common {

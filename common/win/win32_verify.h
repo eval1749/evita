@@ -11,7 +11,6 @@
       auto const error = ::GetLastError();   \
       LOG(0) << #expr << " error=" << error; \
     }                                        \
-  \
-}
+  }
 
 #endif  // COMMON_WIN_WIN32_VERIFY_H_

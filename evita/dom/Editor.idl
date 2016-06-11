@@ -28,7 +28,7 @@ interface Editor {
   [ImplementedAs = JavaScript] static Window activeWindow();
 
   [ImplementedAs = JavaScript] static void bindKey(
-      Function window_class, DOMString key_combination, Function command,
+      object owner, DOMString key_combination, object command,
       optional DOMString description);
 
   static Promise<boolean> checkSpelling(DOMString word_to_check);

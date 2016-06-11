@@ -29,7 +29,7 @@ goog.scope(function() {
 /** @const @type {string} */ const LINE_COMMENT = '\x2F/';
 /** @const @type {number} */ const MAX_HISTORY_LINES = 20;
 
-/** @const @type {!Map.<string, !Object>} */
+/** @const @type {!Map<string, !Object>} */
 const keyBindings = new Map();
 
 /**
@@ -246,10 +246,11 @@ class JsConsole {
 
   /** @private */
   installKeyBindings() {
-    for (const[key, command] of keyBindings.entries())
-      this.document.bindKey(
-          /** @type{string} */ (key),
-          /** @type{!Object} */ (command));
+    for (const key of keyBindings.keys()) {
+      const command =
+          /** @type {function(!TextWindow, number=)} */ (keyBindings.get(key));
+      Editor.bindKey(this.document, key, command);
+    }
   }
 
   /** @param {*} result */
@@ -270,7 +271,7 @@ class JsConsole {
    */
   static bindKey(keyCombination, command) {
     keyBindings.set(keyCombination, command);
-    console.document.bindKey(keyCombination, command);
+    Editor.bindKey(console.document, keyCombination, command);
   }
 
   /** @return {!JsConsole} */

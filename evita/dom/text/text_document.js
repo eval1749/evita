@@ -79,16 +79,6 @@ function wordClassBefore(document, position) {
 }
 
 /**
- * @this {!TextDocument}
- * @param {string} keyCombination
- * @param {!Function|!Map} command
- */
-function bindKey(keyCombination, command) {
-  let keyCode = Editor.parseKeyCombination(keyCombination);
-  this.keymap.set(keyCode, command);
-}
-
-/**
  * @param {!TextDocument} document
  * @param {number} offset
  * @return {number} An offset of end of line containing |offset|.
@@ -626,7 +616,6 @@ Object.defineProperties(TextDocument.prototype, {
   state: {value: 0, writable: true},
   savedRevision_: {value: 0, writable: true},
 
-  bindKey: {value: bindKey},
   computeEndOf_: {value: computeEndOf},
   computeMotion_: {value: computeMotion},
   computeStartOf_: {value: computeStartOf},

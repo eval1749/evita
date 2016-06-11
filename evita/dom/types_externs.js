@@ -57,10 +57,6 @@ var TextOffset;
 //
 // Editor.idl
 //
-/**
- * @typedef {Map<number,function(number=)>}
- */
-var KeyBindingMap;
 
 /**
  * @typedef {{

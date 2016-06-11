@@ -7,14 +7,15 @@ goog.scope(function() {
 /** @const @type {number} */ const MOD_CTRL = 0x200;
 /** @const @type {number} */ const MOD_SHIFT = 0x400;
 
-/** @const @type {string} */ const PROPERTY_KEYMAP = 'keymap';
-
 /** @enum {string} */
 const State = {
   ARGUMENT: 'ARGUMENT',
   COMMAND: 'COMMAND',
   QUOTE: 'QUOTE',
 };
+
+/** @const @type {!Map<!Object, !Keymap>} */
+const keymaps = new Map();
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -86,6 +87,27 @@ class Argument {
 }
 
 /**
+ * @param {!Object} owner
+ * @param {string} keyCombination
+ * @param {function(number=)} command
+ * @param {string=} opt_description
+ */
+function bindKey(owner, keyCombination, command, opt_description) {
+  /** @const @type {number} */
+  const keyCode = Editor.parseKeyCombination(keyCombination);
+  if (opt_description)
+    command['commandDescription'] = opt_description;
+  /** @const @type {?Keymap} */
+  const keymap = keymapFor(owner);
+  if (keymap)
+    return keymap.set(keyCode, command);
+  /** @const @type {!Keymap} */
+  const newKeymap = /** @type {!Keymap} */ (new Map());
+  keymaps.set(owner, newKeymap);
+  newKeymap.set(keyCode, command);
+}
+
+/**
  * @param {!Window} window
  * @param {!Function} commandFunction
  * @param {!Argument} argument
@@ -137,19 +159,11 @@ function keyBindingOf(window, keyCode, currentKeymap) {
 }
 
 /**
- * @param {Object} object
+ * @param {!Object} object
  * @return {Keymap}
  */
 function keymapFor(object) {
-  if (object === null)
-    return null;
-  if (!(PROPERTY_KEYMAP in object))
-    return null;
-  /** @const @type {?Keymap} */
-  const maybeKeymap = object[PROPERTY_KEYMAP] || null;
-  if (!(maybeKeymap instanceof Map))
-    return null;
-  return /** @type {!Keymap} */ (maybeKeymap);
+  return keymaps.get(object) || null;
 }
 
 /**
@@ -191,7 +205,9 @@ function * searchPathOf(currentKeymap, window) {
 
   // Document instance keymap
   if (window instanceof TextWindow) {
-    const textWindow = /**@type {!TextWindow} */ (window);
+    /** @const @type {!TextWindow} */
+    const textWindow = /** @type {!TextWindow} */ (window);
+    /** @const {!Keymap} */
     const documentKeymap = keymapFor(textWindow.document);
     if (documentKeymap)
       yield documentKeymap;
@@ -205,7 +221,7 @@ function * searchPathOf(currentKeymap, window) {
   // Looking for class keymap
   for (let runner = window; runner !== null;
        runner = Object.getPrototypeOf(/** @type {!Object} */ (runner))) {
-    const keymap = keymapFor(runner.constructor);
+    const keymap = keymapFor(/** @type {!Object} */ (runner.constructor));
     if (keymap)
       yield keymap;
   }
@@ -358,6 +374,9 @@ class Commander {
     return /** @type {!Commander} */ (base.Singleton.get(Commander));
   }
 
+  /** @return {?Keymap} */
+  static keymapFor(owner) { return keymapFor(owner); }
+
   /** @public static */
   static quoteCommand() { Commander.instance.startQuote(); }
 }
@@ -374,6 +393,9 @@ function handleKeyboardEvent(event) {
 
 Object.defineProperty(
     Window, 'handleKeyboardEvent', {value: handleKeyboardEvent});
+
+Editor.bindKey =
+    /** @type {function (Object, string, Object, string=)} */ (bindKey);
 
 Editor.bindKey(TextWindow, 'Ctrl+Q', Commander.quoteCommand);
 Editor.bindKey(Window, 'Ctrl+U', Commander.argumentCommand);

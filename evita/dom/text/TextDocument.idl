@@ -28,8 +28,6 @@
 
   [ImplementedAs = JavaScript] attribute DOMString fileName;
 
-  [ImplementedAs = JavaScript] attribute Keymap keymap;
-
   [ImplementedAs = JavaScript] attribute Date lastStartTime_;
 
   [ImplementedAs = JavaScript] attribute Date lastWriteTime;
@@ -52,9 +50,6 @@
   //
   // Operations
   //
-  [ImplementedAs = JavaScript] void bindKey(DOMString keyCombination,
-                                            Object command);
-
   [ ImplementedAs = charCodeAt, RaisesException ] long charCodeAt(
       TextOffset offset);
 

@@ -7,20 +7,6 @@ goog.scope(function() {
 Editor['RegExp'] = RegularExpression;
 
 /**
- * @template T
- * @param {!function(new: T)} owner
- * @return {!KeyBindingMap}
- */
-function keyMapOf(owner) {
-  if ('keymap' in owner)
-    return /** @type {!KeyBindingMap} */ (owner['keymap']);
-  /** @const @type {!KeyBindingMap} */
-  const keymap = /** @type {!KeyBindingMap} */ (new Map());
-  owner['keymap'] = keymap;
-  return keymap;
-}
-
-/**
  * @param {?Window} window1
  * @param {!Window} window2
  * @return {?Window}
@@ -46,23 +32,6 @@ function activeWindow() {
     return current.children.reduce(updateActiveWindow, newValue);
   }
   return EditorWindow.list.reduce(updateActiveWindow, null);
-}
-
-/**
- * @template T
- * @param {function(new: T)} owner
- * @param {string} keyCombination
- * @param {function(number=)} command
- * @param {string=} opt_description
- */
-function bindKey(owner, keyCombination, command, opt_description) {
-  /** @const @type {number} */
-  const keyCode = Editor.parseKeyCombination(keyCombination);
-  if (opt_description)
-    command['commandDescription'] = opt_description;
-  /** @const @type {!KeyBindingMap} */
-  const keymap = keyMapOf(owner);
-  keymap.set(keyCode, command);
 }
 
 function exit() {
@@ -234,8 +203,8 @@ function processCommandLine(cwd, args) {
   }
 }
 
-[activeWindow, bindKey, exit, forceExit, localizeText, open,
- parseKeyCombination, processCommandLine,
+[activeWindow, exit, forceExit, localizeText, open, parseKeyCombination,
+ processCommandLine,
 ].forEach(fn => Object.defineProperty(Editor, fn.name, {value: fn}));
 
 });

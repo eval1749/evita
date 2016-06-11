@@ -69,6 +69,9 @@ js_lib_files = [
 
   "components/win_resource/win_resource.js",
 
+  # Commander provides keyboard binding.
+  "global/commander.js",
+
   "components/repl/repl.js",
   "components/repl/console.js",
   "components/repl/describe.js",
@@ -85,7 +88,4 @@ js_lib_files = [
   "jslib/install_stringify.js",
 
   "testing/test.js",
-
-  # Commander provides keyboard binding.
-  "global/commander.js",
 ]

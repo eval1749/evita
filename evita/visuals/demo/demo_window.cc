@@ -5,6 +5,7 @@
 #include "evita/visuals/demo/demo_window.h"
 
 #include "base/message_loop/message_loop.h"
+#include "base/threading/thread_task_runner_handle.h"
 #include "base/time/time.h"
 #include "build/build_config.h"
 #include "evita/gfx/base/geometry/float_rect.h"
@@ -34,8 +35,7 @@ DemoWindow::DemoWindow(WindowEventHandler* event_handler,
       quit_closure_(quit_closure) {}
 
 DemoWindow::~DemoWindow() {
-  base::MessageLoop::current()->task_runner()->PostTask(FROM_HERE,
-                                                        quit_closure_);
+  base::ThreadTaskRunnerHandle::Get()->PostTask(FROM_HERE, quit_closure_);
 }
 
 gfx::Canvas* DemoWindow::GetCanvas() const {

@@ -3,7 +3,7 @@
 
 #include "evita/ginx/per_isolate_data.h"
 
-#include "base/message_loop/message_loop.h"
+#include "base/threading/thread_task_runner_handle.h"
 #include "evita/ginx/gin_embedders.h"
 #include "evita/ginx/v8.h"
 
@@ -13,7 +13,7 @@ PerIsolateData::PerIsolateData(v8::Isolate* isolate)
     : construct_mode_(kCreateNewObject),
       current_runner_(nullptr),
       isolate_(isolate),
-      task_runner_(base::MessageLoop::current()->task_runner()) {
+      task_runner_(base::ThreadTaskRunnerHandle::Get()) {
   isolate_->SetData(gin::kEmbedderEvita, this);
 }
 

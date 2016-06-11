@@ -12,6 +12,7 @@
 #include "base/macros.h"
 #include "base/message_loop/message_loop.h"
 #include "base/run_loop.h"
+#include "base/threading/thread_task_runner_handle.h"
 #include "evita/ui/animation/animation_scheduler.h"
 #include "evita/ui/compositor/compositor.h"
 #include "evita/visuals/demo/demo_model.h"
@@ -75,7 +76,7 @@ void DemoScheduler::RequestAnimationFrame(ui::AnimationFrameHandler* handler) {
   const auto next_frame_time =
       last_frame_time_ + base::TimeDelta::FromMilliseconds(1000 / 60);
   const auto delta = next_frame_time - base::TimeTicks::Now();
-  base::MessageLoop::current()->task_runner()->PostNonNestableDelayedTask(
+  base::ThreadTaskRunnerHandle::Get()->PostDelayedTask(
       FROM_HERE, base::Bind(&DemoScheduler::BeginFrame, base::Unretained(this)),
       std::min(base::TimeDelta::FromMilliseconds(3),
                std::max(delta, base::TimeDelta::FromMilliseconds(3))));

@@ -111,7 +111,6 @@ class Widget : public EventTarget,
   virtual void DidRequestDestroy();
   virtual void DidSetFocus(Widget* last_focused);
   virtual void DidShow();
-  virtual HCURSOR GetCursorAt(const gfx::Point& point) const;
   virtual void OnKeyPressed(const KeyEvent& event);
   virtual void OnKeyReleased(const KeyEvent& event);
   virtual void OnMouseEntered(const MouseEvent& event);

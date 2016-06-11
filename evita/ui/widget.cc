@@ -252,10 +252,6 @@ gfx::RectF Widget::GetContentsBounds() const {
   return gfx::RectF(gfx::SizeF(bounds_.width(), bounds_.height()));
 }
 
-HCURSOR Widget::GetCursorAt(const gfx::Point&) const {
-  return ::LoadCursor(nullptr, IDC_ARROW);
-}
-
 Widget* Widget::GetHostWidget() const {
   for (auto runner : base::tree::ancestors_or_self(this)) {
     if (runner->native_window())

@@ -34,12 +34,6 @@ static base::TimeDelta ComputeFrameDelay(const base::TimeTicks& last_frame_time,
   return std::max(delta, base::TimeDelta::FromMilliseconds(3));
 }
 
-static base::TimeDelta ComputeIdleDelay() {
-  return ui::FocusController::instance()->IsForeground()
-             ? base::TimeDelta::FromMilliseconds(50)
-             : base::TimeDelta::FromMilliseconds(5000);
-}
-
 #define FOR_EACH_STATE(V) V(Idle) V(Running) V(Sleeping) V(Waiting)
 
 enum class Scheduler::State {

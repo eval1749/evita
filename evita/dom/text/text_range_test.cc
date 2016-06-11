@@ -531,11 +531,6 @@ TEST_F(TextRangeTest, text) {
   EXPECT_SCRIPT_EQ("def", "range2.text");
 }
 
-TEST_F(TextRangeTest, toLocalLocaleLowerCase) {
-  PopulateSample("ABCDEFGHIJ");
-  EXPECT_SCRIPT_EQ("abcdefghij", "r.toLocaleLowerCase(); r.text");
-}
-
 TEST_F(TextRangeTest, toLocalLowerCase) {
   PopulateSample("ABCDEFGHIJ");
   EXPECT_SCRIPT_EQ("abcdefghij", "r.toLowerCase(); r.text");

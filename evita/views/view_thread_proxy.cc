@@ -122,7 +122,9 @@ void RunSynchronously(const base::Callback<void(Params...)>& task,
 ViewThreadProxy::ViewThreadProxy(base::MessageLoop* message_loop)
     : delegate_(new ViewDelegateImpl()),
       message_loop_(message_loop),
-      waitable_event_(new base::WaitableEvent(true, false)) {}
+      waitable_event_(new base::WaitableEvent(
+          base::WaitableEvent::ResetPolicy::MANUAL,
+          base::WaitableEvent::InitialState::NOT_SIGNALED)) {}
 
 ViewThreadProxy::~ViewThreadProxy() {}
 

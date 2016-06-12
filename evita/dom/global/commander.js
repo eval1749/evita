@@ -2,7 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+goog.require('commands');
+
 goog.scope(function() {
+
+/** @constructor */
+const Command = commands.Command;
+
+/** @constructor */
+const Keymap = commands.Keymap;
+
 /** @const @type {number} */ const MOD_ALT = 0x800;
 /** @const @type {number} */ const MOD_CTRL = 0x200;
 /** @const @type {number} */ const MOD_SHIFT = 0x400;
@@ -89,35 +98,39 @@ class Argument {
 /**
  * @param {!Object} owner
  * @param {string} keyCombination
- * @param {function(number=)} command
+ * @param {function(number=)} procedure
  * @param {string=} opt_description
  */
-function bindKey(owner, keyCombination, command, opt_description) {
+function bindKey(owner, keyCombination, procedure, opt_description) {
   /** @const @type {number} */
   const keyCode = Editor.parseKeyCombination(keyCombination);
-  if (opt_description)
-    command['commandDescription'] = opt_description;
+  /** @const @type {string} */
+  const commandName = procedure.name || `Command of keyCombination`;
+  /** @const @type {string} */
+  const description = opt_description || commandName;
+  /** @const @type {!Command} */
+  const command = new Command(commandName, procedure, description);
   /** @const @type {?Keymap} */
   const keymap = keymapFor(owner);
   if (keymap)
     return keymap.set(keyCode, command);
   /** @const @type {!Keymap} */
-  const newKeymap = /** @type {!Keymap} */ (new Map());
+  const newKeymap = new Keymap(owner.name, `Keymap for ${owner.name}`);
   keymaps.set(owner, newKeymap);
   newKeymap.set(keyCode, command);
 }
 
 /**
  * @param {!Window} window
- * @param {!Function} commandFunction
+ * @param {!Command} command
  * @param {!Argument} argument
  */
-function executeCommand(window, commandFunction, argument) {
+function executeCommand(window, command, argument) {
   try {
     if (argument.hasValue)
-      commandFunction.call(window, argument.value);
+      command.execute(window, argument.value);
     else
-      commandFunction.call(window);
+      command.execute(window);
   } catch (exception) {
     if (exception instanceof TextDocumentReadOnly) {
       reportReadOnly(window, exception);
@@ -147,11 +160,11 @@ function executeQuote(window, keyCode, repeatCount) {
  * @param {Keymap} currentKeymap
  * @param {!Window} window
  * @param {number} keyCode
- * @return {Function|Keymap}
+ * @return {!Command|!Keymap|null}
  */
 function keyBindingOf(window, keyCode, currentKeymap) {
   for (const keymap of searchPathOf(currentKeymap, window)) {
-    const present = keymap.get(keyCode) || null;
+    const present = keymap.get(keyCode);
     if (present)
       return present;
   }
@@ -303,15 +316,15 @@ class Commander {
     if (binding === null)
       return this.reportUnboundKeySequence(window, keyCode);
 
-    if (typeof(binding) === 'function') {
-      executeCommand(window, binding, this.argument_);
-      if (this.state_ === State.COMMAND)
-        this.reset();
+    if (binding instanceof Keymap) {
+      this.keymap_ = binding;
       return;
     }
 
-    if (binding instanceof Map) {
-      this.keymap_ = /** @type {!Keymap} */ (binding);
+    if (binding instanceof Command) {
+      executeCommand(window, binding, this.argument_);
+      if (this.state_ === State.COMMAND)
+        this.reset();
       return;
     }
 

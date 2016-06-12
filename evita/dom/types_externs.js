@@ -22,13 +22,6 @@
 var EventListener;
 
 /**
- * Note: Since, Closure compiler doesn't support recursive type, we use
- * |!Map| instead of |!Keymap|.
- * @typedef {Map.<number, !Function|!Map>}
- */
-var Keymap;
-
-/**
  * @typedef {RegularExpression}
  */
 Editor.RegExp;

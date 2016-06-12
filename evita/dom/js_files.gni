@@ -69,6 +69,8 @@ js_lib_files = [
 
   "components/win_resource/win_resource.js",
 
+  "global/command.js",
+
   # Commander provides keyboard binding.
   "global/commander.js",
 

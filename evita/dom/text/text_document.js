@@ -30,9 +30,6 @@ const WORD_CLASS_MAP = (function() {
   return map;
 })();
 
-/** @type {Keymap} */
-TextDocument.prototype.keymap_;
-
 /** @type {string} */
 TextDocument.prototype.name_;
 
@@ -568,16 +565,6 @@ Object.defineProperties(TextDocument, {
 
 /**
  * @this {!TextDocument}
- * @return {!Keymap}
- */
-function getKeymap() {
-  if (!this.keymap_)
-    this.keymap_ = new Map();
-  return this.keymap_;
-}
-
-/**
- * @this {!TextDocument}
  * @return {string}
  */
 function getName() {
@@ -604,8 +591,6 @@ function toString() {
 
 Object.defineProperties(TextDocument.prototype, {
   fileName: {value: '', writable: true},
-  keymap: {get: getKeymap},
-  keymap_: {value: null, writable: true},
   lastWriteTime: {value: new Date(0), writable: true},
   modified: {get: getTextDocumentModified, set: setTextDocumentModified},
   name_: {value: '', writable: true},

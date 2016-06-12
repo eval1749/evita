@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+goog.require('unicode');
+
 /** @type {*} */
 var $0;
 
@@ -257,15 +259,31 @@ Editor.bindKey(
         'Move active position of selection to end of document.');
 
 /**
- * @param {TextSelection} selection
- * @param {function(TextSelection)} changer
+ * @param {!TextRange} range
+ * @return {!TextRange}
  */
-function changeCase(selection, changer) {
-  if (selection.range.collapsed) {
-    selection.range.startOf(Unit.WORD, Alter.EXTEND);
-    selection.range.endOf(Unit.WORD, Alter.EXTEND);
+function selectWordIfCollapsed(range) {
+  if (!range.collapsed)
+    return range;
+  range.startOf(Unit.WORD, Alter.EXTEND);
+  range.endOf(Unit.WORD, Alter.EXTEND);
+  return range;
+}
+
+/**
+ * @param {string} text
+ * @return string
+ */
+function toCapitalCase(text) {
+  for (/** @type {number} */ let i = 0; i < text.length; ++i) {
+    if (!unicode.isLetter(text.charCodeAt(i)))
+      continue;
+    return [
+      text.substr(0, i), text.charAt(i).toLocaleUpperCase(),
+      text.substr(i + 1).toLocaleLowerCase()
+    ].join('');
   }
-  changer(selection);
+  return text;
 }
 
 // TODO(eval1749): We should display dialog box to prompt enter line number
@@ -287,6 +305,7 @@ Editor.bindKey(TextWindow, 'Ctrl+G', gotoLineCommand);
 function startOfDocumentCommand() {
   this.selection.homeKey(Unit.DOCUMENT);
 }
+
 Editor.bindKey(
     TextWindow, 'Ctrl+Home', startOfDocumentCommand,
     'move to home of document\n' +
@@ -381,27 +400,21 @@ Editor.bindKey(
       current.destroy();
     });
 
-Editor.bindKey(
-    TextWindow, 'Ctrl+Shift+C',
-    /**
-     * @this {!TextWindow}
-     */
-    function() {
-      changeCase(
-          /** @type{!TextSelection} */ (this.selection),
-          function(selection) { selection.range.capitalize(); });
-    });
+/** @this {!TextWindow} */
+function toCapitalCaseCommand() {
+  const range = selectWordIfCollapsed(this.selection.range);
+  range.text = toCapitalCase(range.text);
+}
 
-Editor.bindKey(
-    TextWindow, 'Ctrl+Shift+D',
-    /**
-     * @this {!TextWindow}
-     */
-    function() {
-      changeCase(
-          /** @type{!TextSelection}*/ (this.selection),
-          function(selection) { selection.range.toLowerCase(); });
-    });
+Editor.bindKey(TextWindow, 'Ctrl+Shift+C', toCapitalCaseCommand);
+
+/** @this {!TextWindow} */
+function toLowerCaseCommand() {
+  const range = selectWordIfCollapsed(this.selection.range);
+  range.text = range.text.toLocaleLowerCase();
+}
+
+Editor.bindKey(TextWindow, 'Ctrl+Shift+D', toLowerCaseCommand);
 
 /**
  * Evaluate script in selection selection
@@ -453,17 +466,13 @@ Editor.bindKey(
     'exthome to home of document\n' +
         'Move active position of selection to home of document.');
 
-Editor.bindKey(
-    TextWindow, 'Ctrl+Shift+U',
-    /**
-     * @this {!TextWindow}
-     */
-    function() {
-      changeCase(
-          /** @type{!TextSelection} */ (this.selection),
-          function(selection) { selection.range.toUpperCase(); });
-    });
+/** @this {!TextWindow} */
+function toUpperCaseCommand() {
+  const range = selectWordIfCollapsed(this.selection.range);
+  range.text = range.text.toLocaleUpperCase();
+}
 
+Editor.bindKey(TextWindow, 'Ctrl+Shift+U', toUpperCaseCommand);
 Editor.bindKey(TextWindow, 'Ctrl+V', pasteFromClipboardCommand);
 
 /**

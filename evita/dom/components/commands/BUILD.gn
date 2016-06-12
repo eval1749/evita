@@ -6,6 +6,7 @@ import("//evita/build/js_module.gni")
 
 js_module("commands") {
   files = [
+    "commands.js",
     "$target_gen_dir/cursor_key_commands.js",
     "text_window_commands.js",
     "window_commands.js",
@@ -15,6 +16,7 @@ js_module("commands") {
     "//evita/dom/strings_en_US.js",
     "//evita/dom/text/text_document_externs.js",
     "//evita/dom/unicode/unicode_enums.js",
+    "//evita/dom/unicode/unicode_externs.js",
   ]
   deps = [
     ":cursor_key_commands",

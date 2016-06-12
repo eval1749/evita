@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-goog.require('commands');
+goog.require('commanders');
 goog.require('testing');
 
 goog.scope(() => {
-const Command = commands.Command;
+const Command = commanders.Command;
 
 testing.test('Command.register', (t) => {
   const command = new Command('foo', () => {}, 'Foo command');

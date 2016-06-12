@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-goog.require('commands');
+goog.require('commanders');
 
 goog.scope(function() {
 
 /** @constructor */
-const Command = commands.Command;
+const Command = commanders.Command;
 
 /** @constructor */
-const Keymap = commands.Keymap;
+const Keymap = commanders.Keymap;
 
 /** @const @type {number} */ const MOD_ALT = 0x800;
 /** @const @type {number} */ const MOD_CTRL = 0x200;

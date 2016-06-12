@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-goog.provide('commands');
+goog.provide('commanders');
 
 goog.scope(() => {
 
@@ -98,8 +98,8 @@ class Keymap extends Command {
 };
 
 /** @constructor */
-commands.Command = Command;
+commanders.Command = Command;
 
 /** @constructor */
-commands.Keymap = Keymap;
+commanders.Keymap = Keymap;
 });

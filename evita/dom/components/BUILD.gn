@@ -7,6 +7,7 @@ import("//evita/dom/testing/js_test.gni")
 js_test("test_files") {
   test_name = "components"
   data = [
+    "commands/text_window_commands_test.js",
     "highlights/highlights_test.js",
     "imaging/imaging_test.js",
     "modes/modes_test.js",

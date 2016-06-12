@@ -222,6 +222,7 @@ test("evita_dom_tests") {
     "//evita/dom/encodings:test_files",
     "//evita/dom/events:test_files",
     "//evita/dom/forms:test_files",
+    "//evita/dom/global:test_files",
     "//evita/dom/os:test_files",
     "//evita/dom/testing:test_support",
     "//evita/dom/text:test_files",

@@ -6,6 +6,9 @@ goog.provide('commands');
 
 goog.scope(() => {
 
+/** @const @type {!Map<string, !Command>} */
+const commandMap = new Map();
+
 class Command {
   /**
    * @public
@@ -41,6 +44,19 @@ class Command {
 
   /** @override */
   toString() { return `Command(${this.name})`; }
+
+  /**
+   * @public
+   * @param {string} name
+   * @return {?Command}
+   */
+  static query(name) { return commandMap.get(name) || null; }
+
+  /**
+   * @public
+   * @param {!Command} command
+   */
+  static register(command) { commandMap.set(command.name, command); }
 }
 
 /**

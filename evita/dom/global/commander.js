@@ -105,11 +105,18 @@ function bindKey(owner, keyCombination, procedure, opt_description) {
   /** @const @type {number} */
   const keyCode = Editor.parseKeyCombination(keyCombination);
   /** @const @type {string} */
-  const commandName = procedure.name || `Command of keyCombination`;
+  const commandName = (() => {
+    if (procedure.name) {
+      const name = procedure.name.replace(/Command$/, '');
+      return `${owner.name}.${name}`;
+    }
+    return `${owner.name}.${keyCombination}`;
+  })();
   /** @const @type {string} */
   const description = opt_description || commandName;
   /** @const @type {!Command} */
   const command = new Command(commandName, procedure, description);
+  Command.register(command);
   /** @const @type {?Keymap} */
   const keymap = keymapFor(owner);
   if (keymap)

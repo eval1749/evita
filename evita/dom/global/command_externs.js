@@ -11,6 +11,17 @@ var commands;
  */
 commands.Command = function(name, procedure, description) {};
 
+/**
+ * @param {string} name
+ * @return {?Command}
+ */
+command.Command.query = function(name) {};
+
+/**
+ * @param {!Command} command
+ */
+command.Command.register = function(command) {};
+
 /** @type {string} */
 commands.Command.prototype.description;
 

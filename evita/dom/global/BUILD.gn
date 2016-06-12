@@ -2,6 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//evita/dom/testing/js_test.gni")
 import("//tools/grit/grit_rule.gni")
 
 grit("global_strings") {
@@ -14,5 +15,12 @@ grit("global_strings") {
   grit_flags = [
     "-E",
     "target_gen_dir=" + rebase_path(target_gen_dir),
+  ]
+}
+
+js_test("test_files") {
+  test_name = "global"
+  data = [
+    "command_test.js",
   ]
 }

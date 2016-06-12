@@ -340,7 +340,7 @@ function handleRealize(window, event) {
  * @param {!TextWindow} window
  */
 function handleSelectionChange(window) {
-  if (window.isSelectionChanged_)
+  if (!window.parent || window.isSelectionChanged_)
     return;
   window.isSelectionChanged_ = true;
   Editor.requestIdleCallback(() => {

@@ -8,19 +8,19 @@ vars = {
 
   'autopep8_revision': '9eb1121f357077c7d71fc770e25d3678f906a401',
   'base_revision': '6312f75bcef11b6a218f6d6458a16597b9127ce1',
-  'build_revision': 'b0d7c1e69e15dbf1c341d2fa90565f1b497c0f1d',
-  'buildtools_revision': 'd2664782a3855d5be8cbbfd3c23b6652926de8cc',
+  'build_revision': '6d9becf753310daf17f04ac4f0d8c109c364cdd2',
+  'buildtools_revision': 'aa47d9773d8f4d6254a587a1240b3dc023d54f06',
   'cygwin_revision': '4fbd5b9e6664b991c06dd3a157c8f8e67fcbff48',
   'gmock_revision': '0421b6f358139f02e102c9c332ce19a33faf75be', # from svn revision 566
   'grit_revision': '3a6166d8a1226a793d9978ea3d44925eb59ed43e',
   'gtest_revision': '6f8a66431cb592dad629028a50b3dd418a408c87',
-  'gyp_revision': '35eafcd939515d51d19556c543f9cf97faf75ee6',
+  'gyp_revision': 'bac4680ec9a5c55ab692490b6732999648ecf1e9',
   'icu_revision': 'a71b13d13ae2677b6a3af60c37f332078caa2671',
   'idl_parser_revision': 'fce24a3e157ff80b88a514fb469dacf82358f1f0',
   'pep8_revision': '4dc42d842274ba27d2724e76eb83ff69e7db226f',
   'ply_revision': '4a6baf95860033d4c69d3e3087696b30c687622c',
   'testing_revision': 'c636c0d432ea24c92815dbc889fb4ca22a89ace7',
-  'v8_revision': 'a90e831ead0d9623d7bfb3afc6b4f6c7e800f1a4', # 5.4.43
+  'v8_revision': '3176b92b5a66fd3d572304c021b066d714224cd5', # 5.4.46
   'zlib_revision': '6c1421668fbeb42b16796b6bcd41639cea2edc1c',
 }
 

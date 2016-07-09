@@ -111,7 +111,6 @@ class Node {
       throw new Error(`${child} isn't child of ${this}`);
     if (node.parentNode_)
       node.parentNode_.removeChild(node);
-    const nextSibling = child.nextSibling_;
     const previousSibling = child.previousSibling_;
     if (previousSibling)
       previousSibling.nextSibling_ = node;

@@ -141,11 +141,6 @@ class FileLoader {
 
   load(fileName) {
     return (async(function * (loader, fileName) {
-      /** @const @type {!EncodingDetector} */
-      const detector = new EncodingDetector();
-      // Remember |readonly| property for restoring on error.
-      /** @const @type {boolean} */
-      const readonly = loader.document_.readonly;
       loader.file_ = yield Os.File.open(fileName);
       /** @const @type {!Os.File} */
       const file = loader.file_;

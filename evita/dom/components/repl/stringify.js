@@ -409,9 +409,7 @@ class Processor {
     const length = Math.min(array.length, this.maxLength_);
     /** @type {number} */
     let index = 0;
-    while (index < array.length) {
-      if (index >= this.maxLength_)
-        break;
+    while (index < length) {
       this.visitor_.visitMember(index);
       this.process(array[index], level);
       ++index;

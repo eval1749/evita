@@ -482,7 +482,6 @@ function listTextDocument() {
  * @return {string}
  */
 function makeUniqueName(candidate) {
-  let uniqueName = candidate;
   const lastDot = candidate.lastIndexOf('.');
   const head = lastDot > 0 ? candidate.substr(0, lastDot) : candidate;
   const tail = lastDot > 0 ? candidate.substr(lastDot) : '';

@@ -271,9 +271,6 @@ Object.defineProperties(TextFieldControl.prototype, {
    */
   function setText(control, start, end, newText) {
     var text = control.value_;
-    var compositionEnd =
-        control.compositionStart_ + control.compositionString_.length;
-    var oldValue = control.value_;
     var newValue = text.substr(0, start) + newText + text.substr(end);
     control.compositionString_ = newText;
     control.value_ = newValue;
@@ -296,8 +293,6 @@ Object.defineProperties(TextFieldControl.prototype, {
    * @param {!TextFieldSelection} selection
    */
   function typeCharacter(charCode, selection) {
-    var control = selection.control;
-    var text = control.value;
     setSelectionText(selection, String.fromCharCode(charCode));
     selection.collapseTo(selection.end);
   }
@@ -369,8 +364,6 @@ Object.defineProperties(TextFieldControl.prototype, {
   });
 
   bindKey('Backspace', function(selection) {
-    var control = selection.control;
-    var text = control.value;
     if (selection.collapsed)
       --selection.focusOffset;
     setSelectionText(selection, '');
@@ -440,8 +433,6 @@ Object.defineProperties(TextFieldControl.prototype, {
   });
 
   bindKey('Delete', function(selection) {
-    var control = selection.control;
-    var text = control.value;
     if (selection.collapsed)
       ++selection.focusOffset;
     setSelectionText(selection, '');

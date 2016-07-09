@@ -40,6 +40,7 @@ CLOSURE_ERRORS = [
     'undefinedNames',
     'undefinedVars',
     'unknownDefines',
+    'unusedLocalVariables',
     'uselessCode',
     'visibility',
 ]

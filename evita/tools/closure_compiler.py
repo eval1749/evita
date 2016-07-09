@@ -48,6 +48,7 @@ CLOSURE_WARNINGS = [
 ]
 
 CLOSURE_OPTIONS = [
+    '--checks-only',
     '--compilation_level=SIMPLE',
     '--formatting=PRETTY_PRINT',
     '--env=CUSTOM',
@@ -81,11 +82,9 @@ def run(js_output_file, js_files, js_externs, closure_options):
                     ' %(js_files)s' +
                     ' %(js_externs)s') % params
     exit_code = os.system(command_line)
-    if exit_code != 0 and js_output_file != '':
-        try:
-            os.remove(js_output_file)
-        except OSError as detail:
-            print detail
+    if exit_code == 0:
+        with open(js_output_file, 'wt') as output:
+            output.write('done')
     return exit_code
 
 

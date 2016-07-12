@@ -8,7 +8,7 @@ vars = {
 
   'autopep8_revision': '9eb1121f357077c7d71fc770e25d3678f906a401',
   'base_revision': 'b7e9bed0c3d1057c6b46c5bd9cbffe401ada752b',
-  'build_revision': '6d9becf753310daf17f04ac4f0d8c109c364cdd2',
+  'build_revision': '766297ee7fd0da3d95276a02ff11089ec3aced9b',
   'buildtools_revision': 'aa47d9773d8f4d6254a587a1240b3dc023d54f06',
   'cygwin_revision': '4fbd5b9e6664b991c06dd3a157c8f8e67fcbff48',
   'gmock_revision': '0421b6f358139f02e102c9c332ce19a33faf75be', # from svn revision 566
@@ -20,7 +20,7 @@ vars = {
   'pep8_revision': '4dc42d842274ba27d2724e76eb83ff69e7db226f',
   'ply_revision': '4a6baf95860033d4c69d3e3087696b30c687622c',
   'testing_revision': 'dc9b69849bf6128e9da0141a28289a5d90c782e9',
-  'v8_revision': '75f10f91b1b0b392d2a29a7a480bf079db6f43fa', # 5.4.70
+  'v8_revision': '57599f4bf5731be57cbc51f82ee81465d063750b', # 5.4.80
   'zlib_revision': '5a95f9ae95ee3ed2fdd41e12af8c32413703425b',
 }
 

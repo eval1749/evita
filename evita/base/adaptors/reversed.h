@@ -22,23 +22,8 @@ namespace internal {
 // ReversedAdaptor
 //
 template <typename T>
-class ReversedAdaptor {
- public:
-  using iterator = typename T::reverse_iterator;
-
-  explicit ReversedAdaptor(const T& x)
-      : begin_(const_cast<T&>(x).rbegin()), end_(const_cast<T&>(x).rend()) {}
-
-  ~ReversedAdaptor() = default;
-
-  iterator begin() { return begin_; }
-  iterator end() { return end_; }
-
- private:
-  iterator begin_;
-  iterator end_;
-
-  DISALLOW_ASSIGN(ReversedAdaptor);
+struct ReversedAdaptor {
+  T& iterable;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -46,37 +31,46 @@ class ReversedAdaptor {
 // ConstReversedAdaptor
 //
 template <typename T>
-class ConstReversedAdaptor {
- public:
-  using const_iterator = typename T::const_reverse_iterator;
-
-  explicit ConstReversedAdaptor(const T& x)
-      : begin_(x.rbegin()), end_(x.rend()) {}
-
-  ~ConstReversedAdaptor() = default;
-
-  const_iterator begin() const { return begin_; }
-  const_iterator end() const { return end_; }
-
- private:
-  const_iterator begin_;
-  const_iterator end_;
-
-  DISALLOW_ASSIGN(ConstReversedAdaptor);
+struct ConstReversedAdaptor {
+  const T& iterable;
 };
 
 }  // namespace internal
 
 template <typename T>
-internal::ReversedAdaptor<T> Reversed(const T& x) {
-  return internal::ReversedAdaptor<T>(x);
+internal::ReversedAdaptor<T> Reversed(T&& thing) {
+  return {thing};
 }
 
 template <typename T>
-internal::ConstReversedAdaptor<T> ConstReversed(const T& x) {
-  return internal::ConstReverseAdaptor<T>(x);
+internal::ConstReversedAdaptor<T> ConstReversed(const T& thing) {
+  return {thing};
 }
 
 }  // namespace base
+
+namespace std {
+
+template <typename T>
+auto begin(base::internal::ReversedAdaptor<T> x) {
+  return rbegin(x.iterable);
+}
+
+template <typename T>
+auto end(base::internal::ReversedAdaptor<T> x) {
+  return rend(x.iterable);
+}
+
+template <typename T>
+auto begin(base::internal::ConstReversedAdaptor<T> x) {
+  return rbegin(x.iterable);
+}
+
+template <typename T>
+auto end(base::internal::ConstReversedAdaptor<T> x) {
+  return rend(x.iterable);
+}
+
+}  // namespace std
 
 #endif  // EVITA_BASE_ADAPTORS_REVERSED_H_

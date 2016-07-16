@@ -4,11 +4,13 @@
 
 #include <algorithm>
 #include <iterator>
+#include <utility>
 #include <vector>
 
 #include "evita/text/layout/block_flow.h"
 
 #include "base/trace_event/trace_event.h"
+#include "evita/base/adaptors/reversed.h"
 #include "evita/text/layout/line/inline_box.h"
 #include "evita/text/layout/line/root_inline_box.h"
 #include "evita/text/layout/line/root_inline_box_cache.h"
@@ -105,8 +107,7 @@ text::Offset BlockFlow::ComputeStartOfLine(text::Offset text_offset) {
 text::Offset BlockFlow::ComputeVisibleEnd() const {
   DCHECK(!ShouldFormat());
   DCHECK(!dirty_line_point_);
-  for (auto it = lines_.crbegin(); it != lines_.crend(); ++it) {
-    auto const line = *it;
+  for (const auto& line : base::Reversed(lines_)) {
     if (line->bounds().bottom <= bounds_.bottom)
       return line->text_end();
   }

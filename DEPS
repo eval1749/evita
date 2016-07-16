@@ -7,7 +7,7 @@ vars = {
   'github.git': 'https://github.com',
 
   'autopep8_revision': '9eb1121f357077c7d71fc770e25d3678f906a401',
-  'base_revision': 'b7e9bed0c3d1057c6b46c5bd9cbffe401ada752b',
+  'base_revision': 'cee585fe23c245fe289d5bbf5e3a126f42e60187',
   'build_revision': '6d146149b533ff2223abf1523d097e21884a2595',
   'buildtools_revision': '55638fe5c31652a808f059027b99b08bafd15fb7',
   'cygwin_revision': '4fbd5b9e6664b991c06dd3a157c8f8e67fcbff48',

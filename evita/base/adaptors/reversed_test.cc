@@ -26,6 +26,7 @@ TEST(ReversedTest, Reversed) {
   EXPECT_EQ(101, v[2]);
 }
 
+#if 0
 TEST(ReversedTest, ReversedArray) {
   int v[3] = {3, 2, 1};
   int j = 0;
@@ -37,6 +38,7 @@ TEST(ReversedTest, ReversedArray) {
   EXPECT_EQ(102, v[1]);
   EXPECT_EQ(101, v[2]);
 }
+#endif
 
 TEST(ReversedTest, ReversedStdArray) {
   std::array<int, 3> v{3, 2, 1};

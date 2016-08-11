@@ -230,6 +230,10 @@ void ProcessIoContext::Write(void* buffer,
     return;
   }
 
+#if 0
+  // TODO(eval1749): Since http://crrev.com/406831,
+  // |base::Thread::thread_handle()| is no long avaialble, we should find the
+  // way to have thread handle.
   // Abort blocked read pipe operation.
   // We'll get ERROR_OPERATION_ABORTED(995).
   auto const hThread = reinterpret_cast<HANDLE>(
@@ -242,6 +246,7 @@ void ProcessIoContext::Write(void* buffer,
       return;
     }
   }
+#endif
 
   gateway_thread_->task_runner()->PostTask(
       FROM_HERE,

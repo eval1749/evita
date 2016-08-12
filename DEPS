@@ -10,6 +10,7 @@ vars = {
   'base_revision': '3452bd76bb82cfe4de6efba4b368f53a7c198441',
   'build_revision': 'e1fa1d72e5795ddcaff4ded5b083b1b08e52023a',
   'buildtools_revision': '33a32b8aa2b7274d246fcf85ce8f762cf4291418',
+  'ced_revision': '9012c0ab648025dd0f8df14294bf5d6d73793ac9',
   'cygwin_revision': '4fbd5b9e6664b991c06dd3a157c8f8e67fcbff48',
   'gmock_revision': '0421b6f358139f02e102c9c332ce19a33faf75be', # from svn revision 566
   'grit_revision': '685fc61f33bd78fd86e30e4140fabb18b3ba46d9',
@@ -45,6 +46,9 @@ deps = {
 
   'src/third_party/autopep8':
     Var('github.git') + '/hhatto/autopep8.git' + '@' + Var('autopep8_revision'),
+
+  'src/third_party/ced/src':
+    Var('chromium_git') + '/external/github.com/google/compact_enc_det.git' + '@' + Var('ced_revision'),
 
   'src/third_party/cygwin':
     Var('chromium_git') + '/chromium/deps/cygwin.git' + '@' + Var('cygwin_revision'),

@@ -6,13 +6,10 @@ if (is_android) {
   import("//build/config/android/config.gni")
 }
 
-# TODO(sky): nuke this. Temporary while sorting out http://crbug.com/465456.
-enable_correct_v8_arch = false
-
 v8_use_external_startup_data = false
 
-# Turns on compiler optimizations in V8 in Debug build.
-v8_optimized_debug = true
+# TODO(sky): nuke this. Temporary while sorting out http://crbug.com/465456.
+enable_correct_v8_arch = false
 
 # V8 extras
 # Adding V8 extras files requires API owners review
@@ -20,3 +17,5 @@ v8_optimized_debug = true
 
 v8_extra_library_files = []
 v8_experimental_extra_library_files = []
+
+v8_enable_inspector_override = false

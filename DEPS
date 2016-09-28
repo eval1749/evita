@@ -8,7 +8,7 @@ vars = {
 
   'autopep8_revision': '9eb1121f357077c7d71fc770e25d3678f906a401',
   'base_revision': 'b836ccfe90f605b4b732b6fdf08f2bf0c5ced0bc',
-  'build_revision': '7ec7ad1a5dba8b996440e3bcbd05983cbd41ef3b',
+  'build_revision': '43f8b7b4f8fa2290a3ce9f82544514a8d961e2c3',
   'buildtools_revision': '86f7e41d9424b9d8faf66c601b129855217f9a08',
   'ced_revision': '9012c0ab648025dd0f8df14294bf5d6d73793ac9',
   'cygwin_revision': 'c89e446b273697fadf3a10ff1007a97c0b7de6df',
@@ -21,7 +21,7 @@ vars = {
   'pep8_revision': '4dc42d842274ba27d2724e76eb83ff69e7db226f',
   'ply_revision': '4a6baf95860033d4c69d3e3087696b30c687622c',
   'testing_revision': '9b53040be5c0dfee2d19917a845593ce38263259',
-  'v8_revision': '21299c3ccd967a410e4a98a1b1f535abe2429b6f', # 5.5.290
+  'v8_revision': '1e5db73e931ff5434dd1826e3c8d02ab7d6f6f49', # 5.5.302
   'zlib_revision': '830b5c25b5fbe37e032ea09dd011d57042dd94df',
 }
 

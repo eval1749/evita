@@ -44,8 +44,9 @@ class SynchronousCaller final {
   Result Call(base::MessageLoop* message_loop) {
     event_->Reset();
     DOM_AUTO_UNLOCK_SCOPE();
-    message_loop->PostTask(FROM_HERE, base::Bind(&SynchronousCaller::RunTask,
-                                                 base::Unretained(this)));
+    message_loop->task_runner()->PostTask(
+        FROM_HERE,
+        base::Bind(&SynchronousCaller::RunTask, base::Unretained(this)));
     event_->Wait();
     return result_;
   }
@@ -88,8 +89,9 @@ class SynchronousRunner final {
   void Run(base::MessageLoop* message_loop) {
     event_->Reset();
     DOM_AUTO_UNLOCK_SCOPE();
-    message_loop->PostTask(FROM_HERE, base::Bind(&SynchronousRunner::RunTask,
-                                                 base::Unretained(this)));
+    message_loop->task_runner()->PostTask(
+        FROM_HERE,
+        base::Bind(&SynchronousRunner::RunTask, base::Unretained(this)));
     event_->Wait();
   }
 
@@ -134,7 +136,7 @@ ViewThreadProxy::~ViewThreadProxy() {}
     DCHECK_CALLED_ON_SCRIPT_THREAD();                                        \
     if (!message_loop_)                                                      \
       return;                                                                \
-    message_loop_->PostTask(                                                 \
+    message_loop_->task_runner()->PostTask(                                  \
         FROM_HERE,                                                           \
         base::Bind(&ViewDelegate::name, base::Unretained(delegate_.get()))); \
   }
@@ -144,7 +146,7 @@ ViewThreadProxy::~ViewThreadProxy() {}
     DCHECK_CALLED_ON_SCRIPT_THREAD();                                      \
     if (!message_loop_)                                                    \
       return;                                                              \
-    message_loop_->PostTask(                                               \
+    message_loop_->task_runner()->PostTask(                                \
         FROM_HERE, base::Bind(&ViewDelegate::name,                         \
                               base::Unretained(delegate_.get()), param1)); \
   }
@@ -154,7 +156,7 @@ ViewThreadProxy::~ViewThreadProxy() {}
     DCHECK_CALLED_ON_SCRIPT_THREAD();                                      \
     if (!message_loop_)                                                    \
       return;                                                              \
-    message_loop_->PostTask(                                               \
+    message_loop_->task_runner()->PostTask(                                \
         FROM_HERE,                                                         \
         base::Bind(&ViewDelegate::name, base::Unretained(delegate_.get()), \
                    param1, param2));                                       \
@@ -165,7 +167,7 @@ ViewThreadProxy::~ViewThreadProxy() {}
     DCHECK_CALLED_ON_SCRIPT_THREAD();                                      \
     if (!message_loop_)                                                    \
       return;                                                              \
-    message_loop_->PostTask(                                               \
+    message_loop_->task_runner()->PostTask(                                \
         FROM_HERE,                                                         \
         base::Bind(&ViewDelegate::name, base::Unretained(delegate_.get()), \
                    param1, param2, param3));                               \
@@ -176,7 +178,7 @@ ViewThreadProxy::~ViewThreadProxy() {}
     DCHECK_CALLED_ON_SCRIPT_THREAD();                                          \
     if (!message_loop_)                                                        \
       return;                                                                  \
-    message_loop_->PostTask(                                                   \
+    message_loop_->task_runner()->PostTask(                                    \
         FROM_HERE,                                                             \
         base::Bind(&ViewDelegate::name, base::Unretained(delegate_.get()), p1, \
                    p2, p3, p4));                                               \
@@ -188,7 +190,7 @@ ViewThreadProxy::~ViewThreadProxy() {}
     DCHECK_CALLED_ON_SCRIPT_THREAD();                                          \
     if (!message_loop_)                                                        \
       return;                                                                  \
-    message_loop_->PostTask(                                                   \
+    message_loop_->task_runner()->PostTask(                                    \
         FROM_HERE,                                                             \
         base::Bind(&ViewDelegate::name, base::Unretained(delegate_.get()), p1, \
                    p2, p3, p4, p5));                                           \
@@ -232,7 +234,7 @@ void ViewThreadProxy::PaintForm(domapi::WindowId window_id,
   DCHECK_CALLED_ON_SCRIPT_THREAD();
   if (!message_loop_)
     return;
-  message_loop_->PostTask(
+  message_loop_->task_runner()->PostTask(
       FROM_HERE,
       base::Bind(&ViewDelegate::PaintForm, base::Unretained(delegate_.get()),
                  window_id, base::Passed(std::move(form))));
@@ -244,7 +246,7 @@ void ViewThreadProxy::PaintTextArea(
   DCHECK_CALLED_ON_SCRIPT_THREAD();
   if (!message_loop_)
     return;
-  message_loop_->PostTask(
+  message_loop_->task_runner()->PostTask(
       FROM_HERE, base::Bind(&ViewDelegate::PaintTextArea,
                             base::Unretained(delegate_.get()), window_id,
                             base::Passed(std::move(display_item))));
@@ -256,7 +258,7 @@ void ViewThreadProxy::PaintVisualDocument(
   DCHECK_CALLED_ON_SCRIPT_THREAD();
   if (!message_loop_)
     return;
-  message_loop_->PostTask(
+  message_loop_->task_runner()->PostTask(
       FROM_HERE, base::Bind(&ViewDelegate::PaintVisualDocument,
                             base::Unretained(delegate_.get()), window_id,
                             base::Passed(std::move(display_item_list))));

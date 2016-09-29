@@ -8,6 +8,7 @@
 #include <string>
 
 #include "base/logging.h"
+#include "base/message_loop/message_loop.h"
 #include "base/strings/utf_string_conversions.h"
 #include "base/trace_event/trace_event.h"
 #include "evita/dom/forms/form.h"

@@ -57,7 +57,7 @@ class Clipboard final {
   DataTransferData* Get(const Format* format) const;
 
  private:
-  bool opened_;
+  bool opened_ = false;
 
   DISALLOW_ASSIGN(Clipboard);
 };

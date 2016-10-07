@@ -5,6 +5,7 @@
 #include <windows.h>
 
 #include <string>
+#include <utility>
 #include <unordered_map>
 
 #include "evita/dom/components/clipboard/clipboard.h"
@@ -243,8 +244,13 @@ DataTransferData* TextFormat::FromClipboard(HANDLE handle) const {
 //
 // Clipboard
 //
-Clipboard::Clipboard(ExceptionState* exception_state)
-    : opened_(::OpenClipboard(nullptr) != FALSE) {
+Clipboard::Clipboard(ExceptionState* exception_state) {
+  const int kMaxAttemptsToOpenClipboard = 5;
+  for (auto attempts = 0; attempts < kMaxAttemptsToOpenClipboard; ++attempts) {
+    if (::OpenClipboard(nullptr))
+      break;
+    ::Sleep(5);
+  }
   if (!opened_) {
     const auto last_error = ::GetLastError();
     exception_state->ThrowPlatformError("OpenClipboard", last_error);

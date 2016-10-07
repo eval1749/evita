@@ -247,8 +247,10 @@ DataTransferData* TextFormat::FromClipboard(HANDLE handle) const {
 Clipboard::Clipboard(ExceptionState* exception_state) {
   const int kMaxAttemptsToOpenClipboard = 5;
   for (auto attempts = 0; attempts < kMaxAttemptsToOpenClipboard; ++attempts) {
-    if (::OpenClipboard(nullptr))
+    if (::OpenClipboard(nullptr)) {
+      opened_ = true;
       break;
+    }
     ::Sleep(5);
   }
   if (!opened_) {

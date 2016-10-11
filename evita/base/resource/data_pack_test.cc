@@ -39,7 +39,7 @@ class DataPackTest : public testing::Test{
 TEST_F(DataPackTest, LoadFromFile) {
   base::ScopedTempDir dir;
   ASSERT_TRUE(dir.CreateUniqueTempDir());
-  auto data_path = dir.path().Append(FILE_PATH_LITERAL("sample.pak"));
+  auto data_path = dir.GetPath().Append(FILE_PATH_LITERAL("sample.pak"));
 
   ASSERT_EQ(base::WriteFile(data_path, kSamplePakContents, kSamplePakSize),
             static_cast<int>(kSamplePakSize));

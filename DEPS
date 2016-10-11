@@ -7,22 +7,22 @@ vars = {
   'github.git': 'https://github.com',
 
   'autopep8_revision': '9eb1121f357077c7d71fc770e25d3678f906a401',
-  'base_revision': '2efc4ae606a38db4b7c02efb6abe4f9af00902b7',
-  'build_revision': '5e4ffb5c8928fe5afacd1b1b0f2bb732cdc0d77c',
+  'base_revision': 'b1daf89ce9c857d15638f80ed85e47ff73b91989',
+  'build_revision': '17093d45bf738e9ae4b6294492860ee65218a657',
   'buildtools_revision': '5fd66957f08bb752dca714a591c84587c9d70762',
   'ced_revision': '9012c0ab648025dd0f8df14294bf5d6d73793ac9',
   'cygwin_revision': 'c89e446b273697fadf3a10ff1007a97c0b7de6df',
   'gmock_revision': '0421b6f358139f02e102c9c332ce19a33faf75be', # from svn revision 566
-  'grit_revision': 'b3fb946d9e758d7e5789c3dc8df4eb54337f7312',
+  'grit_revision': 'e6f9d67ce3556c3e180d36168ee50befd9fbfd8b',
   'gtest_revision': '6f8a66431cb592dad629028a50b3dd418a408c87',
   'gyp_revision': '702ac58e477214c635d9b541932e75a95d349352',
   'icu_revision': 'b0bd3ee50bc2e768d7a17cbc60d87f517f024dbe',
   'idl_parser_revision': 'fce24a3e157ff80b88a514fb469dacf82358f1f0',
   'pep8_revision': '4dc42d842274ba27d2724e76eb83ff69e7db226f',
   'ply_revision': '4a6baf95860033d4c69d3e3087696b30c687622c',
-  'testing_revision': '1310674f3e89bce7647aab8d7523039e2810bbcf',
-  'v8_revision': '58bce67f5fd1615ba493fb0f95ace2a99c7ef649', # 5.5.313
-  'zlib_revision': '40925c7211b26f85071c98a16c3d8a43d70c7c67',
+  'testing_revision': 'b49a9f4c3c5bc547fc2866c85f2b97084537b710',
+  'v8_revision': '1373b805f4005bd93a024816660ab37ab64e233c', # 5.6.17
+  'zlib_revision': '4e2773bc8d1f995ffbea5008d12ee14fcb968e8d',
 }
 
 deps = {

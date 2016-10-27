@@ -110,8 +110,8 @@ bool VisualWindow::HandleMouseEvent(const domapi::MouseEvent& event) {
   if (hovered_node_ == found.node())
     return false;
   hovered_node_ = found.node();
-  FOR_EACH_OBSERVER(UserActionSource::Observer, observers_,
-                    DidChangeHoveredNode(hovered_node_));
+  for (auto& observer : observers_)
+    observer.DidChangeHoveredNode(hovered_node_);
   return false;
 }
 

@@ -127,7 +127,8 @@ void View::DidChangeLifecycleState(ViewLifecycle::State new_state,
                                    ViewLifecycle::State old_state) {
   if (!ShouldNotifyViewChange(new_state, old_state))
     return;
-  FOR_EACH_OBSERVER(ViewObserver, observers_, DidChangeView());
+  for (auto& observer : observers_)
+    observer.DidChangeView();
 }
 
 }  // namespace visuals

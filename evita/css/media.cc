@@ -37,15 +37,18 @@ void Media::RemoveObserver(MediaObserver* observer) const {
 }
 
 void Media::DidChangeMediaState() {
-  FOR_EACH_OBSERVER(MediaObserver, observers_, DidChangeMediaState());
+  for (auto& observer : observers_)
+    observer.DidChangeMediaState();
 }
 
 void Media::DidChangeSystemMetrics() {
-  FOR_EACH_OBSERVER(MediaObserver, observers_, DidChangeSystemMetrics());
+  for (auto& observer : observers_)
+    observer.DidChangeSystemMetrics();
 }
 
 void Media::DidChangeViewportSize() {
-  FOR_EACH_OBSERVER(MediaObserver, observers_, DidChangeViewportSize());
+  for (auto& observer : observers_)
+    observer.DidChangeViewportSize();
 }
 
 }  // namespace css

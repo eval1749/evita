@@ -32,18 +32,21 @@ void Animatable::CancelAnimation() {
 
 void Animatable::DidCancelAnimation() {
   DCHECK(!animator_);
-  FOR_EACH_OBSERVER(AnimationObserver, observers_, DidCancelAnimation(this));
+  for (auto& observer : observers_)
+    observer.DidCancelAnimation(this);
 }
 
 void Animatable::DidAnimate() {
   DCHECK(animator_);
-  FOR_EACH_OBSERVER(AnimationObserver, observers_, DidAnimate(this));
+  for (auto& observer : observers_)
+    observer.DidAnimate(this);
 }
 
 void Animatable::DidFinishAnimation() {
   DCHECK(!animator_);
   DCHECK(is_finished_);
-  FOR_EACH_OBSERVER(AnimationObserver, observers_, DidFinishAnimation(this));
+  for (auto& observer : observers_)
+    observer.DidFinishAnimation(this);
 }
 
 void Animatable::FinalizeAnimation() {

@@ -94,8 +94,8 @@ void ViewLifecycle::ChangeState(State new_state) {
   DCHECK_NE(state_, new_state);
   const auto old_state = state_;
   state_ = new_state;
-  FOR_EACH_OBSERVER(ViewLifecycleObserver, observers_,
-                    DidChangeLifecycleState(new_state, old_state));
+  for (auto& observer : observers_)
+    observer.DidChangeLifecycleState(new_state, old_state);
 }
 
 void ViewLifecycle::FinishShutdown() {

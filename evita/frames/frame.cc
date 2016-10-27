@@ -342,7 +342,8 @@ void Frame::DidRequestDestroy() {
 
 void Frame::DidSetFocus(ui::Widget* widget) {
   views::Window::DidSetFocus(widget);
-  FOR_EACH_OBSERVER(views::FrameObserver, observers_, DidActivateFrame(this));
+  for (auto& observer : observers_)
+    observer.DidActivateFrame(this);
   if (!tab_strip_animator_->active_tab_content()) {
     // This |Frame| doesn't show anything and tabs are being added.
     return;

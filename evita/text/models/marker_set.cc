@@ -207,7 +207,8 @@ Notifier::Notifier(const Buffer& buffer,
 Notifier::~Notifier() {
   for (const auto& change : changes_) {
     const auto& range = StaticRange(buffer_, change.first, change.second);
-    FOR_EACH_OBSERVER(MarkerSetObserver, *observers_, DidChangeMarker(range));
+    for (auto& observer : *observers_)
+      observer.DidChangeMarker(range);
   }
 }
 

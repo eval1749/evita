@@ -58,7 +58,8 @@ void Selection::Model::DidChangeRange() {
 void Selection::Model::NotifyChange() {
   TRACE_EVENT_WITH_FLOW0("views", "Selection::NotifyChange", &selection_,
                          TRACE_EVENT_FLAG_FLOW_OUT);
-  FOR_EACH_OBSERVER(SelectionChangeObserver, observers_, DidChangeSelection());
+  for (auto& observer : observers_)
+    observer.DidChangeSelection();
 }
 
 void Selection::Model::RemoveObserver(SelectionChangeObserver* observer) {

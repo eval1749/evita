@@ -91,7 +91,8 @@ const visuals::TextFormat& Form::GetTextFormat() const {
 }
 
 void Form::NotifyChangeForm() {
-  FOR_EACH_OBSERVER(FormObserver, observers_, DidChangeForm());
+  for (auto& observer : observers_)
+    observer.DidChangeForm();
 }
 
 std::unique_ptr<domapi::Form> Form::Paint(

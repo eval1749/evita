@@ -23,12 +23,13 @@ void TabContent::DidEnterSizeMove() {}
 void TabContent::DidExitSizeMove() {}
 
 void TabContent::NotifyActivateTabContent() {
-  FOR_EACH_OBSERVER(TabContentObserver, observers_,
-                    DidActivateTabContent(this));
+  for (auto& observer : observers_)
+    observer.DidActivateTabContent(this);
 }
 
 void TabContent::NotifyUpdateTabContent() {
-  FOR_EACH_OBSERVER(TabContentObserver, observers_, DidUpdateContent(this));
+  for (auto& observer : observers_)
+    observer.DidUpdateContent(this);
 }
 
 void TabContent::RemoveObserver(TabContentObserver* observer) {

@@ -90,13 +90,14 @@ void Buffer::Delete(Offset start, Offset end) {
     return;
   {
     const auto& range_for_will = StaticRange(*this, start, end);
-    FOR_EACH_OBSERVER(BufferMutationObserver, observers_,
-                      WillDeleteAt(range_for_will));
+    for (auto& observer : observers_)
+      observer.WillDeleteAt(range_for_will);
   }
   deleteChars(start, end);
   UpdateChangeTick();
   const auto& range = StaticRange(*this, start, end);
-  FOR_EACH_OBSERVER(BufferMutationObserver, observers_, DidDeleteAt(range));
+  for (auto& observer : observers_)
+    observer.DidDeleteAt(range);
 }
 
 void Buffer::EndUndoGroup(const base::string16& name) {
@@ -123,7 +124,8 @@ void Buffer::InsertBefore(Offset offset, const base::string16& text) {
   UpdateChangeTick();
   const auto& range =
       StaticRange(*this, offset, offset + OffsetDelta(text.size()));
-  FOR_EACH_OBSERVER(BufferMutationObserver, observers_, DidInsertBefore(range));
+  for (auto& observer : observers_)
+    observer.DidInsertBefore(range);
 }
 
 Offset Buffer::Redo(Offset offset) {
@@ -173,7 +175,8 @@ void Buffer::UpdateChangeTick() {
 // MarkerSetObserver
 void Buffer::DidChangeMarker(const StaticRange& range) {
   ++version_;
-  FOR_EACH_OBSERVER(BufferMutationObserver, observers_, DidChangeStyle(range));
+  for (auto& observer : observers_)
+    observer.DidChangeStyle(range);
 }
 
 #if DCHECK_IS_ON()

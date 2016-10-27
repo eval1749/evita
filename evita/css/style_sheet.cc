@@ -26,8 +26,8 @@ void StyleSheet::AppendRule(const Selector& selector,
   const auto rule = new Rule(selector, std::move(style));
   const auto index = rules_.size();
   rules_.push_back(rule);
-  FOR_EACH_OBSERVER(StyleSheetObserver, observers_,
-                    DidInsertRule(*rule, index));
+  for (auto& observer : observers_)
+    observer.DidInsertRule(*rule, index);
 }
 
 void StyleSheet::AddObserver(StyleSheetObserver* observer) const {
@@ -39,8 +39,8 @@ void StyleSheet::InsertRule(const Selector& selector,
                             size_t index) {
   const auto rule = new Rule(selector, std::move(style));
   rules_.insert(rules_.begin() + index, rule);
-  FOR_EACH_OBSERVER(StyleSheetObserver, observers_,
-                    DidInsertRule(*rule, index));
+  for (auto& observer : observers_)
+    observer.DidInsertRule(*rule, index);
 }
 
 void StyleSheet::RemoveObserver(StyleSheetObserver* observer) const {
@@ -51,8 +51,8 @@ void StyleSheet::RemoveRule(size_t index) {
   const auto& it = rules_.begin() + index;
   const auto& old_rule = *it;
   rules_.erase(it);
-  FOR_EACH_OBSERVER(StyleSheetObserver, observers_,
-                    DidRemoveRule(*old_rule, index));
+  for (auto& observer : observers_)
+    observer.DidRemoveRule(*old_rule, index);
   delete old_rule;
 }
 

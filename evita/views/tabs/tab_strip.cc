@@ -357,7 +357,8 @@ void TabCollection::DeleteTab(Tab* tab) {
   if (selection_changed)
     NotifySelectTab();
 
-  FOR_EACH_OBSERVER(ModelObserver, observers_, DidDeleteTab(tab));
+  for (auto& observer : observers_)
+    observer.DidDeleteTab(tab);
 }
 
 int TabCollection::GetPreferredTabWidth() const {
@@ -386,7 +387,8 @@ void TabCollection::InsertTab(TabContent* tab_content, size_t tab_index_in) {
   tabs_.insert(tabs_.begin() + static_cast<ptrdiff_t>(tab_index), new_tab);
   AppendChild(new_tab);
   RenumberTabIndex();
-  FOR_EACH_OBSERVER(ModelObserver, observers_, DidInsertTab(new_tab));
+  for (auto& observer : observers_)
+    observer.DidInsertTab(new_tab);
 }
 
 void TabCollection::MakeSelectionVisible() {
@@ -582,7 +584,8 @@ void TabCollection::InsertBefore(Tab* new_tab, Tab* ref_tab) {
   tabs_.erase(tabs_.begin() + new_tab->tab_index());
   tabs_.insert(tabs_.begin() + ref_tab->tab_index(), new_tab);
   RenumberTabIndex();
-  FOR_EACH_OBSERVER(ModelObserver, observers_, DidInsertTab(new_tab));
+  for (auto& observer : observers_)
+    observer.DidInsertTab(new_tab);
 }
 
 void TabCollection::RemoveObserver(ModelObserver* observer) {

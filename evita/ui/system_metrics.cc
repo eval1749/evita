@@ -31,18 +31,20 @@ void SystemMetrics::AddObserver(SystemMetricsObserver* observer) {
 
 void SystemMetrics::NotifyChangeIconFont() {
   UpdateTextFormat();
-  FOR_EACH_OBSERVER(SystemMetricsObserver, observers_, DidChangeIconFont());
+  for (auto& observer : observers_)
+    observer.DidChangeIconFont();
 }
 
 void SystemMetrics::NotifyChangeSystemColor() {
   UpdateColors();
-  FOR_EACH_OBSERVER(SystemMetricsObserver, observers_, DidChangeSystemColor());
+  for (auto& observer : observers_)
+    observer.DidChangeSystemColor();
 }
 
 void SystemMetrics::NotifyChangeSystemMetrics() {
   UpdateTextFormat();
-  FOR_EACH_OBSERVER(SystemMetricsObserver, observers_,
-                    DidChangeSystemMetrics());
+  for (auto& observer : observers_)
+    observer.DidChangeSystemMetrics();
 }
 
 void SystemMetrics::RemoveObserver(SystemMetricsObserver* observer) {

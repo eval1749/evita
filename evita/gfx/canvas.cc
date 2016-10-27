@@ -168,7 +168,8 @@ void Canvas::DidLostRenderTarget() {
   GetRenderTarget()->GetDpi(&dpi.width, &dpi.height);
   GetRenderTarget()->SetAntialiasMode(kAntialiasMode);
   UpdateDpi(dpi);
-  FOR_EACH_OBSERVER(CanvasObserver, observers_, DidRecreateCanvas());
+  for (auto& observer : observers_)
+    observer.DidRecreateCanvas();
 }
 
 void Canvas::DrawBitmap(const Bitmap& bitmap,

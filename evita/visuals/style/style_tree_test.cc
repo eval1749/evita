@@ -38,8 +38,8 @@ class StyleTreeTest : public ::testing::Test, public visuals::UserActionSource {
   const css::MockMedia& mock_media() const { return mock_media_; }
 
   void NotifyChangeHoveredNode(Node* hovered_node) {
-    FOR_EACH_OBSERVER(UserActionSource::Observer, observers_,
-                      DidChangeHoveredNode(hovered_node));
+    for (auto& observer : observers_)
+      observer.DidChangeHoveredNode(hovered_node);
   }
 
  private:

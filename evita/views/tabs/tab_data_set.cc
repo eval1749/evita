@@ -56,7 +56,8 @@ void TabDataSet::SetTabData(domapi::WindowId window_id,
     *it->second = tab_data;
   }
 
-  FOR_EACH_OBSERVER(Observer, observers_, DidSetTabData(window_id, tab_data));
+  for (auto& observer : observers_)
+    observer.DidSetTabData(window_id, tab_data);
 }
 
 }  // namespace views

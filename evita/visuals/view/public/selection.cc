@@ -69,8 +69,8 @@ void Selection::Clear() {
   const auto old_model = *model_;
   model_->Clear();
   caret_timer_->Stop();
-  FOR_EACH_OBSERVER(SelectionObserver, observers_,
-                    DidChangeSelection(old_model, *model_));
+  for (auto& observer : observers_)
+    observer.DidChangeSelection(old_model, *model_);
 }
 
 void Selection::Collapse(Node* node, int offset) {
@@ -83,13 +83,14 @@ void Selection::Collapse(Node* node, int offset) {
   *model_ = new_model;
   is_caret_on_ = true;
   caret_timer_->Stop();
-  FOR_EACH_OBSERVER(SelectionObserver, observers_,
-                    DidChangeSelection(old_model, *model_));
+  for (auto& observer : observers_)
+    observer.DidChangeSelection(old_model, *model_);
 }
 
 void Selection::DidFireCaretTimer() {
   is_caret_on_ = !is_caret_on_;
-  FOR_EACH_OBSERVER(SelectionObserver, observers_, DidChangeCaretBlink());
+  for (auto& observer : observers_)
+    observer.DidChangeCaretBlink();
 }
 
 void Selection::DidPaint() {
@@ -113,8 +114,8 @@ void Selection::ExtendTo(Node* node, int offset) {
   *model_ = new_model;
   is_caret_on_ = true;
   caret_timer_->Stop();
-  FOR_EACH_OBSERVER(SelectionObserver, observers_,
-                    DidChangeSelection(old_model, *model_));
+  for (auto& observer : observers_)
+    observer.DidChangeSelection(old_model, *model_);
 }
 
 void Selection::RemoveObserver(SelectionObserver* observer) const {

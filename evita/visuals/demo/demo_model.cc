@@ -274,8 +274,8 @@ void DemoModel::DidMoveMouse(const gfx::FloatPoint& point) {
   if (hovered_node_ == line)
     return;
   hovered_node_ = line;
-  FOR_EACH_OBSERVER(UserActionSource::Observer, observers_,
-                    DidChangeHoveredNode(hovered_node_));
+  for (auto& observer : observers_)
+    observer.DidChangeHoveredNode(hovered_node_);
 }
 
 void DemoModel::DidPressKey(int key_code) {

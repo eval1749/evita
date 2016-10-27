@@ -241,15 +241,15 @@ void CompiledStyleSheetSet::RemoveObserver(
 void CompiledStyleSheetSet::DidInsertRule(const css::Rule& new_rule,
                                           size_t index) {
   ClearCache();
-  FOR_EACH_OBSERVER(css::StyleSheetObserver, observers_,
-                    DidInsertRule(new_rule, index));
+  for (auto& observer : observers_)
+    observer.DidInsertRule(new_rule, index);
 }
 
 void CompiledStyleSheetSet::DidRemoveRule(const css::Rule& old_rule,
                                           size_t index) {
   ClearCache();
-  FOR_EACH_OBSERVER(css::StyleSheetObserver, observers_,
-                    DidRemoveRule(old_rule, index));
+  for (auto& observer : observers_)
+    observer.DidRemoveRule(old_rule, index);
 }
 
 }  // namespace visuals

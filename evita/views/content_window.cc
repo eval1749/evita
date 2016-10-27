@@ -27,7 +27,8 @@ void ContentWindow::AddObserver(ContentObserver* observer) {
 }
 
 void ContentWindow::NotifyUpdateContent() {
-  FOR_EACH_OBSERVER(ContentObserver, observers_, DidUpdateContent(this));
+  for (auto& observer : observers_)
+    observer.DidUpdateContent(this);
 }
 
 void ContentWindow::RemoveObserver(ContentObserver* observer) {
@@ -48,7 +49,8 @@ void ContentWindow::DidRealize() {
 
 void ContentWindow::DidSetFocus(ui::Widget* widget) {
   Window::DidSetFocus(widget);
-  FOR_EACH_OBSERVER(ContentObserver, observers_, DidActivateContent(this));
+  for (auto& observer : observers_)
+    observer.DidActivateContent(this);
 }
 
 }  // namespace views

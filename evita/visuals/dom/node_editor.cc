@@ -41,8 +41,8 @@ void NodeEditor::AddClass(ElementNode* element, base::AtomicString class_name) {
   element->class_list_.emplace_back(class_name);
   const auto document = element->document();
   ++document->version_;
-  FOR_EACH_OBSERVER(DocumentObserver, document->observers_,
-                    DidAddClass(*element, class_name));
+  for (auto& observer : document->observers_)
+    observer.DidAddClass(*element, class_name);
 }
 
 void NodeEditor::AddClass(ElementNode* element,
@@ -71,8 +71,8 @@ void NodeEditor::AppendChild(ContainerNode* container, Node* new_child) {
   container->last_child_ = new_child;
   RegisterElementIdForSubtree(*new_child);
   ++document->version_;
-  FOR_EACH_OBSERVER(DocumentObserver, document->observers_,
-                    DidAppendChild(*container, *new_child));
+  for (auto& observer : document->observers_)
+    observer.DidAppendChild(*container, *new_child);
 }
 
 void NodeEditor::InsertBefore(ContainerNode* container,
@@ -99,8 +99,8 @@ void NodeEditor::InsertBefore(ContainerNode* container,
   new_child->previous_sibling_ = previous_sibling;
   RegisterElementIdForSubtree(*new_child);
   ++document->version_;
-  FOR_EACH_OBSERVER(DocumentObserver, document->observers_,
-                    DidInsertBefore(*container, *new_child, *ref_child));
+  for (auto& observer : document->observers_)
+    observer.DidInsertBefore(*container, *new_child, *ref_child);
 }
 
 void NodeEditor::RegisterElementIdForSubtree(const Node& node) {
@@ -117,8 +117,8 @@ void NodeEditor::RemoveChild(ContainerNode* container, Node* old_child) {
   const auto document = container->document_;
   DCHECK(!document->is_locked());
   DCHECK_EQ(container, old_child->parent_);
-  FOR_EACH_OBSERVER(DocumentObserver, document->observers_,
-                    DidRemoveChild(*container, *old_child));
+  for (auto& observer : document->observers_)
+    observer.DidRemoveChild(*container, *old_child);
   UnregisterElementIdForSubtree(*old_child);
   const auto next_sibling = old_child->next_sibling_;
   const auto previous_sibling = old_child->previous_sibling_;
@@ -134,8 +134,8 @@ void NodeEditor::RemoveChild(ContainerNode* container, Node* old_child) {
   old_child->previous_sibling_ = nullptr;
   old_child->parent_ = nullptr;
   ++document->version_;
-  FOR_EACH_OBSERVER(DocumentObserver, document->observers_,
-                    DidRemoveChild(*container, *old_child));
+  for (auto& observer : document->observers_)
+    observer.DidRemoveChild(*container, *old_child);
 }
 
 void NodeEditor::RemoveClass(ElementNode* element,
@@ -155,8 +155,8 @@ void NodeEditor::RemoveClass(ElementNode* element,
   element->class_list_.pop_back();
   const auto document = element->document();
   ++document->version_;
-  FOR_EACH_OBSERVER(DocumentObserver, document->observers_,
-                    DidRemoveClass(*element, class_name));
+  for (auto& observer : document->observers_)
+    observer.DidRemoveClass(*element, class_name);
 }
 
 void NodeEditor::RemoveClass(ElementNode* element,
@@ -197,8 +197,8 @@ void NodeEditor::ReplaceChild(ContainerNode* container,
   new_child->previous_sibling_ = previous_sibling;
   new_child->parent_ = container;
   new_child->document_ = document;
-  FOR_EACH_OBSERVER(DocumentObserver, document->observers_,
-                    DidReplaceChild(*container, *new_child, *old_child));
+  for (auto& observer : document->observers_)
+    observer.DidReplaceChild(*container, *new_child, *old_child);
 }
 
 void NodeEditor::SetImageData(Image* image, const ImageData& new_data) {
@@ -209,8 +209,8 @@ void NodeEditor::SetImageData(Image* image, const ImageData& new_data) {
   const auto old_data = image->data_;
   image->data_ = new_data;
   ++document->version_;
-  FOR_EACH_OBSERVER(DocumentObserver, document->observers_,
-                    DidSetImageData(*image, new_data, old_data));
+  for (auto& observer : document->observers_)
+    observer.DidSetImageData(*image, new_data, old_data);
 }
 
 void NodeEditor::SetInlineStyle(ElementNode* element,
@@ -222,14 +222,14 @@ void NodeEditor::SetInlineStyle(ElementNode* element,
       return;
     auto old_style = std::move(element->inline_style_);
     element->inline_style_.reset(new css::Style(new_style));
-    FOR_EACH_OBSERVER(DocumentObserver, document->observers_,
-                      DidChangeInlineStyle(*element, old_style.get()));
+    for (auto& observer : document->observers_)
+      observer.DidChangeInlineStyle(*element, old_style.get());
     return;
   }
   element->inline_style_ = std::make_unique<css::Style>(new_style);
   ++document->version_;
-  FOR_EACH_OBSERVER(DocumentObserver, document->observers_,
-                    DidChangeInlineStyle(*element, nullptr));
+  for (auto& observer : document->observers_)
+    observer.DidChangeInlineStyle(*element, nullptr);
 }
 
 void NodeEditor::SetShapeData(Shape* shape, const ShapeData& data) {
@@ -241,8 +241,8 @@ void NodeEditor::SetShapeData(Shape* shape, const ShapeData& data) {
   const auto old_data = shape->data_;
   shape->data_ = new_data;
   ++document->version_;
-  FOR_EACH_OBSERVER(DocumentObserver, document->observers_,
-                    DidSetShapeData(*shape, new_data, old_data));
+  for (auto& observer : document->observers_)
+    observer.DidSetShapeData(*shape, new_data, old_data);
 }
 
 void NodeEditor::SetTextData(Text* text, base::StringPiece16 data) {
@@ -254,8 +254,8 @@ void NodeEditor::SetTextData(Text* text, base::StringPiece16 data) {
   const auto old_data = text->data_;
   text->data_ = new_data;
   ++document->version_;
-  FOR_EACH_OBSERVER(DocumentObserver, document->observers_,
-                    DidSetTextData(*text, new_data, old_data));
+  for (auto& observer : document->observers_)
+    observer.DidSetTextData(*text, new_data, old_data);
 }
 
 void NodeEditor::UnregisterElementIdForSubtree(const Node& node) {

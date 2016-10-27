@@ -100,9 +100,9 @@ Mode.registerExtension('e', 'c#');
 
     // Chromium
     'DCHECK', 'DCHECK_EQ', 'DCHECK_NE', 'DCHECK_LE', 'DCHECK_LT', 'DCHECK_GE',
-    'DCHECK_GT', 'DISALLOW_COPY_AND_ASSIGN', 'FOR_EACH_OBSERVER', 'NOTREACHED',
-    'arraysize', 'base::Bind', 'base::Callback', 'base::Closure',
-    'base::checked_cast', 'base::char16', 'base::string16', 'base::StringPiece',
+    'DCHECK_GT', 'DISALLOW_COPY_AND_ASSIGN', 'NOTREACHED', 'arraysize',
+    'base::Bind', 'base::Callback', 'base::Closure', 'base::checked_cast',
+    'base::char16', 'base::string16', 'base::StringPiece',
     'base::StringPiece16', 'base::StringPrintf', 'base::Time',
     'base::TimeDelta', 'base::TimeTicks', 'base::Unretained', 'scoped_refptr',
 
@@ -128,12 +128,11 @@ suggestions.Session.addProvider(class {
   constructor(session) {
     const mode = modes.Mode.modeOf(session.document);
     this.words_ = [...highlights.HighlightEngine.keywordsFor(mode.id)]
-        .map(word => word.split(/[:.]+/).pop())
-        .filter(word => word.startsWith(session.prefix))
+                      .map(word => word.split(/[:.]+/).pop())
+                      .filter(word => word.startsWith(session.prefix))
   }
 
-  isReady() { return true; }
-  next() {
+  isReady() { return true; } next() {
     if (this.words_.length === 0)
       return '';
     return this.words_.shift();
@@ -154,7 +153,8 @@ Editor.bindKey(TextWindow, 'Ctrl+Shift+M', function() {
   const hotEnd = document.length;
 
   const message =
-      `#Task=${taskScheduler.tasks_.size} Spell Checker(${document.name}) cold=${coldOffset}/${coldEnd} hot=${hotOffset}/${hotEnd}`;
+      `#Task=${taskScheduler.tasks_.size} Spell Checker(${document.name
+      }) cold=${coldOffset}/${coldEnd} hot=${hotOffset}/${hotEnd}`;
   Editor.messageBox(this, message, 0);
   console.log(`/* ${message} */`);
 });
@@ -228,7 +228,9 @@ Editor.bindKey(TextWindow, 'Ctrl+Shift+M', function() {
     const headerFileName =
         path.join('/') + '/' + document.name.replace('.cc', '.h');
     return copyrightTextCxx + `#include "${headerFileName}"\n\n` +
-        `namespace ${namespace} {\n` + '\n' + `}  // namespace ${namespace}\n`;
+        `namespace ${namespace} {\n` +
+        '\n' +
+        `}  // namespace ${namespace}\n`;
   }
 
   function cheaderTemplateFor(document) {
@@ -236,9 +238,14 @@ Editor.bindKey(TextWindow, 'Ctrl+Shift+M', function() {
     const namespace = path[path.length - 1];
     const guard = (path.join('_') + '_' + document.name.replace('.', '_') + '_')
                       .toUpperCase();
-    return copyrightTextCxx + `#ifndef ${guard}\n` + `#define ${guard}\n` +
-        '\n' + `namespace ${namespace} {\n` + '\n' +
-        `}  // namespace ${namespace}\n` + '\n' + `#endif  // ${guard}\n`;
+    return copyrightTextCxx + `#ifndef ${guard}\n` +
+        `#define ${guard}\n` +
+        '\n' +
+        `namespace ${namespace} {\n` +
+        '\n' +
+        `}  // namespace ${namespace}\n` +
+        '\n' +
+        `#endif  // ${guard}\n`;
   }
 
   Mode.registerTemplate('cc', cppTemplateFor);

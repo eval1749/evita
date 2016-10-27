@@ -363,8 +363,8 @@ void StyleTree::Impl::UpdateElement(Context* context,
   DCHECK(item->style->has_display())
       << "Style merge failed. We should merge initial style. " << *item->style;
   if (old_style) {
-    FOR_EACH_OBSERVER(StyleTreeObserver, observers_,
-                      DidChangeComputedStyle(element, *old_style));
+    for (auto& observer : observers_)
+      observer.DidChangeComputedStyle(element, *old_style);
   }
   UpdateChildren(context, element);
 }

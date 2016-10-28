@@ -54,8 +54,8 @@ void SingletonHwnd::RemoveObserver(Observer* observer) {
 
 // MessageDelegate
 LRESULT SingletonHwnd::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
-  FOR_EACH_OBSERVER(Observer, observers_,
-                    OnWndProc(*window_, message, wParam, lParam));
+  for (auto& observer : observers_)
+    observer.OnWndProc(*window_, message, wParam, lParam);
   return window_->DefWindowProc(message, wParam, lParam);
 }
 

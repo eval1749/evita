@@ -14,6 +14,15 @@ testing.test('stringify.Array', function(t) {
   t.expect(stringify([1, 2])).toEqual('[1, 2]');
 });
 
+testing.test('stringify.GenericFunction.prototype', t => {
+  const foo = Object.getPrototypeOf(function*() {});
+  t.expect(stringify(foo))
+    .toEqual('#1=#{GeneratorFunction ' + ([
+        'length: 0',
+        'name: ""',
+        'prototype: #{Generator constructor: #1#}'].join(', ')) + '}');
+});
+
 testing.test('stringify.RootObject', t => {
   const foo = Object.create(null, {a: {value: 1}, b: {value: 2}});
   t.expect(stringify(foo)).toEqual('{a: 1, b: 2}');

@@ -27,9 +27,23 @@ function computeClassName(object) {
 
 /**
  * @param {!Object} object
+ * @return {boolean}
+ */
+function isInstancePrototype(object) {
+  /** @type {Function} */
+  const constructor = object.constructor;
+  if (!constructor)
+    return false;
+  return object === constructor.prototype;
+}
+
+/**
+ * @param {!Object} object
  * @return {?function():string}
  */
 function findToString(object) {
+  if (isInstancePrototype(object))
+    return null;
   for (let runner = object; runner && runner.constructor !== Object;
        runner = Object.getPrototypeOf(runner)) {
     const descriptor = Object.getOwnPropertyDescriptor(runner, 'toString');
@@ -65,18 +79,6 @@ function isTypedArray(object) {
       object instanceof Int8Array || object instanceof Uint16Array ||
       object instanceof Uint32Array || object instanceof Uint8Array ||
       object instanceof Uint8ClampedArray;
-}
-
-/**
- * @param {!Object} object
- * @return {boolean}
- */
-function isInstancePrototype(object) {
-  /** @type {Function} */
-  const constructor = object.constructor;
-  if (!constructor)
-    return false;
-  return object === constructor.prototype;
 }
 
 /**

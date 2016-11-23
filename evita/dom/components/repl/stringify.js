@@ -30,7 +30,7 @@ function computeClassName(object) {
  * @return {?function():string}
  */
 function findToString(object) {
-  for (let runner = object; runner.constructor !== Object;
+  for (let runner = object; runner && runner.constructor !== Object;
        runner = Object.getPrototypeOf(runner)) {
     const descriptor = Object.getOwnPropertyDescriptor(runner, 'toString');
     if (descriptor)
@@ -69,13 +69,25 @@ function isTypedArray(object) {
 
 /**
  * @param {!Object} object
+ * @return {boolean}
+ */
+function isInstancePrototype(object) {
+  /** @type {Function} */
+  const constructor = object.constructor;
+  if (!constructor)
+    return false;
+  return object === constructor.prototype;
+}
+
+/**
+ * @param {!Object} object
  * @return {!Array}
  */
 function collectProperties(object) {
-  const override = object['stringifyProperties'];
-  if (object !== object.constructor.prototype &&
-      typeof(override) === 'function') {
-    return override.call(object);
+  if (!isInstancePrototype(object)) {
+    const override = object['stringifyProperties'];
+    if (typeof(override) === 'function')
+      return override.call(object);
   }
   let props = [];
   const removeFunction = object.constructor !== Object;

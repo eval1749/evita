@@ -10,7 +10,6 @@ goog.require('css.CSSStyleRule');
 goog.require('css.CSSStyleSheet');
 goog.require('css.PropertyBuilder');
 goog.require('css.Tokenizer');
-goog.require('css.Tokenizer');
 
 goog.scope(function() {
 

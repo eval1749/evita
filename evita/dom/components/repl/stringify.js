@@ -506,7 +506,7 @@ class Processor {
       this.visitor_.startContainer(`\u007B`, false);
     /** @type {number} */
     let index = 0;
-    for (let prop of props) {
+    for (const prop of props) {
       if (index >= this.maxLength_)
         break;
       this.visitor_.visitKey(prop.name, index);

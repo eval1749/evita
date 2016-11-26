@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <utility>
+
 #include "evita/dom/css/css_style_sheet_handle.h"
 
 #include "base/logging.h"
@@ -26,14 +28,15 @@ CSSStyleSheetHandle::CSSStyleSheetHandle() : object_(new css::StyleSheet()) {}
 CSSStyleSheetHandle::~CSSStyleSheetHandle() {}
 
 // Bindings implementations
-void CSSStyleSheetHandle::AppendStyleRule(CSSStyleSheetHandle* handle,
+void CSSStyleSheetHandle::AppendStyleRule(ScriptHost* script_host,
+                                          CSSStyleSheetHandle* handle,
                                           const base::string16& selector_text,
                                           v8::Local<v8::Map> raw_style) {
   css::Selector::Parser parser;
   const auto& selector = parser.Parse(selector_text);
   if (!parser.error().empty())
     return;
-  const auto& runner = ScriptHost::instance()->runner();
+  const auto& runner = script_host->runner();
   const auto& context = runner->context();
   auto style = CSSStyle::ConvertFromV8(context, raw_style);
   handle->object_->AppendRule(selector, std::move(style));
@@ -47,7 +50,8 @@ void CSSStyleSheetHandle::DeleteRule(CSSStyleSheetHandle* handle, int index) {
   handle->object_->RemoveRule(index);
 }
 
-void CSSStyleSheetHandle::InsertStyleRule(CSSStyleSheetHandle* handle,
+void CSSStyleSheetHandle::InsertStyleRule(ScriptHost* script_host,
+                                          CSSStyleSheetHandle* handle,
                                           const base::string16& selector_text,
                                           v8::Local<v8::Map> raw_style,
                                           int index) {
@@ -55,7 +59,7 @@ void CSSStyleSheetHandle::InsertStyleRule(CSSStyleSheetHandle* handle,
   const auto& selector = parser.Parse(selector_text);
   if (!parser.error().empty())
     return;
-  const auto& runner = ScriptHost::instance()->runner();
+  const auto& runner = script_host->runner();
   const auto& context = runner->context();
   auto style = CSSStyle::ConvertFromV8(context, raw_style);
   handle->object_->InsertRule(selector, std::move(style), index);
@@ -69,10 +73,10 @@ v8::Local<v8::Map> CSSStyleSheetHandle::RuleAt(
     exception_state->ThrowError("Unbound index");
     return v8::Local<v8::Map>();
   }
-  const auto& runner = ScriptHost::instance()->runner();
+  const auto& context = exception_state->context();
+  const auto& runner = ginx::Runner::From(context);
   ginx::Runner::EscapableHandleScope runner_scope(runner);
   const auto& isolate = runner->isolate();
-  const auto& context = runner->context();
   const auto& rule = handle->object_->rules()[index];
   const auto& map = CSSStyle::ConvertToV8(context, rule->style());
   return runner_scope.Escape(

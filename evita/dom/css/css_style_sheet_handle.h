@@ -20,6 +20,7 @@ class CSSStyleSheetHandleClass;
 }
 
 class ExceptionState;
+class ScriptHost;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -39,12 +40,14 @@ class CSSStyleSheetHandle final : public ginx::Scriptable<CSSStyleSheetHandle> {
   // Bindings implementations
   CSSStyleSheetHandle();
 
-  static void AppendStyleRule(CSSStyleSheetHandle* handle,
+  static void AppendStyleRule(ScriptHost* script_host,
+                              CSSStyleSheetHandle* handle,
                               const base::string16& selector,
                               v8::Local<v8::Map> raw_style);
   static int CountRules(CSSStyleSheetHandle* handle);
   static void DeleteRule(CSSStyleSheetHandle* handle, int index);
-  static void InsertStyleRule(CSSStyleSheetHandle* handle,
+  static void InsertStyleRule(ScriptHost* script_host,
+                              CSSStyleSheetHandle* handle,
                               const base::string16& selector,
                               v8::Local<v8::Map> raw_style,
                               int index);

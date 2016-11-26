@@ -12,6 +12,17 @@ const ESCAPE_MAP = {
 
 /**
  * @param {!Object} object
+ * @return {!Array<!Object>}
+ */
+function inclusiveAncestorsOf(object) {
+  const result = []
+  for (let runner = object; runner; runner = Object.getPrototypeOf(runner))
+    result.push(runner)
+  return result;
+}
+
+/**
+ * @param {!Object} object
  * @return {string}
  */
 function computeClassName(object) {
@@ -44,8 +55,9 @@ function isInstancePrototype(object) {
 function findToString(object) {
   if (isInstancePrototype(object))
     return null;
-  for (let runner = object; runner && runner.constructor !== Object;
-       runner = Object.getPrototypeOf(runner)) {
+  for (const runner of inclusiveAncestorsOf(object)) {
+    if (runner.constructor === Object)
+      return null;
     const descriptor = Object.getOwnPropertyDescriptor(runner, 'toString');
     if (descriptor)
       return /** @type {function():string} */ (descriptor.value);
@@ -82,8 +94,17 @@ function isTypedArray(object) {
 }
 
 /**
+ * @param {string|symbol} name
+ * @return {boolean}
+ */
+function isPrivatePropertyName(name) {
+  return typeof(name) === 'string' &&
+      name.charCodeAt(name.length - 1) === Unicode.LOW_LINE;
+}
+
+/**
  * @param {!Object} object
- * @return {!Array}
+ * @return {!Array<{name: string, value:*}>}
  */
 function collectProperties(object) {
   if (!isInstancePrototype(object)) {
@@ -91,29 +112,40 @@ function collectProperties(object) {
     if (typeof(override) === 'function')
       return override.call(object);
   }
-  let props = [];
-  const removeFunction = object.constructor !== Object;
-  for (let runner = object; runner; runner = Object.getPrototypeOf(runner)) {
+
+  // Ignore member functions other than Object literal and Object.create(null)
+  const removeFunction = object.constructor && object.constructor !== Object;
+
+  /**
+   * @param {!Object} object
+   * @param {string} name
+   * @return {{name: string, value: *}|undefined}
+   */
+  function extractValue(object, name) {
+    if (isPrivatePropertyName(name))
+      return undefined;
+    /** @type {!ObjectPropertyDescriptor} */
+    const descriptor = /** @type {!ObjectPropertyDescriptor} */(
+        Object.getOwnPropertyDescriptor(object, name));
+    const value = descriptor['value'];
+    if (removeFunction && typeof(value) === 'function')
+      return undefined;
+    if (value === undefined)
+      return undefined;
+    return {name, value};
+  }
+
+  /** @type {!Array<{name: string, value: *}>} */
+  const props = [];
+  for (const runner of inclusiveAncestorsOf(object)) {
     if (runner === Object.prototype)
       break;
-    const current = /** @type {!Object} */ (runner);
-    props = props.concat(
-        Object.getOwnPropertyNames(current)
-            .map(function(name) {
-              const desc = Object.getOwnPropertyDescriptor(
-                  /** @type {!Object} */ (current), name);
-              desc['name'] = name;
-              return desc;
-            })
-            .filter(function(desc) {
-              const name = desc['name'];
-              if (name.charCodeAt(name.length - 1) === Unicode.LOW_LINE)
-                return false;
-              const value = desc['value'];
-              if (removeFunction && typeof(value) === 'function')
-                return false;
-              return value !== undefined;
-            }));
+    for (const name of Object.getOwnPropertyNames(runner)) {
+      const descriptor = extractValue(runner, name);
+      if (!descriptor)
+        continue;
+      props.push(descriptor);
+    }
   }
   return props.sort((a, b) => a.name.localeCompare(b.name));
 }

@@ -7,3 +7,9 @@
  * @return {!Generator<T>}
  */
 Array.prototype.values = function() {};
+
+/**
+ * @param {!Object} object
+ * @return {!Object} (string|symbol): !ObjectPropertyDescriptor
+ */
+Object.getOwnPropertyDescriptors = function(object) {};

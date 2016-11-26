@@ -157,9 +157,10 @@ v8::Local<v8::Object> NewRunScriptResult(v8::Isolate* isolate,
   return result;
 }
 
-v8::Local<v8::Object> RunScriptInternal(const base::string16& script_text,
+v8::Local<v8::Object> RunScriptInternal(ScriptHost* script_host,
+                                        const base::string16& script_text,
                                         const base::string16& file_name) {
-  auto const runner = ScriptHost::instance()->runner();
+  auto const runner = script_host->runner();
   auto const isolate = runner->isolate();
   ginx::Runner::EscapableHandleScope runner_scope(runner);
   v8::TryCatch try_catch(isolate);
@@ -296,14 +297,16 @@ v8::Local<v8::Promise> Editor::MessageBox(Window* maybe_window,
   return MessageBox(maybe_window, message, flags, base::string16());
 }
 
-v8::Local<v8::Object> Editor::RunScript(const base::string16& script_text,
+v8::Local<v8::Object> Editor::RunScript(ScriptHost* script_host,
+                                        const base::string16& script_text,
                                         const base::string16& file_name) {
   SuppressMessageBoxScope suppress_message_box_scope;
-  return RunScriptInternal(script_text, file_name);
+  return RunScriptInternal(script_host, script_text, file_name);
 }
 
-v8::Local<v8::Object> Editor::RunScript(const base::string16& script_text) {
-  return RunScript(script_text, L"__runscript__");
+v8::Local<v8::Object> Editor::RunScript(ScriptHost* script_host,
+                                        const base::string16& script_text) {
+  return RunScript(script_host, script_text, L"__runscript__");
 }
 
 void Editor::SetSwitch(const base::string16& name,

@@ -76,9 +76,11 @@ class Editor final : public ginx::Scriptable<Editor> {
                                            int flags);
 
   // Run specified script
-  static v8::Local<v8::Object> RunScript(const base::string16& script_text,
+  static v8::Local<v8::Object> RunScript(ScriptHost* script_host,
+                                         const base::string16& script_text,
                                          const base::string16& file_name);
-  static v8::Local<v8::Object> RunScript(const base::string16& script_text);
+  static v8::Local<v8::Object> RunScript(ScriptHost* script_host,
+                                         const base::string16& script_text);
 
   // Set global switch value.
   static void SetSwitch(const base::string16& name,

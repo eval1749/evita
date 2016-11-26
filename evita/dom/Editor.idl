@@ -90,7 +90,7 @@ interface Editor {
    * @param {string=} opt_file_name
    * @return {!RunScriptResult}
    */
-  // TODO(eval1749): We should have |CallWith=ScriptHost| extended attribute.
+  [CallWith=ScriptHost]
   static RunScriptResult runScript(DOMString script_text,
                                    optional DOMString file_name);
 

@@ -39,6 +39,11 @@ ExceptionState::ExceptionState(Situation situation,
 
 ExceptionState::~ExceptionState() {}
 
+void ExceptionState::set_is_thrown() {
+  DCHECK(!is_thrown_);
+  is_thrown_ = true;
+}
+
 std::string ExceptionState::ComposeMessage(const std::string& detail) const {
   const auto& interface_name = interface_name_.as_string();
   const auto& property_name = property_name_.as_string();

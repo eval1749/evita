@@ -46,6 +46,7 @@ class ExceptionState final {
 
   v8::Local<v8::Context> context() const { return context_; }
   bool is_thrown() const { return is_thrown_; }
+  void set_is_thrown();
 
   // Throw arity error in generated code from IDL.
   void ThrowArityError(int min_arity, int max_arity, int actual_arity);

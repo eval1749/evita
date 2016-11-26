@@ -30,6 +30,7 @@ static_assert(sizeof(kCategoryNames) / sizeof(*kCategoryNames) ==
                   U_CHAR_CATEGORY_COUNT,
               "kCategoryNames size mismatch");
 
+// From "third_party/icu/source/common/unicode/uscript.h"
 #define FOR_EACH_SCRIPT(V)                    \
   V(COMMON, 0, "Zyyy")                        \
   V(INHERITED, 1, "Zinh")                     \
@@ -192,12 +193,22 @@ static_assert(sizeof(kCategoryNames) / sizeof(*kCategoryNames) ==
   V(TIRHUTA, 158, "Tirh")                     \
   V(CAUCASIAN_ALBANIAN, 159, "Aghb")          \
   V(MAHAJANI, 160, "Mahj")                    \
+  /* ICU 54 */                                \
   V(AHOM, 161, "Ahom")                        \
   V(HATRAN, 162, "Hatr")                      \
   V(MODI, 163, "Modi")                        \
   V(MULTANI, 164, "Mult")                     \
   V(PAU_CIN_HAU, 165, "Pauc")                 \
-  V(SIDDHAM, 166, "Sidd")
+  V(SIDDHAM, 166, "Sidd")                     \
+  /* ICU 58 */                                \
+  V(ADLAM, 167, "Adlm")                       \
+  V(BHAIKSUKI, 168, "Bhks")                   \
+  V(MARCHEN, 169, "Marc")                     \
+  V(NEWA, 170, "Newa")                        \
+  V(OSAGE, 171, "Osge")                       \
+  V(HAN_WITH_BOPOMOFO, 172, "Hanb")           \
+  V(JAMO, 173, "Jamo")                        \
+  V(SYMBOLS_EMOJI, 174, "Zsye")
 
 #define USCRIPT_TAI_THAM USCRIPT_LANNA
 #define USCRIPT_MENDE_KIKAKUI USCRIPT_MENDE

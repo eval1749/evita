@@ -41,10 +41,12 @@ testing.test('Unicode.SCRIPT_DATA', function(t) {
   t.expect(Unicode.SCRIPT_DATA[0x3042]).toEqual(Unicode.Script.HIRAGANA);
 });
 
+// See "evita/dom/unicode/unicode_icu.cc" for implementation
 testing.test('Unicode.SCRIPT_NAMES', function(t) {
   t.expect(Unicode.SCRIPT_NAMES[100]).toEqual('VISIBLE_SPEECH');
   t.expect(Unicode.SCRIPT_NAMES[166]).toEqual('SIDDHAM');
-  t.expect(Unicode.SCRIPT_NAMES.length).toEqual(167);
+  t.expect(Unicode.SCRIPT_NAMES[174]).toEqual('SYMBOLS_EMOJI');
+  t.expect(Unicode.SCRIPT_NAMES.length).toEqual(175);
 });
 
 testing.test('unicode.categoryOf', function(t) {

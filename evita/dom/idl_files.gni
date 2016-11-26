@@ -13,6 +13,7 @@ interface_idl_files = [
   "//evita/dom/components/win_resource/WinResource.idl",
   "//evita/dom/Editor.idl",
   "//evita/dom/FilePath.idl",
+  "//evita/dom/ScriptModule.idl",
   "//evita/dom/encodings/TextDecoder.idl",
   "//evita/dom/encodings/TextEncoder.idl",
   "//evita/dom/events/CompositionEvent.idl",

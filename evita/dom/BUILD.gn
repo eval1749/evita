@@ -78,6 +78,8 @@ source_set("core") {
     "global_load_script.cc",
     "script_host.cc",
     "script_host.h",
+    "script_module.cc",
+    "script_module.h",
     "timers/one_shot_timer.cc",
     "timers/one_shot_timer.h",
     "timers/repeating_timer.cc",

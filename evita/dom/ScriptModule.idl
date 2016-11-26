@@ -1,0 +1,18 @@
+// Copyright (c) 2016 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+callback ScriptModuleResolveCallbck =
+    ScriptModule(DOMString specifier, DOMString referrer);
+
+interface ScriptModule {
+  [CallWith = ScriptHost] readonly attribute long id;
+  [CallWith = ScriptHost] readonly attribute DOMString[] requests;
+  readonly attribute DOMString specifier;
+
+  [ CallWith = ScriptHost, RaisesException ] static ScriptModule compile(
+      DOMString specifier, DOMString script_text);
+  [ CallWith = ScriptHost, RaisesException ] void evaluate();
+  [ CallWith = ScriptHost, RaisesException ] boolean instantiate(
+      ScriptModuleResolveCallbck callback);
+};

@@ -79,7 +79,7 @@ base::string16 TextDocument::SyntaxAt(text::Offset offset,
 
 bool TextDocument::CheckCanChange(ExceptionState* exception_state) const {
   if (buffer_->IsReadOnly()) {
-    auto const runner = ScriptHost::instance()->runner();
+    auto const runner = ginx::Runner::From(exception_state->context());
     auto const isolate = runner->isolate();
     ginx::Runner::Scope runner_scope(runner);
     auto const ctor =

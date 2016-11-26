@@ -305,12 +305,10 @@ void {{class_name}}::Get_{{attribute.cc_name}}(
     exception_state.ThrowReceiverError(info.This());
     return;
   }
-{% if attribute.getter_raises_exception %}
-  {{attribute.to_v8_type}} value = impl->{{attribute.cc_name}}(&exception_state);
+  {{attribute.to_v8_type}} value = impl->{{attribute.cc_name}}({{ emit_arguments(attribute.getter_signature) }});
+{% if attribute.getter_signature.is_raises_exception %}
   if (exception_state.is_thrown())
     return;
-{% else %}
-  {{attribute.to_v8_type}} value = impl->{{attribute.cc_name}}();
 {% endif %}
 {%    if attribute.can_fast_return %}
   info.GetReturnValue().Set(value);
@@ -335,19 +333,14 @@ void {{class_name}}::Set_{{attribute.cc_name}}(
     exception_state.ThrowReceiverError(info.This());
     return;
   }
-  {{attribute.from_v8_type}} new_value;
-  if (!gin::ConvertFromV8(isolate, info[0], &new_value)) {
+  {{attribute.from_v8_type}} param0;
+  if (!gin::ConvertFromV8(isolate, info[0], &param0)) {
     exception_state.ThrowArgumentError("{{attribute.display_type}}", info[0], 0);
     return;
   }
-{% if attribute.setter_raises_exception %}
-  impl->set_{{attribute.cc_name}}(new_value, &exception_state);
-{% else %}
-  impl->set_{{attribute.cc_name}}(new_value);
-{% endif %}
+  impl->set_{{attribute.cc_name}}({{ emit_arguments(attribute.setter_signature) }});
 }
-
-{%  endif %}
+{% endif %}
 {% endfor %}
 {#############################################################
  #

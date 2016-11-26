@@ -512,19 +512,34 @@ class AttributeContext(BaseContext):
             return {'cc_name': cc_name}
         glue_type = to_glue_type(attribute.idl_type)
         is_raises_exception = self.attribute_of('RaisesException', '*')
+        call_with_list = []
+        if 'CallWith' in attribute.extended_attributes:
+            call_with_list = attribute.extended_attributes[
+                'CallWith'].split('|')
         return {
+            'call_with_list': call_with_list,
             'can_fast_return': can_fast_return_of(glue_type),
             'cc_name': cc_name,
             'display_type': glue_type.display_str(),
             'from_v8_type': glue_type.from_v8_str(),
-            'getter_raises_exception':
-                is_raises_exception == '*' or is_raises_exception == 'Getter',
+            'getter_signature': {
+                'call_with_list': call_with_list,
+                'is_raises_exception': is_raises_exception == '*' or
+                is_raises_exception == 'Getter',
+                'parameters': [],
+
+            },
             'is_read_only': attribute.is_read_only,
             'is_static': attribute.is_static,
             'name': attribute.name,
-            'setter_raises_exception':
-                is_raises_exception == '*' or is_raises_exception == 'Setter',
+            'setter_signature': {
+                'call_with_list': call_with_list,
+                'is_raises_exception': is_raises_exception == '*' or
+                is_raises_exception == 'Setter',
+                'parameters': ['-'],
+            },
             'to_v8_type': glue_type.to_v8_str(),
+            'use_call_with': len(call_with_list) > 0,
         }
 
 

@@ -44,6 +44,7 @@ class ExceptionState final {
 
   ~ExceptionState();
 
+  v8::Local<v8::Context> context() const { return context_; }
   bool is_thrown() const { return is_thrown_; }
 
   // Throw arity error in generated code from IDL.

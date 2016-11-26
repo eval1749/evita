@@ -140,8 +140,8 @@ void NodeHandle::AppendChild(NodeHandle* parent,
 // static
 v8::Local<v8::Map> NodeHandle::GetInlineStyle(NodeHandle* element_handle,
                                               ExceptionState* exception_state) {
-  const auto& runner = ScriptHost::instance()->runner();
-  const auto& context = runner->context();
+  const auto& context = exception_state->context();
+  const auto& runner = ginx::Runner::From(context);
   const auto element = AsElement(element_handle, exception_state);
   if (!element)
     return v8::Local<v8::Map>();
@@ -210,8 +210,7 @@ void NodeHandle::SetImageData(NodeHandle* image_handle,
 void NodeHandle::SetInlineStyle(NodeHandle* element_handle,
                                 v8::Local<v8::Map> raw_style,
                                 ExceptionState* exception_state) {
-  const auto& runner = ScriptHost::instance()->runner();
-  const auto& context = runner->context();
+  const auto& context = exception_state->context();
   const auto element = AsElement(element_handle, exception_state);
   if (!element)
     return;

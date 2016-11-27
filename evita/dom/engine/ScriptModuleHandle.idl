@@ -13,6 +13,6 @@ interface ScriptModuleHandle {
   [ CallWith = ScriptHost, RaisesException ] static ScriptModuleHandle compile(
       DOMString specifier, DOMString script_text);
   [ CallWith = ScriptHost, RaisesException ] void evaluate();
-  [ CallWith = ScriptHost, RaisesException ] boolean instantiate(
+  [ CallWith = ScriptHost, RaisesException ] void instantiate(
       ScriptModuleResolveCallbck callback);
 };

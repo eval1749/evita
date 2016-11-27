@@ -33,8 +33,8 @@ class ScriptModuleHandle final : public ginx::Scriptable<ScriptModuleHandle> {
   enum class State;
 
   ScriptModuleHandle(v8::Isolate* isolate,
-               v8::Local<v8::Module> module,
-               const base::string16& specifier);
+                     v8::Local<v8::Module> module,
+                     const base::string16& specifier);
 
   // ScriptModuleHandle.idl
   int id(ScriptHost* script_host) const;
@@ -42,13 +42,13 @@ class ScriptModuleHandle final : public ginx::Scriptable<ScriptModuleHandle> {
   const base::string16& specifier() const { return specifier_; }
 
   static ScriptModuleHandle* Compile(ScriptHost* script_host,
-                               const base::string16& specifier,
-                               const base::string16& script_text,
-                               ExceptionState* exception_state);
+                                     const base::string16& specifier,
+                                     const base::string16& script_text,
+                                     ExceptionState* exception_state);
 
   void Evaluate(ScriptHost* script_host, ExceptionState* exception_state);
 
-  bool Instantiate(ScriptHost* script_host,
+  void Instantiate(ScriptHost* script_host,
                    v8::Local<v8::Function> callback,
                    ExceptionState* exception_state);
 

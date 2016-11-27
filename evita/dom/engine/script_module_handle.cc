@@ -48,7 +48,8 @@ ModuleMap* ModuleMap::GetInstance() {
   return base::Singleton<ModuleMap>::get();
 }
 
-void ModuleMap::Set(v8::Local<v8::Module> module, ScriptModuleHandle* script_module) {
+void ModuleMap::Set(v8::Local<v8::Module> module,
+                    ScriptModuleHandle* script_module) {
   const auto& result = map_.emplace(module->GetIdentityHash(), script_module);
   DCHECK(result.second);
 }
@@ -123,8 +124,8 @@ enum class ScriptModuleHandle::State {
 };
 
 ScriptModuleHandle::ScriptModuleHandle(v8::Isolate* isolate,
-                           v8::Local<v8::Module> module,
-                           const base::string16& specifier)
+                                       v8::Local<v8::Module> module,
+                                       const base::string16& specifier)
     : module_(isolate, module), specifier_(specifier), state_(State::Created) {}
 
 ScriptModuleHandle::~ScriptModuleHandle() = default;
@@ -150,10 +151,11 @@ std::vector<base::string16> ScriptModuleHandle::requests(
   return requests;
 }
 
-ScriptModuleHandle* ScriptModuleHandle::Compile(ScriptHost* script_host,
-                                    const base::string16& specifier,
-                                    const base::string16& script_text,
-                                    ExceptionState* exception_state) {
+ScriptModuleHandle* ScriptModuleHandle::Compile(
+    ScriptHost* script_host,
+    const base::string16& specifier,
+    const base::string16& script_text,
+    ExceptionState* exception_state) {
   auto* const isolate = script_host->isolate();
   auto* const runner = script_host->runner();
   ginx::Runner::Scope runner_scope(runner);
@@ -166,13 +168,14 @@ ScriptModuleHandle* ScriptModuleHandle::Compile(ScriptHost* script_host,
     exception_state->set_is_thrown();
     return nullptr;
   }
-  auto* const script_module = new ScriptModuleHandle(isolate, module, specifier);
+  auto* const script_module =
+      new ScriptModuleHandle(isolate, module, specifier);
   ModuleMap::GetInstance()->Set(module, script_module);
   return script_module;
 }
 
 void ScriptModuleHandle::Evaluate(ScriptHost* script_host,
-                            ExceptionState* exception_state) {
+                                  ExceptionState* exception_state) {
   if (state_ != State::Ready) {
     exception_state->ThrowError(
         base::StringPrintf("Module '%ls' isn't ready.", specifier_.c_str()));
@@ -186,13 +189,13 @@ void ScriptModuleHandle::Evaluate(ScriptHost* script_host,
     return exception_state->set_is_thrown();
 }
 
-bool ScriptModuleHandle::Instantiate(ScriptHost* script_host,
-                               v8::Local<v8::Function> callback,
-                               ExceptionState* exception_state) {
+void ScriptModuleHandle::Instantiate(ScriptHost* script_host,
+                                     v8::Local<v8::Function> callback,
+                                     ExceptionState* exception_state) {
   if (state_ != State::Created) {
     exception_state->ThrowError(base::StringPrintf(
         "Module '%ls' is already instantiated.", specifier_.c_str()));
-    return false;
+    return;
   }
   auto* const isolate = script_host->isolate();
   auto context = script_host->runner()->context();
@@ -201,10 +204,9 @@ bool ScriptModuleHandle::Instantiate(ScriptHost* script_host,
   state_ = State::Instantiated;
   if (!module->Instantiate(context, ModuleResolver::Callback)) {
     exception_state->set_is_thrown();
-    return false;
+    return;
   }
   state_ = State::Ready;
-  return true;
 }
 
 v8::Local<v8::Module> ScriptModuleHandle::ToV8(v8::Isolate* isolate) const {

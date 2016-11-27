@@ -61,6 +61,7 @@
   <keyword>true</keyword>
 
   <!--  Future reserved word in ES6 -->
+  <keyword>async</keyword>
   <keyword>await</keyword>
   <keyword>enum</keyword>
   <keyword>implements</keyword>

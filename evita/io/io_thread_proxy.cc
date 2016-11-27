@@ -51,6 +51,9 @@ DEFINE_DELEGATE_2(CheckSpelling,
 DEFINE_DELEGATE_2(CloseContext,
                   const domapi::IoContextId&,
                   const domapi::IoIntPromise&)
+DEFINE_DELEGATE_2(ComputeFullPathName,
+                  const base::string16&,
+                  const ComputeFullPathNamePromise&)
 DEFINE_DELEGATE_3(GetWinResourceNames,
                   const domapi::WinResourceId&,
                   const base::string16&,

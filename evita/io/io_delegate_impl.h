@@ -28,6 +28,8 @@ class IoDelegateImpl final : public domapi::IoDelegate {
                      const CheckSpellingResolver& promise) final;
   void CloseContext(const domapi::IoContextId& context_id,
                     const domapi::IoIntPromise& promise) final;
+  void ComputeFullPathName(const base::string16& path_name,
+                           const ComputeFullPathNamePromise& promise) final;
   void GetWinResourceNames(const domapi::WinResourceId& resource_id,
                            const base::string16& type,
                            const GetWinResourceNamessPromise& promise) final;

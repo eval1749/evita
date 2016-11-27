@@ -21,6 +21,28 @@ class OsFileTest : public AbstractDomTest {
   DISALLOW_COPY_AND_ASSIGN(OsFileTest);
 };
 
+TEST_F(OsFileTest, OsFile_computeFullPathName_failed) {
+  mock_io_delegate()->SetComputeFullPathName(L"", 123);
+  EXPECT_SCRIPT_VALID(
+      "var promise = Os.File.computeFullPathName('.');"
+      "var result;"
+      "promise.catch(x => result = x)");
+  EXPECT_SCRIPT_TRUE("promise instanceof Promise");
+  EXPECT_SCRIPT_TRUE("result instanceof Os.File.Error");
+  EXPECT_SCRIPT_EQ("123", "result.winLastError");
+}
+
+TEST_F(OsFileTest, OsFile_computeFullPathName_succeeded) {
+  mock_io_delegate()->SetComputeFullPathName(L"xyz", 0);
+  EXPECT_SCRIPT_VALID(
+      "var promise = Os.File.computeFullPathName('foo');"
+      "var result;"
+      "promise.then(x => result = x);");
+  EXPECT_SCRIPT_TRUE("promise instanceof Promise");
+  EXPECT_SCRIPT_EQ("string", "typeof(result)");
+  EXPECT_SCRIPT_EQ("xyz", "result");
+}
+
 TEST_F(OsFileTest, OsFile_makeTempFileName_failed) {
   mock_io_delegate()->SetMakeTempFileName(L"", 123);
   EXPECT_SCRIPT_VALID(

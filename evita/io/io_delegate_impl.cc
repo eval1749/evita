@@ -90,6 +90,24 @@ void IoDelegateImpl::CloseContext(const domapi::IoContextId& context_id,
   context_map_.erase(it);
 }
 
+void IoDelegateImpl::ComputeFullPathName(
+    const base::string16& path_name,
+    const ComputeFullPathNamePromise& promise) {
+  base::string16 full_name(MAX_PATH + 1, 0);
+  base::char16* file_start = nullptr;
+  const auto length = ::GetFullPathNameW(path_name.c_str(),
+                                         static_cast<DWORD>(full_name.length()),
+                                         &full_name[0], &file_start);
+  full_name.resize(length);
+  if (length == 0) {
+    const auto last_error = ::GetLastError();
+    PLOG(ERROR) << "GetFullPathName failed";
+    Reject(promise.reject, last_error);
+    return;
+  }
+  RunCallback(base::Bind(promise.resolve, full_name));
+}
+
 void IoDelegateImpl::GetWinResourceNames(
     const domapi::WinResourceId& resource_id,
     const base::string16& type,

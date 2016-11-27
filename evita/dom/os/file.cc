@@ -35,6 +35,15 @@ File::File(domapi::IoContextId context_id) : ScriptableBase(context_id) {}
 
 File::~File() {}
 
+v8::Local<v8::Promise> File::ComputeFullPathName(
+    const base::string16& path_name) {
+  return PromiseResolver::Call(
+      FROM_HERE,
+      base::Bind(&domapi::IoDelegate::ComputeFullPathName,
+                 base::Unretained(ScriptHost::instance()->io_delegate()),
+                 path_name));
+}
+
 v8::Local<v8::Promise> File::MakeTempFileName(const base::string16& dir_name,
                                               const base::string16& prefix) {
   return PromiseResolver::Call(

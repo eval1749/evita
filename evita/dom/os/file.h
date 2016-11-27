@@ -31,6 +31,8 @@ class File final : public ginx::Scriptable<File, AbstractFile> {
  private:
   friend class bindings::FileClass;
 
+  static v8::Local<v8::Promise> ComputeFullPathName(
+      const base::string16& path_name);
   static v8::Local<v8::Promise> MakeTempFileName(const base::string16& dir_name,
                                                  const base::string16& prefix);
 

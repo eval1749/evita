@@ -26,6 +26,8 @@ class IoDelegate {
  public:
   using CheckSpellingResolver = domapi::Promise<bool>;
 
+  using ComputeFullPathNamePromise = domapi::Promise<base::string16, IoError>;
+
   using GetWinResourceNamessPromise =
       domapi::Promise<std::vector<base::string16>, IoError>;
 
@@ -40,6 +42,11 @@ class IoDelegate {
 
   virtual void CloseContext(const IoContextId& context_id,
                             const IoIntPromise& promise) = 0;
+
+  // Returns full path name of |path_name|.
+  virtual void ComputeFullPathName(
+      const base::string16& path_name,
+      const ComputeFullPathNamePromise& promise) = 0;
 
   // Returns list of resource names of specified resource type.
   virtual void GetWinResourceNames(

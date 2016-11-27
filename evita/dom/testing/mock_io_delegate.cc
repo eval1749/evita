@@ -47,6 +47,12 @@ void MockIoDelegate::SetCallResult(const base::StringPiece& name,
   call_results_.push_back(result);
 }
 
+void MockIoDelegate::SetComputeFullPathName(base::StringPiece16 result,
+                                            int error_code) {
+  SetCallResult("ComputeFullPathName", error_code);
+  string_result_ = result.as_string();
+}
+
 void MockIoDelegate::SetFileStatus(const domapi::FileStatus& file_status,
                                    int error_code) {
   SetCallResult("QueryFileStatus", error_code);
@@ -56,7 +62,7 @@ void MockIoDelegate::SetFileStatus(const domapi::FileStatus& file_status,
 void MockIoDelegate::SetMakeTempFileName(const base::string16 file_name,
                                          int error_code) {
   SetCallResult("MakeTempFileName", error_code);
-  temp_file_name_ = file_name;
+  string_result_ = file_name;
 }
 
 void MockIoDelegate::SetOpenDirectoryResult(domapi::IoContextId context_id,
@@ -119,6 +125,16 @@ void MockIoDelegate::CloseContext(const domapi::IoContextId&,
     resolver.resolve.Run(true);
 }
 
+void MockIoDelegate::ComputeFullPathName(
+    const base::string16& path_name,
+    const ComputeFullPathNamePromise& promise) {
+  const auto& result = PopCallResult("ComputeFullPathName");
+  if (auto const error_code = result.error_code)
+    promise.reject.Run(domapi::IoError(error_code));
+  else
+    promise.resolve.Run(string_result_);
+}
+
 void MockIoDelegate::GetWinResourceNames(
     const domapi::WinResourceId& resource_id,
     const base::string16& type,
@@ -162,7 +178,7 @@ void MockIoDelegate::MakeTempFileName(
   if (auto const error_code = result.error_code)
     resolver.reject.Run(domapi::IoError(error_code));
   else
-    resolver.resolve.Run(dir_name + L"\\" + prefix + temp_file_name_);
+    resolver.resolve.Run(dir_name + L"\\" + prefix + string_result_);
 }
 
 void MockIoDelegate::MoveFile(const base::string16&,

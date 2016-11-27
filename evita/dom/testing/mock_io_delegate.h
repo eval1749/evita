@@ -34,6 +34,7 @@ class MockIoDelegate final : public domapi::IoDelegate {
   void SetCallResult(const base::StringPiece& name,
                      int erorr_code,
                      int num_transferred);
+  void SetComputeFullPathName(base::StringPiece16 result, int error_code);
   void SetMakeTempFileName(const base::string16 file_name, int error_code);
   void SetFileStatus(const domapi::FileStatus& data, int error_code);
   void SetOpenDirectoryResult(domapi::IoContextId context_id, int error_code);
@@ -54,6 +55,8 @@ class MockIoDelegate final : public domapi::IoDelegate {
                      const CheckSpellingResolver& promise) final;
   void CloseContext(const domapi::IoContextId& context_id,
                     const domapi::IoIntPromise& promise);
+  void ComputeFullPathName(const base::string16& path_name,
+                           const ComputeFullPathNamePromise& promise) final;
   void GetWinResourceNames(const domapi::WinResourceId& resource_id,
                            const base::string16& type,
                            const GetWinResourceNamessPromise& promise) final;
@@ -119,7 +122,7 @@ class MockIoDelegate final : public domapi::IoDelegate {
   std::vector<uint8_t> resource_data_;
   base::string16 resource_name_;
   base::string16 resource_type_;
-  base::string16 temp_file_name_;
+  base::string16 string_result_;
 
   DISALLOW_COPY_AND_ASSIGN(MockIoDelegate);
 };

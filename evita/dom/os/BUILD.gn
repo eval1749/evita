@@ -33,7 +33,7 @@ source_set("test_files") {
   sources = [
     "directory_test.cc",
     "file_test.cc",
-    "process_unittest.cc",
+    "process_test.cc",
   ]
 
   public_deps = [

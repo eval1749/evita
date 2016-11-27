@@ -118,9 +118,10 @@ ModuleResolver* ModuleResolver::GetInstance() {
 
 enum class ScriptModuleHandle::State {
   Evaluated,
+  Failed,
   Instantiated,
   Created,
-  Ready,
+  Succeeded,
 };
 
 ScriptModuleHandle::ScriptModuleHandle(v8::Isolate* isolate,
@@ -176,37 +177,40 @@ ScriptModuleHandle* ScriptModuleHandle::Compile(
 
 void ScriptModuleHandle::Evaluate(ScriptHost* script_host,
                                   ExceptionState* exception_state) {
-  if (state_ != State::Ready) {
-    exception_state->ThrowError(
-        base::StringPrintf("Module '%ls' isn't ready.", specifier_.c_str()));
+  if (state_ != State::Instantiated) {
+    exception_state->ThrowError(base::StringPrintf(
+        "Can not evaluate Module '%ls' state=%d.", specifier_.c_str(), state_));
     return;
   }
   auto* const isolate = script_host->isolate();
   auto context = script_host->runner()->context();
   auto module = ToV8(isolate);
-  state_ = State::Evaluated;
-  if (!module->Evaluate(context).IsEmpty())
+  if (module->Evaluate(context).IsEmpty()) {
+    state_ = State::Failed;
     return exception_state->set_is_thrown();
+  }
+  state_ = State::Succeeded;
 }
 
 void ScriptModuleHandle::Instantiate(ScriptHost* script_host,
                                      v8::Local<v8::Function> callback,
                                      ExceptionState* exception_state) {
   if (state_ != State::Created) {
-    exception_state->ThrowError(base::StringPrintf(
-        "Module '%ls' is already instantiated.", specifier_.c_str()));
+    exception_state->ThrowError(
+        base::StringPrintf("Can not Instantiate moudle '%ls'state=%d.",
+                           specifier_.c_str(), state_));
     return;
   }
   auto* const isolate = script_host->isolate();
   auto context = script_host->runner()->context();
   auto module = ToV8(isolate);
   ModuleResolver::Scope scope(callback);
-  state_ = State::Instantiated;
   if (!module->Instantiate(context, ModuleResolver::Callback)) {
+    state_ = State::Failed;
     exception_state->set_is_thrown();
     return;
   }
-  state_ = State::Ready;
+  state_ = State::Instantiated;
 }
 
 v8::Local<v8::Module> ScriptModuleHandle::ToV8(v8::Isolate* isolate) const {

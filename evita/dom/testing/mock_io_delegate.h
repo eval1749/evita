@@ -30,12 +30,12 @@ class MockIoDelegate final : public domapi::IoDelegate {
   void set_check_spelling_result(bool result) {
     check_spelling_result_ = result;
   }
-  void SetCallResult(const base::StringPiece& name, int error_code);
-  void SetCallResult(const base::StringPiece& name,
+  void SetCallResult(base::StringPiece name, int error_code);
+  void SetCallResult(base::StringPiece name,
                      int erorr_code,
                      int num_transferred);
   void SetComputeFullPathName(base::StringPiece16 result, int error_code);
-  void SetMakeTempFileName(const base::string16 file_name, int error_code);
+  void SetMakeTempFileName(base::StringPiece16 file_name, int error_code);
   void SetFileStatus(const domapi::FileStatus& data, int error_code);
   void SetOpenDirectoryResult(domapi::IoContextId context_id, int error_code);
   void SetOpenFileResult(domapi::IoContextId context_id, int error_code);
@@ -54,7 +54,7 @@ class MockIoDelegate final : public domapi::IoDelegate {
   void CheckSpelling(const base::string16& word_to_check,
                      const CheckSpellingResolver& promise) final;
   void CloseContext(const domapi::IoContextId& context_id,
-                    const domapi::IoIntPromise& promise);
+                    const domapi::IoIntPromise& promise) final;
   void ComputeFullPathName(const base::string16& path_name,
                            const ComputeFullPathNamePromise& promise) final;
   void GetWinResourceNames(const domapi::WinResourceId& resource_id,
@@ -106,7 +106,7 @@ class MockIoDelegate final : public domapi::IoDelegate {
     int num_transferred;
   };
 
-  CallResult PopCallResult(const base::StringPiece& name);
+  CallResult PopCallResult(base::StringPiece name);
   void QueryFileStatus(const base::string16& file_name,
                        const domapi::QueryFileStatusPromise& promise) final;
 
@@ -120,9 +120,6 @@ class MockIoDelegate final : public domapi::IoDelegate {
   bool check_spelling_result_;
   std::vector<base::string16> strings_;
   std::vector<uint8_t> resource_data_;
-  base::string16 resource_name_;
-  base::string16 resource_type_;
-  base::string16 string_result_;
 
   DISALLOW_COPY_AND_ASSIGN(MockIoDelegate);
 };

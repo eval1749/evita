@@ -24,7 +24,7 @@ void MockIoDelegate::set_bytes(const std::vector<uint8_t> new_bytes) {
 }
 
 MockIoDelegate::CallResult MockIoDelegate::PopCallResult(
-    const base::StringPiece& name) {
+    base::StringPiece name) {
   DCHECK(call_results_.size()) << "Expect " << name;
   auto result = call_results_.front();
   DCHECK_EQ(name, result.name);
@@ -32,12 +32,11 @@ MockIoDelegate::CallResult MockIoDelegate::PopCallResult(
   return result;
 }
 
-void MockIoDelegate::SetCallResult(const base::StringPiece& name,
-                                   int error_code) {
+void MockIoDelegate::SetCallResult(base::StringPiece name, int error_code) {
   SetCallResult(name, error_code, 0);
 }
 
-void MockIoDelegate::SetCallResult(const base::StringPiece& name,
+void MockIoDelegate::SetCallResult(base::StringPiece name,
                                    int error_code,
                                    int num_transferred) {
   CallResult result;
@@ -50,7 +49,7 @@ void MockIoDelegate::SetCallResult(const base::StringPiece& name,
 void MockIoDelegate::SetComputeFullPathName(base::StringPiece16 result,
                                             int error_code) {
   SetCallResult("ComputeFullPathName", error_code);
-  string_result_ = result.as_string();
+  strings_.push_back(result.as_string());
 }
 
 void MockIoDelegate::SetFileStatus(const domapi::FileStatus& file_status,
@@ -59,10 +58,10 @@ void MockIoDelegate::SetFileStatus(const domapi::FileStatus& file_status,
   file_status_ = file_status;
 }
 
-void MockIoDelegate::SetMakeTempFileName(const base::string16 file_name,
+void MockIoDelegate::SetMakeTempFileName(base::StringPiece16 file_name,
                                          int error_code) {
   SetCallResult("MakeTempFileName", error_code);
-  string_result_ = file_name;
+  strings_.push_back(file_name.as_string());
 }
 
 void MockIoDelegate::SetOpenDirectoryResult(domapi::IoContextId context_id,
@@ -98,8 +97,8 @@ void MockIoDelegate::SetResourceResult(base::StringPiece operation,
                                        const std::vector<uint8_t>& data) {
   SetCallResult(operation, error_code);
   resource_data_ = data;
-  resource_name_ = name.as_string();
-  resource_type_ = type.as_string();
+  strings_.push_back(name.as_string());
+  strings_.push_back(type.as_string());
 }
 
 void MockIoDelegate::SetStrings(base::StringPiece name,
@@ -129,10 +128,12 @@ void MockIoDelegate::ComputeFullPathName(
     const base::string16& path_name,
     const ComputeFullPathNamePromise& promise) {
   const auto& result = PopCallResult("ComputeFullPathName");
-  if (auto const error_code = result.error_code)
+  if (auto const error_code = result.error_code) {
     promise.reject.Run(domapi::IoError(error_code));
-  else
-    promise.resolve.Run(string_result_);
+    return;
+  }
+  promise.resolve.Run(strings_.back());
+  strings_.pop_back();
 }
 
 void MockIoDelegate::GetWinResourceNames(
@@ -163,7 +164,11 @@ void MockIoDelegate::LoadWinResource(const domapi::WinResourceId& resource_id,
   auto const result = PopCallResult("LoadWinResource");
   if (auto const error_code = result.error_code)
     return promise.reject.Run(domapi::IoError(error_code));
-  if (resource_type_ != type || resource_name_ != name)
+  const auto expected_type = strings_.back();
+  strings_.pop_back();
+  const auto expected_name = strings_.back();
+  strings_.pop_back();
+  if (expected_type != type || expected_name != name)
     return promise.reject.Run(domapi::IoError(ERROR_NOT_FOUND));
   ::memcpy(buffer, resource_data_.data(),
            std::min(resource_data_.size(), buffer_size));
@@ -175,10 +180,12 @@ void MockIoDelegate::MakeTempFileName(
     const base::string16& prefix,
     const domapi::MakeTempFileNamePromise& resolver) {
   auto const result = PopCallResult("MakeTempFileName");
-  if (auto const error_code = result.error_code)
+  if (auto const error_code = result.error_code) {
     resolver.reject.Run(domapi::IoError(error_code));
-  else
-    resolver.resolve.Run(dir_name + L"\\" + prefix + string_result_);
+    return;
+  }
+  resolver.resolve.Run(dir_name + L"\\" + prefix + strings_.back());
+  strings_.pop_back();
 }
 
 void MockIoDelegate::MoveFile(const base::string16&,

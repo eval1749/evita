@@ -5,7 +5,7 @@
 #include <stack>
 #include <unordered_map>
 
-#include "evita/dom/script_module.h"
+#include "evita/dom/engine/script_module_handle.h"
 
 #include "base/memory/singleton.h"
 #include "base/strings/stringprintf.h"
@@ -18,13 +18,13 @@ namespace dom {
 
 namespace {
 
-// Map v8::Module to ScriptModule.
+// Map v8::Module to ScriptModuleHandle.
 class ModuleMap final {
  public:
   ~ModuleMap() = default;
 
-  ScriptModule* Get(v8::Local<v8::Module> module) const;
-  void Set(v8::Local<v8::Module> module, ScriptModule* script_module);
+  ScriptModuleHandle* Get(v8::Local<v8::Module> module) const;
+  void Set(v8::Local<v8::Module> module, ScriptModuleHandle* script_module);
 
   static ModuleMap* GetInstance();
 
@@ -33,12 +33,12 @@ class ModuleMap final {
 
   ModuleMap() = default;
 
-  std::unordered_map<int, ScriptModule*> map_;
+  std::unordered_map<int, ScriptModuleHandle*> map_;
 
   DISALLOW_COPY_AND_ASSIGN(ModuleMap);
 };
 
-ScriptModule* ModuleMap::Get(v8::Local<v8::Module> module) const {
+ScriptModuleHandle* ModuleMap::Get(v8::Local<v8::Module> module) const {
   const auto& it = map_.find(module->GetIdentityHash());
   DCHECK(it != map_.end());
   return it->second;
@@ -48,7 +48,7 @@ ModuleMap* ModuleMap::GetInstance() {
   return base::Singleton<ModuleMap>::get();
 }
 
-void ModuleMap::Set(v8::Local<v8::Module> module, ScriptModule* script_module) {
+void ModuleMap::Set(v8::Local<v8::Module> module, ScriptModuleHandle* script_module) {
   const auto& result = map_.emplace(module->GetIdentityHash(), script_module);
   DCHECK(result.second);
 }
@@ -103,7 +103,7 @@ v8::MaybeLocal<v8::Module> ModuleResolver::Callback(
                              gin::ConvertToV8(isolate, script_referrer));
   if (result.IsEmpty())
     return v8::MaybeLocal<v8::Module>();
-  ScriptModule* script_module = nullptr;
+  ScriptModuleHandle* script_module = nullptr;
   if (!gin::ConvertFromV8(isolate, result, &script_module))
     return v8::MaybeLocal<v8::Module>();
   return v8::MaybeLocal<v8::Module>(script_module->ToV8(isolate));
@@ -115,26 +115,26 @@ ModuleResolver* ModuleResolver::GetInstance() {
 
 }  // namespace
 
-enum class ScriptModule::State {
+enum class ScriptModuleHandle::State {
   Evaluated,
   Instantiated,
   Created,
   Ready,
 };
 
-ScriptModule::ScriptModule(v8::Isolate* isolate,
+ScriptModuleHandle::ScriptModuleHandle(v8::Isolate* isolate,
                            v8::Local<v8::Module> module,
                            const base::string16& specifier)
     : module_(isolate, module), specifier_(specifier), state_(State::Created) {}
 
-ScriptModule::~ScriptModule() = default;
+ScriptModuleHandle::~ScriptModuleHandle() = default;
 
-int ScriptModule::id(ScriptHost* script_host) const {
+int ScriptModuleHandle::id(ScriptHost* script_host) const {
   auto* const isolate = script_host->isolate();
   return ToV8(isolate)->GetIdentityHash();
 }
 
-std::vector<base::string16> ScriptModule::requests(
+std::vector<base::string16> ScriptModuleHandle::requests(
     ScriptHost* script_host) const {
   auto* const isolate = script_host->isolate();
   auto module = ToV8(isolate);
@@ -150,7 +150,7 @@ std::vector<base::string16> ScriptModule::requests(
   return requests;
 }
 
-ScriptModule* ScriptModule::Compile(ScriptHost* script_host,
+ScriptModuleHandle* ScriptModuleHandle::Compile(ScriptHost* script_host,
                                     const base::string16& specifier,
                                     const base::string16& script_text,
                                     ExceptionState* exception_state) {
@@ -166,12 +166,12 @@ ScriptModule* ScriptModule::Compile(ScriptHost* script_host,
     exception_state->set_is_thrown();
     return nullptr;
   }
-  auto* const script_module = new ScriptModule(isolate, module, specifier);
+  auto* const script_module = new ScriptModuleHandle(isolate, module, specifier);
   ModuleMap::GetInstance()->Set(module, script_module);
   return script_module;
 }
 
-void ScriptModule::Evaluate(ScriptHost* script_host,
+void ScriptModuleHandle::Evaluate(ScriptHost* script_host,
                             ExceptionState* exception_state) {
   if (state_ != State::Ready) {
     exception_state->ThrowError(
@@ -186,7 +186,7 @@ void ScriptModule::Evaluate(ScriptHost* script_host,
     return exception_state->set_is_thrown();
 }
 
-bool ScriptModule::Instantiate(ScriptHost* script_host,
+bool ScriptModuleHandle::Instantiate(ScriptHost* script_host,
                                v8::Local<v8::Function> callback,
                                ExceptionState* exception_state) {
   if (state_ != State::Created) {
@@ -207,7 +207,7 @@ bool ScriptModule::Instantiate(ScriptHost* script_host,
   return true;
 }
 
-v8::Local<v8::Module> ScriptModule::ToV8(v8::Isolate* isolate) const {
+v8::Local<v8::Module> ScriptModuleHandle::ToV8(v8::Isolate* isolate) const {
   return module_.Get(isolate);
 }
 

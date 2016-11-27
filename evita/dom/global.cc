@@ -13,6 +13,7 @@
 #include "evita/dom/editor.h"
 #include "evita/dom/encodings/text_decoder.h"
 #include "evita/dom/encodings/text_encoder.h"
+#include "evita/dom/engine/script_module_handle.h"
 #include "evita/dom/events/composition_event.h"
 #include "evita/dom/events/event.h"
 #include "evita/dom/events/event_target.h"
@@ -38,7 +39,6 @@
 #include "evita/dom/os/file.h"
 #include "evita/dom/os/process.h"
 #include "evita/dom/script_host.h"
-#include "evita/dom/script_module.h"
 #include "evita/dom/text/regular_expression.h"
 #include "evita/dom/text/text_document.h"
 #include "evita/dom/text/text_mutation_observer.h"
@@ -99,7 +99,7 @@ v8::Local<v8::ObjectTemplate> Global::GetObjectTemplate(v8::Isolate* isolate) {
 
     auto const editor_templ = INSTALL(Editor);
     INSTALL(FilePath);
-    INSTALL(ScriptModule);
+    INSTALL(ScriptModuleHandle);
     INSTALL(TextRange);
     INSTALL(RegularExpression);
 

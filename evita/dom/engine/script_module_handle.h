@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_DOM_SCRIPT_MODULE_H_
-#define EVITA_DOM_SCRIPT_MODULE_H_
+#ifndef EVITA_DOM_ENGINE_SCRIPT_MODULE_HANDLE_H_
+#define EVITA_DOM_ENGINE_SCRIPT_MODULE_HANDLE_H_
 
 #include <vector>
 
@@ -13,35 +13,35 @@
 namespace dom {
 
 namespace bindings {
-class ScriptModuleClass;
+class ScriptModuleHandleClass;
 }
 
 class ExceptionState;
 class ScriptHost;
 
-class ScriptModule final : public ginx::Scriptable<ScriptModule> {
-  DECLARE_SCRIPTABLE_OBJECT(ScriptModule)
+class ScriptModuleHandle final : public ginx::Scriptable<ScriptModuleHandle> {
+  DECLARE_SCRIPTABLE_OBJECT(ScriptModuleHandle)
 
  public:
-  ~ScriptModule() final;
+  ~ScriptModuleHandle() final;
 
   v8::Local<v8::Module> ToV8(v8::Isolate* isolate) const;
 
  private:
-  friend class bindings::ScriptModuleClass;
+  friend class bindings::ScriptModuleHandleClass;
 
   enum class State;
 
-  ScriptModule(v8::Isolate* isolate,
+  ScriptModuleHandle(v8::Isolate* isolate,
                v8::Local<v8::Module> module,
                const base::string16& specifier);
 
-  // ScriptModule.idl
+  // ScriptModuleHandle.idl
   int id(ScriptHost* script_host) const;
   std::vector<base::string16> requests(ScriptHost* script_host) const;
   const base::string16& specifier() const { return specifier_; }
 
-  static ScriptModule* Compile(ScriptHost* script_host,
+  static ScriptModuleHandle* Compile(ScriptHost* script_host,
                                const base::string16& specifier,
                                const base::string16& script_text,
                                ExceptionState* exception_state);
@@ -56,9 +56,9 @@ class ScriptModule final : public ginx::Scriptable<ScriptModule> {
   const base::string16 specifier_;
   State state_;
 
-  DISALLOW_COPY_AND_ASSIGN(ScriptModule);
+  DISALLOW_COPY_AND_ASSIGN(ScriptModuleHandle);
 };
 
 }  // namespace dom
 
-#endif  // EVITA_DOM_SCRIPT_MODULE_H_
+#endif  // EVITA_DOM_ENGINE_SCRIPT_MODULE_HANDLE_H_

@@ -32,7 +32,7 @@ source_set("test_files") {
 
   sources = [
     "directory_test.cc",
-    "file_unittest.cc",
+    "file_test.cc",
     "process_unittest.cc",
   ]
 

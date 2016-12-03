@@ -12,6 +12,7 @@ kSampleTextMap.set('simple_root.js', [
   'import {simple1} from "simple1.js";',
   'import {simple2} from "simple2.js";',
   'console.log("simple.js", `simple1=${simple1}`, `simple2=${simple2}`);',
+  '123',
 ].join('\n'));
 kSampleTextMap.set('simple1.js', 'export let simple1 = 123;');
 kSampleTextMap.set('simple2.js', 'export let simple2 = 456;');
@@ -28,10 +29,30 @@ kSampleTextMap.set('chain1.js', [
 kSampleTextMap.set('chain2.js', 'export let chain2 = 456;');
 
 // cycle
-kSampleTextMap.set('cycle_root.js', 'import {cycle1} from "cycle1.js";');
-kSampleTextMap.set('cycle1.js', 'import {cycle2} from "cycle2.js";');
-kSampleTextMap.set('cycle2.js', 'import {cycle3} from "cycle3.js";');
-kSampleTextMap.set('cycle3.js', 'import {cycle1} from "cycle1.js";');
+kSampleTextMap.set('cycle_root.js', [
+  'import * as cycle1 from "cycle1.js";',
+  'console.log("cycle_root.js");',
+  'describe(cycle1);',
+].join('\n'));
+kSampleTextMap.set('cycle1.js', [
+  'import * as cycle2 from "cycle2.js";',
+  'export {cycle2};',
+].join('\n'));
+kSampleTextMap.set('cycle2.js', [
+  'import * as cycle3 from "cycle3.js";',
+  'export {cycle3};',
+].join('\n'));
+kSampleTextMap.set('cycle3.js', [
+  'import * as cycle1 from "cycle1.js";',
+  'export {cycle1};',
+].join('\n'));
+
+
+// loop
+kSampleTextMap.set('loop_root.js', 'import "loop1.js";');
+kSampleTextMap.set('loop1.js', 'import "loop2.js";');
+kSampleTextMap.set('loop2.js', 'import "loop3.js";');
+kSampleTextMap.set('loop3.js', 'import "loop1.js";');
 
 class SampleScriptTextProvider {
   /**
@@ -70,11 +91,12 @@ const kScriptTextProvider = new SampleScriptTextProvider();
 
 function loadModule(specifier) {
   const loader = new ScriptModuleLoader(kScriptTextProvider);
-  return loader.load(specifier);
+  loader.load(specifier).then(x => console.log('loadModule', specifier, x));
 }
 
 loadModule('simple_root.js');
 loadModule('chain_root.js');
 loadModule('cycle_root.js');
+loadModule('loop_root.js');
 
 });

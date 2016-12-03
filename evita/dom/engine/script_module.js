@@ -44,53 +44,6 @@ function canAdvanceTo(oldState, newState) {
   throw new Error(`Invalid state ${oldState}`);
 }
 
-// |ScriptModuleMap| provides
-//  1. mapping from module full name to |ScriptModule|.
-//  2. mapping from |NativeScriptModule| to |ScriptModule|; used for
-//     resolve referer in callback of |NativeScriptModule#instantiate()|.
-class ScriptModuleMap {
-  constructor() {
-    /** @const @type {!Map<string, !ScriptModule} */
-    this.fullNameToModule_ = new Map();
-    /** @const @type {!Map<NativeScriptModule, !ScriptModule} */
-    this.handleToModule_ = new Map();
-  }
-
-  /**
-   * @param {!NativeScriptModule} handle
-   * @return {!ScriptModule}
-   */
-  fromHandle(handle) {
-    const module = this.handleToModule_.get(handle);
-    if (!module)
-      throw new Error(`No assocaited ScriptModule for ${handle}`);
-    return module;
-  }
-
-  /**
-   * @param {string} fullName
-   * @return {!ScriptModuole}
-   */
-  getOrCreate(fullName) {
-    console.assert(typeof(fullName) === 'string', fullName);
-    const module = this.fullNameToModule_.get(fullName);
-    if (module)
-      return module;
-    const newModule = new ScriptModule(fullName);
-    this.fullNameToModule_.set(fullName, newModule);
-    return newModule;
-  }
-
-  /**
-   * @param {!ScriptModule} module
-   */
-  registerHandle(module) {
-    console.assert(module.handle, module);
-    console.assert(module.state === State.COMPILED, module);
-    this.handleToModule_.set(module.handle, module);
-  }
-}
-
 class ScriptModule {
   /**
    * @param {string} fullName
@@ -107,6 +60,8 @@ class ScriptModule {
       /** @const @type {!function(!Error)} */
       this.reject_ = reject;
     });
+    /** @type {!Array<!ScriptModule>} */
+    this.requests_ = [];
     /** @type {State} */
     this.state_ = State.INITIALIZED;
   }
@@ -115,10 +70,22 @@ class ScriptModule {
   get fullName() { return this.fullName_; }
 
   /** @return {!NativeScriptModule} */
-  get handle() { return this.handle_; }
+  get handle() {
+    console.assert(this.isCompiled, this);
+    return this.handle_;
+  }
+
+  /** @return {boolean} */
+  get isCompiled() { return this.handle_ !== null; }
 
   /** @return {!Promise} */
   get promise() { return this.promise_; }
+
+  /** @return {!Array<!ScriptModule>} */
+  get requests() {
+    console.assert(this.isCompiled, this);
+    return this.requests_;
+  }
 
   /** @return {State} */
   get state() { return this.state_; }
@@ -127,37 +94,44 @@ class ScriptModule {
    * @param {State} newState
    */
   advanceTo(newState) {
-    console.log('  advanceTo', this, newState);
     console.assert(canAdvanceTo(this.state_, newState), this, newState);
     this.state_ = newState;
   }
 
   /**
-   * @param {string} scriptText
+   * @public
+   * @param {!NativeScriptModule} handle
+   * @param {!Array<!ScriptModule>} requests
    */
-  compile(scriptText) {
-    console.assert(canAdvanceTo(this.state_, State.COMPILED), this);
+  didCompile(handle, requests) {
     if (this.handle_)
       throw new Error(`${module} is already compiled.`);
-    this.handle_ = NativeScriptModule.compile(this.fullName, scriptText);
+    this.handle_ = handle;
+    this.requests_ = requests;
     this.advanceTo(State.COMPILED);
   }
 
   /**
+   * @public
    * @param {!Error} error
    */
   fail(error) {
-    console.log('  fail', this, error);
     this.handle_ = null;
     this.state_ = State.FAILED;
     this.reject_(error);
   }
 
+  /**
+   * @return {*}
+   */
   finish() {
     this.advanceTo(State.EVALUATING);
-    this.handle_.evaluate();
+    const result = this.handle_.evaluate();
+    // TODO(eval1749): We would like to known |Module::Evaluate()| returns
+    // other than |undefined|.
+    console.assert(result === undefined, result);
     this.advanceTo(State.FINISHED);
-    this.resolve_(this);
+    this.resolve_(result);
   }
 
   /** @return {boolean} */
@@ -270,6 +244,28 @@ class PlatformScriptTextProvider {
   }
 }
 
+/**
+ * @param {!ScriptModule} module
+ * @param {!Array<!ScriptModule>} path
+ * @return {!Array<!ScriptModule>}
+ */
+function checkCycle(module, path) {
+  if (module.state !== State.COMPILED)
+    return [];
+  const index = path.indexOf(module);
+  if (index >= 0)
+    return path.slice(index);
+  path.push(module);
+  for (const request of module.requests) {
+    const cycle = checkCycle(request, path);
+    if (cycle)
+      return cycle;
+  }
+  path.pop();
+  return [];
+}
+
+
 /** @type {!ScriptTextProvider} */
 const kPlatformScriptTextProvider = new PlatformScriptTextProvider();
 
@@ -278,10 +274,31 @@ class ScriptModuleLoader {
    * @param {!ScriptTextProvider} scriptTextProvider
    */
   constructor(scriptTextProvider) {
-    /** @const @type {!ScriptModuleMap} */
-    this.moduleMap_ = new ScriptModuleMap();
+    /** @const @type {!Map<string, !ScriptModule} */
+    this.fullNameToModule_ = new Map();
+    /** @const @type {!Map<NativeScriptModule, !ScriptModule} */
+    this.handleToModule_ = new Map();
     /** @const @type {!ScriptTextProvider} */
     this.scriptTextProvider_ = scriptTextProvider;
+  }
+
+  /**
+   * @private
+   * @param {!ScriptModule} module
+   * @param {string} scriptText
+   */
+  compile(module, scriptText) {
+    console.assert(canAdvanceTo(module.state, State.COMPILED), module);
+    const handle = NativeScriptModule.compile(module.fullName, scriptText);
+    this.handleToModule_.set(handle, module);
+    /** @type {string} */
+    const dirName = this.dirNameOf(module.fullName);
+    const requests = handle.requests.map(specifier => {
+      /** @type {string} */
+      const requestFullName = this.computeFullName(specifier, dirName);
+      return this.getOrCreateModule(requestFullName);
+    });
+    module.didCompile(handle, requests);
   }
 
   /**
@@ -296,22 +313,6 @@ class ScriptModuleLoader {
 
   /**
    * @private
-   * @param {!ScriptModule} module
-   * @return {!Array<!ScriptModule>}
-   */
-  computeRequests(module) {
-    /** @type {string} */
-    const dirName = this.dirNameOf(module.fullName);
-    return module.handle.requests.map(specifier => {
-      /** @type {string} */
-      const requestFullName = this.computeFullName(specifier, dirName);
-      /** @type {!ScriptModule} */
-      return this.getOrCreateModule(requestFullName);
-    });
-  }
-
-  /**
-   * @private
    * @param {string} fullName
    * @return string
    */
@@ -321,16 +322,29 @@ class ScriptModuleLoader {
    * @param {!NativeScriptModule} handle
    * @return {!ScriptModule}
    */
-  fromHandle(handle) { return this.moduleMap_.fromHandle(handle); }
+  fromHandle(handle) {
+    const module = this.handleToModule_.get(handle);
+    if (!module)
+      throw new Error(`No assocaited ScriptModule for ${handle}`);
+    return module;
+  }
 
   /**
    * @private
    * @param {string} fullName
    * @return {!ScriptModuole}
    */
-  getOrCreateModule(fullName) { return this.moduleMap_.getOrCreate(fullName); }
+  getOrCreateModule(fullName) {
+    const module = this.fullNameToModule_.get(fullName);
+    if (module)
+      return module;
+    const newModule = new ScriptModule(fullName);
+    this.fullNameToModule_.set(fullName, newModule);
+    return newModule;
+  }
 
   /**
+   * @public
    * @param {string} specifier
    * @param {ScriptTextProvider=} provider
    */
@@ -346,20 +360,17 @@ class ScriptModuleLoader {
    * @return {!Promise}
    */
   async loadInternal(module) {
-    console.log('  loadInternal', module);
-    module.advanceTo(State.LOADING);
-    const scriptText = await this.readScriptText(module.fullName);
-    module.advanceTo(State.LOADED);
     try {
-      module.compile(scriptText);
-      this.moduleMap_.registerHandle(module);
-      /** @type {!Array<!ScriptModule>} */
-      const requests = this.computeRequests(module);
-      // TODO(eval1749): We should check cyclic dependency of |requests| and
-      // |module|.
+      module.advanceTo(State.LOADING);
+      const scriptText = await this.readScriptText(module.fullName);
+      module.advanceTo(State.LOADED);
+      this.compile(module, scriptText);
+      checkCycle(module, []);
 
       // Wait all requests are fnished or one of them is rejected.
-      await Promise.all(requests.map(request => this.loadIfNeeded(request)));
+      await Promise.all(
+          module.requests.filter(request => request.state === State.INITIALIZED)
+              .map(request => this.loadInternal(request)));
       module.advanceTo(State.RESOLVED);
 
       // All requested modules for |module| are loaded, we tell |module|
@@ -369,7 +380,7 @@ class ScriptModuleLoader {
         const requestFullName =
             this.computeFullName(specifier, referer.fullName);
         const requestModule = this.getOrCreateModule(requestFullName);
-        if (!requestModule.isFinished())
+        if (!requestModule.isCompiled)
           throw new Error(`${requestModule} should be finished.`);
         return requestModule.handle;
       });

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_DOM_ENGINE_SCRIPT_MODULE_HANDLE_H_
-#define EVITA_DOM_ENGINE_SCRIPT_MODULE_HANDLE_H_
+#ifndef EVITA_DOM_ENGINE_native_script_module_H_
+#define EVITA_DOM_ENGINE_native_script_module_H_
 
 #include <vector>
 
@@ -13,35 +13,35 @@
 namespace dom {
 
 namespace bindings {
-class ScriptModuleHandleClass;
+class NativeScriptModuleClass;
 }
 
 class ExceptionState;
 class ScriptHost;
 
-class ScriptModuleHandle final : public ginx::Scriptable<ScriptModuleHandle> {
-  DECLARE_SCRIPTABLE_OBJECT(ScriptModuleHandle)
+class NativeScriptModule final : public ginx::Scriptable<NativeScriptModule> {
+  DECLARE_SCRIPTABLE_OBJECT(NativeScriptModule)
 
  public:
-  ~ScriptModuleHandle() final;
+  ~NativeScriptModule() final;
 
   v8::Local<v8::Module> ToV8(v8::Isolate* isolate) const;
 
  private:
-  friend class bindings::ScriptModuleHandleClass;
+  friend class bindings::NativeScriptModuleClass;
 
   enum class State;
 
-  ScriptModuleHandle(v8::Isolate* isolate,
+  NativeScriptModule(v8::Isolate* isolate,
                      v8::Local<v8::Module> module,
                      const base::string16& specifier);
 
-  // ScriptModuleHandle.idl
+  // NativeScriptModule.idl
   int id(ScriptHost* script_host) const;
   std::vector<base::string16> requests(ScriptHost* script_host) const;
   const base::string16& specifier() const { return specifier_; }
 
-  static ScriptModuleHandle* Compile(ScriptHost* script_host,
+  static NativeScriptModule* Compile(ScriptHost* script_host,
                                      const base::string16& specifier,
                                      const base::string16& script_text,
                                      ExceptionState* exception_state);
@@ -56,9 +56,9 @@ class ScriptModuleHandle final : public ginx::Scriptable<ScriptModuleHandle> {
   const base::string16 specifier_;
   State state_;
 
-  DISALLOW_COPY_AND_ASSIGN(ScriptModuleHandle);
+  DISALLOW_COPY_AND_ASSIGN(NativeScriptModule);
 };
 
 }  // namespace dom
 
-#endif  // EVITA_DOM_ENGINE_SCRIPT_MODULE_HANDLE_H_
+#endif  // EVITA_DOM_ENGINE_native_script_module_H_

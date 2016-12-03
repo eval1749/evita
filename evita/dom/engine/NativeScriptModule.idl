@@ -3,14 +3,14 @@
 // found in the LICENSE file.
 
 callback ScriptModuleResolveCallbck =
-    ScriptModuleHandle(DOMString specifier, DOMString referrer);
+    NativeScriptModule(DOMString specifier, DOMString referrer);
 
-interface ScriptModuleHandle {
+interface NativeScriptModule {
   [CallWith = ScriptHost] readonly attribute long id;
   [CallWith = ScriptHost] readonly attribute DOMString[] requests;
   readonly attribute DOMString specifier;
 
-  [ CallWith = ScriptHost, RaisesException ] static ScriptModuleHandle compile(
+  [ CallWith = ScriptHost, RaisesException ] static NativeScriptModule compile(
       DOMString specifier, DOMString script_text);
   [ CallWith = ScriptHost, RaisesException ] void evaluate();
   [ CallWith = ScriptHost, RaisesException ] void instantiate(

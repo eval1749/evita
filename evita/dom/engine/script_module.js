@@ -46,18 +46,18 @@ function canAdvanceTo(oldState, newState) {
 
 // |ScriptModuleMap| provides
 //  1. mapping from module full name to |ScriptModule|.
-//  2. mapping from |ScriptModuleHandle| to |ScriptModule|; used for
-//     resolve referer in callback of |ScriptModuleHandle#instantiate()|.
+//  2. mapping from |NativeScriptModule| to |ScriptModule|; used for
+//     resolve referer in callback of |NativeScriptModule#instantiate()|.
 class ScriptModuleMap {
   constructor() {
     /** @const @type {!Map<string, !ScriptModule} */
     this.fullNameToModule_ = new Map();
-    /** @const @type {!Map<ScriptModuleHandle, !ScriptModule} */
+    /** @const @type {!Map<NativeScriptModule, !ScriptModule} */
     this.handleToModule_ = new Map();
   }
 
   /**
-   * @param {!ScriptModuleHandle} handle
+   * @param {!NativeScriptModule} handle
    * @return {!ScriptModule}
    */
   fromHandle(handle) {
@@ -98,7 +98,7 @@ class ScriptModule {
   constructor(fullName) {
     /** @const @type {string} */
     this.fullName_ = fullName;
-    /** @type {?ScriptModuleHandle} */
+    /** @type {?NativeScriptModule} */
     this.handle_ = null;
     /** @const @type {!Promise} */
     this.promise_ = new Promise((resolve, reject) => {
@@ -114,7 +114,7 @@ class ScriptModule {
   /** @return {string} */
   get fullName() { return this.fullName_; }
 
-  /** @return {!ScriptModuleHandle} */
+  /** @return {!NativeScriptModule} */
   get handle() { return this.handle_; }
 
   /** @return {!Promise} */
@@ -139,7 +139,7 @@ class ScriptModule {
     console.assert(canAdvanceTo(this.state_, State.COMPILED), this);
     if (this.handle_)
       throw new Error(`${module} is already compiled.`);
-    this.handle_ = ScriptModuleHandle.compile(this.fullName, scriptText);
+    this.handle_ = NativeScriptModule.compile(this.fullName, scriptText);
     this.advanceTo(State.COMPILED);
   }
 
@@ -318,7 +318,7 @@ class ScriptModuleLoader {
   dirNameOf(fullName) { return this.scriptTextProvider_.dirNameOf(fullName); }
 
   /**
-   * @param {!ScriptModuleHandle} handle
+   * @param {!NativeScriptModule} handle
    * @return {!ScriptModule}
    */
   fromHandle(handle) { return this.moduleMap_.fromHandle(handle); }

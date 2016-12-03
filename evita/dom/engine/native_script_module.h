@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_DOM_ENGINE_native_script_module_H_
-#define EVITA_DOM_ENGINE_native_script_module_H_
+#ifndef EVITA_DOM_ENGINE_NATIVE_SCRIPT_MODULE_H_
+#define EVITA_DOM_ENGINE_NATIVE_SCRIPT_MODULE_H_
 
 #include <vector>
 
@@ -46,7 +46,8 @@ class NativeScriptModule final : public ginx::Scriptable<NativeScriptModule> {
                                      const base::string16& script_text,
                                      ExceptionState* exception_state);
 
-  void Evaluate(ScriptHost* script_host, ExceptionState* exception_state);
+  v8::Local<v8::Value> Evaluate(ScriptHost* script_host,
+                                ExceptionState* exception_state);
 
   void Instantiate(ScriptHost* script_host,
                    v8::Local<v8::Function> callback,
@@ -61,4 +62,4 @@ class NativeScriptModule final : public ginx::Scriptable<NativeScriptModule> {
 
 }  // namespace dom
 
-#endif  // EVITA_DOM_ENGINE_native_script_module_H_
+#endif  // EVITA_DOM_ENGINE_NATIVE_SCRIPT_MODULE_H_

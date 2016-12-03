@@ -12,7 +12,7 @@ interface NativeScriptModule {
 
   [ CallWith = ScriptHost, RaisesException ] static NativeScriptModule compile(
       DOMString specifier, DOMString script_text);
-  [ CallWith = ScriptHost, RaisesException ] void evaluate();
+  [ CallWith = ScriptHost, RaisesException ] any evaluate();
   [ CallWith = ScriptHost, RaisesException ] void instantiate(
       ScriptModuleResolveCallbck callback);
 };

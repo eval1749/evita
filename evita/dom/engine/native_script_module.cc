@@ -175,21 +175,25 @@ NativeScriptModule* NativeScriptModule::Compile(
   return script_module;
 }
 
-void NativeScriptModule::Evaluate(ScriptHost* script_host,
-                                  ExceptionState* exception_state) {
+v8::Local<v8::Value> NativeScriptModule::Evaluate(
+    ScriptHost* script_host,
+    ExceptionState* exception_state) {
   if (state_ != State::Instantiated) {
     exception_state->ThrowError(base::StringPrintf(
         "Can not evaluate Module '%ls' state=%d.", specifier_.c_str(), state_));
-    return;
+    return v8::Local<v8::Value>();
   }
   auto* const isolate = script_host->isolate();
   auto context = script_host->runner()->context();
   auto module = ToV8(isolate);
-  if (module->Evaluate(context).IsEmpty()) {
+  auto result = module->Evaluate(context);
+  if (result.IsEmpty()) {
     state_ = State::Failed;
-    return exception_state->set_is_thrown();
+    exception_state->set_is_thrown();
+    return v8::Local<v8::Value>();
   }
   state_ = State::Succeeded;
+  return result.ToLocalChecked();
 }
 
 void NativeScriptModule::Instantiate(ScriptHost* script_host,

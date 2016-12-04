@@ -34,6 +34,9 @@ class ScriptModule {
     this.handle_ = handle;
   }
 
+  /** @return {boolean} */
+  get isCompiled() { return this.handle_ !== null; }
+
   /** @override */
   toString() { return `SciprtModule("${this.fullName_}")`; }
 }
@@ -142,9 +145,10 @@ class PlatformScriptTextProvider {
   }
 }
 
-/** @type {!ScriptTextProvider} */
-const kPlatformScriptTextProvider = new PlatformScriptTextProvider();
-
+// |ScriptModuleLoader| provides following methods for loading and unloading
+// ES6 modules:
+//  - load(fullName)
+//  - unload(fullName)
 class ScriptModuleLoader {
   /**
    * @param {!ScriptTextProvider} scriptTextProvider
@@ -188,25 +192,30 @@ class ScriptModuleLoader {
     const module = new ScriptModule(fullName);
     this.fullNameToModule_.set(fullName, module);
 
-    /** @type {string} */
-    const scriptText = await this.readScriptText(fullName);
+    try {
+      /** @type {string} */
+      const scriptText = await this.readScriptText(fullName);
 
-    /** @type {!NativeScriptModule} */
-    const handle = NativeScriptModule.compile(fullName, scriptText);
-    module.handle = handle;
-    this.handleToModule_.set(handle, module);
+      /** @type {!NativeScriptModule} */
+      const handle = NativeScriptModule.compile(fullName, scriptText);
+      module.handle = handle;
+      this.handleToModule_.set(handle, module);
 
-    /** @type {string} */
-    const dirName = this.dirNameOf(fullName);
-    /** @type {!Array<!ScriptModule>} */
-    const requestModules = [];
-    for (const request of handle.requests) {
-      const requestFullName = this.normalizeSpecifier(request, dirName);
-      requestModules.push(this.fetchModleTree(requestFullName));
+      /** @type {string} */
+      const dirName = this.dirNameOf(fullName);
+      /** @type {!Array<!ScriptModule>} */
+      const requestModules = [];
+      for (const request of handle.requests) {
+        const requestFullName = this.normalizeSpecifier(request, dirName);
+        requestModules.push(this.fetchModleTree(requestFullName));
+      }
+
+      await Promise.all(requestModules);
+      return module;
+    } catch (exception) {
+      this.unloadModule(module);
+      throw exception;
     }
-
-    await Promise.all(requestModules);
-    return module;
   }
 
   /**
@@ -226,9 +235,11 @@ class ScriptModuleLoader {
    */
   async load(specifier) {
     const fullName = await this.scriptTextProvider_.computeFullName(specifier);
+    const present = this.fullNameToModule_.get(fullName) || null;
+    if (present)
+      this.unloadModule(present);
     const module = await this.fetchModleTree(fullName);
     module.handle.instantiate(this.resolveCallback.bind(this));
-
     const result = module.handle.evaluate();
     // TODO(eval1749): We would like to known |Module::Evaluate()| returns
     // other than |undefined|.
@@ -265,11 +276,32 @@ class ScriptModuleLoader {
       throw new Error(`No such module ${fullName}`);
     return module.handle;
   }
+
+  /**
+   * @public
+   * @param {string} specifier
+   */
+  async unload(specifier) {
+    const fullName = await this.scriptTextProvider_.computeFullName(specifier);
+    this.unloadModule(fullName);
+  }
+
+  /**
+   * @private
+   * @param {!ScriptModule} module
+   */
+  unloadModule(module) {
+    this.fullNameToModule_.delete(module.fullName);
+    if (!module.isCompiled)
+      return true;
+    this.handleToModule_.delete(module.handle);
+    return true;
+  }
 }
 
-// export { ScriptModule, loadModule };
 global.ScriptModule = ScriptModule;
 global.ScriptModuleLoader = ScriptModuleLoader;
 global.ScriptTextProvider = ScriptTextProvider;
+global.PlatformScriptTextProvider = PlatformScriptTextProvider;
 
 });

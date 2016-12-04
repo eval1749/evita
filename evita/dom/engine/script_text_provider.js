@@ -27,6 +27,7 @@ ScriptTextProvider.prototype.normalizeSpecifier = function(specifier, dirName) {
 
 /**
  * @param {string} fullName
+ * @param {string} referrer
  * @return {!Promise<string>}
  */
-ScriptTextProvider.prototype.readScriptText = function(fullName) {};
+ScriptTextProvider.prototype.readScriptText = function(fullName, referrer) {};

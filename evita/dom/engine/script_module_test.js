@@ -103,12 +103,13 @@ class SampleScriptTextProvider {
 
   /**
    * @param {string} fullName
+   * @param {string} referer
    * @return {!Promise<string>}
    */
-  readScriptText(fullName) {
+  readScriptText(fullName, referer) {
     const text = kSampleTextMap.get(fullName);
     if (text === undefined)
-      throw new Error(`No such sample "${fullName}".`);
+      throw new Error(`No such sample "${fullName} in ${referer}".`);
     return Promise.resolve(text);
   }
 }

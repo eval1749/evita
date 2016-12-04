@@ -56,9 +56,10 @@ class FileScriptTextProvider {
 
   /**
    * @param {string} fullName
+   * @param {string} referrer
    * @return {!Promise<string>}
    */
-  async readScriptText(fullName) {
+  async readScriptText(fullName, referrer) {
     /** @type {string} */
     const encoding = 'utf-8';
     try {
@@ -85,9 +86,9 @@ class FileScriptTextProvider {
     } catch (error) {
       switch (error['winLastError']) {
         case 2:
-          throw new Error(`No such file "${fullName}"`);
+          throw new Error(`No such file "${fullName}" in "${referrer}"`);
         case 3:
-          throw new Error(`No such path "${fullName}"`);
+          throw new Error(`No such path "${fullName}" in "${referrer}"`);
       }
       throw error;
     }

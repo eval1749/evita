@@ -56,9 +56,7 @@ class Session {
   /**
    * @param {!ScriptModule} module
    */
-  addModule(module) {
-    this.modules_.push(module);
-  }
+  addModule(module) { this.modules_.push(module); }
 }
 
 // |ScriptModuleLoader| provides following methods for loading and unloading
@@ -99,9 +97,10 @@ class ScriptModuleLoader {
    * @private
    * @param {!Session} session
    * @param {string} fullName
+   * @param {string} referrer
    * @return {!Promise<!ScriptModule>}
    */
-  async fetchModleTree(session, fullName) {
+  async fetchModleTree(session, fullName, referrer) {
     /** @type {?ScriptModule} */
     const present = this.fullNameToModule_.get(fullName) || null;
     if (present)
@@ -112,7 +111,7 @@ class ScriptModuleLoader {
 
     try {
       /** @type {string} */
-      const scriptText = await this.readScriptText(fullName);
+      const scriptText = await this.readScriptText(fullName, referrer);
 
       /** @type {!NativeScriptModule} */
       const handle = NativeScriptModule.compile(fullName, scriptText);
@@ -125,7 +124,8 @@ class ScriptModuleLoader {
       const requestModules = [];
       for (const request of handle.requests) {
         const requestFullName = this.normalizeSpecifier(request, dirName);
-        requestModules.push(this.fetchModleTree(session, requestFullName));
+        requestModules.push(
+            this.fetchModleTree(session, requestFullName, fullName));
       }
 
       await Promise.all(requestModules);
@@ -158,7 +158,7 @@ class ScriptModuleLoader {
     if (present)
       this.unloadModule(present);
     const session = new Session();
-    const module = await this.fetchModleTree(session, fullName);
+    const module = await this.fetchModleTree(session, fullName, '-');
     module.handle.instantiate(this.resolveCallback.bind(this));
     const result = module.handle.evaluate();
     // TODO(eval1749): We would like to known |Module::Evaluate()| returns
@@ -171,10 +171,11 @@ class ScriptModuleLoader {
   /**
    * @private
    * @param {string} fullName
+   * @param {string} referrer
    * @return {!Promise<string>}
    */
-  readScriptText(fullName) {
-    return this.scriptTextProvider_.readScriptText(fullName);
+  readScriptText(fullName, referrer) {
+    return this.scriptTextProvider_.readScriptText(fullName, referrer);
   }
 
   /**

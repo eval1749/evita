@@ -31,8 +31,7 @@ kSampleTextMap.set('chain2.js', 'export let chain2 = 456;');
 // cycle
 kSampleTextMap.set('cycle_root.js', [
   'import * as cycle1 from "cycle1.js";',
-  'console.log("cycle_root.js");',
-  'describe(cycle1);',
+  'console.log("cycle_root.js", "cycle1", cycle1);',
 ].join('\n'));
 kSampleTextMap.set('cycle1.js', [
   'import * as cycle2 from "cycle2.js";',
@@ -49,7 +48,10 @@ kSampleTextMap.set('cycle3.js', [
 
 
 // loop
-kSampleTextMap.set('loop_root.js', 'import "loop1.js";');
+kSampleTextMap.set('loop_root.js', [
+  'import * as loop1 from "loop1.js";',
+  'console.log("loop1", loop1)',
+].join('\n'));
 kSampleTextMap.set('loop1.js', 'import "loop2.js";');
 kSampleTextMap.set('loop2.js', 'import "loop3.js";');
 kSampleTextMap.set('loop3.js', 'import "loop1.js";');
@@ -91,7 +93,7 @@ const kScriptTextProvider = new SampleScriptTextProvider();
 
 function loadModule(specifier) {
   const loader = new ScriptModuleLoader(kScriptTextProvider);
-  loader.load(specifier).then(x => console.log('loadModule', specifier, x));
+  loader.load(specifier).then(x => console.log('  loadModule', specifier, x));
 }
 
 loadModule('simple_root.js');

@@ -4,49 +4,6 @@
 
 goog.scope(function() {
 
-/** @enum {string} */
-const State = {
-  COMPILED: 'COMPILED',
-  COMPILING: 'COMPILEING',
-  EVALUATED: 'EVALUATED',
-  EVALUATING: 'EVALUATING',
-  FAILED: 'FAILED',
-  INSTANTIATED: 'INSTANTIATED',
-  INSTANTIATING: 'INSTANTIATING',
-  LOADED: 'LOADED',
-  LOADING: 'LOADING',
-  NOT_STARTED: 'NOT_STARTED',
-  RESOLVED: 'RESOLVED',
-  RESOLVING: 'RESOLVING',
-};
-
-/** @type {!Map<State, State>} */
-const kCanAdvanceMap = (() => {
-  /** @type {!Map<State, State>} */
-  const map = new Map();
-  [State.NOT_STARTED, State.LOADING, State.LOADED, State.COMPILING,
-   State.COMPILED, State.RESOLVING, State.RESOLVED, State.INSTANTIATING,
-   State.INSTANTIATED, State.EVALUATING, State.EVALUATED]
-      .reduce((previous, current) => {
-        map.set(previous, current);
-        return current;
-      });
-  return map;
-})();
-
-/**
- * @param {State} oldState
- * @param {State} newState
- * @return {boolean}
- */
-function canAdvanceTo(oldState, newState) {
-  /** @type {State} */
-  const allowed = kCanAdvanceMap.get(oldState) || State.FAILED;
-  if (allowed === State.FAILED)
-    throw new Error(`Invalid state ${oldState}`);
-  return newState === allowed;
-}
-
 class ScriptModule {
   /**
    * @param {string} fullName
@@ -56,15 +13,6 @@ class ScriptModule {
     this.fullName_ = fullName;
     /** @type {?NativeScriptModule} */
     this.handle_ = null;
-    /** @const @type {!Promise} */
-    this.promise_ = new Promise((resolve, reject) => {
-      /** @const @type {!function(boolean)} */
-      this.resolve_ = resolve;
-      /** @const @type {!function(!Error)} */
-      this.reject_ = reject;
-    });
-    /** @type {State} */
-    this.state_ = State.NOT_STARTED;
   }
 
   /** @return {string} */
@@ -86,37 +34,11 @@ class ScriptModule {
     this.handle_ = handle;
   }
 
-  /** @return {boolean} */
-  get isStarted() { return this.state_ !== State.NOT_STARTED; }
-
   /** @return {!Promise} */
   get promise() { return this.promise_; }
 
-  /**
-   * @param {State} newState
-   */
-  advanceTo(newState) {
-    if (!canAdvanceTo(this.state_, newState))
-      throw new Error(`${this} can not advance to ${newState}.`);
-    this.state_ = newState;
-  }
-
-  /**
-   * @public
-   * @param {!Error} error
-   */
-  fail(error) {
-    this.state_ = State.FAILED;
-    this.reject_(error);
-  }
-
-  /**
-   * @param {*}
-   */
-  finish(result) { this.resolve_(result); }
-
   /** @override */
-  toString() { return `SciprtModule("${this.fullName_}", ${this.state_})`; }
+  toString() { return `SciprtModule("${this.fullName_}")`; }
 }
 
 /** @interface */
@@ -240,26 +162,6 @@ class ScriptModuleLoader {
 
   /**
    * @private
-   * @param {!ScriptModule} module
-   * @param {string} scriptText
-   * @return {!Array<!ScriptModule>} A list of requested module.
-   */
-  compile(module, scriptText) {
-    /** @type {!NativeScriptModule} */
-    const handle = NativeScriptModule.compile(module.fullName, scriptText);
-    module.handle = handle;
-    this.handleToModule_.set(handle, module);
-    /** @type {string} */
-    const dirName = this.dirNameOf(module.fullName);
-    return handle.requests.map(specifier => {
-      /** @type {string} */
-      const requestFullName = this.computeFullName(specifier, dirName);
-      return this.getOrCreateModule(requestFullName);
-    });
-  }
-
-  /**
-   * @private
    * @param {string} specifier
    * @param {string} dirName
    * @return {string}
@@ -276,6 +178,40 @@ class ScriptModuleLoader {
   dirNameOf(fullName) { return this.scriptTextProvider_.dirNameOf(fullName); }
 
   /**
+   * @private
+   * @param {string} fullName
+   * @return {!Promise<!ScriptModule>}
+   */
+  async fetchModleTree(fullName) {
+    /** @type {?ScriptModule} */
+    const present = this.fullNameToModule_.get(fullName) || null;
+    if (present)
+      return present;
+    const module = new ScriptModule(fullName);
+    this.fullNameToModule_.set(fullName, module);
+
+    /** @type {string} */
+    const scriptText = await this.readScriptText(fullName);
+
+    /** @type {!NativeScriptModule} */
+    const handle = NativeScriptModule.compile(fullName, scriptText);
+    module.handle = handle;
+    this.handleToModule_.set(handle, module);
+
+    /** @type {string} */
+    const dirName = this.dirNameOf(fullName);
+    /** @type {!Array<!ScriptModule>} */
+    const requestModules = [];
+    for (const request of handle.requests) {
+      const requestFullName = this.computeFullName(request, dirName);
+      requestModules.push(this.fetchModleTree(requestFullName));
+    }
+
+    await Promise.all(requestModules);
+    return module;
+  }
+
+  /**
    * @param {!NativeScriptModule} handle
    * @return {!ScriptModule}
    */
@@ -287,78 +223,21 @@ class ScriptModuleLoader {
   }
 
   /**
-   * @private
-   * @param {string} fullName
-   * @return {!ScriptModuole}
-   */
-  getOrCreateModule(fullName) {
-    const module = this.fullNameToModule_.get(fullName);
-    if (module)
-      return module;
-    const newModule = new ScriptModule(fullName);
-    this.fullNameToModule_.set(fullName, newModule);
-    return newModule;
-  }
-
-  /**
    * @public
    * @param {string} specifier
    * @param {ScriptTextProvider=} provider
    */
   async load(specifier) {
     const fullName = await this.computeFullName(specifier);
-    const module = this.getOrCreateModule(fullName);
-    return this.loadInternal(module);
-  }
+    const module = await this.fetchModleTree(fullName);
+    module.handle.instantiate(this.resolveCallback.bind(this));
 
-  /**
-   * @private
-   * @param {!ScriptModule} module
-   * @return {!Promise}
-   */
-  async loadInternal(module) {
-    if (module.isStarted)
-      return module.Promise;
-    try {
-      module.advanceTo(State.LOADING);
-      const scriptText = await this.readScriptText(module.fullName);
-      module.advanceTo(State.LOADED);
-
-      module.advanceTo(State.COMPILING);
-      /** @type {!Array<!ScriptModule>} */
-      const requests = this.compile(module, scriptText);
-      module.advanceTo(State.COMPILED);
-
-      module.advanceTo(State.RESOLVING);
-      await this.loadRequests(requests);
-      module.advanceTo(State.RESOLVED);
-
-      module.advanceTo(State.INSTANTIATING);
-      module.handle.instantiate(this.resolveCallback.bind(this));
-      module.advanceTo(State.INSTANTIATED);
-
-      module.advanceTo(State.EVALUATING);
-      const result = module.handle.evaluate();
-      module.advanceTo(State.EVALUATED);
-
-      // TODO(eval1749): We would like to known |Module::Evaluate()| returns
-      // other than |undefined|.
-      if (result !== undefined)
-        throw new Error(`${module} returns ${result}.`);
-
-      module.finish(result);
-    } catch (error) {
-      module.fail(error);
-    }
-    return module.promise;
-  }
-
-  /**
-   * @param {!Array<!ScriptModule>} requests
-   * @reutrn {!Promise}
-   */
-  loadRequests(requests) {
-    return Promise.all(requests.map(request => this.loadInternal(request)));
+    const result = module.handle.evaluate();
+    // TODO(eval1749): We would like to known |Module::Evaluate()| returns
+    // other than |undefined|.
+    if (result !== undefined)
+      throw new Error(`${module} returns ${result}.`);
+    return result;
   }
 
   /**
@@ -380,10 +259,12 @@ class ScriptModuleLoader {
     /** @type {!ScriptModule} */
     const referer = this.fromHandle(refererHandle);
     /** @type {string} */
-    const requestFullName = this.computeFullName(specifier, referer.fullName);
-    /** @type {!ScriptModule} */
-    const requestModule = this.getOrCreateModule(requestFullName);
-    return requestModule.handle;
+    const fullName = this.computeFullName(specifier, referer.fullName);
+    /** @type {?ScriptModule} */
+    const module = this.fullNameToModule_.get(fullName) || null;
+    if (!module)
+      throw new Error(`No such module ${fullName}`);
+    return module.handle;
   }
 }
 

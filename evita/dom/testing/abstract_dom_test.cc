@@ -52,6 +52,14 @@ class RunnerDelegateMock final : public ginx::RunnerDelegate {
   DISALLOW_COPY_AND_ASSIGN(RunnerDelegateMock);
 };
 
+v8::MaybeLocal<v8::Module> ModuleResolverCallback(
+    v8::Local<v8::Context> context,
+    v8::Local<v8::String> specifier,
+    v8::Local<v8::Module> referrer) {
+  NOTREACHED() << "We'll support module import int testing.";
+  return v8::Local<v8::Module>();
+}
+
 }  // namespace
 
 //////////////////////////////////////////////////////////////////////
@@ -215,9 +223,35 @@ void AbstractDomTest::PopulateGlobalTemplate(v8::Isolate*,
                                              v8::Local<v8::ObjectTemplate>) {}
 
 void AbstractDomTest::RunFile(const base::FilePath& path) {
-  std::string source;
-  ASSERT_TRUE(base::ReadFileToString(path, &source)) << path.LossyDisplayName();
-  ASSERT_TRUE(RunScript(source, base::UTF16ToUTF8(path.LossyDisplayName()), 0));
+  ginx::Runner::Scope runner_scope(runner_.get());
+  const auto& file_name = path.LossyDisplayName();
+  std::string script_text;
+  ASSERT_TRUE(base::ReadFileToString(path, &script_text)) << file_name;
+  const int kLineNumber = 0;
+  const int kColumnNumber = 0;
+  auto* const isolate = runner_->isolate();
+  v8::ScriptOrigin script_origin(gin::StringToV8(isolate, file_name),
+                                 v8::Integer::New(isolate, kLineNumber),
+                                 v8::Integer::New(isolate, kColumnNumber));
+  v8::ScriptCompiler::Source source(gin::StringToV8(isolate, script_text),
+                                    script_origin);
+  auto module = v8::ScriptCompiler::CompileModule(isolate, &source)
+                    .FromMaybe(v8::Local<v8::Module>());
+  if (module.IsEmpty()) {
+    FAIL() << "Failed to compile \"" << file_name << '"';
+    return;
+  }
+  auto context = runner_->context();
+  if (!module->Instantiate(context, ModuleResolverCallback)) {
+    FAIL() << "Failed to resolve \"" << file_name << '"';
+    return;
+  }
+  DOM_AUTO_LOCK_SCOPE();
+  if (module->Evaluate(context).IsEmpty()) {
+    FAIL() << "Failed to evaluate \"" << file_name << '"';
+    return;
+  }
+  isolate->RunMicrotasks();
 }
 
 void AbstractDomTest::RunFile(

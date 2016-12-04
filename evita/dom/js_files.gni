@@ -7,6 +7,8 @@ js_lib_files = [
   "initializer.js",
   "key_names.js",
 
+  "engine/script_module.js",
+
   "base/base.js",
   "base/async.js",
   "base/base64.js",

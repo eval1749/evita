@@ -61,25 +61,35 @@ class FileScriptTextProvider {
   async readScriptText(fullName) {
     /** @type {string} */
     const encoding = 'utf-8';
-    /** @type {Os.File} */
-    const file = await Os.File.open(fullName);
     try {
-      /** @type {!Array<string>} */
-      const texts = [];
-      /** @type {!ArrayBufferView} */
-      const buffer = new Uint8Array(4096);
-      /** @type {!TextDecoder} */
-      const decoder = new TextDecoder(encoding, {fatal: true});
-      for (;;) {
-        /** @const @type {number} */
-        const numRead = await file.read(buffer);
-        if (numRead === 0)
-          break;
-        texts.push(decoder.decode(buffer.subarray(0, numRead)));
+      /** @type {Os.File} */
+      const file = await Os.File.open(fullName);
+      try {
+        /** @type {!Array<string>} */
+        const texts = [];
+        /** @type {!ArrayBufferView} */
+        const buffer = new Uint8Array(4096);
+        /** @type {!TextDecoder} */
+        const decoder = new TextDecoder(encoding, {fatal: true});
+        for (;;) {
+          /** @const @type {number} */
+          const numRead = await file.read(buffer);
+          if (numRead === 0)
+            break;
+          texts.push(decoder.decode(buffer.subarray(0, numRead)));
+        }
+        return texts.join('').replace(/\r\n/g, '\n');
+      } finally {
+        file.close();
       }
-      return texts.join('').replace(/\r\n/g, '\n');
-    } finally {
-      file.close();
+    } catch (error) {
+      switch (error['winLastError']) {
+        case 2:
+          throw new Error(`No such file "${fullName}"`);
+        case 3:
+          throw new Error(`No such path "${fullName}"`);
+      }
+      throw error;
     }
   }
 }

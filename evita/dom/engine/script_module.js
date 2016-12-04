@@ -34,9 +34,6 @@ class ScriptModule {
     this.handle_ = handle;
   }
 
-  /** @return {!Promise} */
-  get promise() { return this.promise_; }
-
   /** @override */
   toString() { return `SciprtModule("${this.fullName_}")`; }
 }
@@ -80,10 +77,11 @@ class PlatformScriptTextProvider {
 
   /**
    * ScriptTextProvider#computeFullName
-   * @param {string} specifier
+   * @param {string} specifierIn
    * @return {!Promise<string>}
    */
   computeFullName(specifierIn) {
+    /** @type {string} */
     const specifier = this.normalize(specifierIn);
     return Os.File.computeFullPathName(specifier);
   }
@@ -93,7 +91,7 @@ class PlatformScriptTextProvider {
    * @param {string} fullName
    * @return {string}
    */
-  dirNameOf(fullName) { return FilePath.dirName(fullName); }
+  dirNameOf(fullName) { return FilePath.dirname(fullName); }
 
   /**
    * @param {string} specifier
@@ -103,7 +101,7 @@ class PlatformScriptTextProvider {
 
   /**
    * ScriptTextProvider#normalizeSpecifier
-   * @param {string} specifierIn
+   * @param {string} specifier
    * @param {string} dirName
    * @return {string}
    */
@@ -122,7 +120,7 @@ class PlatformScriptTextProvider {
     /** @type {string} */
     const encoding = 'utf-8';
     /** @type {Os.File} */
-    const file = await Os.File.open(scriptPath);
+    const file = await Os.File.open(fullName);
     try {
       /** @type {!Array<string>} */
       const texts = [];
@@ -152,9 +150,9 @@ class ScriptModuleLoader {
    * @param {!ScriptTextProvider} scriptTextProvider
    */
   constructor(scriptTextProvider) {
-    /** @const @type {!Map<string, !ScriptModule} */
+    /** @const @type {!Map<string, !ScriptModule>} */
     this.fullNameToModule_ = new Map();
-    /** @const @type {!Map<NativeScriptModule, !ScriptModule} */
+    /** @const @type {!Map<NativeScriptModule, !ScriptModule>} */
     this.handleToModule_ = new Map();
     /** @const @type {!ScriptTextProvider} */
     this.scriptTextProvider_ = scriptTextProvider;
@@ -166,8 +164,8 @@ class ScriptModuleLoader {
    * @param {string} dirName
    * @return {string}
    */
-  computeFullName(specifier, dirName) {
-    return this.scriptTextProvider_.computeFullName(specifier, dirName);
+  normalizeSpecifier(specifier, dirName) {
+    return this.scriptTextProvider_.normalizeSpecifier(specifier, dirName);
   }
 
   /**
@@ -203,7 +201,7 @@ class ScriptModuleLoader {
     /** @type {!Array<!ScriptModule>} */
     const requestModules = [];
     for (const request of handle.requests) {
-      const requestFullName = this.computeFullName(request, dirName);
+      const requestFullName = this.normalizeSpecifier(request, dirName);
       requestModules.push(this.fetchModleTree(requestFullName));
     }
 
@@ -225,10 +223,9 @@ class ScriptModuleLoader {
   /**
    * @public
    * @param {string} specifier
-   * @param {ScriptTextProvider=} provider
    */
   async load(specifier) {
-    const fullName = await this.computeFullName(specifier);
+    const fullName = await this.scriptTextProvider_.computeFullName(specifier);
     const module = await this.fetchModleTree(fullName);
     module.handle.instantiate(this.resolveCallback.bind(this));
 
@@ -259,7 +256,9 @@ class ScriptModuleLoader {
     /** @type {!ScriptModule} */
     const referer = this.fromHandle(refererHandle);
     /** @type {string} */
-    const fullName = this.computeFullName(specifier, referer.fullName);
+    const dirName = this.dirNameOf(referer.fullName);
+    /** @type {string} */
+    const fullName = this.normalizeSpecifier(specifier, dirName);
     /** @type {?ScriptModule} */
     const module = this.fullNameToModule_.get(fullName) || null;
     if (!module)

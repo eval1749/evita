@@ -2,7 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+goog.require('engine.ScriptModuleLoader');
+
 goog.scope(function() {
+
+const ScriptModuleLoader = engine.ScriptModuleLoader;
 
 /** @type {string} */
 const kSampleDirName = '/samples';

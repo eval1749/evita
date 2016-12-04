@@ -37,16 +37,17 @@ const keyBindings = new Map();
  * @return {string}
  */
 function formatReason(reason) {
-  if (reason instanceof Error) {
-    const stack = reason['stack'];
-    if (stack)
-      return stack.toString();
-    const message = reason['message'];
-    if (message) {
-      return 'Exception: ' + message;
-    }
-  }
-  return repl.stringify(reason);
+  if (!(reason instanceof Error))
+    return repl.stringify(reason);
+  const error = /** @type {!Error} */ (reason);
+  const lines = [`${error.name}: ${error.message}`];
+  if ('sourceLine' in error)
+    lines.push(`Source code: ${error['sourceLine']}`);
+  if (('fileName' in error) && 'lineNumber' in error)
+    lines.push(`Location: ${error['fileName']}($error('lineNumber'])`);
+  if ('stack' in error)
+    lines.push(`Stack: ${error['stack']}`);
+  return lines.join('\n');
 }
 
 //////////////////////////////////////////////////////////////////////

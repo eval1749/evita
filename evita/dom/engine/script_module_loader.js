@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+goog.provide('engine');
+goog.provide('engine.ScriptModuleLoader');
+
 goog.scope(function() {
 
 class ScriptModule {
@@ -41,107 +44,20 @@ class ScriptModule {
   toString() { return `SciprtModule("${this.fullName_}")`; }
 }
 
-/** @interface */
-const ScriptTextProvider = function() {};
-
-/**
- * @param {string} specifier
- * @return {!Promise<string>}
- */
-ScriptTextProvider.prototype.computeFullName = function(specifier) {};
-
-/**
- * @param {string} fullName
- * @return {string}
- */
-ScriptTextProvider.prototype.dirNameOf = function(fullName) {};
-
-/**
- * @param {string} specifier
- * @param {string} dirName
- * @return {string}
- */
-ScriptTextProvider.prototype.normalizeSpecifier = function(specifier, dirName) {
-};
-
-/**
- * @param {string} fullName
- * @return {!Promise<string>}
- */
-ScriptTextProvider.prototype.readScriptText = function(fullName) {};
-
-const RE_BACKSLASH = new RegExp('\\\\', 'g');
-
-/**
- * @implements {ScriptTextProvider}
- */
-class PlatformScriptTextProvider {
-  constructor() {}
-
-  /**
-   * ScriptTextProvider#computeFullName
-   * @param {string} specifierIn
-   * @return {!Promise<string>}
-   */
-  computeFullName(specifierIn) {
-    /** @type {string} */
-    const specifier = this.normalize(specifierIn);
-    return Os.File.computeFullPathName(specifier);
+class Session {
+  constructor() {
+    /** @const @type {!Array<!ScriptModule>} */
+    this.modules_ = [];
   }
 
-  /**
-   * ScriptTextProvider#dirNameOf
-   * @param {string} fullName
-   * @return {string}
-   */
-  dirNameOf(fullName) { return FilePath.dirname(fullName); }
+  /** @return {!Array<!ScriptModule>} */
+  get modules() { return this.modules_; }
 
   /**
-   * @param {string} specifier
-   * @return {string}
+   * @param {!ScriptModule} module
    */
-  normalize(specifier) { return specifier.replace(RE_BACKSLASH, '/'); }
-
-  /**
-   * ScriptTextProvider#normalizeSpecifier
-   * @param {string} specifier
-   * @param {string} dirName
-   * @return {string}
-   */
-  normalizeSpecifier(specifier, dirName) {
-    const split = FilePath.split(specifier);
-    if (split.absolute)
-      return FilePath.normalize(specifier);
-    return FilePath.normalize(`${dirName}/${specifier}`);
-  }
-
-  /**
-   * @param {string} fullName
-   * @return {!Promise<string>}
-   */
-  async readScriptText(fullName) {
-    /** @type {string} */
-    const encoding = 'utf-8';
-    /** @type {Os.File} */
-    const file = await Os.File.open(fullName);
-    try {
-      /** @type {!Array<string>} */
-      const texts = [];
-      /** @type {!ArrayBufferView} */
-      const buffer = new Uint8Array(4096);
-      /** @type {!TextDecoder} */
-      const decoder = new TextDecoder(encoding, {fatal: true});
-      for (;;) {
-        /** @const @type {number} */
-        const numRead = await file.read(buffer);
-        if (numRead === 0)
-          break;
-        texts.push(decoder.decode(buffer.subarray(0, numRead)));
-      }
-      return texts.join('').replace(/\r\n/g, '\n');
-    } finally {
-      file.close();
-    }
+  addModule(module) {
+    this.modules_.push(module);
   }
 }
 
@@ -181,16 +97,18 @@ class ScriptModuleLoader {
 
   /**
    * @private
+   * @param {!Session} session
    * @param {string} fullName
    * @return {!Promise<!ScriptModule>}
    */
-  async fetchModleTree(fullName) {
+  async fetchModleTree(session, fullName) {
     /** @type {?ScriptModule} */
     const present = this.fullNameToModule_.get(fullName) || null;
     if (present)
       return present;
     const module = new ScriptModule(fullName);
     this.fullNameToModule_.set(fullName, module);
+    session.addModule(module);
 
     try {
       /** @type {string} */
@@ -207,7 +125,7 @@ class ScriptModuleLoader {
       const requestModules = [];
       for (const request of handle.requests) {
         const requestFullName = this.normalizeSpecifier(request, dirName);
-        requestModules.push(this.fetchModleTree(requestFullName));
+        requestModules.push(this.fetchModleTree(session, requestFullName));
       }
 
       await Promise.all(requestModules);
@@ -232,20 +150,22 @@ class ScriptModuleLoader {
   /**
    * @public
    * @param {string} specifier
+   * @return {!Promise<!Array<string>>} A list of module full name.
    */
   async load(specifier) {
     const fullName = await this.scriptTextProvider_.computeFullName(specifier);
     const present = this.fullNameToModule_.get(fullName) || null;
     if (present)
       this.unloadModule(present);
-    const module = await this.fetchModleTree(fullName);
+    const session = new Session();
+    const module = await this.fetchModleTree(session, fullName);
     module.handle.instantiate(this.resolveCallback.bind(this));
     const result = module.handle.evaluate();
     // TODO(eval1749): We would like to known |Module::Evaluate()| returns
     // other than |undefined|.
     if (result !== undefined)
       throw new Error(`${module} returns ${result}.`);
-    return result;
+    return session.modules.map(module => module.fullName);
   }
 
   /**
@@ -299,9 +219,7 @@ class ScriptModuleLoader {
   }
 }
 
-global.ScriptModule = ScriptModule;
-global.ScriptModuleLoader = ScriptModuleLoader;
-global.ScriptTextProvider = ScriptTextProvider;
-global.PlatformScriptTextProvider = PlatformScriptTextProvider;
+/** @constructor */
+engine.ScriptModuleLoader = ScriptModuleLoader;
 
 });

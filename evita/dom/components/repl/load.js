@@ -10,6 +10,26 @@ const ScriptModuleLoader = engine.ScriptModuleLoader;
 
 const LINE_COMMENT = '\x2F/';
 const RE_BACKSLASH = new RegExp('\\\\', 'g');
+/** @type {string} */
+const kMessage = 'message';
+
+/**
+ * @param {!Object} error
+ * @param {string} fullName
+ * @param {string} referrer
+ * @return {Object}
+ */
+function improveErrorMessage(error, fullName, referrer) {
+  switch (error['winLastError']) {
+    case 2:
+      error[kMessage] = `No such file "${fullName}" in "${referrer}"`;
+      return error;
+    case 3:
+      error[kMessage] = `No such path "${fullName}" in "${referrer}"`;
+      return error;
+  }
+  return error;
+}
 
 /**
  * @implements {ScriptTextProvider}
@@ -84,13 +104,7 @@ class FileScriptTextProvider {
         file.close();
       }
     } catch (error) {
-      switch (error['winLastError']) {
-        case 2:
-          throw new Error(`No such file "${fullName}" in "${referrer}"`);
-        case 3:
-          throw new Error(`No such path "${fullName}" in "${referrer}"`);
-      }
-      throw error;
+      throw improveErrorMessage(error, fullName, referrer);
     }
   }
 }

@@ -1,0 +1,87 @@
+# Copyright (c) 2016 Project Vogue. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//testing/test.gni")
+
+config("public_implementation") {
+  defines = [ "JOANA_PUBLIC_IMPLEMENTATION" ]
+}
+
+component("public") {
+  output_name = "joana_public"
+  sources = [
+    "ast/comment.cc",
+    "ast/comment.h",
+    "ast/container_node.cc",
+    "ast/container_node.h",
+    "ast/expressions/expression.cc",
+    "ast/expressions/expression.h",
+    "ast/expressions/literal_expression.cc",
+    "ast/expressions/literal_expression.h",
+    "ast/literals/boolean_literal.cc",
+    "ast/literals/boolean_literal.h",
+    "ast/literals/literal.cc",
+    "ast/literals/literal.h",
+    "ast/literals/null_literal.cc",
+    "ast/literals/null_literal.h",
+    "ast/literals/numeric_literal.cc",
+    "ast/literals/numeric_literal.h",
+    "ast/literals/string_literal.cc",
+    "ast/literals/string_literal.h",
+    "ast/literals/undefined_literal.cc",
+    "ast/literals/undefined_literal.h",
+    "ast/module.cc",
+    "ast/module.h",
+    "ast/name.cc",
+    "ast/name.h",
+    "ast/node.cc",
+    "ast/node.h",
+    "ast/node_factory.cc",
+    "ast/node_factory.h",
+    "ast/node_forward.h",
+    "ast/punctuator.cc",
+    "ast/punctuator.h",
+    "ast/statements/statement.h",
+    "ast/statements/statement.h",
+    "ast/template.cc",
+    "ast/template.h",
+    "castable.h",
+    "error_sink.cc",
+    "error_sink.h",
+    "memory/zone.cc",
+    "memory/zone.h",
+    "memory/zone_allocated.cc",
+    "memory/zone_allocated.h",
+    "memory/zone_allocator.h",
+    "memory/zone_owner.cc",
+    "memory/zone_owner.h",
+    "memory/zone_user.cc",
+    "memory/zone_user.h",
+    "public_export.h",
+    "source_code.cc",
+    "source_code.h",
+    "source_code_factory.cc",
+    "source_code_factory.h",
+    "source_code_range.cc",
+    "source_code_range.h",
+  ]
+
+  public_deps = [
+    "//base",
+  ]
+
+  configs += [ ":public_implementation" ]
+}
+
+test("tests") {
+  output_name = "joana_public_tests"
+  sources = [
+    "castable_test.cc",
+  ]
+  deps = [
+    ":public",
+    "//base/test:run_all_unittests",
+    "//testing/gtest",
+  ]
+}

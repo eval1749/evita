@@ -26,6 +26,7 @@ FILE_TYPES = {
 WHITE_LIST = [
     'common/',
     'evita/',
+    'joana/',
     'regex/',
 ]
 

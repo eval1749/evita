@@ -10,7 +10,7 @@
 
 group("root") {
   deps = [
-    "//common",
     "//evita",
+    "//joana",
   ]
 }

@@ -1,0 +1,21 @@
+# Copyright (c) 2016 Project Vogue. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+config("parser_implementation") {
+  defines = [ "JOANA_PARSER_IMPLEMENTATION" ]
+}
+
+component("public") {
+  output_name = "joana_parser"
+  sources = [
+    "parse.cc",
+    "parse.h",
+  ]
+
+  public_deps = [
+    "//joana/parser",
+  ]
+
+  configs += [ ":parser_implementation" ]
+}

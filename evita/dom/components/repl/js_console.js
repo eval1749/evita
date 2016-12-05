@@ -44,10 +44,10 @@ function formatReason(reason) {
   if ('sourceLine' in error)
     lines.push(`Source code: ${error['sourceLine']}`);
   if (('fileName' in error) && 'lineNumber' in error)
-    lines.push(`Location: ${error['fileName']}($error('lineNumber'])`);
+    lines.push(`Location: ${error['fileName']}(${error['lineNumber']})`);
   if ('stack' in error)
     lines.push(`Stack: ${error['stack']}`);
-  return lines.join('\n');
+  return lines.map(line => ` * ${line}`).join('\n');
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -150,39 +150,25 @@ class JsConsole {
     }
     this.history_.add(line);
     console.freshLine();
-    const result = Editor.runScript(line, console.document.name);
-    if (result.exception) {
-      this.rememberResult_(result.exception);
-      if (result.stackTraceString === '') {
-        result.stackTraceString = result.exception +
-            result.stackTrace
-                .map(function(stackFrame) {
-                  return '  at ' + stackFrame.functionName + ' (' +
-                      stackFrame.scriptName + '(' + stackFrame.lineNumber +
-                      ':' + stackFrame.column + ')';
-                })
-                .join('\n');
+    try {
+      const value = Editor.runScript(line, console.document.name);
+      console.freshLine();
+      if (value instanceof Promise) {
+        this.rememberResult_(value);
+        return this.handlePromiseResult(value);
       }
+      if (value !== undefined) {
+        this.rememberResult_(value);
+        console.emit(repl.stringify(value));
+      }
+    } catch (reason) {
+      this.rememberResult_(reason);
       console.freshLine();
       console.emit(BLOCK_COMMENT);
-      console.emit('\nException: ');
-      console.emit(result.stackTraceString);
+      console.emit('\n');
+      console.emit(formatReason(reason));
       console.emit('\n');
       console.emit(BLOCK_COMMENT_END);
-      this.emitPrompt();
-      return;
-    }
-
-    const value = result.value;
-    if (value instanceof Promise) {
-      this.rememberResult_(value);
-      return this.handlePromiseResult(value);
-    }
-
-    if (value !== undefined) {
-      this.rememberResult_(value);
-      console.freshLine();
-      console.emit(repl.stringify(value));
     }
     this.emitPrompt();
   }

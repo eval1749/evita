@@ -88,11 +88,10 @@ interface Editor {
   /**
    * @param {string} script_text
    * @param {string=} opt_file_name
-   * @return {!RunScriptResult}
+   * @return {*}
    */
-  [CallWith=ScriptHost]
-  static RunScriptResult runScript(DOMString script_text,
-                                   optional DOMString file_name);
+  [CallWith = ScriptHost] static any runScript(DOMString script_text,
+                                               optional DOMString file_name);
 
   [ImplementedAs = JavaScript] static DOMString stringify(any value);
 

@@ -18,6 +18,7 @@
 #include "evita/dom/windows/window.h"
 #include "evita/ginx/converter.h"
 #include "evita/ginx/function_template_builder.h"
+#include "evita/ginx/ginx_util.h"
 #include "evita/ginx/runner.h"
 
 namespace gin {
@@ -124,63 +125,6 @@ void TraceLogClient::DidGetOutput(const std::string& chunk,
   delete this;
 }
 
-v8::Local<v8::Object> NewRunScriptResult(v8::Isolate* isolate,
-                                         v8::Local<v8::Value> run_value,
-                                         const v8::TryCatch& try_catch) {
-  auto const result = v8::Object::New(isolate);
-  if (try_catch.HasCaught()) {
-    result->Set(gin::StringToV8(isolate, "exception"), try_catch.Exception());
-    auto const message = try_catch.Message();
-    if (!message.IsEmpty()) {
-      result->Set(gin::StringToV8(isolate, "stackTrace"),
-                  message->GetStackTrace().IsEmpty()
-                      ? v8::Array::New(isolate, 0)
-                      : message->GetStackTrace()->AsArray());
-      result->Set(gin::StringToV8(isolate, "stackTraceString"),
-                  try_catch.StackTrace().IsEmpty()
-                      ? gin::ConvertToV8(isolate, base::string16())
-                      : try_catch.StackTrace());
-      result->Set(gin::StringToV8(isolate, "lineNumber"),
-                  gin::ConvertToV8(isolate, message->GetLineNumber()));
-      result->Set(gin::StringToV8(isolate, "start"),
-                  gin::ConvertToV8(isolate, message->GetStartPosition()));
-      result->Set(gin::StringToV8(isolate, "end"),
-                  gin::ConvertToV8(isolate, message->GetEndPosition()));
-      result->Set(gin::StringToV8(isolate, "startColumn"),
-                  gin::ConvertToV8(isolate, message->GetStartColumn()));
-      result->Set(gin::StringToV8(isolate, "endColumn"),
-                  gin::ConvertToV8(isolate, message->GetEndColumn()));
-    }
-  } else {
-    result->Set(gin::StringToV8(isolate, "value"), run_value);
-  }
-  return result;
-}
-
-v8::Local<v8::Object> RunScriptInternal(ScriptHost* script_host,
-                                        const base::string16& script_text,
-                                        const base::string16& file_name) {
-  auto const runner = script_host->runner();
-  auto const isolate = runner->isolate();
-  ginx::Runner::EscapableHandleScope runner_scope(runner);
-  v8::TryCatch try_catch(isolate);
-  try_catch.SetVerbose(true);
-  v8::ScriptOrigin script_origin(gin::StringToV8(isolate, file_name));
-  v8::ScriptCompiler::Source source(gin::StringToV8(isolate, script_text),
-                                    script_origin);
-  auto script = v8::ScriptCompiler::Compile(runner->context(), &source)
-                    .FromMaybe(v8::Local<v8::Script>());
-  if (script.IsEmpty()) {
-    return runner_scope.Escape(
-        NewRunScriptResult(isolate, v8::Local<v8::Value>(), try_catch));
-  }
-  auto const run_value = script->Run();
-  if (run_value.IsEmpty()) {
-    return runner_scope.Escape(
-        NewRunScriptResult(isolate, v8::Local<v8::Value>(), try_catch));
-  }
-  return runner_scope.Escape(NewRunScriptResult(isolate, run_value, try_catch));
-}
 }  // namespace
 
 //////////////////////////////////////////////////////////////////////
@@ -297,15 +241,31 @@ v8::Local<v8::Promise> Editor::MessageBox(Window* maybe_window,
   return MessageBox(maybe_window, message, flags, base::string16());
 }
 
-v8::Local<v8::Object> Editor::RunScript(ScriptHost* script_host,
-                                        const base::string16& script_text,
-                                        const base::string16& file_name) {
+v8::Local<v8::Value> Editor::RunScript(ScriptHost* script_host,
+                                       const base::string16& script_text,
+                                       const base::string16& file_name) {
   SuppressMessageBoxScope suppress_message_box_scope;
-  return RunScriptInternal(script_host, script_text, file_name);
+  auto* const runner = script_host->runner();
+  auto* const isolate = runner->isolate();
+  v8::TryCatch try_catch(isolate);
+  try_catch.SetVerbose(true);
+  v8::ScriptOrigin script_origin(gin::StringToV8(isolate, file_name));
+  v8::ScriptCompiler::Source source(gin::StringToV8(isolate, script_text),
+                                    script_origin);
+  auto const script = v8::ScriptCompiler::Compile(runner->context(), &source)
+                          .FromMaybe(v8::Local<v8::Script>());
+  if (!script.IsEmpty()) {
+    auto const result = script->Run();
+    if (!result.IsEmpty())
+      return result;
+  }
+  ginx::ImproveErrorMessage(runner->context(), try_catch);
+  try_catch.ReThrow();
+  return v8::Local<v8::Value>();
 }
 
-v8::Local<v8::Object> Editor::RunScript(ScriptHost* script_host,
-                                        const base::string16& script_text) {
+v8::Local<v8::Value> Editor::RunScript(ScriptHost* script_host,
+                                       const base::string16& script_text) {
   return RunScript(script_host, script_text, L"__runscript__");
 }
 

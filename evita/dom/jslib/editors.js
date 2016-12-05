@@ -8,28 +8,26 @@ goog.scope(function() {
 
 const Initializer = core.Initializer;
 
-function loadUserScript() {
-  /** @const @type {{dirs: !Array<string>, scriptPath: string}} */
-  const context = {
-    dirs: [
-      Os.getenv('HOME'), Os.getenv('USERPROFILE'),
-      Os.getenv('HOMEDRIVE') + Os.getenv('HOMEPATH')
-    ],
-    scriptPath: ''
-  };
-  function tryLoad() {
-    if (!context.dirs.length)
-      return Promise.reject('none');
-    context.scriptPath = FilePath.join(context.dirs.shift(), 'evitarc.js');
+/**
+ * @return {!Promise}
+ */
+async function loadUserScript() {
+  /** @type {!Array<string>} */
+  const dirNames = [Os.getenv('HOME'), Os.getenv('USERPROFILE')];
+  for (const dirName of dirNames) {
+    if (dirName === '')
+      continue;
+    const fileName = FilePath.join(dirName, 'evitarc.js');
     // TODO(eval1749): We should not use |repl.load()| or move |repl.load()|
     // here.
-    return repl.load(context.scriptPath, {verbose: true});
+    try {
+      return await repl.load(fileName, {verbose: true});
+    } catch (error) {
+      if (error instanceof Os.File.Error)
+        return;
+      console.log(`Failed to load ${fileName}: ${error}`);
+    }
   }
-  return tryLoad().catch(function(reason) {
-    if (!(reason instanceof Os.File.Error))
-      return;
-    tryLoad();
-  });
 }
 
 /**
@@ -52,12 +50,11 @@ function processCommandLine(args) {
 /**
  * @param {!Array<string>} args
  */
-function start(args) {
+async function start(args) {
   Initializer.initialize();
   Editor.loadModule('commands');
-  loadUserScript()
-      .then(value => processCommandLine(args))
-      .catch(value => processCommandLine(args));
+  await loadUserScript()
+  processCommandLine(args);
 }
 
 /** @const @type {function(!Array<string>)} */

@@ -12,10 +12,13 @@ const Initializer = core.Initializer;
  * @return {!Promise}
  */
 async function loadUserScript() {
-  /** @type {!Array<string>} */
-  const dirNames = [Os.getenv('HOME'), Os.getenv('USERPROFILE')];
+  /** @type {!Set<string>} */
+  const dirNames = new Set([
+    Os.getenv('HOME'), Os.getenv('USERPROFILE'),
+    Os.getenv('HOMEDRIVE') + Os.getenv('HOMEPATH')
+  ]);
   for (const dirName of dirNames) {
-    if (dirName === '')
+    if (!dirName)
       continue;
     const fileName = FilePath.join(dirName, 'evitarc.js');
     // TODO(eval1749): We should not use |repl.load()| or move |repl.load()|
@@ -24,8 +27,9 @@ async function loadUserScript() {
       return await repl.load(fileName, {verbose: true});
     } catch (error) {
       if (error instanceof Os.File.Error)
-        return;
+        continue;
       console.log(`Failed to load ${fileName}: ${error}`);
+      throw error;
     }
   }
 }
@@ -53,8 +57,15 @@ function processCommandLine(args) {
 async function start(args) {
   Initializer.initialize();
   Editor.loadModule('commands');
-  await loadUserScript()
-  processCommandLine(args);
+  try {
+    await loadUserScript();
+    processCommandLine(args);
+  } catch (error) {
+    const files = [];
+    if (error['fileName'])
+      files.push(error['fileName']);
+    processCommandLine(files);
+  }
 }
 
 /** @const @type {function(!Array<string>)} */

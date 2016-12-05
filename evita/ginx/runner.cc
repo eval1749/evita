@@ -93,7 +93,16 @@ Runner::Runner(v8::Isolate* isolate, RunnerDelegate* delegate)
   delegate_->DidCreateContext(this);
 }
 
-Runner::~Runner() {}
+Runner::~Runner() {
+  auto* const isolate = context_holder_->isolate();
+  {
+    v8::Locker locker_scope(isolate);
+    v8::Isolate::Scope isolate_scope(isolate);
+    v8::HandleScope handle_scope(isolate);
+    v8::Context::Scope context_scope(context_holder_->context());
+    context_holder_.reset();
+  }
+}
 
 v8::Local<v8::Context> Runner::context() const {
   return context_holder_->context();

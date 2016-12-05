@@ -53,6 +53,7 @@ group("evita_tests") {
     "//evita/base:tests",
     "//evita/dom:evita_dom_tests",
     "//evita/gfx:tests",
+    "//evita/ginx:tests",
     "//evita/regex:tests",
     "//evita/text:evita_text_tests",
     "//evita/text/layout:evita_layout_tests",

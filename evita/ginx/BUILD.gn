@@ -48,13 +48,15 @@ source_set("ginx") {
   ]
 }
 
-test("evita_ginx_unittests") {
+test("tests") {
+  output_name = "evita_ginx_tests"
   sources = [
-    "runner_unittest.cc",
+    "runner_test.cc",
   ]
   deps = [
     ":ginx",
     "//base/test:run_all_unittests",
+    "//evita/gc",
     "//testing/gtest",
   ]
 }

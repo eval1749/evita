@@ -7,7 +7,7 @@
 namespace joana {
 namespace ast {
 
-NullLiteral::NullLiteral(const SourceCodeRange& location) : Literal(location) {}
+NullLiteral::NullLiteral(const SourceCodeRange& range) : Literal(range) {}
 
 NullLiteral::~NullLiteral() = default;
 

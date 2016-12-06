@@ -16,7 +16,7 @@ class JOANA_PUBLIC_EXPORT Name final : public Node {
   DECLARE_CONCRETE_AST_NODE(Name, Node);
 
  public:
-  explicit Name(const SourceCodeRange& location);
+  explicit Name(const SourceCodeRange& range);
   ~Name() final;
 
  private:

@@ -7,7 +7,7 @@
 namespace joana {
 namespace ast {
 
-Template::Template(const SourceCodeRange& location) : ContainerNode(location) {}
+Template::Template(const SourceCodeRange& range) : ContainerNode(range) {}
 
 Template::~Template() = default;
 

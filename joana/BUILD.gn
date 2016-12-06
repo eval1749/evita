@@ -2,8 +2,20 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//testing/test.gni")
+
 group("joana") {
   deps = [
     "//joana/checker",
+  ]
+}
+
+test("joana_tests") {
+  output_name = "joana_tests"
+  deps = [
+    "//base/test:run_all_unittests",
+    "//joana/parser:test_files",
+    "//joana/public:test_files",
+    "//testing/gtest",
   ]
 }

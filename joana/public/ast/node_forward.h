@@ -31,6 +31,7 @@ namespace ast {
   FOR_EACH_AST_LITERAL(V)             \
   FOR_EACH_AST_STATEMENT(V)           \
   V(Comment)                          \
+  V(Invalid)                          \
   V(Punctuator)                       \
   V(Module)                           \
   V(Name)                             \
@@ -41,8 +42,10 @@ FOR_EACH_ABSTRACT_AST_NODE(V)
 FOR_EACH_CONCRETE_AST_NODE(V)
 #undef V
 
+enum class InvalidKind;
 class NodeEditor;
 class NodeFactory;
+enum class PunctuatorKind;
 
 }  // namespace ast
 }  // namespace joana

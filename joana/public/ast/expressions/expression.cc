@@ -7,8 +7,7 @@
 namespace joana {
 namespace ast {
 
-Expression::Expression(const SourceCodeRange& location)
-    : ContainerNode(location) {}
+Expression::Expression(const SourceCodeRange& range) : ContainerNode(range) {}
 
 Expression::~Expression() = default;
 

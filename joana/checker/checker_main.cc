@@ -30,11 +30,11 @@ namespace internal {
 
 class ErrorRecord final : public ZoneAllocated {
  public:
-  ErrorRecord(const SourceCodeRange& location, int error_code);
+  ErrorRecord(const SourceCodeRange& range, int error_code);
   ~ErrorRecord();
 
   int error_code() const { return error_code_; }
-  const SourceCodeRange& location() const { return range_; }
+  const SourceCodeRange& range() const { return range_; }
 
  private:
   const int error_code_;
@@ -43,8 +43,8 @@ class ErrorRecord final : public ZoneAllocated {
   DISALLOW_COPY_AND_ASSIGN(ErrorRecord);
 };
 
-ErrorRecord::ErrorRecord(const SourceCodeRange& location, int error_code)
-    : error_code_(error_code), range_(location) {}
+ErrorRecord::ErrorRecord(const SourceCodeRange& range, int error_code)
+    : error_code_(error_code), range_(range) {}
 
 ErrorRecord::~ErrorRecord() = default;
 
@@ -57,7 +57,7 @@ class SimpleErrorSink final : public ErrorSink {
 
  private:
   // |ErrorSink| members
-  void AddError(const SourceCodeRange& location, int error_code) final;
+  void AddError(const SourceCodeRange& range, int error_code) final;
 
   Zone zone_;
   std::vector<ErrorRecord*> errors_;
@@ -65,9 +65,8 @@ class SimpleErrorSink final : public ErrorSink {
   DISALLOW_COPY_AND_ASSIGN(SimpleErrorSink);
 };
 
-void SimpleErrorSink::AddError(const SourceCodeRange& location,
-                               int error_code) {
-  auto* const record = new (&zone_) ErrorRecord(location, error_code);
+void SimpleErrorSink::AddError(const SourceCodeRange& range, int error_code) {
+  auto* const record = new (&zone_) ErrorRecord(range, error_code);
   errors_.push_back(record);
 }
 
@@ -104,20 +103,17 @@ Checker::Checker()
 
 void Checker::AddSourceCode(const base::FilePath& file_path,
                             base::StringPiece16 file_contents) {
-  auto* const source_code = source_code_factory_.New(file_path, file_contents);
-  source_codes_.push_back(source_code);
-  SourceCodeRange location(*source_code, 0,
-                           static_cast<int>(file_contents.size()));
-  const auto& module = Parse(&node_factory_, &error_sink_, location);
-  ast_map_.emplace(source_code, &module);
+  const auto& source_code = source_code_factory_.New(file_path, file_contents);
+  source_codes_.push_back(&source_code);
+  const auto& module = Parse(&node_factory_, &error_sink_, source_code.range());
+  ast_map_.emplace(&source_code, &module);
 }
 
 int Checker::Run() {
   for (auto* const error : error_sink_.errors()) {
-    std::cerr << error->location().source_code().file_path().LossyDisplayName()
-              << '(' << error->location().start() << ':'
-              << error->location().end() << ':' << error->error_code()
-              << std::endl;
+    std::cerr << error->range().source_code().file_path().LossyDisplayName()
+              << '(' << error->range().start() << ':' << error->range().end()
+              << ':' << error->error_code() << std::endl;
   }
   return error_sink_.errors().size() == 0 ? 0 : 1;
 }
@@ -144,10 +140,10 @@ extern "C" int main() {
         base::MakeAbsoluteFilePath(base::FilePath(file_name));
     std::string file_contents8;
     if (!base::ReadFileToString(file_path, &file_contents8)) {
-      LOG(ERROR) << "Cannot read file " << file_path.LossyDisplayName();
+      LOG(ERROR) << "Cannot read file " << file_path.value();
       continue;
     }
-    VLOG(0) << "Process " << file_path.LossyDisplayName();
+    VLOG(0) << "Process " << file_path.value();
     const auto& file_contents = base::UTF8ToUTF16(file_contents8);
     checker.AddSourceCode(file_path, base::StringPiece16(file_contents));
   }

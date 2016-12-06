@@ -7,8 +7,8 @@
 namespace joana {
 namespace ast {
 
-Punctuator::Punctuator(const SourceCodeRange& location, Kind kind)
-    : Node(location), kind_(kind) {}
+Punctuator::Punctuator(const SourceCodeRange& range, PunctuatorKind kind)
+    : Node(range), kind_(kind) {}
 
 Punctuator::~Punctuator() = default;
 

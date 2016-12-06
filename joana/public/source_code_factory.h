@@ -16,8 +16,8 @@ class JOANA_PUBLIC_EXPORT SourceCode::Factory {
   explicit Factory(Zone* zone);
   ~Factory();
 
-  SourceCode* New(const base::FilePath& file_path,
-                  base::StringPiece16 file_contents);
+  const SourceCode& New(const base::FilePath& file_path,
+                        base::StringPiece16 file_contents);
 
  private:
   Zone* const zone_;

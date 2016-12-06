@@ -12,3 +12,14 @@ source_set("parser") {
     "//joana/public",
   ]
 }
+
+source_set("test_files") {
+  testonly = true
+  sources = [
+    "lexer/lexer_test.cc",
+  ]
+  deps = [
+    ":parser",
+    "//testing/gtest",
+  ]
+}

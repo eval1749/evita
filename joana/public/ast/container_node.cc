@@ -7,8 +7,7 @@
 namespace joana {
 namespace ast {
 
-ContainerNode::ContainerNode(const SourceCodeRange& location)
-    : Node(location) {}
+ContainerNode::ContainerNode(const SourceCodeRange& range) : Node(range) {}
 
 ContainerNode::~ContainerNode() = default;
 

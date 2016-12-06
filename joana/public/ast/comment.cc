@@ -7,7 +7,7 @@
 namespace joana {
 namespace ast {
 
-Comment::Comment(const SourceCodeRange& location) : Node(location) {}
+Comment::Comment(const SourceCodeRange& range) : Node(range) {}
 
 Comment::~Comment() = default;
 

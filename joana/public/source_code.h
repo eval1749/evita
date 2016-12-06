@@ -13,6 +13,8 @@
 
 namespace joana {
 
+class SourceCodeRange;
+
 class JOANA_PUBLIC_EXPORT SourceCode final {
  public:
   class Factory;
@@ -21,8 +23,12 @@ class JOANA_PUBLIC_EXPORT SourceCode final {
 
   const base::FilePath& file_path() const { return file_path_; }
   const base::StringPiece16 contents() const { return file_contents_; }
+  SourceCodeRange range() const;
+  int size() const;
 
+  base::char16 GetChar(int offset) const;
   base::StringPiece16 GetString(int start, int end) const;
+  SourceCodeRange Slice(int start, int end) const;
 
  private:
   SourceCode(const base::FilePath& file_path,

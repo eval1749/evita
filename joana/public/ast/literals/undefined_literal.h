@@ -17,7 +17,7 @@ class JOANA_PUBLIC_EXPORT UndefinedLiteral final : public Literal {
   ~UndefinedLiteral() final;
 
  private:
-  explicit UndefinedLiteral(const SourceCodeRange& location);
+  explicit UndefinedLiteral(const SourceCodeRange& range);
 
   DISALLOW_COPY_AND_ASSIGN(UndefinedLiteral);
 };

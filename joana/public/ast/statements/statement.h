@@ -17,7 +17,7 @@ class JOANA_PUBLIC_EXPORT Statement : public ContainerNode {
   ~Statement() override;
 
  protected:
-  explicit Statement(const SourceCodeRange& location);
+  explicit Statement(const SourceCodeRange& range);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(Statement);

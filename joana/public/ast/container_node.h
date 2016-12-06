@@ -21,7 +21,7 @@ class JOANA_PUBLIC_EXPORT ContainerNode : public Node {
   Node* last_child() const final;
 
  protected:
-  explicit ContainerNode(const SourceCodeRange& location);
+  explicit ContainerNode(const SourceCodeRange& range);
 
  private:
   Node* first_child_ = nullptr;

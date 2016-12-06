@@ -5,6 +5,8 @@
 #ifndef JOANA_PUBLIC_SOURCE_CODE_RANGE_H_
 #define JOANA_PUBLIC_SOURCE_CODE_RANGE_H_
 
+#include <iosfwd>
+
 #include "base/strings/string_piece.h"
 #include "joana/public/public_export.h"
 
@@ -14,9 +16,8 @@ class SourceCode;
 
 class JOANA_PUBLIC_EXPORT SourceCodeRange final {
  public:
-  SourceCodeRange(const SourceCode& source_code, int start, int end);
   SourceCodeRange(const SourceCodeRange& other);
-  SourceCodeRange();
+  SourceCodeRange() = delete;
 
   bool operator==(const SourceCodeRange& other) const;
   bool operator!=(const SourceCodeRange& other) const;
@@ -28,10 +29,17 @@ class JOANA_PUBLIC_EXPORT SourceCodeRange final {
   base::StringPiece16 GetString() const;
 
  private:
-  int end_ = 0;
-  const SourceCode* source_code_ = nullptr;
-  int start_ = 0;
+  friend class SourceCode;
+
+  SourceCodeRange(const SourceCode& source_code, int start, int end);
+
+  int end_;
+  const SourceCode* source_code_;
+  int start_;
 };
+
+JOANA_PUBLIC_EXPORT std::ostream& operator<<(std::ostream& ostream,
+                                             const SourceCodeRange& range);
 
 }  // namespace joana
 

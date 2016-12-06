@@ -11,23 +11,23 @@
 namespace joana {
 namespace ast {
 
+enum class PunctuatorKind {
+#define V(text, capital, upper) capital,
+  FOR_EACH_JAVASCRIPT_PUNCTUATOR(V)
+#undef V
+};
+
 class JOANA_PUBLIC_EXPORT Punctuator final : public Node {
   DECLARE_CONCRETE_AST_NODE(Punctuator, Node);
 
  public:
-  enum class Kind {
-#define V(text, name, upper) k##name,
-    FOR_EACH_JAVASCRIPT_PUNCTUATOR(V)
-#undef V
-  };
-
-  explicit Punctuator(const SourceCodeRange& location, Kind kind);
+  explicit Punctuator(const SourceCodeRange& range, PunctuatorKind kind);
   ~Punctuator() final;
 
-  Kind kind() const { return kind_; }
+  PunctuatorKind kind() const { return kind_; }
 
  private:
-  const Kind kind_;
+  const PunctuatorKind kind_;
 
   DISALLOW_COPY_AND_ASSIGN(Punctuator);
 };

@@ -6,7 +6,6 @@
 #define JOANA_PARSER_LEXER_CHARACTER_READER_H_
 
 #include "base/macros.h"
-#include "base/optional.h"
 #include "base/strings/string16.h"
 
 namespace joana {
@@ -24,14 +23,14 @@ class CharacterReader final {
   int location() const { return current_; }
   const SourceCode& source_code() const;
 
-  bool HasMore() const;
-  base::char16 Read();
-  void Unread();
+  void Advance();
+  bool AdvanceIf(base::char16 char_code);
+  bool CanAdvance() const;
+  base::char16 Get() const;
 
  private:
   int current_;
   const SourceCodeRange& range_;
-  base::Optional<base::char16> unread_;
 
   DISALLOW_COPY_AND_ASSIGN(CharacterReader);
 };

@@ -7,8 +7,8 @@
 namespace joana {
 namespace ast {
 
-UndefinedLiteral::UndefinedLiteral(const SourceCodeRange& location)
-    : Literal(location) {}
+UndefinedLiteral::UndefinedLiteral(const SourceCodeRange& range)
+    : Literal(range) {}
 
 UndefinedLiteral::~UndefinedLiteral() = default;
 

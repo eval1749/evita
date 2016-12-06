@@ -17,7 +17,7 @@ class JOANA_PUBLIC_EXPORT Expression : public ContainerNode {
   ~Expression() override;
 
  protected:
-  explicit Expression(const SourceCodeRange& location);
+  explicit Expression(const SourceCodeRange& range);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(Expression);

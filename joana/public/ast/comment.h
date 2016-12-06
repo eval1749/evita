@@ -7,8 +7,6 @@
 
 #include "joana/public/ast/node.h"
 
-#include "base/strings/string_piece.h"
-
 namespace joana {
 namespace ast {
 
@@ -19,7 +17,7 @@ class JOANA_PUBLIC_EXPORT Comment final : public Node {
   ~Comment() final;
 
  private:
-  explicit Comment(const SourceCodeRange& location);
+  explicit Comment(const SourceCodeRange& range);
 
   DISALLOW_COPY_AND_ASSIGN(Comment);
 };

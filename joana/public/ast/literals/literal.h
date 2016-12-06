@@ -17,7 +17,7 @@ class JOANA_PUBLIC_EXPORT Literal : public Node {
   ~Literal() override;
 
  protected:
-  explicit Literal(const SourceCodeRange& location);
+  explicit Literal(const SourceCodeRange& range);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(Literal);

@@ -2,8 +2,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//testing/test.gni")
-
 config("public_implementation") {
   defines = [ "JOANA_PUBLIC_IMPLEMENTATION" ]
 }
@@ -15,10 +13,13 @@ component("public") {
     "ast/comment.h",
     "ast/container_node.cc",
     "ast/container_node.h",
+    "ast/error_codes.h",
     "ast/expressions/expression.cc",
     "ast/expressions/expression.h",
     "ast/expressions/literal_expression.cc",
     "ast/expressions/literal_expression.h",
+    "ast/invalid.cc",
+    "ast/invalid.h",
     "ast/literals/boolean_literal.cc",
     "ast/literals/boolean_literal.h",
     "ast/literals/literal.cc",
@@ -49,6 +50,8 @@ component("public") {
     "castable.h",
     "error_sink.cc",
     "error_sink.h",
+    "escaped_string_piece.cc",
+    "escaped_string_piece.h",
     "memory/zone.cc",
     "memory/zone.h",
     "memory/zone_allocated.cc",
@@ -74,14 +77,13 @@ component("public") {
   configs += [ ":public_implementation" ]
 }
 
-test("tests") {
-  output_name = "joana_public_tests"
+source_set("test_files") {
+  testonly = true
   sources = [
     "castable_test.cc",
   ]
   deps = [
     ":public",
-    "//base/test:run_all_unittests",
     "//testing/gtest",
   ]
 }

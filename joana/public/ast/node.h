@@ -28,12 +28,14 @@ class JOANA_PUBLIC_EXPORT Node : public Castable<Node>, public ZoneAllocated {
   Node* parent() const { return parent_; }
   Node* previous_sibling() const { return previous_sibling_; }
 
-  const SourceCodeRange& location() const { return range_; }
+  const SourceCodeRange& range() const { return range_; }
 
-  virtual void PrintTo(std::ostream* ostream) const;
+  void PrintTo(std::ostream* ostream) const;
 
  protected:
-  explicit Node(const SourceCodeRange& location);
+  explicit Node(const SourceCodeRange& range);
+
+  virtual void PrintMoreTo(std::ostream* ostream) const;
 
  private:
   Node* next_sibling_ = nullptr;

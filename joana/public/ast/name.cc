@@ -7,7 +7,7 @@
 namespace joana {
 namespace ast {
 
-Name::Name(const SourceCodeRange& location) : Node(location) {}
+Name::Name(const SourceCodeRange& range) : Node(range) {}
 
 Name::~Name() = default;
 

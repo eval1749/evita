@@ -14,7 +14,7 @@ class SourceCodeRange;
 
 class JOANA_PUBLIC_EXPORT ErrorSink {
  public:
-  virtual void AddError(const SourceCodeRange& location, int error_code) = 0;
+  virtual void AddError(const SourceCodeRange& range, int error_code) = 0;
 
  protected:
   ErrorSink();

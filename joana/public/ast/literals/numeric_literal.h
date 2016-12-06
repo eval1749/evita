@@ -19,7 +19,10 @@ class JOANA_PUBLIC_EXPORT NumericLiteral final : public Literal {
   double value() const { return value_; }
 
  private:
-  NumericLiteral(const SourceCodeRange& location, double value);
+  NumericLiteral(const SourceCodeRange& range, double value);
+
+  // Implements |Node| members
+  void PrintMoreTo(std::ostream* ostream) const final;
 
   const double value_;
 

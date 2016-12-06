@@ -6,6 +6,7 @@
 
 #include "joana/public/ast/comment.h"
 #include "joana/public/ast/expressions/literal_expression.h"
+#include "joana/public/ast/invalid.h"
 #include "joana/public/ast/literals/boolean_literal.h"
 #include "joana/public/ast/literals/null_literal.h"
 #include "joana/public/ast/literals/numeric_literal.h"
@@ -13,6 +14,7 @@
 #include "joana/public/ast/literals/undefined_literal.h"
 #include "joana/public/ast/module.h"
 #include "joana/public/ast/name.h"
+#include "joana/public/ast/punctuator.h"
 #include "joana/public/ast/template.h"
 
 namespace joana {
@@ -26,12 +28,21 @@ Comment& NodeFactory::NewComment(const SourceCodeRange& range) {
   return *new (zone_) Comment(range);
 }
 
+Invalid& NodeFactory::NewInvalid(const SourceCodeRange& range, int error_code) {
+  return *new (zone_) Invalid(range, error_code);
+}
+
 Module& NodeFactory::NewModule(const SourceCodeRange& range) {
   return *new (zone_) Module(range);
 }
 
 Name& NodeFactory::NewName(const SourceCodeRange& range) {
   return *new (zone_) Name(range);
+}
+
+Punctuator& NodeFactory::NewPunctuator(const SourceCodeRange& range,
+                                       PunctuatorKind kind) {
+  return *new (zone_) Punctuator(range, kind);
 }
 
 Template& NodeFactory::NewTemplate(const SourceCodeRange& range) {

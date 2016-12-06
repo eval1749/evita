@@ -7,8 +7,8 @@
 namespace joana {
 namespace ast {
 
-BooleanLiteral::BooleanLiteral(const SourceCodeRange& location, bool value)
-    : Literal(location), value_(value) {}
+BooleanLiteral::BooleanLiteral(const SourceCodeRange& range, bool value)
+    : Literal(range), value_(value) {}
 
 BooleanLiteral::~BooleanLiteral() = default;
 

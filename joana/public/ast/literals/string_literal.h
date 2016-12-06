@@ -14,7 +14,7 @@ namespace joana {
 namespace ast {
 
 class JOANA_PUBLIC_EXPORT StringLiteral final : public Literal {
-  DECLARE_CONCRETE_AST_NODE(BooleanLiteral, Literal);
+  DECLARE_CONCRETE_AST_NODE(StringLiteral, Literal);
 
  public:
   ~StringLiteral() final;
@@ -22,7 +22,10 @@ class JOANA_PUBLIC_EXPORT StringLiteral final : public Literal {
   const base::string16& data() const { return data_; }
 
  private:
-  StringLiteral(const SourceCodeRange& location, base::StringPiece16 data);
+  StringLiteral(const SourceCodeRange& range, base::StringPiece16 data);
+
+  // Implements |Node| members
+  void PrintMoreTo(std::ostream* ostream) const final;
 
   const base::string16 data_;
 

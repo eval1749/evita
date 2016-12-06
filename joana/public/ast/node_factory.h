@@ -24,9 +24,13 @@ class JOANA_PUBLIC_EXPORT NodeFactory final {
   // Factory member functions
   Comment& NewComment(const SourceCodeRange& range);
 
+  Invalid& NewInvalid(const SourceCodeRange& range, int error_code);
+
   Module& NewModule(const SourceCodeRange& range);
 
   Name& NewName(const SourceCodeRange& range);
+
+  Punctuator& NewPunctuator(const SourceCodeRange& range, PunctuatorKind kind);
 
   Template& NewTemplate(const SourceCodeRange& range);
 

@@ -10,7 +10,7 @@ namespace joana {
 namespace ast {
 
 LiteralExpression::LiteralExpression(const Literal& literal)
-    : Expression(literal.location()), literal_(literal) {}
+    : Expression(literal.range()), literal_(literal) {}
 
 LiteralExpression::~LiteralExpression() = default;
 

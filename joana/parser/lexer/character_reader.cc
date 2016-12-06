@@ -19,26 +19,27 @@ const SourceCode& CharacterReader::source_code() const {
   return range_.source_code();
 }
 
-bool CharacterReader::HasMore() const {
-  return unread_.has_value() || current_ < range_.end();
-}
-
-base::char16 CharacterReader::Read() {
-  if (unread_.has_value()) {
-    const auto value = unread_.value();
-    unread_.reset();
-    return value;
-  }
+void CharacterReader::Advance() {
   DCHECK_LT(current_, range_.end());
-  const auto result = range_.source_code().GetString(current_, current_)[0];
   ++current_;
-  return result;
 }
 
-void CharacterReader::Unread() {
-  DCHECK(!unread_.has_value());
-  DCHECK_GT(current_, range_.start());
-  unread_.emplace(range_.source_code().GetString(current_ - 1, current_)[0]);
+bool CharacterReader::AdvanceIf(base::char16 char_code) {
+  if (!CanAdvance())
+    return false;
+  if (Get() != char_code)
+    return false;
+  Advance();
+  return true;
+}
+
+bool CharacterReader::CanAdvance() const {
+  return current_ < range_.end();
+}
+
+base::char16 CharacterReader::Get() const {
+  DCHECK_LT(current_, range_.end());
+  return range_.source_code().GetChar(current_);
 }
 
 }  // namespace internal

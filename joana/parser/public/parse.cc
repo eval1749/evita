@@ -12,8 +12,8 @@ using Parser = internal::Parser;
 
 const ast::Node& Parse(ast::NodeFactory* node_factory,
                        ErrorSink* error_sink,
-                       const SourceCodeRange& location) {
-  Parser parser(node_factory, error_sink, location);
+                       const SourceCodeRange& range) {
+  Parser parser(node_factory, error_sink, range);
   return parser.Run();
 }
 

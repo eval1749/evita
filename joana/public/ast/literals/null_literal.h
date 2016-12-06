@@ -17,7 +17,7 @@ class JOANA_PUBLIC_EXPORT NullLiteral final : public Literal {
   ~NullLiteral() final;
 
  private:
-  explicit NullLiteral(const SourceCodeRange& location);
+  explicit NullLiteral(const SourceCodeRange& range);
 
   DISALLOW_COPY_AND_ASSIGN(NullLiteral);
 };

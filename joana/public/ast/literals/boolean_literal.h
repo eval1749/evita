@@ -19,7 +19,7 @@ class JOANA_PUBLIC_EXPORT BooleanLiteral final : public Literal {
   bool value() const { return value_; }
 
  private:
-  BooleanLiteral(const SourceCodeRange& location, bool value);
+  BooleanLiteral(const SourceCodeRange& range, bool value);
 
   const bool value_;
 

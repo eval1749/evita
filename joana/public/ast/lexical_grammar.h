@@ -77,10 +77,13 @@ namespace joana {
   V(yield, Yield, YIELD)
 
 #define FOR_EACH_JAVASCRIPT_PUNCTUATOR(V)                       \
+  V("???", Invalid, INVALID)                                    \
   V("{", LeftBrace, LEFT_BRACE)                                 \
   V("}", RightBrace, RIGHT_BRACE)                               \
   V("[", LeftBracket, LEFT_BRACKET)                             \
   V("]", RightBracket, RIGHT_BRACKET)                           \
+  V("(", LeftParenthesis, LEFT_PARENTHESIS)                     \
+  V(")", RightParenthesis, RIGHT_PARENTHESIS)                   \
   V(".", Dot, DOT)                                              \
   V("...", DotDotDot, DOT_DOT_DOT)                              \
   V(";", SemiColon, SEMI_COLON)                                 \
@@ -104,6 +107,8 @@ namespace joana {
   V("|", BitOr, BIT_OR)                                         \
   V("|", BitXor, BIT_XOR)                                       \
   V("!", LogicalNot, LOGICAL_NOT)                               \
+  V("!=", NotEqual, NOT_EQUAL)                                  \
+  V("!==", NotEqualEqual, NOT_EQUAL_EQUAL)                      \
   V("~", BitNot, BIT_NOT)                                       \
   V("&&", LogicalAnd, LOGICAL_AND)                              \
   V("||", LogicalOr, LOGICAL_OR)                                \
@@ -111,6 +116,7 @@ namespace joana {
   V(":", Colon, COLON)                                          \
   V("=", Equal, EQUAL)                                          \
   V("+=", PlusEqual, PLUS_EQUAL)                                \
+  V("-=", MinusEqual, PLUS_EQUAL)                               \
   V("*=", TimesEqual, TIMES_EQUAL)                              \
   V("%=", ModuloEqual, MODULO_EQUAL)                            \
   V("<<=", LeftShiftEqual, LEFT_SHIT_EQUAL)                     \

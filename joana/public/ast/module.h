@@ -17,7 +17,7 @@ class JOANA_PUBLIC_EXPORT Module final : public ContainerNode {
   ~Module() final;
 
  private:
-  explicit Module(const SourceCodeRange& location);
+  explicit Module(const SourceCodeRange& range);
 
   DISALLOW_COPY_AND_ASSIGN(Module);
 };

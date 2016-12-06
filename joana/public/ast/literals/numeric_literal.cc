@@ -7,10 +7,15 @@
 namespace joana {
 namespace ast {
 
-NumericLiteral::NumericLiteral(const SourceCodeRange& location, double value)
-    : Literal(location), value_(value) {}
+NumericLiteral::NumericLiteral(const SourceCodeRange& range, double value)
+    : Literal(range), value_(value) {}
 
 NumericLiteral::~NumericLiteral() = default;
+
+// Implements |Node| members
+void NumericLiteral::PrintMoreTo(std::ostream* ostream) const {
+  *ostream << ", " << value_;
+}
 
 }  // namespace ast
 }  // namespace joana

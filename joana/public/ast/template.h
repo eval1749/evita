@@ -14,7 +14,7 @@ class JOANA_PUBLIC_EXPORT Template final : public ContainerNode {
   DECLARE_CONCRETE_AST_NODE(Template, ContainerNode);
 
  public:
-  explicit Template(const SourceCodeRange& location);
+  explicit Template(const SourceCodeRange& range);
   ~Template() final;
 
  private:

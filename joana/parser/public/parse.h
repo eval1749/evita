@@ -19,7 +19,7 @@ class SourceCodeRange;
 
 JOANA_PARSER_EXPORT const ast::Node& Parse(ast::NodeFactory* node_factory,
                                            ErrorSink* error_sink,
-                                           const SourceCodeRange& location);
+                                           const SourceCodeRange& range);
 
 }  // namespace joana
 

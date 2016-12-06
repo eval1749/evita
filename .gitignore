@@ -9,6 +9,7 @@
 *.sln
 *.suo
 *.targets
+*.TMP
 *.user
 *.vcproj
 *.vcxproj

@@ -5,6 +5,8 @@
 #ifndef JOANA_PUBLIC_AST_NODE_FACTORY_H_
 #define JOANA_PUBLIC_AST_NODE_FACTORY_H_
 
+#include <memory>
+
 #include "base/strings/string_piece.h"
 #include "joana/public/ast/node_forward.h"
 #include "joana/public/memory/zone.h"
@@ -50,6 +52,9 @@ class JOANA_PUBLIC_EXPORT NodeFactory final {
   UndefinedLiteral& NewUndefinedLiteral(const SourceCodeRange& range);
 
  private:
+  class NameIdMap;
+
+  std::unique_ptr<NameIdMap> name_id_map_;
   Zone* const zone_;
 
   DISALLOW_COPY_AND_ASSIGN(NodeFactory);

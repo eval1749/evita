@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <unordered_map>
+
 #include "joana/public/ast/node_factory.h"
 
 #include "joana/public/ast/comment.h"
@@ -14,13 +16,62 @@
 #include "joana/public/ast/literals/undefined_literal.h"
 #include "joana/public/ast/module.h"
 #include "joana/public/ast/name.h"
+#include "joana/public/ast/name_id.h"
 #include "joana/public/ast/punctuator.h"
 #include "joana/public/ast/template.h"
 
 namespace joana {
 namespace ast {
 
-NodeFactory::NodeFactory(Zone* zone) : zone_(zone) {}
+class NodeFactory::NameIdMap {
+ public:
+  NameIdMap();
+  ~NameIdMap();
+
+  int Register(base::StringPiece16 name);
+
+ private:
+  void Populate();
+
+  std::unordered_map<base::StringPiece16, int, base::StringPiece16Hash> map_;
+  int last_id_ = 0;
+
+  DISALLOW_COPY_AND_ASSIGN(NameIdMap);
+};
+
+NodeFactory::NameIdMap::NameIdMap() {
+  Populate();
+}
+
+NodeFactory::NameIdMap::~NameIdMap() = default;
+
+void NodeFactory::NameIdMap::Populate() {
+  last_id_ = static_cast<int>(NameId::StartKeyword);
+#define V(name, camel, upper) Register(base::StringPiece16(L## #name));
+  FOR_EACH_JAVASCRIPT_KEYWORD(V)
+#undef V
+
+  last_id_ = static_cast<int>(NameId::StartKnown);
+#define V(name, camel, upper) Register(base::StringPiece16(L## #name));
+  FOR_EACH_JAVASCRIPT_KNOWN_WORD(V)
+#undef V
+}
+
+int NodeFactory::NameIdMap::Register(base::StringPiece16 name) {
+  const auto& it = map_.find(name);
+  if (it != map_.end())
+    return it->second;
+  ++last_id_;
+  map_.emplace(name, last_id_);
+  return last_id_;
+}
+
+//
+// NodeFactory implementations
+//
+NodeFactory::NodeFactory(Zone* zone)
+    : name_id_map_(new NameIdMap()), zone_(zone) {}
+
 NodeFactory::~NodeFactory() = default;
 
 // Nodes
@@ -37,7 +88,7 @@ Module& NodeFactory::NewModule(const SourceCodeRange& range) {
 }
 
 Name& NodeFactory::NewName(const SourceCodeRange& range) {
-  return *new (zone_) Name(range);
+  return *new (zone_) Name(range, name_id_map_->Register(range.GetString()));
 }
 
 Punctuator& NodeFactory::NewPunctuator(const SourceCodeRange& range,

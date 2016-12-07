@@ -19,6 +19,7 @@
 #include "joana/public/ast/literals/numeric_literal.h"
 #include "joana/public/ast/literals/string_literal.h"
 #include "joana/public/ast/name.h"
+#include "joana/public/ast/name_id.h"
 #include "joana/public/ast/node.h"
 #include "joana/public/ast/node_factory.h"
 #include "joana/public/ast/punctuator.h"
@@ -277,6 +278,26 @@ TEST_F(LexerTest, Name) {
 
   PrepareSouceCode("abc def");
   EXPECT_EQ(NewName(0, 3) + " " + NewName(4, 7), Parse());
+
+  PrepareSouceCode("while");
+  EXPECT_EQ(NewName(0, 5), Parse());
+}
+
+TEST_F(LexerTest, NodeFactoryNewName) {
+  PrepareSouceCode("while");
+  EXPECT_EQ(static_cast<int>(ast::NameId::KeywordWhile),
+            factory().NewName(MakeRange(0, 5)).number())
+      << "We can identify keyword 'while'.";
+
+  PrepareSouceCode("from");
+  EXPECT_EQ(static_cast<int>(ast::NameId::KnownFrom),
+            factory().NewName(MakeRange(0, 4)).number())
+      << "We can identify contextual keyword 'from'.";
+
+  PrepareSouceCode("of");
+  EXPECT_EQ(static_cast<int>(ast::NameId::KnownOf),
+            factory().NewName(MakeRange(0, 2)).number())
+      << "We can identify contextual keyword 'of'.";
 }
 
 TEST_F(LexerTest, NumericLiteral) {

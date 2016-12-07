@@ -76,6 +76,14 @@ namespace joana {
   V(with, With, WITH)                    \
   V(yield, Yield, YIELD)
 
+#define FOR_EACH_JAVASCRIPT_KNOWN_WORD(V)  \
+  V(Object, Object, OBJECT)                \
+  V(constructor, Constructor, CONSTRUCTOR) \
+  V(from, From, CONSTRUCTOR)               \
+  V(of, Of, OF)                            \
+  V(prototype, Prototype, PROTOTYPE)       \
+  V(undefined, Undefined, UNDEFINED)
+
 #define FOR_EACH_JAVASCRIPT_PUNCTUATOR(V)                       \
   V("???", Invalid, INVALID)                                    \
   V("{", LeftBrace, LEFT_BRACE)                                 \

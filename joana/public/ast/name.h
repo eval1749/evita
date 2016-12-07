@@ -16,10 +16,18 @@ class JOANA_PUBLIC_EXPORT Name final : public Node {
   DECLARE_CONCRETE_AST_NODE(Name, Node);
 
  public:
-  explicit Name(const SourceCodeRange& range);
   ~Name() final;
 
+  int number() const { return number_; }
+
  private:
+  Name(const SourceCodeRange& range, int number);
+
+  // Implements |Node| members
+  void PrintMoreTo(std::ostream* ostream) const final;
+
+  const int number_;
+
   DISALLOW_COPY_AND_ASSIGN(Name);
 };
 

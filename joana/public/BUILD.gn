@@ -40,6 +40,7 @@ component("public") {
     "ast/module.h",
     "ast/name.cc",
     "ast/name.h",
+    "ast/name_id.h",
     "ast/node.cc",
     "ast/node.h",
     "ast/node_factory.cc",

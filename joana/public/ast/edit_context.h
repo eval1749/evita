@@ -23,8 +23,8 @@ class JOANA_PUBLIC_EXPORT EditContext {
   EditContext(ErrorSink* error_sink, NodeFactory* node_factory);
   ~EditContext();
 
-  ErrorSink* error_sink() const { return error_sink_; }
-  NodeFactory* node_factory() const { return node_factory_; }
+  ErrorSink& error_sink() const { return *error_sink_; }
+  NodeFactory& node_factory() const { return *node_factory_; }
 
  private:
   ErrorSink* const error_sink_;

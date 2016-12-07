@@ -33,7 +33,7 @@ class Lexer final {
  private:
   enum class ErrorCode;
 
-  ast::NodeFactory* node_factory() const;
+  ast::NodeFactory& node_factory() const;
   const SourceCode& source_code() const;
 
   void AddError(const SourceCodeRange& range, ErrorCode error_code);

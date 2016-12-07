@@ -108,7 +108,7 @@ Lexer::Lexer(ast::EditContext* context, const SourceCodeRange& range)
 
 Lexer::~Lexer() = default;
 
-ast::NodeFactory* Lexer::node_factory() const {
+ast::NodeFactory& Lexer::node_factory() const {
   return context_->node_factory();
 }
 
@@ -117,7 +117,7 @@ const SourceCode& Lexer::source_code() const {
 }
 
 void Lexer::AddError(const SourceCodeRange& range, ErrorCode error_code) {
-  context_->error_sink()->AddError(range, static_cast<int>(error_code));
+  context_->error_sink().AddError(range, static_cast<int>(error_code));
 }
 
 void Lexer::AddError(ErrorCode error_code) {
@@ -138,7 +138,7 @@ ast::Node* Lexer::HandleBlockComment() {
   auto is_after_asterisk = false;
   while (reader_->HasCharacter()) {
     if (is_after_asterisk && reader_->AdvanceIf('/'))
-      return &node_factory()->NewComment(MakeTokenRange());
+      return &node_factory().NewComment(MakeTokenRange());
     is_after_asterisk = reader_->Get() == '*';
     reader_->Advance();
   }
@@ -200,8 +200,8 @@ ast::Node* Lexer::HandleDecimal() {
   const auto value =
       static_cast<double>(digits_part) * std::pow(10.0, digits_scale);
   const auto exponent = exponent_part * exponent_sign;
-  return &node_factory()->NewNumericLiteral(MakeTokenRange(),
-                                            value * std::pow(10.0, exponent));
+  return &node_factory().NewNumericLiteral(MakeTokenRange(),
+                                           value * std::pow(10.0, exponent));
 }
 
 ast::Node* Lexer::HandleInteger(int base) {
@@ -234,7 +234,7 @@ ast::Node* Lexer::HandleInteger(int base) {
     return NewInvalid(ErrorCode::NUMERIC_LITERAL_INTEGER_OVERFLOW);
   if (number_of_digits == 0)
     return NewError(ErrorCode::NUMERIC_LITERAL_INTEGER_NO_DIGITS);
-  return &node_factory()->NewNumericLiteral(MakeTokenRange(), accumulator);
+  return &node_factory().NewNumericLiteral(MakeTokenRange(), accumulator);
 }
 
 ast::Node* Lexer::HandleLineComment() {
@@ -245,7 +245,7 @@ ast::Node* Lexer::HandleLineComment() {
     }
     reader_->Advance();
   }
-  return &node_factory()->NewComment(MakeTokenRange());
+  return &node_factory().NewComment(MakeTokenRange());
 }
 
 ast::Node* Lexer::HandleName() {
@@ -254,7 +254,7 @@ ast::Node* Lexer::HandleName() {
       break;
     reader_->Advance();
   }
-  return &node_factory()->NewName(MakeTokenRange());
+  return &node_factory().NewName(MakeTokenRange());
 }
 
 // Handle op, op op, op '=' pattern.
@@ -293,7 +293,7 @@ ast::Node* Lexer::HandleStringLiteral() {
     switch (state) {
       case State::Normal:
         if (reader_->AdvanceIf(delimiter)) {
-          return &node_factory()->NewStringLiteral(
+          return &node_factory().NewStringLiteral(
               MakeTokenRange(),
               base::StringPiece16(characters.data(), characters.size()));
         }
@@ -503,12 +503,12 @@ ast::Node* Lexer::NewError(ErrorCode error_code) {
 }
 
 ast::Node* Lexer::NewInvalid(ErrorCode error_code) {
-  return &node_factory()->NewInvalid(MakeTokenRange(),
-                                     static_cast<int>(error_code));
+  return &node_factory().NewInvalid(MakeTokenRange(),
+                                    static_cast<int>(error_code));
 }
 
 ast::Node* Lexer::NewPunctuator(ast::PunctuatorKind kind) {
-  return &node_factory()->NewPunctuator(MakeTokenRange(), kind);
+  return &node_factory().NewPunctuator(MakeTokenRange(), kind);
 }
 
 ast::Node* Lexer::NextToken() {

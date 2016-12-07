@@ -5,6 +5,7 @@
 #include "joana/parser/parser.h"
 
 #include "joana/parser/lexer/lexer.h"
+#include "joana/public/ast/invalid.h"
 #include "joana/public/ast/module.h"
 #include "joana/public/ast/node_factory.h"
 
@@ -22,6 +23,16 @@ Parser::Parser(ast::NodeFactory* node_factory,
 Parser::~Parser() = default;
 
 const ast::Node& Parser::Run() {
+  while (lexer_->HasToken()) {
+    auto& token = lexer_->GetToken();
+    if (token.is<ast::Invalid>()) {
+      // TODO(eval1749): We should skip tokens until good point to restart
+      // toplevel parsing.
+      lexer_->Advance();
+      continue;
+    }
+    lexer_->Advance();
+  }
   return root_;
 }
 

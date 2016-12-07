@@ -210,15 +210,12 @@ std::string LexerTest::Parse() {
   Lexer lexer(&node_factory_, &error_sink_, source_code_->range());
   std::ostringstream ostream;
   auto delimiter = "";
-  for (;;) {
-    auto& node = lexer.NextToken();
-    if (node.is<ast::Invalid>() &&
-        node.as<ast::Invalid>()->error_code() == ERROR_CHARACTER_NO_MORE) {
-      break;
-    }
+  while (lexer.HasToken()) {
     ostream << delimiter;
     delimiter = " ";
+    auto& node = lexer.GetToken();
     node.PrintTo(&ostream);
+    lexer.Advance();
   }
   for (const auto* error : error_sink_.errors()) {
     ostream << ' ' << error->error_code() << '@' << error->range();

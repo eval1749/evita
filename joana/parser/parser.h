@@ -29,6 +29,9 @@ class Parser final {
 
   ~Parser();
 
+  // Returns root node, either |Module| or |Script|, of abstract syntax tree
+  // for source code specified in |range|. The result may be partial result
+  // if source code does not match grammar.
   const ast::Node& Run();
 
  private:

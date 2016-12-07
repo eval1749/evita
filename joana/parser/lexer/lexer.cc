@@ -565,7 +565,7 @@ ast::Node& Lexer::NextToken() {
         if (reader_->AdvanceIf('.')) {
           if (reader_->AdvanceIf('.'))
             return NewPunctuator(ast::PunctuatorKind::DotDotDot);
-          return NewInvalid(ErrorCode::PUNCTUATOR_DOT_DOT);
+          return NewError(ErrorCode::PUNCTUATOR_DOT_DOT);
         }
         return NewPunctuator(ast::PunctuatorKind::Dot);
       case '/':

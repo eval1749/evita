@@ -19,6 +19,7 @@
 #include "joana/public/ast/name.h"
 #include "joana/public/ast/node.h"
 #include "joana/public/ast/node_factory.h"
+#include "joana/public/ast/punctuator.h"
 #include "joana/public/error_sink.h"
 #include "joana/public/memory/zone.h"
 #include "joana/public/source_code.h"
@@ -115,6 +116,7 @@ class LexerTest : public ::testing::Test {
   std::string NewName(int start, int end);
   std::string NewNumericLiteral(int start, int end, double value);
   std::string NewNumericLiteral(double value);
+  std::string NewPunctuator(ast::PunctuatorKind kind);
   std::string NewStringLiteral(base::StringPiece data);
   std::string NewStringLiteral(const std::vector<base::char16> data);
   void PrepareSouceCode(base::StringPiece script_text);
@@ -179,6 +181,10 @@ std::string LexerTest::NewNumericLiteral(int start, int end, double value) {
 
 std::string LexerTest::NewNumericLiteral(double value) {
   return ToString(factory().NewNumericLiteral(MakeRange(), value));
+}
+
+std::string LexerTest::NewPunctuator(ast::PunctuatorKind kind) {
+  return ToString(factory().NewPunctuator(MakeRange(), kind));
 }
 
 std::string LexerTest::NewStringLiteral(base::StringPiece data8) {
@@ -308,6 +314,64 @@ TEST_F(LexerTest, NumericLiteralError) {
   PrepareSouceCode("0123");
   EXPECT_EQ(NewInvalid(0, 4, 4, ERROR_NUMERIC_LITERAL_INTEGER_OCTAL), Parse())
       << "Strict mode does not allow legacy octal literal";
+}
+
+TEST_F(LexerTest, Punctuator) {
+  // "."
+  PrepareSouceCode(".");
+  EXPECT_EQ(NewPunctuator(ast::PunctuatorKind::Dot), Parse());
+
+  PrepareSouceCode("...");
+  EXPECT_EQ(NewPunctuator(ast::PunctuatorKind::DotDotDot), Parse());
+
+  // "!"
+  PrepareSouceCode("!");
+  EXPECT_EQ(NewPunctuator(ast::PunctuatorKind::LogicalNot), Parse());
+
+  PrepareSouceCode("!=");
+  EXPECT_EQ(NewPunctuator(ast::PunctuatorKind::NotEqual), Parse());
+
+  PrepareSouceCode("!==");
+  EXPECT_EQ(NewPunctuator(ast::PunctuatorKind::NotEqualEqual), Parse());
+
+  // "+"
+  PrepareSouceCode("+");
+  EXPECT_EQ(NewPunctuator(ast::PunctuatorKind::Plus), Parse());
+
+  PrepareSouceCode("++");
+  EXPECT_EQ(NewPunctuator(ast::PunctuatorKind::PlusPlus), Parse());
+
+  PrepareSouceCode("+=");
+  EXPECT_EQ(NewPunctuator(ast::PunctuatorKind::PlusPlus), Parse());
+
+  // "<"
+  PrepareSouceCode("<");
+  EXPECT_EQ(NewPunctuator(ast::PunctuatorKind::LessThan), Parse());
+
+  PrepareSouceCode("<<");
+  EXPECT_EQ(NewPunctuator(ast::PunctuatorKind::LeftShift), Parse());
+
+  PrepareSouceCode("<=");
+  EXPECT_EQ(NewPunctuator(ast::PunctuatorKind::LessThanOrEqual), Parse());
+
+  // ">"
+  PrepareSouceCode(">");
+  EXPECT_EQ(NewPunctuator(ast::PunctuatorKind::GreaterThan), Parse());
+
+  PrepareSouceCode(">>");
+  EXPECT_EQ(NewPunctuator(ast::PunctuatorKind::RightShift), Parse());
+
+  PrepareSouceCode(">>>");
+  EXPECT_EQ(NewPunctuator(ast::PunctuatorKind::UnsignedRightShift), Parse());
+
+  PrepareSouceCode(">=");
+  EXPECT_EQ(NewPunctuator(ast::PunctuatorKind::GreaterThanOrEqual), Parse());
+}
+
+TEST_F(LexerTest, PunctuatorError) {
+  PrepareSouceCode("..");
+  EXPECT_EQ(NewInvalid(0, 2, 2, ERROR_PUNCTUATOR_DOT_DOT), Parse())
+      << "'..' is not a valid punctuator.";
 }
 
 TEST_F(LexerTest, StringLiteral) {

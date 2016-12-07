@@ -9,6 +9,7 @@
 #include "joana/public/ast/invalid.h"
 #include "joana/public/ast/module.h"
 #include "joana/public/ast/node_factory.h"
+#include "joana/public/error_sink.h"
 
 namespace joana {
 namespace internal {
@@ -16,9 +17,21 @@ namespace internal {
 Parser::Parser(ast::EditContext* context, const SourceCodeRange& range)
     : context_(context),
       lexer_(new Lexer(context, range)),
-      root_(context->node_factory()->NewModule(range)) {}
+      root_(context->node_factory().NewModule(range)) {}
 
 Parser::~Parser() = default;
+
+ast::NodeFactory& Parser::node_factory() const {
+  return context_->node_factory();
+}
+
+void Parser::AddError(const ast::Node& token, ErrorCode error_code) {
+  context_->error_sink().AddError(token.range(), static_cast<int>(error_code));
+}
+
+void Parser::AddStatement(const ast::Statement& statement) {
+  // TODO(eval1749): NYI: Parser::AddStatement()
+}
 
 const ast::Node& Parser::Run() {
   while (lexer_->HasToken()) {
@@ -29,7 +42,7 @@ const ast::Node& Parser::Run() {
       lexer_->Advance();
       continue;
     }
-    lexer_->Advance();
+    ParseStatement();
   }
   return root_;
 }

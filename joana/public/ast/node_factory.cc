@@ -16,8 +16,8 @@
 #include "joana/public/ast/literals/undefined_literal.h"
 #include "joana/public/ast/module.h"
 #include "joana/public/ast/name.h"
-#include "joana/public/ast/name_id.h"
 #include "joana/public/ast/punctuator.h"
+#include "joana/public/ast/statements/empty_statement.h"
 #include "joana/public/ast/template.h"
 
 namespace joana {
@@ -128,6 +128,11 @@ StringLiteral& NodeFactory::NewStringLiteral(const SourceCodeRange& range,
 UndefinedLiteral& NodeFactory::NewUndefinedLiteral(
     const SourceCodeRange& range) {
   return *new (zone_) UndefinedLiteral(range);
+}
+
+// Statements factory members
+EmptyStatement& NodeFactory::NewEmptyStatement(const Punctuator& semi_colon) {
+  return *new (zone_) EmptyStatement(semi_colon);
 }
 
 }  // namespace ast

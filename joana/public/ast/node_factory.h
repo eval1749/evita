@@ -51,6 +51,9 @@ class JOANA_PUBLIC_EXPORT NodeFactory final {
 
   UndefinedLiteral& NewUndefinedLiteral(const SourceCodeRange& range);
 
+  // Statements factory members
+  EmptyStatement& NewEmptyStatement(const Punctuator& semi_colon);
+
  private:
   class NameIdMap;
 

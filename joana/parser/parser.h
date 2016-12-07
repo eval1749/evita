@@ -13,6 +13,8 @@ namespace joana {
 namespace ast {
 class EditContext;
 class Node;
+class NodeFactory;
+class Statement;
 }
 class SourceCodeRange;
 
@@ -32,6 +34,15 @@ class Parser final {
   const ast::Node& Run();
 
  private:
+  enum class ErrorCode;
+
+  ast::NodeFactory& node_factory() const;
+
+  void AddError(const ast::Node& token, ErrorCode error_code);
+  void AddStatement(const ast::Statement& statement);
+
+  void ParseStatement();
+
   ast::EditContext* const context_;
   std::unique_ptr<Lexer> lexer_;
   ast::Node& root_;

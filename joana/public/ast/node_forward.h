@@ -24,7 +24,9 @@ namespace ast {
   V(StringLiteral)              \
   V(UndefinedLiteral)
 
-#define FOR_EACH_AST_STATEMENT(V) V(ExpressionStatment)
+#define FOR_EACH_AST_STATEMENT(V) \
+  V(EmptyStatement)               \
+  V(ExpressionStatment)
 
 #define FOR_EACH_CONCRETE_AST_NODE(V) \
   FOR_EACH_AST_EXPRESSION(V)          \

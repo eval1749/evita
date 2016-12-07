@@ -29,7 +29,8 @@ namespace ast {
   V(EXPRESSION, BRACKET_NOT_CLSOED)     \
   V(EXPRESSION, PARENTHESIS_NOT_CLSOED) \
   V(STATEMENT, BRACE_NOT_CLSOED)        \
-  V(STATEMENT, NO_SEMI_COLON)
+  V(STATEMENT, NO_SEMI_COLON)           \
+  V(STATEMENT, NYI)
 
 const auto kLexerErrorCodeBase = 10000;
 const auto kParserErrorCodeBase = 20000;

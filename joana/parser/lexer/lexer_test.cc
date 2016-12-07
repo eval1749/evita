@@ -12,6 +12,8 @@
 #include "base/strings/string_piece.h"
 #include "base/strings/utf_string_conversions.h"
 #include "joana/public/ast/comment.h"
+#include "joana/public/ast/edit_context.h"
+#include "joana/public/ast/edit_context_builder.h"
 #include "joana/public/ast/error_codes.h"
 #include "joana/public/ast/invalid.h"
 #include "joana/public/ast/literals/numeric_literal.h"
@@ -126,6 +128,7 @@ class LexerTest : public ::testing::Test {
   SimpleErrorSink error_sink_;
   Zone zone_;
   ast::NodeFactory node_factory_;
+  std::unique_ptr<ast::EditContext> context_;
   const SourceCode* source_code_ = nullptr;
   SourceCode::Factory source_code_factory_;
 
@@ -133,7 +136,13 @@ class LexerTest : public ::testing::Test {
 };
 
 LexerTest::LexerTest()
-    : zone_("LexerTest"), node_factory_(&zone_), source_code_factory_(&zone_) {}
+    : zone_("LexerTest"),
+      node_factory_(&zone_),
+      context_(ast::EditContext::Builder()
+                   .SetErrorSink(&error_sink_)
+                   .SetNodeFactory(&node_factory_)
+                   .Build()),
+      source_code_factory_(&zone_) {}
 
 SourceCodeRange LexerTest::MakeRange(int start, int end) const {
   DCHECK(source_code_);
@@ -207,7 +216,7 @@ void LexerTest::PrepareSouceCode(base::StringPiece script_text) {
 
 std::string LexerTest::Parse() {
   DCHECK(source_code_);
-  Lexer lexer(&node_factory_, &error_sink_, source_code_->range());
+  Lexer lexer(context_.get(), source_code_->range());
   std::ostringstream ostream;
   auto delimiter = "";
   while (lexer.HasToken()) {

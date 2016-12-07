@@ -22,9 +22,7 @@ class CharacterReader;
 
 class Lexer final {
  public:
-  Lexer(ast::NodeFactory* node_factory,
-        ErrorSink* error_sink,
-        const SourceCodeRange& range);
+  Lexer(ast::EditContext* context, const SourceCodeRange& range);
 
   ~Lexer();
 
@@ -35,6 +33,7 @@ class Lexer final {
  private:
   enum class ErrorCode;
 
+  ast::NodeFactory* node_factory() const;
   const SourceCode& source_code() const;
 
   void AddError(const SourceCodeRange& range, ErrorCode error_code);
@@ -61,9 +60,8 @@ class Lexer final {
 
   SourceCodeRange RangeFrom(int start) const;
 
+  ast::EditContext* const context_;
   ast::Node* current_token_ = nullptr;
-  ErrorSink* const error_sink_;
-  ast::NodeFactory* const node_factory_;
   const SourceCodeRange& range_;
   const std::unique_ptr<CharacterReader> reader_;
   int token_start_;

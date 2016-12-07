@@ -11,10 +11,9 @@
 
 namespace joana {
 namespace ast {
+class EditContext;
 class Node;
-class NodeFactory;
 }
-class ErrorSink;
 class SourceCodeRange;
 
 namespace internal {
@@ -23,9 +22,7 @@ class Lexer;
 
 class Parser final {
  public:
-  Parser(ast::NodeFactory* node_factory,
-         ErrorSink* error_sink,
-         const SourceCodeRange& range);
+  Parser(ast::EditContext* context, const SourceCodeRange& range);
 
   ~Parser();
 
@@ -35,9 +32,8 @@ class Parser final {
   const ast::Node& Run();
 
  private:
-  ErrorSink* const error_sink_;
+  ast::EditContext* const context_;
   std::unique_ptr<Lexer> lexer_;
-  ast::NodeFactory* const node_factory_;
   ast::Node& root_;
 
   DISALLOW_COPY_AND_ASSIGN(Parser);

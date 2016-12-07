@@ -10,15 +10,13 @@
 namespace joana {
 
 namespace ast {
+class EditContext;
 class Node;
-class NodeFactory;
 }
 
-class ErrorSink;
 class SourceCodeRange;
 
-JOANA_PARSER_EXPORT const ast::Node& Parse(ast::NodeFactory* node_factory,
-                                           ErrorSink* error_sink,
+JOANA_PARSER_EXPORT const ast::Node& Parse(ast::EditContext* context,
                                            const SourceCodeRange& range);
 
 }  // namespace joana

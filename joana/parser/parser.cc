@@ -5,6 +5,7 @@
 #include "joana/parser/parser.h"
 
 #include "joana/parser/lexer/lexer.h"
+#include "joana/public/ast/edit_context.h"
 #include "joana/public/ast/invalid.h"
 #include "joana/public/ast/module.h"
 #include "joana/public/ast/node_factory.h"
@@ -12,13 +13,10 @@
 namespace joana {
 namespace internal {
 
-Parser::Parser(ast::NodeFactory* node_factory,
-               ErrorSink* error_sink,
-               const SourceCodeRange& range)
-    : error_sink_(error_sink),
-      lexer_(new Lexer(node_factory, error_sink, range)),
-      node_factory_(node_factory),
-      root_(node_factory_->NewModule(range)) {}
+Parser::Parser(ast::EditContext* context, const SourceCodeRange& range)
+    : context_(context),
+      lexer_(new Lexer(context, range)),
+      root_(context->node_factory()->NewModule(range)) {}
 
 Parser::~Parser() = default;
 

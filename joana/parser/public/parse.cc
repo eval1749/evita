@@ -10,10 +10,9 @@ namespace joana {
 
 using Parser = internal::Parser;
 
-const ast::Node& Parse(ast::NodeFactory* node_factory,
-                       ErrorSink* error_sink,
+const ast::Node& Parse(ast::EditContext* context,
                        const SourceCodeRange& range) {
-  Parser parser(node_factory, error_sink, range);
+  Parser parser(context, range);
   return parser.Run();
 }
 

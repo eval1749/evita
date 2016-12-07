@@ -14,13 +14,13 @@ enum class NameId {
   Zero,
 
   StartKeyword,
-#define V(name, camel, upper) Keyword##camel,
+#define V(name, camel, upper) camel,
   FOR_EACH_JAVASCRIPT_KEYWORD(V)
 #undef V
       EndKwyrod,
 
   StartKnown,
-#define V(name, camel, upper) Known##camel,
+#define V(name, camel, upper) camel,
   FOR_EACH_JAVASCRIPT_KNOWN_WORD(V)
 #undef V
       EndKnown,

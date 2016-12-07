@@ -25,7 +25,7 @@ void CharacterReader::Advance() {
 }
 
 bool CharacterReader::AdvanceIf(base::char16 char_code) {
-  if (!CanAdvance())
+  if (!HasCharacter())
     return false;
   if (Get() != char_code)
     return false;
@@ -33,13 +33,13 @@ bool CharacterReader::AdvanceIf(base::char16 char_code) {
   return true;
 }
 
-bool CharacterReader::CanAdvance() const {
-  return current_ < range_.end();
-}
-
 base::char16 CharacterReader::Get() const {
   DCHECK_LT(current_, range_.end());
   return range_.source_code().GetChar(current_);
+}
+
+bool CharacterReader::HasCharacter() const {
+  return current_ < range_.end();
 }
 
 }  // namespace internal

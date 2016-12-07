@@ -134,7 +134,7 @@ ast::Node& Lexer::GetToken() const {
 
 ast::Node* Lexer::HandleBlockComment() {
   auto is_after_asterisk = false;
-  while (reader_->CanAdvance()) {
+  while (reader_->HasCharacter()) {
     if (is_after_asterisk && reader_->AdvanceIf('/'))
       return &node_factory_->NewComment(MakeTokenRange());
     is_after_asterisk = reader_->Get() == '*';
@@ -148,7 +148,7 @@ ast::Node* Lexer::HandleDecimal() {
   uint64_t digits_part = reader_->Get() - '0';
   reader_->Advance();
   auto digits_scale = 0;
-  while (reader_->CanAdvance()) {
+  while (reader_->HasCharacter()) {
     if (reader_->Get() < '0' && reader_->Get() > '9')
       break;
     if (digits_part > kMaxIntegerPart) {
@@ -161,7 +161,7 @@ ast::Node* Lexer::HandleDecimal() {
     reader_->Advance();
   }
   if (reader_->AdvanceIf('.')) {
-    while (reader_->CanAdvance()) {
+    while (reader_->HasCharacter()) {
       if (reader_->Get() < '0' && reader_->Get() > '9')
         break;
       if (digits_part > kMaxIntegerPart) {
@@ -183,7 +183,7 @@ ast::Node* Lexer::HandleDecimal() {
       exponent_sign = 1;
     else if (reader_->AdvanceIf('-'))
       exponent_sign = -1;
-    while (reader_->CanAdvance()) {
+    while (reader_->HasCharacter()) {
       if (reader_->Get() < '0' && reader_->Get() > '9')
         break;
       if (exponent_part > kMaxIntegerPart) {
@@ -199,7 +199,7 @@ ast::Node* Lexer::HandleDecimal() {
       static_cast<double>(digits_part) * std::pow(10.0, digits_scale);
   const auto exponent = exponent_part * exponent_sign;
   return &node_factory_->NewNumericLiteral(MakeTokenRange(),
-                                          value * std::pow(10.0, exponent));
+                                           value * std::pow(10.0, exponent));
 }
 
 ast::Node* Lexer::HandleInteger(int base) {
@@ -208,7 +208,7 @@ ast::Node* Lexer::HandleInteger(int base) {
   const auto kMaxInteger = static_cast<uint64_t>(1) << 53;
   auto number_of_digits = 0;
   auto is_overflow = false;
-  while (reader_->CanAdvance() && IsDigitWithBase(reader_->Get(), base)) {
+  while (reader_->HasCharacter() && IsDigitWithBase(reader_->Get(), base)) {
     if (accumulator > kMaxInteger / base) {
       if (!is_overflow)
         AddError(ErrorCode::NUMERIC_LITERAL_INTEGER_OVERFLOW);
@@ -221,10 +221,10 @@ ast::Node* Lexer::HandleInteger(int base) {
     reader_->Advance();
   }
 
-  if (reader_->CanAdvance() && IsIdentifierPart(reader_->Get())) {
+  if (reader_->HasCharacter() && IsIdentifierPart(reader_->Get())) {
     reader_->Advance();
     AddError(ErrorCode::NUMERIC_LITERAL_INTEGER_BAD_DIGIT);
-    while (reader_->CanAdvance() && IsIdentifierPart(reader_->Get()))
+    while (reader_->HasCharacter() && IsIdentifierPart(reader_->Get()))
       reader_->Advance();
     return NewInvalid(ErrorCode::NUMERIC_LITERAL_INTEGER_BAD_DIGIT);
   }
@@ -236,7 +236,7 @@ ast::Node* Lexer::HandleInteger(int base) {
 }
 
 ast::Node* Lexer::HandleLineComment() {
-  while (reader_->CanAdvance()) {
+  while (reader_->HasCharacter()) {
     if (IsLineTerminator(reader_->Get())) {
       reader_->Advance();
       break;
@@ -247,7 +247,7 @@ ast::Node* Lexer::HandleLineComment() {
 }
 
 ast::Node* Lexer::HandleName() {
-  while (reader_->CanAdvance()) {
+  while (reader_->HasCharacter()) {
     if (!IsIdentifierPart(reader_->Get()))
       break;
     reader_->Advance();
@@ -287,7 +287,7 @@ ast::Node* Lexer::HandleStringLiteral() {
   reader_->Advance();
   auto accumulator = 0;
   auto backslash_start = 0;
-  while (reader_->CanAdvance()) {
+  while (reader_->HasCharacter()) {
     switch (state) {
       case State::Normal:
         if (reader_->AdvanceIf(delimiter)) {
@@ -490,7 +490,7 @@ ast::Node* Lexer::HandleZero() {
 }
 
 SourceCodeRange Lexer::MakeTokenRange() const {
-  if (reader_->CanAdvance())
+  if (reader_->HasCharacter())
     DCHECK_LT(token_start_, reader_->location());
   return source_code().Slice(token_start_, reader_->location());
 }
@@ -502,7 +502,7 @@ ast::Node* Lexer::NewError(ErrorCode error_code) {
 
 ast::Node* Lexer::NewInvalid(ErrorCode error_code) {
   return &node_factory_->NewInvalid(MakeTokenRange(),
-                                   static_cast<int>(error_code));
+                                    static_cast<int>(error_code));
 }
 
 ast::Node* Lexer::NewPunctuator(ast::PunctuatorKind kind) {
@@ -510,7 +510,7 @@ ast::Node* Lexer::NewPunctuator(ast::PunctuatorKind kind) {
 }
 
 ast::Node* Lexer::NextToken() {
-  while (reader_->CanAdvance()) {
+  while (reader_->HasCharacter()) {
     token_start_ = reader_->location();
     switch (reader_->Get()) {
       case ' ':

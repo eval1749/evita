@@ -11,7 +11,7 @@ namespace joana {
 namespace ast {
 
 class JOANA_PUBLIC_EXPORT Statement : public ContainerNode {
-  DECLARE_CASTABLE_CLASS(Statement, ContainerNode);
+  DECLARE_ABSTRACT_AST_NODE(Statement, ContainerNode);
 
  public:
   ~Statement() override;

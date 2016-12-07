@@ -8,9 +8,26 @@
 #include "joana/public/ast/node.h"
 
 #include "base/strings/string_piece.h"
+#include "joana/public/ast/lexical_grammar.h"
 
 namespace joana {
 namespace ast {
+
+enum class NameId {
+  Zero,
+
+  StartKeyword,
+#define V(name, camel, upper) camel,
+  FOR_EACH_JAVASCRIPT_KEYWORD(V)
+#undef V
+      EndKwyrod,
+
+  StartKnown,
+#define V(name, camel, upper) camel,
+  FOR_EACH_JAVASCRIPT_KNOWN_WORD(V)
+#undef V
+      EndKnown,
+};
 
 class JOANA_PUBLIC_EXPORT Name final : public Node {
   DECLARE_CONCRETE_AST_NODE(Name, Node);

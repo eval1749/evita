@@ -19,7 +19,6 @@
 #include "joana/public/ast/literals/numeric_literal.h"
 #include "joana/public/ast/literals/string_literal.h"
 #include "joana/public/ast/name.h"
-#include "joana/public/ast/name_id.h"
 #include "joana/public/ast/node.h"
 #include "joana/public/ast/node_factory.h"
 #include "joana/public/ast/punctuator.h"

@@ -45,6 +45,9 @@ class JOANA_PUBLIC_EXPORT InvalidExpression : public Expression {
   DISALLOW_COPY_AND_ASSIGN(InvalidExpression);
 };
 
+//
+// LiteralExpression
+//
 class JOANA_PUBLIC_EXPORT LiteralExpression : public Expression {
   DECLARE_CONCRETE_AST_NODE(LiteralExpression, Expression);
 

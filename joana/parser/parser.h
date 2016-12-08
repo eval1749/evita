@@ -41,6 +41,10 @@ class Parser final {
   void AddError(const ast::Node& token, ErrorCode error_code);
   void AddStatement(const ast::Statement& statement);
 
+  // Expressions
+  void ParseExpression();
+
+  // Statements
   void ParseStatement();
 
   ast::EditContext* const context_;

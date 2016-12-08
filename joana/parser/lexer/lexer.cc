@@ -88,6 +88,11 @@ bool IsLineTerminator(base::char16 char_code) {
          char_code == kLineSeparator || char_code == kParagraphSeparator;
 }
 
+bool IsWhitespace(base::char16 char_code) {
+  return IsLineTerminator(char_code) || char_code == ' ' || char_code == '\t' ||
+         char_code == '\v' || char_code == '\f' || char_code == '\r';
+}
+
 }  // namespace
 
 enum class Lexer::ErrorCode {
@@ -512,6 +517,10 @@ ast::Node* Lexer::NewPunctuator(ast::PunctuatorKind kind) {
 
 ast::Node* Lexer::NextToken() {
   while (reader_->HasCharacter()) {
+    if (IsWhitespace(reader_->Get())) {
+      reader_->Advance();
+      continue;
+    }
     token_start_ = reader_->location();
     switch (reader_->Get()) {
       case ' ':
@@ -520,8 +529,6 @@ ast::Node* Lexer::NextToken() {
       case 0x000B:  // v VT
       case 0x000C:  // f FF
       case 0x000D:  // r CR
-        reader_->Advance();
-        continue;
       case '!':
         reader_->Advance();
         if (reader_->AdvanceIf('=')) {

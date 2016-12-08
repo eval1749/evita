@@ -10,6 +10,8 @@
 namespace joana {
 namespace ast {
 
+class Name;
+
 class JOANA_PUBLIC_EXPORT Literal : public Node {
   DECLARE_ABSTRACT_AST_NODE(Literal, Node);
 
@@ -32,7 +34,7 @@ class JOANA_PUBLIC_EXPORT BooleanLiteral final : public Literal {
   bool value() const { return value_; }
 
  private:
-  BooleanLiteral(const SourceCodeRange& range, bool value);
+  BooleanLiteral(const Name& name, bool value);
 
   const bool value_;
 
@@ -46,7 +48,7 @@ class JOANA_PUBLIC_EXPORT NullLiteral final : public Literal {
   ~NullLiteral() final;
 
  private:
-  explicit NullLiteral(const SourceCodeRange& range);
+  explicit NullLiteral(const Name& name);
 
   DISALLOW_COPY_AND_ASSIGN(NullLiteral);
 };
@@ -96,7 +98,7 @@ class JOANA_PUBLIC_EXPORT UndefinedLiteral final : public Literal {
   ~UndefinedLiteral() final;
 
  private:
-  explicit UndefinedLiteral(const SourceCodeRange& range);
+  explicit UndefinedLiteral(const Name& name);
 
   DISALLOW_COPY_AND_ASSIGN(UndefinedLiteral);
 };

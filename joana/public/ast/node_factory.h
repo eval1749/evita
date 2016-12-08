@@ -40,16 +40,16 @@ class JOANA_PUBLIC_EXPORT NodeFactory final {
   LiteralExpression& NewLiteralExpression(const Literal& literal);
 
   // Literals factory members
-  BooleanLiteral& NewCommen(const SourceCodeRange& range, bool value);
+  BooleanLiteral& NewCommen(const Name& name, bool value);
 
-  NullLiteral& NewNullLiteral(const SourceCodeRange& range);
+  NullLiteral& NewNullLiteral(const Name& name);
 
   NumericLiteral& NewNumericLiteral(const SourceCodeRange& range, double value);
 
   StringLiteral& NewStringLiteral(const SourceCodeRange& range,
                                   base::StringPiece16 data);
 
-  UndefinedLiteral& NewUndefinedLiteral(const SourceCodeRange& range);
+  UndefinedLiteral& NewUndefinedLiteral(const Name& name);
 
   // Statements factory members
   EmptyStatement& NewEmptyStatement(const Punctuator& semi_colon);

@@ -102,13 +102,12 @@ LiteralExpression& NodeFactory::NewLiteralExpression(const Literal& literal) {
 }
 
 // Literals
-BooleanLiteral& NodeFactory::NewCommen(const SourceCodeRange& range,
-                                       bool value) {
-  return *new (zone_) BooleanLiteral(range, value);
+BooleanLiteral& NodeFactory::NewCommen(const Name& name, bool value) {
+  return *new (zone_) BooleanLiteral(name, value);
 }
 
-NullLiteral& NodeFactory::NewNullLiteral(const SourceCodeRange& range) {
-  return *new (zone_) NullLiteral(range);
+NullLiteral& NodeFactory::NewNullLiteral(const Name& name) {
+  return *new (zone_) NullLiteral(name);
 }
 
 NumericLiteral& NodeFactory::NewNumericLiteral(const SourceCodeRange& range,
@@ -121,9 +120,8 @@ StringLiteral& NodeFactory::NewStringLiteral(const SourceCodeRange& range,
   return *new (zone_) StringLiteral(range, data);
 }
 
-UndefinedLiteral& NodeFactory::NewUndefinedLiteral(
-    const SourceCodeRange& range) {
-  return *new (zone_) UndefinedLiteral(range);
+UndefinedLiteral& NodeFactory::NewUndefinedLiteral(const Name& name) {
+  return *new (zone_) UndefinedLiteral(name);
 }
 
 // Statements factory members

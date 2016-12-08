@@ -4,6 +4,7 @@
 
 #include "joana/public/ast/literals.h"
 
+#include "joana/public/ast/name.h"
 #include "joana/public/escaped_string_piece.h"
 
 namespace joana {
@@ -12,15 +13,15 @@ namespace ast {
 //
 // BooleanLiteral
 //
-BooleanLiteral::BooleanLiteral(const SourceCodeRange& range, bool value)
-    : Literal(range), value_(value) {}
+BooleanLiteral::BooleanLiteral(const Name& name, bool value)
+    : Literal(name.range()), value_(value) {}
 
 BooleanLiteral::~BooleanLiteral() = default;
 
 //
 // NullLiteral
 //
-NullLiteral::NullLiteral(const SourceCodeRange& range) : Literal(range) {}
+NullLiteral::NullLiteral(const Name& name) : Literal(name.range()) {}
 
 NullLiteral::~NullLiteral() = default;
 
@@ -61,8 +62,7 @@ void StringLiteral::PrintMoreTo(std::ostream* ostream) const {
 //
 // UndefinedLiteral
 //
-UndefinedLiteral::UndefinedLiteral(const SourceCodeRange& range)
-    : Literal(range) {}
+UndefinedLiteral::UndefinedLiteral(const Name& name) : Literal(name.range()) {}
 
 UndefinedLiteral::~UndefinedLiteral() = default;
 

@@ -7,19 +7,44 @@
 #include "joana/parser/lexer/lexer.h"
 #include "joana/parser/parser_error_codes.h"
 #include "joana/public/ast/expressions.h"
+#include "joana/public/ast/literals.h"
+#include "joana/public/ast/name.h"
 #include "joana/public/ast/node_factory.h"
 #include "joana/public/ast/punctuator.h"
 
 namespace joana {
 namespace internal {
 
-void Parser::ParseExpression() {
+ast::Expression& Parser::NewInvalidExpression(const ast::Node& node,
+                                              ErrorCode error_code) {
+  AddError(node, error_code);
+  return node_factory().NewInvalidExpression(node,
+                                             static_cast<int>(error_code));
+}
+
+ast::Expression& Parser::NewLiteralExpression(const ast::Literal& literal) {
+  return node_factory().NewLiteralExpression(literal);
+}
+
+ast::Expression& Parser::ParseExpression() {
   const auto& token = lexer_->GetToken();
-  if (auto* punctator = token.as<ast::Punctuator>()) {
-    AddError(token, ErrorCode::ERROR_EXPRESSION_NYI);
-    return;
+  if (auto* name = token.as<ast::Name>())
+    return ParseExpressionName();
+  if (auto* punctator = token.as<ast::Punctuator>())
+    return NewInvalidExpression(token, ErrorCode::ERROR_EXPRESSION_NYI);
+  return NewInvalidExpression(token, ErrorCode::ERROR_EXPRESSION_NYI);
+}
+
+ast::Expression& Parser::ParseExpressionName() {
+  const auto& name = *lexer_->GetToken().as<ast::Name>();
+  switch (static_cast<ast::NameId>(name.number())) {
+    case ast::NameId::False:
+      return NewLiteralExpression(
+          node_factory().NewBooleanLiteral(name, false));
+    case ast::NameId::True:
+      return NewLiteralExpression(node_factory().NewBooleanLiteral(name, true));
   }
-  AddError(token, ErrorCode::ERROR_EXPRESSION_NYI);
+  return NewInvalidExpression(name, ErrorCode::ERROR_EXPRESSION_NYI);
 }
 
 }  // namespace internal

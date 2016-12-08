@@ -12,6 +12,8 @@
 namespace joana {
 namespace ast {
 class EditContext;
+class Expression;
+class Literal;
 class Node;
 class NodeFactory;
 class Statement;
@@ -42,7 +44,11 @@ class Parser final {
   void AddStatement(const ast::Statement& statement);
 
   // Expressions
-  void ParseExpression();
+  ast::Expression& NewInvalidExpression(const ast::Node& node,
+                                        ErrorCode error_code);
+  ast::Expression& NewLiteralExpression(const ast::Literal& literal);
+  ast::Expression& ParseExpression();
+  ast::Expression& ParseExpressionName();
 
   // Statements
   void ParseStatement();

@@ -517,174 +517,175 @@ ast::Node* Lexer::NewPunctuator(ast::PunctuatorKind kind) {
 
 ast::Node* Lexer::NextToken() {
   while (reader_->HasCharacter()) {
-    if (IsWhitespace(reader_->Get())) {
-      reader_->Advance();
-      continue;
-    }
-    token_start_ = reader_->location();
-    switch (reader_->Get()) {
-      case ' ':
-      case 0x0009:  // t TAB
-      case 0x000A:  // n LF
-      case 0x000B:  // v VT
-      case 0x000C:  // f FF
-      case 0x000D:  // r CR
-      case '!':
-        reader_->Advance();
-        if (reader_->AdvanceIf('=')) {
-          if (reader_->AdvanceIf('='))
-            return NewPunctuator(ast::PunctuatorKind::NotEqualEqual);
-          return NewPunctuator(ast::PunctuatorKind::NotEqual);
-        }
-        return NewPunctuator(ast::PunctuatorKind::LogicalNot);
-      case '"':
-        return HandleStringLiteral();
-      case '#':
-        goto invalid_character;
-      case '$':
-        return HandleName();
-      case '%':
-        return HandleOperator(ast::PunctuatorKind::Modulo,
-                              ast::PunctuatorKind::Invalid,
-                              ast::PunctuatorKind::ModuloEqual);
-      case '&':
-        return HandleOperator(ast::PunctuatorKind::BitAnd,
-                              ast::PunctuatorKind::LogicalAnd,
-                              ast::PunctuatorKind::BitAndEqual);
-      case '\'':
-        return HandleStringLiteral();
-      case '(':
-        reader_->Advance();
-        return NewPunctuator(ast::PunctuatorKind::LeftParenthesis);
-      case ')':
-        reader_->Advance();
-        return NewPunctuator(ast::PunctuatorKind::RightParenthesis);
-      case '*':
-        reader_->Advance();
-        if (reader_->AdvanceIf('='))
-          return NewPunctuator(ast::PunctuatorKind::TimesEqual);
-        if (reader_->AdvanceIf('*')) {
-          if (reader_->AdvanceIf('='))
-            return NewPunctuator(ast::PunctuatorKind::TimesTimesEqual);
-          return NewPunctuator(ast::PunctuatorKind::TimesTimes);
-        }
-        return NewPunctuator(ast::PunctuatorKind::Times);
-      case '+':
-        return HandleOperator(ast::PunctuatorKind::Plus,
-                              ast::PunctuatorKind::PlusPlus,
-                              ast::PunctuatorKind::PlusEqual);
-      case ',':
-        reader_->Advance();
-        return NewPunctuator(ast::PunctuatorKind::Comma);
-      case '-':
-        return HandleOperator(ast::PunctuatorKind::Minus,
-                              ast::PunctuatorKind::MinusMinus,
-                              ast::PunctuatorKind::MinusEqual);
-      case '.':
-        reader_->Advance();
-        if (reader_->AdvanceIf('.')) {
-          if (reader_->AdvanceIf('.'))
-            return NewPunctuator(ast::PunctuatorKind::DotDotDot);
-          return NewError(ErrorCode::PUNCTUATOR_DOT_DOT);
-        }
-        return NewPunctuator(ast::PunctuatorKind::Dot);
-      case '/':
-        reader_->Advance();
-        if (reader_->AdvanceIf('='))
-          return NewPunctuator(ast::PunctuatorKind::DivideEqual);
-        if (reader_->AdvanceIf('*'))
-          return HandleBlockComment();
-        if (reader_->AdvanceIf('/'))
-          return HandleLineComment();
-        return NewPunctuator(ast::PunctuatorKind::Divide);
-      case '0':
-        reader_->Advance();
-        return HandleZero();
-      case '1':
-      case '2':
-      case '3':
-      case '4':
-      case '5':
-      case '6':
-      case '7':
-      case '8':
-      case '9':
-        return HandleDecimal();
-      case ':':
-        return NewPunctuator(ast::PunctuatorKind::Colon);
-      case ';':
-        return NewPunctuator(ast::PunctuatorKind::SemiColon);
-      case '<':
-        reader_->Advance();
-        if (reader_->AdvanceIf('='))
-          return NewPunctuator(ast::PunctuatorKind::LessThanOrEqual);
-        if (reader_->AdvanceIf('<')) {
-          if (reader_->AdvanceIf('='))
-            return NewPunctuator(ast::PunctuatorKind::LeftShiftEqual);
-          return NewPunctuator(ast::PunctuatorKind::LeftShift);
-        }
-        return NewPunctuator(ast::PunctuatorKind::LessThan);
-      case '=':
-        if (reader_->AdvanceIf('=')) {
-          if (reader_->AdvanceIf('='))
-            return NewPunctuator(ast::PunctuatorKind::EqualEqualEqual);
-          return NewPunctuator(ast::PunctuatorKind::EqualEqual);
-        }
-        if (reader_->AdvanceIf('>'))
-          return NewPunctuator(ast::PunctuatorKind::Arrow);
-        return NewPunctuator(ast::PunctuatorKind::Equal);
-      case '>':
-        reader_->Advance();
-        if (reader_->AdvanceIf('='))
-          return NewPunctuator(ast::PunctuatorKind::GreaterThanOrEqual);
-        if (reader_->AdvanceIf('>')) {
-          if (reader_->AdvanceIf('='))
-            return NewPunctuator(ast::PunctuatorKind::RightShiftEqual);
-          if (reader_->AdvanceIf('>')) {
-            if (reader_->AdvanceIf('='))
-              return NewPunctuator(
-                  ast::PunctuatorKind::UnsignedRightShiftEqual);
-            return NewPunctuator(ast::PunctuatorKind::UnsignedRightShift);
-          }
-          return NewPunctuator(ast::PunctuatorKind::RightShift);
-        }
-        return NewPunctuator(ast::PunctuatorKind::GreaterThan);
-      case '?':
-        return NewPunctuator(ast::PunctuatorKind::Question);
-      case '`':
-        // TODO(eval1749): NYI: template token
-        return HandleStringLiteral();
-      case '[':
-        return NewPunctuator(ast::PunctuatorKind::LeftBracket);
-      case ']':
-        return NewPunctuator(ast::PunctuatorKind::RightBracket);
-      case '_':
-        return HandleName();
-      case '^':
-        return HandleOperator(ast::PunctuatorKind::BitXor,
-                              ast::PunctuatorKind::Invalid,
-                              ast::PunctuatorKind::BitXorEqual);
-      case '{':
-        return NewPunctuator(ast::PunctuatorKind::LeftBrace);
-      case '}':
-        return NewPunctuator(ast::PunctuatorKind::RightBrace);
-      case '|':
-        return HandleOperator(ast::PunctuatorKind::BitOr,
-                              ast::PunctuatorKind::LogicalOr,
-                              ast::PunctuatorKind::BitOrEqual);
-      invalid_character:
-      default:
-        if (reader_->Get() >= 'A' && reader_->Get() <= 'Z')
-          return HandleName();
-        if (reader_->Get() >= 'a' && reader_->Get() <= 'z')
-          return HandleName();
-        // TODO(eval1749): NYI: UnicodeIDStart
-        // TODO(eval1749): NYI: \ UnicodeEscapeSequence
-        reader_->Advance();
-        return NewInvalid(ErrorCode::CHARACTER_INVALID);
-    }
+    if (!IsWhitespace(reader_->Get()))
+      return HandleCharacter();
+    reader_->Advance();
   }
   return nullptr;
+}
+
+ast::Node* Lexer::HandleCharacter() {
+  token_start_ = reader_->location();
+  switch (reader_->Get()) {
+    case ' ':
+    case 0x0009:  // t TAB
+    case 0x000A:  // n LF
+    case 0x000B:  // v VT
+    case 0x000C:  // f FF
+    case 0x000D:  // r CR
+    case '!':
+      reader_->Advance();
+      if (reader_->AdvanceIf('=')) {
+        if (reader_->AdvanceIf('='))
+          return NewPunctuator(ast::PunctuatorKind::NotEqualEqual);
+        return NewPunctuator(ast::PunctuatorKind::NotEqual);
+      }
+      return NewPunctuator(ast::PunctuatorKind::LogicalNot);
+    case '"':
+      return HandleStringLiteral();
+    case '#':
+      goto invalid_character;
+    case '$':
+      return HandleName();
+    case '%':
+      return HandleOperator(ast::PunctuatorKind::Modulo,
+                            ast::PunctuatorKind::Invalid,
+                            ast::PunctuatorKind::ModuloEqual);
+    case '&':
+      return HandleOperator(ast::PunctuatorKind::BitAnd,
+                            ast::PunctuatorKind::LogicalAnd,
+                            ast::PunctuatorKind::BitAndEqual);
+    case '\'':
+      return HandleStringLiteral();
+    case '(':
+      reader_->Advance();
+      return NewPunctuator(ast::PunctuatorKind::LeftParenthesis);
+    case ')':
+      reader_->Advance();
+      return NewPunctuator(ast::PunctuatorKind::RightParenthesis);
+    case '*':
+      reader_->Advance();
+      if (reader_->AdvanceIf('='))
+        return NewPunctuator(ast::PunctuatorKind::TimesEqual);
+      if (reader_->AdvanceIf('*')) {
+        if (reader_->AdvanceIf('='))
+          return NewPunctuator(ast::PunctuatorKind::TimesTimesEqual);
+        return NewPunctuator(ast::PunctuatorKind::TimesTimes);
+      }
+      return NewPunctuator(ast::PunctuatorKind::Times);
+    case '+':
+      return HandleOperator(ast::PunctuatorKind::Plus,
+                            ast::PunctuatorKind::PlusPlus,
+                            ast::PunctuatorKind::PlusEqual);
+    case ',':
+      reader_->Advance();
+      return NewPunctuator(ast::PunctuatorKind::Comma);
+    case '-':
+      return HandleOperator(ast::PunctuatorKind::Minus,
+                            ast::PunctuatorKind::MinusMinus,
+                            ast::PunctuatorKind::MinusEqual);
+    case '.':
+      reader_->Advance();
+      if (reader_->AdvanceIf('.')) {
+        if (reader_->AdvanceIf('.'))
+          return NewPunctuator(ast::PunctuatorKind::DotDotDot);
+        return NewError(ErrorCode::PUNCTUATOR_DOT_DOT);
+      }
+      return NewPunctuator(ast::PunctuatorKind::Dot);
+    case '/':
+      reader_->Advance();
+      if (reader_->AdvanceIf('='))
+        return NewPunctuator(ast::PunctuatorKind::DivideEqual);
+      if (reader_->AdvanceIf('*'))
+        return HandleBlockComment();
+      if (reader_->AdvanceIf('/'))
+        return HandleLineComment();
+      return NewPunctuator(ast::PunctuatorKind::Divide);
+    case '0':
+      reader_->Advance();
+      return HandleZero();
+    case '1':
+    case '2':
+    case '3':
+    case '4':
+    case '5':
+    case '6':
+    case '7':
+    case '8':
+    case '9':
+      return HandleDecimal();
+    case ':':
+      return NewPunctuator(ast::PunctuatorKind::Colon);
+    case ';':
+      return NewPunctuator(ast::PunctuatorKind::SemiColon);
+    case '<':
+      reader_->Advance();
+      if (reader_->AdvanceIf('='))
+        return NewPunctuator(ast::PunctuatorKind::LessThanOrEqual);
+      if (reader_->AdvanceIf('<')) {
+        if (reader_->AdvanceIf('='))
+          return NewPunctuator(ast::PunctuatorKind::LeftShiftEqual);
+        return NewPunctuator(ast::PunctuatorKind::LeftShift);
+      }
+      return NewPunctuator(ast::PunctuatorKind::LessThan);
+    case '=':
+      if (reader_->AdvanceIf('=')) {
+        if (reader_->AdvanceIf('='))
+          return NewPunctuator(ast::PunctuatorKind::EqualEqualEqual);
+        return NewPunctuator(ast::PunctuatorKind::EqualEqual);
+      }
+      if (reader_->AdvanceIf('>'))
+        return NewPunctuator(ast::PunctuatorKind::Arrow);
+      return NewPunctuator(ast::PunctuatorKind::Equal);
+    case '>':
+      reader_->Advance();
+      if (reader_->AdvanceIf('='))
+        return NewPunctuator(ast::PunctuatorKind::GreaterThanOrEqual);
+      if (reader_->AdvanceIf('>')) {
+        if (reader_->AdvanceIf('='))
+          return NewPunctuator(ast::PunctuatorKind::RightShiftEqual);
+        if (reader_->AdvanceIf('>')) {
+          if (reader_->AdvanceIf('='))
+            return NewPunctuator(ast::PunctuatorKind::UnsignedRightShiftEqual);
+          return NewPunctuator(ast::PunctuatorKind::UnsignedRightShift);
+        }
+        return NewPunctuator(ast::PunctuatorKind::RightShift);
+      }
+      return NewPunctuator(ast::PunctuatorKind::GreaterThan);
+    case '?':
+      return NewPunctuator(ast::PunctuatorKind::Question);
+    case '`':
+      // TODO(eval1749): NYI: template token
+      return HandleStringLiteral();
+    case '[':
+      return NewPunctuator(ast::PunctuatorKind::LeftBracket);
+    case ']':
+      return NewPunctuator(ast::PunctuatorKind::RightBracket);
+    case '_':
+      return HandleName();
+    case '^':
+      return HandleOperator(ast::PunctuatorKind::BitXor,
+                            ast::PunctuatorKind::Invalid,
+                            ast::PunctuatorKind::BitXorEqual);
+    case '{':
+      return NewPunctuator(ast::PunctuatorKind::LeftBrace);
+    case '}':
+      return NewPunctuator(ast::PunctuatorKind::RightBrace);
+    case '|':
+      return HandleOperator(ast::PunctuatorKind::BitOr,
+                            ast::PunctuatorKind::LogicalOr,
+                            ast::PunctuatorKind::BitOrEqual);
+    invalid_character:
+    default:
+      if (reader_->Get() >= 'A' && reader_->Get() <= 'Z')
+        return HandleName();
+      if (reader_->Get() >= 'a' && reader_->Get() <= 'z')
+        return HandleName();
+      // TODO(eval1749): NYI: UnicodeIDStart
+      // TODO(eval1749): NYI: \ UnicodeEscapeSequence
+      reader_->Advance();
+      return NewInvalid(ErrorCode::CHARACTER_INVALID);
+  }
 }
 
 SourceCodeRange Lexer::RangeFrom(int start) const {

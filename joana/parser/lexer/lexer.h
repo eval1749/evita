@@ -40,6 +40,7 @@ class Lexer final {
   void AddError(ErrorCode error_code);
 
   ast::Node* HandleBlockComment();
+  ast::Node* HandleCharacter();
   ast::Node* HandleDecimal();
   ast::Node* HandleInteger(int base);
   ast::Node* HandleLineComment();

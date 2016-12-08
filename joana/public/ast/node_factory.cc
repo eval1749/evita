@@ -107,7 +107,7 @@ LiteralExpression& NodeFactory::NewLiteralExpression(const Literal& literal) {
 }
 
 // Literals
-BooleanLiteral& NodeFactory::NewCommen(const Name& name, bool value) {
+BooleanLiteral& NodeFactory::NewBooleanLiteral(const Name& name, bool value) {
   return *new (zone_) BooleanLiteral(name, value);
 }
 

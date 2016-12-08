@@ -41,7 +41,7 @@ class JOANA_PUBLIC_EXPORT NodeFactory final {
   LiteralExpression& NewLiteralExpression(const Literal& literal);
 
   // Literals factory members
-  BooleanLiteral& NewCommen(const Name& name, bool value);
+  BooleanLiteral& NewBooleanLiteral(const Name& name, bool value);
 
   NullLiteral& NewNullLiteral(const Name& name);
 

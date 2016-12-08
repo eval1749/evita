@@ -17,6 +17,8 @@
 #include "base/strings/string_piece.h"
 #include "base/strings/utf_string_conversions.h"
 #include "joana/parser/public/parse.h"
+#include "joana/public/ast/edit_context.h"
+#include "joana/public/ast/edit_context_builder.h"
 #include "joana/public/ast/node_factory.h"
 #include "joana/public/error_sink.h"
 #include "joana/public/memory/zone.h"
@@ -87,6 +89,7 @@ class Checker final {
   SimpleErrorSink error_sink_;
   Zone node_zone_;
   ast::NodeFactory node_factory_;
+  std::unique_ptr<ast::EditContext> context_;
   std::vector<const SourceCode*> source_codes_;
   Zone source_code_zone_;
   SourceCode::Factory source_code_factory_;
@@ -98,6 +101,10 @@ class Checker final {
 Checker::Checker()
     : node_zone_("Checker.Node"),
       node_factory_(&node_zone_),
+      context_(ast::EditContext::Builder()
+                   .SetErrorSink(&error_sink_)
+                   .SetNodeFactory(&node_factory_)
+                   .Build()),
       source_code_zone_("Checker.SourceCode"),
       source_code_factory_(&source_code_zone_) {}
 
@@ -105,7 +112,7 @@ void Checker::AddSourceCode(const base::FilePath& file_path,
                             base::StringPiece16 file_contents) {
   const auto& source_code = source_code_factory_.New(file_path, file_contents);
   source_codes_.push_back(&source_code);
-  const auto& module = Parse(&node_factory_, &error_sink_, source_code.range());
+  const auto& module = Parse(context_.get(), source_code.range());
   ast_map_.emplace(&source_code, &module);
 }
 

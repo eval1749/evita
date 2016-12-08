@@ -39,23 +39,23 @@ class Lexer final {
   void AddError(const SourceCodeRange& range, ErrorCode error_code);
   void AddError(ErrorCode error_code);
 
-  ast::Node* HandleBlockComment();
-  ast::Node* HandleCharacter();
-  ast::Node* HandleDecimal();
-  ast::Node* HandleInteger(int base);
-  ast::Node* HandleLineComment();
-  ast::Node* HandleName();
-  ast::Node* HandleOperator(ast::PunctuatorKind one,
+  ast::Node& HandleBlockComment();
+  ast::Node& HandleCharacter();
+  ast::Node& HandleDecimal();
+  ast::Node& HandleInteger(int base);
+  ast::Node& HandleLineComment();
+  ast::Node& HandleName();
+  ast::Node& HandleOperator(ast::PunctuatorKind one,
                             ast::PunctuatorKind two,
                             ast::PunctuatorKind equal);
-  ast::Node* HandleStringLiteral();
-  ast::Node* HandleZero();
+  ast::Node& HandleStringLiteral();
+  ast::Node& HandleZero();
 
   SourceCodeRange MakeTokenRange() const;
 
-  ast::Node* NewError(ErrorCode error_code);
-  ast::Node* NewInvalid(ErrorCode error_code);
-  ast::Node* NewPunctuator(ast::PunctuatorKind kind);
+  ast::Node& NewError(ErrorCode error_code);
+  ast::Node& NewInvalid(ErrorCode error_code);
+  ast::Node& NewPunctuator(ast::PunctuatorKind kind);
 
   ast::Node* NextToken();
 

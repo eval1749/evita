@@ -4,7 +4,7 @@
 
 #include "joana/public/ast/expressions.h"
 
-#include "joana/public/ast/literals/literal.h"
+#include "joana/public/ast/literals.h"
 
 namespace joana {
 namespace ast {

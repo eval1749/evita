@@ -19,7 +19,7 @@ void Parser::ParseStatement() {
     if (punctator->kind() == ast::PunctuatorKind::SemiColon)
       return AddStatement(node_factory().NewEmptyStatement(*punctator));
   }
-  AddError(token, ErrorCode::STATEMENT_NYI);
+  AddError(token, ErrorCode::ERROR_STATEMENT_NYI);
 }
 
 }  // namespace internal

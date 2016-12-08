@@ -14,7 +14,7 @@ namespace internal {
 
 enum class Parser::ErrorCode {
   None = ast::kParserErrorCodeBase,
-#define V(token, reason) token##_##reason,
+#define V(category, reason) ERROR_##category##_##reason,
   FOR_EACH_PARSER_ERROR_CODE(V)
 #undef V
 };

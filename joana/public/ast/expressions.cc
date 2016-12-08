@@ -2,13 +2,23 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "joana/public/ast/expressions/literal_expression.h"
+#include "joana/public/ast/expressions.h"
 
 #include "joana/public/ast/literals/literal.h"
 
 namespace joana {
 namespace ast {
 
+//
+// Expression
+//
+Expression::Expression(const SourceCodeRange& range) : ContainerNode(range) {}
+
+Expression::~Expression() = default;
+
+//
+// LiteralExpression
+//
 LiteralExpression::LiteralExpression(const Literal& literal)
     : Expression(literal.range()), literal_(literal) {}
 

@@ -2,13 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef JOANA_PUBLIC_AST_EXPRESSIONS_EXPRESSION_H_
-#define JOANA_PUBLIC_AST_EXPRESSIONS_EXPRESSION_H_
+#ifndef JOANA_PUBLIC_AST_EXPRESSIONS_H_
+#define JOANA_PUBLIC_AST_EXPRESSIONS_H_
 
 #include "joana/public/ast/container_node.h"
+#include "joana/public/ast/node_forward.h"
 
 namespace joana {
 namespace ast {
+
+class Literal;
 
 class JOANA_PUBLIC_EXPORT Expression : public ContainerNode {
   DECLARE_ABSTRACT_AST_NODE(Expression, ContainerNode);
@@ -23,7 +26,24 @@ class JOANA_PUBLIC_EXPORT Expression : public ContainerNode {
   DISALLOW_COPY_AND_ASSIGN(Expression);
 };
 
+
+class JOANA_PUBLIC_EXPORT LiteralExpression : public Expression {
+  DECLARE_CONCRETE_AST_NODE(LiteralExpression, Expression);
+
+ public:
+  ~LiteralExpression() override;
+
+  const Literal& literal() const { return literal_; }
+
+ private:
+  explicit LiteralExpression(const Literal& literal);
+
+  const Literal& literal_;
+
+  DISALLOW_COPY_AND_ASSIGN(LiteralExpression);
+};
+
 }  // namespace ast
 }  // namespace joana
 
-#endif  // JOANA_PUBLIC_AST_EXPRESSIONS_EXPRESSION_H_
+#endif  // JOANA_PUBLIC_AST_EXPRESSIONS_H_

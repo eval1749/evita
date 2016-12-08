@@ -7,7 +7,7 @@
 #include "joana/public/ast/node_factory.h"
 
 #include "joana/public/ast/comment.h"
-#include "joana/public/ast/expressions/literal_expression.h"
+#include "joana/public/ast/expressions.h"
 #include "joana/public/ast/invalid.h"
 #include "joana/public/ast/literals/boolean_literal.h"
 #include "joana/public/ast/literals/null_literal.h"

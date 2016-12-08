@@ -15,7 +15,9 @@ namespace ast {
   V(Node)                             \
   V(Statement)
 
-#define FOR_EACH_AST_EXPRESSION(V) V(LiteralExpression)
+#define FOR_EACH_AST_EXPRESSION(V) \
+  V(InvalidExpression)             \
+  V(LiteralExpression)
 
 #define FOR_EACH_AST_LITERAL(V) \
   V(BooleanLiteral)             \

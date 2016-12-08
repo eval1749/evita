@@ -17,6 +17,14 @@ Expression::Expression(const SourceCodeRange& range) : ContainerNode(range) {}
 Expression::~Expression() = default;
 
 //
+// InvalidExpression
+//
+InvalidExpression::InvalidExpression(const Node& node, int error_code)
+    : Expression(node.range()), error_code_(error_code) {}
+
+InvalidExpression::~InvalidExpression() = default;
+
+//
 // LiteralExpression
 //
 LiteralExpression::LiteralExpression(const Literal& literal)

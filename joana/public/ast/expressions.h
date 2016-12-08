@@ -26,6 +26,24 @@ class JOANA_PUBLIC_EXPORT Expression : public ContainerNode {
   DISALLOW_COPY_AND_ASSIGN(Expression);
 };
 
+//
+// InvalidExpression
+//
+class JOANA_PUBLIC_EXPORT InvalidExpression : public Expression {
+  DECLARE_CONCRETE_AST_NODE(InvalidExpression, Expression);
+
+ public:
+  ~InvalidExpression() override;
+
+  int error_code() const { return error_code_; }
+
+ private:
+  InvalidExpression(const Node& node, int error_code);
+
+  const int error_code_;
+
+  DISALLOW_COPY_AND_ASSIGN(InvalidExpression);
+};
 
 class JOANA_PUBLIC_EXPORT LiteralExpression : public Expression {
   DECLARE_CONCRETE_AST_NODE(LiteralExpression, Expression);

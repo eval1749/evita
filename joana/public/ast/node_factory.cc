@@ -97,6 +97,11 @@ Template& NodeFactory::NewTemplate(const SourceCodeRange& range) {
 }
 
 // Expressions
+InvalidExpression& NodeFactory::NewInvalidExpression(const Node& node,
+                                                     int error_code) {
+  return *new (zone_) InvalidExpression(node, error_code);
+}
+
 LiteralExpression& NodeFactory::NewLiteralExpression(const Literal& literal) {
   return *new (zone_) LiteralExpression(literal);
 }

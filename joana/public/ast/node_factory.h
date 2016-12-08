@@ -37,6 +37,7 @@ class JOANA_PUBLIC_EXPORT NodeFactory final {
   Template& NewTemplate(const SourceCodeRange& range);
 
   // Expressions factory members
+  InvalidExpression& NewInvalidExpression(const Node& node, int error_code);
   LiteralExpression& NewLiteralExpression(const Literal& literal);
 
   // Literals factory members

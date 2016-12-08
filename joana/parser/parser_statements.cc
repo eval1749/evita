@@ -8,7 +8,7 @@
 #include "joana/parser/parser_error_codes.h"
 #include "joana/public/ast/node_factory.h"
 #include "joana/public/ast/punctuator.h"
-#include "joana/public/ast/statements/empty_statement.h"
+#include "joana/public/ast/statements.h"
 
 namespace joana {
 namespace internal {

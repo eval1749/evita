@@ -17,7 +17,7 @@
 #include "joana/public/ast/module.h"
 #include "joana/public/ast/name.h"
 #include "joana/public/ast/punctuator.h"
-#include "joana/public/ast/statements/empty_statement.h"
+#include "joana/public/ast/statements.h"
 #include "joana/public/ast/template.h"
 
 namespace joana {

@@ -19,18 +19,18 @@ BooleanLiteral::BooleanLiteral(const Name& name, bool value)
 BooleanLiteral::~BooleanLiteral() = default;
 
 //
-// NullLiteral
-//
-NullLiteral::NullLiteral(const Name& name) : Literal(name.range()) {}
-
-NullLiteral::~NullLiteral() = default;
-
-//
 // Literal
 //
 Literal::Literal(const SourceCodeRange& range) : Node(range) {}
 
 Literal::~Literal() = default;
+
+//
+// NullLiteral
+//
+NullLiteral::NullLiteral(const Name& name) : Literal(name.range()) {}
+
+NullLiteral::~NullLiteral() = default;
 
 //
 // NumericLiteral

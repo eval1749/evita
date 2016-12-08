@@ -42,6 +42,7 @@ class Lexer final {
   ast::Node& HandleBlockComment();
   ast::Node& HandleCharacter();
   ast::Node& HandleDecimal();
+  ast::Node& HandleDigitZero();
   ast::Node& HandleInteger(int base);
   ast::Node& HandleLineComment();
   ast::Node& HandleName();
@@ -49,7 +50,6 @@ class Lexer final {
                             ast::PunctuatorKind two,
                             ast::PunctuatorKind equal);
   ast::Node& HandleStringLiteral();
-  ast::Node& HandleZero();
 
   SourceCodeRange MakeTokenRange() const;
 

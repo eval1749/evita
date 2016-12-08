@@ -228,7 +228,7 @@ ast::Node& Lexer::HandleCharacter() {
       return NewPunctuator(ast::PunctuatorKind::Divide);
     case '0':
       reader_->Advance();
-      return HandleZero();
+      return HandleDigitZero();
     case '1':
     case '2':
     case '3':
@@ -370,6 +370,38 @@ ast::Node& Lexer::HandleDecimal() {
   const auto exponent = exponent_part * exponent_sign;
   return node_factory().NewNumericLiteral(MakeTokenRange(),
                                           value * std::pow(10.0, exponent));
+}
+
+ast::Node& Lexer::HandleDigitZero() {
+  switch (reader_->Get()) {
+    case '0':
+    case '1':
+    case '2':
+    case '3':
+    case '4':
+    case '5':
+    case '6':
+    case '7':
+      // Continue fetching octal digits
+      HandleInteger(8);
+      return NewError(ErrorCode::NUMERIC_LITERAL_INTEGER_OCTAL);
+    case '8':
+    case '9':
+      return HandleDecimal();
+    case 'b':
+    case 'B':
+      reader_->Advance();
+      return HandleInteger(2);
+    case 'o':
+    case 'O':
+      reader_->Advance();
+      return HandleInteger(8);
+    case 'x':
+    case 'X':
+      reader_->Advance();
+      return HandleInteger(16);
+  }
+  return NewInvalid(ErrorCode::NUMERIC_LITERAL_PREFIX_ZERO);
 }
 
 ast::Node& Lexer::HandleInteger(int base) {
@@ -625,38 +657,6 @@ ast::Node& Lexer::HandleStringLiteral() {
     reader_->Advance();
   }
   return NewError(ErrorCode::STRING_LITERAL_NOT_CLOSED);
-}
-
-ast::Node& Lexer::HandleZero() {
-  switch (reader_->Get()) {
-    case '0':
-    case '1':
-    case '2':
-    case '3':
-    case '4':
-    case '5':
-    case '6':
-    case '7':
-      // Continue fetching octal digits
-      HandleInteger(8);
-      return NewError(ErrorCode::NUMERIC_LITERAL_INTEGER_OCTAL);
-    case '8':
-    case '9':
-      return HandleDecimal();
-    case 'b':
-    case 'B':
-      reader_->Advance();
-      return HandleInteger(2);
-    case 'o':
-    case 'O':
-      reader_->Advance();
-      return HandleInteger(8);
-    case 'x':
-    case 'X':
-      reader_->Advance();
-      return HandleInteger(16);
-  }
-  return NewInvalid(ErrorCode::NUMERIC_LITERAL_PREFIX_ZERO);
 }
 
 SourceCodeRange Lexer::MakeTokenRange() const {

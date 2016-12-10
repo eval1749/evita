@@ -6,15 +6,11 @@
 
 #include "joana/public/ast/node_factory.h"
 
-#include "joana/public/ast/comment.h"
 #include "joana/public/ast/expressions.h"
-#include "joana/public/ast/invalid.h"
 #include "joana/public/ast/literals.h"
 #include "joana/public/ast/module.h"
-#include "joana/public/ast/name.h"
-#include "joana/public/ast/punctuator.h"
 #include "joana/public/ast/statements.h"
-#include "joana/public/ast/template.h"
+#include "joana/public/ast/tokens.h"
 
 namespace joana {
 namespace ast {
@@ -90,10 +86,6 @@ Name& NodeFactory::NewName(const SourceCodeRange& range) {
 Punctuator& NodeFactory::NewPunctuator(const SourceCodeRange& range,
                                        PunctuatorKind kind) {
   return *new (zone_) Punctuator(range, kind);
-}
-
-Template& NodeFactory::NewTemplate(const SourceCodeRange& range) {
-  return *new (zone_) Template(range);
 }
 
 // Expressions

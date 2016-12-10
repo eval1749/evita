@@ -7,16 +7,12 @@
 #include "joana/parser/simple_formatter.h"
 
 #include "base/strings/utf_string_conversions.h"
-#include "joana/public/ast/comment.h"
 #include "joana/public/ast/expressions.h"
-#include "joana/public/ast/invalid.h"
 #include "joana/public/ast/literals.h"
 #include "joana/public/ast/module.h"
-#include "joana/public/ast/name.h"
 #include "joana/public/ast/node_traversal.h"
-#include "joana/public/ast/punctuator.h"
 #include "joana/public/ast/statements.h"
-#include "joana/public/ast/template.h"
+#include "joana/public/ast/tokens.h"
 
 namespace joana {
 namespace internal {
@@ -59,10 +55,6 @@ void SimpleFormatter::VisitModule(ast::Module* node) {
 }
 
 void SimpleFormatter::VisitName(ast::Name* node) {
-  OutputAsSourceCode(*node);
-}
-
-void SimpleFormatter::VisitTemplate(ast::Template* node) {
   OutputAsSourceCode(*node);
 }
 

@@ -1,0 +1,133 @@
+// Copyright (c) 2016 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#ifndef JOANA_PUBLIC_AST_TOKENS_H_
+#define JOANA_PUBLIC_AST_TOKENS_H_
+
+#include "joana/public/ast/node.h"
+
+#include "joana/public/ast/lexical_grammar.h"
+
+namespace joana {
+namespace ast {
+
+enum class PunctuatorKind {
+#define V(text, capital, upper) capital,
+  FOR_EACH_JAVASCRIPT_PUNCTUATOR(V)
+#undef V
+};
+
+enum class NameId {
+  Zero,
+
+  StartKeyword,
+#define V(name, camel, upper) camel,
+  FOR_EACH_JAVASCRIPT_KEYWORD(V)
+#undef V
+      EndKwyrod,
+
+  StartKnown,
+#define V(name, camel, upper) camel,
+  FOR_EACH_JAVASCRIPT_KNOWN_WORD(V)
+#undef V
+      EndKnown,
+};
+
+//
+// Token
+//
+class JOANA_PUBLIC_EXPORT Token : public Node {
+  DECLARE_ABSTRACT_AST_NODE(Token, Node);
+
+ public:
+  ~Token() override;
+
+ protected:
+  explicit Token(const SourceCodeRange& range);
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(Token);
+};
+
+//
+// Comment
+//
+class JOANA_PUBLIC_EXPORT Comment final : public Token {
+  DECLARE_CONCRETE_AST_NODE(Comment, Token);
+
+ public:
+  ~Comment() final;
+
+ private:
+  explicit Comment(const SourceCodeRange& range);
+
+  DISALLOW_COPY_AND_ASSIGN(Comment);
+};
+
+//
+// Invalid
+//
+class JOANA_PUBLIC_EXPORT Invalid final : public Token {
+  DECLARE_CONCRETE_AST_NODE(Invalid, Token);
+
+ public:
+  ~Invalid() final;
+
+  int error_code() const { return error_code_; }
+
+ private:
+  explicit Invalid(const SourceCodeRange& range, int error_code);
+
+  // Implements |Node| members
+  void PrintMoreTo(std::ostream* ostream) const final;
+
+  const int error_code_;
+
+  DISALLOW_COPY_AND_ASSIGN(Invalid);
+};
+
+//
+// Name
+//
+class JOANA_PUBLIC_EXPORT Name final : public Token {
+  DECLARE_CONCRETE_AST_NODE(Name, Token);
+
+ public:
+  ~Name() final;
+
+  int number() const { return number_; }
+
+ private:
+  Name(const SourceCodeRange& range, int number);
+
+  // Implements |Node| members
+  void PrintMoreTo(std::ostream* ostream) const final;
+
+  const int number_;
+
+  DISALLOW_COPY_AND_ASSIGN(Name);
+};
+
+//
+// Punctuator
+//
+class JOANA_PUBLIC_EXPORT Punctuator final : public Token {
+  DECLARE_CONCRETE_AST_NODE(Punctuator, Node);
+
+ public:
+  explicit Punctuator(const SourceCodeRange& range, PunctuatorKind kind);
+  ~Punctuator() final;
+
+  PunctuatorKind kind() const { return kind_; }
+
+ private:
+  const PunctuatorKind kind_;
+
+  DISALLOW_COPY_AND_ASSIGN(Punctuator);
+};
+
+}  // namespace ast
+}  // namespace joana
+
+#endif  // JOANA_PUBLIC_AST_TOKENS_H_

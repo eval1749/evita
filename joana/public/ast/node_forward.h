@@ -13,7 +13,8 @@ namespace ast {
   V(ContainerNode)                    \
   V(Literal)                          \
   V(Node)                             \
-  V(Statement)
+  V(Statement)                        \
+  V(Token)
 
 #define FOR_EACH_AST_EXPRESSION(V) \
   V(InvalidExpression)             \
@@ -32,16 +33,18 @@ namespace ast {
   V(ExpressionStatement)          \
   V(InvalidStatement)
 
+#define FOR_EACH_AST_TOKEN(V) \
+  V(Comment)                  \
+  V(Invalid)                  \
+  V(Punctuator)               \
+  V(Name)
+
 #define FOR_EACH_CONCRETE_AST_NODE(V) \
   FOR_EACH_AST_EXPRESSION(V)          \
   FOR_EACH_AST_LITERAL(V)             \
   FOR_EACH_AST_STATEMENT(V)           \
-  V(Comment)                          \
-  V(Invalid)                          \
-  V(Punctuator)                       \
-  V(Module)                           \
-  V(Name)                             \
-  V(Template)
+  FOR_EACH_AST_TOKEN(V)               \
+  V(Module)
 
 #define V(name) class name;
 FOR_EACH_ABSTRACT_AST_NODE(V)

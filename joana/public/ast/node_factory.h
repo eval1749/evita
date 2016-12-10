@@ -34,8 +34,6 @@ class JOANA_PUBLIC_EXPORT NodeFactory final {
 
   Punctuator& NewPunctuator(const SourceCodeRange& range, PunctuatorKind kind);
 
-  Template& NewTemplate(const SourceCodeRange& range);
-
   // Expressions factory members
   InvalidExpression& NewInvalidExpression(const Node& node, int error_code);
   LiteralExpression& NewLiteralExpression(const Literal& literal);

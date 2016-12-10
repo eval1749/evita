@@ -4,7 +4,7 @@
 
 #include "joana/public/ast/literals.h"
 
-#include "joana/public/ast/name.h"
+#include "joana/public/ast/tokens.h"
 #include "joana/public/escaped_string_piece.h"
 
 namespace joana {

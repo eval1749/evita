@@ -4,15 +4,11 @@
 
 #include "joana/public/ast/node_visitor.h"
 
-#include "joana/public/ast/comment.h"
 #include "joana/public/ast/expressions.h"
-#include "joana/public/ast/invalid.h"
 #include "joana/public/ast/literals.h"
 #include "joana/public/ast/module.h"
-#include "joana/public/ast/name.h"
-#include "joana/public/ast/punctuator.h"
 #include "joana/public/ast/statements.h"
-#include "joana/public/ast/template.h"
+#include "joana/public/ast/tokens.h"
 
 namespace joana {
 namespace ast {

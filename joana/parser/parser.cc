@@ -6,11 +6,11 @@
 
 #include "joana/parser/lexer/lexer.h"
 #include "joana/public/ast/edit_context.h"
-#include "joana/public/ast/invalid.h"
 #include "joana/public/ast/module.h"
 #include "joana/public/ast/node_editor.h"
 #include "joana/public/ast/node_factory.h"
 #include "joana/public/ast/statements.h"
+#include "joana/public/ast/tokens.h"
 #include "joana/public/error_sink.h"
 
 namespace joana {

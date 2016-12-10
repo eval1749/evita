@@ -240,8 +240,10 @@ ast::Node& Lexer::HandleCharacter() {
     case '9':
       return HandleDecimal();
     case ':':
+      reader_->Advance();
       return NewPunctuator(ast::PunctuatorKind::Colon);
     case ';':
+      reader_->Advance();
       return NewPunctuator(ast::PunctuatorKind::SemiColon);
     case '<':
       reader_->Advance();
@@ -283,8 +285,10 @@ ast::Node& Lexer::HandleCharacter() {
       // TODO(eval1749): NYI: template token
       return HandleStringLiteral();
     case '[':
+      reader_->Advance();
       return NewPunctuator(ast::PunctuatorKind::LeftBracket);
     case ']':
+      reader_->Advance();
       return NewPunctuator(ast::PunctuatorKind::RightBracket);
     case '_':
       return HandleName();
@@ -293,8 +297,10 @@ ast::Node& Lexer::HandleCharacter() {
                             ast::PunctuatorKind::Invalid,
                             ast::PunctuatorKind::BitXorEqual);
     case '{':
+      reader_->Advance();
       return NewPunctuator(ast::PunctuatorKind::LeftBrace);
     case '}':
+      reader_->Advance();
       return NewPunctuator(ast::PunctuatorKind::RightBrace);
     case '|':
       return HandleOperator(ast::PunctuatorKind::BitOr,

@@ -109,10 +109,11 @@ void SimpleFormatter::VisitEmptyStatement(ast::EmptyStatement* node) {
 
 void SimpleFormatter::VisitExpressionStatement(ast::ExpressionStatement* node) {
   Format(node->expression());
+  *ostream_ << ';';
 }
 
 void SimpleFormatter::VisitInvalidStatement(ast::InvalidStatement* node) {
-  *ostream_ << "ERROR(" << node->error_code() << ')';
+  *ostream_ << "ERROR(" << node->error_code() << ");";
 }
 
 }  // namespace internal

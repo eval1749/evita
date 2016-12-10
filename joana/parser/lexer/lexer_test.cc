@@ -234,10 +234,16 @@ TEST_F(LexerTest, NodeFactoryNewName) {
             factory().NewName(MakeRange(0, 5)).number())
       << "We can identify keyword 'while'.";
 
+  PrepareSouceCode("while");
+  EXPECT_TRUE(factory().NewName(MakeRange(0, 5)).IsKeyword());
+
   PrepareSouceCode("from");
   EXPECT_EQ(static_cast<int>(ast::NameId::From),
             factory().NewName(MakeRange(0, 4)).number())
       << "We can identify contextual keyword 'from'.";
+
+  PrepareSouceCode("from");
+  EXPECT_FALSE(factory().NewName(MakeRange(0, 4)).IsKeyword());
 
   PrepareSouceCode("of");
   EXPECT_EQ(static_cast<int>(ast::NameId::Of),

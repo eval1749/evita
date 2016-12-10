@@ -12,26 +12,32 @@
 namespace joana {
 namespace ast {
 
+//
+// PunctuatorKind
+//
 enum class PunctuatorKind {
 #define V(text, capital, upper) capital,
   FOR_EACH_JAVASCRIPT_PUNCTUATOR(V)
 #undef V
 };
 
+//
+// NameId
+//
 enum class NameId {
   Zero,
 
-  StartKeyword,
+  StartOfKeyword,
 #define V(name, camel, upper) camel,
   FOR_EACH_JAVASCRIPT_KEYWORD(V)
 #undef V
-      EndKwyrod,
+      EndOfKeyword,
 
-  StartKnown,
+  StartOfKnownWord,
 #define V(name, camel, upper) camel,
   FOR_EACH_JAVASCRIPT_KNOWN_WORD(V)
 #undef V
-      EndKnown,
+      EndOfKnownWord,
 };
 
 //
@@ -97,6 +103,8 @@ class JOANA_PUBLIC_EXPORT Name final : public Token {
   ~Name() final;
 
   int number() const { return number_; }
+
+  bool IsKeyword() const;
 
  private:
   Name(const SourceCodeRange& range, int number);

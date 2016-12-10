@@ -64,6 +64,11 @@ Name::Name(const SourceCodeRange& range, int number)
 
 Name::~Name() = default;
 
+bool Name::IsKeyword() const {
+  return number_ > static_cast<int>(NameId::StartOfKeyword) &&
+         number_ < static_cast<int>(NameId::EndOfKeyword);
+}
+
 // Implements |Node| members
 void Name::PrintMoreTo(std::ostream* ostream) const {
   *ostream << ", " << number_;

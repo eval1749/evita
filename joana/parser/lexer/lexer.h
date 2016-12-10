@@ -13,6 +13,7 @@
 namespace joana {
 
 class ErrorSink;
+class PunctuatorKind;
 class SourceCode;
 class SourceCodeRange;
 
@@ -26,7 +27,11 @@ class Lexer final {
 
   ~Lexer();
 
+  // Returns source code location where |Lexer| reads.
+  SourceCodeRange location() const;
+
   void Advance();
+  // Returns true if |Lexer| has a token.
   bool HasToken() const { return current_token_ != nullptr; }
   ast::Node& GetToken() const;
 

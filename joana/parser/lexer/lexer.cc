@@ -109,6 +109,10 @@ Lexer::Lexer(ast::EditContext* context, const SourceCodeRange& range)
 
 Lexer::~Lexer() = default;
 
+SourceCodeRange Lexer::location() const {
+  return source_code().Slice(reader_->location(), reader_->location());
+}
+
 ast::NodeFactory& Lexer::node_factory() const {
   return context_->node_factory();
 }

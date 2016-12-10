@@ -11,6 +11,7 @@
 #include "base/macros.h"
 #include "base/strings/string_piece.h"
 #include "base/strings/utf_string_conversions.h"
+#include "joana/parser/simple_error_sink.h"
 #include "joana/public/ast/comment.h"
 #include "joana/public/ast/edit_context.h"
 #include "joana/public/ast/edit_context_builder.h"
@@ -39,57 +40,6 @@ enum ErrorCode {
   FOR_EACH_LEXER_ERROR_CODE(V)
 #undef V
 };
-
-class ErrorRecord final : public ZoneAllocated {
- public:
-  ErrorRecord(const SourceCodeRange& range, int error_code);
-  ~ErrorRecord();
-
-  int error_code() const { return error_code_; }
-  const SourceCodeRange& range() const { return range_; }
-
- private:
-  const int error_code_;
-  const SourceCodeRange range_;
-
-  DISALLOW_COPY_AND_ASSIGN(ErrorRecord);
-};
-
-ErrorRecord::ErrorRecord(const SourceCodeRange& range, int error_code)
-    : error_code_(error_code), range_(range) {}
-
-ErrorRecord::~ErrorRecord() = default;
-
-class SimpleErrorSink final : public ErrorSink {
- public:
-  SimpleErrorSink();
-  ~SimpleErrorSink();
-
-  const std::vector<ErrorRecord*>& errors() const { return errors_; }
-
-  void Reset();
-
- private:
-  // |ErrorSink| members
-  void AddError(const SourceCodeRange& range, int error_code) final;
-
-  Zone zone_;
-  std::vector<ErrorRecord*> errors_;
-
-  DISALLOW_COPY_AND_ASSIGN(SimpleErrorSink);
-};
-
-void SimpleErrorSink::AddError(const SourceCodeRange& range, int error_code) {
-  auto* const record = new (&zone_) ErrorRecord(range, error_code);
-  errors_.push_back(record);
-}
-
-SimpleErrorSink::SimpleErrorSink() : zone_("SimpleErrorSink") {}
-SimpleErrorSink::~SimpleErrorSink() = default;
-
-void SimpleErrorSink::Reset() {
-  errors_.clear();
-}
 
 std::string ToString(const ast::Node& node) {
   std::ostringstream ostream;

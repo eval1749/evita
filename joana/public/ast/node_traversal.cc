@@ -54,10 +54,59 @@ bool NodeAncestors::Iterator::operator!=(const Iterator& other) const {
 }
 
 //
+// NodeChildren
+//
+NodeChildren::NodeChildren(const ContainerNode& container)
+    : container_(const_cast<ContainerNode*>(&container)) {}
+
+NodeChildren::NodeChildren(const NodeChildren& other)
+    : container_(other.container_) {}
+
+NodeChildren::~NodeChildren() = default;
+
+NodeChildren::Iterator NodeChildren::begin() const {
+  return Iterator(this, NodeTraversal::FirstChildOf(*container_));
+}
+
+NodeChildren::Iterator::Iterator(const NodeChildren* owner, Node* node)
+    : node_(node), owner_(owner) {
+  DCHECK(owner);
+}
+
+NodeChildren::Iterator::Iterator(const Iterator& other)
+    : node_(other.node_), owner_(other.owner_) {}
+
+NodeChildren::Iterator::~Iterator() = default;
+
+Node& NodeChildren::Iterator::operator*() const {
+  DCHECK(node_);
+  return *node_;
+}
+
+NodeChildren::Iterator& NodeChildren::Iterator::operator++() {
+  DCHECK(node_);
+  node_ = NodeTraversal::NextSiblingOf(*node_);
+  return *this;
+}
+
+bool NodeChildren::Iterator::operator==(const Iterator& other) const {
+  DCHECK_EQ(owner_, other.owner_);
+  return node_ == other.node_;
+}
+
+bool NodeChildren::Iterator::operator!=(const Iterator& other) const {
+  return !operator==(other);
+}
+
+//
 // NodeTraversal
 //
 NodeAncestors NodeTraversal::AncestorsOf(const Node& node) {
   return NodeAncestors(ParentOf(node));
+}
+
+NodeChildren NodeTraversal::ChildrenOf(const ContainerNode& container) {
+  return NodeChildren(container);
 }
 
 Node* NodeTraversal::FirstChildOf(const ContainerNode& container) {

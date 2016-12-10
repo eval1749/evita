@@ -7,7 +7,6 @@
 
 #include <iterator>
 
-#include "base/macros.h"
 #include "joana/public/public_export.h"
 
 namespace joana {
@@ -56,6 +55,45 @@ class JOANA_PUBLIC_EXPORT NodeAncestors final {
   Node* node_;
 };
 
+// |NodeChildren| is a return value of |NodeTraversal::ChildrenOf()| and
+// |NodeTraversal::InclusiveChildrenOf()|.
+class JOANA_PUBLIC_EXPORT NodeChildren final {
+ public:
+  class JOANA_PUBLIC_EXPORT Iterator final
+      : public std::iterator<std::input_iterator_tag, Node> {
+   public:
+    Iterator(const Iterator& other);
+    ~Iterator();
+
+    reference operator*() const;
+    Iterator& operator++();
+
+    bool operator==(const Iterator& other) const;
+    bool operator!=(const Iterator& other) const;
+
+   private:
+    friend class NodeChildren;
+
+    Iterator(const NodeChildren* owner, Node* node);
+
+    Node* node_;
+    const NodeChildren* owner_;
+  };
+
+  NodeChildren(const NodeChildren& other);
+  ~NodeChildren();
+
+  Iterator begin() const;
+  Iterator end() const { return Iterator(this, nullptr); }
+
+ private:
+  friend class NodeTraversal;
+
+  explicit NodeChildren(const ContainerNode& container);
+
+  ContainerNode* container_;
+};
+
 //
 // NodeTraversal
 //
@@ -65,6 +103,7 @@ class JOANA_PUBLIC_EXPORT NodeTraversal final {
   ~NodeTraversal() = delete;
 
   static NodeAncestors AncestorsOf(const Node& container);
+  static NodeChildren ChildrenOf(const ContainerNode& container);
   static Node* FirstChildOf(const ContainerNode& node);
   static NodeAncestors InclusiveAncestorsOf(const Node& node);
   static Node* LastChildOf(const ContainerNode& container);

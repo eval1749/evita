@@ -223,6 +223,23 @@ TEST_F(NodeTest, NodeTraversalAncestorsOf) {
   EXPECT_EQ((std::vector<const Node*>{&block2, &module}), result);
 }
 
+TEST_F(NodeTest, NodeTraversalChildrenOf) {
+  auto& module = factory().NewModule(range());
+  auto& statement1 = NewEmptyStatement();
+  NodeEditor().AppendChild(&module, &statement1);
+  auto& statement2 = NewEmptyStatement();
+  NodeEditor().AppendChild(&module, &statement2);
+  auto& statement3 = NewEmptyStatement();
+  NodeEditor().AppendChild(&module, &statement3);
+
+  std::vector<const Node*> result;
+  for (const auto& node : NodeTraversal::ChildrenOf(module))
+    result.push_back(&node);
+
+  EXPECT_EQ((std::vector<const Node*>{&statement1, &statement2, &statement3}),
+            result);
+}
+
 TEST_F(NodeTest, NodeTraversalInclusiveAncestorsOf) {
   auto& module = factory().NewModule(range());
   auto& statement1 = NewEmptyStatement();

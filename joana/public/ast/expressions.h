@@ -54,12 +54,10 @@ class JOANA_PUBLIC_EXPORT LiteralExpression : public Expression {
  public:
   ~LiteralExpression() override;
 
-  const Literal& literal() const { return literal_; }
+  const Literal& literal() const;
 
  private:
   explicit LiteralExpression(const Literal& literal);
-
-  const Literal& literal_;
 
   DISALLOW_COPY_AND_ASSIGN(LiteralExpression);
 };

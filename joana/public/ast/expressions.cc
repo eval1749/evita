@@ -5,6 +5,8 @@
 #include "joana/public/ast/expressions.h"
 
 #include "joana/public/ast/literals.h"
+#include "joana/public/ast/node_editor.h"
+#include "joana/public/ast/node_traversal.h"
 
 namespace joana {
 namespace ast {
@@ -28,9 +30,17 @@ InvalidExpression::~InvalidExpression() = default;
 // LiteralExpression
 //
 LiteralExpression::LiteralExpression(const Literal& literal)
-    : Expression(literal.range()), literal_(literal) {}
+    : Expression(literal.range()) {
+  NodeEditor().AppendChild(this, const_cast<Literal*>(&literal));
+}
 
 LiteralExpression::~LiteralExpression() = default;
+
+const Literal& LiteralExpression::literal() const {
+  auto* const literal = NodeTraversal::FirstChildOf(*this);
+  DCHECK(literal);
+  return literal->As<Literal>();
+}
 
 }  // namespace ast
 }  // namespace joana

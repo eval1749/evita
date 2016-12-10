@@ -30,8 +30,11 @@ ast::Expression& Parser::ParseExpression() {
   const auto& token = lexer_->GetToken();
   if (auto* name = token.TryAs<ast::Name>())
     return ParseExpressionName();
-  if (auto* punctator = token.TryAs<ast::Punctuator>())
+  if (auto* punctator = token.TryAs<ast::Punctuator>()) {
+    lexer_->Advance();
     return NewInvalidExpression(token, ErrorCode::ERROR_EXPRESSION_NYI);
+  }
+  lexer_->Advance();
   return NewInvalidExpression(token, ErrorCode::ERROR_EXPRESSION_NYI);
 }
 
@@ -39,9 +42,11 @@ ast::Expression& Parser::ParseExpressionName() {
   const auto& name = *lexer_->GetToken().TryAs<ast::Name>();
   switch (static_cast<ast::NameId>(name.number())) {
     case ast::NameId::False:
+      lexer_->Advance();
       return NewLiteralExpression(
           node_factory().NewBooleanLiteral(name, false));
     case ast::NameId::True:
+      lexer_->Advance();
       return NewLiteralExpression(node_factory().NewBooleanLiteral(name, true));
   }
   return NewInvalidExpression(name, ErrorCode::ERROR_EXPRESSION_NYI);

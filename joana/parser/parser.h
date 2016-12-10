@@ -11,6 +11,7 @@
 
 namespace joana {
 namespace ast {
+class ContainerNode;
 class EditContext;
 class Expression;
 class Literal;
@@ -41,7 +42,6 @@ class Parser final {
   ast::NodeFactory& node_factory() const;
 
   void AddError(const ast::Node& token, ErrorCode error_code);
-  void AddStatement(const ast::Statement& statement);
 
   // Expressions
   ast::Expression& NewInvalidExpression(const ast::Node& node,
@@ -51,11 +51,13 @@ class Parser final {
   ast::Expression& ParseExpressionName();
 
   // Statements
-  void ParseStatement();
+  ast::Statement& NewInvalidStatement(const ast::Node& node,
+                                      ErrorCode error_code);
+  ast::Statement& ParseStatement();
 
   ast::EditContext* const context_;
   std::unique_ptr<Lexer> lexer_;
-  ast::Node& root_;
+  ast::ContainerNode& root_;
 
   DISALLOW_COPY_AND_ASSIGN(Parser);
 };

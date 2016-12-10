@@ -8,7 +8,9 @@
 #include "joana/public/ast/edit_context.h"
 #include "joana/public/ast/invalid.h"
 #include "joana/public/ast/module.h"
+#include "joana/public/ast/node_editor.h"
 #include "joana/public/ast/node_factory.h"
+#include "joana/public/ast/statements.h"
 #include "joana/public/error_sink.h"
 
 namespace joana {
@@ -29,10 +31,6 @@ void Parser::AddError(const ast::Node& token, ErrorCode error_code) {
   context_->error_sink().AddError(token.range(), static_cast<int>(error_code));
 }
 
-void Parser::AddStatement(const ast::Statement& statement) {
-  // TODO(eval1749): NYI: Parser::AddStatement()
-}
-
 const ast::Node& Parser::Run() {
   while (lexer_->HasToken()) {
     auto& token = lexer_->GetToken();
@@ -42,7 +40,7 @@ const ast::Node& Parser::Run() {
       lexer_->Advance();
       continue;
     }
-    ParseStatement();
+    ast::NodeEditor().AppendChild(&root_, &ParseStatement());
   }
   return root_;
 }

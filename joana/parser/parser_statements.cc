@@ -13,13 +13,21 @@
 namespace joana {
 namespace internal {
 
-void Parser::ParseStatement() {
+ast::Statement& Parser::NewInvalidStatement(const ast::Node& node,
+                                            ErrorCode error_code) {
+  AddError(node, error_code);
+  return node_factory().NewInvalidStatement(node, static_cast<int>(error_code));
+}
+
+ast::Statement& Parser::ParseStatement() {
   const auto& token = lexer_->GetToken();
   if (auto* punctator = token.TryAs<ast::Punctuator>()) {
-    if (punctator->kind() == ast::PunctuatorKind::SemiColon)
-      return AddStatement(node_factory().NewEmptyStatement(*punctator));
+    if (punctator->kind() == ast::PunctuatorKind::SemiColon) {
+      lexer_->Advance();
+      return node_factory().NewEmptyStatement(*punctator);
+    }
   }
-  AddError(token, ErrorCode::ERROR_STATEMENT_NYI);
+  return node_factory().NewExpressionStatement(ParseExpression());
 }
 
 }  // namespace internal

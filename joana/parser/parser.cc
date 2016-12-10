@@ -35,24 +35,40 @@ void Parser::AddError(const SourceCodeRange& range, ErrorCode error_code) {
   context_->error_sink().AddError(range, static_cast<int>(error_code));
 }
 
+void Parser::Advance() {
+  lexer_->Advance();
+}
+
 bool Parser::AdvanceIf(ast::PunctuatorKind kind) {
-  if (!lexer_->HasToken())
+  if (!HasToken())
     return false;
-  const auto& node = lexer_->GetToken();
+  const auto& node = GetToken();
   auto* const punctuator = node.TryAs<ast::Punctuator>();
   if (!punctuator || punctuator->kind() != kind)
     return false;
-  lexer_->Advance();
+  Advance();
   return true;
 }
 
+ast::Node& Parser::GetToken() {
+  return lexer_->GetToken();
+}
+
+bool Parser::HasToken() const {
+  return lexer_->HasToken();
+}
+
 const ast::Node& Parser::Run() {
-  while (lexer_->HasToken()) {
-    auto& token = lexer_->GetToken();
+  while (HasToken()) {
+    auto& token = GetToken();
+    if (token.Is<ast::Comment>()) {
+      Advance();
+      continue;
+    }
     if (token.Is<ast::Invalid>()) {
       // TODO(eval1749): We should skip tokens until good point to restart
       // toplevel parsing.
-      lexer_->Advance();
+      Advance();
       continue;
     }
     ast::NodeEditor().AppendChild(&root_, &ParseStatement());

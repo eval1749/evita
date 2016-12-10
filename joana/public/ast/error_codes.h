@@ -29,9 +29,19 @@ namespace ast {
   V(EXPRESSION, BRACKET_NOT_CLSOED)     \
   V(EXPRESSION, PARENTHESIS_NOT_CLSOED) \
   V(EXPRESSION, NYI)                    \
+  V(STATEMENT, AWAIT)                   \
   V(STATEMENT, BRACE_NOT_CLSOED)        \
+  V(STATEMENT, BREAK)                   \
+  V(STATEMENT, CASE)                    \
+  V(STATEMENT, CATCH)                   \
+  V(STATEMENT, CONTINUE)                \
+  V(STATEMENT, ELSE)                    \
   V(STATEMENT, EXPECT_SEMI_COLON)       \
-  V(STATEMENT, NYI)
+  V(STATEMENT, EXTENDS)                 \
+  V(STATEMENT, FINALLY)                 \
+  V(STATEMENT, INVALID)                 \
+  V(STATEMENT, RESERVED_WORD)           \
+  V(STATEMENT, YIELD)
 
 const auto kLexerErrorCodeBase = 10000;
 const auto kParserErrorCodeBase = 20000;

@@ -30,6 +30,7 @@ namespace joana {
 
 // Note: true, false and null are not actual keywords.
 #define FOR_EACH_JAVASCRIPT_KEYWORD(V)   \
+  V(async, Async, ASYNC)                 \
   V(await, Await, AWAIT)                 \
   V(break, Break, BREAK)                 \
   V(case, Case, CASE)                    \
@@ -42,6 +43,7 @@ namespace joana {
   V(delete, Delete, DELETE)              \
   V(do, Do, DO)                          \
   V(else, Else, ELSE)                    \
+  V(enum, Enum, ENUM)                    \
   V(export, Export, EXPORT)              \
   V(extends, Extends, EXTENDS)           \
   V(false, False, FALSE)                 \

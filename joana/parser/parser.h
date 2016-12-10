@@ -45,9 +45,12 @@ class Parser final {
   void AddError(const ast::Node& token, ErrorCode error_code);
   void AddError(const SourceCodeRange& range, ErrorCode error_code);
 
+  void Advance();
   // Returns true if |Lexer| has a punctuator of |kind| and advance to next
   // token.
   bool AdvanceIf(ast::PunctuatorKind kind);
+  ast::Node& GetToken();
+  bool HasToken() const;
 
   // Expressions
   ast::Expression& NewInvalidExpression(const ast::Node& node,
@@ -60,6 +63,23 @@ class Parser final {
   ast::Statement& NewInvalidStatement(const ast::Node& node,
                                       ErrorCode error_code);
   ast::Statement& ParseStatement();
+  ast::Statement& ParseStatementAsync();
+  ast::Statement& ParseStatementBreak();
+  ast::Statement& ParseStatementConst();
+  ast::Statement& ParseStatementContinue();
+  ast::Statement& ParseStatementDo();
+  ast::Statement& ParseStatementExpression();
+  ast::Statement& ParseStatementFor();
+  ast::Statement& ParseStatementFunction();
+  ast::Statement& ParseStatementIf();
+  ast::Statement& ParseStatementKeyword();
+  ast::Statement& ParseStatementLet();
+  ast::Statement& ParseStatementReturn();
+  ast::Statement& ParseStatementSwitch();
+  ast::Statement& ParseStatementThrow();
+  ast::Statement& ParseStatementVar();
+  ast::Statement& ParseStatementWhile();
+  ast::Statement& ParseStatementYield();
 
   ast::EditContext* const context_;
   std::unique_ptr<Lexer> lexer_;

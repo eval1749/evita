@@ -30,7 +30,7 @@ namespace ast {
   V(EXPRESSION, PARENTHESIS_NOT_CLSOED) \
   V(EXPRESSION, NYI)                    \
   V(STATEMENT, BRACE_NOT_CLSOED)        \
-  V(STATEMENT, NO_SEMI_COLON)           \
+  V(STATEMENT, EXPECT_SEMI_COLON)       \
   V(STATEMENT, NYI)
 
 const auto kLexerErrorCodeBase = 10000;

@@ -17,6 +17,7 @@ class Expression;
 class Literal;
 class Node;
 class NodeFactory;
+enum class PunctuatorKind;
 class Statement;
 }
 class SourceCodeRange;
@@ -42,6 +43,11 @@ class Parser final {
   ast::NodeFactory& node_factory() const;
 
   void AddError(const ast::Node& token, ErrorCode error_code);
+  void AddError(const SourceCodeRange& range, ErrorCode error_code);
+
+  // Returns true if |Lexer| has a punctuator of |kind| and advance to next
+  // token.
+  bool AdvanceIf(ast::PunctuatorKind kind);
 
   // Expressions
   ast::Expression& NewInvalidExpression(const ast::Node& node,

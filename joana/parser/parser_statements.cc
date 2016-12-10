@@ -27,7 +27,11 @@ ast::Statement& Parser::ParseStatement() {
       return node_factory().NewEmptyStatement(*punctator);
     }
   }
-  return node_factory().NewExpressionStatement(ParseExpression());
+  auto& result = node_factory().NewExpressionStatement(ParseExpression());
+  if (AdvanceIf(ast::PunctuatorKind::SemiColon))
+    return result;
+  AddError(lexer_->location(), ErrorCode::ERROR_STATEMENT_EXPECT_SEMI_COLON);
+  return result;
 }
 
 }  // namespace internal

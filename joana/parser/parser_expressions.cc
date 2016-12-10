@@ -44,6 +44,9 @@ ast::Expression& Parser::ParseExpressionName() {
       lexer_->Advance();
       return NewLiteralExpression(
           node_factory().NewBooleanLiteral(name, false));
+    case ast::NameId::Null:
+      lexer_->Advance();
+      return NewLiteralExpression(node_factory().NewNullLiteral(name));
     case ast::NameId::True:
       lexer_->Advance();
       return NewLiteralExpression(node_factory().NewBooleanLiteral(name, true));

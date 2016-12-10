@@ -28,7 +28,22 @@ ast::NodeFactory& Parser::node_factory() const {
 }
 
 void Parser::AddError(const ast::Node& token, ErrorCode error_code) {
-  context_->error_sink().AddError(token.range(), static_cast<int>(error_code));
+  AddError(token.range(), error_code);
+}
+
+void Parser::AddError(const SourceCodeRange& range, ErrorCode error_code) {
+  context_->error_sink().AddError(range, static_cast<int>(error_code));
+}
+
+bool Parser::AdvanceIf(ast::PunctuatorKind kind) {
+  if (!lexer_->HasToken())
+    return false;
+  const auto& node = lexer_->GetToken();
+  auto* const punctuator = node.TryAs<ast::Punctuator>();
+  if (!punctuator || punctuator->kind() != kind)
+    return false;
+  lexer_->Advance();
+  return true;
 }
 
 const ast::Node& Parser::Run() {

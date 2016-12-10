@@ -67,8 +67,9 @@ TEST_F(ParserTest, EmptyStatement) {
 }
 
 TEST_F(ParserTest, ExpressionStatement) {
-  TEST_PARSER("false\n");
-  TEST_PARSER("true\n");
+  TEST_PARSER("false;\n");
+  TEST_PARSER("null;\n");
+  TEST_PARSER("true;\n");
 }
 
 }  // namespace internal

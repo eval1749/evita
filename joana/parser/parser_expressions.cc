@@ -28,15 +28,15 @@ ast::Expression& Parser::NewLiteralExpression(const ast::Literal& literal) {
 
 ast::Expression& Parser::ParseExpression() {
   const auto& token = lexer_->GetToken();
-  if (auto* name = token.as<ast::Name>())
+  if (auto* name = token.TryAs<ast::Name>())
     return ParseExpressionName();
-  if (auto* punctator = token.as<ast::Punctuator>())
+  if (auto* punctator = token.TryAs<ast::Punctuator>())
     return NewInvalidExpression(token, ErrorCode::ERROR_EXPRESSION_NYI);
   return NewInvalidExpression(token, ErrorCode::ERROR_EXPRESSION_NYI);
 }
 
 ast::Expression& Parser::ParseExpressionName() {
-  const auto& name = *lexer_->GetToken().as<ast::Name>();
+  const auto& name = *lexer_->GetToken().TryAs<ast::Name>();
   switch (static_cast<ast::NameId>(name.number())) {
     case ast::NameId::False:
       return NewLiteralExpression(

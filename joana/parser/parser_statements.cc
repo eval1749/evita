@@ -15,7 +15,7 @@ namespace internal {
 
 void Parser::ParseStatement() {
   const auto& token = lexer_->GetToken();
-  if (auto* punctator = token.as<ast::Punctuator>()) {
+  if (auto* punctator = token.TryAs<ast::Punctuator>()) {
     if (punctator->kind() == ast::PunctuatorKind::SemiColon)
       return AddStatement(node_factory().NewEmptyStatement(*punctator));
   }

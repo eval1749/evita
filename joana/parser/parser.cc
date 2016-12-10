@@ -36,7 +36,7 @@ void Parser::AddStatement(const ast::Statement& statement) {
 const ast::Node& Parser::Run() {
   while (lexer_->HasToken()) {
     auto& token = lexer_->GetToken();
-    if (token.is<ast::Invalid>()) {
+    if (token.Is<ast::Invalid>()) {
       // TODO(eval1749): We should skip tokens until good point to restart
       // toplevel parsing.
       lexer_->Advance();

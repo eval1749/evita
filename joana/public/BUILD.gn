@@ -30,9 +30,13 @@ component("public") {
     "ast/name.h",
     "ast/node.cc",
     "ast/node.h",
+    "ast/node_editor.cc",
+    "ast/node_editor.h",
     "ast/node_factory.cc",
     "ast/node_factory.h",
     "ast/node_forward.h",
+    "ast/node_traversal.cc",
+    "ast/node_traversal.h",
     "ast/punctuator.cc",
     "ast/punctuator.h",
     "ast/statements.cc",
@@ -72,6 +76,7 @@ component("public") {
 source_set("test_files") {
   testonly = true
   sources = [
+    "ast/node_test.cc",
     "castable_test.cc",
   ]
   deps = [

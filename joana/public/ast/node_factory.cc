@@ -130,6 +130,10 @@ UndefinedLiteral& NodeFactory::NewUndefinedLiteral(const Name& name) {
 }
 
 // Statements factory members
+BlockStatement& NodeFactory::NewBlockStatement(const Punctuator& left_brace) {
+  return *new (zone_) BlockStatement(left_brace);
+}
+
 EmptyStatement& NodeFactory::NewEmptyStatement(const Punctuator& semi_colon) {
   return *new (zone_) EmptyStatement(semi_colon);
 }

@@ -16,19 +16,29 @@
 namespace joana {
 namespace ast {
 
+class ContainerNode;
+
 class JOANA_PUBLIC_EXPORT Node : public Castable<Node>, public ZoneAllocated {
   DECLARE_CASTABLE_CLASS(Node, Castable);
 
  public:
   virtual ~Node();
 
+  bool operator==(const Node& other) const;
+  bool operator==(const Node* other) const;
+  bool operator!=(const Node& other) const;
+  bool operator!=(const Node* other) const;
+
   virtual Node* first_child() const;
   virtual Node* last_child() const;
   Node* next_sibling() const { return next_sibling_; }
-  Node* parent() const { return parent_; }
+  ContainerNode* parent() const { return parent_; }
   Node* previous_sibling() const { return previous_sibling_; }
 
   const SourceCodeRange& range() const { return range_; }
+
+  bool Contains(const Node& other) const;
+  bool IsDescendantOf(const Node& other) const;
 
   void PrintTo(std::ostream* ostream) const;
 
@@ -38,19 +48,24 @@ class JOANA_PUBLIC_EXPORT Node : public Castable<Node>, public ZoneAllocated {
   virtual void PrintMoreTo(std::ostream* ostream) const;
 
  private:
+  friend class NodeEditor;
+
   Node* next_sibling_ = nullptr;
-  Node* parent_ = nullptr;
+  ContainerNode* parent_ = nullptr;
   Node* previous_sibling_ = nullptr;
   const SourceCodeRange range_;
 
   DISALLOW_COPY_AND_ASSIGN(Node);
 };
 
-std::ostream& operator<<(std::ostream& ostream, const Node* node);
+JOANA_PUBLIC_EXPORT std::ostream& operator<<(std::ostream& ostream,
+                                             const Node& node);
+JOANA_PUBLIC_EXPORT std::ostream& operator<<(std::ostream& ostream,
+                                             const Node* node);
 
 #define DECLARE_AST_NODE(name, base)  \
   DECLARE_CASTABLE_CLASS(name, base); \
-  friend class NodeBuilder;           \
+  friend class NodeEditor;            \
   friend class NodeFactory;
 
 #define DECLARE_ABSTRACT_AST_NODE(name, base) DECLARE_AST_NODE(name, base);

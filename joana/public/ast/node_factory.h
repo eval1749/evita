@@ -54,6 +54,8 @@ class JOANA_PUBLIC_EXPORT NodeFactory final {
 
   // Statements factory members
   BlockStatement& NewBlockStatement(const Punctuator& left_brace);
+  ExpressionStatement& NewExpressionStatement(const Expression& expression);
+  InvalidStatement& NewInvalidStatement(const Node& node, int error_code);
   EmptyStatement& NewEmptyStatement(const Punctuator& semi_colon);
 
  private:

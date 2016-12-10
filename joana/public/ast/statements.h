@@ -11,6 +11,8 @@
 namespace joana {
 namespace ast {
 
+class Expression;
+
 //
 // Statement
 //
@@ -57,6 +59,42 @@ class JOANA_PUBLIC_EXPORT EmptyStatement : public Statement {
 
  private:
   DISALLOW_COPY_AND_ASSIGN(EmptyStatement);
+};
+
+//
+// ExpressionStatement
+//
+class JOANA_PUBLIC_EXPORT ExpressionStatement : public Statement {
+  DECLARE_CONCRETE_AST_NODE(ExpressionStatement, Statement);
+
+ public:
+  ~ExpressionStatement() override;
+
+  Expression* expression() const;
+
+ private:
+  explicit ExpressionStatement(const Expression& expression);
+
+  DISALLOW_COPY_AND_ASSIGN(ExpressionStatement);
+};
+
+//
+// InvalidStatement
+//
+class JOANA_PUBLIC_EXPORT InvalidStatement : public Statement {
+  DECLARE_CONCRETE_AST_NODE(InvalidStatement, Statement);
+
+ public:
+  ~InvalidStatement() override;
+
+  int error_code() const { return error_code_; }
+
+ private:
+  InvalidStatement(const Node& node, int error_code);
+
+  const int error_code_;
+
+  DISALLOW_COPY_AND_ASSIGN(InvalidStatement);
 };
 
 }  // namespace ast

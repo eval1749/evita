@@ -29,7 +29,8 @@ namespace ast {
 #define FOR_EACH_AST_STATEMENT(V) \
   V(BlockStatement)               \
   V(EmptyStatement)               \
-  V(ExpressionStatment)
+  V(ExpressionStatement)          \
+  V(InvalidStatement)
 
 #define FOR_EACH_CONCRETE_AST_NODE(V) \
   FOR_EACH_AST_EXPRESSION(V)          \

@@ -4,10 +4,22 @@
 
 #include "joana/public/ast/statements.h"
 
+#include "joana/public/ast/expressions.h"
+#include "joana/public/ast/node_editor.h"
 #include "joana/public/ast/punctuator.h"
 
 namespace joana {
 namespace ast {
+
+//
+// BlockStatement
+//
+BlockStatement::BlockStatement(const Punctuator& semi_colon)
+    : Statement(semi_colon.range()) {
+  DCHECK_EQ(semi_colon.kind(), PunctuatorKind::LeftBrace);
+}
+
+BlockStatement::~BlockStatement() = default;
 
 //
 // EmptyStatement
@@ -20,14 +32,22 @@ EmptyStatement::EmptyStatement(const Punctuator& semi_colon)
 EmptyStatement::~EmptyStatement() = default;
 
 //
-// BlockStatement
+// ExpressionStatement
 //
-BlockStatement::BlockStatement(const Punctuator& semi_colon)
-    : Statement(semi_colon.range()) {
-  DCHECK_EQ(semi_colon.kind(), PunctuatorKind::LeftBrace);
+ExpressionStatement::ExpressionStatement(const Expression& expression)
+    : Statement(expression.range()) {
+  NodeEditor().AppendChild(this, const_cast<Expression*>(&expression));
 }
 
-BlockStatement::~BlockStatement() = default;
+ExpressionStatement::~ExpressionStatement() = default;
+
+//
+// InvalidStatement
+//
+InvalidStatement::InvalidStatement(const Node& node, int error_code)
+    : Statement(node.range()), error_code_(error_code) {}
+
+InvalidStatement::~InvalidStatement() = default;
 
 //
 // Statement

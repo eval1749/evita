@@ -138,5 +138,15 @@ EmptyStatement& NodeFactory::NewEmptyStatement(const Punctuator& semi_colon) {
   return *new (zone_) EmptyStatement(semi_colon);
 }
 
+ExpressionStatement& NodeFactory::NewExpressionStatement(
+    const Expression& expression) {
+  return *new (zone_) ExpressionStatement(expression);
+}
+
+InvalidStatement& NodeFactory::NewInvalidStatement(const Node& node,
+                                                   int error_code) {
+  return *new (zone_) InvalidStatement(node, error_code);
+}
+
 }  // namespace ast
 }  // namespace joana

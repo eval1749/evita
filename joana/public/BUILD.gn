@@ -37,6 +37,8 @@ component("public") {
     "ast/node_forward.h",
     "ast/node_traversal.cc",
     "ast/node_traversal.h",
+    "ast/node_visitor.cc",
+    "ast/node_visitor.h",
     "ast/punctuator.cc",
     "ast/punctuator.h",
     "ast/statements.cc",

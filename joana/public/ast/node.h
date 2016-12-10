@@ -17,6 +17,7 @@ namespace joana {
 namespace ast {
 
 class ContainerNode;
+class NodeVisitor;
 
 class JOANA_PUBLIC_EXPORT Node : public Castable<Node>, public ZoneAllocated {
   DECLARE_CASTABLE_CLASS(Node, Castable);
@@ -37,6 +38,7 @@ class JOANA_PUBLIC_EXPORT Node : public Castable<Node>, public ZoneAllocated {
 
   const SourceCodeRange& range() const { return range_; }
 
+  virtual void Accept(NodeVisitor* visitor) = 0;
   bool Contains(const Node& other) const;
   bool IsDescendantOf(const Node& other) const;
 
@@ -70,7 +72,9 @@ JOANA_PUBLIC_EXPORT std::ostream& operator<<(std::ostream& ostream,
 
 #define DECLARE_ABSTRACT_AST_NODE(name, base) DECLARE_AST_NODE(name, base);
 
-#define DECLARE_CONCRETE_AST_NODE(name, base) DECLARE_AST_NODE(name, base);
+#define DECLARE_CONCRETE_AST_NODE(name, base) \
+  DECLARE_AST_NODE(name, base);               \
+  void Accept(NodeVisitor* visitor) final;
 
 }  // namespace ast
 }  // namespace joana

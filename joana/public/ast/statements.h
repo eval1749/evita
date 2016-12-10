@@ -11,6 +11,9 @@
 namespace joana {
 namespace ast {
 
+//
+// Statement
+//
 class JOANA_PUBLIC_EXPORT Statement : public ContainerNode {
   DECLARE_ABSTRACT_AST_NODE(Statement, ContainerNode);
 
@@ -24,6 +27,25 @@ class JOANA_PUBLIC_EXPORT Statement : public ContainerNode {
   DISALLOW_COPY_AND_ASSIGN(Statement);
 };
 
+//
+// BlockStatement
+//
+class JOANA_PUBLIC_EXPORT BlockStatement : public Statement {
+  DECLARE_CONCRETE_AST_NODE(BlockStatement, Statement);
+
+ public:
+  ~BlockStatement() override;
+
+ protected:
+  explicit BlockStatement(const Punctuator& left_brace);
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(BlockStatement);
+};
+
+//
+// EmptyStatement
+//
 class JOANA_PUBLIC_EXPORT EmptyStatement : public Statement {
   DECLARE_CONCRETE_AST_NODE(EmptyStatement, Statement);
 

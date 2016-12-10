@@ -53,6 +53,7 @@ class JOANA_PUBLIC_EXPORT NodeFactory final {
   UndefinedLiteral& NewUndefinedLiteral(const Name& name);
 
   // Statements factory members
+  BlockStatement& NewBlockStatement(const Punctuator& left_brace);
   EmptyStatement& NewEmptyStatement(const Punctuator& semi_colon);
 
  private:

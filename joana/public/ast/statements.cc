@@ -20,6 +20,16 @@ EmptyStatement::EmptyStatement(const Punctuator& semi_colon)
 EmptyStatement::~EmptyStatement() = default;
 
 //
+// BlockStatement
+//
+BlockStatement::BlockStatement(const Punctuator& semi_colon)
+    : Statement(semi_colon.range()) {
+  DCHECK_EQ(semi_colon.kind(), PunctuatorKind::LeftBrace);
+}
+
+BlockStatement::~BlockStatement() = default;
+
+//
 // Statement
 //
 Statement::Statement(const SourceCodeRange& range) : ContainerNode(range) {}

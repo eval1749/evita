@@ -27,6 +27,7 @@ namespace ast {
   V(UndefinedLiteral)
 
 #define FOR_EACH_AST_STATEMENT(V) \
+  V(BlockStatement)               \
   V(EmptyStatement)               \
   V(ExpressionStatment)
 

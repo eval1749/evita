@@ -7,7 +7,7 @@
 #include "joana/public/ast/expressions.h"
 #include "joana/public/ast/node_editor.h"
 #include "joana/public/ast/node_traversal.h"
-#include "joana/public/ast/punctuator.h"
+#include "joana/public/ast/tokens.h"
 
 namespace joana {
 namespace ast {

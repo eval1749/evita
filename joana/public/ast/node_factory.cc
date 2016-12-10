@@ -38,12 +38,12 @@ NodeFactory::NameIdMap::NameIdMap() {
 NodeFactory::NameIdMap::~NameIdMap() = default;
 
 void NodeFactory::NameIdMap::Populate() {
-  last_id_ = static_cast<int>(NameId::StartKeyword);
+  last_id_ = static_cast<int>(NameId::StartOfKeyword);
 #define V(name, camel, upper) Register(base::StringPiece16(L## #name));
   FOR_EACH_JAVASCRIPT_KEYWORD(V)
 #undef V
 
-  last_id_ = static_cast<int>(NameId::StartKnown);
+  last_id_ = static_cast<int>(NameId::StartOfKnownWord);
 #define V(name, camel, upper) Register(base::StringPiece16(L## #name));
   FOR_EACH_JAVASCRIPT_KNOWN_WORD(V)
 #undef V

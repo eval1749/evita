@@ -7,8 +7,8 @@
 #include "joana/parser/lexer/lexer.h"
 #include "joana/parser/parser_error_codes.h"
 #include "joana/public/ast/node_factory.h"
-#include "joana/public/ast/punctuator.h"
 #include "joana/public/ast/statements.h"
+#include "joana/public/ast/tokens.h"
 
 namespace joana {
 namespace internal {

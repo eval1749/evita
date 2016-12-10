@@ -70,7 +70,7 @@ class JOANA_PUBLIC_EXPORT ExpressionStatement : public Statement {
  public:
   ~ExpressionStatement() override;
 
-  Expression* expression() const;
+  const Expression& expression() const;
 
  private:
   explicit ExpressionStatement(const Expression& expression);

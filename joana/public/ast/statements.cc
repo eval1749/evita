@@ -6,6 +6,7 @@
 
 #include "joana/public/ast/expressions.h"
 #include "joana/public/ast/node_editor.h"
+#include "joana/public/ast/node_traversal.h"
 #include "joana/public/ast/punctuator.h"
 
 namespace joana {
@@ -40,6 +41,12 @@ ExpressionStatement::ExpressionStatement(const Expression& expression)
 }
 
 ExpressionStatement::~ExpressionStatement() = default;
+
+const Expression& ExpressionStatement::expression() const {
+  auto* const child = NodeTraversal::FirstChildOf(*this);
+  DCHECK(child) << *this;
+  return child->As<Expression>();
+}
 
 //
 // InvalidStatement

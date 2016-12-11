@@ -224,7 +224,8 @@ ast::Statement& Parser::ParseStatementContinue() {
 }
 
 ast::Statement& Parser::ParseStatementDo() {
-  StatementScope do_scope(this, ConsumeToken());
+  auto& do_keyword = ConsumeToken().As<ast::Name>();
+  StatementScope do_scope(this, do_keyword);
   auto& statement = ParseStatement();
   if (!ConsumeTokenIf(ast::NameId::While))
     return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_DO_EXPECT_WHILE);
@@ -235,8 +236,7 @@ ast::Statement& Parser::ParseStatementDo() {
               ErrorCode::ERROR_STATEMENT_DO_EXPECT_RPAREN);
   ExpectToken(ast::PunctuatorKind::SemiColon,
               ErrorCode::ERROR_STATEMENT_DO_EXPECT_SEMI_COLON);
-  return node_factory().NewDoWhileStatement(do_scope.keyword(), statement,
-                                            condition);
+  return node_factory().NewDoWhileStatement(do_keyword, statement, condition);
 }
 
 ast::Statement& Parser::ParseStatementExpression() {

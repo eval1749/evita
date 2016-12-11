@@ -24,6 +24,11 @@ class SimpleFormatter final : public ast::NodeVisitor {
   void OutputAsSourceCode(const ast::Node& node);
 
  private:
+  class IndentScope;
+
+  // Returns true if |statement| is block statement.
+  bool FormatChildStatement(const ast::Statement& statement);
+
 #define V(name) void Visit##name(ast::name* node) final;
   FOR_EACH_CONCRETE_AST_NODE(V)
 #undef V

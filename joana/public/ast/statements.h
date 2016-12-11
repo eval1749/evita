@@ -79,6 +79,32 @@ class JOANA_PUBLIC_EXPORT ExpressionStatement : public Statement {
 };
 
 //
+// IfStatement
+//
+class JOANA_PUBLIC_EXPORT IfStatement : public Statement {
+  DECLARE_CONCRETE_AST_NODE(IfStatement, Statement);
+
+ public:
+  ~IfStatement() override;
+
+  ast::Expression& condition() const;
+  ast::Statement& else_clause() const;
+  bool has_else() const;
+  ast::Statement& then_clause() const;
+
+ private:
+  IfStatement(const Name& if_keyword,
+              const Expression& condition,
+              const Statement& then_clause,
+              const Statement& else_clause);
+  IfStatement(const Name& if_keyword,
+              const Expression& condition,
+              const Statement& then_clause);
+
+  DISALLOW_COPY_AND_ASSIGN(IfStatement);
+};
+
+//
 // InvalidStatement
 //
 class JOANA_PUBLIC_EXPORT InvalidStatement : public Statement {

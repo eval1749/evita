@@ -32,6 +32,7 @@ namespace ast {
   V(BlockStatement)               \
   V(EmptyStatement)               \
   V(ExpressionStatement)          \
+  V(IfStatement)                  \
   V(InvalidStatement)
 
 #define FOR_EACH_AST_TOKEN(V) \

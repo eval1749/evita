@@ -49,6 +49,44 @@ const Expression& ExpressionStatement::expression() const {
 }
 
 //
+// IfStatement
+//
+IfStatement::IfStatement(const Name& if_keyword,
+                         const Expression& condition,
+                         const Statement& then_clause,
+                         const Statement& else_clause)
+    : IfStatement(if_keyword, condition, then_clause) {
+  NodeEditor().AppendChild(this, const_cast<Statement*>(&else_clause));
+}
+
+IfStatement::IfStatement(const Name& if_keyword,
+                         const Expression& condition,
+                         const Statement& then_clause)
+    : Statement(if_keyword.range()) {
+  DCHECK_EQ(if_keyword, NameId::If);
+  NodeEditor().AppendChild(this, const_cast<Expression*>(&condition));
+  NodeEditor().AppendChild(this, const_cast<Statement*>(&then_clause));
+}
+
+IfStatement::~IfStatement() = default;
+
+ast::Expression& IfStatement::condition() const {
+  return NodeTraversal::ChildAt(*this, 0).As<Expression>();
+}
+
+ast::Statement& IfStatement::else_clause() const {
+  return NodeTraversal::ChildAt(*this, 2).As<Statement>();
+}
+
+ast::Statement& IfStatement::then_clause() const {
+  return NodeTraversal::ChildAt(*this, 1).As<Statement>();
+}
+
+bool IfStatement::has_else() const {
+  return NodeTraversal::CountChildren(*this) == 3;
+}
+
+//
 // InvalidStatement
 //
 InvalidStatement::InvalidStatement(const Node& node, int error_code)

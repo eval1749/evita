@@ -17,12 +17,54 @@
 namespace joana {
 namespace internal {
 
+//
+// SimpleFormatter::IndentScope
+//
+class SimpleFormatter::IndentScope final {
+ public:
+  explicit IndentScope(SimpleFormatter* formatter) : formatter_(formatter) {
+    ++formatter_->indent_;
+  }
+
+  ~IndentScope() {
+    DCHECK_GE(formatter_->indent_, 1);
+    --formatter_->indent_;
+  }
+
+ private:
+  SimpleFormatter* const formatter_;
+
+  DISALLOW_COPY_AND_ASSIGN(IndentScope);
+};
+
+//
+// SimpleFormatter
+//
 SimpleFormatter::SimpleFormatter(std::ostream* ostream) : ostream_(ostream) {}
 
 SimpleFormatter::~SimpleFormatter() = default;
 
 void SimpleFormatter::Format(const ast::Node& node) {
   Visit(node);
+}
+
+bool SimpleFormatter::FormatChildStatement(const ast::Statement& statement) {
+  if (auto* block = statement.TryAs<ast::BlockStatement>()) {
+    *ostream_ << " {" << std::endl;
+    IndentScope scope(this);
+    for (const auto& child : ast::NodeTraversal::ChildrenOf(*block)) {
+      OutputIndent();
+      Format(child);
+      *ostream_ << std::endl;
+    }
+    *ostream_ << '}';
+    return true;
+  }
+  *ostream_ << std::endl;
+  IndentScope scope(this);
+  OutputIndent();
+  Format(statement);
+  return false;
 }
 
 void SimpleFormatter::OutputAsSourceCode(const ast::Node& node) {
@@ -114,6 +156,23 @@ void SimpleFormatter::VisitEmptyStatement(ast::EmptyStatement* node) {
 void SimpleFormatter::VisitExpressionStatement(ast::ExpressionStatement* node) {
   Format(node->expression());
   *ostream_ << ';';
+}
+
+void SimpleFormatter::VisitIfStatement(ast::IfStatement* node) {
+  *ostream_ << "if (";
+  Format(node->condition());
+  *ostream_ << ")";
+  if (!node->has_else()) {
+    FormatChildStatement(node->then_clause());
+    return;
+  }
+
+  if (FormatChildStatement(node->then_clause()))
+    *ostream_ << ' ';
+  else
+    *ostream_ << std::endl;
+  *ostream_ << "else";
+  FormatChildStatement(node->else_clause());
 }
 
 void SimpleFormatter::VisitInvalidStatement(ast::InvalidStatement* node) {

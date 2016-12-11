@@ -28,7 +28,8 @@ class Castable {
   template <class Class>
   const Class& As() const {
     const auto* const result = TryAs<Class>();
-    DCHECK(result) << static_cast<Base&>(*this) << "is not " << class_name();
+    DCHECK(result) << static_cast<const Base&>(*this) << "is not "
+                   << class_name();
     return *result;
   }
 

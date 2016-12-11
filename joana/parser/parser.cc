@@ -44,6 +44,12 @@ void Parser::Advance() {
   lexer_->Advance();
 }
 
+ast::Node& Parser::ConsumeToken() {
+  auto& token = PeekToken();
+  Advance();
+  return token;
+}
+
 bool Parser::ConsumeTokenIf(ast::NameId name_id) {
   if (!HasToken())
     return false;

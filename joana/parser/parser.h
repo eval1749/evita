@@ -49,6 +49,7 @@ class Parser final {
   void AddError(const SourceCodeRange& range, ErrorCode error_code);
 
   void Advance();
+  ast::Node& ConsumeToken();
   // Returns true if |Lexer| has a punctuator of |name_id| and advance to next
   // token.
   bool ConsumeTokenIf(ast::NameId keyword_id);

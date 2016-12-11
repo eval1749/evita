@@ -86,9 +86,8 @@ ast::Statement& Parser::ParseStatementFunction() {
 }
 
 ast::Statement& Parser::ParseStatementIf() {
-  auto& if_keyword = PeekToken().As<ast::Name>();
+  auto& if_keyword = ConsumeToken().As<ast::Name>();
   DCHECK_EQ(if_keyword, ast::NameId::If);
-  Advance();
   if (!ConsumeTokenIf(ast::PunctuatorKind::LeftParenthesis)) {
     Advance();
     return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_IF_EXPECT_LPAREN);

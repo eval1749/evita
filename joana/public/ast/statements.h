@@ -214,7 +214,7 @@ class JOANA_PUBLIC_EXPORT WhileStatement : public Statement {
   Statement& statement() const;
 
  protected:
-  explicit WhileStatement(const Name& while_keyword,
+  explicit WhileStatement(const Name& keywod,
                           const Expression& condition,
                           const Statement& statement);
 

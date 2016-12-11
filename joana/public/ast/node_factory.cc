@@ -188,10 +188,10 @@ ThrowStatement& NodeFactory::NewThrowStatement(const Name& keyword,
   return *new (zone_) ThrowStatement(keyword, expression);
 }
 
-WhileStatement& NodeFactory::NewWhileStatement(const Name& while_keyword,
+WhileStatement& NodeFactory::NewWhileStatement(const Name& keywod,
                                                const Expression& condition,
                                                const Statement& statement) {
-  return *new (zone_) WhileStatement(while_keyword, condition, statement);
+  return *new (zone_) WhileStatement(keywod, condition, statement);
 }
 
 }  // namespace ast

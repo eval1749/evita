@@ -193,11 +193,11 @@ ast::Expression& ThrowStatement::expression() const {
 //
 // WhileStatement
 //
-WhileStatement::WhileStatement(const Name& while_keyword,
+WhileStatement::WhileStatement(const Name& keywod,
                                const Expression& condition,
                                const Statement& statement)
-    : Statement(while_keyword.range()) {
-  DCHECK_EQ(while_keyword, NameId::While);
+    : Statement(keywod.range()) {
+  DCHECK_EQ(keywod, NameId::While);
   NodeEditor().AppendChild(this, const_cast<Expression*>(&condition));
   NodeEditor().AppendChild(this, const_cast<Statement*>(&statement));
 }

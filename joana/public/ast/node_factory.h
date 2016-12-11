@@ -74,7 +74,7 @@ class JOANA_PUBLIC_EXPORT NodeFactory final {
   InvalidStatement& NewInvalidStatement(const Node& node, int error_code);
   ThrowStatement& NewThrowStatement(const Name& keyword,
                                     const Expression& condition);
-  WhileStatement& NewWhileStatement(const Name& while_keyword,
+  WhileStatement& NewWhileStatement(const Name& keywod,
                                     const Expression& condition,
                                     const Statement& statement);
 

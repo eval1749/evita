@@ -40,6 +40,7 @@ class Parser final {
   const ast::Node& Run();
 
  private:
+  class BracketStack;
   enum class ErrorCode;
 
   ast::NodeFactory& node_factory() const;
@@ -88,6 +89,7 @@ class Parser final {
   ast::Statement& ParseStatementWhile();
   ast::Statement& ParseStatementYield();
 
+  std::unique_ptr<BracketStack> bracket_stack_;
   ast::EditContext* const context_;
   std::unique_ptr<Lexer> lexer_;
   ast::ContainerNode& root_;

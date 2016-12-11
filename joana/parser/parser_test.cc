@@ -53,6 +53,8 @@ std::string ParserTest::Parse(base::StringPiece script_text) {
   std::ostringstream ostream;
   Parser parser(context.get(), source_code.range());
   SimpleFormatter(&ostream).Format(parser.Run());
+  for (const auto& error : error_sink.errors())
+    ostream << error << std::endl;
   return ostream.str();
 }
 
@@ -61,6 +63,14 @@ std::string ParserTest::Parse(base::StringPiece script_text) {
     auto* const source = script_text;      \
     EXPECT_EQ(source, Parse(script_text)); \
   }
+
+TEST_F(ParserTest, Bracket) {
+  EXPECT_EQ(
+      "PASER_ERROR_EXPRESSION_NYI;\n"
+      "PASER_ERROR_EXPRESSION_NYI@0:1\n"
+      "PASER_ERROR_STATEMENT_EXPECT_SEMI_COLON@1:1\n",
+      Parse("{"));
+}
 
 TEST_F(ParserTest, EmptyStatement) {
   TEST_PARSER(";\n");

@@ -2,9 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <vector>
+
 #include "joana/parser/parser.h"
 
 #include "joana/parser/lexer/lexer.h"
+#include "joana/parser/parser_error_codes.h"
 #include "joana/public/ast/edit_context.h"
 #include "joana/public/ast/module.h"
 #include "joana/public/ast/node_editor.h"
@@ -17,8 +20,61 @@
 namespace joana {
 namespace internal {
 
+//
+// BracketStack
+//
+class Parser::BracketStack final {
+ public:
+  BracketStack() = default;
+  ~BracketStack() = default;
+
+  const std::vector<const ast::Node*>& tokens() const { return stack_; }
+
+  ErrorCode Feed(const ast::Node& token);
+
+ private:
+  ErrorCode Check(const ast::Node& token, ast::PunctuatorKind expected);
+
+  std::vector<const ast::Node*> stack_;
+  DISALLOW_COPY_AND_ASSIGN(BracketStack);
+};
+
+Parser::ErrorCode Parser::BracketStack::Check(const ast::Node& token,
+                                              ast::PunctuatorKind expected) {
+  if (stack_.empty())
+    return ErrorCode::ERROR_BRACKET_UNEXPECTED;
+  if (*stack_.back() != expected)
+    return ErrorCode::ERROR_BRACKET_MISMATCHED;
+  stack_.pop_back();
+  return ErrorCode::None;
+}
+
+Parser::ErrorCode Parser::BracketStack::Feed(const ast::Node& token) {
+  auto* const bracket = token.TryAs<ast::Punctuator>();
+  if (!bracket)
+    return ErrorCode::None;
+  switch (static_cast<ast::PunctuatorKind>(bracket->kind())) {
+    case ast::PunctuatorKind::LeftParenthesis:
+    case ast::PunctuatorKind::LeftBracket:
+    case ast::PunctuatorKind::LeftBrace:
+      stack_.push_back(bracket);
+      return ErrorCode::None;
+    case ast::PunctuatorKind::RightParenthesis:
+      return Check(token, ast::PunctuatorKind::LeftParenthesis);
+    case ast::PunctuatorKind::RightBracket:
+      return Check(token, ast::PunctuatorKind::LeftBracket);
+    case ast::PunctuatorKind::RightBrace:
+      return Check(token, ast::PunctuatorKind::LeftBrace);
+  }
+  return ErrorCode::None;
+}
+
+//
+// Parser
+//
 Parser::Parser(ast::EditContext* context, const SourceCodeRange& range)
-    : context_(context),
+    : bracket_stack_(new BracketStack()),
+      context_(context),
       lexer_(new Lexer(context, range)),
       root_(context->node_factory().NewModule(range)) {}
 
@@ -42,6 +98,12 @@ void Parser::AddError(const SourceCodeRange& range, ErrorCode error_code) {
 
 void Parser::Advance() {
   lexer_->Advance();
+  if (!HasToken())
+    return;
+  const auto error_code = bracket_stack_->Feed(PeekToken());
+  if (error_code == ErrorCode::None)
+    return;
+  AddError(PeekToken(), error_code);
 }
 
 ast::Node& Parser::ConsumeToken() {
@@ -91,6 +153,8 @@ const ast::Node& Parser::Run() {
     }
     ast::NodeEditor().AppendChild(&root_, &ParseStatement());
   }
+  for (const auto& bracket : bracket_stack_->tokens())
+    AddError(*bracket, ErrorCode::ERROR_BRACKET_NOT_CLOSED);
   return root_;
 }
 

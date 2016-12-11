@@ -130,13 +130,13 @@ BlockStatement& NodeFactory::NewBlockStatement(const Punctuator& left_brace) {
   return *new (zone_) BlockStatement(left_brace);
 }
 
-BreakStatement& NodeFactory::NewBreakStatement(const Name& break_keyword,
+BreakStatement& NodeFactory::NewBreakStatement(const Name& keywod,
                                                const Name& label) {
-  return *new (zone_) BreakStatement(break_keyword, label);
+  return *new (zone_) BreakStatement(keywod, label);
 }
 
-BreakStatement& NodeFactory::NewBreakStatement(const Name& break_keyword) {
-  return *new (zone_) BreakStatement(break_keyword);
+BreakStatement& NodeFactory::NewBreakStatement(const Name& keywod) {
+  return *new (zone_) BreakStatement(keywod);
 }
 
 ContinueStatement& NodeFactory::NewContinueStatement(

@@ -186,20 +186,20 @@ ast::Statement& Parser::ParseStatementBlock() {
 }
 
 ast::Statement& Parser::ParseStatementBreak() {
-  auto& break_keyword = ConsumeToken().As<ast::Name>();
+  auto& keywod = ConsumeToken().As<ast::Name>();
   if (!CanUseBreak())
-    AddError(break_keyword, ErrorCode::ERROR_STATEMENT_BREAK_BAD_PLACE);
+    AddError(keywod, ErrorCode::ERROR_STATEMENT_BREAK_BAD_PLACE);
   if (!HasToken())
     return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
   if (ConsumeTokenIf(ast::PunctuatorKind::SemiColon))
-    return node_factory().NewBreakStatement(break_keyword);
+    return node_factory().NewBreakStatement(keywod);
   if (!PeekToken().Is<ast::Name>())
     AddError(PeekToken(), ErrorCode::ERROR_STATEMENT_BREAK_NOT_LABEL);
   auto& label = ConsumeToken().As<ast::Name>();
   ExpectToken(ast::PunctuatorKind::SemiColon,
               ErrorCode::ERROR_STATEMENT_BREAK_SEMI_COLON);
   // TODO(eval1749): Find label for |break| statement
-  return node_factory().NewBreakStatement(break_keyword, label);
+  return node_factory().NewBreakStatement(keywod, label);
 }
 
 ast::Statement& Parser::ParseStatementConst() {

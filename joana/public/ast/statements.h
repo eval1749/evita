@@ -58,8 +58,8 @@ class JOANA_PUBLIC_EXPORT BreakStatement : public Statement {
   Name& label() const;
 
  protected:
-  BreakStatement(const Name& break_keyword, const Name& label);
-  explicit BreakStatement(const Name& break_keyword);
+  BreakStatement(const Name& keywod, const Name& label);
+  explicit BreakStatement(const Name& keywod);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(BreakStatement);

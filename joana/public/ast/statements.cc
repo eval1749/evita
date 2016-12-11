@@ -25,15 +25,14 @@ BlockStatement::~BlockStatement() = default;
 //
 // BreakStatement
 //
-BreakStatement::BreakStatement(const Name& break_keyword, const Name& label)
-    : BreakStatement(break_keyword) {
+BreakStatement::BreakStatement(const Name& keywod, const Name& label)
+    : BreakStatement(keywod) {
   DCHECK(!label.As<Name>().IsKeyword());
   NodeEditor().AppendChild(this, const_cast<Name*>(&label));
 }
 
-BreakStatement::BreakStatement(const Name& break_keyword)
-    : Statement(break_keyword.range()) {
-  DCHECK_EQ(break_keyword, NameId::Break);
+BreakStatement::BreakStatement(const Name& keywod) : Statement(keywod.range()) {
+  DCHECK_EQ(keywod, NameId::Break);
 }
 
 BreakStatement::~BreakStatement() = default;

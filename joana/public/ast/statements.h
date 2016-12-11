@@ -202,33 +202,54 @@ class JOANA_PUBLIC_EXPORT ThrowStatement : public Statement {
 };
 
 //
-// TryStatement
+// TryCatchStatement
 //
-class JOANA_PUBLIC_EXPORT TryStatement : public Statement {
-  DECLARE_CONCRETE_AST_NODE(TryStatement, Statement);
+class JOANA_PUBLIC_EXPORT TryCatchStatement : public Statement {
+  DECLARE_CONCRETE_AST_NODE(TryCatchStatement, Statement);
 
  public:
-  ~TryStatement() override;
+  ~TryCatchStatement() override;
 
-  BlockStatement& block() const;
-  BlockStatement& catch_block() const;
+  Statement& block() const;
+  Statement& catch_block() const;
   Name& catch_name() const;
-  BlockStatement& finally_block() const;
+  Statement& finally_block() const;
   bool has_finally() const;
 
  protected:
-  TryStatement(const Name& keyword,
-               const BlockStatement& block,
-               const Name& catch_name,
-               const BlockStatement& catch_block,
-               const BlockStatement& finally_block);
-  TryStatement(const Name& keyword,
-               const BlockStatement& block,
-               const Name& catch_name,
-               const BlockStatement& catch_block);
+  TryCatchStatement(const Name& keyword,
+                    const Statement& block,
+                    const Name& catch_name,
+                    const Statement& catch_block,
+                    const Statement& finally_block);
+  TryCatchStatement(const Name& keyword,
+                    const Statement& block,
+                    const Name& catch_name,
+                    const Statement& catch_block);
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(TryStatement);
+  DISALLOW_COPY_AND_ASSIGN(TryCatchStatement);
+};
+
+//
+// TryFinallyStatement
+//
+class JOANA_PUBLIC_EXPORT TryFinallyStatement : public Statement {
+  DECLARE_CONCRETE_AST_NODE(TryFinallyStatement, Statement);
+
+ public:
+  ~TryFinallyStatement() override;
+
+  Statement& block() const;
+  Statement& finally_block() const;
+
+ protected:
+  TryFinallyStatement(const Name& keyword,
+                      const Statement& block,
+                      const Statement& finally_block);
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(TryFinallyStatement);
 };
 
 //

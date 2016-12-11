@@ -220,7 +220,7 @@ void SimpleFormatter::VisitThrowStatement(ast::ThrowStatement* node) {
   *ostream_ << ';';
 }
 
-void SimpleFormatter::VisitTryStatement(ast::TryStatement* node) {
+void SimpleFormatter::VisitTryCatchStatement(ast::TryCatchStatement* node) {
   *ostream_ << "try";
   FormatChildStatement(node->block());
   *ostream_ << " catch (";
@@ -229,6 +229,13 @@ void SimpleFormatter::VisitTryStatement(ast::TryStatement* node) {
   FormatChildStatement(node->catch_block());
   if (!node->has_finally())
     return;
+  *ostream_ << " finally";
+  FormatChildStatement(node->finally_block());
+}
+
+void SimpleFormatter::VisitTryFinallyStatement(ast::TryFinallyStatement* node) {
+  *ostream_ << "try";
+  FormatChildStatement(node->block());
   *ostream_ << " finally";
   FormatChildStatement(node->finally_block());
 }

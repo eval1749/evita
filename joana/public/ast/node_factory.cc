@@ -186,21 +186,30 @@ ThrowStatement& NodeFactory::NewThrowStatement(const Name& keyword,
   return *new (zone_) ThrowStatement(keyword, expression);
 }
 
-TryStatement& NodeFactory::NewTryStatement(
+TryCatchStatement& NodeFactory::NewTryCatchStatement(
     const Name& keyword,
-    const BlockStatement& block,
+    const Statement& block,
     const Name& catch_name,
-    const BlockStatement& catch_block,
-    const BlockStatement& finally_block) {
+    const Statement& catch_block,
+    const Statement& finally_block) {
   return *new (zone_)
-      TryStatement(keyword, block, catch_name, catch_block, finally_block);
+      TryCatchStatement(keyword, block, catch_name, catch_block, finally_block);
 }
 
-TryStatement& NodeFactory::NewTryStatement(const Name& keyword,
-                                           const BlockStatement& block,
-                                           const Name& catch_name,
-                                           const BlockStatement& catch_block) {
-  return *new (zone_) TryStatement(keyword, block, catch_name, catch_block);
+TryCatchStatement& NodeFactory::NewTryCatchStatement(
+    const Name& keyword,
+    const Statement& block,
+    const Name& catch_name,
+    const Statement& catch_block) {
+  return *new (zone_)
+      TryCatchStatement(keyword, block, catch_name, catch_block);
+}
+
+TryFinallyStatement& NodeFactory::NewTryFinallyStatement(
+    const Name& keyword,
+    const Statement& block,
+    const Statement& finally_block) {
+  return *new (zone_) TryFinallyStatement(keyword, block, finally_block);
 }
 
 WhileStatement& NodeFactory::NewWhileStatement(const Name& keyword,

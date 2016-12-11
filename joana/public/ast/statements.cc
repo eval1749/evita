@@ -190,49 +190,71 @@ ast::Expression& ThrowStatement::expression() const {
 }
 
 //
-// TryStatement
+// TryCatchStatement
 //
-TryStatement::TryStatement(const Name& keyword,
-                           const BlockStatement& block,
-                           const Name& catch_name,
-                           const BlockStatement& catch_block,
-                           const BlockStatement& finally_block)
-    : TryStatement(keyword, block, catch_name, catch_block) {
+TryCatchStatement::TryCatchStatement(const Name& keyword,
+                                     const Statement& block,
+                                     const Name& catch_name,
+                                     const Statement& catch_block,
+                                     const Statement& finally_block)
+    : TryCatchStatement(keyword, block, catch_name, catch_block) {
   DCHECK_EQ(keyword, NameId::Try);
-  NodeEditor().AppendChild(this, const_cast<BlockStatement*>(&finally_block));
+  NodeEditor().AppendChild(this, const_cast<Statement*>(&finally_block));
 }
 
-TryStatement::TryStatement(const Name& keyword,
-                           const BlockStatement& block,
-                           const Name& catch_name,
-                           const BlockStatement& catch_block)
+TryCatchStatement::TryCatchStatement(const Name& keyword,
+                                     const Statement& block,
+                                     const Name& catch_name,
+                                     const Statement& catch_block)
     : Statement(keyword.range()) {
   DCHECK_EQ(keyword, NameId::Try);
-  NodeEditor().AppendChild(this, const_cast<BlockStatement*>(&block));
+  NodeEditor().AppendChild(this, const_cast<Statement*>(&block));
   NodeEditor().AppendChild(this, const_cast<Name*>(&catch_name));
-  NodeEditor().AppendChild(this, const_cast<BlockStatement*>(&catch_block));
+  NodeEditor().AppendChild(this, const_cast<Statement*>(&catch_block));
 }
 
-TryStatement::~TryStatement() = default;
+TryCatchStatement::~TryCatchStatement() = default;
 
-ast::BlockStatement& TryStatement::block() const {
-  return NodeTraversal::ChildAt(*this, 0).As<BlockStatement>();
+ast::Statement& TryCatchStatement::block() const {
+  return NodeTraversal::ChildAt(*this, 0).As<Statement>();
 }
 
-ast::BlockStatement& TryStatement::catch_block() const {
-  return NodeTraversal::ChildAt(*this, 2).As<BlockStatement>();
+ast::Statement& TryCatchStatement::catch_block() const {
+  return NodeTraversal::ChildAt(*this, 2).As<Statement>();
 }
 
-ast::Name& TryStatement::catch_name() const {
+ast::Name& TryCatchStatement::catch_name() const {
   return NodeTraversal::ChildAt(*this, 1).As<Name>();
 }
 
-ast::BlockStatement& TryStatement::finally_block() const {
-  return NodeTraversal::ChildAt(*this, 3).As<BlockStatement>();
+ast::Statement& TryCatchStatement::finally_block() const {
+  return NodeTraversal::ChildAt(*this, 3).As<Statement>();
 }
 
-bool TryStatement::has_finally() const {
+bool TryCatchStatement::has_finally() const {
   return NodeTraversal::CountChildren(*this) == 4;
+}
+
+//
+// TryFinallyStatement
+//
+TryFinallyStatement::TryFinallyStatement(const Name& keyword,
+                                         const Statement& block,
+                                         const Statement& finally_block)
+    : Statement(keyword.range()) {
+  DCHECK_EQ(keyword, NameId::Try);
+  NodeEditor().AppendChild(this, const_cast<Statement*>(&block));
+  NodeEditor().AppendChild(this, const_cast<Statement*>(&finally_block));
+}
+
+TryFinallyStatement::~TryFinallyStatement() = default;
+
+ast::Statement& TryFinallyStatement::block() const {
+  return NodeTraversal::ChildAt(*this, 0).As<Statement>();
+}
+
+ast::Statement& TryFinallyStatement::finally_block() const {
+  return NodeTraversal::ChildAt(*this, 1).As<Statement>();
 }
 
 //

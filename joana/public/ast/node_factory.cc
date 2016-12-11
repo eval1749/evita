@@ -139,6 +139,17 @@ BreakStatement& NodeFactory::NewBreakStatement(const Name& break_keyword) {
   return *new (zone_) BreakStatement(break_keyword);
 }
 
+ContinueStatement& NodeFactory::NewContinueStatement(
+    const Name& continue_keyword,
+    const Name& label) {
+  return *new (zone_) ContinueStatement(continue_keyword, label);
+}
+
+ContinueStatement& NodeFactory::NewContinueStatement(
+    const Name& continue_keyword) {
+  return *new (zone_) ContinueStatement(continue_keyword);
+}
+
 DoWhileStatement& NodeFactory::NewDoWhileStatement(
     const Name& do_keyword,
     const Statement& statement,

@@ -31,6 +31,7 @@ namespace ast {
 #define FOR_EACH_AST_STATEMENT(V) \
   V(BlockStatement)               \
   V(BreakStatement)               \
+  V(ContinueStatement)            \
   V(DoWhileStatement)             \
   V(EmptyStatement)               \
   V(ExpressionStatement)          \

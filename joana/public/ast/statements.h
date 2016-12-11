@@ -66,6 +66,26 @@ class JOANA_PUBLIC_EXPORT BreakStatement : public Statement {
 };
 
 //
+// ContinueStatement
+//
+class JOANA_PUBLIC_EXPORT ContinueStatement : public Statement {
+  DECLARE_CONCRETE_AST_NODE(ContinueStatement, Statement);
+
+ public:
+  ~ContinueStatement() override;
+
+  bool has_label() const;
+  Name& label() const;
+
+ protected:
+  ContinueStatement(const Name& continue_keyword, const Name& label);
+  explicit ContinueStatement(const Name& continue_keyword);
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(ContinueStatement);
+};
+
+//
 // DoWhileStatement
 //
 class JOANA_PUBLIC_EXPORT DoWhileStatement : public Statement {

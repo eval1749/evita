@@ -48,6 +48,32 @@ ast::Name& BreakStatement::label() const {
 }
 
 //
+// ContinueStatement
+//
+ContinueStatement::ContinueStatement(const Name& continue_keyword,
+                                     const Name& label)
+    : ContinueStatement(continue_keyword) {
+  DCHECK(!label.As<Name>().IsKeyword());
+  NodeEditor().AppendChild(this, const_cast<Name*>(&label));
+}
+
+ContinueStatement::ContinueStatement(const Name& continue_keyword)
+    : Statement(continue_keyword.range()) {
+  DCHECK_EQ(continue_keyword, NameId::Continue);
+}
+
+ContinueStatement::~ContinueStatement() = default;
+
+bool ContinueStatement::has_label() const {
+  return NodeTraversal::FirstChildOf(*this) != nullptr;
+}
+
+ast::Name& ContinueStatement::label() const {
+  DCHECK(has_label()) << *this;
+  return NodeTraversal::FirstChildOf(*this)->As<Name>();
+}
+
+//
 // DoWhileStatement
 //
 DoWhileStatement::DoWhileStatement(const Name& do_keyword,

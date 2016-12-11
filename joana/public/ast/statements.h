@@ -46,6 +46,27 @@ class JOANA_PUBLIC_EXPORT BlockStatement : public Statement {
 };
 
 //
+// DoWhileStatement
+//
+class JOANA_PUBLIC_EXPORT DoWhileStatement : public Statement {
+  DECLARE_CONCRETE_AST_NODE(DoWhileStatement, Statement);
+
+ public:
+  ~DoWhileStatement() override;
+
+  Expression& condition() const;
+  Statement& statement() const;
+
+ protected:
+  explicit DoWhileStatement(const Name& do_keyword,
+                            const Statement& statement,
+                            const Expression& condition);
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(DoWhileStatement);
+};
+
+//
 // EmptyStatement
 //
 class JOANA_PUBLIC_EXPORT EmptyStatement : public Statement {

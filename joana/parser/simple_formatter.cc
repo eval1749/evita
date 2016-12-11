@@ -155,6 +155,17 @@ void SimpleFormatter::VisitBlockStatement(ast::BlockStatement* node) {
   *ostream_ << '}';
 }
 
+void SimpleFormatter::VisitDoWhileStatement(ast::DoWhileStatement* node) {
+  *ostream_ << "do";
+  if (FormatChildStatement(node->statement()))
+    *ostream_ << ' ';
+  else
+    *ostream_ << std::endl;
+  *ostream_ << "while (";
+  Format(node->condition());
+  *ostream_ << ");";
+}
+
 void SimpleFormatter::VisitEmptyStatement(ast::EmptyStatement* node) {
   *ostream_ << ';';
 }

@@ -22,6 +22,25 @@ BlockStatement::BlockStatement(const Punctuator& semi_colon)
 
 BlockStatement::~BlockStatement() = default;
 
+DoWhileStatement::DoWhileStatement(const Name& do_keyword,
+                                   const Statement& statement,
+                                   const Expression& condition)
+    : Statement(do_keyword.range()) {
+  DCHECK_EQ(do_keyword, NameId::Do);
+  NodeEditor().AppendChild(this, const_cast<Statement*>(&statement));
+  NodeEditor().AppendChild(this, const_cast<Expression*>(&condition));
+}
+
+DoWhileStatement::~DoWhileStatement() = default;
+
+ast::Expression& DoWhileStatement::condition() const {
+  return NodeTraversal::ChildAt(*this, 1).As<Expression>();
+}
+
+ast::Statement& DoWhileStatement::statement() const {
+  return NodeTraversal::ChildAt(*this, 0).As<Statement>();
+}
+
 //
 // EmptyStatement
 //

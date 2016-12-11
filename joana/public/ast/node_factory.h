@@ -54,6 +54,9 @@ class JOANA_PUBLIC_EXPORT NodeFactory final {
   // Statements factory members
   BlockStatement& NewBlockStatement(const Punctuator& left_brace);
   ExpressionStatement& NewExpressionStatement(const Expression& expression);
+  DoWhileStatement& NewDoWhileStatement(const Name& do_keyword,
+                                        const Statement& statement,
+                                        const Expression& condition);
   IfStatement& NewIfStatement(const Name& if_keyword,
                               const Expression& condition,
                               const Statement& then_clause,

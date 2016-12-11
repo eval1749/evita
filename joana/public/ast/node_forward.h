@@ -30,6 +30,7 @@ namespace ast {
 
 #define FOR_EACH_AST_STATEMENT(V) \
   V(BlockStatement)               \
+  V(DoWhileStatement)             \
   V(EmptyStatement)               \
   V(ExpressionStatement)          \
   V(IfStatement)                  \

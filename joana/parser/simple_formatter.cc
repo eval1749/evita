@@ -3,10 +3,12 @@
 // found in the LICENSE file.
 
 #include <ostream>
+#include <string>
 
 #include "joana/parser/simple_formatter.h"
 
 #include "base/strings/utf_string_conversions.h"
+#include "joana/public/ast/error_codes.h"
 #include "joana/public/ast/expressions.h"
 #include "joana/public/ast/literals.h"
 #include "joana/public/ast/module.h"
@@ -82,7 +84,7 @@ void SimpleFormatter::VisitComment(ast::Comment* node) {
 }
 
 void SimpleFormatter::VisitInvalid(ast::Invalid* node) {
-  *ostream_ << "INVALID(" << node->error_code() << ')';
+  *ostream_ << *node;
 }
 
 void SimpleFormatter::VisitPunctuator(ast::Punctuator* node) {
@@ -123,7 +125,11 @@ void SimpleFormatter::VisitUndefinedLiteral(ast::UndefinedLiteral* node) {
 
 // Expressions
 void SimpleFormatter::VisitInvalidExpression(ast::InvalidExpression* node) {
-  *ostream_ << "ERROR(" << node->error_code() << ')';
+  const auto string = ast::ErrorStringOf(node->error_code());
+  if (string.empty())
+    *ostream_ << node->error_code();
+  else
+    *ostream_ << string;
 }
 
 void SimpleFormatter::VisitLiteralExpression(ast::LiteralExpression* node) {
@@ -176,7 +182,11 @@ void SimpleFormatter::VisitIfStatement(ast::IfStatement* node) {
 }
 
 void SimpleFormatter::VisitInvalidStatement(ast::InvalidStatement* node) {
-  *ostream_ << "ERROR(" << node->error_code() << ");";
+  const auto string = ast::ErrorStringOf(node->error_code());
+  if (string.empty())
+    *ostream_ << node->error_code();
+  else
+    *ostream_ << string;
 }
 
 }  // namespace internal

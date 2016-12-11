@@ -255,8 +255,8 @@ ast::Statement& Parser::ParseStatementFunction() {
 }
 
 ast::Statement& Parser::ParseStatementIf() {
-  auto& if_keyword = ConsumeToken().As<ast::Name>();
-  DCHECK_EQ(if_keyword, ast::NameId::If);
+  auto& keywod = ConsumeToken().As<ast::Name>();
+  DCHECK_EQ(keywod, ast::NameId::If);
   ExpectToken(ast::PunctuatorKind::LeftParenthesis,
               ErrorCode::ERROR_STATEMENT_IF_EXPECT_LPAREN);
   auto& condition = ParseExpression();
@@ -264,9 +264,9 @@ ast::Statement& Parser::ParseStatementIf() {
               ErrorCode::ERROR_STATEMENT_IF_EXPECT_RPAREN);
   auto& then_clause = ParseStatement();
   if (!ConsumeTokenIf(ast::NameId::Else))
-    return node_factory().NewIfStatement(if_keyword, condition, then_clause);
+    return node_factory().NewIfStatement(keywod, condition, then_clause);
   auto& else_clause = ParseStatement();
-  return node_factory().NewIfStatement(if_keyword, condition, then_clause,
+  return node_factory().NewIfStatement(keywod, condition, then_clause,
                                        else_clause);
 }
 

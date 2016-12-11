@@ -154,11 +154,11 @@ class JOANA_PUBLIC_EXPORT IfStatement : public Statement {
   ast::Statement& then_clause() const;
 
  private:
-  IfStatement(const Name& if_keyword,
+  IfStatement(const Name& keywod,
               const Expression& condition,
               const Statement& then_clause,
               const Statement& else_clause);
-  IfStatement(const Name& if_keyword,
+  IfStatement(const Name& keywod,
               const Expression& condition,
               const Statement& then_clause);
 

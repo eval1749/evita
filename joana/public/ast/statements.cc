@@ -124,19 +124,19 @@ const Expression& ExpressionStatement::expression() const {
 //
 // IfStatement
 //
-IfStatement::IfStatement(const Name& if_keyword,
+IfStatement::IfStatement(const Name& keywod,
                          const Expression& condition,
                          const Statement& then_clause,
                          const Statement& else_clause)
-    : IfStatement(if_keyword, condition, then_clause) {
+    : IfStatement(keywod, condition, then_clause) {
   NodeEditor().AppendChild(this, const_cast<Statement*>(&else_clause));
 }
 
-IfStatement::IfStatement(const Name& if_keyword,
+IfStatement::IfStatement(const Name& keywod,
                          const Expression& condition,
                          const Statement& then_clause)
-    : Statement(if_keyword.range()) {
-  DCHECK_EQ(if_keyword, NameId::If);
+    : Statement(keywod.range()) {
+  DCHECK_EQ(keywod, NameId::If);
   NodeEditor().AppendChild(this, const_cast<Expression*>(&condition));
   NodeEditor().AppendChild(this, const_cast<Statement*>(&then_clause));
 }

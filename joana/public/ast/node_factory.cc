@@ -165,18 +165,17 @@ ExpressionStatement& NodeFactory::NewExpressionStatement(
   return *new (zone_) ExpressionStatement(expression);
 }
 
-IfStatement& NodeFactory::NewIfStatement(const Name& if_keyword,
+IfStatement& NodeFactory::NewIfStatement(const Name& keywod,
                                          const Expression& condition,
                                          const Statement& then_clause,
                                          const Statement& else_clause) {
-  return *new (zone_)
-      IfStatement(if_keyword, condition, then_clause, else_clause);
+  return *new (zone_) IfStatement(keywod, condition, then_clause, else_clause);
 }
 
-IfStatement& NodeFactory::NewIfStatement(const Name& if_keyword,
+IfStatement& NodeFactory::NewIfStatement(const Name& keywod,
                                          const Expression& condition,
                                          const Statement& then_clause) {
-  return *new (zone_) IfStatement(if_keyword, condition, then_clause);
+  return *new (zone_) IfStatement(keywod, condition, then_clause);
 }
 
 InvalidStatement& NodeFactory::NewInvalidStatement(const Node& node,

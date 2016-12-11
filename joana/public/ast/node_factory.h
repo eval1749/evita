@@ -64,11 +64,11 @@ class JOANA_PUBLIC_EXPORT NodeFactory final {
                               const Expression& condition);
   EmptyStatement& NewEmptyStatement(const Punctuator& semi_colon);
   ExpressionStatement& NewExpressionStatement(const Expression& expression);
-  IfStatement& NewIfStatement(const Name& if_keyword,
+  IfStatement& NewIfStatement(const Name& keywod,
                               const Expression& condition,
                               const Statement& then_clause,
                               const Statement& else_clause);
-  IfStatement& NewIfStatement(const Name& if_keyword,
+  IfStatement& NewIfStatement(const Name& keywod,
                               const Expression& condition,
                               const Statement& then_clause);
   InvalidStatement& NewInvalidStatement(const Node& node, int error_code);

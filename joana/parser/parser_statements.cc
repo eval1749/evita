@@ -228,22 +228,21 @@ ast::Statement& Parser::ParseStatementDo() {
   auto& statement = ParseStatement();
   if (!ConsumeTokenIf(ast::NameId::While))
     return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_DO_EXPECT_WHILE);
-  if (!ConsumeTokenIf(ast::PunctuatorKind::LeftParenthesis))
-    return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_DO_EXPECT_LPAREN);
+  ExpectToken(ast::PunctuatorKind::LeftParenthesis,
+              ErrorCode::ERROR_STATEMENT_DO_EXPECT_LPAREN);
   auto& condition = ParseExpression();
-  if (!ConsumeTokenIf(ast::PunctuatorKind::RightParenthesis))
-    return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_DO_EXPECT_RPAREN);
-  if (!ConsumeTokenIf(ast::PunctuatorKind::SemiColon))
-    return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_DO_EXPECT_SEMI_COLON);
+  ExpectToken(ast::PunctuatorKind::RightParenthesis,
+              ErrorCode::ERROR_STATEMENT_DO_EXPECT_RPAREN);
+  ExpectToken(ast::PunctuatorKind::SemiColon,
+              ErrorCode::ERROR_STATEMENT_DO_EXPECT_SEMI_COLON);
   return node_factory().NewDoWhileStatement(do_scope.keyword(), statement,
                                             condition);
 }
 
 ast::Statement& Parser::ParseStatementExpression() {
   auto& result = node_factory().NewExpressionStatement(ParseExpression());
-  if (ConsumeTokenIf(ast::PunctuatorKind::SemiColon))
-    return result;
-  AddError(lexer_->location(), ErrorCode::ERROR_STATEMENT_EXPECT_SEMI_COLON);
+  ExpectToken(ast::PunctuatorKind::SemiColon,
+              ErrorCode::ERROR_STATEMENT_EXPECT_SEMI_COLON);
   return result;
 }
 
@@ -258,11 +257,11 @@ ast::Statement& Parser::ParseStatementFunction() {
 ast::Statement& Parser::ParseStatementIf() {
   auto& if_keyword = ConsumeToken().As<ast::Name>();
   DCHECK_EQ(if_keyword, ast::NameId::If);
-  if (!ConsumeTokenIf(ast::PunctuatorKind::LeftParenthesis))
-    return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_IF_EXPECT_LPAREN);
+  ExpectToken(ast::PunctuatorKind::LeftParenthesis,
+              ErrorCode::ERROR_STATEMENT_IF_EXPECT_LPAREN);
   auto& condition = ParseExpression();
-  if (!ConsumeTokenIf(ast::PunctuatorKind::RightParenthesis))
-    return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_IF_EXPECT_RPAREN);
+  ExpectToken(ast::PunctuatorKind::RightParenthesis,
+              ErrorCode::ERROR_STATEMENT_IF_EXPECT_RPAREN);
   auto& then_clause = ParseStatement();
   if (!ConsumeTokenIf(ast::NameId::Else))
     return node_factory().NewIfStatement(if_keyword, condition, then_clause);

@@ -190,6 +190,52 @@ ast::Expression& ThrowStatement::expression() const {
 }
 
 //
+// TryStatement
+//
+TryStatement::TryStatement(const Name& keyword,
+                           const BlockStatement& block,
+                           const Name& catch_name,
+                           const BlockStatement& catch_block,
+                           const BlockStatement& finally_block)
+    : TryStatement(keyword, block, catch_name, catch_block) {
+  DCHECK_EQ(keyword, NameId::Try);
+  NodeEditor().AppendChild(this, const_cast<BlockStatement*>(&finally_block));
+}
+
+TryStatement::TryStatement(const Name& keyword,
+                           const BlockStatement& block,
+                           const Name& catch_name,
+                           const BlockStatement& catch_block)
+    : Statement(keyword.range()) {
+  DCHECK_EQ(keyword, NameId::Try);
+  NodeEditor().AppendChild(this, const_cast<BlockStatement*>(&block));
+  NodeEditor().AppendChild(this, const_cast<Name*>(&catch_name));
+  NodeEditor().AppendChild(this, const_cast<BlockStatement*>(&catch_block));
+}
+
+TryStatement::~TryStatement() = default;
+
+ast::BlockStatement& TryStatement::block() const {
+  return NodeTraversal::ChildAt(*this, 0).As<BlockStatement>();
+}
+
+ast::BlockStatement& TryStatement::catch_block() const {
+  return NodeTraversal::ChildAt(*this, 2).As<BlockStatement>();
+}
+
+ast::Name& TryStatement::catch_name() const {
+  return NodeTraversal::ChildAt(*this, 1).As<Name>();
+}
+
+ast::BlockStatement& TryStatement::finally_block() const {
+  return NodeTraversal::ChildAt(*this, 3).As<BlockStatement>();
+}
+
+bool TryStatement::has_finally() const {
+  return NodeTraversal::CountChildren(*this) == 4;
+}
+
+//
 // WhileStatement
 //
 WhileStatement::WhileStatement(const Name& keyword,

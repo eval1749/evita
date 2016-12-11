@@ -220,6 +220,19 @@ void SimpleFormatter::VisitThrowStatement(ast::ThrowStatement* node) {
   *ostream_ << ';';
 }
 
+void SimpleFormatter::VisitTryStatement(ast::TryStatement* node) {
+  *ostream_ << "try";
+  FormatChildStatement(node->block());
+  *ostream_ << " catch (";
+  Format(node->catch_name());
+  *ostream_ << ')';
+  FormatChildStatement(node->catch_block());
+  if (!node->has_finally())
+    return;
+  *ostream_ << " finally";
+  FormatChildStatement(node->finally_block());
+}
+
 void SimpleFormatter::VisitWhileStatement(ast::WhileStatement* node) {
   *ostream_ << "while (";
   Format(node->condition());

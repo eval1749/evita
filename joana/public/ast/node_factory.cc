@@ -186,6 +186,23 @@ ThrowStatement& NodeFactory::NewThrowStatement(const Name& keyword,
   return *new (zone_) ThrowStatement(keyword, expression);
 }
 
+TryStatement& NodeFactory::NewTryStatement(
+    const Name& keyword,
+    const BlockStatement& block,
+    const Name& catch_name,
+    const BlockStatement& catch_block,
+    const BlockStatement& finally_block) {
+  return *new (zone_)
+      TryStatement(keyword, block, catch_name, catch_block, finally_block);
+}
+
+TryStatement& NodeFactory::NewTryStatement(const Name& keyword,
+                                           const BlockStatement& block,
+                                           const Name& catch_name,
+                                           const BlockStatement& catch_block) {
+  return *new (zone_) TryStatement(keyword, block, catch_name, catch_block);
+}
+
 WhileStatement& NodeFactory::NewWhileStatement(const Name& keyword,
                                                const Expression& condition,
                                                const Statement& statement) {

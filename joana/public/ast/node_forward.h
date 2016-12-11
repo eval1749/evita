@@ -38,6 +38,7 @@ namespace ast {
   V(IfStatement)                  \
   V(InvalidStatement)             \
   V(ThrowStatement)               \
+  V(TryStatement)                 \
   V(WhileStatement)
 
 #define FOR_EACH_AST_TOKEN(V) \

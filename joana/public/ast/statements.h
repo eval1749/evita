@@ -202,6 +202,36 @@ class JOANA_PUBLIC_EXPORT ThrowStatement : public Statement {
 };
 
 //
+// TryStatement
+//
+class JOANA_PUBLIC_EXPORT TryStatement : public Statement {
+  DECLARE_CONCRETE_AST_NODE(TryStatement, Statement);
+
+ public:
+  ~TryStatement() override;
+
+  BlockStatement& block() const;
+  BlockStatement& catch_block() const;
+  Name& catch_name() const;
+  BlockStatement& finally_block() const;
+  bool has_finally() const;
+
+ protected:
+  TryStatement(const Name& keyword,
+               const BlockStatement& block,
+               const Name& catch_name,
+               const BlockStatement& catch_block,
+               const BlockStatement& finally_block);
+  TryStatement(const Name& keyword,
+               const BlockStatement& block,
+               const Name& catch_name,
+               const BlockStatement& catch_block);
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(TryStatement);
+};
+
+//
 // WhileStatement
 //
 class JOANA_PUBLIC_EXPORT WhileStatement : public Statement {

@@ -136,6 +136,31 @@ TEST_F(ParserTest, ThrowStatement) {
   TEST_PARSER("throw foo;\n");
 }
 
+TEST_F(ParserTest, TryStatement) {
+  TEST_PARSER(
+      "try {\n"
+      "  foo;\n"
+      "} catch (bar) {\n"
+      "  baz;\n"
+      "}\n");
+
+  TEST_PARSER(
+      "try {\n"
+      "  foo;\n"
+      "} finally {\n"
+      "  baz;\n"
+      "}\n");
+
+  TEST_PARSER(
+      "try {\n"
+      "  foo;\n"
+      "} catch (bar) {\n"
+      "  baz;\n"
+      "} finally {\n"
+      "  quux;\n"
+      "}\n");
+}
+
 TEST_F(ParserTest, WhileStatement) {
   TEST_PARSER(
       "while (foo) {\n"

@@ -137,6 +137,14 @@ bool Parser::ConsumeTokenIf(ast::PunctuatorKind kind) {
   return true;
 }
 
+void Parser::ExpectToken(ast::NameId name_id, ErrorCode error_code) {
+  if (ConsumeTokenIf(name_id))
+    return;
+  if (HasToken())
+    return AddError(PeekToken(), error_code);
+  return AddError(lexer_->location(), error_code);
+}
+
 void Parser::ExpectToken(ast::PunctuatorKind kind, ErrorCode error_code) {
   if (ConsumeTokenIf(kind))
     return;

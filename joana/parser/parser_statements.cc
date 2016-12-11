@@ -308,6 +308,8 @@ ast::Statement& Parser::ParseStatementKeyword() {
       return ParseStatementSwitch();
     case ast::NameId::Throw:
       return ParseStatementThrow();
+    case ast::NameId::Try:
+      return ParseStatementTry();
     case ast::NameId::Var:
       return ParseStatementVar();
     case ast::NameId::While:
@@ -347,6 +349,45 @@ ast::Statement& Parser::ParseStatementThrow() {
   ExpectToken(ast::PunctuatorKind::SemiColon,
               ErrorCode::ERROR_STATEMENT_THROW_EXPECT_SEMI_COLON);
   return node_factory().NewThrowStatement(keyword, expression);
+}
+
+ast::Statement& Parser::ParseStatementTry() {
+  auto& keyword = ConsumeToken().As<ast::Name>();
+  StatementScope while_scope(this, keyword);
+  if (!HasToken() || PeekToken() != ast::PunctuatorKind::LeftBrace)
+    return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_TRY_EXPECT_LBRACE);
+  auto& block = ParseStatement();
+  if (!HasToken())
+    return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_TRY_EXPECT_CATCH);
+  if (PeekToken() == ast::NameId::Finally) {
+    ConsumeToken();
+    if (!HasToken() || PeekToken() != ast::PunctuatorKind::LeftBrace)
+      return NewInvalidStatement(
+          ErrorCode::ERROR_STATEMENT_FINALLY_EXPECT_LBRACE);
+    auto& finally_block = ParseStatementBlock();
+    return node_factory().NewTryFinallyStatement(keyword, block, finally_block);
+  }
+  ExpectToken(ast::NameId::Catch, ErrorCode::ERROR_STATEMENT_TRY_EXPECT_CATCH);
+  ExpectToken(ast::PunctuatorKind::LeftParenthesis,
+              ErrorCode::ERROR_STATEMENT_CATCH_EXPECT_LPAREN);
+  if (!HasToken() || !PeekToken().Is<ast::Name>())
+    return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_CATCH_EXPECT_NAME);
+  auto& catch_name = ConsumeToken().As<ast::Name>();
+  ExpectToken(ast::PunctuatorKind::RightParenthesis,
+              ErrorCode::ERROR_STATEMENT_CATCH_EXPECT_RPAREN);
+  if (!HasToken() || PeekToken() != ast::PunctuatorKind::LeftBrace)
+    return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_CATCH_EXPECT_LBRACE);
+  auto& catch_block = ParseStatement();
+  if (!HasToken() || PeekToken() != ast::NameId::Finally)
+    return node_factory().NewTryCatchStatement(keyword, block, catch_name,
+                                               catch_block);
+  ConsumeToken();
+  if (!HasToken() || PeekToken() != ast::PunctuatorKind::LeftBrace)
+    return NewInvalidStatement(
+        ErrorCode::ERROR_STATEMENT_FINALLY_EXPECT_LBRACE);
+  auto& finally_block = ParseStatement();
+  return node_factory().NewTryCatchStatement(keyword, block, catch_name,
+                                             catch_block, finally_block);
 }
 
 ast::Statement& Parser::ParseStatementVar() {

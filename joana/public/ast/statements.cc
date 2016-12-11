@@ -76,11 +76,11 @@ ast::Name& ContinueStatement::label() const {
 //
 // DoStatement
 //
-DoStatement::DoStatement(const Name& do_keyword,
+DoStatement::DoStatement(const Name& keywod,
                          const Statement& statement,
                          const Expression& condition)
-    : Statement(do_keyword.range()) {
-  DCHECK_EQ(do_keyword, NameId::Do);
+    : Statement(keywod.range()) {
+  DCHECK_EQ(keywod, NameId::Do);
   NodeEditor().AppendChild(this, const_cast<Statement*>(&statement));
   NodeEditor().AppendChild(this, const_cast<Expression*>(&condition));
 }

@@ -59,7 +59,7 @@ class JOANA_PUBLIC_EXPORT NodeFactory final {
   ContinueStatement& NewContinueStatement(const Name& continue_keyword,
                                           const Name& label);
   ContinueStatement& NewContinueStatement(const Name& continue_keyword);
-  DoStatement& NewDoStatement(const Name& do_keyword,
+  DoStatement& NewDoStatement(const Name& keywod,
                               const Statement& statement,
                               const Expression& condition);
   EmptyStatement& NewEmptyStatement(const Punctuator& semi_colon);

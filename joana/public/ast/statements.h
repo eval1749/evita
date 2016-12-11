@@ -98,7 +98,7 @@ class JOANA_PUBLIC_EXPORT DoStatement : public Statement {
   Statement& statement() const;
 
  protected:
-  explicit DoStatement(const Name& do_keyword,
+  explicit DoStatement(const Name& keywod,
                        const Statement& statement,
                        const Expression& condition);
 

@@ -150,10 +150,10 @@ ContinueStatement& NodeFactory::NewContinueStatement(
   return *new (zone_) ContinueStatement(continue_keyword);
 }
 
-DoStatement& NodeFactory::NewDoStatement(const Name& do_keyword,
+DoStatement& NodeFactory::NewDoStatement(const Name& keywod,
                                          const Statement& statement,
                                          const Expression& condition) {
-  return *new (zone_) DoStatement(do_keyword, statement, condition);
+  return *new (zone_) DoStatement(keywod, statement, condition);
 }
 
 EmptyStatement& NodeFactory::NewEmptyStatement(const Punctuator& semi_colon) {

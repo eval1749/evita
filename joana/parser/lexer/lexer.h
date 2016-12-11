@@ -29,6 +29,7 @@ class Lexer final {
 
   // Returns source code location where |Lexer| reads.
   SourceCodeRange location() const;
+  const SourceCode& source_code() const;
 
   void Advance();
   // Returns true if |Lexer| has a token.
@@ -39,7 +40,6 @@ class Lexer final {
   enum class ErrorCode;
 
   ast::NodeFactory& node_factory() const;
-  const SourceCode& source_code() const;
 
   void AddError(const SourceCodeRange& range, ErrorCode error_code);
   void AddError(ErrorCode error_code);

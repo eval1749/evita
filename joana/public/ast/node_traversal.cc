@@ -105,8 +105,29 @@ NodeAncestors NodeTraversal::AncestorsOf(const Node& node) {
   return NodeAncestors(ParentOf(node));
 }
 
+Node& NodeTraversal::ChildAt(const ContainerNode& container, int index) {
+  DCHECK_GE(index, 0);
+  auto position = 0;
+  for (const auto& child : ChildrenOf(container)) {
+    if (position == index)
+      return const_cast<Node&>(child);
+    ++position;
+  }
+  NOTREACHED() << "Index " << index << " is too large for " << container;
+  return const_cast<ContainerNode&>(container);
+}
+
 NodeChildren NodeTraversal::ChildrenOf(const ContainerNode& container) {
   return NodeChildren(container);
+}
+
+int NodeTraversal::CountChildren(const ContainerNode& container) {
+  auto position = 0;
+  for (const auto& child : ChildrenOf(container)) {
+    static_cast<void>(child);
+    ++position;
+  }
+  return position;
 }
 
 Node* NodeTraversal::FirstChildOf(const ContainerNode& container) {

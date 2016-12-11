@@ -103,7 +103,9 @@ class JOANA_PUBLIC_EXPORT NodeTraversal final {
   ~NodeTraversal() = delete;
 
   static NodeAncestors AncestorsOf(const Node& container);
+  static Node& ChildAt(const ContainerNode& container, int index);
   static NodeChildren ChildrenOf(const ContainerNode& container);
+  static int CountChildren(const ContainerNode& container);
   static Node* FirstChildOf(const ContainerNode& node);
   static NodeAncestors InclusiveAncestorsOf(const Node& node);
   static Node* LastChildOf(const ContainerNode& container);

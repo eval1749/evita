@@ -64,11 +64,18 @@ std::string ParserTest::Parse(base::StringPiece script_text) {
     EXPECT_EQ(source, Parse(script_text)); \
   }
 
+TEST_F(ParserTest, BlockStatement) {
+  TEST_PARSER(
+      "{\n"
+      "  foo;\n"
+      "  bar;\n"
+      "}\n");
+}
+
 TEST_F(ParserTest, Bracket) {
   EXPECT_EQ(
-      "PASER_ERROR_EXPRESSION_NYI;\n"
-      "PASER_ERROR_EXPRESSION_NYI@0:1\n"
-      "PASER_ERROR_STATEMENT_EXPECT_SEMI_COLON@1:1\n",
+      "{\n}\n"
+      "PASER_ERROR_BRACKET_NOT_CLOSED@0:1\n",
       Parse("{"));
 }
 

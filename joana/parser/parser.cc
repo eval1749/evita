@@ -139,9 +139,12 @@ bool Parser::HasToken() const {
 }
 
 const ast::Node& Parser::Run() {
+  if (HasToken())
+    bracket_stack_->Feed(PeekToken());
   while (HasToken()) {
     auto& token = PeekToken();
     if (token.Is<ast::Comment>()) {
+      ast::NodeEditor().AppendChild(&root_, &ConsumeToken());
       Advance();
       continue;
     }

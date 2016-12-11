@@ -7,6 +7,7 @@
 #include "joana/parser/lexer/lexer.h"
 #include "joana/parser/parser_error_codes.h"
 #include "joana/public/ast/literals.h"
+#include "joana/public/ast/node_editor.h"
 #include "joana/public/ast/node_factory.h"
 #include "joana/public/ast/statements.h"
 #include "joana/public/ast/tokens.h"
@@ -38,19 +39,39 @@ ast::Statement& Parser::ParseStatement() {
   }
   if (token.Is<ast::Literal>())
     return ParseStatementExpression();
-  if (auto* punctator = token.TryAs<ast::Punctuator>()) {
-    if (punctator->kind() == ast::PunctuatorKind::SemiColon) {
-      Advance();
-      return node_factory().NewEmptyStatement(*punctator);
-    }
-    return ParseStatementExpression();
+  if (token == ast::PunctuatorKind::LeftBrace)
+    return ParseStatementBlock();
+  if (token == ast::PunctuatorKind::SemiColon) {
+    return node_factory().NewEmptyStatement(
+        ConsumeToken().As<ast::Punctuator>());
   }
-  Advance();
-  return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
+  return ParseStatementExpression();
 }
 
 ast::Statement& Parser::ParseStatementAsync() {
   return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
+}
+
+ast::Statement& Parser::ParseStatementBlock() {
+  auto& block =
+      node_factory().NewBlockStatement(ConsumeToken().As<ast::Punctuator>());
+  while (HasToken()) {
+    if (ConsumeTokenIf(ast::PunctuatorKind::RightBrace))
+      break;
+    auto& token = PeekToken();
+    if (token.Is<ast::Comment>()) {
+      ast::NodeEditor().AppendChild(&block, &ConsumeToken());
+      continue;
+    }
+    if (token.Is<ast::Invalid>()) {
+      // TODO(eval1749): We should skip tokens until good point to restart
+      // toplevel parsing.
+      Advance();
+      continue;
+    }
+    ast::NodeEditor().AppendChild(&block, &ParseStatement());
+  }
+  return block;
 }
 
 ast::Statement& Parser::ParseStatementBreak() {

@@ -152,7 +152,7 @@ void SimpleFormatter::VisitBlockStatement(ast::BlockStatement* node) {
   }
   --indent_;
   OutputIndent();
-  *ostream_ << '}' << std::endl;
+  *ostream_ << '}';
 }
 
 void SimpleFormatter::VisitEmptyStatement(ast::EmptyStatement* node) {

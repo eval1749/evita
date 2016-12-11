@@ -73,6 +73,7 @@ class Parser final {
   ast::Statement& ParseStatement();
   ast::Statement& ParseStatementAsync();
   ast::Statement& ParseStatementBreak();
+  ast::Statement& ParseStatementBlock();
   ast::Statement& ParseStatementConst();
   ast::Statement& ParseStatementContinue();
   ast::Statement& ParseStatementDo();

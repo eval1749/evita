@@ -74,24 +74,24 @@ ast::Name& ContinueStatement::label() const {
 }
 
 //
-// DoWhileStatement
+// DoStatement
 //
-DoWhileStatement::DoWhileStatement(const Name& do_keyword,
-                                   const Statement& statement,
-                                   const Expression& condition)
+DoStatement::DoStatement(const Name& do_keyword,
+                         const Statement& statement,
+                         const Expression& condition)
     : Statement(do_keyword.range()) {
   DCHECK_EQ(do_keyword, NameId::Do);
   NodeEditor().AppendChild(this, const_cast<Statement*>(&statement));
   NodeEditor().AppendChild(this, const_cast<Expression*>(&condition));
 }
 
-DoWhileStatement::~DoWhileStatement() = default;
+DoStatement::~DoStatement() = default;
 
-ast::Expression& DoWhileStatement::condition() const {
+ast::Expression& DoStatement::condition() const {
   return NodeTraversal::ChildAt(*this, 1).As<Expression>();
 }
 
-ast::Statement& DoWhileStatement::statement() const {
+ast::Statement& DoStatement::statement() const {
   return NodeTraversal::ChildAt(*this, 0).As<Statement>();
 }
 

@@ -60,9 +60,9 @@ class JOANA_PUBLIC_EXPORT NodeFactory final {
                                           const Name& label);
   ContinueStatement& NewContinueStatement(const Name& continue_keyword);
   ExpressionStatement& NewExpressionStatement(const Expression& expression);
-  DoWhileStatement& NewDoWhileStatement(const Name& do_keyword,
-                                        const Statement& statement,
-                                        const Expression& condition);
+  DoStatement& NewDoStatement(const Name& do_keyword,
+                              const Statement& statement,
+                              const Expression& condition);
   IfStatement& NewIfStatement(const Name& if_keyword,
                               const Expression& condition,
                               const Statement& then_clause,

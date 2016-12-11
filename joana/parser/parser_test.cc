@@ -103,7 +103,7 @@ TEST_F(ParserTest, ContinueStatement) {
       Parse("continue;"));
 }
 
-TEST_F(ParserTest, DoWhileStatement) {
+TEST_F(ParserTest, DoStatement) {
   TEST_PARSER(
       "do {\n"
       "  foo;\n"

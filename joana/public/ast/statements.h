@@ -86,24 +86,24 @@ class JOANA_PUBLIC_EXPORT ContinueStatement : public Statement {
 };
 
 //
-// DoWhileStatement
+// DoStatement
 //
-class JOANA_PUBLIC_EXPORT DoWhileStatement : public Statement {
-  DECLARE_CONCRETE_AST_NODE(DoWhileStatement, Statement);
+class JOANA_PUBLIC_EXPORT DoStatement : public Statement {
+  DECLARE_CONCRETE_AST_NODE(DoStatement, Statement);
 
  public:
-  ~DoWhileStatement() override;
+  ~DoStatement() override;
 
   Expression& condition() const;
   Statement& statement() const;
 
  protected:
-  explicit DoWhileStatement(const Name& do_keyword,
-                            const Statement& statement,
-                            const Expression& condition);
+  explicit DoStatement(const Name& do_keyword,
+                       const Statement& statement,
+                       const Expression& condition);
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(DoWhileStatement);
+  DISALLOW_COPY_AND_ASSIGN(DoStatement);
 };
 
 //

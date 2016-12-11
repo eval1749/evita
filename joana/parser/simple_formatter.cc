@@ -169,7 +169,7 @@ void SimpleFormatter::VisitContinueStatement(ast::ContinueStatement* node) {
   *ostream_ << ';';
 }
 
-void SimpleFormatter::VisitDoWhileStatement(ast::DoWhileStatement* node) {
+void SimpleFormatter::VisitDoStatement(ast::DoStatement* node) {
   *ostream_ << "do";
   if (FormatChildStatement(node->statement()))
     *ostream_ << ' ';

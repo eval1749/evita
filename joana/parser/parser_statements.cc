@@ -236,7 +236,7 @@ ast::Statement& Parser::ParseStatementDo() {
               ErrorCode::ERROR_STATEMENT_DO_EXPECT_RPAREN);
   ExpectToken(ast::PunctuatorKind::SemiColon,
               ErrorCode::ERROR_STATEMENT_DO_EXPECT_SEMI_COLON);
-  return node_factory().NewDoWhileStatement(do_keyword, statement, condition);
+  return node_factory().NewDoStatement(do_keyword, statement, condition);
 }
 
 ast::Statement& Parser::ParseStatementExpression() {

@@ -184,6 +184,27 @@ class JOANA_PUBLIC_EXPORT InvalidStatement : public Statement {
   DISALLOW_COPY_AND_ASSIGN(InvalidStatement);
 };
 
+//
+// WhileStatement
+//
+class JOANA_PUBLIC_EXPORT WhileStatement : public Statement {
+  DECLARE_CONCRETE_AST_NODE(WhileStatement, Statement);
+
+ public:
+  ~WhileStatement() override;
+
+  Expression& condition() const;
+  Statement& statement() const;
+
+ protected:
+  explicit WhileStatement(const Name& while_keyword,
+                          const Expression& condition,
+                          const Statement& statement);
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(WhileStatement);
+};
+
 }  // namespace ast
 }  // namespace joana
 

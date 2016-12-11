@@ -174,5 +174,27 @@ Statement::Statement(const SourceCodeRange& range) : ContainerNode(range) {}
 
 Statement::~Statement() = default;
 
+//
+// WhileStatement
+//
+WhileStatement::WhileStatement(const Name& while_keyword,
+                               const Expression& condition,
+                               const Statement& statement)
+    : Statement(while_keyword.range()) {
+  DCHECK_EQ(while_keyword, NameId::While);
+  NodeEditor().AppendChild(this, const_cast<Expression*>(&condition));
+  NodeEditor().AppendChild(this, const_cast<Statement*>(&statement));
+}
+
+WhileStatement::~WhileStatement() = default;
+
+ast::Expression& WhileStatement::condition() const {
+  return NodeTraversal::ChildAt(*this, 0).As<Expression>();
+}
+
+ast::Statement& WhileStatement::statement() const {
+  return NodeTraversal::ChildAt(*this, 1).As<Statement>();
+}
+
 }  // namespace ast
 }  // namespace joana

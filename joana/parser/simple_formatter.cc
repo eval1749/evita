@@ -214,5 +214,14 @@ void SimpleFormatter::VisitInvalidStatement(ast::InvalidStatement* node) {
     *ostream_ << string;
 }
 
+void SimpleFormatter::VisitWhileStatement(ast::WhileStatement* node) {
+  *ostream_ << "while (";
+  Format(node->condition());
+  *ostream_ << ')';
+  if (FormatChildStatement(node->statement()))
+    return;
+  *ostream_ << ';';
+}
+
 }  // namespace internal
 }  // namespace joana

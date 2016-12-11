@@ -72,6 +72,9 @@ class JOANA_PUBLIC_EXPORT NodeFactory final {
                               const Statement& then_clause);
   InvalidStatement& NewInvalidStatement(const Node& node, int error_code);
   EmptyStatement& NewEmptyStatement(const Punctuator& semi_colon);
+  WhileStatement& NewWhileStatement(const Name& while_keyword,
+                                    const Expression& condition,
+                                    const Statement& statement);
 
  private:
   class NameIdMap;

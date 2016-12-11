@@ -185,5 +185,11 @@ InvalidStatement& NodeFactory::NewInvalidStatement(const Node& node,
   return *new (zone_) InvalidStatement(node, error_code);
 }
 
+WhileStatement& NodeFactory::NewWhileStatement(const Name& while_keyword,
+                                               const Expression& condition,
+                                               const Statement& statement) {
+  return *new (zone_) WhileStatement(while_keyword, condition, statement);
+}
+
 }  // namespace ast
 }  // namespace joana

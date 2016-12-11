@@ -49,16 +49,15 @@ ast::Name& BreakStatement::label() const {
 //
 // ContinueStatement
 //
-ContinueStatement::ContinueStatement(const Name& continue_keyword,
-                                     const Name& label)
-    : ContinueStatement(continue_keyword) {
+ContinueStatement::ContinueStatement(const Name& keywod, const Name& label)
+    : ContinueStatement(keywod) {
   DCHECK(!label.As<Name>().IsKeyword());
   NodeEditor().AppendChild(this, const_cast<Name*>(&label));
 }
 
-ContinueStatement::ContinueStatement(const Name& continue_keyword)
-    : Statement(continue_keyword.range()) {
-  DCHECK_EQ(continue_keyword, NameId::Continue);
+ContinueStatement::ContinueStatement(const Name& keywod)
+    : Statement(keywod.range()) {
+  DCHECK_EQ(keywod, NameId::Continue);
 }
 
 ContinueStatement::~ContinueStatement() = default;

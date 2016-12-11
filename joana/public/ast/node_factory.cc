@@ -139,15 +139,13 @@ BreakStatement& NodeFactory::NewBreakStatement(const Name& keywod) {
   return *new (zone_) BreakStatement(keywod);
 }
 
-ContinueStatement& NodeFactory::NewContinueStatement(
-    const Name& continue_keyword,
-    const Name& label) {
-  return *new (zone_) ContinueStatement(continue_keyword, label);
+ContinueStatement& NodeFactory::NewContinueStatement(const Name& keywod,
+                                                     const Name& label) {
+  return *new (zone_) ContinueStatement(keywod, label);
 }
 
-ContinueStatement& NodeFactory::NewContinueStatement(
-    const Name& continue_keyword) {
-  return *new (zone_) ContinueStatement(continue_keyword);
+ContinueStatement& NodeFactory::NewContinueStatement(const Name& keywod) {
+  return *new (zone_) ContinueStatement(keywod);
 }
 
 DoStatement& NodeFactory::NewDoStatement(const Name& keywod,

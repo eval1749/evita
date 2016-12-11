@@ -78,8 +78,8 @@ class JOANA_PUBLIC_EXPORT ContinueStatement : public Statement {
   Name& label() const;
 
  protected:
-  ContinueStatement(const Name& continue_keyword, const Name& label);
-  explicit ContinueStatement(const Name& continue_keyword);
+  ContinueStatement(const Name& keywod, const Name& label);
+  explicit ContinueStatement(const Name& keywod);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(ContinueStatement);

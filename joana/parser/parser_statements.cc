@@ -350,7 +350,15 @@ ast::Statement& Parser::ParseStatementVar() {
 }
 
 ast::Statement& Parser::ParseStatementWhile() {
-  return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
+  auto& while_keyword = ConsumeToken().As<ast::Name>();
+  StatementScope while_scope(this, while_keyword);
+  ExpectToken(ast::PunctuatorKind::LeftParenthesis,
+              ErrorCode::ERROR_STATEMENT_DO_EXPECT_LPAREN);
+  auto& condition = ParseExpression();
+  ExpectToken(ast::PunctuatorKind::RightParenthesis,
+              ErrorCode::ERROR_STATEMENT_DO_EXPECT_RPAREN);
+  auto& statement = ParseStatement();
+  return node_factory().NewWhileStatement(while_keyword, condition, statement);
 }
 
 ast::Statement& Parser::ParseStatementYield() {

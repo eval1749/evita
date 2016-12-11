@@ -132,5 +132,12 @@ TEST_F(ParserTest, IfStatement) {
       "  baz;\n");
 }
 
+TEST_F(ParserTest, WhileStatement) {
+  TEST_PARSER(
+      "while (foo) {\n"
+      "  bar;\n"
+      "}\n");
+}
+
 }  // namespace internal
 }  // namespace joana

@@ -2,7 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <ostream>
+
 #include "joana/parser/simple_error_sink.h"
+
+#include "joana/public/ast/error_codes.h"
 
 namespace joana {
 namespace internal {
@@ -22,6 +26,20 @@ SimpleErrorSink::~SimpleErrorSink() = default;
 
 void SimpleErrorSink::Reset() {
   errors_.clear();
+}
+
+std::ostream& operator<<(std::ostream& ostream,
+                         const SimpleErrorSink::Error& error) {
+  ostream << ast::ErrorStringOf(error.error_code()) << '@'
+          << error.range().start() << ':' << error.range().end();
+  return ostream;
+}
+
+std::ostream& operator<<(std::ostream& ostream,
+                         const SimpleErrorSink::Error* error) {
+  if (!error)
+    return ostream << "(null)";
+  return ostream << *error;
 }
 
 }  // namespace internal

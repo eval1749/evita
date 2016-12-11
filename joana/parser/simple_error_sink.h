@@ -5,6 +5,7 @@
 #ifndef JOANA_PARSER_SIMPLE_ERROR_SINK_H_
 #define JOANA_PARSER_SIMPLE_ERROR_SINK_H_
 
+#include <iosfwd>
 #include <vector>
 
 #include "base/macros.h"
@@ -49,6 +50,11 @@ class SimpleErrorSink final : public ErrorSink {
 
   DISALLOW_COPY_AND_ASSIGN(SimpleErrorSink);
 };
+
+std::ostream& operator<<(std::ostream& ostream,
+                         const SimpleErrorSink::Error& error);
+std::ostream& operator<<(std::ostream& ostream,
+                         const SimpleErrorSink::Error* error);
 
 }  // namespace internal
 }  // namespace joana

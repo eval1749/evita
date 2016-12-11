@@ -59,10 +59,11 @@ class JOANA_PUBLIC_EXPORT NodeFactory final {
   ContinueStatement& NewContinueStatement(const Name& continue_keyword,
                                           const Name& label);
   ContinueStatement& NewContinueStatement(const Name& continue_keyword);
-  ExpressionStatement& NewExpressionStatement(const Expression& expression);
   DoStatement& NewDoStatement(const Name& do_keyword,
                               const Statement& statement,
                               const Expression& condition);
+  EmptyStatement& NewEmptyStatement(const Punctuator& semi_colon);
+  ExpressionStatement& NewExpressionStatement(const Expression& expression);
   IfStatement& NewIfStatement(const Name& if_keyword,
                               const Expression& condition,
                               const Statement& then_clause,
@@ -71,7 +72,6 @@ class JOANA_PUBLIC_EXPORT NodeFactory final {
                               const Expression& condition,
                               const Statement& then_clause);
   InvalidStatement& NewInvalidStatement(const Node& node, int error_code);
-  EmptyStatement& NewEmptyStatement(const Punctuator& semi_colon);
   WhileStatement& NewWhileStatement(const Name& while_keyword,
                                     const Expression& condition,
                                     const Statement& statement);

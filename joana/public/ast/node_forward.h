@@ -18,7 +18,8 @@ namespace ast {
 
 #define FOR_EACH_AST_EXPRESSION(V) \
   V(InvalidExpression)             \
-  V(LiteralExpression)
+  V(LiteralExpression)             \
+  V(ReferenceExpression)
 
 #define FOR_EACH_AST_LITERAL(V) \
   V(BooleanLiteral)             \

@@ -7,6 +7,7 @@
 #include "joana/public/ast/literals.h"
 #include "joana/public/ast/node_editor.h"
 #include "joana/public/ast/node_traversal.h"
+#include "joana/public/ast/tokens.h"
 
 namespace joana {
 namespace ast {
@@ -40,6 +41,23 @@ const Literal& LiteralExpression::literal() const {
   auto* const literal = NodeTraversal::FirstChildOf(*this);
   DCHECK(literal);
   return literal->As<Literal>();
+}
+
+//
+// ReferenceExpression
+//
+ReferenceExpression::ReferenceExpression(const Name& name)
+    : Expression(name.range()) {
+  DCHECK(!name.IsKeyword()) << name;
+  NodeEditor().AppendChild(this, const_cast<Name*>(&name));
+}
+
+ReferenceExpression::~ReferenceExpression() = default;
+
+const Name& ReferenceExpression::name() const {
+  auto* const child = NodeTraversal::FirstChildOf(*this);
+  DCHECK(child);
+  return child->As<Name>();
 }
 
 }  // namespace ast

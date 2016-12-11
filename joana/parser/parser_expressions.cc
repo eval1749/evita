@@ -38,7 +38,7 @@ ast::Expression& Parser::ParseExpression() {
 }
 
 ast::Expression& Parser::ParseExpressionName() {
-  const auto& name = *GetToken().TryAs<ast::Name>();
+  const auto& name = GetToken().As<ast::Name>();
   switch (static_cast<ast::NameId>(name.number())) {
     case ast::NameId::False:
       Advance();
@@ -51,7 +51,10 @@ ast::Expression& Parser::ParseExpressionName() {
       Advance();
       return NewLiteralExpression(node_factory().NewBooleanLiteral(name, true));
   }
-  return NewInvalidExpression(name, ErrorCode::ERROR_EXPRESSION_NYI);
+  Advance();
+  if (name.IsKeyword())
+    return NewInvalidExpression(name, ErrorCode::ERROR_EXPRESSION_NYI);
+  return node_factory().NewReferenceExpression(name);
 }
 
 }  // namespace internal

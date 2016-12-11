@@ -13,6 +13,9 @@ namespace ast {
 
 class Literal;
 
+//
+// Expression is a base class of expression nodes.
+//
 class JOANA_PUBLIC_EXPORT Expression : public ContainerNode {
   DECLARE_ABSTRACT_AST_NODE(Expression, ContainerNode);
 
@@ -60,6 +63,23 @@ class JOANA_PUBLIC_EXPORT LiteralExpression : public Expression {
   explicit LiteralExpression(const Literal& literal);
 
   DISALLOW_COPY_AND_ASSIGN(LiteralExpression);
+};
+
+//
+// ReferenceExpression
+//
+class JOANA_PUBLIC_EXPORT ReferenceExpression : public Expression {
+  DECLARE_CONCRETE_AST_NODE(ReferenceExpression, Expression);
+
+ public:
+  ~ReferenceExpression() override;
+
+  const Name& name() const;
+
+ private:
+  explicit ReferenceExpression(const Name& name);
+
+  DISALLOW_COPY_AND_ASSIGN(ReferenceExpression);
 };
 
 }  // namespace ast

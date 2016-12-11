@@ -98,6 +98,10 @@ LiteralExpression& NodeFactory::NewLiteralExpression(const Literal& literal) {
   return *new (zone_) LiteralExpression(literal);
 }
 
+ReferenceExpression& NodeFactory::NewReferenceExpression(const Name& name) {
+  return *new (zone_) ReferenceExpression(name);
+}
+
 // Literals
 BooleanLiteral& NodeFactory::NewBooleanLiteral(const Name& name, bool value) {
   return *new (zone_) BooleanLiteral(name, value);

@@ -88,6 +88,10 @@ void SimpleFormatter::VisitLiteralExpression(ast::LiteralExpression* node) {
   OutputAsSourceCode(node->literal());
 }
 
+void SimpleFormatter::VisitReferenceExpression(ast::ReferenceExpression* node) {
+  OutputAsSourceCode(node->name());
+}
+
 // Statements
 void SimpleFormatter::VisitBlockStatement(ast::BlockStatement* node) {
   OutputIndent();

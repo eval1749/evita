@@ -37,6 +37,7 @@ class JOANA_PUBLIC_EXPORT NodeFactory final {
   // Expressions factory members
   InvalidExpression& NewInvalidExpression(const Node& node, int error_code);
   LiteralExpression& NewLiteralExpression(const Literal& literal);
+  ReferenceExpression& NewReferenceExpression(const Name& name);
 
   // Literals factory members
   BooleanLiteral& NewBooleanLiteral(const Name& name, bool value);

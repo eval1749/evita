@@ -15,11 +15,13 @@ class ContainerNode;
 class EditContext;
 class Expression;
 class Literal;
+enum class NameId;
 class Node;
 class NodeFactory;
 enum class PunctuatorKind;
 class Statement;
-}
+}  // namespace ast
+class SourceCode;
 class SourceCodeRange;
 
 namespace internal {
@@ -41,14 +43,19 @@ class Parser final {
   enum class ErrorCode;
 
   ast::NodeFactory& node_factory() const;
+  const SourceCode& source_code() const;
 
   void AddError(const ast::Node& token, ErrorCode error_code);
   void AddError(const SourceCodeRange& range, ErrorCode error_code);
 
   void Advance();
+  // Returns true if |Lexer| has a punctuator of |name_id| and advance to next
+  // token.
+  bool AdvanceIf(ast::NameId keyword_id);
   // Returns true if |Lexer| has a punctuator of |kind| and advance to next
   // token.
   bool AdvanceIf(ast::PunctuatorKind kind);
+  ast::Node& GetLastToken();
   ast::Node& GetToken();
   bool HasToken() const;
 
@@ -60,8 +67,7 @@ class Parser final {
   ast::Expression& ParseExpressionName();
 
   // Statements
-  ast::Statement& NewInvalidStatement(const ast::Node& node,
-                                      ErrorCode error_code);
+  ast::Statement& NewInvalidStatement(ErrorCode error_code);
   ast::Statement& ParseStatement();
   ast::Statement& ParseStatementAsync();
   ast::Statement& ParseStatementBreak();

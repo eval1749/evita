@@ -12,6 +12,7 @@
 #include "joana/public/ast/statements.h"
 #include "joana/public/ast/tokens.h"
 #include "joana/public/error_sink.h"
+#include "joana/public/source_code.h"
 
 namespace joana {
 namespace internal {
@@ -27,6 +28,10 @@ ast::NodeFactory& Parser::node_factory() const {
   return context_->node_factory();
 }
 
+const SourceCode& Parser::source_code() const {
+  return lexer_->source_code();
+}
+
 void Parser::AddError(const ast::Node& token, ErrorCode error_code) {
   AddError(token.range(), error_code);
 }
@@ -39,12 +44,19 @@ void Parser::Advance() {
   lexer_->Advance();
 }
 
+bool Parser::AdvanceIf(ast::NameId name_id) {
+  if (!HasToken())
+    return false;
+  if (GetToken() != name_id)
+    return false;
+  Advance();
+  return true;
+}
+
 bool Parser::AdvanceIf(ast::PunctuatorKind kind) {
   if (!HasToken())
     return false;
-  const auto& node = GetToken();
-  auto* const punctuator = node.TryAs<ast::Punctuator>();
-  if (!punctuator || punctuator->kind() != kind)
+  if (GetToken() != kind)
     return false;
   Advance();
   return true;

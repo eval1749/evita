@@ -10,14 +10,23 @@
 #include "joana/public/ast/node_factory.h"
 #include "joana/public/ast/statements.h"
 #include "joana/public/ast/tokens.h"
+#include "joana/public/source_code.h"
 
 namespace joana {
 namespace internal {
 
-ast::Statement& Parser::NewInvalidStatement(const ast::Node& node,
-                                            ErrorCode error_code) {
-  AddError(node, error_code);
-  return node_factory().NewInvalidStatement(node, static_cast<int>(error_code));
+ast::Statement& Parser::NewInvalidStatement(ErrorCode error_code) {
+  if (HasToken()) {
+    AddError(GetToken(), error_code);
+    return node_factory().NewInvalidStatement(GetToken(),
+                                              static_cast<int>(error_code));
+  }
+  auto& invalid = node_factory().NewInvalid(
+      source_code().end(),
+      static_cast<int>(ErrorCode::ERROR_STATEMENT_INVALID));
+  AddError(invalid, error_code);
+  return node_factory().NewInvalidStatement(invalid,
+                                            static_cast<int>(error_code));
 }
 
 ast::Statement& Parser::ParseStatement() {
@@ -37,27 +46,27 @@ ast::Statement& Parser::ParseStatement() {
     return ParseStatementExpression();
   }
   Advance();
-  return NewInvalidStatement(token, ErrorCode::ERROR_STATEMENT_INVALID);
+  return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
 }
 
 ast::Statement& Parser::ParseStatementAsync() {
-  return NewInvalidStatement(GetToken(), ErrorCode::ERROR_STATEMENT_INVALID);
+  return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
 }
 
 ast::Statement& Parser::ParseStatementBreak() {
-  return NewInvalidStatement(GetToken(), ErrorCode::ERROR_STATEMENT_INVALID);
+  return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
 }
 
 ast::Statement& Parser::ParseStatementConst() {
-  return NewInvalidStatement(GetToken(), ErrorCode::ERROR_STATEMENT_INVALID);
+  return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
 }
 
 ast::Statement& Parser::ParseStatementContinue() {
-  return NewInvalidStatement(GetToken(), ErrorCode::ERROR_STATEMENT_INVALID);
+  return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
 }
 
 ast::Statement& Parser::ParseStatementDo() {
-  return NewInvalidStatement(GetToken(), ErrorCode::ERROR_STATEMENT_INVALID);
+  return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
 }
 
 ast::Statement& Parser::ParseStatementExpression() {
@@ -69,42 +78,62 @@ ast::Statement& Parser::ParseStatementExpression() {
 }
 
 ast::Statement& Parser::ParseStatementFor() {
-  return NewInvalidStatement(GetToken(), ErrorCode::ERROR_STATEMENT_INVALID);
+  return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
 }
 
 ast::Statement& Parser::ParseStatementFunction() {
-  return NewInvalidStatement(GetToken(), ErrorCode::ERROR_STATEMENT_INVALID);
+  return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
 }
 
 ast::Statement& Parser::ParseStatementIf() {
-  return NewInvalidStatement(GetToken(), ErrorCode::ERROR_STATEMENT_INVALID);
+  auto& if_keyword = GetToken().As<ast::Name>();
+  DCHECK_EQ(if_keyword, ast::NameId::If);
+  Advance();
+  if (!AdvanceIf(ast::PunctuatorKind::LeftParenthesis)) {
+    Advance();
+    return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_IF_EXPECT_LPAREN);
+  }
+  if (!HasToken())
+    return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
+  auto& condition = ParseExpression();
+  if (!AdvanceIf(ast::PunctuatorKind::RightParenthesis)) {
+    Advance();
+    return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_IF_EXPECT_RPAREN);
+  }
+  if (!HasToken())
+    return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
+  auto& then_clause = ParseStatement();
+  if (!AdvanceIf(ast::NameId::Else))
+    return node_factory().NewIfStatement(if_keyword, condition, then_clause);
+  auto& else_clause = ParseStatement();
+  return node_factory().NewIfStatement(if_keyword, condition, then_clause,
+                                       else_clause);
 }
 
 ast::Statement& Parser::ParseStatementKeyword() {
   const auto& keyword = GetToken().As<ast::Name>();
-  DCHECK(keyword.IsKeyword());
+  DCHECK(keyword.IsKeyword()) << keyword;
   switch (static_cast<ast::NameId>(keyword.number())) {
     case ast::NameId::Async:
       return ParseStatementAsync();
     case ast::NameId::Await:
-      return NewInvalidStatement(keyword, ErrorCode::ERROR_STATEMENT_AWAIT);
+      return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_AWAIT);
     case ast::NameId::Break:
       return ParseStatementBreak();
     case ast::NameId::Case:
-      return NewInvalidStatement(keyword, ErrorCode::ERROR_STATEMENT_CASE);
+      return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_CASE);
     case ast::NameId::Continue:
       return ParseStatementContinue();
     case ast::NameId::Const:
       return ParseStatementConst();
     case ast::NameId::Debugger:
-      return NewInvalidStatement(keyword,
-                                 ErrorCode::ERROR_STATEMENT_RESERVED_WORD);
+      return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_RESERVED_WORD);
     case ast::NameId::Do:
       return ParseStatementDo();
     case ast::NameId::Else:
-      return NewInvalidStatement(keyword, ErrorCode::ERROR_STATEMENT_ELSE);
+      return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_ELSE);
     case ast::NameId::Finally:
-      return NewInvalidStatement(keyword, ErrorCode::ERROR_STATEMENT_FINALLY);
+      return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_FINALLY);
     case ast::NameId::For:
       return ParseStatementFor();
     case ast::NameId::Function:
@@ -135,38 +164,37 @@ ast::Statement& Parser::ParseStatementKeyword() {
     case ast::NameId::Public:
     case ast::NameId::Static:
     case ast::NameId::With:
-      return NewInvalidStatement(keyword,
-                                 ErrorCode::ERROR_STATEMENT_RESERVED_WORD);
+      return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_RESERVED_WORD);
   }
   return ParseStatementExpression();
 }
 
 ast::Statement& Parser::ParseStatementLet() {
-  return NewInvalidStatement(GetToken(), ErrorCode::ERROR_STATEMENT_INVALID);
+  return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
 }
 
 ast::Statement& Parser::ParseStatementReturn() {
-  return NewInvalidStatement(GetToken(), ErrorCode::ERROR_STATEMENT_INVALID);
+  return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
 }
 
 ast::Statement& Parser::ParseStatementSwitch() {
-  return NewInvalidStatement(GetToken(), ErrorCode::ERROR_STATEMENT_INVALID);
+  return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
 }
 
 ast::Statement& Parser::ParseStatementThrow() {
-  return NewInvalidStatement(GetToken(), ErrorCode::ERROR_STATEMENT_INVALID);
+  return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
 }
 
 ast::Statement& Parser::ParseStatementVar() {
-  return NewInvalidStatement(GetToken(), ErrorCode::ERROR_STATEMENT_INVALID);
+  return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
 }
 
 ast::Statement& Parser::ParseStatementWhile() {
-  return NewInvalidStatement(GetToken(), ErrorCode::ERROR_STATEMENT_INVALID);
+  return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
 }
 
 ast::Statement& Parser::ParseStatementYield() {
-  return NewInvalidStatement(GetToken(), ErrorCode::ERROR_STATEMENT_INVALID);
+  return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
 }
 
 }  // namespace internal

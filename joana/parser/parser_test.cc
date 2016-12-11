@@ -73,5 +73,16 @@ TEST_F(ParserTest, ExpressionStatement) {
   TEST_PARSER("true;\n");
 }
 
+TEST_F(ParserTest, IfStatement) {
+  TEST_PARSER(
+      "if (foo)\n"
+      "  bar;\n");
+  TEST_PARSER(
+      "if (foo)\n"
+      "  bar;\n"
+      "else\n"
+      "  baz;\n");
+}
+
 }  // namespace internal
 }  // namespace joana

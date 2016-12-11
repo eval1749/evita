@@ -39,6 +39,8 @@ namespace ast {
   V(STATEMENT, EXPECT_SEMI_COLON)       \
   V(STATEMENT, EXTENDS)                 \
   V(STATEMENT, FINALLY)                 \
+  V(STATEMENT, IF_EXPECT_LPAREN)        \
+  V(STATEMENT, IF_EXPECT_RPAREN)        \
   V(STATEMENT, INVALID)                 \
   V(STATEMENT, RESERVED_WORD)           \
   V(STATEMENT, YIELD)

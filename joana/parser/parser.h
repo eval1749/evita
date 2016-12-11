@@ -59,6 +59,7 @@ class Parser final {
   // Returns true if |Lexer| has a punctuator of |kind| and advance to next
   // token.
   bool ConsumeTokenIf(ast::PunctuatorKind kind);
+  void ExpectToken(ast::PunctuatorKind kind, ErrorCode error_code);
   ast::Node& GetLastToken();
   ast::Node& PeekToken();
   bool HasToken() const;
@@ -70,6 +71,7 @@ class Parser final {
   ast::Expression& ParseExpressionName();
 
   // Statements
+  bool CanUseBreak() const;
   ast::Statement& NewInvalidStatement(ErrorCode error_code);
   ast::Statement& ParseStatement();
   ast::Statement& ParseStatementAsync();

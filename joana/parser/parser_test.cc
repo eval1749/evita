@@ -79,6 +79,18 @@ TEST_F(ParserTest, Bracket) {
       Parse("{"));
 }
 
+TEST_F(ParserTest, BreakStatement) {
+  TEST_PARSER(
+      "do {\n"
+      "  break;\n"
+      "} while (bar);\n");
+
+  EXPECT_EQ(
+      "break;\n"
+      "PASER_ERROR_STATEMENT_BREAK_BAD_PLACE@0:5\n",
+      Parse("break;"));
+}
+
 TEST_F(ParserTest, DoWhileStatement) {
   TEST_PARSER(
       "do {\n"

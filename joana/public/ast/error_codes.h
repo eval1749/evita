@@ -36,7 +36,9 @@ namespace ast {
   V(EXPRESSION, PARENTHESIS_NOT_CLSOED) \
   V(STATEMENT, AWAIT)                   \
   V(STATEMENT, BRACE_NOT_CLSOED)        \
-  V(STATEMENT, BREAK)                   \
+  V(STATEMENT, BREAK_BAD_PLACE)         \
+  V(STATEMENT, BREAK_NOT_LABEL)         \
+  V(STATEMENT, BREAK_SEMI_COLON)        \
   V(STATEMENT, CASE)                    \
   V(STATEMENT, CATCH)                   \
   V(STATEMENT, CONTINUE)                \

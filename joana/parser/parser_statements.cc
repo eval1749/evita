@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <iterator>
+
 #include "joana/parser/parser.h"
 
 #include "joana/parser/lexer/lexer.h"
@@ -15,15 +17,75 @@
 namespace joana {
 namespace internal {
 
+namespace {
+
+bool IsLoopKeyword(const ast::Name& keyword) {
+  return keyword == ast::NameId::Do || keyword == ast::NameId::For ||
+         keyword == ast::NameId::While;
+}
+
+}  // namespace
+
 //
 // StatementScope
 //
 class Parser::StatementScope final {
  public:
+  class Scopes final {
+   public:
+    class Iterator final
+        : public std::iterator<std::input_iterator_tag, StatementScope> {
+     public:
+      Iterator(const Iterator& other)
+          : owner_(other.owner_), scope_(other.scope_) {}
+
+      ~Iterator() = default;
+
+      reference operator*() const {
+        DCHECK(scope_);
+        return *scope_;
+      }
+
+      Iterator& operator++() {
+        scope_ = scope_->outer_;
+        return *this;
+      }
+
+      bool operator==(const Iterator& other) const {
+        DCHECK_EQ(owner_, other.owner_);
+        return scope_ == other.scope_;
+      }
+
+      bool operator!=(const Iterator& other) const {
+        return !operator==(other);
+      }
+
+     private:
+      friend class Scopes;
+
+      Iterator(const Scopes* owner, StatementScope* scope)
+          : owner_(owner), scope_(scope) {}
+
+      const Scopes* owner_;
+      StatementScope* scope_;
+    };
+
+    explicit Scopes(StatementScope* scope) : start_(scope) {}
+    Scopes(const Scopes& other) : start_(other.start_) {}
+    ~Scopes() = default;
+
+    Iterator begin() { return Iterator(this, start_); }
+    Iterator end() { return Iterator(this, nullptr); }
+
+   private:
+    StatementScope* start_;
+  };
+
   StatementScope(Parser* parser, const ast::Node& keyword);
   ~StatementScope();
 
   ast::Name& keyword() const { return *keyword_; }
+  static Scopes ScopesOf(StatementScope* start) { return Scopes(start); }
 
  private:
   ast::Name* keyword_;
@@ -38,6 +100,7 @@ Parser::StatementScope::StatementScope(Parser* parser, const ast::Node& keyword)
       outer_(parser->statement_scope_),
       parser_(parser) {
   DCHECK(keyword.As<ast::Name>().IsKeyword()) << keyword;
+  parser_->statement_scope_ = this;
 }
 
 Parser::StatementScope::~StatementScope() {
@@ -47,6 +110,15 @@ Parser::StatementScope::~StatementScope() {
 //
 // Functions for parsing statements
 //
+bool Parser::CanUseBreak() const {
+  for (const auto& scope : StatementScope::ScopesOf(statement_scope_)) {
+    auto& keyword = scope.keyword();
+    if (IsLoopKeyword(keyword) || keyword == ast::NameId::Switch)
+      return true;
+  }
+  return false;
+}
+
 ast::Statement& Parser::NewInvalidStatement(ErrorCode error_code) {
   auto& token = ComputeInvalidToken(error_code);
   AddError(token, error_code);
@@ -101,7 +173,20 @@ ast::Statement& Parser::ParseStatementBlock() {
 }
 
 ast::Statement& Parser::ParseStatementBreak() {
-  return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
+  auto& break_keyword = ConsumeToken().As<ast::Name>();
+  if (!CanUseBreak())
+    AddError(break_keyword, ErrorCode::ERROR_STATEMENT_BREAK_BAD_PLACE);
+  if (!HasToken())
+    return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
+  if (ConsumeTokenIf(ast::PunctuatorKind::SemiColon))
+    return node_factory().NewBreakStatement(break_keyword);
+  if (!PeekToken().Is<ast::Name>())
+    AddError(PeekToken(), ErrorCode::ERROR_STATEMENT_BREAK_NOT_LABEL);
+  auto& label = ConsumeToken().As<ast::Name>();
+  ExpectToken(ast::PunctuatorKind::SemiColon,
+              ErrorCode::ERROR_STATEMENT_BREAK_SEMI_COLON);
+  // TODO(eval1749): Find label for |break| statement
+  return node_factory().NewBreakStatement(break_keyword, label);
 }
 
 ast::Statement& Parser::ParseStatementConst() {

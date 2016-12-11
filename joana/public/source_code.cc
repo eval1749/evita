@@ -14,12 +14,20 @@ SourceCode::SourceCode(const base::FilePath& file_path,
 
 SourceCode::~SourceCode() = default;
 
+SourceCodeRange SourceCode::end() const {
+  return SourceCodeRange(*this, size(), size());
+}
+
 SourceCodeRange SourceCode::range() const {
   return SourceCodeRange(*this, 0, size());
 }
 
 int SourceCode::size() const {
   return static_cast<int>(file_contents_.size());
+}
+
+SourceCodeRange SourceCode::start() const {
+  return SourceCodeRange(*this, 0, 0);
 }
 
 base::char16 SourceCode::GetChar(int offset) const {

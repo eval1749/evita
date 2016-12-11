@@ -26,7 +26,7 @@ ast::Expression& Parser::NewLiteralExpression(const ast::Literal& literal) {
 }
 
 ast::Expression& Parser::ParseExpression() {
-  const auto& token = GetToken();
+  const auto& token = PeekToken();
   if (auto* name = token.TryAs<ast::Name>())
     return ParseExpressionName();
   if (auto* punctator = token.TryAs<ast::Punctuator>()) {
@@ -38,7 +38,7 @@ ast::Expression& Parser::ParseExpression() {
 }
 
 ast::Expression& Parser::ParseExpressionName() {
-  const auto& name = GetToken().As<ast::Name>();
+  const auto& name = PeekToken().As<ast::Name>();
   switch (static_cast<ast::NameId>(name.number())) {
     case ast::NameId::False:
       Advance();

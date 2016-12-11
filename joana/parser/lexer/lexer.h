@@ -34,7 +34,7 @@ class Lexer final {
   void Advance();
   // Returns true if |Lexer| has a token.
   bool HasToken() const { return current_token_ != nullptr; }
-  ast::Node& GetToken() const;
+  ast::Node& PeekToken() const;
 
  private:
   enum class ErrorCode;

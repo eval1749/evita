@@ -47,7 +47,7 @@ void Parser::Advance() {
 bool Parser::AdvanceIf(ast::NameId name_id) {
   if (!HasToken())
     return false;
-  if (GetToken() != name_id)
+  if (PeekToken() != name_id)
     return false;
   Advance();
   return true;
@@ -56,14 +56,14 @@ bool Parser::AdvanceIf(ast::NameId name_id) {
 bool Parser::AdvanceIf(ast::PunctuatorKind kind) {
   if (!HasToken())
     return false;
-  if (GetToken() != kind)
+  if (PeekToken() != kind)
     return false;
   Advance();
   return true;
 }
 
-ast::Node& Parser::GetToken() {
-  return lexer_->GetToken();
+ast::Node& Parser::PeekToken() {
+  return lexer_->PeekToken();
 }
 
 bool Parser::HasToken() const {
@@ -72,7 +72,7 @@ bool Parser::HasToken() const {
 
 const ast::Node& Parser::Run() {
   while (HasToken()) {
-    auto& token = GetToken();
+    auto& token = PeekToken();
     if (token.Is<ast::Comment>()) {
       Advance();
       continue;

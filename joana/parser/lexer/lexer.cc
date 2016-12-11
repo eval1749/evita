@@ -134,7 +134,7 @@ void Lexer::Advance() {
   current_token_ = NextToken();
 }
 
-ast::Node& Lexer::GetToken() const {
+ast::Node& Lexer::PeekToken() const {
   DCHECK(current_token_);
   return *current_token_;
 }

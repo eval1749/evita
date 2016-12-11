@@ -56,7 +56,7 @@ class Parser final {
   // token.
   bool AdvanceIf(ast::PunctuatorKind kind);
   ast::Node& GetLastToken();
-  ast::Node& GetToken();
+  ast::Node& PeekToken();
   bool HasToken() const;
 
   // Expressions

@@ -17,8 +17,8 @@ namespace internal {
 
 ast::Statement& Parser::NewInvalidStatement(ErrorCode error_code) {
   if (HasToken()) {
-    AddError(GetToken(), error_code);
-    return node_factory().NewInvalidStatement(GetToken(),
+    AddError(PeekToken(), error_code);
+    return node_factory().NewInvalidStatement(PeekToken(),
                                               static_cast<int>(error_code));
   }
   auto& invalid = node_factory().NewInvalid(
@@ -30,7 +30,7 @@ ast::Statement& Parser::NewInvalidStatement(ErrorCode error_code) {
 }
 
 ast::Statement& Parser::ParseStatement() {
-  const auto& token = GetToken();
+  const auto& token = PeekToken();
   if (auto* name = token.TryAs<ast::Name>()) {
     if (name->IsKeyword())
       return ParseStatementKeyword();
@@ -86,7 +86,7 @@ ast::Statement& Parser::ParseStatementFunction() {
 }
 
 ast::Statement& Parser::ParseStatementIf() {
-  auto& if_keyword = GetToken().As<ast::Name>();
+  auto& if_keyword = PeekToken().As<ast::Name>();
   DCHECK_EQ(if_keyword, ast::NameId::If);
   Advance();
   if (!AdvanceIf(ast::PunctuatorKind::LeftParenthesis)) {
@@ -111,7 +111,7 @@ ast::Statement& Parser::ParseStatementIf() {
 }
 
 ast::Statement& Parser::ParseStatementKeyword() {
-  const auto& keyword = GetToken().As<ast::Name>();
+  const auto& keyword = PeekToken().As<ast::Name>();
   DCHECK(keyword.IsKeyword()) << keyword;
   switch (static_cast<ast::NameId>(keyword.number())) {
     case ast::NameId::Async:

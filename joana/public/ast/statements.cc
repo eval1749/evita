@@ -22,6 +22,34 @@ BlockStatement::BlockStatement(const Punctuator& semi_colon)
 
 BlockStatement::~BlockStatement() = default;
 
+//
+// BreakStatement
+//
+BreakStatement::BreakStatement(const Name& break_keyword, const Name& label)
+    : BreakStatement(break_keyword) {
+  DCHECK(!label.As<Name>().IsKeyword());
+  NodeEditor().AppendChild(this, const_cast<Name*>(&label));
+}
+
+BreakStatement::BreakStatement(const Name& break_keyword)
+    : Statement(break_keyword.range()) {
+  DCHECK_EQ(break_keyword, NameId::Break);
+}
+
+BreakStatement::~BreakStatement() = default;
+
+bool BreakStatement::has_label() const {
+  return NodeTraversal::FirstChildOf(*this) != nullptr;
+}
+
+ast::Name& BreakStatement::label() const {
+  DCHECK(has_label()) << *this;
+  return NodeTraversal::FirstChildOf(*this)->As<Name>();
+}
+
+//
+// DoWhileStatement
+//
 DoWhileStatement::DoWhileStatement(const Name& do_keyword,
                                    const Statement& statement,
                                    const Expression& condition)

@@ -155,6 +155,13 @@ void SimpleFormatter::VisitBlockStatement(ast::BlockStatement* node) {
   *ostream_ << '}';
 }
 
+void SimpleFormatter::VisitBreakStatement(ast::BreakStatement* node) {
+  *ostream_ << "break";
+  if (node->has_label())
+    *ostream_ << ' ' << node->label();
+  *ostream_ << ';';
+}
+
 void SimpleFormatter::VisitDoWhileStatement(ast::DoWhileStatement* node) {
   *ostream_ << "do";
   if (FormatChildStatement(node->statement()))

@@ -46,6 +46,26 @@ class JOANA_PUBLIC_EXPORT BlockStatement : public Statement {
 };
 
 //
+// BreakStatement
+//
+class JOANA_PUBLIC_EXPORT BreakStatement : public Statement {
+  DECLARE_CONCRETE_AST_NODE(BreakStatement, Statement);
+
+ public:
+  ~BreakStatement() override;
+
+  bool has_label() const;
+  Name& label() const;
+
+ protected:
+  BreakStatement(const Name& break_keyword, const Name& label);
+  explicit BreakStatement(const Name& break_keyword);
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(BreakStatement);
+};
+
+//
 // DoWhileStatement
 //
 class JOANA_PUBLIC_EXPORT DoWhileStatement : public Statement {

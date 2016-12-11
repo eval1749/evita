@@ -15,6 +15,7 @@ component("public") {
     "ast/edit_context.h",
     "ast/edit_context_builder.cc",
     "ast/edit_context_builder.h",
+    "ast/error_codes.cc",
     "ast/error_codes.h",
     "ast/expressions.cc",
     "ast/expressions.h",

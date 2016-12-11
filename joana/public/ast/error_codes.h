@@ -5,6 +5,9 @@
 #ifndef JOANA_PUBLIC_AST_ERROR_CODES_H_
 #define JOANA_PUBLIC_AST_ERROR_CODES_H_
 
+#include "base/strings/string_piece.h"
+#include "joana/public/public_export.h"
+
 namespace joana {
 namespace ast {
 
@@ -26,6 +29,9 @@ namespace ast {
   V(STRING_LITERAL, NOT_CLOSED)
 
 #define FOR_EACH_PARSER_ERROR_CODE(V)   \
+  V(BRACKET, MISMATCHED)                \
+  V(BRACKET, NOT_CLOSED)                \
+  V(BRACKET, UNEXPECTED)                \
   V(EXPRESSION, BRACKET_NOT_CLSOED)     \
   V(EXPRESSION, PARENTHESIS_NOT_CLSOED) \
   V(EXPRESSION, NYI)                    \
@@ -47,6 +53,8 @@ namespace ast {
 
 const auto kLexerErrorCodeBase = 10000;
 const auto kParserErrorCodeBase = 20000;
+
+JOANA_PUBLIC_EXPORT base::StringPiece ErrorStringOf(int error_code);
 
 }  // namespace ast
 }  // namespace joana

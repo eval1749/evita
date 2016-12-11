@@ -42,6 +42,7 @@ class Parser final {
  private:
   class BracketStack;
   enum class ErrorCode;
+  class StatementScope;
 
   ast::NodeFactory& node_factory() const;
   const SourceCode& source_code() const;
@@ -50,6 +51,7 @@ class Parser final {
   void AddError(const SourceCodeRange& range, ErrorCode error_code);
 
   void Advance();
+  ast::Node& ComputeInvalidToken(ErrorCode error_code);
   ast::Node& ConsumeToken();
   // Returns true if |Lexer| has a punctuator of |name_id| and advance to next
   // token.
@@ -62,8 +64,7 @@ class Parser final {
   bool HasToken() const;
 
   // Expressions
-  ast::Expression& NewInvalidExpression(const ast::Node& node,
-                                        ErrorCode error_code);
+  ast::Expression& NewInvalidExpression(ErrorCode error_code);
   ast::Expression& NewLiteralExpression(const ast::Literal& literal);
   ast::Expression& ParseExpression();
   ast::Expression& ParseExpressionName();
@@ -94,6 +95,7 @@ class Parser final {
   ast::EditContext* const context_;
   std::unique_ptr<Lexer> lexer_;
   ast::ContainerNode& root_;
+  StatementScope* statement_scope_ = nullptr;
 
   DISALLOW_COPY_AND_ASSIGN(Parser);
 };

@@ -11,26 +11,52 @@
 #include "joana/public/ast/node_factory.h"
 #include "joana/public/ast/statements.h"
 #include "joana/public/ast/tokens.h"
-#include "joana/public/source_code.h"
 
 namespace joana {
 namespace internal {
 
+//
+// StatementScope
+//
+class Parser::StatementScope final {
+ public:
+  StatementScope(Parser* parser, const ast::Node& keyword);
+  ~StatementScope();
+
+  ast::Name& keyword() const { return *keyword_; }
+
+ private:
+  ast::Name* keyword_;
+  StatementScope* const outer_;
+  Parser* const parser_;
+
+  DISALLOW_COPY_AND_ASSIGN(StatementScope);
+};
+
+Parser::StatementScope::StatementScope(Parser* parser, const ast::Node& keyword)
+    : keyword_(const_cast<ast::Name*>(&keyword.As<ast::Name>())),
+      outer_(parser->statement_scope_),
+      parser_(parser) {
+  DCHECK(keyword.As<ast::Name>().IsKeyword()) << keyword;
+}
+
+Parser::StatementScope::~StatementScope() {
+  parser_->statement_scope_ = outer_;
+}
+
+//
+// Functions for parsing statements
+//
 ast::Statement& Parser::NewInvalidStatement(ErrorCode error_code) {
-  if (HasToken()) {
-    AddError(PeekToken(), error_code);
-    return node_factory().NewInvalidStatement(PeekToken(),
-                                              static_cast<int>(error_code));
-  }
-  auto& invalid = node_factory().NewInvalid(
-      source_code().end(),
-      static_cast<int>(ErrorCode::ERROR_STATEMENT_INVALID));
-  AddError(invalid, error_code);
-  return node_factory().NewInvalidStatement(invalid,
+  auto& token = ComputeInvalidToken(error_code);
+  AddError(token, error_code);
+  return node_factory().NewInvalidStatement(token,
                                             static_cast<int>(error_code));
 }
 
 ast::Statement& Parser::ParseStatement() {
+  if (!HasToken())
+    return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
   const auto& token = PeekToken();
   if (auto* name = token.TryAs<ast::Name>()) {
     if (name->IsKeyword())
@@ -87,7 +113,19 @@ ast::Statement& Parser::ParseStatementContinue() {
 }
 
 ast::Statement& Parser::ParseStatementDo() {
-  return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
+  StatementScope do_scope(this, ConsumeToken());
+  auto& statement = ParseStatement();
+  if (!ConsumeTokenIf(ast::NameId::While))
+    return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_DO_EXPECT_WHILE);
+  if (!ConsumeTokenIf(ast::PunctuatorKind::LeftParenthesis))
+    return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_DO_EXPECT_LPAREN);
+  auto& condition = ParseExpression();
+  if (!ConsumeTokenIf(ast::PunctuatorKind::RightParenthesis))
+    return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_DO_EXPECT_RPAREN);
+  if (!ConsumeTokenIf(ast::PunctuatorKind::SemiColon))
+    return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_DO_EXPECT_SEMI_COLON);
+  return node_factory().NewDoWhileStatement(do_scope.keyword(), statement,
+                                            condition);
 }
 
 ast::Statement& Parser::ParseStatementExpression() {
@@ -109,19 +147,11 @@ ast::Statement& Parser::ParseStatementFunction() {
 ast::Statement& Parser::ParseStatementIf() {
   auto& if_keyword = ConsumeToken().As<ast::Name>();
   DCHECK_EQ(if_keyword, ast::NameId::If);
-  if (!ConsumeTokenIf(ast::PunctuatorKind::LeftParenthesis)) {
-    Advance();
+  if (!ConsumeTokenIf(ast::PunctuatorKind::LeftParenthesis))
     return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_IF_EXPECT_LPAREN);
-  }
-  if (!HasToken())
-    return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
   auto& condition = ParseExpression();
-  if (!ConsumeTokenIf(ast::PunctuatorKind::RightParenthesis)) {
-    Advance();
+  if (!ConsumeTokenIf(ast::PunctuatorKind::RightParenthesis))
     return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_IF_EXPECT_RPAREN);
-  }
-  if (!HasToken())
-    return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
   auto& then_clause = ParseStatement();
   if (!ConsumeTokenIf(ast::NameId::Else))
     return node_factory().NewIfStatement(if_keyword, condition, then_clause);

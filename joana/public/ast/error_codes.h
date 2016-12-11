@@ -32,15 +32,18 @@ namespace ast {
   V(BRACKET, MISMATCHED)                \
   V(BRACKET, NOT_CLOSED)                \
   V(BRACKET, UNEXPECTED)                \
-  V(EXPRESSION, BRACKET_NOT_CLSOED)     \
+  V(EXPRESSION, INVALID)                \
   V(EXPRESSION, PARENTHESIS_NOT_CLSOED) \
-  V(EXPRESSION, NYI)                    \
   V(STATEMENT, AWAIT)                   \
   V(STATEMENT, BRACE_NOT_CLSOED)        \
   V(STATEMENT, BREAK)                   \
   V(STATEMENT, CASE)                    \
   V(STATEMENT, CATCH)                   \
   V(STATEMENT, CONTINUE)                \
+  V(STATEMENT, DO_EXPECT_LPAREN)        \
+  V(STATEMENT, DO_EXPECT_RPAREN)        \
+  V(STATEMENT, DO_EXPECT_SEMI_COLON)    \
+  V(STATEMENT, DO_EXPECT_WHILE)         \
   V(STATEMENT, ELSE)                    \
   V(STATEMENT, EXPECT_SEMI_COLON)       \
   V(STATEMENT, EXTENDS)                 \

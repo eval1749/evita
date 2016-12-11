@@ -112,6 +112,13 @@ ast::Node& Parser::ConsumeToken() {
   return token;
 }
 
+ast::Node& Parser::ComputeInvalidToken(ErrorCode error_code) {
+  if (HasToken())
+    return PeekToken();
+  return node_factory().NewInvalid(source_code().end(),
+                                   static_cast<int>(error_code));
+}
+
 bool Parser::ConsumeTokenIf(ast::NameId name_id) {
   if (!HasToken())
     return false;

@@ -79,6 +79,13 @@ TEST_F(ParserTest, Bracket) {
       Parse("{"));
 }
 
+TEST_F(ParserTest, DoWhileStatement) {
+  TEST_PARSER(
+      "do {\n"
+      "  foo;\n"
+      "} while (bar);\n");
+}
+
 TEST_F(ParserTest, EmptyStatement) {
   TEST_PARSER(";\n");
 }

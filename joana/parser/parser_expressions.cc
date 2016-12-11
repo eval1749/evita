@@ -14,10 +14,10 @@
 namespace joana {
 namespace internal {
 
-ast::Expression& Parser::NewInvalidExpression(const ast::Node& node,
-                                              ErrorCode error_code) {
-  AddError(node, error_code);
-  return node_factory().NewInvalidExpression(node,
+ast::Expression& Parser::NewInvalidExpression(ErrorCode error_code) {
+  auto& token = ComputeInvalidToken(error_code);
+  AddError(token, error_code);
+  return node_factory().NewInvalidExpression(token,
                                              static_cast<int>(error_code));
 }
 
@@ -26,15 +26,17 @@ ast::Expression& Parser::NewLiteralExpression(const ast::Literal& literal) {
 }
 
 ast::Expression& Parser::ParseExpression() {
+  if (!HasToken())
+    return NewInvalidExpression(ErrorCode::ERROR_EXPRESSION_INVALID);
   const auto& token = PeekToken();
   if (auto* name = token.TryAs<ast::Name>())
     return ParseExpressionName();
   if (auto* punctator = token.TryAs<ast::Punctuator>()) {
     Advance();
-    return NewInvalidExpression(token, ErrorCode::ERROR_EXPRESSION_NYI);
+    return NewInvalidExpression(ErrorCode::ERROR_EXPRESSION_INVALID);
   }
   Advance();
-  return NewInvalidExpression(token, ErrorCode::ERROR_EXPRESSION_NYI);
+  return NewInvalidExpression(ErrorCode::ERROR_EXPRESSION_INVALID);
 }
 
 ast::Expression& Parser::ParseExpressionName() {
@@ -53,7 +55,7 @@ ast::Expression& Parser::ParseExpressionName() {
   }
   Advance();
   if (name.IsKeyword())
-    return NewInvalidExpression(name, ErrorCode::ERROR_EXPRESSION_NYI);
+    return NewInvalidExpression(ErrorCode::ERROR_EXPRESSION_INVALID);
   return node_factory().NewReferenceExpression(name);
 }
 

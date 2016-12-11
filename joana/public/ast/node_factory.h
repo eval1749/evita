@@ -53,27 +53,27 @@ class JOANA_PUBLIC_EXPORT NodeFactory final {
 
   // Statements factory members
   BlockStatement& NewBlockStatement(const Punctuator& left_brace);
-  BreakStatement& NewBreakStatement(const Name& keywod, const Name& label);
-  BreakStatement& NewBreakStatement(const Name& keywod);
-  ContinueStatement& NewContinueStatement(const Name& keywod,
+  BreakStatement& NewBreakStatement(const Name& keyword, const Name& label);
+  BreakStatement& NewBreakStatement(const Name& keyword);
+  ContinueStatement& NewContinueStatement(const Name& keyword,
                                           const Name& label);
-  ContinueStatement& NewContinueStatement(const Name& keywod);
-  DoStatement& NewDoStatement(const Name& keywod,
+  ContinueStatement& NewContinueStatement(const Name& keyword);
+  DoStatement& NewDoStatement(const Name& keyword,
                               const Statement& statement,
                               const Expression& condition);
   EmptyStatement& NewEmptyStatement(const Punctuator& semi_colon);
   ExpressionStatement& NewExpressionStatement(const Expression& expression);
-  IfStatement& NewIfStatement(const Name& keywod,
+  IfStatement& NewIfStatement(const Name& keyword,
                               const Expression& condition,
                               const Statement& then_clause,
                               const Statement& else_clause);
-  IfStatement& NewIfStatement(const Name& keywod,
+  IfStatement& NewIfStatement(const Name& keyword,
                               const Expression& condition,
                               const Statement& then_clause);
   InvalidStatement& NewInvalidStatement(const Node& node, int error_code);
   ThrowStatement& NewThrowStatement(const Name& keyword,
                                     const Expression& condition);
-  WhileStatement& NewWhileStatement(const Name& keywod,
+  WhileStatement& NewWhileStatement(const Name& keyword,
                                     const Expression& condition,
                                     const Statement& statement);
 

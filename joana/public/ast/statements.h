@@ -58,8 +58,8 @@ class JOANA_PUBLIC_EXPORT BreakStatement : public Statement {
   Name& label() const;
 
  protected:
-  BreakStatement(const Name& keywod, const Name& label);
-  explicit BreakStatement(const Name& keywod);
+  BreakStatement(const Name& keyword, const Name& label);
+  explicit BreakStatement(const Name& keyword);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(BreakStatement);
@@ -78,8 +78,8 @@ class JOANA_PUBLIC_EXPORT ContinueStatement : public Statement {
   Name& label() const;
 
  protected:
-  ContinueStatement(const Name& keywod, const Name& label);
-  explicit ContinueStatement(const Name& keywod);
+  ContinueStatement(const Name& keyword, const Name& label);
+  explicit ContinueStatement(const Name& keyword);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(ContinueStatement);
@@ -98,7 +98,7 @@ class JOANA_PUBLIC_EXPORT DoStatement : public Statement {
   Statement& statement() const;
 
  protected:
-  explicit DoStatement(const Name& keywod,
+  explicit DoStatement(const Name& keyword,
                        const Statement& statement,
                        const Expression& condition);
 
@@ -154,11 +154,11 @@ class JOANA_PUBLIC_EXPORT IfStatement : public Statement {
   ast::Statement& then_clause() const;
 
  private:
-  IfStatement(const Name& keywod,
+  IfStatement(const Name& keyword,
               const Expression& condition,
               const Statement& then_clause,
               const Statement& else_clause);
-  IfStatement(const Name& keywod,
+  IfStatement(const Name& keyword,
               const Expression& condition,
               const Statement& then_clause);
 
@@ -214,7 +214,7 @@ class JOANA_PUBLIC_EXPORT WhileStatement : public Statement {
   Statement& statement() const;
 
  protected:
-  explicit WhileStatement(const Name& keywod,
+  explicit WhileStatement(const Name& keyword,
                           const Expression& condition,
                           const Statement& statement);
 

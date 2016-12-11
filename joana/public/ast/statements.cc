@@ -25,14 +25,15 @@ BlockStatement::~BlockStatement() = default;
 //
 // BreakStatement
 //
-BreakStatement::BreakStatement(const Name& keywod, const Name& label)
-    : BreakStatement(keywod) {
+BreakStatement::BreakStatement(const Name& keyword, const Name& label)
+    : BreakStatement(keyword) {
   DCHECK(!label.As<Name>().IsKeyword());
   NodeEditor().AppendChild(this, const_cast<Name*>(&label));
 }
 
-BreakStatement::BreakStatement(const Name& keywod) : Statement(keywod.range()) {
-  DCHECK_EQ(keywod, NameId::Break);
+BreakStatement::BreakStatement(const Name& keyword)
+    : Statement(keyword.range()) {
+  DCHECK_EQ(keyword, NameId::Break);
 }
 
 BreakStatement::~BreakStatement() = default;
@@ -49,15 +50,15 @@ ast::Name& BreakStatement::label() const {
 //
 // ContinueStatement
 //
-ContinueStatement::ContinueStatement(const Name& keywod, const Name& label)
-    : ContinueStatement(keywod) {
+ContinueStatement::ContinueStatement(const Name& keyword, const Name& label)
+    : ContinueStatement(keyword) {
   DCHECK(!label.As<Name>().IsKeyword());
   NodeEditor().AppendChild(this, const_cast<Name*>(&label));
 }
 
-ContinueStatement::ContinueStatement(const Name& keywod)
-    : Statement(keywod.range()) {
-  DCHECK_EQ(keywod, NameId::Continue);
+ContinueStatement::ContinueStatement(const Name& keyword)
+    : Statement(keyword.range()) {
+  DCHECK_EQ(keyword, NameId::Continue);
 }
 
 ContinueStatement::~ContinueStatement() = default;
@@ -74,11 +75,11 @@ ast::Name& ContinueStatement::label() const {
 //
 // DoStatement
 //
-DoStatement::DoStatement(const Name& keywod,
+DoStatement::DoStatement(const Name& keyword,
                          const Statement& statement,
                          const Expression& condition)
-    : Statement(keywod.range()) {
-  DCHECK_EQ(keywod, NameId::Do);
+    : Statement(keyword.range()) {
+  DCHECK_EQ(keyword, NameId::Do);
   NodeEditor().AppendChild(this, const_cast<Statement*>(&statement));
   NodeEditor().AppendChild(this, const_cast<Expression*>(&condition));
 }
@@ -122,19 +123,19 @@ const Expression& ExpressionStatement::expression() const {
 //
 // IfStatement
 //
-IfStatement::IfStatement(const Name& keywod,
+IfStatement::IfStatement(const Name& keyword,
                          const Expression& condition,
                          const Statement& then_clause,
                          const Statement& else_clause)
-    : IfStatement(keywod, condition, then_clause) {
+    : IfStatement(keyword, condition, then_clause) {
   NodeEditor().AppendChild(this, const_cast<Statement*>(&else_clause));
 }
 
-IfStatement::IfStatement(const Name& keywod,
+IfStatement::IfStatement(const Name& keyword,
                          const Expression& condition,
                          const Statement& then_clause)
-    : Statement(keywod.range()) {
-  DCHECK_EQ(keywod, NameId::If);
+    : Statement(keyword.range()) {
+  DCHECK_EQ(keyword, NameId::If);
   NodeEditor().AppendChild(this, const_cast<Expression*>(&condition));
   NodeEditor().AppendChild(this, const_cast<Statement*>(&then_clause));
 }
@@ -191,11 +192,11 @@ ast::Expression& ThrowStatement::expression() const {
 //
 // WhileStatement
 //
-WhileStatement::WhileStatement(const Name& keywod,
+WhileStatement::WhileStatement(const Name& keyword,
                                const Expression& condition,
                                const Statement& statement)
-    : Statement(keywod.range()) {
-  DCHECK_EQ(keywod, NameId::While);
+    : Statement(keyword.range()) {
+  DCHECK_EQ(keyword, NameId::While);
   NodeEditor().AppendChild(this, const_cast<Expression*>(&condition));
   NodeEditor().AppendChild(this, const_cast<Statement*>(&statement));
 }

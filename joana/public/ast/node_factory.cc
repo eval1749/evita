@@ -130,28 +130,28 @@ BlockStatement& NodeFactory::NewBlockStatement(const Punctuator& left_brace) {
   return *new (zone_) BlockStatement(left_brace);
 }
 
-BreakStatement& NodeFactory::NewBreakStatement(const Name& keywod,
+BreakStatement& NodeFactory::NewBreakStatement(const Name& keyword,
                                                const Name& label) {
-  return *new (zone_) BreakStatement(keywod, label);
+  return *new (zone_) BreakStatement(keyword, label);
 }
 
-BreakStatement& NodeFactory::NewBreakStatement(const Name& keywod) {
-  return *new (zone_) BreakStatement(keywod);
+BreakStatement& NodeFactory::NewBreakStatement(const Name& keyword) {
+  return *new (zone_) BreakStatement(keyword);
 }
 
-ContinueStatement& NodeFactory::NewContinueStatement(const Name& keywod,
+ContinueStatement& NodeFactory::NewContinueStatement(const Name& keyword,
                                                      const Name& label) {
-  return *new (zone_) ContinueStatement(keywod, label);
+  return *new (zone_) ContinueStatement(keyword, label);
 }
 
-ContinueStatement& NodeFactory::NewContinueStatement(const Name& keywod) {
-  return *new (zone_) ContinueStatement(keywod);
+ContinueStatement& NodeFactory::NewContinueStatement(const Name& keyword) {
+  return *new (zone_) ContinueStatement(keyword);
 }
 
-DoStatement& NodeFactory::NewDoStatement(const Name& keywod,
+DoStatement& NodeFactory::NewDoStatement(const Name& keyword,
                                          const Statement& statement,
                                          const Expression& condition) {
-  return *new (zone_) DoStatement(keywod, statement, condition);
+  return *new (zone_) DoStatement(keyword, statement, condition);
 }
 
 EmptyStatement& NodeFactory::NewEmptyStatement(const Punctuator& semi_colon) {
@@ -163,17 +163,17 @@ ExpressionStatement& NodeFactory::NewExpressionStatement(
   return *new (zone_) ExpressionStatement(expression);
 }
 
-IfStatement& NodeFactory::NewIfStatement(const Name& keywod,
+IfStatement& NodeFactory::NewIfStatement(const Name& keyword,
                                          const Expression& condition,
                                          const Statement& then_clause,
                                          const Statement& else_clause) {
-  return *new (zone_) IfStatement(keywod, condition, then_clause, else_clause);
+  return *new (zone_) IfStatement(keyword, condition, then_clause, else_clause);
 }
 
-IfStatement& NodeFactory::NewIfStatement(const Name& keywod,
+IfStatement& NodeFactory::NewIfStatement(const Name& keyword,
                                          const Expression& condition,
                                          const Statement& then_clause) {
-  return *new (zone_) IfStatement(keywod, condition, then_clause);
+  return *new (zone_) IfStatement(keyword, condition, then_clause);
 }
 
 InvalidStatement& NodeFactory::NewInvalidStatement(const Node& node,
@@ -186,10 +186,10 @@ ThrowStatement& NodeFactory::NewThrowStatement(const Name& keyword,
   return *new (zone_) ThrowStatement(keyword, expression);
 }
 
-WhileStatement& NodeFactory::NewWhileStatement(const Name& keywod,
+WhileStatement& NodeFactory::NewWhileStatement(const Name& keyword,
                                                const Expression& condition,
                                                const Statement& statement) {
-  return *new (zone_) WhileStatement(keywod, condition, statement);
+  return *new (zone_) WhileStatement(keyword, condition, statement);
 }
 
 }  // namespace ast

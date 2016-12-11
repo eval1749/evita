@@ -186,20 +186,20 @@ ast::Statement& Parser::ParseStatementBlock() {
 }
 
 ast::Statement& Parser::ParseStatementBreak() {
-  auto& keywod = ConsumeToken().As<ast::Name>();
+  auto& keyword = ConsumeToken().As<ast::Name>();
   if (!CanUseBreak())
-    AddError(keywod, ErrorCode::ERROR_STATEMENT_BREAK_BAD_PLACE);
+    AddError(keyword, ErrorCode::ERROR_STATEMENT_BREAK_BAD_PLACE);
   if (!HasToken())
     return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
   if (ConsumeTokenIf(ast::PunctuatorKind::SemiColon))
-    return node_factory().NewBreakStatement(keywod);
+    return node_factory().NewBreakStatement(keyword);
   if (!PeekToken().Is<ast::Name>())
     AddError(PeekToken(), ErrorCode::ERROR_STATEMENT_BREAK_NOT_LABEL);
   auto& label = ConsumeToken().As<ast::Name>();
   ExpectToken(ast::PunctuatorKind::SemiColon,
               ErrorCode::ERROR_STATEMENT_BREAK_SEMI_COLON);
   // TODO(eval1749): Find label for |break| statement
-  return node_factory().NewBreakStatement(keywod, label);
+  return node_factory().NewBreakStatement(keyword, label);
 }
 
 ast::Statement& Parser::ParseStatementConst() {
@@ -207,25 +207,25 @@ ast::Statement& Parser::ParseStatementConst() {
 }
 
 ast::Statement& Parser::ParseStatementContinue() {
-  auto& keywod = ConsumeToken().As<ast::Name>();
+  auto& keyword = ConsumeToken().As<ast::Name>();
   if (!CanUseContinue())
-    AddError(keywod, ErrorCode::ERROR_STATEMENT_CONTINUE_BAD_PLACE);
+    AddError(keyword, ErrorCode::ERROR_STATEMENT_CONTINUE_BAD_PLACE);
   if (!HasToken())
     return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
   if (ConsumeTokenIf(ast::PunctuatorKind::SemiColon))
-    return node_factory().NewContinueStatement(keywod);
+    return node_factory().NewContinueStatement(keyword);
   if (!PeekToken().Is<ast::Name>())
     AddError(PeekToken(), ErrorCode::ERROR_STATEMENT_CONTINUE_NOT_LABEL);
   auto& label = ConsumeToken().As<ast::Name>();
   ExpectToken(ast::PunctuatorKind::SemiColon,
               ErrorCode::ERROR_STATEMENT_CONTINUE_SEMI_COLON);
   // TODO(eval1749): Find label for |continue| statement
-  return node_factory().NewContinueStatement(keywod, label);
+  return node_factory().NewContinueStatement(keyword, label);
 }
 
 ast::Statement& Parser::ParseStatementDo() {
-  auto& keywod = ConsumeToken().As<ast::Name>();
-  StatementScope do_scope(this, keywod);
+  auto& keyword = ConsumeToken().As<ast::Name>();
+  StatementScope do_scope(this, keyword);
   auto& statement = ParseStatement();
   if (!ConsumeTokenIf(ast::NameId::While))
     return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_DO_EXPECT_WHILE);
@@ -236,7 +236,7 @@ ast::Statement& Parser::ParseStatementDo() {
               ErrorCode::ERROR_STATEMENT_DO_EXPECT_RPAREN);
   ExpectToken(ast::PunctuatorKind::SemiColon,
               ErrorCode::ERROR_STATEMENT_DO_EXPECT_SEMI_COLON);
-  return node_factory().NewDoStatement(keywod, statement, condition);
+  return node_factory().NewDoStatement(keyword, statement, condition);
 }
 
 ast::Statement& Parser::ParseStatementExpression() {
@@ -255,8 +255,8 @@ ast::Statement& Parser::ParseStatementFunction() {
 }
 
 ast::Statement& Parser::ParseStatementIf() {
-  auto& keywod = ConsumeToken().As<ast::Name>();
-  DCHECK_EQ(keywod, ast::NameId::If);
+  auto& keyword = ConsumeToken().As<ast::Name>();
+  DCHECK_EQ(keyword, ast::NameId::If);
   ExpectToken(ast::PunctuatorKind::LeftParenthesis,
               ErrorCode::ERROR_STATEMENT_IF_EXPECT_LPAREN);
   auto& condition = ParseExpression();
@@ -264,9 +264,9 @@ ast::Statement& Parser::ParseStatementIf() {
               ErrorCode::ERROR_STATEMENT_IF_EXPECT_RPAREN);
   auto& then_clause = ParseStatement();
   if (!ConsumeTokenIf(ast::NameId::Else))
-    return node_factory().NewIfStatement(keywod, condition, then_clause);
+    return node_factory().NewIfStatement(keyword, condition, then_clause);
   auto& else_clause = ParseStatement();
-  return node_factory().NewIfStatement(keywod, condition, then_clause,
+  return node_factory().NewIfStatement(keyword, condition, then_clause,
                                        else_clause);
 }
 
@@ -354,15 +354,15 @@ ast::Statement& Parser::ParseStatementVar() {
 }
 
 ast::Statement& Parser::ParseStatementWhile() {
-  auto& keywod = ConsumeToken().As<ast::Name>();
-  StatementScope while_scope(this, keywod);
+  auto& keyword = ConsumeToken().As<ast::Name>();
+  StatementScope while_scope(this, keyword);
   ExpectToken(ast::PunctuatorKind::LeftParenthesis,
               ErrorCode::ERROR_STATEMENT_DO_EXPECT_LPAREN);
   auto& condition = ParseExpression();
   ExpectToken(ast::PunctuatorKind::RightParenthesis,
               ErrorCode::ERROR_STATEMENT_DO_EXPECT_RPAREN);
   auto& statement = ParseStatement();
-  return node_factory().NewWhileStatement(keywod, condition, statement);
+  return node_factory().NewWhileStatement(keyword, condition, statement);
 }
 
 ast::Statement& Parser::ParseStatementYield() {

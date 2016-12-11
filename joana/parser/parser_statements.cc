@@ -71,7 +71,7 @@ ast::Statement& Parser::ParseStatementDo() {
 
 ast::Statement& Parser::ParseStatementExpression() {
   auto& result = node_factory().NewExpressionStatement(ParseExpression());
-  if (AdvanceIf(ast::PunctuatorKind::SemiColon))
+  if (ConsumeTokenIf(ast::PunctuatorKind::SemiColon))
     return result;
   AddError(lexer_->location(), ErrorCode::ERROR_STATEMENT_EXPECT_SEMI_COLON);
   return result;
@@ -89,21 +89,21 @@ ast::Statement& Parser::ParseStatementIf() {
   auto& if_keyword = PeekToken().As<ast::Name>();
   DCHECK_EQ(if_keyword, ast::NameId::If);
   Advance();
-  if (!AdvanceIf(ast::PunctuatorKind::LeftParenthesis)) {
+  if (!ConsumeTokenIf(ast::PunctuatorKind::LeftParenthesis)) {
     Advance();
     return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_IF_EXPECT_LPAREN);
   }
   if (!HasToken())
     return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
   auto& condition = ParseExpression();
-  if (!AdvanceIf(ast::PunctuatorKind::RightParenthesis)) {
+  if (!ConsumeTokenIf(ast::PunctuatorKind::RightParenthesis)) {
     Advance();
     return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_IF_EXPECT_RPAREN);
   }
   if (!HasToken())
     return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
   auto& then_clause = ParseStatement();
-  if (!AdvanceIf(ast::NameId::Else))
+  if (!ConsumeTokenIf(ast::NameId::Else))
     return node_factory().NewIfStatement(if_keyword, condition, then_clause);
   auto& else_clause = ParseStatement();
   return node_factory().NewIfStatement(if_keyword, condition, then_clause,

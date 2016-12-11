@@ -44,7 +44,7 @@ void Parser::Advance() {
   lexer_->Advance();
 }
 
-bool Parser::AdvanceIf(ast::NameId name_id) {
+bool Parser::ConsumeTokenIf(ast::NameId name_id) {
   if (!HasToken())
     return false;
   if (PeekToken() != name_id)
@@ -53,7 +53,7 @@ bool Parser::AdvanceIf(ast::NameId name_id) {
   return true;
 }
 
-bool Parser::AdvanceIf(ast::PunctuatorKind kind) {
+bool Parser::ConsumeTokenIf(ast::PunctuatorKind kind) {
   if (!HasToken())
     return false;
   if (PeekToken() != kind)

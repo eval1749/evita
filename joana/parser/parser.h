@@ -51,10 +51,10 @@ class Parser final {
   void Advance();
   // Returns true if |Lexer| has a punctuator of |name_id| and advance to next
   // token.
-  bool AdvanceIf(ast::NameId keyword_id);
+  bool ConsumeTokenIf(ast::NameId keyword_id);
   // Returns true if |Lexer| has a punctuator of |kind| and advance to next
   // token.
-  bool AdvanceIf(ast::PunctuatorKind kind);
+  bool ConsumeTokenIf(ast::PunctuatorKind kind);
   ast::Node& GetLastToken();
   ast::Node& PeekToken();
   bool HasToken() const;

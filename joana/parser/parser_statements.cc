@@ -342,7 +342,11 @@ ast::Statement& Parser::ParseStatementSwitch() {
 }
 
 ast::Statement& Parser::ParseStatementThrow() {
-  return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
+  auto& keyword = ConsumeToken().As<ast::Name>();
+  auto& expression = ParseExpression();
+  ExpectToken(ast::PunctuatorKind::SemiColon,
+              ErrorCode::ERROR_STATEMENT_THROW_EXPECT_SEMI_COLON);
+  return node_factory().NewThrowStatement(keyword, expression);
 }
 
 ast::Statement& Parser::ParseStatementVar() {

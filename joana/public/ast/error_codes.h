@@ -56,6 +56,7 @@ namespace ast {
   V(STATEMENT, IF_EXPECT_RPAREN)        \
   V(STATEMENT, INVALID)                 \
   V(STATEMENT, RESERVED_WORD)           \
+  V(STATEMENT, THROW_EXPECT_SEMI_COLON) \
   V(STATEMENT, YIELD)
 
 const auto kLexerErrorCodeBase = 10000;

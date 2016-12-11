@@ -7,6 +7,7 @@
 #include "base/files/file_path.h"
 #include "joana/public/ast/container_node.h"
 #include "joana/public/ast/node_traversal.h"
+#include "joana/public/ast/tokens.h"
 #include "joana/public/escaped_string_piece.h"
 #include "joana/public/source_code.h"
 
@@ -30,6 +31,24 @@ bool Node::operator!=(const Node& other) const {
 
 bool Node::operator!=(const Node* other) const {
   return this != other;
+}
+
+bool Node::operator==(NameId name_id) const {
+  auto* name = TryAs<Name>();
+  return name && name->number() == static_cast<int>(name_id);
+}
+
+bool Node::operator!=(NameId name_id) const {
+  return !operator==(name_id);
+}
+
+bool Node::operator==(PunctuatorKind kind) const {
+  auto* punctuator = TryAs<Punctuator>();
+  return punctuator && punctuator->kind() == kind;
+}
+
+bool Node::operator!=(PunctuatorKind kind) const {
+  return !operator==(kind);
 }
 
 Node* Node::first_child() const {

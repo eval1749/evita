@@ -17,7 +17,9 @@ namespace joana {
 namespace ast {
 
 class ContainerNode;
+enum class NameId;
 class NodeVisitor;
+enum class PunctuatorKind;
 
 class JOANA_PUBLIC_EXPORT Node : public Castable<Node>, public ZoneAllocated {
   DECLARE_CASTABLE_CLASS(Node, Castable);
@@ -29,6 +31,10 @@ class JOANA_PUBLIC_EXPORT Node : public Castable<Node>, public ZoneAllocated {
   bool operator==(const Node* other) const;
   bool operator!=(const Node& other) const;
   bool operator!=(const Node* other) const;
+  bool operator==(NameId name_id) const;
+  bool operator!=(NameId name_id) const;
+  bool operator==(PunctuatorKind kind) const;
+  bool operator!=(PunctuatorKind kind) const;
 
   virtual Node* first_child() const;
   virtual Node* last_child() const;

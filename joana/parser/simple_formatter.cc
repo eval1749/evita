@@ -214,6 +214,12 @@ void SimpleFormatter::VisitInvalidStatement(ast::InvalidStatement* node) {
     *ostream_ << string;
 }
 
+void SimpleFormatter::VisitThrowStatement(ast::ThrowStatement* node) {
+  *ostream_ << "throw ";
+  Format(node->expression());
+  *ostream_ << ';';
+}
+
 void SimpleFormatter::VisitWhileStatement(ast::WhileStatement* node) {
   *ostream_ << "while (";
   Format(node->condition());

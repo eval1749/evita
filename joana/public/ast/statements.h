@@ -185,6 +185,23 @@ class JOANA_PUBLIC_EXPORT InvalidStatement : public Statement {
 };
 
 //
+// ThrowStatement
+//
+class JOANA_PUBLIC_EXPORT ThrowStatement : public Statement {
+  DECLARE_CONCRETE_AST_NODE(ThrowStatement, Statement);
+
+ public:
+  ~ThrowStatement() override;
+
+  ast::Expression& expression() const;
+
+ private:
+  ThrowStatement(const Name& keyword, const Expression& expression);
+
+  DISALLOW_COPY_AND_ASSIGN(ThrowStatement);
+};
+
+//
 // WhileStatement
 //
 class JOANA_PUBLIC_EXPORT WhileStatement : public Statement {

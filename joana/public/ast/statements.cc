@@ -175,6 +175,22 @@ Statement::Statement(const SourceCodeRange& range) : ContainerNode(range) {}
 Statement::~Statement() = default;
 
 //
+// ThrowStatement
+//
+ThrowStatement::ThrowStatement(const Name& keyword,
+                               const Expression& expression)
+    : Statement(keyword.range()) {
+  DCHECK_EQ(keyword, NameId::Throw);
+  NodeEditor().AppendChild(this, const_cast<Expression*>(&expression));
+}
+
+ThrowStatement::~ThrowStatement() = default;
+
+ast::Expression& ThrowStatement::expression() const {
+  return NodeTraversal::ChildAt(*this, 0).As<Expression>();
+}
+
+//
 // WhileStatement
 //
 WhileStatement::WhileStatement(const Name& while_keyword,

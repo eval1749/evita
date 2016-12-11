@@ -184,6 +184,11 @@ InvalidStatement& NodeFactory::NewInvalidStatement(const Node& node,
   return *new (zone_) InvalidStatement(node, error_code);
 }
 
+ThrowStatement& NodeFactory::NewThrowStatement(const Name& keyword,
+                                               const Expression& expression) {
+  return *new (zone_) ThrowStatement(keyword, expression);
+}
+
 WhileStatement& NodeFactory::NewWhileStatement(const Name& while_keyword,
                                                const Expression& condition,
                                                const Statement& statement) {

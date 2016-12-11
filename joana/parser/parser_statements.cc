@@ -115,6 +115,19 @@ bool Parser::CanUseBreak() const {
     auto& keyword = scope.keyword();
     if (IsLoopKeyword(keyword) || keyword == ast::NameId::Switch)
       return true;
+    if (keyword == ast::NameId::Finally)
+      return false;
+  }
+  return false;
+}
+
+bool Parser::CanUseContinue() const {
+  for (const auto& scope : StatementScope::ScopesOf(statement_scope_)) {
+    auto& keyword = scope.keyword();
+    if (IsLoopKeyword(keyword))
+      return true;
+    if (keyword == ast::NameId::Finally)
+      return false;
   }
   return false;
 }
@@ -194,7 +207,20 @@ ast::Statement& Parser::ParseStatementConst() {
 }
 
 ast::Statement& Parser::ParseStatementContinue() {
-  return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
+  auto& continue_keyword = ConsumeToken().As<ast::Name>();
+  if (!CanUseContinue())
+    AddError(continue_keyword, ErrorCode::ERROR_STATEMENT_CONTINUE_BAD_PLACE);
+  if (!HasToken())
+    return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
+  if (ConsumeTokenIf(ast::PunctuatorKind::SemiColon))
+    return node_factory().NewContinueStatement(continue_keyword);
+  if (!PeekToken().Is<ast::Name>())
+    AddError(PeekToken(), ErrorCode::ERROR_STATEMENT_CONTINUE_NOT_LABEL);
+  auto& label = ConsumeToken().As<ast::Name>();
+  ExpectToken(ast::PunctuatorKind::SemiColon,
+              ErrorCode::ERROR_STATEMENT_CONTINUE_SEMI_COLON);
+  // TODO(eval1749): Find label for |continue| statement
+  return node_factory().NewContinueStatement(continue_keyword, label);
 }
 
 ast::Statement& Parser::ParseStatementDo() {

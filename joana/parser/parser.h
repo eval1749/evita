@@ -72,6 +72,7 @@ class Parser final {
 
   // Statements
   bool CanUseBreak() const;
+  bool CanUseContinue() const;
   ast::Statement& NewInvalidStatement(ErrorCode error_code);
   ast::Statement& ParseStatement();
   ast::Statement& ParseStatementAsync();

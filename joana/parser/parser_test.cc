@@ -91,6 +91,18 @@ TEST_F(ParserTest, BreakStatement) {
       Parse("break;"));
 }
 
+TEST_F(ParserTest, ContinueStatement) {
+  TEST_PARSER(
+      "do {\n"
+      "  continue;\n"
+      "} while (bar);\n");
+
+  EXPECT_EQ(
+      "continue;\n"
+      "PASER_ERROR_STATEMENT_CONTINUE_BAD_PLACE@0:8\n",
+      Parse("continue;"));
+}
+
 TEST_F(ParserTest, DoWhileStatement) {
   TEST_PARSER(
       "do {\n"

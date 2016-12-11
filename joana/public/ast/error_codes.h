@@ -41,7 +41,9 @@ namespace ast {
   V(STATEMENT, BREAK_SEMI_COLON)        \
   V(STATEMENT, CASE)                    \
   V(STATEMENT, CATCH)                   \
-  V(STATEMENT, CONTINUE)                \
+  V(STATEMENT, CONTINUE_BAD_PLACE)      \
+  V(STATEMENT, CONTINUE_NOT_LABEL)      \
+  V(STATEMENT, CONTINUE_SEMI_COLON)     \
   V(STATEMENT, DO_EXPECT_LPAREN)        \
   V(STATEMENT, DO_EXPECT_RPAREN)        \
   V(STATEMENT, DO_EXPECT_SEMI_COLON)    \

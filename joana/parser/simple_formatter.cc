@@ -55,8 +55,7 @@ bool SimpleFormatter::FormatChildStatement(const ast::Statement& statement) {
     *ostream_ << " {" << std::endl;
     IndentScope scope(this);
     for (const auto& child : ast::NodeTraversal::ChildrenOf(*block)) {
-      OutputIndent();
-      Format(child);
+      FormatWithIndent(child);
       *ostream_ << std::endl;
     }
     *ostream_ << '}';
@@ -64,23 +63,37 @@ bool SimpleFormatter::FormatChildStatement(const ast::Statement& statement) {
   }
   *ostream_ << std::endl;
   IndentScope scope(this);
-  OutputIndent();
-  Format(statement);
+  FormatWithIndent(statement);
   return false;
 }
 
-void SimpleFormatter::OutputAsSourceCode(const ast::Node& node) {
-  *ostream_ << base::UTF16ToUTF8(node.range().GetString());
+void SimpleFormatter::FormatWithIndent(const ast::Node& node) {
+  auto* runner = &node;
+  while (auto* labeled = runner->TryAs<ast::LabeledStatement>()) {
+    OutputSpaces(indent_ * indent_size_ - 1);
+    *ostream_ << labeled->label() << ':' << std::endl;
+    runner = &labeled->statement();
+  }
+  OutputIndent();
+  Format(*runner);
 }
 
 void SimpleFormatter::OutputIndent() {
-  for (auto counter = 0; counter < indent_; ++counter)
-    *ostream_ << "  ";
+  OutputSpaces(indent_ * indent_size_);
+}
+
+void SimpleFormatter::OutputSpaces(int amount) {
+  for (auto counter = 0; counter < amount; ++counter)
+    *ostream_ << ' ';
+}
+
+void SimpleFormatter::OutputUsingSoourceCode(const ast::Node& node) {
+  *ostream_ << base::UTF16ToUTF8(node.range().GetString());
 }
 
 // NodeVisitor implementations
 void SimpleFormatter::VisitComment(ast::Comment* node) {
-  OutputAsSourceCode(*node);
+  OutputUsingSoourceCode(*node);
 }
 
 void SimpleFormatter::VisitInvalid(ast::Invalid* node) {
@@ -88,7 +101,7 @@ void SimpleFormatter::VisitInvalid(ast::Invalid* node) {
 }
 
 void SimpleFormatter::VisitPunctuator(ast::Punctuator* node) {
-  OutputAsSourceCode(*node);
+  OutputUsingSoourceCode(*node);
 }
 
 void SimpleFormatter::VisitModule(ast::Module* node) {
@@ -99,28 +112,28 @@ void SimpleFormatter::VisitModule(ast::Module* node) {
 }
 
 void SimpleFormatter::VisitName(ast::Name* node) {
-  OutputAsSourceCode(*node);
+  OutputUsingSoourceCode(*node);
 }
 
 // Literals
 void SimpleFormatter::VisitBooleanLiteral(ast::BooleanLiteral* node) {
-  OutputAsSourceCode(*node);
+  OutputUsingSoourceCode(*node);
 }
 
 void SimpleFormatter::VisitNullLiteral(ast::NullLiteral* node) {
-  OutputAsSourceCode(*node);
+  OutputUsingSoourceCode(*node);
 }
 
 void SimpleFormatter::VisitNumericLiteral(ast::NumericLiteral* node) {
-  OutputAsSourceCode(*node);
+  OutputUsingSoourceCode(*node);
 }
 
 void SimpleFormatter::VisitStringLiteral(ast::StringLiteral* node) {
-  OutputAsSourceCode(*node);
+  OutputUsingSoourceCode(*node);
 }
 
 void SimpleFormatter::VisitUndefinedLiteral(ast::UndefinedLiteral* node) {
-  OutputAsSourceCode(*node);
+  OutputUsingSoourceCode(*node);
 }
 
 // Expressions
@@ -133,24 +146,23 @@ void SimpleFormatter::VisitInvalidExpression(ast::InvalidExpression* node) {
 }
 
 void SimpleFormatter::VisitLiteralExpression(ast::LiteralExpression* node) {
-  OutputAsSourceCode(node->literal());
+  OutputUsingSoourceCode(node->literal());
 }
 
 void SimpleFormatter::VisitReferenceExpression(ast::ReferenceExpression* node) {
-  OutputAsSourceCode(node->name());
+  OutputUsingSoourceCode(node->name());
 }
 
 // Statements
 void SimpleFormatter::VisitBlockStatement(ast::BlockStatement* node) {
-  OutputIndent();
   *ostream_ << '{' << std::endl;
-  ++indent_;
-  for (const auto& child : ast::NodeTraversal::ChildrenOf(*node)) {
-    OutputIndent();
-    Format(child);
-    *ostream_ << std::endl;
+  {
+    IndentScope scope(this);
+    for (const auto& child : ast::NodeTraversal::ChildrenOf(*node)) {
+      FormatWithIndent(child);
+      *ostream_ << std::endl;
+    }
   }
-  --indent_;
   OutputIndent();
   *ostream_ << '}';
 }
@@ -212,6 +224,10 @@ void SimpleFormatter::VisitInvalidStatement(ast::InvalidStatement* node) {
     *ostream_ << node->error_code();
   else
     *ostream_ << string;
+}
+
+void SimpleFormatter::VisitLabeledStatement(ast::LabeledStatement* node) {
+  Format(node->statement());
 }
 
 void SimpleFormatter::VisitThrowStatement(ast::ThrowStatement* node) {

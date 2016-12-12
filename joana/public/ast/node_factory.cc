@@ -181,6 +181,11 @@ InvalidStatement& NodeFactory::NewInvalidStatement(const Node& node,
   return *new (zone_) InvalidStatement(node, error_code);
 }
 
+LabeledStatement& NodeFactory::NewLabeledStatement(const Name& label,
+                                                   const Statement& statement) {
+  return *new (zone_) LabeledStatement(label, statement);
+}
+
 ThrowStatement& NodeFactory::NewThrowStatement(const Name& keyword,
                                                const Expression& expression) {
   return *new (zone_) ThrowStatement(keyword, expression);

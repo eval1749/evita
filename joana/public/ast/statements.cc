@@ -167,6 +167,26 @@ InvalidStatement::InvalidStatement(const Node& node, int error_code)
 InvalidStatement::~InvalidStatement() = default;
 
 //
+// LabeledStatement
+//
+LabeledStatement::LabeledStatement(const Name& label,
+                                   const Statement& statement)
+    : Statement(label.range()) {
+  NodeEditor().AppendChild(this, const_cast<Name*>(&label));
+  NodeEditor().AppendChild(this, const_cast<Statement*>(&statement));
+}
+
+LabeledStatement::~LabeledStatement() = default;
+
+Name& LabeledStatement::label() const {
+  return NodeTraversal::ChildAt(*this, 0).As<Name>();
+}
+
+Statement& LabeledStatement::statement() const {
+  return NodeTraversal::ChildAt(*this, 1).As<Statement>();
+}
+
+//
 // Statement
 //
 Statement::Statement(const SourceCodeRange& range) : ContainerNode(range) {}

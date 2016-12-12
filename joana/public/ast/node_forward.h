@@ -37,6 +37,7 @@ namespace ast {
   V(ExpressionStatement)          \
   V(IfStatement)                  \
   V(InvalidStatement)             \
+  V(LabeledStatement)             \
   V(ThrowStatement)               \
   V(TryCatchStatement)            \
   V(TryFinallyStatement)          \

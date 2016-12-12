@@ -71,6 +71,8 @@ class JOANA_PUBLIC_EXPORT NodeFactory final {
                               const Expression& condition,
                               const Statement& then_clause);
   InvalidStatement& NewInvalidStatement(const Node& node, int error_code);
+  LabeledStatement& NewLabeledStatement(const Name& label,
+                                        const Statement& statement);
   ThrowStatement& NewThrowStatement(const Name& keyword,
                                     const Expression& condition);
   TryCatchStatement& NewTryCatchStatement(const Name& keyword,

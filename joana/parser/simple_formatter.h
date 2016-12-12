@@ -20,20 +20,23 @@ class SimpleFormatter final : public ast::NodeVisitor {
   ~SimpleFormatter();
 
   void Format(const ast::Node& node);
-  void OutputIndent();
-  void OutputAsSourceCode(const ast::Node& node);
 
  private:
   class IndentScope;
 
   // Returns true if |statement| is block statement.
   bool FormatChildStatement(const ast::Statement& statement);
+  void FormatWithIndent(const ast::Node& node);
+  void OutputIndent();
+  void OutputSpaces(int amount);
+  void OutputUsingSoourceCode(const ast::Node& node);
 
 #define V(name) void Visit##name(ast::name* node) final;
   FOR_EACH_CONCRETE_AST_NODE(V)
 #undef V
 
   int indent_ = 0;
+  const int indent_size_ = 2;
   std::ostream* const ostream_;
 
   DISALLOW_COPY_AND_ASSIGN(SimpleFormatter);

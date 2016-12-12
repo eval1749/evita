@@ -145,6 +145,20 @@ TEST_F(ParserTest, LabeledStatement) {
       "}\n");
 }
 
+TEST_F(ParserTest, SwitchStatement) {
+  TEST_PARSER(
+      "switch (foo) {\n"
+      "  case 1:\n"
+      "    one;\n"
+      "    break;\n"
+      "  case 2:\n"
+      "  case 3:\n"
+      "    two_or_three;\n"
+      "  default:\n"
+      "    others;\n"
+      "}\n");
+}
+
 TEST_F(ParserTest, ThrowStatement) {
   TEST_PARSER("throw foo;\n");
 }

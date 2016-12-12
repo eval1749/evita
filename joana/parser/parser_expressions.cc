@@ -29,6 +29,8 @@ ast::Expression& Parser::ParseExpression() {
   if (!HasToken())
     return NewInvalidExpression(ErrorCode::ERROR_EXPRESSION_INVALID);
   const auto& token = PeekToken();
+  if (token.Is<ast::Literal>())
+    return NewLiteralExpression(ConsumeToken().As<ast::Literal>());
   if (token.Is<ast::Name>())
     return ParseExpressionAfterName(ConsumeToken().As<ast::Name>());
   if (auto* punctator = token.TryAs<ast::Punctuator>()) {

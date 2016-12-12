@@ -50,6 +50,7 @@ class Parser final {
 
   void AddError(const ast::Node& token, ErrorCode error_code);
   void AddError(const SourceCodeRange& range, ErrorCode error_code);
+  void AddError(ErrorCode error_code);
 
   void Advance();
   ast::Node& ComputeInvalidToken(ErrorCode error_code);
@@ -81,8 +82,10 @@ class Parser final {
   ast::Statement& ParseAsyncStatement();
   ast::Statement& ParseBreakStatement();
   ast::Statement& ParseBlockStatement();
+  ast::Statement& ParseCaseClause();
   ast::Statement& ParseConstStatement();
   ast::Statement& ParseContinueStatement();
+  ast::Statement& ParseDefaultLabel();
   ast::Statement& ParseDoStatement();
   ast::Statement& ParseExpressionStatement();
   ast::Statement& ParseForStatement();

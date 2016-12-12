@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include <iterator>
+#include <vector>
 
 #include "joana/parser/parser.h"
 
@@ -208,6 +209,17 @@ ast::Statement& Parser::ParseBreakStatement() {
   return node_factory().NewBreakStatement(keyword, label);
 }
 
+ast::Statement& Parser::ParseCaseClause() {
+  auto& keyword = ConsumeToken().As<ast::Name>();
+  DCHECK_EQ(keyword, ast::NameId::Case);
+  if (!statement_scope_ || statement_scope_->keyword() != ast::NameId::Switch)
+    return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_CASE_INVALID);
+  auto& expression = ParseExpression();
+  ExpectToken(ast::PunctuatorKind::Colon,
+              ErrorCode::ERROR_STATEMENT_CASE_EXPECT_COLON);
+  return node_factory().NewCaseClause(keyword, expression, ParseStatement());
+}
+
 ast::Statement& Parser::ParseConstStatement() {
   return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
 }
@@ -227,6 +239,16 @@ ast::Statement& Parser::ParseContinueStatement() {
               ErrorCode::ERROR_STATEMENT_CONTINUE_SEMI_COLON);
   // TODO(eval1749): Find label for |continue| statement
   return node_factory().NewContinueStatement(keyword, label);
+}
+
+ast::Statement& Parser::ParseDefaultLabel() {
+  auto& keyword = ConsumeToken().As<ast::Name>();
+  DCHECK(keyword == ast::NameId::Default);
+  if (!statement_scope_ || statement_scope_->keyword() != ast::NameId::Switch)
+    return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_DEFAULT_INVALID);
+  ExpectToken(ast::PunctuatorKind::Colon,
+              ErrorCode::ERROR_STATEMENT_DEFAULT_EXPECT_COLON);
+  return node_factory().NewLabeledStatement(keyword, ParseStatement());
 }
 
 ast::Statement& Parser::ParseDoStatement() {
@@ -262,6 +284,7 @@ ast::Statement& Parser::ParseFunctionStatement() {
 
 ast::Statement& Parser::ParseIfStatement() {
   auto& keyword = ConsumeToken().As<ast::Name>();
+  StatementScope if_scope(this, keyword);
   DCHECK_EQ(keyword, ast::NameId::If);
   ExpectToken(ast::PunctuatorKind::LeftParenthesis,
               ErrorCode::ERROR_STATEMENT_IF_EXPECT_LPAREN);
@@ -287,13 +310,15 @@ ast::Statement& Parser::ParseKeywordStatement() {
     case ast::NameId::Break:
       return ParseBreakStatement();
     case ast::NameId::Case:
-      return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_CASE);
+      return ParseCaseClause();
     case ast::NameId::Continue:
       return ParseContinueStatement();
     case ast::NameId::Const:
       return ParseConstStatement();
     case ast::NameId::Debugger:
       return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_RESERVED_WORD);
+    case ast::NameId::Default:
+      return ParseDefaultLabel();
     case ast::NameId::Do:
       return ParseDoStatement();
     case ast::NameId::Else:
@@ -346,7 +371,26 @@ ast::Statement& Parser::ParseReturnStatement() {
 }
 
 ast::Statement& Parser::ParseSwitchStatement() {
-  return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
+  auto& keyword = ConsumeToken().As<ast::Name>();
+  StatementScope switch_scope(this, keyword);
+  if (!ConsumeTokenIf(ast::PunctuatorKind::LeftParenthesis))
+    return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_SWITCH_EXPECT_LPAREN);
+  auto& expression = ParseExpression();
+  if (!ConsumeTokenIf(ast::PunctuatorKind::RightParenthesis))
+    return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_SWITCH_EXPECT_RPAREN);
+  std::vector<ast::Statement*> clauses;
+  if (!ConsumeTokenIf(ast::PunctuatorKind::LeftBrace)) {
+    AddError(ErrorCode::ERROR_STATEMENT_SWITCH_EXPECT_LBRACE);
+    return node_factory().NewSwitchStatement(keyword, expression, clauses);
+  }
+  while (HasToken()) {
+    if (ConsumeTokenIf(ast::PunctuatorKind::RightBrace))
+      return node_factory().NewSwitchStatement(keyword, expression, clauses);
+    clauses.push_back(&ParseStatement());
+  }
+  AddError(ComputeInvalidToken(ErrorCode::ERROR_STATEMENT_SWITCH_EXPECT_RBRACE),
+           ErrorCode::ERROR_STATEMENT_SWITCH_EXPECT_RBRACE);
+  return node_factory().NewSwitchStatement(keyword, expression, clauses);
 }
 
 ast::Statement& Parser::ParseThrowStatement() {

@@ -96,6 +96,10 @@ void Parser::AddError(const SourceCodeRange& range, ErrorCode error_code) {
   context_->error_sink().AddError(range, static_cast<int>(error_code));
 }
 
+void Parser::AddError(ErrorCode error_code) {
+  AddError(ComputeInvalidToken(error_code), error_code);
+}
+
 void Parser::Advance() {
   lexer_->Advance();
   if (!HasToken())

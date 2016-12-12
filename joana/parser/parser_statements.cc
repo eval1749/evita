@@ -145,25 +145,25 @@ ast::Statement& Parser::ParseStatement() {
   const auto& token = PeekToken();
   if (auto* name = token.TryAs<ast::Name>()) {
     if (name->IsKeyword())
-      return ParseStatementKeyword();
-    return ParseStatementExpression();
+      return ParseKeywordStatement();
+    return ParseExpressionStatement();
   }
   if (token.Is<ast::Literal>())
-    return ParseStatementExpression();
+    return ParseExpressionStatement();
   if (token == ast::PunctuatorKind::LeftBrace)
-    return ParseStatementBlock();
+    return ParseBlockStatement();
   if (token == ast::PunctuatorKind::SemiColon) {
     return node_factory().NewEmptyStatement(
         ConsumeToken().As<ast::Punctuator>());
   }
-  return ParseStatementExpression();
+  return ParseExpressionStatement();
 }
 
-ast::Statement& Parser::ParseStatementAsync() {
+ast::Statement& Parser::ParseAsyncStatement() {
   return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
 }
 
-ast::Statement& Parser::ParseStatementBlock() {
+ast::Statement& Parser::ParseBlockStatement() {
   auto& block =
       node_factory().NewBlockStatement(ConsumeToken().As<ast::Punctuator>());
   while (HasToken()) {
@@ -185,7 +185,7 @@ ast::Statement& Parser::ParseStatementBlock() {
   return block;
 }
 
-ast::Statement& Parser::ParseStatementBreak() {
+ast::Statement& Parser::ParseBreakStatement() {
   auto& keyword = ConsumeToken().As<ast::Name>();
   if (!CanUseBreak())
     AddError(keyword, ErrorCode::ERROR_STATEMENT_BREAK_BAD_PLACE);
@@ -202,11 +202,11 @@ ast::Statement& Parser::ParseStatementBreak() {
   return node_factory().NewBreakStatement(keyword, label);
 }
 
-ast::Statement& Parser::ParseStatementConst() {
+ast::Statement& Parser::ParseConstStatement() {
   return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
 }
 
-ast::Statement& Parser::ParseStatementContinue() {
+ast::Statement& Parser::ParseContinueStatement() {
   auto& keyword = ConsumeToken().As<ast::Name>();
   if (!CanUseContinue())
     AddError(keyword, ErrorCode::ERROR_STATEMENT_CONTINUE_BAD_PLACE);
@@ -223,7 +223,7 @@ ast::Statement& Parser::ParseStatementContinue() {
   return node_factory().NewContinueStatement(keyword, label);
 }
 
-ast::Statement& Parser::ParseStatementDo() {
+ast::Statement& Parser::ParseDoStatement() {
   auto& keyword = ConsumeToken().As<ast::Name>();
   StatementScope do_scope(this, keyword);
   auto& statement = ParseStatement();
@@ -239,22 +239,22 @@ ast::Statement& Parser::ParseStatementDo() {
   return node_factory().NewDoStatement(keyword, statement, condition);
 }
 
-ast::Statement& Parser::ParseStatementExpression() {
+ast::Statement& Parser::ParseExpressionStatement() {
   auto& result = node_factory().NewExpressionStatement(ParseExpression());
   ExpectToken(ast::PunctuatorKind::SemiColon,
               ErrorCode::ERROR_STATEMENT_EXPECT_SEMI_COLON);
   return result;
 }
 
-ast::Statement& Parser::ParseStatementFor() {
+ast::Statement& Parser::ParseForStatement() {
   return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
 }
 
-ast::Statement& Parser::ParseStatementFunction() {
+ast::Statement& Parser::ParseFunctionStatement() {
   return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
 }
 
-ast::Statement& Parser::ParseStatementIf() {
+ast::Statement& Parser::ParseIfStatement() {
   auto& keyword = ConsumeToken().As<ast::Name>();
   DCHECK_EQ(keyword, ast::NameId::If);
   ExpectToken(ast::PunctuatorKind::LeftParenthesis,
@@ -270,52 +270,52 @@ ast::Statement& Parser::ParseStatementIf() {
                                        else_clause);
 }
 
-ast::Statement& Parser::ParseStatementKeyword() {
+ast::Statement& Parser::ParseKeywordStatement() {
   const auto& keyword = PeekToken().As<ast::Name>();
   DCHECK(keyword.IsKeyword()) << keyword;
   switch (static_cast<ast::NameId>(keyword.number())) {
     case ast::NameId::Async:
-      return ParseStatementAsync();
+      return ParseAsyncStatement();
     case ast::NameId::Await:
       return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_AWAIT);
     case ast::NameId::Break:
-      return ParseStatementBreak();
+      return ParseBreakStatement();
     case ast::NameId::Case:
       return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_CASE);
     case ast::NameId::Continue:
-      return ParseStatementContinue();
+      return ParseContinueStatement();
     case ast::NameId::Const:
-      return ParseStatementConst();
+      return ParseConstStatement();
     case ast::NameId::Debugger:
       return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_RESERVED_WORD);
     case ast::NameId::Do:
-      return ParseStatementDo();
+      return ParseDoStatement();
     case ast::NameId::Else:
       return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_ELSE);
     case ast::NameId::Finally:
       return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_FINALLY);
     case ast::NameId::For:
-      return ParseStatementFor();
+      return ParseForStatement();
     case ast::NameId::Function:
-      return ParseStatementFunction();
+      return ParseFunctionStatement();
     case ast::NameId::If:
-      return ParseStatementIf();
+      return ParseIfStatement();
     case ast::NameId::Let:
-      return ParseStatementLet();
+      return ParseLetStatement();
     case ast::NameId::Return:
-      return ParseStatementReturn();
+      return ParseReturnStatement();
     case ast::NameId::Switch:
-      return ParseStatementSwitch();
+      return ParseSwitchStatement();
     case ast::NameId::Throw:
-      return ParseStatementThrow();
+      return ParseThrowStatement();
     case ast::NameId::Try:
-      return ParseStatementTry();
+      return ParseTryStatement();
     case ast::NameId::Var:
-      return ParseStatementVar();
+      return ParseVarStatement();
     case ast::NameId::While:
-      return ParseStatementWhile();
+      return ParseWhileStatement();
     case ast::NameId::Yield:
-      return ParseStatementYield();
+      return ParseYieldStatement();
 
     // Reserved keywords
     case ast::NameId::Enum:
@@ -328,22 +328,22 @@ ast::Statement& Parser::ParseStatementKeyword() {
     case ast::NameId::With:
       return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_RESERVED_WORD);
   }
-  return ParseStatementExpression();
+  return ParseExpressionStatement();
 }
 
-ast::Statement& Parser::ParseStatementLet() {
+ast::Statement& Parser::ParseLetStatement() {
   return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
 }
 
-ast::Statement& Parser::ParseStatementReturn() {
+ast::Statement& Parser::ParseReturnStatement() {
   return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
 }
 
-ast::Statement& Parser::ParseStatementSwitch() {
+ast::Statement& Parser::ParseSwitchStatement() {
   return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
 }
 
-ast::Statement& Parser::ParseStatementThrow() {
+ast::Statement& Parser::ParseThrowStatement() {
   auto& keyword = ConsumeToken().As<ast::Name>();
   auto& expression = ParseExpression();
   ExpectToken(ast::PunctuatorKind::SemiColon,
@@ -351,7 +351,7 @@ ast::Statement& Parser::ParseStatementThrow() {
   return node_factory().NewThrowStatement(keyword, expression);
 }
 
-ast::Statement& Parser::ParseStatementTry() {
+ast::Statement& Parser::ParseTryStatement() {
   auto& keyword = ConsumeToken().As<ast::Name>();
   StatementScope while_scope(this, keyword);
   if (!HasToken() || PeekToken() != ast::PunctuatorKind::LeftBrace)
@@ -364,7 +364,7 @@ ast::Statement& Parser::ParseStatementTry() {
     if (!HasToken() || PeekToken() != ast::PunctuatorKind::LeftBrace)
       return NewInvalidStatement(
           ErrorCode::ERROR_STATEMENT_FINALLY_EXPECT_LBRACE);
-    auto& finally_block = ParseStatementBlock();
+    auto& finally_block = ParseBlockStatement();
     return node_factory().NewTryFinallyStatement(keyword, block, finally_block);
   }
   ExpectToken(ast::NameId::Catch, ErrorCode::ERROR_STATEMENT_TRY_EXPECT_CATCH);
@@ -390,11 +390,11 @@ ast::Statement& Parser::ParseStatementTry() {
                                              catch_block, finally_block);
 }
 
-ast::Statement& Parser::ParseStatementVar() {
+ast::Statement& Parser::ParseVarStatement() {
   return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
 }
 
-ast::Statement& Parser::ParseStatementWhile() {
+ast::Statement& Parser::ParseWhileStatement() {
   auto& keyword = ConsumeToken().As<ast::Name>();
   StatementScope while_scope(this, keyword);
   ExpectToken(ast::PunctuatorKind::LeftParenthesis,
@@ -406,7 +406,7 @@ ast::Statement& Parser::ParseStatementWhile() {
   return node_factory().NewWhileStatement(keyword, condition, statement);
 }
 
-ast::Statement& Parser::ParseStatementYield() {
+ast::Statement& Parser::ParseYieldStatement() {
   return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
 }
 

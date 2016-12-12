@@ -52,6 +52,7 @@ component("public") {
     "memory/zone_owner.h",
     "memory/zone_user.cc",
     "memory/zone_user.h",
+    "memory/zone_vector.h",
     "public_export.h",
     "source_code.cc",
     "source_code.h",

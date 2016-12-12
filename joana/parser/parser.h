@@ -15,6 +15,7 @@ class ContainerNode;
 class EditContext;
 class Expression;
 class Literal;
+class Name;
 enum class NameId;
 class Node;
 class NodeFactory;
@@ -69,7 +70,7 @@ class Parser final {
   ast::Expression& NewInvalidExpression(ErrorCode error_code);
   ast::Expression& NewLiteralExpression(const ast::Literal& literal);
   ast::Expression& ParseExpression();
-  ast::Expression& ParseExpressionName();
+  ast::Expression& ParseExpressionAfterName(const ast::Name& name);
 
   // Statements
   bool CanUseBreak() const;

@@ -71,7 +71,8 @@ void SimpleFormatter::FormatWithIndent(const ast::Node& node) {
   auto* runner = &node;
   while (auto* labeled = runner->TryAs<ast::LabeledStatement>()) {
     OutputSpaces(indent_ * indent_size_ - 1);
-    *ostream_ << labeled->label() << ':' << std::endl;
+    Format(labeled->label());
+    *ostream_ << ':' << std::endl;
     runner = &labeled->statement();
   }
   OutputIndent();
@@ -106,7 +107,7 @@ void SimpleFormatter::VisitPunctuator(ast::Punctuator* node) {
 
 void SimpleFormatter::VisitModule(ast::Module* node) {
   for (const auto& child : ast::NodeTraversal::ChildrenOf(*node)) {
-    Format(child);
+    FormatWithIndent(child);
     *ostream_ << std::endl;
   }
 }

@@ -146,7 +146,13 @@ ast::Statement& Parser::ParseStatement() {
   if (auto* name = token.TryAs<ast::Name>()) {
     if (name->IsKeyword())
       return ParseKeywordStatement();
-    return ParseExpressionStatement();
+    ConsumeToken();
+    if (ConsumeTokenIf(ast::PunctuatorKind::Colon))
+      return node_factory().NewLabeledStatement(*name, ParseStatement());
+    auto& expression = ParseExpressionAfterName(*name);
+    ExpectToken(ast::PunctuatorKind::SemiColon,
+                ErrorCode::ERROR_STATEMENT_EXPECT_SEMI_COLON);
+    return node_factory().NewExpressionStatement(expression);
   }
   if (token.Is<ast::Literal>())
     return ParseExpressionStatement();
@@ -240,10 +246,10 @@ ast::Statement& Parser::ParseDoStatement() {
 }
 
 ast::Statement& Parser::ParseExpressionStatement() {
-  auto& result = node_factory().NewExpressionStatement(ParseExpression());
+  auto& expression = ParseExpression();
   ExpectToken(ast::PunctuatorKind::SemiColon,
               ErrorCode::ERROR_STATEMENT_EXPECT_SEMI_COLON);
-  return result;
+  return node_factory().NewExpressionStatement(expression);
 }
 
 ast::Statement& Parser::ParseForStatement() {

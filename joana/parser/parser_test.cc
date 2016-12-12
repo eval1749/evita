@@ -132,6 +132,19 @@ TEST_F(ParserTest, IfStatement) {
       "  baz;\n");
 }
 
+TEST_F(ParserTest, LabeledStatement) {
+  // There are no label indentation for toplevel label.
+  TEST_PARSER(
+      "label:\n"
+      "foo;\n");
+
+  TEST_PARSER(
+      "{\n"
+      " label:\n"
+      "  foo;\n"
+      "}\n");
+}
+
 TEST_F(ParserTest, ThrowStatement) {
   TEST_PARSER("throw foo;\n");
 }

@@ -29,8 +29,8 @@ ast::Expression& Parser::ParseExpression() {
   if (!HasToken())
     return NewInvalidExpression(ErrorCode::ERROR_EXPRESSION_INVALID);
   const auto& token = PeekToken();
-  if (auto* name = token.TryAs<ast::Name>())
-    return ParseExpressionName();
+  if (token.Is<ast::Name>())
+    return ParseExpressionAfterName(ConsumeToken().As<ast::Name>());
   if (auto* punctator = token.TryAs<ast::Punctuator>()) {
     Advance();
     return NewInvalidExpression(ErrorCode::ERROR_EXPRESSION_INVALID);
@@ -39,21 +39,16 @@ ast::Expression& Parser::ParseExpression() {
   return NewInvalidExpression(ErrorCode::ERROR_EXPRESSION_INVALID);
 }
 
-ast::Expression& Parser::ParseExpressionName() {
-  const auto& name = PeekToken().As<ast::Name>();
+ast::Expression& Parser::ParseExpressionAfterName(const ast::Name& name) {
   switch (static_cast<ast::NameId>(name.number())) {
     case ast::NameId::False:
-      Advance();
       return NewLiteralExpression(
           node_factory().NewBooleanLiteral(name, false));
     case ast::NameId::Null:
-      Advance();
       return NewLiteralExpression(node_factory().NewNullLiteral(name));
     case ast::NameId::True:
-      Advance();
       return NewLiteralExpression(node_factory().NewBooleanLiteral(name, true));
   }
-  Advance();
   if (name.IsKeyword())
     return NewInvalidExpression(ErrorCode::ERROR_EXPRESSION_INVALID);
   return node_factory().NewReferenceExpression(name);

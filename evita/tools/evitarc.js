@@ -50,7 +50,7 @@ Mode.registerExtension('e', 'c#');
     // O
     'Opcode', 'opcode', 'ostream', 'observee',
     // P
-    'Posn', 'Prepend', 'pointee',
+    'Posn', 'Prepend', 'pointee', 'Punctuator', 'punctuator',
     // R
     'readonly', 'Rect', 'rect', 'Renderer', 'renderer', 'Resize', 'resize',
     'resizing', 'Runnable', 'runnable', 'runtime',

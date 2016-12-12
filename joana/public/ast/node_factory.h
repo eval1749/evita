@@ -6,6 +6,7 @@
 #define JOANA_PUBLIC_AST_NODE_FACTORY_H_
 
 #include <memory>
+#include <vector>
 
 #include "base/strings/string_piece.h"
 #include "joana/public/ast/node_forward.h"
@@ -55,6 +56,9 @@ class JOANA_PUBLIC_EXPORT NodeFactory final {
   BlockStatement& NewBlockStatement(const Punctuator& left_brace);
   BreakStatement& NewBreakStatement(const Name& keyword, const Name& label);
   BreakStatement& NewBreakStatement(const Name& keyword);
+  CaseClause& NewCaseClause(const Name& keyword,
+                            const Expression& expression,
+                            const Statement& statement);
   ContinueStatement& NewContinueStatement(const Name& keyword,
                                           const Name& label);
   ContinueStatement& NewContinueStatement(const Name& keyword);
@@ -73,6 +77,9 @@ class JOANA_PUBLIC_EXPORT NodeFactory final {
   InvalidStatement& NewInvalidStatement(const Node& node, int error_code);
   LabeledStatement& NewLabeledStatement(const Name& label,
                                         const Statement& statement);
+  SwitchStatement& NewSwitchStatement(const Name& keyword,
+                                      const Expression& expression,
+                                      const std::vector<Statement*>& clauses);
   ThrowStatement& NewThrowStatement(const Name& keyword,
                                     const Expression& condition);
   TryCatchStatement& NewTryCatchStatement(const Name& keyword,

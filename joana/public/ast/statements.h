@@ -5,8 +5,11 @@
 #ifndef JOANA_PUBLIC_AST_STATEMENTS_H_
 #define JOANA_PUBLIC_AST_STATEMENTS_H_
 
+#include <vector>
+
 #include "joana/public/ast/container_node.h"
 #include "joana/public/ast/node_forward.h"
+#include "joana/public/memory/zone_vector.h"
 
 namespace joana {
 namespace ast {
@@ -63,6 +66,26 @@ class JOANA_PUBLIC_EXPORT BreakStatement : public Statement {
 
  private:
   DISALLOW_COPY_AND_ASSIGN(BreakStatement);
+};
+
+//
+// CaseClause
+//
+class JOANA_PUBLIC_EXPORT CaseClause : public Statement {
+  DECLARE_CONCRETE_AST_NODE(CaseClause, Statement);
+
+ public:
+  ~CaseClause() override;
+
+  Expression& expression() const;
+  Statement& statement() const;
+
+ private:
+  CaseClause(const Name& keyword,
+             const Expression& expression,
+             const Statement& statement);
+
+  DISALLOW_COPY_AND_ASSIGN(CaseClause);
 };
 
 //
@@ -200,6 +223,29 @@ class JOANA_PUBLIC_EXPORT LabeledStatement : public Statement {
   LabeledStatement(const Name& label, const Statement& statement);
 
   DISALLOW_COPY_AND_ASSIGN(LabeledStatement);
+};
+
+//
+// SwitchStatement
+//
+class JOANA_PUBLIC_EXPORT SwitchStatement : public Statement {
+  DECLARE_CONCRETE_AST_NODE(SwitchStatement, Statement);
+
+ public:
+  ~SwitchStatement() override;
+
+  Expression& expression() const;
+  const ZoneVector<Statement*>& clauses() const { return clauses_; }
+
+ private:
+  SwitchStatement(Zone* zone,
+                  const Name& keyword,
+                  const Expression& condition,
+                  const std::vector<Statement*>& clauses);
+
+  ZoneVector<Statement*> clauses_;
+
+  DISALLOW_COPY_AND_ASSIGN(SwitchStatement);
 };
 
 //

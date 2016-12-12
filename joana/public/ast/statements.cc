@@ -48,6 +48,28 @@ ast::Name& BreakStatement::label() const {
 }
 
 //
+// CaseClause
+//
+CaseClause::CaseClause(const Name& keyword,
+                       const Expression& expression,
+                       const Statement& statement)
+    : Statement(keyword.range()) {
+  DCHECK_EQ(keyword, NameId::Case);
+  NodeEditor().AppendChild(this, const_cast<Expression*>(&expression));
+  NodeEditor().AppendChild(this, const_cast<Statement*>(&statement));
+}
+
+CaseClause::~CaseClause() = default;
+
+Expression& CaseClause::expression() const {
+  return NodeTraversal::ChildAt(*this, 0).As<Expression>();
+}
+
+Statement& CaseClause::statement() const {
+  return NodeTraversal::ChildAt(*this, 1).As<Statement>();
+}
+
+//
 // ContinueStatement
 //
 ContinueStatement::ContinueStatement(const Name& keyword, const Name& label)
@@ -192,6 +214,24 @@ Statement& LabeledStatement::statement() const {
 Statement::Statement(const SourceCodeRange& range) : ContainerNode(range) {}
 
 Statement::~Statement() = default;
+
+//
+// SwitchStatement
+//
+SwitchStatement::SwitchStatement(Zone* zone,
+                                 const Name& keyword,
+                                 const Expression& expression,
+                                 const std::vector<Statement*>& clauses)
+    : Statement(keyword.range()), clauses_(zone, clauses) {
+  DCHECK_EQ(keyword, NameId::Switch);
+  NodeEditor().AppendChild(this, const_cast<Expression*>(&expression));
+}
+
+SwitchStatement::~SwitchStatement() = default;
+
+Expression& SwitchStatement::expression() const {
+  return NodeTraversal::ChildAt(*this, 0).As<Expression>();
+}
 
 //
 // ThrowStatement

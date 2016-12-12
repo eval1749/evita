@@ -139,6 +139,12 @@ BreakStatement& NodeFactory::NewBreakStatement(const Name& keyword) {
   return *new (zone_) BreakStatement(keyword);
 }
 
+CaseClause& NodeFactory::NewCaseClause(const Name& keyword,
+                                       const Expression& expression,
+                                       const Statement& statement) {
+  return *new (zone_) CaseClause(keyword, expression, statement);
+}
+
 ContinueStatement& NodeFactory::NewContinueStatement(const Name& keyword,
                                                      const Name& label) {
   return *new (zone_) ContinueStatement(keyword, label);
@@ -184,6 +190,13 @@ InvalidStatement& NodeFactory::NewInvalidStatement(const Node& node,
 LabeledStatement& NodeFactory::NewLabeledStatement(const Name& label,
                                                    const Statement& statement) {
   return *new (zone_) LabeledStatement(label, statement);
+}
+
+SwitchStatement& NodeFactory::NewSwitchStatement(
+    const Name& keyword,
+    const Expression& expression,
+    const std::vector<Statement*>& clauses) {
+  return *new (zone_) SwitchStatement(zone_, keyword, expression, clauses);
 }
 
 ThrowStatement& NodeFactory::NewThrowStatement(const Name& keyword,

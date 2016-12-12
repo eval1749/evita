@@ -31,6 +31,7 @@ namespace ast {
 #define FOR_EACH_AST_STATEMENT(V) \
   V(BlockStatement)               \
   V(BreakStatement)               \
+  V(CaseClause)                   \
   V(ContinueStatement)            \
   V(DoStatement)                  \
   V(EmptyStatement)               \
@@ -39,6 +40,7 @@ namespace ast {
   V(InvalidStatement)             \
   V(LabeledStatement)             \
   V(ThrowStatement)               \
+  V(SwitchStatement)              \
   V(TryCatchStatement)            \
   V(TryFinallyStatement)          \
   V(WhileStatement)

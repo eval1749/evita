@@ -175,6 +175,13 @@ void SimpleFormatter::VisitBreakStatement(ast::BreakStatement* node) {
   *ostream_ << ';';
 }
 
+void SimpleFormatter::VisitCaseClause(ast::CaseClause* node) {
+  *ostream_ << "case ";
+  Format(node->expression());
+  *ostream_ << ": ";
+  Format(node->statement());
+}
+
 void SimpleFormatter::VisitContinueStatement(ast::ContinueStatement* node) {
   *ostream_ << "continue";
   if (node->has_label())
@@ -229,6 +236,40 @@ void SimpleFormatter::VisitInvalidStatement(ast::InvalidStatement* node) {
 
 void SimpleFormatter::VisitLabeledStatement(ast::LabeledStatement* node) {
   Format(node->statement());
+}
+
+void SimpleFormatter::VisitSwitchStatement(ast::SwitchStatement* node) {
+  *ostream_ << "switch (";
+  Format(node->expression());
+  *ostream_ << ") {" << std::endl;
+  IndentScope switch_scope(this);
+  for (const auto& clause : node->clauses()) {
+    auto* runner = clause;
+    for (;;) {
+      if (auto* labeled = runner->TryAs<ast::LabeledStatement>()) {
+        OutputIndent();
+        Format(labeled->label());
+        *ostream_ << ':' << std::endl;
+        runner = &labeled->statement();
+        continue;
+      }
+
+      if (auto* case_clause = runner->TryAs<ast::CaseClause>()) {
+        OutputIndent();
+        *ostream_ << "case ";
+        Format(case_clause->expression());
+        *ostream_ << ':' << std::endl;
+        runner = &case_clause->statement();
+        continue;
+      }
+      IndentScope scope(this);
+      OutputIndent();
+      Format(*runner);
+      *ostream_ << std::endl;
+      break;
+    }
+  }
+  *ostream_ << '}';
 }
 
 void SimpleFormatter::VisitThrowStatement(ast::ThrowStatement* node) {

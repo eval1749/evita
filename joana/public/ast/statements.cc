@@ -42,7 +42,7 @@ bool BreakStatement::has_label() const {
   return NodeTraversal::FirstChildOf(*this) != nullptr;
 }
 
-ast::Name& BreakStatement::label() const {
+Name& BreakStatement::label() const {
   DCHECK(has_label()) << *this;
   return NodeTraversal::FirstChildOf(*this)->As<Name>();
 }
@@ -89,7 +89,7 @@ bool ContinueStatement::has_label() const {
   return NodeTraversal::FirstChildOf(*this) != nullptr;
 }
 
-ast::Name& ContinueStatement::label() const {
+Name& ContinueStatement::label() const {
   DCHECK(has_label()) << *this;
   return NodeTraversal::FirstChildOf(*this)->As<Name>();
 }
@@ -108,11 +108,11 @@ DoStatement::DoStatement(const Name& keyword,
 
 DoStatement::~DoStatement() = default;
 
-ast::Expression& DoStatement::condition() const {
+Expression& DoStatement::condition() const {
   return NodeTraversal::ChildAt(*this, 1).As<Expression>();
 }
 
-ast::Statement& DoStatement::statement() const {
+Statement& DoStatement::statement() const {
   return NodeTraversal::ChildAt(*this, 0).As<Statement>();
 }
 
@@ -164,15 +164,15 @@ IfStatement::IfStatement(const Name& keyword,
 
 IfStatement::~IfStatement() = default;
 
-ast::Expression& IfStatement::condition() const {
+Expression& IfStatement::condition() const {
   return NodeTraversal::ChildAt(*this, 0).As<Expression>();
 }
 
-ast::Statement& IfStatement::else_clause() const {
+Statement& IfStatement::else_clause() const {
   return NodeTraversal::ChildAt(*this, 2).As<Statement>();
 }
 
-ast::Statement& IfStatement::then_clause() const {
+Statement& IfStatement::then_clause() const {
   return NodeTraversal::ChildAt(*this, 1).As<Statement>();
 }
 
@@ -245,7 +245,7 @@ ThrowStatement::ThrowStatement(const Name& keyword,
 
 ThrowStatement::~ThrowStatement() = default;
 
-ast::Expression& ThrowStatement::expression() const {
+Expression& ThrowStatement::expression() const {
   return NodeTraversal::ChildAt(*this, 0).As<Expression>();
 }
 
@@ -275,19 +275,19 @@ TryCatchStatement::TryCatchStatement(const Name& keyword,
 
 TryCatchStatement::~TryCatchStatement() = default;
 
-ast::Statement& TryCatchStatement::block() const {
+Statement& TryCatchStatement::block() const {
   return NodeTraversal::ChildAt(*this, 0).As<Statement>();
 }
 
-ast::Statement& TryCatchStatement::catch_block() const {
+Statement& TryCatchStatement::catch_block() const {
   return NodeTraversal::ChildAt(*this, 2).As<Statement>();
 }
 
-ast::Name& TryCatchStatement::catch_name() const {
+Name& TryCatchStatement::catch_name() const {
   return NodeTraversal::ChildAt(*this, 1).As<Name>();
 }
 
-ast::Statement& TryCatchStatement::finally_block() const {
+Statement& TryCatchStatement::finally_block() const {
   return NodeTraversal::ChildAt(*this, 3).As<Statement>();
 }
 
@@ -309,11 +309,11 @@ TryFinallyStatement::TryFinallyStatement(const Name& keyword,
 
 TryFinallyStatement::~TryFinallyStatement() = default;
 
-ast::Statement& TryFinallyStatement::block() const {
+Statement& TryFinallyStatement::block() const {
   return NodeTraversal::ChildAt(*this, 0).As<Statement>();
 }
 
-ast::Statement& TryFinallyStatement::finally_block() const {
+Statement& TryFinallyStatement::finally_block() const {
   return NodeTraversal::ChildAt(*this, 1).As<Statement>();
 }
 
@@ -331,11 +331,11 @@ WhileStatement::WhileStatement(const Name& keyword,
 
 WhileStatement::~WhileStatement() = default;
 
-ast::Expression& WhileStatement::condition() const {
+Expression& WhileStatement::condition() const {
   return NodeTraversal::ChildAt(*this, 0).As<Expression>();
 }
 
-ast::Statement& WhileStatement::statement() const {
+Statement& WhileStatement::statement() const {
   return NodeTraversal::ChildAt(*this, 1).As<Statement>();
 }
 

@@ -171,10 +171,10 @@ class JOANA_PUBLIC_EXPORT IfStatement : public Statement {
  public:
   ~IfStatement() override;
 
-  ast::Expression& condition() const;
-  ast::Statement& else_clause() const;
+  Expression& condition() const;
+  Statement& else_clause() const;
   bool has_else() const;
-  ast::Statement& then_clause() const;
+  Statement& then_clause() const;
 
  private:
   IfStatement(const Name& keyword,
@@ -216,8 +216,8 @@ class JOANA_PUBLIC_EXPORT LabeledStatement : public Statement {
  public:
   ~LabeledStatement() override;
 
-  ast::Name& label() const;
-  ast::Statement& statement() const;
+  Name& label() const;
+  Statement& statement() const;
 
  private:
   LabeledStatement(const Name& label, const Statement& statement);
@@ -257,7 +257,7 @@ class JOANA_PUBLIC_EXPORT ThrowStatement : public Statement {
  public:
   ~ThrowStatement() override;
 
-  ast::Expression& expression() const;
+  Expression& expression() const;
 
  private:
   ThrowStatement(const Name& keyword, const Expression& expression);

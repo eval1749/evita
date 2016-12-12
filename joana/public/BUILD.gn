@@ -60,6 +60,7 @@ component("public") {
     "source_code_factory.h",
     "source_code_range.cc",
     "source_code_range.h",
+    "visitable.h",
   ]
 
   public_deps = [

@@ -12,6 +12,7 @@
 #include "joana/public/memory/zone_allocated.h"
 #include "joana/public/public_export.h"
 #include "joana/public/source_code_range.h"
+#include "joana/public/visitable.h"
 
 namespace joana {
 namespace ast {
@@ -21,7 +22,9 @@ enum class NameId;
 class NodeVisitor;
 enum class PunctuatorKind;
 
-class JOANA_PUBLIC_EXPORT Node : public Castable<Node>, public ZoneAllocated {
+class JOANA_PUBLIC_EXPORT Node : public Castable<Node>,
+                                 public Visitable<NodeVisitor>,
+                                 public ZoneAllocated {
   DECLARE_CASTABLE_CLASS(Node, Castable);
 
  public:
@@ -44,7 +47,6 @@ class JOANA_PUBLIC_EXPORT Node : public Castable<Node>, public ZoneAllocated {
 
   const SourceCodeRange& range() const { return range_; }
 
-  virtual void Accept(NodeVisitor* visitor) = 0;
   bool Contains(const Node& other) const;
   bool IsDescendantOf(const Node& other) const;
 

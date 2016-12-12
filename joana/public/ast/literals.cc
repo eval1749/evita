@@ -4,7 +4,6 @@
 
 #include "joana/public/ast/literals.h"
 
-#include "joana/public/ast/tokens.h"
 #include "joana/public/escaped_string_piece.h"
 
 namespace joana {
@@ -21,7 +20,7 @@ BooleanLiteral::~BooleanLiteral() = default;
 //
 // Literal
 //
-Literal::Literal(const SourceCodeRange& range) : Node(range) {}
+Literal::Literal(const SourceCodeRange& range) : Token(range) {}
 
 Literal::~Literal() = default;
 

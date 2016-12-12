@@ -5,15 +5,15 @@
 #ifndef JOANA_PUBLIC_AST_LITERALS_H_
 #define JOANA_PUBLIC_AST_LITERALS_H_
 
-#include "joana/public/ast/node.h"
+#include "joana/public/ast/tokens.h"
 
 namespace joana {
 namespace ast {
 
 class Name;
 
-class JOANA_PUBLIC_EXPORT Literal : public Node {
-  DECLARE_ABSTRACT_AST_NODE(Literal, Node);
+class JOANA_PUBLIC_EXPORT Literal : public Token {
+  DECLARE_ABSTRACT_AST_NODE(Literal, Token);
 
  public:
   ~Literal() override;

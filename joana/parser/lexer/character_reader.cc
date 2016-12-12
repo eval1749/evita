@@ -33,8 +33,14 @@ bool CharacterReader::AdvanceIf(base::char16 char_code) {
   return true;
 }
 
+base::char16 CharacterReader::Consume() {
+  const auto result = Get();
+  Advance();
+  return result;
+}
+
 base::char16 CharacterReader::Get() const {
-  DCHECK_LT(current_, range_.end());
+  DCHECK(HasCharacter());
   return range_.source_code().GetChar(current_);
 }
 

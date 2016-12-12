@@ -144,8 +144,7 @@ ast::Node& Lexer::HandleBlockComment() {
   while (reader_->HasCharacter()) {
     if (is_after_asterisk && reader_->AdvanceIf('/'))
       return node_factory().NewComment(MakeTokenRange());
-    is_after_asterisk = reader_->Get() == '*';
-    reader_->Advance();
+    is_after_asterisk = reader_->Consume() == '*';
   }
   return NewInvalid(ErrorCode::BLOCK_COMMENT_NOT_CLOSED);
 }
@@ -322,35 +321,32 @@ ast::Node& Lexer::HandleCharacter() {
 
 ast::Node& Lexer::HandleDecimal() {
   const auto kMaxIntegerPart = std::numeric_limits<uint64_t>::max() / 10 - 1;
-  uint64_t digits_part = reader_->Get() - '0';
-  reader_->Advance();
+  uint64_t digits_part = reader_->Consume() - '0';
   auto digits_scale = 0;
   while (reader_->HasCharacter()) {
     if (!IsDigitWithBase(reader_->Get(), 10))
       break;
+    const auto digit = FromDigitWithBase(reader_->Consume(), 10);
     if (digits_part > kMaxIntegerPart) {
       ++digits_scale;
-      reader_->Advance();
       continue;
     }
     digits_part *= 10;
-    digits_part += FromDigitWithBase(reader_->Get(), 10);
-    reader_->Advance();
+    digits_part += digit;
   }
   if (reader_->AdvanceIf('.')) {
     while (reader_->HasCharacter()) {
       if (!IsDigitWithBase(reader_->Get(), 10))
         break;
+      const auto digit = FromDigitWithBase(reader_->Consume(), 10);
       if (digits_part > kMaxIntegerPart) {
         // Since we've already had number of digits more than precision, just
         // ignore digit digits_part decimal point.
-        reader_->Advance();
         continue;
       }
       --digits_scale;
       digits_part *= 10;
-      digits_part += FromDigitWithBase(reader_->Get(), 10);
-      reader_->Advance();
+      digits_part += digit;
     }
   }
   uint64_t exponent_part = 0;
@@ -363,13 +359,11 @@ ast::Node& Lexer::HandleDecimal() {
     while (reader_->HasCharacter()) {
       if (!IsDigitWithBase(reader_->Get(), 10))
         break;
-      if (exponent_part > kMaxIntegerPart) {
-        reader_->Advance();
+      const auto digit = FromDigitWithBase(reader_->Consume(), 10);
+      if (exponent_part > kMaxIntegerPart)
         continue;
-      }
       exponent_part *= 10;
-      exponent_part += FromDigitWithBase(reader_->Get(), 10);
-      reader_->Advance();
+      exponent_part += digit;
     }
   }
   const auto value =
@@ -418,16 +412,16 @@ ast::Node& Lexer::HandleInteger(int base) {
   auto number_of_digits = 0;
   auto is_overflow = false;
   while (reader_->HasCharacter() && IsDigitWithBase(reader_->Get(), base)) {
+    const auto digit = FromDigitWithBase(reader_->Consume(), base);
     if (accumulator > kMaxInteger / base) {
       if (!is_overflow)
         AddError(ErrorCode::NUMERIC_LITERAL_INTEGER_OVERFLOW);
       is_overflow = true;
     } else {
       accumulator *= base;
-      accumulator += FromDigitWithBase(reader_->Get(), base);
+      accumulator += digit;
     }
     ++number_of_digits;
-    reader_->Advance();
   }
 
   if (reader_->HasCharacter() && IsIdentifierPart(reader_->Get())) {
@@ -446,11 +440,8 @@ ast::Node& Lexer::HandleInteger(int base) {
 
 ast::Node& Lexer::HandleLineComment() {
   while (reader_->HasCharacter()) {
-    if (IsLineTerminator(reader_->Get())) {
-      reader_->Advance();
+    if (IsLineTerminator(reader_->Consume()))
       break;
-    }
-    reader_->Advance();
   }
   return node_factory().NewComment(MakeTokenRange());
 }
@@ -468,8 +459,7 @@ ast::Node& Lexer::HandleName() {
 ast::Node& Lexer::HandleOperator(ast::PunctuatorKind one,
                                  ast::PunctuatorKind two,
                                  ast::PunctuatorKind equal) {
-  const auto char_code = reader_->Get();
-  reader_->Advance();
+  const auto char_code = reader_->Consume();
   if (reader_->AdvanceIf('='))
     return NewPunctuator(equal);
   if (two != ast::PunctuatorKind::Invalid && reader_->AdvanceIf(char_code))
@@ -492,8 +482,7 @@ ast::Node& Lexer::HandleStringLiteral() {
     BackslashX1,
     Normal,
   } state = State::Normal;
-  const auto delimiter = reader_->Get();
-  reader_->Advance();
+  const auto delimiter = reader_->Consume();
   auto accumulator = 0;
   auto backslash_start = 0;
   while (reader_->HasCharacter()) {

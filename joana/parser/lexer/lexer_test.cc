@@ -255,6 +255,10 @@ TEST_F(LexerTest, NumericLiteral) {
   PrepareSouceCode("1234");
   EXPECT_EQ(NewNumericLiteral(1234), Parse());
 
+  PrepareSouceCode("1 2");
+  EXPECT_EQ(NewNumericLiteral(0, 1, 1) + " " + NewNumericLiteral(2, 3, 2),
+            Parse());
+
   PrepareSouceCode("0b1011");
   EXPECT_EQ(NewNumericLiteral(0b1011), Parse());
 

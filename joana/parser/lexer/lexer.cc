@@ -30,7 +30,7 @@ const base::char16 kLineSeparator = 0x2028;
 const base::char16 kParagraphSeparator = 0x2029;
 
 int FromDigitWithBase(base::char16 char_code, int base) {
-  DCHECK(base == 2 || base == 8 || base == 16) << base;
+  DCHECK(base == 2 || base == 8 || base == 10 || base == 16) << base;
   if (base == 16) {
     if (char_code >= '0' && char_code <= '9')
       return char_code - '0';
@@ -52,7 +52,7 @@ int FromHexDigit(base::char16 char_code) {
 }
 
 bool IsDigitWithBase(base::char16 char_code, int base) {
-  DCHECK(base == 2 || base == 8 || base == 16) << base;
+  DCHECK(base == 2 || base == 8 || base == 10 || base == 16) << base;
   if (base == 16) {
     if (char_code >= '0' && char_code <= '9')
       return true;
@@ -326,7 +326,7 @@ ast::Node& Lexer::HandleDecimal() {
   reader_->Advance();
   auto digits_scale = 0;
   while (reader_->HasCharacter()) {
-    if (reader_->Get() < '0' && reader_->Get() > '9')
+    if (!IsDigitWithBase(reader_->Get(), 10))
       break;
     if (digits_part > kMaxIntegerPart) {
       ++digits_scale;
@@ -334,12 +334,12 @@ ast::Node& Lexer::HandleDecimal() {
       continue;
     }
     digits_part *= 10;
-    digits_part += reader_->Get() - '0';
+    digits_part += FromDigitWithBase(reader_->Get(), 10);
     reader_->Advance();
   }
   if (reader_->AdvanceIf('.')) {
     while (reader_->HasCharacter()) {
-      if (reader_->Get() < '0' && reader_->Get() > '9')
+      if (!IsDigitWithBase(reader_->Get(), 10))
         break;
       if (digits_part > kMaxIntegerPart) {
         // Since we've already had number of digits more than precision, just
@@ -349,7 +349,7 @@ ast::Node& Lexer::HandleDecimal() {
       }
       --digits_scale;
       digits_part *= 10;
-      digits_part += reader_->Get() - '0';
+      digits_part += FromDigitWithBase(reader_->Get(), 10);
       reader_->Advance();
     }
   }
@@ -361,14 +361,14 @@ ast::Node& Lexer::HandleDecimal() {
     else if (reader_->AdvanceIf('-'))
       exponent_sign = -1;
     while (reader_->HasCharacter()) {
-      if (reader_->Get() < '0' && reader_->Get() > '9')
+      if (!IsDigitWithBase(reader_->Get(), 10))
         break;
       if (exponent_part > kMaxIntegerPart) {
         reader_->Advance();
         continue;
       }
       exponent_part *= 10;
-      exponent_part += reader_->Get() - '0';
+      exponent_part += FromDigitWithBase(reader_->Get(), 10);
       reader_->Advance();
     }
   }

@@ -34,7 +34,7 @@ class Lexer final {
   void Advance();
   // Returns true if |Lexer| has a token.
   bool HasToken() const { return current_token_ != nullptr; }
-  ast::Node& PeekToken() const;
+  ast::Token& PeekToken() const;
 
  private:
   enum class ErrorCode;
@@ -44,30 +44,30 @@ class Lexer final {
   void AddError(const SourceCodeRange& range, ErrorCode error_code);
   void AddError(ErrorCode error_code);
 
-  ast::Node& HandleBlockComment();
-  ast::Node& HandleCharacter();
-  ast::Node& HandleDecimal();
-  ast::Node& HandleDigitZero();
-  ast::Node& HandleInteger(int base);
-  ast::Node& HandleLineComment();
-  ast::Node& HandleName();
-  ast::Node& HandleOperator(ast::PunctuatorKind one,
-                            ast::PunctuatorKind two,
-                            ast::PunctuatorKind equal);
-  ast::Node& HandleStringLiteral();
+  ast::Token& HandleBlockComment();
+  ast::Token& HandleCharacter();
+  ast::Token& HandleDecimal();
+  ast::Token& HandleDigitZero();
+  ast::Token& HandleInteger(int base);
+  ast::Token& HandleLineComment();
+  ast::Token& HandleName();
+  ast::Token& HandleOperator(ast::PunctuatorKind one,
+                             ast::PunctuatorKind two,
+                             ast::PunctuatorKind equal);
+  ast::Token& HandleStringLiteral();
 
   SourceCodeRange MakeTokenRange() const;
 
-  ast::Node& NewError(ErrorCode error_code);
-  ast::Node& NewInvalid(ErrorCode error_code);
-  ast::Node& NewPunctuator(ast::PunctuatorKind kind);
+  ast::Token& NewError(ErrorCode error_code);
+  ast::Token& NewInvalid(ErrorCode error_code);
+  ast::Token& NewPunctuator(ast::PunctuatorKind kind);
 
-  ast::Node* NextToken();
+  ast::Token* NextToken();
 
   SourceCodeRange RangeFrom(int start) const;
 
   ast::EditContext* const context_;
-  ast::Node* current_token_ = nullptr;
+  ast::Token* current_token_ = nullptr;
   const SourceCodeRange& range_;
   const std::unique_ptr<CharacterReader> reader_;
   int token_start_;

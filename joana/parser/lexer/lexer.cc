@@ -134,12 +134,12 @@ void Lexer::Advance() {
   current_token_ = NextToken();
 }
 
-ast::Node& Lexer::PeekToken() const {
+ast::Token& Lexer::PeekToken() const {
   DCHECK(current_token_);
   return *current_token_;
 }
 
-ast::Node& Lexer::HandleBlockComment() {
+ast::Token& Lexer::HandleBlockComment() {
   auto is_after_asterisk = false;
   while (reader_->HasCharacter()) {
     if (is_after_asterisk && reader_->AdvanceIf('/'))
@@ -149,7 +149,7 @@ ast::Node& Lexer::HandleBlockComment() {
   return NewInvalid(ErrorCode::BLOCK_COMMENT_NOT_CLOSED);
 }
 
-ast::Node& Lexer::HandleCharacter() {
+ast::Token& Lexer::HandleCharacter() {
   token_start_ = reader_->location();
   switch (reader_->Get()) {
     case ' ':
@@ -280,6 +280,7 @@ ast::Node& Lexer::HandleCharacter() {
       }
       return NewPunctuator(ast::PunctuatorKind::GreaterThan);
     case '?':
+      reader_->Advance();
       return NewPunctuator(ast::PunctuatorKind::Question);
     case '`':
       // TODO(eval1749): NYI: template token
@@ -319,7 +320,7 @@ ast::Node& Lexer::HandleCharacter() {
   }
 }
 
-ast::Node& Lexer::HandleDecimal() {
+ast::Token& Lexer::HandleDecimal() {
   const auto kMaxIntegerPart = std::numeric_limits<uint64_t>::max() / 10 - 1;
   uint64_t digits_part = reader_->Consume() - '0';
   auto digits_scale = 0;
@@ -373,7 +374,7 @@ ast::Node& Lexer::HandleDecimal() {
                                           value * std::pow(10.0, exponent));
 }
 
-ast::Node& Lexer::HandleDigitZero() {
+ast::Token& Lexer::HandleDigitZero() {
   switch (reader_->Get()) {
     case '0':
     case '1':
@@ -405,7 +406,7 @@ ast::Node& Lexer::HandleDigitZero() {
   return NewInvalid(ErrorCode::NUMERIC_LITERAL_PREFIX_ZERO);
 }
 
-ast::Node& Lexer::HandleInteger(int base) {
+ast::Token& Lexer::HandleInteger(int base) {
   DCHECK(base == 2 || base == 8 || base == 16) << base;
   uint64_t accumulator = 0;
   const auto kMaxInteger = static_cast<uint64_t>(1) << 53;
@@ -438,7 +439,7 @@ ast::Node& Lexer::HandleInteger(int base) {
   return node_factory().NewNumericLiteral(MakeTokenRange(), accumulator);
 }
 
-ast::Node& Lexer::HandleLineComment() {
+ast::Token& Lexer::HandleLineComment() {
   while (reader_->HasCharacter()) {
     if (IsLineTerminator(reader_->Consume()))
       break;
@@ -446,7 +447,7 @@ ast::Node& Lexer::HandleLineComment() {
   return node_factory().NewComment(MakeTokenRange());
 }
 
-ast::Node& Lexer::HandleName() {
+ast::Token& Lexer::HandleName() {
   while (reader_->HasCharacter()) {
     if (!IsIdentifierPart(reader_->Get()))
       break;
@@ -456,9 +457,9 @@ ast::Node& Lexer::HandleName() {
 }
 
 // Handle op, op op, op '=' pattern.
-ast::Node& Lexer::HandleOperator(ast::PunctuatorKind one,
-                                 ast::PunctuatorKind two,
-                                 ast::PunctuatorKind equal) {
+ast::Token& Lexer::HandleOperator(ast::PunctuatorKind one,
+                                  ast::PunctuatorKind two,
+                                  ast::PunctuatorKind equal) {
   const auto char_code = reader_->Consume();
   if (reader_->AdvanceIf('='))
     return NewPunctuator(equal);
@@ -467,7 +468,7 @@ ast::Node& Lexer::HandleOperator(ast::PunctuatorKind one,
   return NewPunctuator(one);
 }
 
-ast::Node& Lexer::HandleStringLiteral() {
+ast::Token& Lexer::HandleStringLiteral() {
   std::vector<base::char16> characters;
   enum class State {
     Backslash,
@@ -661,21 +662,21 @@ SourceCodeRange Lexer::MakeTokenRange() const {
   return source_code().Slice(token_start_, reader_->location());
 }
 
-ast::Node& Lexer::NewError(ErrorCode error_code) {
+ast::Token& Lexer::NewError(ErrorCode error_code) {
   AddError(error_code);
   return NewInvalid(error_code);
 }
 
-ast::Node& Lexer::NewInvalid(ErrorCode error_code) {
+ast::Token& Lexer::NewInvalid(ErrorCode error_code) {
   return node_factory().NewInvalid(MakeTokenRange(),
                                    static_cast<int>(error_code));
 }
 
-ast::Node& Lexer::NewPunctuator(ast::PunctuatorKind kind) {
+ast::Token& Lexer::NewPunctuator(ast::PunctuatorKind kind) {
   return node_factory().NewPunctuator(MakeTokenRange(), kind);
 }
 
-ast::Node* Lexer::NextToken() {
+ast::Token* Lexer::NextToken() {
   while (reader_->HasCharacter()) {
     if (!IsWhitespace(reader_->Get()))
       return &HandleCharacter();

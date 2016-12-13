@@ -315,6 +315,10 @@ TEST_F(LexerTest, Punctuator) {
   PrepareSouceCode(")");
   EXPECT_EQ(NewPunctuator(ast::PunctuatorKind::SemiColon), Parse());
 
+  // "?"
+  PrepareSouceCode("?");
+  EXPECT_EQ(NewPunctuator(ast::PunctuatorKind::Question), Parse());
+
   // "["
   PrepareSouceCode("[");
   EXPECT_EQ(NewPunctuator(ast::PunctuatorKind::SemiColon), Parse());

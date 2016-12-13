@@ -256,6 +256,7 @@ ast::Token& Lexer::HandleCharacter() {
       }
       return NewPunctuator(ast::PunctuatorKind::LessThan);
     case '=':
+      reader_->Advance();
       if (reader_->AdvanceIf('=')) {
         if (reader_->AdvanceIf('='))
           return NewPunctuator(ast::PunctuatorKind::EqualEqualEqual);

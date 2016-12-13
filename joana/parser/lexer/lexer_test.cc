@@ -307,6 +307,10 @@ TEST_F(LexerTest, Punctuator) {
   PrepareSouceCode(":");
   EXPECT_EQ(NewPunctuator(ast::PunctuatorKind::Colon), Parse());
 
+  // "=>"
+  PrepareSouceCode("=>");
+  EXPECT_EQ(NewPunctuator(ast::PunctuatorKind::Arrow), Parse());
+
   // "("
   PrepareSouceCode("(");
   EXPECT_EQ(NewPunctuator(ast::PunctuatorKind::SemiColon), Parse());

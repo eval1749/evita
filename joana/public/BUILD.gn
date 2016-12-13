@@ -75,6 +75,7 @@ source_set("test_files") {
   sources = [
     "ast/node_test.cc",
     "castable_test.cc",
+    "source_code_range_test.cc",
   ]
   deps = [
     ":public",

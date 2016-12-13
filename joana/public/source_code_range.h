@@ -28,6 +28,14 @@ class JOANA_PUBLIC_EXPORT SourceCodeRange final {
 
   base::StringPiece16 GetString() const;
 
+  static SourceCodeRange Merge(const SourceCodeRange& range1,
+                               const SourceCodeRange& range2);
+
+  template <typename... Params>
+  static SourceCodeRange Merge(const SourceCodeRange& range1,
+                               const SourceCodeRange& range2,
+                               Params... params);
+
  private:
   friend class SourceCode;
 
@@ -40,6 +48,13 @@ class JOANA_PUBLIC_EXPORT SourceCodeRange final {
 
 JOANA_PUBLIC_EXPORT std::ostream& operator<<(std::ostream& ostream,
                                              const SourceCodeRange& range);
+
+template <typename... Params>
+SourceCodeRange SourceCodeRange::Merge(const SourceCodeRange& range1,
+                                       const SourceCodeRange& range2,
+                                       Params... params) {
+  return Merge(range1, Merge(range2, params...));
+}
 
 }  // namespace joana
 

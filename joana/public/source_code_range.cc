@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <algorithm>
+
 #include "joana/public/source_code_range.h"
 
 #include "base/logging.h"
@@ -36,6 +38,13 @@ bool SourceCodeRange::operator!=(const SourceCodeRange& other) const {
 
 base::StringPiece16 SourceCodeRange::GetString() const {
   return source_code_->GetString(start_, end_);
+}
+
+SourceCodeRange SourceCodeRange::Merge(const SourceCodeRange& range1,
+                                       const SourceCodeRange& range2) {
+  DCHECK_EQ(&range1.source_code(), &range2.source_code());
+  return range1.source_code().Slice(std::min(range1.start(), range2.start()),
+                                    std::max(range1.end(), range2.end()));
 }
 
 std::ostream& operator<<(std::ostream& ostream, const SourceCodeRange& range) {

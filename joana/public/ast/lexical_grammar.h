@@ -86,15 +86,16 @@ namespace joana {
   V(prototype, Prototype, PROTOTYPE)       \
   /** new.target */                        \
   V(target, Target, Target)                \
-  V(undefined, Undefined, UNDEFINED)
+  V(undefined, Undefined, UNDEFINED)       \
+  V(yield_star, YieldStar, YIELD_STAR)
 
 // Visitor parameter takes:
 //  - String representation of punctuator.
 //  - Capitalized name
 //  - Upper case
 //  - Binary operator category
-// Note: Parser generates PostPlusPlus, PostMinusMinus and YieldStar tokens
-// instead of Lexer.
+// Note: Parser generates PostPlusPlus and PostMinusMinus tokens instead of
+// Lexer.
 #define FOR_EACH_JAVASCRIPT_PUNCTUATOR(V)                                   \
   V("???", Invalid, INVALID, None)                                          \
   V("{", LeftBrace, LEFT_BRACE, None)                                       \
@@ -150,8 +151,7 @@ namespace joana {
   V("**", TimesTimes, TIMES_TIMES, Exponentiation)                          \
   V("**=", TimesTimesEqual, TIMES_TIMES_EQUAL, Assignment)                  \
   V("/", Divide, DIVIDE, Multiplicative)                                    \
-  V("/=", DivideEqual, DIVIDE_EQUAL, Assignment)                            \
-  V("yield*", YieldStar, YIELD_STAR, None)
+  V("/=", DivideEqual, DIVIDE_EQUAL, Assignment)
 
 }  // namespace joana
 

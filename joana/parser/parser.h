@@ -10,24 +10,9 @@
 #include <vector>
 
 #include "base/macros.h"
+#include "joana/public/ast/node_forward.h"
 
 namespace joana {
-namespace ast {
-
-class ContainerNode;
-class EditContext;
-class Expression;
-class Literal;
-class Name;
-enum class NameId;
-class Node;
-class NodeFactory;
-class Punctuator;
-enum class PunctuatorKind;
-class Statement;
-class Token;
-
-}  // namespace ast
 
 class SourceCode;
 class SourceCodeRange;
@@ -89,11 +74,21 @@ class Parser final {
   ast::Token& PeekToken();
   void PushBackToken(const ast::Token& token);
 
+  // Declarations
+  ast::ArrowFunctionBody& ExpectArrowFunctionBody();
+  std::vector<ast::Expression*> ExpectParameterList(
+      const ast::Expression& expression);
+
   // Expressions
   OperatorPrecedence CategoryOf(const ast::Token& token) const;
   OperatorPrecedence HigherPrecedenceOf(OperatorPrecedence category) const;
+  ast::Expression& NewDeclarationExpression(
+      const ast::Declaration& declaration);
+  ast::Expression& NewElisionExpression();
   ast::Expression& NewInvalidExpression(ErrorCode error_code);
   ast::Expression& NewLiteralExpression(const ast::Literal& literal);
+  ast::Expression& NewUnaryExpression(const ast::Token& op,
+                                      const ast::Expression& expression);
 
   // The entry of parsing an expression.
   ast::Expression& ParseExpression();
@@ -111,6 +106,7 @@ class Parser final {
   ast::Expression& ParsePrimaryExpression();
   ast::Expression& ParseUnaryExpression();
   ast::Expression& ParseUpdateExpression();
+  ast::Expression& ParseYieldExpression();
 
   // Statements
   bool CanUseBreak() const;
@@ -138,7 +134,6 @@ class Parser final {
   ast::Statement& ParseTryStatement();
   ast::Statement& ParseVarStatement();
   ast::Statement& ParseWhileStatement();
-  ast::Statement& ParseYieldStatement();
 
   std::unique_ptr<BracketStack> bracket_stack_;
   ast::EditContext* const context_;

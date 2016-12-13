@@ -49,6 +49,7 @@ class JOANA_PUBLIC_EXPORT Node : public Castable<Node>,
   ContainerNode* parent() const { return parent_; }
   Node* previous_sibling() const { return previous_sibling_; }
 
+  const SourceCode& source_code() const { return range_.source_code(); }
   const SourceCodeRange& range() const { return range_; }
 
   // TODO(eval1749): We should make |ChildAt()| as pure virtual function.

@@ -31,9 +31,20 @@ class JOANA_PUBLIC_EXPORT NodeFactory final {
 
   Module& NewModule(const SourceCodeRange& range);
 
+  // Returns new |Name| token with specified |name_id|. This function is used
+  // for constructing pseudo name "yield*".
+  Name& NewName(const SourceCodeRange& range, NameId name_id);
   Name& NewName(const SourceCodeRange& range);
 
   Punctuator& NewPunctuator(const SourceCodeRange& range, PunctuatorKind kind);
+
+  //
+  // Declarations factory members
+  //
+  ArrowFunction& NewArrowFunction(const SourceCodeRange& range,
+                                  FunctionKind kind,
+                                  const std::vector<Expression*>& parameters,
+                                  const Node& body);
 
   // Expressions factory members
   ArrayLiteralExpression& NewArrayLiteralExpression(
@@ -51,15 +62,17 @@ class JOANA_PUBLIC_EXPORT NodeFactory final {
   CallExpression& NewCallExpression(const SourceCodeRange& range,
                                     const Expression& callee,
                                     const std::vector<Expression*>& arguments);
-  CommaExpression& NewCommaExpression(const SourceCodeRange& range,
-                                      const Expression& left_hand_side,
-                                      const Expression& right_hand_side);
+  CommaExpression& NewCommaExpression(
+      const SourceCodeRange& range,
+      const std::vector<Expression*> expressions);
   ConditionalExpression& NewConditionalExpression(
       const SourceCodeRange& range,
       const Expression& condition,
       const Expression& true_expression,
       const Expression& false_expression);
-  ElisionExpression& NewElisionExpression(const Token& op);
+  DeclarationExpression& NewDeclarationExpression(
+      const Declaration& declaration);
+  ElisionExpression& NewElisionExpression(const SourceCodeRange& range);
   GroupExpression& NewGroupExpression(const SourceCodeRange& range,
                                       const Expression& expression);
   InvalidExpression& NewInvalidExpression(const Node& node, int error_code);

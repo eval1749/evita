@@ -9,12 +9,15 @@ namespace joana {
 namespace ast {
 
 #define FOR_EACH_ABSTRACT_AST_NODE(V) \
+  V(Declaration)                      \
   V(Expression)                       \
   V(ContainerNode)                    \
   V(Literal)                          \
   V(Node)                             \
   V(Statement)                        \
   V(Token)
+
+#define FOR_EACH_AST_DECLARATION(V) V(ArrowFunction)
 
 #define FOR_EACH_AST_EXPRESSION(V) \
   V(ArrayLiteralExpression)        \
@@ -23,6 +26,7 @@ namespace ast {
   V(CallExpression)                \
   V(CommaExpression)               \
   V(ConditionalExpression)         \
+  V(DeclarationExpression)         \
   V(GroupExpression)               \
   V(ElisionExpression)             \
   V(InvalidExpression)             \
@@ -64,6 +68,7 @@ namespace ast {
   V(Name)
 
 #define FOR_EACH_CONCRETE_AST_NODE(V) \
+  FOR_EACH_AST_DECLARATION(V)         \
   FOR_EACH_AST_EXPRESSION(V)          \
   FOR_EACH_AST_LITERAL(V)             \
   FOR_EACH_AST_STATEMENT(V)           \
@@ -77,10 +82,15 @@ FOR_EACH_CONCRETE_AST_NODE(V)
 
 class EditContext;
 class ExpressionList;
+enum class FunctionKind;
 enum class InvalidKind;
+enum class NameId;
 class NodeEditor;
 class NodeFactory;
 enum class PunctuatorKind;
+
+// Expression or BlockStatement
+using ArrowFunctionBody = Node;
 
 }  // namespace ast
 }  // namespace joana

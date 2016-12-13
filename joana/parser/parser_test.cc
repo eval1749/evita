@@ -125,6 +125,25 @@ TEST_F(ParserTest, ExpressionStatementArrayLiteralSpread) {
   TEST_PARSER("[1, 2, ...x];\n");
 }
 
+TEST_F(ParserTest, ExpressionStatementArrowFunction) {
+  TEST_PARSER(
+      "(a) => {\n"
+      "  console.log(a);\n"
+      "};\n");
+}
+
+TEST_F(ParserTest, ExpressionStatementArrowFunction0) {
+  TEST_PARSER("() => 1;\n");
+}
+
+TEST_F(ParserTest, ExpressionStatementArrowFunction1) {
+  TEST_PARSER("x => x * 2;\n");
+}
+
+TEST_F(ParserTest, ExpressionStatementArrowFunction2) {
+  TEST_PARSER("(x, y) => x * y;\n");
+}
+
 TEST_F(ParserTest, ExpressionStatementAssignment1) {
   TEST_PARSER("foo = 100;\n");
   TEST_PARSER("foo = bar + baz;\n");

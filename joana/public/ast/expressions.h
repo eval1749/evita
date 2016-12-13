@@ -14,8 +14,6 @@
 namespace joana {
 namespace ast {
 
-class Literal;
-
 //
 // Expression is a base class of expression nodes.
 //
@@ -39,14 +37,14 @@ class JOANA_PUBLIC_EXPORT ExpressionList final : public ZoneAllocated {
  public:
   ~ExpressionList();
 
-  const ZoneVector<Expression*>& expressions() const { return expressions_; }
+  const ZoneVector<Expression*>& elements() const { return elements_; }
 
  private:
   friend class NodeFactory;
 
-  ExpressionList(Zone* zone, const std::vector<Expression*>& expressions);
+  ExpressionList(Zone* zone, const std::vector<Expression*>& elements);
 
-  ZoneVector<Expression*> expressions_;
+  ZoneVector<Expression*> elements_;
 
   DISALLOW_COPY_AND_ASSIGN(ExpressionList);
 };
@@ -141,19 +139,16 @@ class JOANA_PUBLIC_EXPORT CallExpression final
 // CommaExpression
 //
 class JOANA_PUBLIC_EXPORT CommaExpression final
-    : public NodeTemplate<Expression, Expression*, Expression*> {
+    : public NodeTemplate<Expression, ExpressionList*> {
   DECLARE_CONCRETE_AST_NODE(CommaExpression, Expression);
 
  public:
   ~CommaExpression() final;
 
-  const Expression& lhs() const { return *member_at<0>(); }
-  const Expression& rhs() const { return *member_at<1>(); }
+  const ExpressionList& expressions() const { return *member_at<0>(); }
 
  private:
-  CommaExpression(const SourceCodeRange& range,
-                  Expression* lhs,
-                  Expression* rhs);
+  CommaExpression(const SourceCodeRange& range, ExpressionList* expressions);
 
   DISALLOW_COPY_AND_ASSIGN(CommaExpression);
 };
@@ -179,6 +174,24 @@ class JOANA_PUBLIC_EXPORT ConditionalExpression final
                         Expression* false_expression);
 
   DISALLOW_COPY_AND_ASSIGN(ConditionalExpression);
+};
+
+//
+// DeclarationExpression
+//
+class JOANA_PUBLIC_EXPORT DeclarationExpression final
+    : public NodeTemplate<Expression, Declaration*> {
+  DECLARE_CONCRETE_AST_NODE(DeclarationExpression, Expression);
+
+ public:
+  ~DeclarationExpression() final;
+
+  const Declaration& declaration() const { return *member_at<0>(); }
+
+ private:
+  explicit DeclarationExpression(Declaration* declaration);
+
+  DISALLOW_COPY_AND_ASSIGN(DeclarationExpression);
 };
 
 //

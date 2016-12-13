@@ -8,6 +8,7 @@
 
 #include "joana/parser/lexer/lexer.h"
 #include "joana/parser/parser_error_codes.h"
+#include "joana/public/ast/declarations.h"
 #include "joana/public/ast/expressions.h"
 #include "joana/public/ast/literals.h"
 #include "joana/public/ast/node_factory.h"
@@ -67,10 +68,11 @@ ast::Punctuator& ConvertToPostOperator(ast::NodeFactory* factory,
 
 bool IsUnaryOperator(const ast::Token& token) {
   return token == ast::NameId::Await || token == ast::NameId::Delete ||
-         token == ast::NameId::TypeOf || token == ast::PunctuatorKind::Plus ||
+         token == ast::NameId::TypeOf || token == ast::PunctuatorKind::BitNot ||
+         token == ast::PunctuatorKind::DotDotDot ||
+         token == ast::PunctuatorKind::LogicalNot ||
          token == ast::PunctuatorKind::Minus ||
-         token == ast::PunctuatorKind::BitNot ||
-         token == ast::PunctuatorKind::LogicalNot;
+         token == ast::PunctuatorKind::Plus;
 }
 
 bool IsUpdateOperator(const ast::Token& token) {
@@ -111,6 +113,15 @@ Parser::OperatorPrecedence Parser::HigherPrecedenceOf(
   return static_cast<OperatorPrecedence>(static_cast<int>(category) + 1);
 }
 
+ast::Expression& Parser::NewDeclarationExpression(
+    const ast::Declaration& declaration) {
+  return node_factory().NewDeclarationExpression(declaration);
+}
+
+ast::Expression& Parser::NewElisionExpression() {
+  return node_factory().NewElisionExpression(lexer_->location());
+}
+
 ast::Expression& Parser::NewInvalidExpression(ErrorCode error_code) {
   auto& token = ComputeInvalidToken(error_code);
   AddError(token, error_code);
@@ -120,6 +131,12 @@ ast::Expression& Parser::NewInvalidExpression(ErrorCode error_code) {
 
 ast::Expression& Parser::NewLiteralExpression(const ast::Literal& literal) {
   return node_factory().NewLiteralExpression(literal);
+}
+
+ast::Expression& Parser::NewUnaryExpression(const ast::Token& op,
+                                            const ast::Expression& expression) {
+  return node_factory().NewUnaryExpression(GetSourceCodeRange(), op,
+                                           expression);
 }
 
 // Parse argument list after consuming left parenthesis.
@@ -147,30 +164,19 @@ ast::Expression& Parser::ParseArrayLiteralExpression() {
   SourceCodeRangeScope scope(this);
   ConsumeToken();
   std::vector<ast::Expression*> elements;
-  auto got_comma = true;
+  auto has_expression = false;
   while (HasToken()) {
     if (ConsumeTokenIf(ast::PunctuatorKind::RightBracket)) {
       return node_factory().NewArrayLiteralExpression(GetSourceCodeRange(),
                                                       elements);
     }
-    if (PeekToken() == ast::PunctuatorKind::Comma) {
-      auto& comma = ConsumeToken();
-      if (got_comma)
-        elements.push_back(&node_factory().NewElisionExpression(comma));
-      got_comma = true;
+    if (ConsumeTokenIf(ast::PunctuatorKind::Comma)) {
+      if (!has_expression)
+        elements.push_back(&NewElisionExpression());
+      has_expression = false;
       continue;
     }
-    got_comma = false;
-    if (PeekToken() == ast::PunctuatorKind::DotDotDot) {
-      SourceCodeRangeScope scope(this);
-      auto& op = ConsumeToken();
-      if (!HasToken())
-        break;
-      auto& expression = ParseAssignmentExpression();
-      elements.push_back(&node_factory().NewUnaryExpression(
-          GetSourceCodeRange(), op, expression));
-      continue;
-    }
+    has_expression = true;
     elements.push_back(&ParseAssignmentExpression());
   }
   return node_factory().NewArrayLiteralExpression(GetSourceCodeRange(),
@@ -211,13 +217,13 @@ ast::Expression& Parser::ParseBinaryExpression(OperatorPrecedence category) {
 
 ast::Expression& Parser::ParseCommaExpression() {
   SourceCodeRangeScope scope(this);
-  auto* expression = &ParseAssignmentExpression();
-  while (ConsumeTokenIf(ast::PunctuatorKind::Comma)) {
-    auto& right = ParseAssignmentExpression();
-    expression = &node_factory().NewCommaExpression(GetSourceCodeRange(),
-                                                    *expression, right);
-  }
-  return *expression;
+  std::vector<ast::Expression*> expressions;
+  expressions.push_back(&ParseAssignmentExpression());
+  while (ConsumeTokenIf(ast::PunctuatorKind::Comma))
+    expressions.push_back(&ParseAssignmentExpression());
+  if (expressions.size() == 1)
+    return *expressions.front();
+  return node_factory().NewCommaExpression(GetSourceCodeRange(), expressions);
 }
 
 ast::Expression& Parser::ParseConditionalExpression() {
@@ -278,6 +284,7 @@ ast::Expression& Parser::ParseLeftHandSideExpression() {
 }
 
 ast::Expression& Parser::ParseNameAsExpression(const ast::Name& name) {
+  SourceCodeRangeScope scope(this);
   switch (static_cast<ast::NameId>(name.number())) {
     case ast::NameId::False:
       return NewLiteralExpression(
@@ -292,6 +299,13 @@ ast::Expression& Parser::ParseNameAsExpression(const ast::Name& name) {
   }
   if (name.IsKeyword())
     return NewInvalidExpression(ErrorCode::ERROR_EXPRESSION_INVALID);
+  if (ConsumeTokenIf(ast::PunctuatorKind::Arrow)) {
+    auto& statement = ExpectArrowFunctionBody();
+    auto& parameter = node_factory().NewReferenceExpression(name);
+    return NewDeclarationExpression(node_factory().NewArrowFunction(
+        GetSourceCodeRange(), ast::FunctionKind::Normal, {&parameter},
+        statement));
+  }
   return node_factory().NewReferenceExpression(name);
 }
 
@@ -320,18 +334,23 @@ ast::Expression& Parser::ParseNewExpression() {
 
 ast::Expression& Parser::ParseParenthesis() {
   SourceCodeRangeScope scope(this);
+  ConsumeToken();
   if (ConsumeTokenIf(ast::PunctuatorKind::RightParenthesis)) {
     ExpectToken(ast::PunctuatorKind::Arrow,
                 ErrorCode::ERROR_EXPRESSION_PRIMARY_EXPECT_ARROW);
-    // TODO(eval1749): NYI arrow function
-    return NewInvalidExpression(ErrorCode::ERROR_EXPRESSION_INVALID);
+    auto& statement = ExpectArrowFunctionBody();
+    return NewDeclarationExpression(node_factory().NewArrowFunction(
+        GetSourceCodeRange(), ast::FunctionKind::Normal, {}, statement));
   }
   auto& expression = ParseExpression();
   ExpectToken(ast::PunctuatorKind::RightParenthesis,
               ErrorCode::ERROR_EXPRESSION_PRIMARY_EXPECT_RPAREN);
   if (ConsumeTokenIf(ast::PunctuatorKind::Arrow)) {
-    // TODO(eval1749): NYI arrow function
-    return NewInvalidExpression(ErrorCode::ERROR_EXPRESSION_INVALID);
+    const auto& parameters = ExpectParameterList(expression);
+    auto& statement = ExpectArrowFunctionBody();
+    return NewDeclarationExpression(node_factory().NewArrowFunction(
+        GetSourceCodeRange(), ast::FunctionKind::Normal, parameters,
+        statement));
   }
   return node_factory().NewGroupExpression(GetSourceCodeRange(), expression);
 }
@@ -360,28 +379,10 @@ ast::Expression& Parser::ParseUnaryExpression() {
   if (IsUnaryOperator(PeekToken())) {
     auto& token = ConsumeToken().As<ast::Punctuator>();
     auto& expression = ParseUnaryExpression();
-    return node_factory().NewUnaryExpression(GetSourceCodeRange(), token,
-                                             expression);
+    return NewUnaryExpression(token, expression);
   }
-  if (PeekToken() == ast::NameId::Yield) {
-    auto& keyword = ConsumeToken().As<ast::Name>();
-    if (!HasToken())
-      return node_factory().NewReferenceExpression(keyword);
-    if (ConsumeTokenIf(ast::PunctuatorKind::Times)) {
-      auto& star = node_factory().NewPunctuator(
-          SourceCodeRange::Merge(keyword.range(), lexer_->location()),
-          ast::PunctuatorKind::YieldStar);
-      auto& expression = ParseAssignmentExpression();
-      return node_factory().NewUnaryExpression(GetSourceCodeRange(), star,
-                                               expression);
-    }
-    if (CanStartExpression(PeekToken())) {
-      auto& expression = ParseAssignmentExpression();
-      return node_factory().NewUnaryExpression(GetSourceCodeRange(), keyword,
-                                               expression);
-    }
-    return node_factory().NewReferenceExpression(keyword);
-  }
+  if (PeekToken() == ast::NameId::Yield)
+    return ParseYieldExpression();
   return ParseUpdateExpression();
 }
 
@@ -394,8 +395,7 @@ ast::Expression& Parser::ParseUpdateExpression() {
       AddError(expression.range(),
                ErrorCode::ERROR_EXPRESSION_UPDATE_EXPECT_LHS);
     }
-    return node_factory().NewUnaryExpression(GetSourceCodeRange(), op,
-                                             expression);
+    return NewUnaryExpression(op, expression);
   }
   auto& expression = ParseLeftHandSideExpression();
   if (!HasToken() || !IsUpdateOperator(PeekToken()))
@@ -404,8 +404,24 @@ ast::Expression& Parser::ParseUpdateExpression() {
   if (!CanAssign(expression)) {
     AddError(expression.range(), ErrorCode::ERROR_EXPRESSION_UPDATE_EXPECT_LHS);
   }
-  return node_factory().NewUnaryExpression(GetSourceCodeRange(), op,
-                                           expression);
+  return NewUnaryExpression(op, expression);
+}
+
+ast::Expression& Parser::ParseYieldExpression() {
+  SourceCodeRangeScope scope(this);
+  auto& keyword = ConsumeToken().As<ast::Name>();
+  if (!HasToken())
+    return NewUnaryExpression(keyword, NewElisionExpression());
+  if (PeekToken() == ast::PunctuatorKind::Times) {
+    auto& yield_star = node_factory().NewName(
+        SourceCodeRange::Merge(keyword.range(), lexer_->location()),
+        ast::NameId::YieldStar);
+    ConsumeToken();
+    return NewUnaryExpression(yield_star, ParseAssignmentExpression());
+  }
+  if (CanStartExpression(PeekToken()))
+    return NewUnaryExpression(keyword, ParseAssignmentExpression());
+  return NewUnaryExpression(keyword, NewElisionExpression());
 }
 
 }  // namespace internal

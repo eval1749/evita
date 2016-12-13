@@ -4,6 +4,7 @@
 
 #include "joana/public/ast/expressions.h"
 
+#include "joana/public/ast/declarations.h"
 #include "joana/public/ast/literals.h"
 #include "joana/public/ast/node_editor.h"
 #include "joana/public/ast/node_traversal.h"
@@ -57,9 +58,8 @@ CallExpression::~CallExpression() = default;
 // CommaExpression
 //
 CommaExpression::CommaExpression(const SourceCodeRange& range,
-                                 Expression* lhs,
-                                 Expression* rhs)
-    : NodeTemplate(std::make_tuple(lhs, rhs), range) {}
+                                 ExpressionList* expressions)
+    : NodeTemplate(expressions, range) {}
 
 CommaExpression::~CommaExpression() = default;
 
@@ -75,6 +75,14 @@ ConditionalExpression::ConditionalExpression(const SourceCodeRange& range,
           range) {}
 
 ConditionalExpression::~ConditionalExpression() = default;
+
+//
+// DeclarationExpression
+//
+DeclarationExpression::DeclarationExpression(Declaration* declaration)
+    : NodeTemplate(declaration, declaration->range()) {}
+
+DeclarationExpression::~DeclarationExpression() = default;
 
 //
 // ElisionExpression
@@ -95,8 +103,8 @@ Expression::~Expression() = default;
 // ExpressionList
 //
 ExpressionList::ExpressionList(Zone* zone,
-                               const std::vector<Expression*>& expressions)
-    : expressions_(zone, expressions) {}
+                               const std::vector<Expression*>& elements)
+    : elements_(zone, elements) {}
 
 ExpressionList::~ExpressionList() = default;
 
@@ -159,9 +167,7 @@ PropertyExpression::~PropertyExpression() = default;
 // ReferenceExpression
 //
 ReferenceExpression::ReferenceExpression(Name* name)
-    : NodeTemplate(name, name->range()) {
-  DCHECK(!name->IsKeyword()) << *name;
-}
+    : NodeTemplate(name, name->range()) {}
 
 ReferenceExpression::~ReferenceExpression() = default;
 

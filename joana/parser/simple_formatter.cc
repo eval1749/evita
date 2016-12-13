@@ -8,6 +8,7 @@
 #include "joana/parser/simple_formatter.h"
 
 #include "base/strings/utf_string_conversions.h"
+#include "joana/public/ast/declarations.h"
 #include "joana/public/ast/error_codes.h"
 #include "joana/public/ast/expressions.h"
 #include "joana/public/ast/literals.h"
@@ -15,6 +16,7 @@
 #include "joana/public/ast/node_traversal.h"
 #include "joana/public/ast/statements.h"
 #include "joana/public/ast/tokens.h"
+#include "joana/public/source_code.h"
 
 namespace joana {
 namespace internal {
@@ -69,9 +71,14 @@ bool SimpleFormatter::FormatChildStatement(const ast::Statement& statement) {
 
 void SimpleFormatter::FormatExpressionList(const ast::ExpressionList& list) {
   auto delimiter = "";
-  for (const auto& element : list.expressions()) {
+  for (const auto& element : list.elements()) {
+    if (element->Is<ast::ElisionExpression>()) {
+      *ostream_ << ',';
+      delimiter = "";
+      continue;
+    }
     *ostream_ << delimiter;
-    delimiter = element->Is<ast::ElisionExpression>() ? "" : ", ";
+    delimiter = ", ";
     Format(*element);
   }
 }
@@ -146,6 +153,24 @@ void SimpleFormatter::VisitUndefinedLiteral(ast::UndefinedLiteral* node) {
   OutputUsingSoourceCode(*node);
 }
 
+// Declarations
+void SimpleFormatter::VisitArrowFunction(ast::ArrowFunction* node) {
+  if (node->source_code().GetChar(node->range().start()) == '(') {
+    *ostream_ << '(';
+    FormatExpressionList(node->parameters());
+    *ostream_ << ") =>";
+  } else {
+    Format(*node->parameters().elements().front());
+    *ostream_ << " =>";
+  }
+  if (auto* block = node->body().TryAs<ast::BlockStatement>()) {
+    FormatChildStatement(*block);
+    return;
+  }
+  *ostream_ << ' ';
+  Format(node->body());
+}
+
 // Expressions
 
 void SimpleFormatter::VisitArrayLiteralExpression(
@@ -176,7 +201,7 @@ void SimpleFormatter::VisitCallExpression(ast::CallExpression* node) {
   Format(node->callee());
   *ostream_ << '(';
   auto delimiter = "";
-  for (const auto& argument : node->arguments().expressions()) {
+  for (const auto& argument : node->arguments().elements()) {
     *ostream_ << delimiter;
     delimiter = ", ";
     Format(*argument);
@@ -185,9 +210,7 @@ void SimpleFormatter::VisitCallExpression(ast::CallExpression* node) {
 }
 
 void SimpleFormatter::VisitCommaExpression(ast::CommaExpression* node) {
-  Format(node->lhs());
-  *ostream_ << ", ";
-  Format(node->rhs());
+  FormatExpressionList(node->expressions());
 }
 
 void SimpleFormatter::VisitConditionalExpression(
@@ -199,15 +222,18 @@ void SimpleFormatter::VisitConditionalExpression(
   Format(node->false_expression());
 }
 
+void SimpleFormatter::VisitDeclarationExpression(
+    ast::DeclarationExpression* node) {
+  Format(node->declaration());
+}
+
 void SimpleFormatter::VisitGroupExpression(ast::GroupExpression* node) {
   *ostream_ << '(';
   Format(node->expression());
   *ostream_ << ')';
 }
 
-void SimpleFormatter::VisitElisionExpression(ast::ElisionExpression* node) {
-  *ostream_ << ',';
-}
+void SimpleFormatter::VisitElisionExpression(ast::ElisionExpression* node) {}
 
 void SimpleFormatter::VisitInvalidExpression(ast::InvalidExpression* node) {
   const auto string = ast::ErrorStringOf(node->error_code());
@@ -254,6 +280,10 @@ void SimpleFormatter::VisitUnaryExpression(ast::UnaryExpression* node) {
     return;
   }
   OutputUsingSoourceCode(node->op());
+  if (node->expression().Is<ast::ElisionExpression>())
+    return;
+  if (node->op().Is<ast::Name>())
+    *ostream_ << ' ';
   Format(node->expression());
 }
 

@@ -11,6 +11,8 @@ component("public") {
   sources = [
     "ast/container_node.cc",
     "ast/container_node.h",
+    "ast/declarations.cc",
+    "ast/declarations.h",
     "ast/edit_context.cc",
     "ast/edit_context.h",
     "ast/edit_context_builder.cc",

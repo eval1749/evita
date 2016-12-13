@@ -348,8 +348,6 @@ ast::Statement& Parser::ParseKeywordStatement() {
       return ParseVarStatement();
     case ast::NameId::While:
       return ParseWhileStatement();
-    case ast::NameId::Yield:
-      return ParseYieldStatement();
 
     // Reserved keywords
     case ast::NameId::Enum:
@@ -360,6 +358,7 @@ ast::Statement& Parser::ParseKeywordStatement() {
     case ast::NameId::Public:
     case ast::NameId::Static:
     case ast::NameId::With:
+      ConsumeToken();
       return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_RESERVED_WORD);
   }
   return ParseExpressionStatement();
@@ -457,10 +456,6 @@ ast::Statement& Parser::ParseWhileStatement() {
               ErrorCode::ERROR_STATEMENT_DO_EXPECT_RPAREN);
   auto& statement = ParseStatement();
   return node_factory().NewWhileStatement(keyword, condition, statement);
-}
-
-ast::Statement& Parser::ParseYieldStatement() {
-  return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
 }
 
 }  // namespace internal

@@ -6,6 +6,7 @@
 
 #include "joana/public/ast/node_factory.h"
 
+#include "joana/public/ast/declarations.h"
 #include "joana/public/ast/expressions.h"
 #include "joana/public/ast/literals.h"
 #include "joana/public/ast/module.h"
@@ -79,6 +80,11 @@ Module& NodeFactory::NewModule(const SourceCodeRange& range) {
   return *new (zone_) Module(range);
 }
 
+Name& NodeFactory::NewName(const SourceCodeRange& range, NameId name_id) {
+  DCHECK_EQ(name_id, NameId::YieldStar);
+  return *new (zone_) Name(range, static_cast<int>(name_id));
+}
+
 Name& NodeFactory::NewName(const SourceCodeRange& range) {
   return *new (zone_) Name(range, name_id_map_->Register(range.GetString()));
 }
@@ -86,6 +92,17 @@ Name& NodeFactory::NewName(const SourceCodeRange& range) {
 Punctuator& NodeFactory::NewPunctuator(const SourceCodeRange& range,
                                        PunctuatorKind kind) {
   return *new (zone_) Punctuator(range, kind);
+}
+
+// Declarations
+ArrowFunction& NodeFactory::NewArrowFunction(
+    const SourceCodeRange& range,
+    FunctionKind kind,
+    const std::vector<Expression*>& parameters,
+    const ArrowFunctionBody& body) {
+  auto* const list = new (zone_) ExpressionList(zone_, parameters);
+  return *new (zone_)
+      ArrowFunction(range, kind, list, const_cast<ArrowFunctionBody*>(&body));
 }
 
 // Expressions
@@ -128,11 +145,9 @@ CallExpression& NodeFactory::NewCallExpression(
 
 CommaExpression& NodeFactory::NewCommaExpression(
     const SourceCodeRange& range,
-    const Expression& left_hand_side,
-    const Expression& right_hand_side) {
-  return *new (zone_)
-      CommaExpression(range, const_cast<Expression*>(&left_hand_side),
-                      const_cast<Expression*>(&right_hand_side));
+    const std::vector<Expression*> expressions) {
+  auto* const list = new (zone_) ExpressionList(zone_, expressions);
+  return *new (zone_) CommaExpression(range, list);
 }
 
 ConditionalExpression& NodeFactory::NewConditionalExpression(
@@ -146,9 +161,16 @@ ConditionalExpression& NodeFactory::NewConditionalExpression(
                             const_cast<Expression*>(&false_expression));
 }
 
-ElisionExpression& NodeFactory::NewElisionExpression(const Token& op) {
-  DCHECK_EQ(op, ast::PunctuatorKind::Comma);
-  return *new (zone_) ElisionExpression(op.range());
+DeclarationExpression& NodeFactory::NewDeclarationExpression(
+    const Declaration& declaration) {
+  return *new (zone_)
+      DeclarationExpression(const_cast<Declaration*>(&declaration));
+}
+
+ElisionExpression& NodeFactory::NewElisionExpression(
+    const SourceCodeRange& range) {
+  DCHECK_EQ(range.start(), range.end()) << range;
+  return *new (zone_) ElisionExpression(range);
 }
 
 GroupExpression& NodeFactory::NewGroupExpression(const SourceCodeRange& range,

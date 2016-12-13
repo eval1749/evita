@@ -4,6 +4,7 @@
 
 #include "joana/public/ast/node_visitor.h"
 
+#include "joana/public/ast/declarations.h"
 #include "joana/public/ast/expressions.h"
 #include "joana/public/ast/literals.h"
 #include "joana/public/ast/module.h"

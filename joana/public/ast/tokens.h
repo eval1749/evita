@@ -16,7 +16,7 @@ namespace ast {
 // PunctuatorKind
 //
 enum class PunctuatorKind {
-#define V(text, capital, upper) capital,
+#define V(text, capital, upper, category) capital,
   FOR_EACH_JAVASCRIPT_PUNCTUATOR(V)
 #undef V
 };
@@ -25,7 +25,7 @@ enum class PunctuatorKind {
 // NameId
 //
 enum class NameId {
-  Zero,
+  Invalid,
 
   StartOfKeyword,
 #define V(name, camel, upper) camel,

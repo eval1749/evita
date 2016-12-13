@@ -5,11 +5,15 @@
 #ifndef JOANA_PUBLIC_AST_NODE_H_
 #define JOANA_PUBLIC_AST_NODE_H_
 
+#include <array>
 #include <iosfwd>
+#include <tuple>
+#include <type_traits>
 
 #include "base/macros.h"
 #include "joana/public/castable.h"
 #include "joana/public/memory/zone_allocated.h"
+#include "joana/public/memory/zone_vector.h"
 #include "joana/public/public_export.h"
 #include "joana/public/source_code_range.h"
 #include "joana/public/visitable.h"
@@ -47,7 +51,12 @@ class JOANA_PUBLIC_EXPORT Node : public Castable<Node>,
 
   const SourceCodeRange& range() const { return range_; }
 
+  // TODO(eval1749): We should make |ChildAt()| as pure virtual function.
+  virtual const Node& ChildAt(size_t index) const;
   bool Contains(const Node& other) const;
+  // TODO(eval1749): We should make |CountChildNodes()| as pure virtual
+  // function.
+  virtual size_t CountChildNodes() const;
   bool IsDescendantOf(const Node& other) const;
 
   void PrintTo(std::ostream* ostream) const;
@@ -60,6 +69,8 @@ class JOANA_PUBLIC_EXPORT Node : public Castable<Node>,
  private:
   friend class NodeEditor;
 
+  // TODO(eval1749): We should not use tree. We should use fixed node and
+  // variable node.
   Node* next_sibling_ = nullptr;
   ContainerNode* parent_ = nullptr;
   Node* previous_sibling_ = nullptr;
@@ -83,6 +94,30 @@ JOANA_PUBLIC_EXPORT std::ostream& operator<<(std::ostream& ostream,
 #define DECLARE_CONCRETE_AST_NODE(name, base) \
   DECLARE_AST_NODE(name, base);               \
   void Accept(NodeVisitor* visitor) final;
+
+//
+// NodeTemplate represents fixed number of child nodes.
+//
+template <typename Base, typename... Members>
+class NodeTemplate : public Base {
+ protected:
+  template <typename... Params>
+  explicit NodeTemplate(const std::tuple<Members...>& members, Params... params)
+      : Base(params...), members_(members) {}
+
+  ~NodeTemplate() override = default;
+
+ protected:
+  template <size_t kIndex>
+  auto member_at() const {
+    return std::get<kIndex>(members_);
+  }
+
+ private:
+  std::tuple<Members...> members_;
+
+  DISALLOW_COPY_AND_ASSIGN(NodeTemplate);
+};
 
 }  // namespace ast
 }  // namespace joana

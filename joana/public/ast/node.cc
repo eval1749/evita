@@ -58,8 +58,18 @@ Node* Node::last_child() const {
   return nullptr;
 }
 
+const Node& Node::ChildAt(size_t index) const {
+  NOTREACHED() << this;
+  return *this;
+}
+
 bool Node::Contains(const Node& other) const {
   return this == &other || other.IsDescendantOf(*this);
+}
+
+size_t Node::CountChildNodes() const {
+  NOTREACHED() << this;
+  return 0;
 }
 
 bool Node::IsDescendantOf(const Node& other) const {

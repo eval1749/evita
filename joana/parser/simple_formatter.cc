@@ -67,6 +67,15 @@ bool SimpleFormatter::FormatChildStatement(const ast::Statement& statement) {
   return false;
 }
 
+void SimpleFormatter::FormatExpressionList(const ast::ExpressionList& list) {
+  auto delimiter = "";
+  for (const auto& element : list.expressions()) {
+    *ostream_ << delimiter;
+    delimiter = element->Is<ast::ElisionExpression>() ? "" : ", ";
+    Format(*element);
+  }
+}
+
 void SimpleFormatter::FormatWithIndent(const ast::Node& node) {
   auto* runner = &node;
   while (auto* labeled = runner->TryAs<ast::LabeledStatement>()) {
@@ -138,6 +147,68 @@ void SimpleFormatter::VisitUndefinedLiteral(ast::UndefinedLiteral* node) {
 }
 
 // Expressions
+
+void SimpleFormatter::VisitArrayLiteralExpression(
+    ast::ArrayLiteralExpression* node) {
+  *ostream_ << '[';
+  FormatExpressionList(node->elements());
+  *ostream_ << ']';
+}
+
+void SimpleFormatter::VisitAssignmentExpression(
+    ast::AssignmentExpression* node) {
+  Format(node->lhs());
+  *ostream_ << ' ';
+  Format(node->op());
+  *ostream_ << ' ';
+  Format(node->rhs());
+}
+
+void SimpleFormatter::VisitBinaryExpression(ast::BinaryExpression* node) {
+  Format(node->lhs());
+  *ostream_ << ' ';
+  Format(node->op());
+  *ostream_ << ' ';
+  Format(node->rhs());
+}
+
+void SimpleFormatter::VisitCallExpression(ast::CallExpression* node) {
+  Format(node->callee());
+  *ostream_ << '(';
+  auto delimiter = "";
+  for (const auto& argument : node->arguments().expressions()) {
+    *ostream_ << delimiter;
+    delimiter = ", ";
+    Format(*argument);
+  }
+  *ostream_ << ')';
+}
+
+void SimpleFormatter::VisitCommaExpression(ast::CommaExpression* node) {
+  Format(node->lhs());
+  *ostream_ << ", ";
+  Format(node->rhs());
+}
+
+void SimpleFormatter::VisitConditionalExpression(
+    ast::ConditionalExpression* node) {
+  Format(node->condition());
+  *ostream_ << " ? ";
+  Format(node->true_expression());
+  *ostream_ << " : ";
+  Format(node->false_expression());
+}
+
+void SimpleFormatter::VisitGroupExpression(ast::GroupExpression* node) {
+  *ostream_ << '(';
+  Format(node->expression());
+  *ostream_ << ')';
+}
+
+void SimpleFormatter::VisitElisionExpression(ast::ElisionExpression* node) {
+  *ostream_ << ',';
+}
+
 void SimpleFormatter::VisitInvalidExpression(ast::InvalidExpression* node) {
   const auto string = ast::ErrorStringOf(node->error_code());
   if (string.empty())
@@ -150,8 +221,40 @@ void SimpleFormatter::VisitLiteralExpression(ast::LiteralExpression* node) {
   OutputUsingSoourceCode(node->literal());
 }
 
+void SimpleFormatter::VisitMemberExpression(ast::MemberExpression* node) {
+  Format(node->expression());
+  *ostream_ << '[';
+  Format(node->name_expression());
+  *ostream_ << ']';
+}
+
+void SimpleFormatter::VisitNewExpression(ast::NewExpression* node) {
+  *ostream_ << "new ";
+  Format(node->expression());
+  *ostream_ << '(';
+  FormatExpressionList(node->arguments());
+  *ostream_ << ')';
+}
+
+void SimpleFormatter::VisitPropertyExpression(ast::PropertyExpression* node) {
+  Format(node->expression());
+  *ostream_ << '.';
+  Format(node->name());
+}
+
 void SimpleFormatter::VisitReferenceExpression(ast::ReferenceExpression* node) {
   OutputUsingSoourceCode(node->name());
+}
+
+void SimpleFormatter::VisitUnaryExpression(ast::UnaryExpression* node) {
+  if (node->op() == ast::PunctuatorKind::PostPlusPlus ||
+      node->op() == ast::PunctuatorKind::PostMinusMinus) {
+    Format(node->expression());
+    OutputUsingSoourceCode(node->op());
+    return;
+  }
+  OutputUsingSoourceCode(node->op());
+  Format(node->expression());
 }
 
 // Statements

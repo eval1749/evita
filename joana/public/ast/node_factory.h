@@ -36,9 +36,47 @@ class JOANA_PUBLIC_EXPORT NodeFactory final {
   Punctuator& NewPunctuator(const SourceCodeRange& range, PunctuatorKind kind);
 
   // Expressions factory members
+  ArrayLiteralExpression& NewArrayLiteralExpression(
+      const SourceCodeRange& range,
+      const std::vector<Expression*>& elements);
+  AssignmentExpression& NewAssignmentExpression(
+      const SourceCodeRange& range,
+      const Punctuator& op,
+      const Expression& left_hand_side,
+      const Expression& right_hand_side);
+  BinaryExpression& NewBinaryExpression(const SourceCodeRange& range,
+                                        const Token& op,
+                                        const Expression& left_hand_side,
+                                        const Expression& right_hand_side);
+  CallExpression& NewCallExpression(const SourceCodeRange& range,
+                                    const Expression& callee,
+                                    const std::vector<Expression*>& arguments);
+  CommaExpression& NewCommaExpression(const SourceCodeRange& range,
+                                      const Expression& left_hand_side,
+                                      const Expression& right_hand_side);
+  ConditionalExpression& NewConditionalExpression(
+      const SourceCodeRange& range,
+      const Expression& condition,
+      const Expression& true_expression,
+      const Expression& false_expression);
+  ElisionExpression& NewElisionExpression(const Token& op);
+  GroupExpression& NewGroupExpression(const SourceCodeRange& range,
+                                      const Expression& expression);
   InvalidExpression& NewInvalidExpression(const Node& node, int error_code);
   LiteralExpression& NewLiteralExpression(const Literal& literal);
+  MemberExpression& NewMemberExpression(const SourceCodeRange& range,
+                                        const Expression& expression,
+                                        const Expression& name_expression);
+  NewExpression& NewNewExpression(const SourceCodeRange& range,
+                                  const Expression& expression,
+                                  const std::vector<Expression*>& arguments);
+  PropertyExpression& NewPropertyExpression(const SourceCodeRange& range,
+                                            const Expression& expression,
+                                            const Name& name);
   ReferenceExpression& NewReferenceExpression(const Name& name);
+  UnaryExpression& NewUnaryExpression(const SourceCodeRange& range,
+                                      const Token& op,
+                                      const Expression& expression);
 
   // Literals factory members
   BooleanLiteral& NewBooleanLiteral(const Name& name, bool value);

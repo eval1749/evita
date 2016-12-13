@@ -84,62 +84,74 @@ namespace joana {
   V(from, From, CONSTRUCTOR)               \
   V(of, Of, OF)                            \
   V(prototype, Prototype, PROTOTYPE)       \
+  /** new.target */                        \
+  V(target, Target, Target)                \
   V(undefined, Undefined, UNDEFINED)
 
-#define FOR_EACH_JAVASCRIPT_PUNCTUATOR(V)                       \
-  V("???", Invalid, INVALID)                                    \
-  V("{", LeftBrace, LEFT_BRACE)                                 \
-  V("}", RightBrace, RIGHT_BRACE)                               \
-  V("[", LeftBracket, LEFT_BRACKET)                             \
-  V("]", RightBracket, RIGHT_BRACKET)                           \
-  V("(", LeftParenthesis, LEFT_PARENTHESIS)                     \
-  V(")", RightParenthesis, RIGHT_PARENTHESIS)                   \
-  V(".", Dot, DOT)                                              \
-  V("...", DotDotDot, DOT_DOT_DOT)                              \
-  V(";", SemiColon, SEMI_COLON)                                 \
-  V(",", Comma, COMMA)                                          \
-  V("<", LessThan, LEFT_THAN)                                   \
-  V("<=", LessThanOrEqual, LESS_THAN_OR_EQUAL)                  \
-  V(">", GreaterThan, GREATER_THAN)                             \
-  V(">=", GreaterThanOrEqual, GREATER_THAN_OR_EQUAL)            \
-  V("==", EqualEqual, EQUAL_EQUAL)                              \
-  V("===", EqualEqualEqual, EQUAL_EQUAL_EQUAL)                  \
-  V("+", Plus, PLUS)                                            \
-  V("-", Minus, MIUS)                                           \
-  V("*", Times, TIMES)                                          \
-  V("%", Modulo, MODULO)                                        \
-  V("++", PlusPlus, PLUS_PLUS)                                  \
-  V("--", MinusMinus, MINUS_MINUS)                              \
-  V("<<", LeftShift, LEFT_SHIFT)                                \
-  V(">>", RightShift, RIGHT_SHIFT)                              \
-  V(">>>", UnsignedRightShift, UNSIGNED_RIGHT_SHIFT)            \
-  V("&", BitAnd, BIT_AND)                                       \
-  V("|", BitOr, BIT_OR)                                         \
-  V("|", BitXor, BIT_XOR)                                       \
-  V("!", LogicalNot, LOGICAL_NOT)                               \
-  V("!=", NotEqual, NOT_EQUAL)                                  \
-  V("!==", NotEqualEqual, NOT_EQUAL_EQUAL)                      \
-  V("~", BitNot, BIT_NOT)                                       \
-  V("&&", LogicalAnd, LOGICAL_AND)                              \
-  V("||", LogicalOr, LOGICAL_OR)                                \
-  V("?", Question, QUESTION)                                    \
-  V(":", Colon, COLON)                                          \
-  V("=", Equal, EQUAL)                                          \
-  V("+=", PlusEqual, PLUS_EQUAL)                                \
-  V("-=", MinusEqual, PLUS_EQUAL)                               \
-  V("*=", TimesEqual, TIMES_EQUAL)                              \
-  V("%=", ModuloEqual, MODULO_EQUAL)                            \
-  V("<<=", LeftShiftEqual, LEFT_SHIT_EQUAL)                     \
-  V(">>=", RightShiftEqual, RIGHT_SHIT_EQUAL)                   \
-  V(">>>=", UnsignedRightShiftEqual, UNSIGNED_RIGHT_SHIT_EQUAL) \
-  V("&=", BitAndEqual, BIT_AND_EQUAL)                           \
-  V("|=", BitOrEqual, BIT_OR_EQUAL)                             \
-  V("^=", BitXorEqual, BIT_XOR_EQUAL)                           \
-  V("=>", Arrow, ARROW)                                         \
-  V("**", TimesTimes, TIMES_TIMES)                              \
-  V("**=", TimesTimesEqual, TIMES_TIMES_EQUAL)                  \
-  V("/", Divide, DIVIDE)                                        \
-  V("/=", DivideEqual, DIVIDE_EQUAL)
+// Visitor parameter takes:
+//  - String representation of punctuator.
+//  - Capitalized name
+//  - Upper case
+//  - Binary operator category
+// Note: Parser generates PostPlusPlus, PostMinusMinus and YieldStar tokens
+// instead of Lexer.
+#define FOR_EACH_JAVASCRIPT_PUNCTUATOR(V)                                   \
+  V("???", Invalid, INVALID, None)                                          \
+  V("{", LeftBrace, LEFT_BRACE, None)                                       \
+  V("}", RightBrace, RIGHT_BRACE, None)                                     \
+  V("[", LeftBracket, LEFT_BRACKET, None)                                   \
+  V("]", RightBracket, RIGHT_BRACKET, None)                                 \
+  V("(", LeftParenthesis, LEFT_PARENTHESIS, None)                           \
+  V(")", RightParenthesis, RIGHT_PARENTHESIS, None)                         \
+  V(".", Dot, DOT, None)                                                    \
+  V("...", DotDotDot, DOT_DOT_DOT, None)                                    \
+  V(";", SemiColon, SEMI_COLON, None)                                       \
+  V(",", Comma, COMMA, None)                                                \
+  V("<", LessThan, LEFT_THAN, Relational)                                   \
+  V("<=", LessThanOrEqual, LESS_THAN_OR_EQUAL, Relational)                  \
+  V(">", GreaterThan, GREATER_THAN, Relational)                             \
+  V(">=", GreaterThanOrEqual, GREATER_THAN_OR_EQUAL, Relational)            \
+  V("==", EqualEqual, EQUAL_EQUAL, Equality)                                \
+  V("===", EqualEqualEqual, EQUAL_EQUAL_EQUAL, Equality)                    \
+  V("+", Plus, PLUS, Additive)                                              \
+  V("-", Minus, MIUS, Additive)                                             \
+  V("*", Times, TIMES, Multiplicative)                                      \
+  V("%", Modulo, MODULO, Multiplicative)                                    \
+  V("++", PlusPlus, PLUS_PLUS, None)                                        \
+  V("++", PostPlusPlus, POST_PLUS_PLUS, None)                               \
+  V("--", MinusMinus, MINUS_MINUS, None)                                    \
+  V("--", PostMinusMinus, POST_MINUS_MINUS, None)                           \
+  V("<<", LeftShift, LEFT_SHIFT, Shift)                                     \
+  V(">>", RightShift, RIGHT_SHIFT, Shift)                                   \
+  V(">>>", UnsignedRightShift, UNSIGNED_RIGHT_SHIFT, Shift)                 \
+  V("&", BitAnd, BIT_AND, BitwiseAnd)                                       \
+  V("|", BitOr, BIT_OR, BitwiseOr)                                          \
+  V("^", BitXor, BIT_XOR, BitwiseXor)                                       \
+  V("!", LogicalNot, LOGICAL_NOT, None)                                     \
+  V("!=", NotEqual, NOT_EQUAL, Equality)                                    \
+  V("!==", NotEqualEqual, NOT_EQUAL_EQUAL, Equality)                        \
+  V("~", BitNot, BIT_NOT, None)                                             \
+  V("&&", LogicalAnd, LOGICAL_AND, LogicalAnd)                              \
+  V("||", LogicalOr, LOGICAL_OR, LogicalOr)                                 \
+  V("?", Question, QUESTION, None)                                          \
+  V(":", Colon, COLON, None)                                                \
+  V("=", Equal, EQUAL, Assignment)                                          \
+  V("+=", PlusEqual, PLUS_EQUAL, Assignment)                                \
+  V("-=", MinusEqual, PLUS_EQUAL, Assignment)                               \
+  V("*=", TimesEqual, TIMES_EQUAL, Assignment)                              \
+  V("%=", ModuloEqual, MODULO_EQUAL, Assignment)                            \
+  V("<<=", LeftShiftEqual, LEFT_SHIT_EQUAL, Assignment)                     \
+  V(">>=", RightShiftEqual, RIGHT_SHIT_EQUAL, Assignment)                   \
+  V(">>>=", UnsignedRightShiftEqual, UNSIGNED_RIGHT_SHIT_EQUAL, Assignment) \
+  V("&=", BitAndEqual, BIT_AND_EQUAL, Assignment)                           \
+  V("|=", BitOrEqual, BIT_OR_EQUAL, Assignment)                             \
+  V("^=", BitXorEqual, BIT_XOR_EQUAL, Assignment)                           \
+  V("=>", Arrow, ARROW, None)                                               \
+  V("**", TimesTimes, TIMES_TIMES, Exponentiation)                          \
+  V("**=", TimesTimesEqual, TIMES_TIMES_EQUAL, Assignment)                  \
+  V("/", Divide, DIVIDE, Multiplicative)                                    \
+  V("/=", DivideEqual, DIVIDE_EQUAL, Assignment)                            \
+  V("yield*", YieldStar, YIELD_STAR, None)
 
 }  // namespace joana
 

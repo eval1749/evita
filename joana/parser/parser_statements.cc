@@ -150,7 +150,10 @@ ast::Statement& Parser::ParseStatement() {
     ConsumeToken();
     if (ConsumeTokenIf(ast::PunctuatorKind::Colon))
       return node_factory().NewLabeledStatement(*name, ParseStatement());
-    auto& expression = ParseExpressionAfterName(*name);
+    auto& token2 = ConsumeToken();
+    PushBackToken(token2);
+    PushBackToken(*name);
+    auto& expression = ParseExpression();
     ExpectToken(ast::PunctuatorKind::SemiColon,
                 ErrorCode::ERROR_STATEMENT_EXPECT_SEMI_COLON);
     return node_factory().NewExpressionStatement(expression);

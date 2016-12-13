@@ -114,11 +114,77 @@ TEST_F(ParserTest, EmptyStatement) {
   TEST_PARSER(";\n");
 }
 
-TEST_F(ParserTest, ExpressionStatement) {
+TEST_F(ParserTest, ExpressionStatementArrayLiteral) {
+  TEST_PARSER("[];\n");
+  TEST_PARSER("[1];\n");
+  TEST_PARSER("[,];\n");
+  TEST_PARSER("[,,];\n");
+}
+
+TEST_F(ParserTest, ExpressionStatementArrayLiteralSpread) {
+  TEST_PARSER("[1, 2, ...x];\n");
+}
+
+TEST_F(ParserTest, ExpressionStatementAssignment1) {
+  TEST_PARSER("foo = 100;\n");
+  TEST_PARSER("foo = bar + baz;\n");
+}
+
+TEST_F(ParserTest, ExpressionStatementAssignmentMultiple) {
+  TEST_PARSER("foo = bar = baz;\n");
+}
+
+TEST_F(ParserTest, ExpressionStatementAssignmentOperation) {
+  TEST_PARSER("foo += baz;\n");
+}
+
+TEST_F(ParserTest, ExpressionStatementBinary) {
+  TEST_PARSER("1 + 2 * 3;\n");
+}
+
+TEST_F(ParserTest, ExpressionStatementBinary2) {
+  TEST_PARSER("(1 + 2) * 3;\n");
+}
+
+TEST_F(ParserTest, ExpressionStatementCall0) {
+  TEST_PARSER("foo();\n");
+}
+
+TEST_F(ParserTest, ExpressionStatementCall1) {
+  TEST_PARSER("foo(1);\n");
+}
+
+TEST_F(ParserTest, ExpressionStatementCall2) {
+  TEST_PARSER("foo(1, 2);\n");
+}
+
+TEST_F(ParserTest, ExpressionStatementCall3) {
+  TEST_PARSER("foo(1, 2, 3);\n");
+}
+
+TEST_F(ParserTest, ExpressionStatementComma) {
+  TEST_PARSER("foo, bar, baz;\n");
+}
+
+TEST_F(ParserTest, ExpressionStatementConditional) {
+  TEST_PARSER("foo ? bar : baz;\n");
+}
+
+TEST_F(ParserTest, ExpressionStatementUnary) {
+  TEST_PARSER("!foo;\n");
+}
+
+TEST_F(ParserTest, ExpressionStatementName) {
   TEST_PARSER("false;\n");
   TEST_PARSER("foo;\n");
   TEST_PARSER("null;\n");
   TEST_PARSER("true;\n");
+}
+
+TEST_F(ParserTest, ExpressionStatementYield) {
+  TEST_PARSER("yield;\n");
+  TEST_PARSER("yield 1;\n");
+  TEST_PARSER("yield* foo();\n");
 }
 
 TEST_F(ParserTest, IfStatement) {

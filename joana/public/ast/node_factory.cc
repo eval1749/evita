@@ -89,17 +89,118 @@ Punctuator& NodeFactory::NewPunctuator(const SourceCodeRange& range,
 }
 
 // Expressions
+ArrayLiteralExpression& NodeFactory::NewArrayLiteralExpression(
+    const SourceCodeRange& range,
+    const std::vector<Expression*>& elements) {
+  auto* const list = new (zone_) ExpressionList(zone_, elements);
+  return *new (zone_) ArrayLiteralExpression(range, list);
+}
+
+AssignmentExpression& NodeFactory::NewAssignmentExpression(
+    const SourceCodeRange& range,
+    const Punctuator& op,
+    const Expression& left_hand_side,
+    const Expression& right_hand_side) {
+  return *new (zone_)
+      AssignmentExpression(range, const_cast<Punctuator*>(&op),
+                           const_cast<Expression*>(&left_hand_side),
+                           const_cast<Expression*>(&right_hand_side));
+}
+
+BinaryExpression& NodeFactory::NewBinaryExpression(
+    const SourceCodeRange& range,
+    const Token& op,
+    const Expression& left_hand_side,
+    const Expression& right_hand_side) {
+  return *new (zone_) BinaryExpression(
+      range, const_cast<Token*>(&op), const_cast<Expression*>(&left_hand_side),
+      const_cast<Expression*>(&right_hand_side));
+}
+
+CallExpression& NodeFactory::NewCallExpression(
+    const SourceCodeRange& range,
+    const Expression& callee,
+    const std::vector<Expression*>& arguments) {
+  auto* const list = new (zone_) ExpressionList(zone_, arguments);
+  return *new (zone_)
+      CallExpression(range, const_cast<Expression*>(&callee), list);
+}
+
+CommaExpression& NodeFactory::NewCommaExpression(
+    const SourceCodeRange& range,
+    const Expression& left_hand_side,
+    const Expression& right_hand_side) {
+  return *new (zone_)
+      CommaExpression(range, const_cast<Expression*>(&left_hand_side),
+                      const_cast<Expression*>(&right_hand_side));
+}
+
+ConditionalExpression& NodeFactory::NewConditionalExpression(
+    const SourceCodeRange& range,
+    const Expression& condition,
+    const Expression& true_expression,
+    const Expression& false_expression) {
+  return *new (zone_)
+      ConditionalExpression(range, const_cast<Expression*>(&condition),
+                            const_cast<Expression*>(&true_expression),
+                            const_cast<Expression*>(&false_expression));
+}
+
+ElisionExpression& NodeFactory::NewElisionExpression(const Token& op) {
+  DCHECK_EQ(op, ast::PunctuatorKind::Comma);
+  return *new (zone_) ElisionExpression(op.range());
+}
+
+GroupExpression& NodeFactory::NewGroupExpression(const SourceCodeRange& range,
+                                                 const Expression& expression) {
+  return *new (zone_)
+      GroupExpression(range, const_cast<Expression*>(&expression));
+}
+
 InvalidExpression& NodeFactory::NewInvalidExpression(const Node& node,
                                                      int error_code) {
   return *new (zone_) InvalidExpression(node, error_code);
 }
 
 LiteralExpression& NodeFactory::NewLiteralExpression(const Literal& literal) {
-  return *new (zone_) LiteralExpression(literal);
+  return *new (zone_) LiteralExpression(const_cast<Literal*>(&literal));
+}
+
+MemberExpression& NodeFactory::NewMemberExpression(
+    const SourceCodeRange& range,
+    const Expression& expression,
+    const Expression& name_expression) {
+  return *new (zone_)
+      MemberExpression(range, const_cast<Expression*>(&expression),
+                       const_cast<Expression*>(&name_expression));
+}
+
+NewExpression& NodeFactory::NewNewExpression(
+    const SourceCodeRange& range,
+    const Expression& expression,
+    const std::vector<Expression*>& arguments) {
+  auto* const list = new (zone_) ExpressionList(zone_, arguments);
+  return *new (zone_)
+      NewExpression(range, const_cast<Expression*>(&expression), list);
+}
+
+PropertyExpression& NodeFactory::NewPropertyExpression(
+    const SourceCodeRange& range,
+    const Expression& expression,
+    const Name& name) {
+  return *new (zone_) PropertyExpression(
+      range, const_cast<Expression*>(&expression), const_cast<Name*>(&name));
 }
 
 ReferenceExpression& NodeFactory::NewReferenceExpression(const Name& name) {
-  return *new (zone_) ReferenceExpression(name);
+  return *new (zone_) ReferenceExpression(const_cast<Name*>(&name));
+}
+
+UnaryExpression& NodeFactory::NewUnaryExpression(const SourceCodeRange& range,
+                                                 const Token& op,
+                                                 const Expression& expression) {
+  return *new (zone_) UnaryExpression(range, const_cast<Token*>(&op),
+                                      const_cast<Expression*>(&expression));
 }
 
 // Literals

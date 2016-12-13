@@ -17,9 +17,21 @@ namespace ast {
   V(Token)
 
 #define FOR_EACH_AST_EXPRESSION(V) \
+  V(ArrayLiteralExpression)        \
+  V(AssignmentExpression)          \
+  V(BinaryExpression)              \
+  V(CallExpression)                \
+  V(CommaExpression)               \
+  V(ConditionalExpression)         \
+  V(GroupExpression)               \
+  V(ElisionExpression)             \
   V(InvalidExpression)             \
   V(LiteralExpression)             \
-  V(ReferenceExpression)
+  V(MemberExpression)              \
+  V(NewExpression)                 \
+  V(PropertyExpression)            \
+  V(ReferenceExpression)           \
+  V(UnaryExpression)
 
 #define FOR_EACH_AST_LITERAL(V) \
   V(BooleanLiteral)             \
@@ -64,6 +76,7 @@ FOR_EACH_CONCRETE_AST_NODE(V)
 #undef V
 
 class EditContext;
+class ExpressionList;
 enum class InvalidKind;
 class NodeEditor;
 class NodeFactory;

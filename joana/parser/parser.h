@@ -6,11 +6,14 @@
 #define JOANA_PARSER_PARSER_H_
 
 #include <memory>
+#include <stack>
+#include <vector>
 
 #include "base/macros.h"
 
 namespace joana {
 namespace ast {
+
 class ContainerNode;
 class EditContext;
 class Expression;
@@ -19,9 +22,13 @@ class Name;
 enum class NameId;
 class Node;
 class NodeFactory;
+class Punctuator;
 enum class PunctuatorKind;
 class Statement;
+class Token;
+
 }  // namespace ast
+
 class SourceCode;
 class SourceCodeRange;
 
@@ -31,6 +38,9 @@ class Lexer;
 
 class Parser final {
  public:
+  // Expose |OperatorPrecedence| for implementing static helper functions.
+  enum class OperatorPrecedence;
+
   Parser(ast::EditContext* context, const SourceCodeRange& range);
 
   ~Parser();
@@ -45,6 +55,17 @@ class Parser final {
   enum class ErrorCode;
   class StatementScope;
 
+  class SourceCodeRangeScope final {
+   public:
+    explicit SourceCodeRangeScope(Parser* parser);
+    ~SourceCodeRangeScope();
+
+   private:
+    Parser* const parser_;
+
+    DISALLOW_COPY_AND_ASSIGN(SourceCodeRangeScope);
+  };
+
   ast::NodeFactory& node_factory() const;
   const SourceCode& source_code() const;
 
@@ -53,8 +74,8 @@ class Parser final {
   void AddError(ErrorCode error_code);
 
   void Advance();
-  ast::Node& ComputeInvalidToken(ErrorCode error_code);
-  ast::Node& ConsumeToken();
+  ast::Token& ComputeInvalidToken(ErrorCode error_code);
+  ast::Token& ConsumeToken();
   // Returns true if |Lexer| has a punctuator of |name_id| and advance to next
   // token.
   bool ConsumeTokenIf(ast::NameId keyword_id);
@@ -63,15 +84,33 @@ class Parser final {
   bool ConsumeTokenIf(ast::PunctuatorKind kind);
   void ExpectToken(ast::NameId name_id, ErrorCode error_code);
   void ExpectToken(ast::PunctuatorKind kind, ErrorCode error_code);
-  ast::Node& GetLastToken();
-  ast::Node& PeekToken();
+  SourceCodeRange GetSourceCodeRange() const;
   bool HasToken() const;
+  ast::Token& PeekToken();
+  void PushBackToken(const ast::Token& token);
 
   // Expressions
+  OperatorPrecedence CategoryOf(const ast::Token& token) const;
+  OperatorPrecedence HigherPrecedenceOf(OperatorPrecedence category) const;
   ast::Expression& NewInvalidExpression(ErrorCode error_code);
   ast::Expression& NewLiteralExpression(const ast::Literal& literal);
+
+  // The entry of parsing an expression.
   ast::Expression& ParseExpression();
-  ast::Expression& ParseExpressionAfterName(const ast::Name& name);
+
+  std::vector<ast::Expression*> ParseArgumentList();
+  ast::Expression& ParseArrayLiteralExpression();
+  ast::Expression& ParseAssignmentExpression();
+  ast::Expression& ParseBinaryExpression(OperatorPrecedence category);
+  ast::Expression& ParseCommaExpression();
+  ast::Expression& ParseConditionalExpression();
+  ast::Expression& ParseLeftHandSideExpression();
+  ast::Expression& ParseNameAsExpression(const ast::Name& name);
+  ast::Expression& ParseNewExpression();
+  ast::Expression& ParseParenthesis();
+  ast::Expression& ParsePrimaryExpression();
+  ast::Expression& ParseUnaryExpression();
+  ast::Expression& ParseUpdateExpression();
 
   // Statements
   bool CanUseBreak() const;
@@ -105,7 +144,10 @@ class Parser final {
   ast::EditContext* const context_;
   std::unique_ptr<Lexer> lexer_;
   ast::ContainerNode& root_;
+  std::stack<int> range_stack_;
   StatementScope* statement_scope_ = nullptr;
+  std::vector<ast::Token*> tokens_;
+  std::stack<ast::Token*> token_stack_;
 
   DISALLOW_COPY_AND_ASSIGN(Parser);
 };

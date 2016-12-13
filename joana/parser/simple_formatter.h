@@ -26,6 +26,7 @@ class SimpleFormatter final : public ast::NodeVisitor {
 
   // Returns true if |statement| is block statement.
   bool FormatChildStatement(const ast::Statement& statement);
+  void FormatExpressionList(const ast::ExpressionList& list);
   void FormatWithIndent(const ast::Node& node);
   void OutputIndent();
   void OutputSpaces(int amount);

@@ -70,6 +70,18 @@ Parser::ErrorCode Parser::BracketStack::Feed(const ast::Node& token) {
 }
 
 //
+// SourceCodeRangeScope
+//
+Parser::SourceCodeRangeScope::SourceCodeRangeScope(Parser* parser)
+    : parser_(parser) {
+  parser_->range_stack_.push(parser_->PeekToken().range().start());
+}
+
+Parser::SourceCodeRangeScope::~SourceCodeRangeScope() {
+  parser_->range_stack_.pop();
+}
+
+//
 // Parser
 //
 Parser::Parser(ast::EditContext* context, const SourceCodeRange& range)
@@ -101,22 +113,28 @@ void Parser::AddError(ErrorCode error_code) {
 }
 
 void Parser::Advance() {
+  if (!token_stack_.empty()) {
+    token_stack_.pop();
+    return;
+  }
   lexer_->Advance();
   if (!HasToken())
     return;
-  const auto error_code = bracket_stack_->Feed(PeekToken());
+  auto& token = PeekToken();
+  tokens_.push_back(&token);
+  const auto error_code = bracket_stack_->Feed(token);
   if (error_code == ErrorCode::None)
     return;
-  AddError(PeekToken(), error_code);
+  AddError(token, error_code);
 }
 
-ast::Node& Parser::ConsumeToken() {
+ast::Token& Parser::ConsumeToken() {
   auto& token = PeekToken();
   Advance();
   return token;
 }
 
-ast::Node& Parser::ComputeInvalidToken(ErrorCode error_code) {
+ast::Token& Parser::ComputeInvalidToken(ErrorCode error_code) {
   if (HasToken())
     return PeekToken();
   return node_factory().NewInvalid(source_code().end(),
@@ -157,12 +175,22 @@ void Parser::ExpectToken(ast::PunctuatorKind kind, ErrorCode error_code) {
   return AddError(lexer_->location(), error_code);
 }
 
-ast::Node& Parser::PeekToken() {
-  return lexer_->PeekToken();
+SourceCodeRange Parser::GetSourceCodeRange() const {
+  return source_code().Slice(range_stack_.top(), lexer_->location().end());
 }
 
 bool Parser::HasToken() const {
-  return lexer_->HasToken();
+  return lexer_->HasToken() || !token_stack_.empty();
+}
+
+ast::Token& Parser::PeekToken() {
+  if (token_stack_.empty())
+    return lexer_->PeekToken();
+  return *token_stack_.top();
+}
+
+void Parser::PushBackToken(const ast::Token& token) {
+  token_stack_.push(const_cast<ast::Token*>(&token));
 }
 
 const ast::Node& Parser::Run() {
@@ -171,7 +199,6 @@ const ast::Node& Parser::Run() {
   while (HasToken()) {
     auto& token = PeekToken();
     if (token.Is<ast::Comment>()) {
-      ast::NodeEditor().AppendChild(&root_, &ConsumeToken());
       Advance();
       continue;
     }
@@ -181,6 +208,7 @@ const ast::Node& Parser::Run() {
       Advance();
       continue;
     }
+    SourceCodeRangeScope(this);
     ast::NodeEditor().AppendChild(&root_, &ParseStatement());
   }
   for (const auto& bracket : bracket_stack_->tokens())

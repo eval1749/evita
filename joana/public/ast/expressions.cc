@@ -13,11 +13,101 @@ namespace joana {
 namespace ast {
 
 //
+// ArrayLiteralExpression
+//
+ArrayLiteralExpression::ArrayLiteralExpression(const SourceCodeRange& range,
+                                               ExpressionList* elements)
+    : NodeTemplate(elements, range) {}
+
+ArrayLiteralExpression::~ArrayLiteralExpression() = default;
+
+//
+// AssignmentExpression
+//
+AssignmentExpression::AssignmentExpression(const SourceCodeRange& range,
+                                           Punctuator* op,
+                                           Expression* lhs,
+                                           Expression* rhs)
+    : NodeTemplate(std::make_tuple(op, lhs, rhs), range) {}
+
+AssignmentExpression::~AssignmentExpression() = default;
+
+//
+// BinaryExpression
+//
+BinaryExpression::BinaryExpression(const SourceCodeRange& range,
+                                   Token* op,
+                                   Expression* lhs,
+                                   Expression* rhs)
+    : NodeTemplate(std::make_tuple(op, lhs, rhs), range) {}
+
+BinaryExpression::~BinaryExpression() = default;
+
+//
+// CallExpression
+//
+CallExpression::CallExpression(const SourceCodeRange& range,
+                               Expression* callee,
+                               ExpressionList* arguments)
+    : NodeTemplate(std::make_tuple(callee, arguments), range) {}
+
+CallExpression::~CallExpression() = default;
+
+//
+// CommaExpression
+//
+CommaExpression::CommaExpression(const SourceCodeRange& range,
+                                 Expression* lhs,
+                                 Expression* rhs)
+    : NodeTemplate(std::make_tuple(lhs, rhs), range) {}
+
+CommaExpression::~CommaExpression() = default;
+
+//
+// ConditionalExpression
+//
+ConditionalExpression::ConditionalExpression(const SourceCodeRange& range,
+                                             Expression* condition,
+                                             Expression* true_expression,
+                                             Expression* false_expression)
+    : NodeTemplate(
+          std::make_tuple(condition, true_expression, false_expression),
+          range) {}
+
+ConditionalExpression::~ConditionalExpression() = default;
+
+//
+// ElisionExpression
+//
+ElisionExpression::ElisionExpression(const SourceCodeRange& range)
+    : Expression(range) {}
+
+ElisionExpression::~ElisionExpression() = default;
+
+//
 // Expression
 //
 Expression::Expression(const SourceCodeRange& range) : ContainerNode(range) {}
 
 Expression::~Expression() = default;
+
+//
+// ExpressionList
+//
+ExpressionList::ExpressionList(Zone* zone,
+                               const std::vector<Expression*>& expressions)
+    : expressions_(zone, expressions) {}
+
+ExpressionList::~ExpressionList() = default;
+
+//
+// GroupExpression
+//
+GroupExpression::GroupExpression(const SourceCodeRange& range,
+                                 Expression* expression)
+    : NodeTemplate(expression, range) {}
+
+GroupExpression::~GroupExpression() = default;
 
 //
 // InvalidExpression
@@ -30,35 +120,60 @@ InvalidExpression::~InvalidExpression() = default;
 //
 // LiteralExpression
 //
-LiteralExpression::LiteralExpression(const Literal& literal)
-    : Expression(literal.range()) {
-  NodeEditor().AppendChild(this, const_cast<Literal*>(&literal));
-}
+LiteralExpression::LiteralExpression(Literal* literal)
+    : NodeTemplate(std::make_tuple(literal), literal->range()) {}
 
 LiteralExpression::~LiteralExpression() = default;
 
-const Literal& LiteralExpression::literal() const {
-  auto* const literal = NodeTraversal::FirstChildOf(*this);
-  DCHECK(literal);
-  return literal->As<Literal>();
-}
+//
+// MemberExpression
+//
+MemberExpression::MemberExpression(const SourceCodeRange& range,
+                                   Expression* expression,
+                                   Expression* name_expression)
+    : NodeTemplate(std::make_tuple(expression, name_expression), range) {}
+
+MemberExpression::~MemberExpression() = default;
+
+//
+// NewExpression
+//
+NewExpression::NewExpression(const SourceCodeRange& range,
+                             Expression* expression,
+                             ExpressionList* arguments)
+    : NodeTemplate(std::make_tuple(expression, arguments), range) {}
+
+NewExpression::~NewExpression() = default;
+
+//
+// PropertyExpression
+//
+PropertyExpression::PropertyExpression(const SourceCodeRange& range,
+                                       Expression* expression,
+                                       Name* name)
+    : NodeTemplate(std::make_tuple(expression, name), range) {}
+
+PropertyExpression::~PropertyExpression() = default;
 
 //
 // ReferenceExpression
 //
-ReferenceExpression::ReferenceExpression(const Name& name)
-    : Expression(name.range()) {
-  DCHECK(!name.IsKeyword()) << name;
-  NodeEditor().AppendChild(this, const_cast<Name*>(&name));
+ReferenceExpression::ReferenceExpression(Name* name)
+    : NodeTemplate(name, name->range()) {
+  DCHECK(!name->IsKeyword()) << *name;
 }
 
 ReferenceExpression::~ReferenceExpression() = default;
 
-const Name& ReferenceExpression::name() const {
-  auto* const child = NodeTraversal::FirstChildOf(*this);
-  DCHECK(child);
-  return child->As<Name>();
-}
+//
+// UnaryExpression
+//
+UnaryExpression::UnaryExpression(const SourceCodeRange& range,
+                                 Token* op,
+                                 Expression* expression)
+    : NodeTemplate(std::make_tuple(op, expression), range) {}
+
+UnaryExpression::~UnaryExpression() = default;
 
 }  // namespace ast
 }  // namespace joana

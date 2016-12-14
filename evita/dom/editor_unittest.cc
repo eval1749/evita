@@ -93,10 +93,9 @@ TEST_F(EditorTest, messageBox) {
 }
 
 TEST_F(EditorTest, runScript) {
-  EXPECT_SCRIPT_EQ("1", "Editor.runScript('1').value");
-  EXPECT_SCRIPT_EQ("ReferenceError: foo is not defined,0,1",
-                   "var result = Editor.runScript('foo');"
-                   "[result.exception, result.start, result.end]");
+  EXPECT_SCRIPT_EQ("1", "Editor.runScript('1')");
+  EXPECT_SCRIPT_EQ("ReferenceError: foo is not defined",
+                   "var result = Editor.runScript('foo');");
 }
 
 TEST_F(EditorTest, version) {

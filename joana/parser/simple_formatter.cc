@@ -352,6 +352,11 @@ void SimpleFormatter::VisitContinueStatement(ast::ContinueStatement* node) {
   *ostream_ << ';';
 }
 
+void SimpleFormatter::VisitDeclarationStatement(
+    ast::DeclarationStatement* node) {
+  Format(node->declaration());
+}
+
 void SimpleFormatter::VisitDoStatement(ast::DoStatement* node) {
   *ostream_ << "do";
   if (FormatChildStatement(node->statement()))

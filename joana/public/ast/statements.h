@@ -14,6 +14,7 @@
 namespace joana {
 namespace ast {
 
+class Declaration;
 class Expression;
 
 //
@@ -106,6 +107,24 @@ class JOANA_PUBLIC_EXPORT ContinueStatement : public Statement {
 
  private:
   DISALLOW_COPY_AND_ASSIGN(ContinueStatement);
+};
+
+//
+// DeclarationStatement wraps function and class.
+//
+class JOANA_PUBLIC_EXPORT DeclarationStatement final
+    : public NodeTemplate<Statement, Declaration*> {
+  DECLARE_CONCRETE_AST_NODE(DeclarationStatement, Statement);
+
+ public:
+  ~DeclarationStatement() final;
+
+  const Declaration& declaration() const { return *member_at<0>(); }
+
+ private:
+  explicit DeclarationStatement(Declaration* declaration);
+
+  DISALLOW_COPY_AND_ASSIGN(DeclarationStatement);
 };
 
 //

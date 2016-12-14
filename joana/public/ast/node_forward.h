@@ -52,6 +52,7 @@ namespace ast {
   V(BreakStatement)               \
   V(CaseClause)                   \
   V(ContinueStatement)            \
+  V(DeclarationStatement)         \
   V(DoStatement)                  \
   V(EmptyStatement)               \
   V(ExpressionStatement)          \

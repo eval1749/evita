@@ -243,6 +243,13 @@ TEST_F(ParserTest, ExpressionStatementYield) {
   TEST_PARSER("yield* foo();\n");
 }
 
+TEST_F(ParserTest, FunctionStatement) {
+  TEST_PARSER(
+      "function foo(a, b, c) {\n"
+      "  bar(a + b);\n"
+      "}\n");
+}
+
 TEST_F(ParserTest, IfStatement) {
   TEST_PARSER(
       "if (foo)\n"

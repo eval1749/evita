@@ -117,7 +117,6 @@ class Parser final {
   ast::Statement& NewInvalidStatement(ErrorCode error_code);
   ast::Statement& ParseStatement();
 
-  ast::Statement& ParseAsyncStatement();
   ast::Statement& ParseBreakStatement();
   ast::Statement& ParseBlockStatement();
   ast::Statement& ParseCaseClause();
@@ -127,7 +126,7 @@ class Parser final {
   ast::Statement& ParseDoStatement();
   ast::Statement& ParseExpressionStatement();
   ast::Statement& ParseForStatement();
-  ast::Statement& ParseFunctionStatement();
+  ast::Statement& ParseFunctionStatement(ast::FunctionKind kind);
   ast::Statement& ParseIfStatement();
   ast::Statement& ParseKeywordStatement();
   ast::Statement& ParseLetStatement();

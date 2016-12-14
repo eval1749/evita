@@ -121,6 +121,7 @@ class JOANA_PUBLIC_EXPORT NodeFactory final {
   ContinueStatement& NewContinueStatement(const Name& keyword,
                                           const Name& label);
   ContinueStatement& NewContinueStatement(const Name& keyword);
+  DeclarationStatement& NewDeclarationStatement(const Declaration& declaration);
   DoStatement& NewDoStatement(const Name& keyword,
                               const Statement& statement,
                               const Expression& condition);

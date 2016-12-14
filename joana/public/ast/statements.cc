@@ -4,6 +4,7 @@
 
 #include "joana/public/ast/statements.h"
 
+#include "joana/public/ast/declarations.h"
 #include "joana/public/ast/expressions.h"
 #include "joana/public/ast/node_editor.h"
 #include "joana/public/ast/node_traversal.h"
@@ -93,6 +94,14 @@ Name& ContinueStatement::label() const {
   DCHECK(has_label()) << *this;
   return NodeTraversal::FirstChildOf(*this)->As<Name>();
 }
+
+//
+// DeclarationStatement
+//
+DeclarationStatement::DeclarationStatement(Declaration* declaration)
+    : NodeTemplate(declaration, declaration->range()) {}
+
+DeclarationStatement::~DeclarationStatement() = default;
 
 //
 // DoStatement

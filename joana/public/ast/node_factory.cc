@@ -294,6 +294,12 @@ ContinueStatement& NodeFactory::NewContinueStatement(const Name& keyword) {
   return *new (zone_) ContinueStatement(keyword);
 }
 
+DeclarationStatement& NodeFactory::NewDeclarationStatement(
+    const Declaration& declaration) {
+  return *new (zone_)
+      DeclarationStatement(const_cast<Declaration*>(&declaration));
+}
+
 DoStatement& NodeFactory::NewDoStatement(const Name& keyword,
                                          const Statement& statement,
                                          const Expression& condition) {

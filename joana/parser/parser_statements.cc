@@ -9,6 +9,7 @@
 
 #include "joana/parser/lexer/lexer.h"
 #include "joana/parser/parser_error_codes.h"
+#include "joana/public/ast/declarations.h"
 #include "joana/public/ast/literals.h"
 #include "joana/public/ast/node_editor.h"
 #include "joana/public/ast/node_factory.h"
@@ -169,10 +170,6 @@ ast::Statement& Parser::ParseStatement() {
   return ParseExpressionStatement();
 }
 
-ast::Statement& Parser::ParseAsyncStatement() {
-  return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
-}
-
 ast::Statement& Parser::ParseBlockStatement() {
   auto& block =
       node_factory().NewBlockStatement(ConsumeToken().As<ast::Punctuator>());
@@ -281,8 +278,8 @@ ast::Statement& Parser::ParseForStatement() {
   return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
 }
 
-ast::Statement& Parser::ParseFunctionStatement() {
-  return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
+ast::Statement& Parser::ParseFunctionStatement(ast::FunctionKind kind) {
+  return node_factory().NewDeclarationStatement(ParseFunction(kind));
 }
 
 ast::Statement& Parser::ParseIfStatement() {
@@ -303,11 +300,15 @@ ast::Statement& Parser::ParseIfStatement() {
 }
 
 ast::Statement& Parser::ParseKeywordStatement() {
+  SourceCodeRangeScope scope(this);
   const auto& keyword = PeekToken().As<ast::Name>();
   DCHECK(keyword.IsKeyword()) << keyword;
   switch (static_cast<ast::NameId>(keyword.number())) {
     case ast::NameId::Async:
-      return ParseAsyncStatement();
+      ConsumeToken();
+      ExpectToken(ast::NameId::Function,
+                  ErrorCode::ERROR_FUNCTION_EXPECT_FUNCTION);
+      return ParseFunctionStatement(ast::FunctionKind::Async);
     case ast::NameId::Break:
       return ParseBreakStatement();
     case ast::NameId::Case:
@@ -329,7 +330,10 @@ ast::Statement& Parser::ParseKeywordStatement() {
     case ast::NameId::For:
       return ParseForStatement();
     case ast::NameId::Function:
-      return ParseFunctionStatement();
+      ConsumeToken();
+      if (ConsumeTokenIf(ast::PunctuatorKind::Times))
+        return ParseFunctionStatement(ast::FunctionKind::Generator);
+      return ParseFunctionStatement(ast::FunctionKind::Normal);
     case ast::NameId::If:
       return ParseIfStatement();
     case ast::NameId::Let:

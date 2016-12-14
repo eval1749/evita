@@ -52,43 +52,19 @@ namespace ast {
   V(FUNCTION, INVALID_ARROW_FUNCTION_BODY)   \
   V(FUNCTION, INVALID_PARAMETER)             \
   V(FUNCTION, INVALID_PARAMETER_LIST)        \
-  V(STATEMENT, AWAIT)                        \
-  V(STATEMENT, BRACE_NOT_CLSOED)             \
-  V(STATEMENT, BREAK_NOT_LABEL)              \
-  V(STATEMENT, BREAK_SEMI_COLON)             \
-  V(STATEMENT, CASE_EXPECT_COLON)            \
-  V(STATEMENT, CATCH)                        \
-  V(STATEMENT, CATCH_EXPECT_LBRACE)          \
-  V(STATEMENT, CATCH_EXPECT_LPAREN)          \
   V(STATEMENT, CATCH_EXPECT_NAME)            \
-  V(STATEMENT, CATCH_EXPECT_RPAREN)          \
-  V(STATEMENT, CONTINUE_NOT_LABEL)           \
-  V(STATEMENT, CONTINUE_SEMI_COLON)          \
-  V(STATEMENT, DEFAULT_EXPECT_COLON)         \
-  V(STATEMENT, DO_EXPECT_LPAREN)             \
-  V(STATEMENT, DO_EXPECT_RPAREN)             \
-  V(STATEMENT, DO_EXPECT_SEMI_COLON)         \
-  V(STATEMENT, DO_EXPECT_WHILE)              \
-  V(STATEMENT, ELSE)                         \
+  V(STATEMENT, EXPECT_CATCH)                 \
+  V(STATEMENT, EXPECT_COLON)                 \
+  V(STATEMENT, EXPECT_LABEL)                 \
+  V(STATEMENT, EXPECT_LBRACE)                \
+  V(STATEMENT, EXPECT_LPAREN)                \
+  V(STATEMENT, EXPECT_RBRACE)                \
+  V(STATEMENT, EXPECT_RPAREN)                \
   V(STATEMENT, EXPECT_SEMI_COLON)            \
-  V(STATEMENT, EXTENDS)                      \
-  V(STATEMENT, FINALLY)                      \
-  V(STATEMENT, FINALLY_EXPECT_LBRACE)        \
-  V(STATEMENT, FINALLY_EXPECT_LPAREN)        \
-  V(STATEMENT, IF_EXPECT_LPAREN)             \
-  V(STATEMENT, IF_EXPECT_RPAREN)             \
+  V(STATEMENT, EXPECT_WHILE)                 \
   V(STATEMENT, INVALID)                      \
   V(STATEMENT, RESERVED_WORD)                \
-  V(STATEMENT, SWITCH_EXPECT_LBRACE)         \
-  V(STATEMENT, SWITCH_EXPECT_LPAREN)         \
-  V(STATEMENT, SWITCH_EXPECT_RBRACE)         \
-  V(STATEMENT, SWITCH_EXPECT_RPAREN)         \
-  V(STATEMENT, SWITCH_INVALID_CLAUSE)        \
-  V(STATEMENT, THROW_EXPECT_SEMI_COLON)      \
-  V(STATEMENT, TRY_EXPECT_CATCH)             \
-  V(STATEMENT, TRY_EXPECT_LBRACE)            \
-  V(STATEMENT, TRY_EXPECT_LPAREN)            \
-  V(STATEMENT, YIELD)
+  V(STATEMENT, SWITCH_INVALID_CLAUSE)
 
 const auto kLexerErrorCodeBase = 10000;
 const auto kParserErrorCodeBase = 20000;

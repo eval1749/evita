@@ -96,10 +96,10 @@ ast::Statement& Parser::ParseBreakStatement() {
   if (ConsumeTokenIf(ast::PunctuatorKind::SemiColon))
     return node_factory().NewBreakStatement(keyword);
   if (!PeekToken().Is<ast::Name>())
-    AddError(PeekToken(), ErrorCode::ERROR_STATEMENT_BREAK_NOT_LABEL);
+    AddError(PeekToken(), ErrorCode::ERROR_STATEMENT_EXPECT_LABEL);
   auto& label = ConsumeToken().As<ast::Name>();
   ExpectToken(ast::PunctuatorKind::SemiColon,
-              ErrorCode::ERROR_STATEMENT_BREAK_SEMI_COLON);
+              ErrorCode::ERROR_STATEMENT_EXPECT_SEMI_COLON);
   // TODO(eval1749): Find label for |break| statement
   return node_factory().NewBreakStatement(keyword, label);
 }
@@ -109,7 +109,7 @@ ast::Statement& Parser::ParseCaseClause() {
   DCHECK_EQ(keyword, ast::NameId::Case);
   auto& expression = ParseExpression();
   ExpectToken(ast::PunctuatorKind::Colon,
-              ErrorCode::ERROR_STATEMENT_CASE_EXPECT_COLON);
+              ErrorCode::ERROR_STATEMENT_EXPECT_COLON);
   return node_factory().NewCaseClause(keyword, expression, ParseStatement());
 }
 
@@ -124,10 +124,10 @@ ast::Statement& Parser::ParseContinueStatement() {
   if (ConsumeTokenIf(ast::PunctuatorKind::SemiColon))
     return node_factory().NewContinueStatement(keyword);
   if (!PeekToken().Is<ast::Name>())
-    AddError(PeekToken(), ErrorCode::ERROR_STATEMENT_CONTINUE_NOT_LABEL);
+    AddError(PeekToken(), ErrorCode::ERROR_STATEMENT_EXPECT_LABEL);
   auto& label = ConsumeToken().As<ast::Name>();
   ExpectToken(ast::PunctuatorKind::SemiColon,
-              ErrorCode::ERROR_STATEMENT_CONTINUE_SEMI_COLON);
+              ErrorCode::ERROR_STATEMENT_EXPECT_SEMI_COLON);
   // TODO(eval1749): Find label for |continue| statement
   return node_factory().NewContinueStatement(keyword, label);
 }
@@ -136,7 +136,7 @@ ast::Statement& Parser::ParseDefaultLabel() {
   auto& keyword = ConsumeToken().As<ast::Name>();
   DCHECK(keyword == ast::NameId::Default);
   ExpectToken(ast::PunctuatorKind::Colon,
-              ErrorCode::ERROR_STATEMENT_DEFAULT_EXPECT_COLON);
+              ErrorCode::ERROR_STATEMENT_EXPECT_COLON);
   return node_factory().NewLabeledStatement(keyword, ParseStatement());
 }
 
@@ -144,14 +144,14 @@ ast::Statement& Parser::ParseDoStatement() {
   auto& keyword = ConsumeToken().As<ast::Name>();
   auto& statement = ParseStatement();
   if (!ConsumeTokenIf(ast::NameId::While))
-    return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_DO_EXPECT_WHILE);
+    return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_EXPECT_WHILE);
   ExpectToken(ast::PunctuatorKind::LeftParenthesis,
-              ErrorCode::ERROR_STATEMENT_DO_EXPECT_LPAREN);
+              ErrorCode::ERROR_STATEMENT_EXPECT_LPAREN);
   auto& condition = ParseExpression();
   ExpectToken(ast::PunctuatorKind::RightParenthesis,
-              ErrorCode::ERROR_STATEMENT_DO_EXPECT_RPAREN);
+              ErrorCode::ERROR_STATEMENT_EXPECT_RPAREN);
   ExpectToken(ast::PunctuatorKind::SemiColon,
-              ErrorCode::ERROR_STATEMENT_DO_EXPECT_SEMI_COLON);
+              ErrorCode::ERROR_STATEMENT_EXPECT_SEMI_COLON);
   return node_factory().NewDoStatement(keyword, statement, condition);
 }
 
@@ -174,10 +174,10 @@ ast::Statement& Parser::ParseIfStatement() {
   auto& keyword = ConsumeToken().As<ast::Name>();
   DCHECK_EQ(keyword, ast::NameId::If);
   ExpectToken(ast::PunctuatorKind::LeftParenthesis,
-              ErrorCode::ERROR_STATEMENT_IF_EXPECT_LPAREN);
+              ErrorCode::ERROR_STATEMENT_EXPECT_LPAREN);
   auto& condition = ParseExpression();
   ExpectToken(ast::PunctuatorKind::RightParenthesis,
-              ErrorCode::ERROR_STATEMENT_IF_EXPECT_RPAREN);
+              ErrorCode::ERROR_STATEMENT_EXPECT_RPAREN);
   auto& then_clause = ParseStatement();
   if (!ConsumeTokenIf(ast::NameId::Else))
     return node_factory().NewIfStatement(keyword, condition, then_clause);
@@ -204,16 +204,10 @@ ast::Statement& Parser::ParseKeywordStatement() {
       return ParseContinueStatement();
     case ast::NameId::Const:
       return ParseConstStatement();
-    case ast::NameId::Debugger:
-      return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_RESERVED_WORD);
     case ast::NameId::Default:
       return ParseDefaultLabel();
     case ast::NameId::Do:
       return ParseDoStatement();
-    case ast::NameId::Else:
-      return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_ELSE);
-    case ast::NameId::Finally:
-      return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_FINALLY);
     case ast::NameId::For:
       return ParseForStatement();
     case ast::NameId::Function:
@@ -239,7 +233,10 @@ ast::Statement& Parser::ParseKeywordStatement() {
       return ParseWhileStatement();
 
     // Reserved keywords
+    case ast::NameId::Catch:
+    case ast::NameId::Else:
     case ast::NameId::Enum:
+    case ast::NameId::Finally:
     case ast::NameId::Interface:
     case ast::NameId::Package:
     case ast::NameId::Private:
@@ -264,13 +261,13 @@ ast::Statement& Parser::ParseReturnStatement() {
 ast::Statement& Parser::ParseSwitchStatement() {
   auto& keyword = ConsumeToken().As<ast::Name>();
   if (!ConsumeTokenIf(ast::PunctuatorKind::LeftParenthesis))
-    return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_SWITCH_EXPECT_LPAREN);
+    return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_EXPECT_LPAREN);
   auto& expression = ParseExpression();
   if (!ConsumeTokenIf(ast::PunctuatorKind::RightParenthesis))
-    return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_SWITCH_EXPECT_RPAREN);
+    return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_EXPECT_RPAREN);
   std::vector<ast::Statement*> clauses;
   if (!ConsumeTokenIf(ast::PunctuatorKind::LeftBrace)) {
-    AddError(ErrorCode::ERROR_STATEMENT_SWITCH_EXPECT_LBRACE);
+    AddError(ErrorCode::ERROR_STATEMENT_EXPECT_LBRACE);
     return node_factory().NewSwitchStatement(keyword, expression, clauses);
   }
   while (HasToken()) {
@@ -278,8 +275,8 @@ ast::Statement& Parser::ParseSwitchStatement() {
       return node_factory().NewSwitchStatement(keyword, expression, clauses);
     clauses.push_back(&ParseStatement());
   }
-  AddError(ComputeInvalidToken(ErrorCode::ERROR_STATEMENT_SWITCH_EXPECT_RBRACE),
-           ErrorCode::ERROR_STATEMENT_SWITCH_EXPECT_RBRACE);
+  AddError(ComputeInvalidToken(ErrorCode::ERROR_STATEMENT_EXPECT_RBRACE),
+           ErrorCode::ERROR_STATEMENT_EXPECT_RBRACE);
   return node_factory().NewSwitchStatement(keyword, expression, clauses);
 }
 
@@ -287,43 +284,41 @@ ast::Statement& Parser::ParseThrowStatement() {
   auto& keyword = ConsumeToken().As<ast::Name>();
   auto& expression = ParseExpression();
   ExpectToken(ast::PunctuatorKind::SemiColon,
-              ErrorCode::ERROR_STATEMENT_THROW_EXPECT_SEMI_COLON);
+              ErrorCode::ERROR_STATEMENT_EXPECT_SEMI_COLON);
   return node_factory().NewThrowStatement(keyword, expression);
 }
 
 ast::Statement& Parser::ParseTryStatement() {
   auto& keyword = ConsumeToken().As<ast::Name>();
   if (!HasToken() || PeekToken() != ast::PunctuatorKind::LeftBrace)
-    return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_TRY_EXPECT_LBRACE);
+    return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_EXPECT_LBRACE);
   auto& block = ParseStatement();
   if (!HasToken())
-    return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_TRY_EXPECT_CATCH);
+    return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_EXPECT_CATCH);
   if (PeekToken() == ast::NameId::Finally) {
     ConsumeToken();
     if (!HasToken() || PeekToken() != ast::PunctuatorKind::LeftBrace)
-      return NewInvalidStatement(
-          ErrorCode::ERROR_STATEMENT_FINALLY_EXPECT_LBRACE);
+      return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_EXPECT_LBRACE);
     auto& finally_block = ParseBlockStatement();
     return node_factory().NewTryFinallyStatement(keyword, block, finally_block);
   }
-  ExpectToken(ast::NameId::Catch, ErrorCode::ERROR_STATEMENT_TRY_EXPECT_CATCH);
+  ExpectToken(ast::NameId::Catch, ErrorCode::ERROR_STATEMENT_EXPECT_CATCH);
   ExpectToken(ast::PunctuatorKind::LeftParenthesis,
-              ErrorCode::ERROR_STATEMENT_CATCH_EXPECT_LPAREN);
+              ErrorCode::ERROR_STATEMENT_EXPECT_LPAREN);
   if (!HasToken() || !PeekToken().Is<ast::Name>())
     return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_CATCH_EXPECT_NAME);
   auto& catch_name = ConsumeToken().As<ast::Name>();
   ExpectToken(ast::PunctuatorKind::RightParenthesis,
-              ErrorCode::ERROR_STATEMENT_CATCH_EXPECT_RPAREN);
+              ErrorCode::ERROR_STATEMENT_EXPECT_RPAREN);
   if (!HasToken() || PeekToken() != ast::PunctuatorKind::LeftBrace)
-    return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_CATCH_EXPECT_LBRACE);
+    return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_EXPECT_LBRACE);
   auto& catch_block = ParseStatement();
   if (!HasToken() || PeekToken() != ast::NameId::Finally)
     return node_factory().NewTryCatchStatement(keyword, block, catch_name,
                                                catch_block);
   ConsumeToken();
   if (!HasToken() || PeekToken() != ast::PunctuatorKind::LeftBrace)
-    return NewInvalidStatement(
-        ErrorCode::ERROR_STATEMENT_FINALLY_EXPECT_LBRACE);
+    return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_EXPECT_LBRACE);
   auto& finally_block = ParseStatement();
   return node_factory().NewTryCatchStatement(keyword, block, catch_name,
                                              catch_block, finally_block);
@@ -336,10 +331,10 @@ ast::Statement& Parser::ParseVarStatement() {
 ast::Statement& Parser::ParseWhileStatement() {
   auto& keyword = ConsumeToken().As<ast::Name>();
   ExpectToken(ast::PunctuatorKind::LeftParenthesis,
-              ErrorCode::ERROR_STATEMENT_DO_EXPECT_LPAREN);
+              ErrorCode::ERROR_STATEMENT_EXPECT_LPAREN);
   auto& condition = ParseExpression();
   ExpectToken(ast::PunctuatorKind::RightParenthesis,
-              ErrorCode::ERROR_STATEMENT_DO_EXPECT_RPAREN);
+              ErrorCode::ERROR_STATEMENT_EXPECT_RPAREN);
   auto& statement = ParseStatement();
   return node_factory().NewWhileStatement(keyword, condition, statement);
 }

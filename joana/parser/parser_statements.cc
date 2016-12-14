@@ -29,6 +29,24 @@ bool IsLoopKeyword(const ast::Name& keyword) {
 }  // namespace
 
 //
+// Parser::ExpectSemiColonScope
+//
+class Parser::ExpectSemiColonScope final {
+ public:
+  explicit ExpectSemiColonScope(Parser* parser) : parser_(parser) {}
+
+  ~ExpectSemiColonScope() {
+    parser_->ExpectToken(ast::PunctuatorKind::SemiColon,
+                         ErrorCode::ERROR_STATEMENT_EXPECT_SEMI_COLON);
+  }
+
+ private:
+  Parser* const parser_;
+
+  DISALLOW_COPY_AND_ASSIGN(ExpectSemiColonScope);
+};
+
+//
 // Functions for parsing statements
 //
 ast::Statement& Parser::NewInvalidStatement(ErrorCode error_code) {
@@ -90,18 +108,11 @@ ast::Statement& Parser::ParseBlockStatement() {
 }
 
 ast::Statement& Parser::ParseBreakStatement() {
-  auto& keyword = ConsumeToken().As<ast::Name>();
-  if (!HasToken())
-    return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
-  if (ConsumeTokenIf(ast::PunctuatorKind::SemiColon))
-    return node_factory().NewBreakStatement(keyword);
-  if (!PeekToken().Is<ast::Name>())
-    AddError(PeekToken(), ErrorCode::ERROR_STATEMENT_EXPECT_LABEL);
-  auto& label = ConsumeToken().As<ast::Name>();
-  ExpectToken(ast::PunctuatorKind::SemiColon,
-              ErrorCode::ERROR_STATEMENT_EXPECT_SEMI_COLON);
-  // TODO(eval1749): Find label for |break| statement
-  return node_factory().NewBreakStatement(keyword, label);
+  ConsumeToken();
+  ExpectSemiColonScope semi_colon_scope(this);
+  auto& label = HasToken() && PeekToken().Is<ast::Name>() ? ConsumeToken()
+                                                          : NewEmptyName();
+  return node_factory().NewBreakStatement(GetSourceCodeRange(), label);
 }
 
 ast::Statement& Parser::ParseCaseClause() {

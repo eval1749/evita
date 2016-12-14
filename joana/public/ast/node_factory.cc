@@ -270,13 +270,9 @@ BlockStatement& NodeFactory::NewBlockStatement(const Punctuator& left_brace) {
   return *new (zone_) BlockStatement(left_brace);
 }
 
-BreakStatement& NodeFactory::NewBreakStatement(const Name& keyword,
-                                               const Name& label) {
-  return *new (zone_) BreakStatement(keyword, label);
-}
-
-BreakStatement& NodeFactory::NewBreakStatement(const Name& keyword) {
-  return *new (zone_) BreakStatement(keyword);
+BreakStatement& NodeFactory::NewBreakStatement(const SourceCodeRange& range,
+                                               const Token& label) {
+  return *new (zone_) BreakStatement(range, const_cast<Token*>(&label));
 }
 
 CaseClause& NodeFactory::NewCaseClause(const Name& keyword,

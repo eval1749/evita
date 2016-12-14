@@ -38,6 +38,7 @@ class Parser final {
  private:
   class BracketStack;
   enum class ErrorCode;
+  class ExpectSemiColonScope;
 
   class SourceCodeRangeScope final {
    public:

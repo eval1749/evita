@@ -26,27 +26,10 @@ BlockStatement::~BlockStatement() = default;
 //
 // BreakStatement
 //
-BreakStatement::BreakStatement(const Name& keyword, const Name& label)
-    : BreakStatement(keyword) {
-  DCHECK(!label.As<Name>().IsKeyword());
-  NodeEditor().AppendChild(this, const_cast<Name*>(&label));
-}
-
-BreakStatement::BreakStatement(const Name& keyword)
-    : Statement(keyword.range()) {
-  DCHECK_EQ(keyword, NameId::Break);
-}
+BreakStatement::BreakStatement(const SourceCodeRange& range, Token* label)
+    : NodeTemplate(label, range) {}
 
 BreakStatement::~BreakStatement() = default;
-
-bool BreakStatement::has_label() const {
-  return NodeTraversal::FirstChildOf(*this) != nullptr;
-}
-
-Name& BreakStatement::label() const {
-  DCHECK(has_label()) << *this;
-  return NodeTraversal::FirstChildOf(*this)->As<Name>();
-}
 
 //
 // CaseClause

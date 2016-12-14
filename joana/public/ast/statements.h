@@ -52,18 +52,17 @@ class JOANA_PUBLIC_EXPORT BlockStatement : public Statement {
 //
 // BreakStatement
 //
-class JOANA_PUBLIC_EXPORT BreakStatement : public Statement {
+class JOANA_PUBLIC_EXPORT BreakStatement
+    : public NodeTemplate<Statement, Token*> {
   DECLARE_CONCRETE_AST_NODE(BreakStatement, Statement);
 
  public:
   ~BreakStatement() override;
 
-  bool has_label() const;
-  Name& label() const;
+  Token& label() const { return *member_at<0>(); }
 
  protected:
-  BreakStatement(const Name& keyword, const Name& label);
-  explicit BreakStatement(const Name& keyword);
+  BreakStatement(const SourceCodeRange& range, Token* label);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(BreakStatement);

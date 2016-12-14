@@ -332,9 +332,12 @@ void SimpleFormatter::VisitBlockStatement(ast::BlockStatement* node) {
 }
 
 void SimpleFormatter::VisitBreakStatement(ast::BreakStatement* node) {
-  *ostream_ << "break";
-  if (node->has_label())
-    *ostream_ << ' ' << node->label();
+  if (node->label().Is<ast::Empty>()) {
+    *ostream_ << "break;";
+    return;
+  }
+  *ostream_ << ' ';
+  Format(node->label());
   *ostream_ << ';';
 }
 

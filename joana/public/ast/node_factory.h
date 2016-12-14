@@ -113,8 +113,8 @@ class JOANA_PUBLIC_EXPORT NodeFactory final {
 
   // Statements factory members
   BlockStatement& NewBlockStatement(const Punctuator& left_brace);
-  BreakStatement& NewBreakStatement(const Name& keyword, const Name& label);
-  BreakStatement& NewBreakStatement(const Name& keyword);
+  BreakStatement& NewBreakStatement(const SourceCodeRange& range,
+                                    const Token& label);
   CaseClause& NewCaseClause(const Name& keyword,
                             const Expression& expression,
                             const Statement& statement);

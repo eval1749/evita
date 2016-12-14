@@ -62,6 +62,7 @@ namespace ast {
   V(ThrowStatement)               \
   V(SwitchStatement)              \
   V(TryCatchStatement)            \
+  V(TryCatchFinallyStatement)     \
   V(TryFinallyStatement)          \
   V(WhileStatement)
 

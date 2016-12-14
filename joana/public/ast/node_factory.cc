@@ -350,30 +350,37 @@ ThrowStatement& NodeFactory::NewThrowStatement(const Name& keyword,
   return *new (zone_) ThrowStatement(keyword, expression);
 }
 
-TryCatchStatement& NodeFactory::NewTryCatchStatement(
-    const Name& keyword,
-    const Statement& block,
-    const Name& catch_name,
+TryCatchFinallyStatement& NodeFactory::NewTryCatchFinallyStatement(
+    const SourceCodeRange& range,
+    const Statement& try_block,
+    const Expression& catch_parameter,
     const Statement& catch_block,
     const Statement& finally_block) {
   return *new (zone_)
-      TryCatchStatement(keyword, block, catch_name, catch_block, finally_block);
+      TryCatchFinallyStatement(range, const_cast<Statement*>(&try_block),
+                               const_cast<Expression*>(&catch_parameter),
+                               const_cast<Statement*>(&catch_block),
+                               const_cast<Statement*>(&finally_block));
 }
 
 TryCatchStatement& NodeFactory::NewTryCatchStatement(
-    const Name& keyword,
-    const Statement& block,
-    const Name& catch_name,
+    const SourceCodeRange& range,
+    const Statement& try_block,
+    const Expression& catch_parameter,
     const Statement& catch_block) {
   return *new (zone_)
-      TryCatchStatement(keyword, block, catch_name, catch_block);
+      TryCatchStatement(range, const_cast<Statement*>(&try_block),
+                        const_cast<Expression*>(&catch_parameter),
+                        const_cast<Statement*>(&catch_block));
 }
 
 TryFinallyStatement& NodeFactory::NewTryFinallyStatement(
-    const Name& keyword,
-    const Statement& block,
+    const SourceCodeRange& range,
+    const Statement& try_block,
     const Statement& finally_block) {
-  return *new (zone_) TryFinallyStatement(keyword, block, finally_block);
+  return *new (zone_)
+      TryFinallyStatement(range, const_cast<Statement*>(&try_block),
+                          const_cast<Statement*>(&finally_block));
 }
 
 WhileStatement& NodeFactory::NewWhileStatement(const Name& keyword,

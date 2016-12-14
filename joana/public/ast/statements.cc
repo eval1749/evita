@@ -259,72 +259,42 @@ Expression& ThrowStatement::expression() const {
 }
 
 //
+// TryCatchFinallyStatement
+//
+TryCatchFinallyStatement::TryCatchFinallyStatement(const SourceCodeRange& range,
+                                                   Statement* try_block,
+                                                   Expression* catch_parameter,
+                                                   Statement* catch_block,
+                                                   Statement* finally_block)
+    : NodeTemplate(std::make_tuple(try_block,
+                                   catch_parameter,
+                                   catch_block,
+                                   finally_block),
+                   range) {}
+
+TryCatchFinallyStatement::~TryCatchFinallyStatement() = default;
+
+//
 // TryCatchStatement
 //
-TryCatchStatement::TryCatchStatement(const Name& keyword,
-                                     const Statement& block,
-                                     const Name& catch_name,
-                                     const Statement& catch_block,
-                                     const Statement& finally_block)
-    : TryCatchStatement(keyword, block, catch_name, catch_block) {
-  DCHECK_EQ(keyword, NameId::Try);
-  NodeEditor().AppendChild(this, const_cast<Statement*>(&finally_block));
-}
-
-TryCatchStatement::TryCatchStatement(const Name& keyword,
-                                     const Statement& block,
-                                     const Name& catch_name,
-                                     const Statement& catch_block)
-    : Statement(keyword.range()) {
-  DCHECK_EQ(keyword, NameId::Try);
-  NodeEditor().AppendChild(this, const_cast<Statement*>(&block));
-  NodeEditor().AppendChild(this, const_cast<Name*>(&catch_name));
-  NodeEditor().AppendChild(this, const_cast<Statement*>(&catch_block));
-}
+TryCatchStatement::TryCatchStatement(const SourceCodeRange& range,
+                                     Statement* try_block,
+                                     Expression* catch_parameter,
+                                     Statement* catch_block)
+    : NodeTemplate(std::make_tuple(try_block, catch_parameter, catch_block),
+                   range) {}
 
 TryCatchStatement::~TryCatchStatement() = default;
-
-Statement& TryCatchStatement::block() const {
-  return NodeTraversal::ChildAt(*this, 0).As<Statement>();
-}
-
-Statement& TryCatchStatement::catch_block() const {
-  return NodeTraversal::ChildAt(*this, 2).As<Statement>();
-}
-
-Name& TryCatchStatement::catch_name() const {
-  return NodeTraversal::ChildAt(*this, 1).As<Name>();
-}
-
-Statement& TryCatchStatement::finally_block() const {
-  return NodeTraversal::ChildAt(*this, 3).As<Statement>();
-}
-
-bool TryCatchStatement::has_finally() const {
-  return NodeTraversal::CountChildren(*this) == 4;
-}
 
 //
 // TryFinallyStatement
 //
-TryFinallyStatement::TryFinallyStatement(const Name& keyword,
-                                         const Statement& block,
-                                         const Statement& finally_block)
-    : Statement(keyword.range()) {
-  DCHECK_EQ(keyword, NameId::Try);
-  NodeEditor().AppendChild(this, const_cast<Statement*>(&block));
-  NodeEditor().AppendChild(this, const_cast<Statement*>(&finally_block));
-}
+TryFinallyStatement::TryFinallyStatement(const SourceCodeRange& range,
+                                         Statement* try_block,
+                                         Statement* finally_block)
+    : NodeTemplate(std::make_tuple(try_block, finally_block), range) {}
 
 TryFinallyStatement::~TryFinallyStatement() = default;
-
-Statement& TryFinallyStatement::block() const {
-  return NodeTraversal::ChildAt(*this, 0).As<Statement>();
-}
-
-Statement& TryFinallyStatement::finally_block() const {
-  return NodeTraversal::ChildAt(*this, 1).As<Statement>();
-}
 
 //
 // WhileStatement

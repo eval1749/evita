@@ -285,30 +285,54 @@ class JOANA_PUBLIC_EXPORT ThrowStatement : public Statement {
 };
 
 //
+// TryCatchFinallyStatement
+//
+class JOANA_PUBLIC_EXPORT TryCatchFinallyStatement
+    : public NodeTemplate<Statement,
+                          Statement*,
+                          Expression*,
+                          Statement*,
+                          Statement*> {
+  DECLARE_CONCRETE_AST_NODE(TryCatchFinallyStatement, Statement);
+
+ public:
+  ~TryCatchFinallyStatement() final;
+
+  Statement& catch_block() const { return *member_at<2>(); }
+  Expression& catch_parameter() const { return *member_at<1>(); }
+  Statement& finally_block() const { return *member_at<3>(); }
+  Statement& try_block() const { return *member_at<0>(); }
+
+ protected:
+  TryCatchFinallyStatement(const SourceCodeRange& range,
+                           Statement* try_block,
+                           Expression* catch_parameter,
+                           Statement* catch_block,
+                           Statement* finally_block);
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(TryCatchFinallyStatement);
+};
+
+//
 // TryCatchStatement
 //
-class JOANA_PUBLIC_EXPORT TryCatchStatement : public Statement {
+class JOANA_PUBLIC_EXPORT TryCatchStatement
+    : public NodeTemplate<Statement, Statement*, Expression*, Statement*> {
   DECLARE_CONCRETE_AST_NODE(TryCatchStatement, Statement);
 
  public:
-  ~TryCatchStatement() override;
+  ~TryCatchStatement() final;
 
-  Statement& block() const;
-  Statement& catch_block() const;
-  Name& catch_name() const;
-  Statement& finally_block() const;
-  bool has_finally() const;
+  Statement& catch_block() const { return *member_at<2>(); }
+  Expression& catch_parameter() const { return *member_at<1>(); }
+  Statement& try_block() const { return *member_at<0>(); }
 
  protected:
-  TryCatchStatement(const Name& keyword,
-                    const Statement& block,
-                    const Name& catch_name,
-                    const Statement& catch_block,
-                    const Statement& finally_block);
-  TryCatchStatement(const Name& keyword,
-                    const Statement& block,
-                    const Name& catch_name,
-                    const Statement& catch_block);
+  TryCatchStatement(const SourceCodeRange& range,
+                    Statement* try_block,
+                    Expression* catch_parameter,
+                    Statement* catch_block);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(TryCatchStatement);
@@ -317,19 +341,20 @@ class JOANA_PUBLIC_EXPORT TryCatchStatement : public Statement {
 //
 // TryFinallyStatement
 //
-class JOANA_PUBLIC_EXPORT TryFinallyStatement : public Statement {
+class JOANA_PUBLIC_EXPORT TryFinallyStatement
+    : public NodeTemplate<Statement, Statement*, Statement*> {
   DECLARE_CONCRETE_AST_NODE(TryFinallyStatement, Statement);
 
  public:
-  ~TryFinallyStatement() override;
+  ~TryFinallyStatement() final;
 
-  Statement& block() const;
-  Statement& finally_block() const;
+  Statement& finally_block() const { return *member_at<1>(); }
+  Statement& try_block() const { return *member_at<0>(); }
 
  protected:
-  TryFinallyStatement(const Name& keyword,
-                      const Statement& block,
-                      const Statement& finally_block);
+  TryFinallyStatement(const SourceCodeRange& range,
+                      Statement* try_block,
+                      Statement* finally_block);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(TryFinallyStatement);

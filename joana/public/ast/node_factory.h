@@ -142,17 +142,18 @@ class JOANA_PUBLIC_EXPORT NodeFactory final {
                                       const std::vector<Statement*>& clauses);
   ThrowStatement& NewThrowStatement(const Name& keyword,
                                     const Expression& condition);
-  TryCatchStatement& NewTryCatchStatement(const Name& keyword,
-                                          const Statement& block,
-                                          const Name& catch_name,
-                                          const Statement& catch_block,
-                                          const Statement& finally_block);
-  TryCatchStatement& NewTryCatchStatement(const Name& keyword,
-                                          const Statement& block,
-                                          const Name& catch_name,
+  TryCatchFinallyStatement& NewTryCatchFinallyStatement(
+      const SourceCodeRange& range,
+      const Statement& try_block,
+      const Expression& catch_parameter,
+      const Statement& catch_block,
+      const Statement& finally_block);
+  TryCatchStatement& NewTryCatchStatement(const SourceCodeRange& range,
+                                          const Statement& try_block,
+                                          const Expression& catch_parameter,
                                           const Statement& catch_block);
-  TryFinallyStatement& NewTryFinallyStatement(const Name& keyword,
-                                              const Statement& block,
+  TryFinallyStatement& NewTryFinallyStatement(const SourceCodeRange& range,
+                                              const Statement& try_block,
                                               const Statement& finally_block);
   WhileStatement& NewWhileStatement(const Name& keyword,
                                     const Expression& condition,

@@ -289,39 +289,25 @@ ast::Statement& Parser::ParseThrowStatement() {
 }
 
 ast::Statement& Parser::ParseTryStatement() {
-  auto& keyword = ConsumeToken().As<ast::Name>();
-  if (!HasToken() || PeekToken() != ast::PunctuatorKind::LeftBrace)
-    return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_EXPECT_LBRACE);
-  auto& block = ParseStatement();
-  if (!HasToken())
-    return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_EXPECT_CATCH);
-  if (PeekToken() == ast::NameId::Finally) {
-    ConsumeToken();
-    if (!HasToken() || PeekToken() != ast::PunctuatorKind::LeftBrace)
-      return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_EXPECT_LBRACE);
-    auto& finally_block = ParseBlockStatement();
-    return node_factory().NewTryFinallyStatement(keyword, block, finally_block);
-  }
-  ExpectToken(ast::NameId::Catch, ErrorCode::ERROR_STATEMENT_EXPECT_CATCH);
-  ExpectToken(ast::PunctuatorKind::LeftParenthesis,
-              ErrorCode::ERROR_STATEMENT_EXPECT_LPAREN);
-  if (!HasToken() || !PeekToken().Is<ast::Name>())
-    return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_CATCH_EXPECT_NAME);
-  auto& catch_name = ConsumeToken().As<ast::Name>();
-  ExpectToken(ast::PunctuatorKind::RightParenthesis,
-              ErrorCode::ERROR_STATEMENT_EXPECT_RPAREN);
-  if (!HasToken() || PeekToken() != ast::PunctuatorKind::LeftBrace)
-    return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_EXPECT_LBRACE);
-  auto& catch_block = ParseStatement();
-  if (!HasToken() || PeekToken() != ast::NameId::Finally)
-    return node_factory().NewTryCatchStatement(keyword, block, catch_name,
-                                               catch_block);
   ConsumeToken();
-  if (!HasToken() || PeekToken() != ast::PunctuatorKind::LeftBrace)
-    return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_EXPECT_LBRACE);
+  auto& try_block = ParseStatement();
+  if (ConsumeTokenIf(ast::NameId::Finally)) {
+    auto& finally_block = ParseBlockStatement();
+    return node_factory().NewTryFinallyStatement(GetSourceCodeRange(),
+                                                 try_block, finally_block);
+  }
+  if (!ConsumeTokenIf(ast::NameId::Catch))
+    return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_EXPECT_CATCH);
+  auto& catch_parameter = ParseExpression();
+  auto& catch_block = ParseStatement();
+  if (!ConsumeTokenIf(ast::NameId::Finally)) {
+    return node_factory().NewTryCatchStatement(GetSourceCodeRange(), try_block,
+                                               catch_parameter, catch_block);
+  }
   auto& finally_block = ParseStatement();
-  return node_factory().NewTryCatchStatement(keyword, block, catch_name,
-                                             catch_block, finally_block);
+  return node_factory().NewTryCatchFinallyStatement(GetSourceCodeRange(),
+                                                    try_block, catch_parameter,
+                                                    catch_block, finally_block);
 }
 
 ast::Statement& Parser::ParseVarStatement() {

@@ -22,6 +22,38 @@ ast::ArrowFunctionBody& Parser::ParseArrowFunctionBody() {
   return ParseExpression();
 }
 
+ast::Class& Parser::ParseClass() {
+  SourceCodeRangeScope scope(this);
+  DCHECK_EQ(PeekToken(), ast::NameId::Class);
+  ConsumeToken();
+  auto& class_name = ParseClassName();
+  auto& heritage = ParseClassHeritage();
+  auto& class_body = ParseClassBody();
+  return node_factory().NewClass(GetSourceCodeRange(), class_name, heritage,
+                                 class_body);
+}
+
+ast::Expression& Parser::ParseClassBody() {
+  SourceCodeRangeScope scope(this);
+  if (!HasToken() || PeekToken() != ast::PunctuatorKind::LeftBrace)
+    return NewInvalidExpression(ErrorCode::ERROR_CLASS_EXPECT_LBRACE);
+  return ParsePrimaryExpression();
+}
+
+ast::Expression& Parser::ParseClassHeritage() {
+  if (!ConsumeTokenIf(ast::NameId::Extends))
+    return NewEmptyExpression();
+  return ParseLeftHandSideExpression();
+}
+
+ast::Token& Parser::ParseClassName() {
+  if (!HasToken() || !PeekToken().Is<ast::Name>())
+    return NewEmptyName();
+  if (PeekToken() == ast::NameId::Extends)
+    return NewEmptyName();
+  return ConsumeToken().As<ast::Name>();
+}
+
 ast::Function& Parser::ParseFunction(ast::FunctionKind kind) {
   auto& name = PeekToken().Is<ast::Name>() ? ConsumeToken() : NewEmptyName();
   auto& parameter_list = ParseParameterList();
@@ -50,7 +82,7 @@ ast::Expression& Parser::ParseParameterList() {
   if (!ConsumeTokenIf(ast::PunctuatorKind::LeftParenthesis))
     return NewInvalidExpression(ErrorCode::ERROR_FUNCTION_EXPECT_LPAREN);
   if (ConsumeTokenIf(ast::PunctuatorKind::RightParenthesis))
-    return node_factory().NewEmptyExpression(GetSourceCodeRange());
+    return NewEmptyExpression();
   auto& expression = ParseExpression();
   ExpectToken(ast::PunctuatorKind::RightParenthesis,
               ErrorCode::ERROR_FUNCTION_EXPECT_RPAREN);

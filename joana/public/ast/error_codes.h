@@ -32,6 +32,8 @@ namespace ast {
   V(BRACKET, MISMATCHED)                     \
   V(BRACKET, NOT_CLOSED)                     \
   V(BRACKET, UNEXPECTED)                     \
+  V(CLASS, EXPECT_LBRACE)                    \
+  V(CLASS, INVALID)                          \
   V(EXPRESSION, ARGUMENT_LIST_EXPECT_COMMA)  \
   V(EXPRESSION, ARGUMENT_LIST_EXPECT_RPAREN) \
   V(EXPRESSION, ASYNC_EXPECT_FUNCTION)       \

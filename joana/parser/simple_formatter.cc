@@ -169,6 +169,20 @@ void SimpleFormatter::VisitArrowFunction(ast::ArrowFunction* node) {
   Format(node->body());
 }
 
+void SimpleFormatter::VisitClass(ast::Class* node) {
+  *ostream_ << "class";
+  if (!node->name().Is<ast::Empty>()) {
+    *ostream_ << ' ';
+    Format(node->name());
+  }
+  if (!node->heritage().Is<ast::EmptyExpression>()) {
+    *ostream_ << " extends ";
+    Format(node->heritage());
+  }
+  *ostream_ << ' ';
+  Format(node->body());
+}
+
 void SimpleFormatter::VisitFunction(ast::Function* node) {
   switch (node->kind()) {
     case ast::FunctionKind::Async:
@@ -340,6 +354,12 @@ void SimpleFormatter::VisitObjectLiteralExpression(
   const auto& members = node->members().elements();
   if (members.empty()) {
     *ostream_ << "{}";
+    return;
+  }
+  if (members.size() == 1) {
+    *ostream_ << "{ ";
+    Format(*members.front());
+    *ostream_ << " }";
     return;
   }
   *ostream_ << '{' << std::endl;

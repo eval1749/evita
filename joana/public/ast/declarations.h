@@ -74,6 +74,29 @@ class ArrowFunction final : public NodeTemplate<Declaration,
 };
 
 //
+// Class
+//
+class Class final
+    : public NodeTemplate<Declaration, Token*, Expression*, Expression*> {
+  DECLARE_CONCRETE_AST_NODE(Class, Declaration);
+
+ public:
+  ~Class() final;
+
+  const Expression& body() const { return *member_at<2>(); }
+  const Token& name() const { return *member_at<0>(); }
+  const Expression& heritage() const { return *member_at<1>(); }
+
+ private:
+  Class(const SourceCodeRange& range,
+        Token* name,
+        Expression* heritage,
+        Expression* body);
+
+  DISALLOW_COPY_AND_ASSIGN(Class);
+};
+
+//
 // Function
 //
 // The parameter list is represented by |ast::Expression| with:

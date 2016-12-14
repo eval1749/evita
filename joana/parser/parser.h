@@ -77,6 +77,10 @@ class Parser final {
   // Declarations
   ast::Token& NewEmptyName();
   ast::ArrowFunctionBody& ParseArrowFunctionBody();
+  ast::Class& ParseClass();
+  ast::Expression& ParseClassBody();
+  ast::Expression& ParseClassHeritage();
+  ast::Token& ParseClassName();
   ast::Function& ParseFunction(ast::FunctionKind kind);
   ast::Statement& ParseFunctionBody();
   ast::Method& ParseMethod(ast::FunctionKind kind);
@@ -89,6 +93,7 @@ class Parser final {
   ast::Expression& NewDeclarationExpression(
       const ast::Declaration& declaration);
   ast::Expression& NewElisionExpression();
+  ast::Expression& NewEmptyExpression();
   ast::Expression& NewInvalidExpression(ErrorCode error_code);
   ast::Expression& NewLiteralExpression(const ast::Literal& literal);
   ast::Expression& NewUnaryExpression(const ast::Token& op,

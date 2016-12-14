@@ -108,6 +108,15 @@ ArrowFunction& NodeFactory::NewArrowFunction(const SourceCodeRange& range,
                     const_cast<ArrowFunctionBody*>(&body));
 }
 
+Class& NodeFactory::NewClass(const SourceCodeRange& range,
+                             const Token& name,
+                             const Expression& heritage,
+                             const Expression& body) {
+  return *new (zone_)
+      Class(range, const_cast<Token*>(&name),
+            const_cast<Expression*>(&heritage), const_cast<Expression*>(&body));
+}
+
 Function& NodeFactory::NewFunction(const SourceCodeRange& range,
                                    FunctionKind kind,
                                    const Token& name,

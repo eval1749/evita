@@ -21,6 +21,17 @@ ArrowFunction::ArrowFunction(const SourceCodeRange& range,
 ArrowFunction::~ArrowFunction() = default;
 
 //
+// Class
+//
+Class::Class(const SourceCodeRange& range,
+             Token* name,
+             Expression* heritage,
+             Expression* body)
+    : NodeTemplate(std::make_tuple(name, heritage, body), range) {}
+
+Class::~Class() = default;
+
+//
 // Declaration
 //
 Declaration::Declaration(const SourceCodeRange& range) : Node(range) {}

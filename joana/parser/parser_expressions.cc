@@ -113,6 +113,10 @@ ast::Expression& Parser::NewElisionExpression() {
   return node_factory().NewElisionExpression(lexer_->location());
 }
 
+ast::Expression& Parser::NewEmptyExpression() {
+  return node_factory().NewEmptyExpression(GetSourceCodeRange());
+}
+
 ast::Expression& Parser::NewInvalidExpression(ErrorCode error_code) {
   auto& token = ComputeInvalidToken(error_code);
   AddError(token, error_code);
@@ -241,8 +245,11 @@ ast::Expression& Parser::ParseFunctionExpression(ast::FunctionKind kind) {
   return NewDeclarationExpression(ParseFunction(kind));
 }
 
+// The entry point of parsing a class heritage.
 ast::Expression& Parser::ParseLeftHandSideExpression() {
   SourceCodeRangeScope scope(this);
+  if (!HasToken())
+    return NewInvalidExpression(ErrorCode::ERROR_EXPRESSION_INVALID);
   if (PeekToken() == ast::NameId::New)
     return ParseNewExpression();
   auto* expression = &ParsePrimaryExpression();
@@ -416,7 +423,7 @@ ast::Expression& Parser::ParseParenthesis() {
   DCHECK_EQ(PeekToken(), ast::PunctuatorKind::LeftParenthesis);
   ConsumeToken();
   if (ConsumeTokenIf(ast::PunctuatorKind::RightParenthesis)) {
-    auto& parameter = node_factory().NewEmptyExpression(GetSourceCodeRange());
+    auto& parameter = NewEmptyExpression();
     ExpectToken(ast::PunctuatorKind::Arrow,
                 ErrorCode::ERROR_EXPRESSION_PRIMARY_EXPECT_ARROW);
     auto& statement = ParseArrowFunctionBody();
@@ -452,6 +459,8 @@ ast::Expression& Parser::ParsePrimaryExpression() {
   const auto& token = PeekToken();
   if (token.Is<ast::Literal>())
     return NewLiteralExpression(ConsumeToken().As<ast::Literal>());
+  if (token == ast::NameId::Class)
+    return NewDeclarationExpression(ParseClass());
   if (token.Is<ast::Name>())
     return ParseNameAsExpression();
   if (token == ast::PunctuatorKind::LeftParenthesis)
@@ -460,7 +469,6 @@ ast::Expression& Parser::ParsePrimaryExpression() {
     return ParseArrayLiteralExpression();
   if (token == ast::PunctuatorKind::LeftBrace)
     return ParseObjectLiteralExpression();
-  // TODO(eval1749): NYI class expression
   // TODO(eval1749): NYI regular expression literal
   // TODO(eval1749): NYI template literal
   Advance();

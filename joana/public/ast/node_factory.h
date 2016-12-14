@@ -47,6 +47,11 @@ class JOANA_PUBLIC_EXPORT NodeFactory final {
                                   const Expression& parameter_list,
                                   const Node& body);
 
+  Class& NewClass(const SourceCodeRange& range,
+                  const Token& name,
+                  const Expression& heritage,
+                  const Expression& body);
+
   Function& NewFunction(const SourceCodeRange& range,
                         FunctionKind kind,
                         const Token& name,

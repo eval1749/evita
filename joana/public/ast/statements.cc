@@ -193,6 +193,14 @@ Statement& LabeledStatement::statement() const {
 }
 
 //
+// LetStatement
+//
+LetStatement::LetStatement(const SourceCodeRange& range, Expression* expression)
+    : NodeTemplate(expression, range) {}
+
+LetStatement::~LetStatement() = default;
+
+//
 // ReturnStatement
 //
 ReturnStatement::ReturnStatement(const SourceCodeRange& range,

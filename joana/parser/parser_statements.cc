@@ -243,7 +243,10 @@ ast::Statement& Parser::ParseKeywordStatement() {
 }
 
 ast::Statement& Parser::ParseLetStatement() {
-  return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
+  ExpectSemiColonScope semi_colon_scope(this);
+  ConsumeToken();
+  auto& expression = ParseExpression();
+  return node_factory().NewLetStatement(GetSourceCodeRange(), expression);
 }
 
 ast::Statement& Parser::ParseReturnStatement() {

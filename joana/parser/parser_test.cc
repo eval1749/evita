@@ -269,6 +269,11 @@ TEST_F(ParserTest, LabeledStatement) {
       "}\n");
 }
 
+TEST_F(ParserTest, LetStatement) {
+  TEST_PARSER("let foo = 1;\n");
+  TEST_PARSER("let foo = 1, bar;\n");
+}
+
 TEST_F(ParserTest, ReturnStatement) {
   TEST_PARSER("return;\n");
   TEST_PARSER("return 1;\n");

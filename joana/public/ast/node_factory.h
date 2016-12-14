@@ -138,6 +138,8 @@ class JOANA_PUBLIC_EXPORT NodeFactory final {
   InvalidStatement& NewInvalidStatement(const Node& node, int error_code);
   LabeledStatement& NewLabeledStatement(const Name& label,
                                         const Statement& statement);
+  LetStatement& NewLetStatement(const SourceCodeRange& range,
+                                const Expression& expression);
   ReturnStatement& NewReturnStatement(const SourceCodeRange& range,
                                       const Expression& condition);
   SwitchStatement& NewSwitchStatement(const Name& keyword,

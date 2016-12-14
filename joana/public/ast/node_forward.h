@@ -60,6 +60,7 @@ namespace ast {
   V(IfStatement)                  \
   V(InvalidStatement)             \
   V(LabeledStatement)             \
+  V(LetStatement)                 \
   V(ReturnStatement)              \
   V(ThrowStatement)               \
   V(SwitchStatement)              \

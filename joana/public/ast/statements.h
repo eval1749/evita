@@ -262,6 +262,25 @@ class JOANA_PUBLIC_EXPORT LabeledStatement : public Statement {
 };
 
 //
+// LetStatement
+//
+class JOANA_PUBLIC_EXPORT LetStatement
+    : public NodeTemplate<Statement, Expression*> {
+  DECLARE_CONCRETE_AST_NODE(LetStatement, Statement);
+
+ public:
+  ~LetStatement() override;
+
+  const Expression& expression() { return *member_at<0>(); }
+
+ protected:
+  LetStatement(const SourceCodeRange& range, Expression* expression);
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(LetStatement);
+};
+
+//
 // ReturnStatement
 //
 class JOANA_PUBLIC_EXPORT ReturnStatement

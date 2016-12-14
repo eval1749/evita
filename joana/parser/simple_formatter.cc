@@ -418,6 +418,12 @@ void SimpleFormatter::VisitLabeledStatement(ast::LabeledStatement* node) {
   Format(node->statement());
 }
 
+void SimpleFormatter::VisitLetStatement(ast::LetStatement* node) {
+  *ostream_ << "let ";
+  Format(node->expression());
+  *ostream_ << ';';
+}
+
 void SimpleFormatter::VisitReturnStatement(ast::ReturnStatement* node) {
   if (node->expression().Is<ast::ElisionExpression>()) {
     *ostream_ << "return;";

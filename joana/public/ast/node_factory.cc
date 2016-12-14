@@ -337,6 +337,11 @@ LabeledStatement& NodeFactory::NewLabeledStatement(const Name& label,
   return *new (zone_) LabeledStatement(label, statement);
 }
 
+LetStatement& NodeFactory::NewLetStatement(const SourceCodeRange& range,
+                                           const Expression& expression) {
+  return *new (zone_) LetStatement(range, const_cast<Expression*>(&expression));
+}
+
 ReturnStatement& NodeFactory::NewReturnStatement(const SourceCodeRange& range,
                                                  const Expression& expression) {
   return *new (zone_)

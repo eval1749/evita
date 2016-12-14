@@ -75,8 +75,8 @@ class Parser final {
   void PushBackToken(const ast::Token& token);
 
   // Declarations
-  ast::ArrowFunctionBody& ExpectArrowFunctionBody();
   ast::Token& NewEmptyName();
+  ast::ArrowFunctionBody& ParseArrowFunctionBody();
   ast::Function& ParseFunction(ast::FunctionKind kind);
   ast::Statement& ParseFunctionBody();
   ast::Expression& ParseParameterList();

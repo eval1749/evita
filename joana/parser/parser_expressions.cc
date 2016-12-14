@@ -313,7 +313,7 @@ ast::Expression& Parser::ParseNameAsExpression(const ast::Name& name) {
   if (name.IsKeyword())
     return NewInvalidExpression(ErrorCode::ERROR_EXPRESSION_INVALID);
   if (ConsumeTokenIf(ast::PunctuatorKind::Arrow)) {
-    auto& statement = ExpectArrowFunctionBody();
+    auto& statement = ParseArrowFunctionBody();
     auto& parameter = node_factory().NewReferenceExpression(name);
     return NewDeclarationExpression(node_factory().NewArrowFunction(
         GetSourceCodeRange(), ast::FunctionKind::Normal, parameter, statement));
@@ -351,7 +351,7 @@ ast::Expression& Parser::ParseParenthesis() {
     auto& parameter = node_factory().NewEmptyExpression(GetSourceCodeRange());
     ExpectToken(ast::PunctuatorKind::Arrow,
                 ErrorCode::ERROR_EXPRESSION_PRIMARY_EXPECT_ARROW);
-    auto& statement = ExpectArrowFunctionBody();
+    auto& statement = ParseArrowFunctionBody();
     return NewDeclarationExpression(node_factory().NewArrowFunction(
         GetSourceCodeRange(), ast::FunctionKind::Normal, parameter, statement));
   }
@@ -362,7 +362,7 @@ ast::Expression& Parser::ParseParenthesis() {
       node_factory().NewGroupExpression(GetSourceCodeRange(), sub_expression);
   if (!ConsumeTokenIf(ast::PunctuatorKind::Arrow))
     return expression;
-  auto& statement = ExpectArrowFunctionBody();
+  auto& statement = ParseArrowFunctionBody();
   return NewDeclarationExpression(node_factory().NewArrowFunction(
       GetSourceCodeRange(), ast::FunctionKind::Normal, expression, statement));
 }

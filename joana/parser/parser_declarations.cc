@@ -12,7 +12,7 @@
 namespace joana {
 namespace internal {
 
-ast::ArrowFunctionBody& Parser::ExpectArrowFunctionBody() {
+ast::ArrowFunctionBody& Parser::ParseArrowFunctionBody() {
   if (!HasToken()) {
     return NewInvalidStatement(
         ErrorCode::ERROR_FUNCTION_INVALID_ARROW_FUNCTION_BODY);

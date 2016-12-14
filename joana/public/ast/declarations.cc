@@ -27,5 +27,17 @@ Declaration::Declaration(const SourceCodeRange& range) : Node(range) {}
 
 Declaration::~Declaration() = default;
 
+//
+// Function
+//
+Function::Function(const SourceCodeRange& range,
+                   FunctionKind kind,
+                   Token* name,
+                   Expression* parameter_list,
+                   Statement* body)
+    : NodeTemplate(std::make_tuple(kind, name, parameter_list, body), range) {}
+
+Function::~Function() = default;
+
 }  // namespace ast
 }  // namespace joana

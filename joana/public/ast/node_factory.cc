@@ -72,6 +72,10 @@ Comment& NodeFactory::NewComment(const SourceCodeRange& range) {
   return *new (zone_) Comment(range);
 }
 
+Empty& NodeFactory::NewEmpty(const SourceCodeRange& range) {
+  return *new (zone_) Empty(range);
+}
+
 Invalid& NodeFactory::NewInvalid(const SourceCodeRange& range, int error_code) {
   return *new (zone_) Invalid(range, error_code);
 }
@@ -102,6 +106,16 @@ ArrowFunction& NodeFactory::NewArrowFunction(const SourceCodeRange& range,
   return *new (zone_)
       ArrowFunction(range, kind, const_cast<Expression*>(&parameter_list),
                     const_cast<ArrowFunctionBody*>(&body));
+}
+
+Function& NodeFactory::NewFunction(const SourceCodeRange& range,
+                                   FunctionKind kind,
+                                   const Token& name,
+                                   const Expression& parameter_list,
+                                   const Statement& body) {
+  return *new (zone_) Function(range, kind, const_cast<Token*>(&name),
+                               const_cast<Expression*>(&parameter_list),
+                               const_cast<Statement*>(&body));
 }
 
 // Expressions

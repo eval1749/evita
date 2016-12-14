@@ -71,6 +71,39 @@ class ArrowFunction final : public NodeTemplate<Declaration,
   DISALLOW_COPY_AND_ASSIGN(ArrowFunction);
 };
 
+//
+// Function
+//
+// The parameter list is represented by |ast::Expression| with:
+//  - () = EmptyExpression
+//  - (a, b, ...) = GroupExpression with CommaExpression
+//
+class Function final : public NodeTemplate<Declaration,
+                                           FunctionKind,
+                                           Token*,
+                                           Expression*,
+                                           Statement*> {
+  DECLARE_CONCRETE_AST_NODE(Function, Declaration);
+
+ public:
+  ~Function() final;
+
+  const Statement& body() const { return *member_at<3>(); }
+  FunctionKind kind() const { return member_at<0>(); }
+  const Token& name() const { return *member_at<1>(); }
+  const Expression& parameter_list() const { return *member_at<2>(); }
+
+ private:
+  // |statement| should be either expression statement or block statement.
+  Function(const SourceCodeRange& range,
+           FunctionKind kind,
+           Token* name,
+           Expression* parameter_list,
+           Statement* body);
+
+  DISALLOW_COPY_AND_ASSIGN(Function);
+};
+
 }  // namespace ast
 }  // namespace joana
 

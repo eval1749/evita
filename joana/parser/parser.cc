@@ -183,6 +183,10 @@ bool Parser::HasToken() const {
   return lexer_->HasToken() || !token_stack_.empty();
 }
 
+ast::Token& Parser::NewEmptyName() {
+  return node_factory().NewEmpty(lexer_->location());
+}
+
 ast::Token& Parser::PeekToken() {
   if (token_stack_.empty())
     return lexer_->PeekToken();

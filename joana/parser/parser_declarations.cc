@@ -22,5 +22,32 @@ ast::ArrowFunctionBody& Parser::ExpectArrowFunctionBody() {
   return ParseExpression();
 }
 
+ast::Function& Parser::ParseFunction(ast::FunctionKind kind) {
+  auto& name = PeekToken().Is<ast::Name>() ? ConsumeToken() : NewEmptyName();
+  auto& parameter_list = ParseParameterList();
+  auto& body = ParseFunctionBody();
+  return node_factory().NewFunction(GetSourceCodeRange(), kind, name,
+                                    parameter_list, body);
+}
+
+ast::Statement& Parser::ParseFunctionBody() {
+  SourceCodeRangeScope scope(this);
+  if (!HasToken() || PeekToken() != ast::PunctuatorKind::LeftBrace)
+    return NewInvalidStatement(ErrorCode::ERROR_FUNCTION_EXPECT_LBRACE);
+  return ParseStatement();
+}
+
+ast::Expression& Parser::ParseParameterList() {
+  SourceCodeRangeScope scope(this);
+  if (!ConsumeTokenIf(ast::PunctuatorKind::LeftParenthesis))
+    return NewInvalidExpression(ErrorCode::ERROR_FUNCTION_EXPECT_LPAREN);
+  if (ConsumeTokenIf(ast::PunctuatorKind::RightParenthesis))
+    return node_factory().NewEmptyExpression(GetSourceCodeRange());
+  auto& expression = ParseExpression();
+  ExpectToken(ast::PunctuatorKind::RightParenthesis,
+              ErrorCode::ERROR_FUNCTION_EXPECT_RPAREN);
+  return node_factory().NewGroupExpression(GetSourceCodeRange(), expression);
+}
+
 }  // namespace internal
 }  // namespace joana

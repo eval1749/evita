@@ -17,7 +17,9 @@ namespace ast {
   V(Statement)                        \
   V(Token)
 
-#define FOR_EACH_AST_DECLARATION(V) V(ArrowFunction)
+#define FOR_EACH_AST_DECLARATION(V) \
+  V(ArrowFunction)                  \
+  V(Function)
 
 #define FOR_EACH_AST_EXPRESSION(V) \
   V(ArrayLiteralExpression)        \
@@ -64,6 +66,7 @@ namespace ast {
 
 #define FOR_EACH_AST_TOKEN(V) \
   V(Comment)                  \
+  V(Empty)                    \
   V(Invalid)                  \
   V(Punctuator)               \
   V(Name)

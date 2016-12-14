@@ -19,6 +19,13 @@ Comment::Comment(const SourceCodeRange& range) : Token(range) {}
 Comment::~Comment() = default;
 
 //
+// Empty
+//
+Empty::Empty(const SourceCodeRange& range) : Token(range) {}
+
+Empty::~Empty() = default;
+
+//
 // Invalid
 //
 Invalid::Invalid(const SourceCodeRange& range, int error_code)

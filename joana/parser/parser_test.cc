@@ -185,6 +185,27 @@ TEST_F(ParserTest, ExpressionStatementComma) {
   TEST_PARSER("foo, bar, baz;\n");
 }
 
+TEST_F(ParserTest, ExpressionFunctionAsync) {
+  TEST_PARSER(
+      "x = async function() {\n"
+      "  1;\n"
+      "};\n");
+}
+
+TEST_F(ParserTest, ExpressionFunctionGenerator) {
+  TEST_PARSER(
+      "x = function*(x) {\n"
+      "  1;\n"
+      "};\n");
+}
+
+TEST_F(ParserTest, ExpressionFunctionNormal) {
+  TEST_PARSER(
+      "x = function(a, b) {\n"
+      "  1;\n"
+      "};\n");
+}
+
 TEST_F(ParserTest, ExpressionStatementConditional) {
   TEST_PARSER("foo ? bar : baz;\n");
 }

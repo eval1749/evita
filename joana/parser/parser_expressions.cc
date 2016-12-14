@@ -248,6 +248,10 @@ ast::Expression& Parser::ParseExpression() {
   return ParseCommaExpression();
 }
 
+ast::Expression& Parser::ParseFunctionExpression(ast::FunctionKind kind) {
+  return NewDeclarationExpression(ParseFunction(kind));
+}
+
 ast::Expression& Parser::ParseLeftHandSideExpression() {
   SourceCodeRangeScope scope(this);
   if (PeekToken() == ast::NameId::New)
@@ -287,9 +291,17 @@ ast::Expression& Parser::ParseLeftHandSideExpression() {
 ast::Expression& Parser::ParseNameAsExpression(const ast::Name& name) {
   SourceCodeRangeScope scope(this);
   switch (static_cast<ast::NameId>(name.number())) {
+    case ast::NameId::Async:
+      ExpectToken(ast::NameId::Function,
+                  ErrorCode::ERROR_FUNCTION_EXPECT_FUNCTION);
+      return ParseFunctionExpression(ast::FunctionKind::Async);
     case ast::NameId::False:
       return NewLiteralExpression(
           node_factory().NewBooleanLiteral(name, false));
+    case ast::NameId::Function:
+      if (ConsumeTokenIf(ast::PunctuatorKind::Times))
+        return ParseFunctionExpression(ast::FunctionKind::Generator);
+      return ParseFunctionExpression(ast::FunctionKind::Normal);
     case ast::NameId::Null:
       return NewLiteralExpression(node_factory().NewNullLiteral(name));
     case ast::NameId::Super:
@@ -366,7 +378,6 @@ ast::Expression& Parser::ParsePrimaryExpression() {
   if (token == ast::PunctuatorKind::LeftBracket)
     return ParseArrayLiteralExpression();
   // TODO(eval1749): NYI object literal
-  // TODO(eval1749): NYI function expression
   // TODO(eval1749): NYI class expression
   // TODO(eval1749): NYI regular expression literal
   // TODO(eval1749): NYI template literal

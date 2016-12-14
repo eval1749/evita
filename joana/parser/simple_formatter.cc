@@ -113,6 +113,10 @@ void SimpleFormatter::VisitComment(ast::Comment* node) {
   OutputUsingSoourceCode(*node);
 }
 
+void SimpleFormatter::VisitEmpty(ast::Empty* node) {
+  *ostream_ << "(empty)";
+}
+
 void SimpleFormatter::VisitInvalid(ast::Invalid* node) {
   *ostream_ << *node;
 }
@@ -157,6 +161,34 @@ void SimpleFormatter::VisitUndefinedLiteral(ast::UndefinedLiteral* node) {
 void SimpleFormatter::VisitArrowFunction(ast::ArrowFunction* node) {
   Format(node->parameter_list());
   *ostream_ << " =>";
+  if (auto* block = node->body().TryAs<ast::BlockStatement>()) {
+    FormatChildStatement(*block);
+    return;
+  }
+  *ostream_ << ' ';
+  Format(node->body());
+}
+
+void SimpleFormatter::VisitFunction(ast::Function* node) {
+  switch (node->kind()) {
+    case ast::FunctionKind::Async:
+      *ostream_ << "async function";
+      break;
+    case ast::FunctionKind::Generator:
+      *ostream_ << "function*";
+      break;
+    case ast::FunctionKind::Normal:
+      *ostream_ << "function";
+      break;
+    case ast::FunctionKind::Invalid:
+      NOTREACHED();
+      break;
+  }
+  if (!node->name().Is<ast::Empty>()) {
+    *ostream_ << ' ';
+    Format(node->name());
+  }
+  Format(node->parameter_list());
   if (auto* block = node->body().TryAs<ast::BlockStatement>()) {
     FormatChildStatement(*block);
     return;

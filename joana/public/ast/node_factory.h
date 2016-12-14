@@ -26,6 +26,7 @@ class JOANA_PUBLIC_EXPORT NodeFactory final {
 
   // Factory member functions
   Comment& NewComment(const SourceCodeRange& range);
+  Empty& NewEmpty(const SourceCodeRange& range);
 
   Invalid& NewInvalid(const SourceCodeRange& range, int error_code);
 
@@ -45,6 +46,12 @@ class JOANA_PUBLIC_EXPORT NodeFactory final {
                                   FunctionKind kind,
                                   const Expression& parameter_list,
                                   const Node& body);
+
+  Function& NewFunction(const SourceCodeRange& range,
+                        FunctionKind kind,
+                        const Token& name,
+                        const Expression& parameter_list,
+                        const Statement& body);
 
   // Expressions factory members
   ArrayLiteralExpression& NewArrayLiteralExpression(

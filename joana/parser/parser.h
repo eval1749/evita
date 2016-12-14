@@ -76,6 +76,10 @@ class Parser final {
 
   // Declarations
   ast::ArrowFunctionBody& ExpectArrowFunctionBody();
+  ast::Token& NewEmptyName();
+  ast::Function& ParseFunction(ast::FunctionKind kind);
+  ast::Statement& ParseFunctionBody();
+  ast::Expression& ParseParameterList();
 
   // Expressions
   OperatorPrecedence CategoryOf(const ast::Token& token) const;
@@ -97,6 +101,7 @@ class Parser final {
   ast::Expression& ParseBinaryExpression(OperatorPrecedence category);
   ast::Expression& ParseCommaExpression();
   ast::Expression& ParseConditionalExpression();
+  ast::Expression& ParseFunctionExpression(ast::FunctionKind kind);
   ast::Expression& ParseLeftHandSideExpression();
   ast::Expression& ParseNameAsExpression(const ast::Name& name);
   ast::Expression& ParseNewExpression();

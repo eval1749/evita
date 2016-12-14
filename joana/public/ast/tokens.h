@@ -72,6 +72,21 @@ class JOANA_PUBLIC_EXPORT Comment final : public Token {
 };
 
 //
+// Empty is used for representing anonymous class and function.
+//
+class JOANA_PUBLIC_EXPORT Empty final : public Token {
+  DECLARE_CONCRETE_AST_NODE(Empty, Token);
+
+ public:
+  ~Empty() final;
+
+ private:
+  explicit Empty(const SourceCodeRange& range);
+
+  DISALLOW_COPY_AND_ASSIGN(Empty);
+};
+
+//
 // Invalid
 //
 class JOANA_PUBLIC_EXPORT Invalid final : public Token {

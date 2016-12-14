@@ -68,7 +68,8 @@ ast::Punctuator& ConvertToPostOperator(ast::NodeFactory* factory,
 
 bool IsUnaryOperator(const ast::Token& token) {
   return token == ast::NameId::Await || token == ast::NameId::Delete ||
-         token == ast::NameId::TypeOf || token == ast::PunctuatorKind::BitNot ||
+         token == ast::NameId::TypeOf || token == ast::NameId::Void ||
+         token == ast::PunctuatorKind::BitNot ||
          token == ast::PunctuatorKind::DotDotDot ||
          token == ast::PunctuatorKind::LogicalNot ||
          token == ast::PunctuatorKind::Minus ||
@@ -376,7 +377,7 @@ ast::Expression& Parser::ParsePrimaryExpression() {
 ast::Expression& Parser::ParseUnaryExpression() {
   SourceCodeRangeScope scope(this);
   if (IsUnaryOperator(PeekToken())) {
-    auto& token = ConsumeToken().As<ast::Punctuator>();
+    auto& token = ConsumeToken();
     auto& expression = ParseUnaryExpression();
     return NewUnaryExpression(token, expression);
   }

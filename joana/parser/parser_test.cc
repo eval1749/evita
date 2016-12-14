@@ -193,6 +193,18 @@ TEST_F(ParserTest, ExpressionStatementUnary) {
   TEST_PARSER("!foo;\n");
 }
 
+TEST_F(ParserTest, ExpressionStatementUnaryDelete) {
+  TEST_PARSER("delete foo;\n");
+}
+
+TEST_F(ParserTest, ExpressionStatementUnaryTypeOf) {
+  TEST_PARSER("typeof foo;\n");
+}
+
+TEST_F(ParserTest, ExpressionStatementUnaryVoid) {
+  TEST_PARSER("void foo;\n");
+}
+
 TEST_F(ParserTest, ExpressionStatementName) {
   TEST_PARSER("false;\n");
   TEST_PARSER("foo;\n");

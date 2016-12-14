@@ -98,6 +98,7 @@ class EditContext;
 class ExpressionList;
 enum class FunctionKind;
 enum class InvalidKind;
+enum class MethodKind;
 enum class NameId;
 class NodeEditor;
 class NodeFactory;

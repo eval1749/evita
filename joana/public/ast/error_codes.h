@@ -56,6 +56,7 @@ namespace ast {
   V(PROPERTY, EXPECT_COMMA)                  \
   V(PROPERTY, EXPECT_RBRACKET)               \
   V(PROPERTY, INVALID_TOKEN)                 \
+  V(PROPERTY, INVALID_STATIC)                \
   V(STATEMENT, CATCH_EXPECT_NAME)            \
   V(STATEMENT, EXPECT_CATCH)                 \
   V(STATEMENT, EXPECT_COLON)                 \

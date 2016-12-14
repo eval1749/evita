@@ -59,6 +59,7 @@ class JOANA_PUBLIC_EXPORT NodeFactory final {
                         const Statement& body);
 
   Method& NewMethod(const SourceCodeRange& range,
+                    MethodKind is_static,
                     FunctionKind kind,
                     const Expression& name,
                     const Expression& parameter_list,

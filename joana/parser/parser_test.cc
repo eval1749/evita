@@ -176,6 +176,7 @@ TEST_F(ParserTest, ExpressionClass) {
   TEST_PARSER("var x = class {};\n");
   TEST_PARSER("var x = class Foo {};\n");
   TEST_PARSER("var x = class Foo extends Bar { constructor() {} };\n");
+  TEST_PARSER("var x = class Foo { static foo() {} };\n");
 }
 
 TEST_F(ParserTest, ExpressionCall3) {

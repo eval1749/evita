@@ -27,6 +27,14 @@ enum class FunctionKind {
 };
 
 //
+// MethodKind
+//
+enum class MethodKind {
+  NonStatic,
+  Static,
+};
+
+//
 // Declaration is a base class of declaration nodes.
 //
 class JOANA_PUBLIC_EXPORT Declaration : public Node {
@@ -137,6 +145,7 @@ class Function final : public NodeTemplate<Declaration,
 //  - (a, b, ...) = GroupExpression with CommaExpression
 //
 class Method final : public NodeTemplate<Declaration,
+                                         MethodKind,
                                          FunctionKind,
                                          Expression*,
                                          Expression*,
@@ -146,14 +155,16 @@ class Method final : public NodeTemplate<Declaration,
  public:
   ~Method() final;
 
-  const Statement& body() const { return *member_at<3>(); }
-  FunctionKind kind() const { return member_at<0>(); }
-  const Expression& name() const { return *member_at<1>(); }
-  const Expression& parameter_list() const { return *member_at<2>(); }
+  const Statement& body() const { return *member_at<4>(); }
+  bool is_static() const { return member_at<0>() == MethodKind::Static; }
+  FunctionKind kind() const { return member_at<1>(); }
+  const Expression& name() const { return *member_at<2>(); }
+  const Expression& parameter_list() const { return *member_at<3>(); }
 
  private:
   // |statement| should be either expression statement or block statement.
   Method(const SourceCodeRange& range,
+         MethodKind is_static,
          FunctionKind kind,
          Expression* name,
          Expression* parameter_list,

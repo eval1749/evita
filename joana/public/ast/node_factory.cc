@@ -128,13 +128,15 @@ Function& NodeFactory::NewFunction(const SourceCodeRange& range,
 }
 
 Method& NodeFactory::NewMethod(const SourceCodeRange& range,
+                               MethodKind is_static,
                                FunctionKind kind,
                                const Expression& name,
                                const Expression& parameter_list,
                                const Statement& method_body) {
-  return *new (zone_) Method(range, kind, const_cast<Expression*>(&name),
-                             const_cast<Expression*>(&parameter_list),
-                             const_cast<Statement*>(&method_body));
+  return *new (zone_)
+      Method(range, is_static, kind, const_cast<Expression*>(&name),
+             const_cast<Expression*>(&parameter_list),
+             const_cast<Statement*>(&method_body));
 }
 
 // Expressions

@@ -83,7 +83,7 @@ class Parser final {
   ast::Token& ParseClassName();
   ast::Function& ParseFunction(ast::FunctionKind kind);
   ast::Statement& ParseFunctionBody();
-  ast::Method& ParseMethod(ast::FunctionKind kind);
+  ast::Method& ParseMethod(ast::MethodKind is_static, ast::FunctionKind kind);
   ast::Expression& ParseParameterList();
   ast::Expression& ParsePropertyName();
 
@@ -114,7 +114,8 @@ class Parser final {
   ast::Expression& ParseConditionalExpression();
   ast::Expression& ParseFunctionExpression(ast::FunctionKind kind);
   ast::Expression& ParseLeftHandSideExpression();
-  ast::Expression& ParseMethodExpression(ast::FunctionKind kind);
+  ast::Expression& ParseMethodExpression(ast::MethodKind is_static,
+                                         ast::FunctionKind kind);
   ast::Expression& ParseNameAsExpression();
   ast::Expression& ParseNewExpression();
   ast::Expression& ParseObjectLiteralExpression();

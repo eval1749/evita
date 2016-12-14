@@ -69,12 +69,13 @@ ast::Statement& Parser::ParseFunctionBody() {
   return ParseStatement();
 }
 
-ast::Method& Parser::ParseMethod(ast::FunctionKind kind) {
+ast::Method& Parser::ParseMethod(ast::MethodKind is_static,
+                                 ast::FunctionKind kind) {
   auto& method_name = ParsePropertyName();
   auto& parameter_list = ParseParameterList();
   auto& method_body = ParseFunctionBody();
-  return node_factory().NewMethod(GetSourceCodeRange(), kind, method_name,
-                                  parameter_list, method_body);
+  return node_factory().NewMethod(GetSourceCodeRange(), is_static, kind,
+                                  method_name, parameter_list, method_body);
 }
 
 ast::Expression& Parser::ParseParameterList() {
@@ -90,6 +91,8 @@ ast::Expression& Parser::ParseParameterList() {
 }
 
 ast::Expression& Parser::ParsePropertyName() {
+  if (!HasToken())
+    return NewInvalidExpression(ErrorCode::ERROR_PROPERTY_INVALID_TOKEN);
   if (PeekToken().Is<ast::Name>())
     return ParsePrimaryExpression();
   if (PeekToken() == ast::PunctuatorKind::LeftBrace)

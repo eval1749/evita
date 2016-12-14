@@ -284,8 +284,9 @@ ast::Expression& Parser::ParseLeftHandSideExpression() {
   return *expression;
 }
 
-ast::Expression& Parser::ParseMethodExpression(ast::FunctionKind kind) {
-  return NewDeclarationExpression(ParseMethod(kind));
+ast::Expression& Parser::ParseMethodExpression(ast::MethodKind is_static,
+                                               ast::FunctionKind kind) {
+  return NewDeclarationExpression(ParseMethod(is_static, kind));
 }
 
 ast::Expression& Parser::ParseNameAsExpression() {
@@ -361,33 +362,44 @@ ast::Expression& Parser::ParseObjectLiteralExpression() {
       need_comma = true;
       continue;
     }
+    auto is_static = ConsumeTokenIf(ast::NameId::Static)
+                         ? ast::MethodKind::Static
+                         : ast::MethodKind::NonStatic;
     need_comma = false;
     if (ConsumeTokenIf(ast::NameId::Async)) {
-      members.push_back(&ParseMethodExpression(ast::FunctionKind::Async));
+      members.push_back(
+          &ParseMethodExpression(is_static, ast::FunctionKind::Async));
       continue;
     }
     if (ConsumeTokenIf(ast::NameId::Get)) {
-      members.push_back(&ParseMethodExpression(ast::FunctionKind::Getter));
+      members.push_back(
+          &ParseMethodExpression(is_static, ast::FunctionKind::Getter));
       continue;
     }
     if (ConsumeTokenIf(ast::NameId::Set)) {
-      members.push_back(&ParseMethodExpression(ast::FunctionKind::Setter));
+      members.push_back(
+          &ParseMethodExpression(is_static, ast::FunctionKind::Setter));
       continue;
     }
     if (ConsumeTokenIf(ast::PunctuatorKind::Times)) {
-      members.push_back(&ParseMethodExpression(ast::FunctionKind::Generator));
+      members.push_back(
+          &ParseMethodExpression(is_static, ast::FunctionKind::Generator));
       continue;
     }
     auto& property_name = ParsePropertyName();
+    if (!HasToken())
+      break;
     if (PeekToken() == ast::PunctuatorKind::LeftParenthesis) {
       auto& parameter_list = ParseParameterList();
       auto& method_body = ParseFunctionBody();
       auto& method = node_factory().NewMethod(
-          GetSourceCodeRange(), ast::FunctionKind::Normal, property_name,
-          parameter_list, method_body);
+          GetSourceCodeRange(), is_static, ast::FunctionKind::Normal,
+          property_name, parameter_list, method_body);
       members.push_back(&NewDeclarationExpression(method));
       continue;
     }
+    if (is_static == ast::MethodKind::Static)
+      AddError(ErrorCode::ERROR_PROPERTY_INVALID_STATIC);
     need_comma = true;
     if (PeekToken() == ast::PunctuatorKind::RightBrace) {
       members.push_back(&property_name);

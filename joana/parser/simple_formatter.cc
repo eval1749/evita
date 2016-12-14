@@ -214,6 +214,8 @@ void SimpleFormatter::VisitFunction(ast::Function* node) {
 }
 
 void SimpleFormatter::VisitMethod(ast::Method* node) {
+  if (node->is_static())
+    *ostream_ << "static ";
   switch (node->kind()) {
     case ast::FunctionKind::Async:
       *ostream_ << "async ";

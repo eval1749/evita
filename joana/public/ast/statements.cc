@@ -54,6 +54,15 @@ Statement& CaseClause::statement() const {
 }
 
 //
+// ConstStatement
+//
+ConstStatement::ConstStatement(const SourceCodeRange& range,
+                               Expression* expression)
+    : NodeTemplate(expression, range) {}
+
+ConstStatement::~ConstStatement() = default;
+
+//
 // ContinueStatement
 //
 ContinueStatement::ContinueStatement(const SourceCodeRange& range, Token* label)

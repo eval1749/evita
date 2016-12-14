@@ -113,7 +113,10 @@ ast::Statement& Parser::ParseCaseClause() {
 }
 
 ast::Statement& Parser::ParseConstStatement() {
-  return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
+  ExpectSemiColonScope semi_colon_scope(this);
+  ConsumeToken();
+  auto& expression = ParseExpression();
+  return node_factory().NewConstStatement(GetSourceCodeRange(), expression);
 }
 
 ast::Statement& Parser::ParseContinueStatement() {

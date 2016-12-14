@@ -89,6 +89,25 @@ class JOANA_PUBLIC_EXPORT CaseClause : public Statement {
 };
 
 //
+// ConstStatement
+//
+class JOANA_PUBLIC_EXPORT ConstStatement
+    : public NodeTemplate<Statement, Expression*> {
+  DECLARE_CONCRETE_AST_NODE(ConstStatement, Statement);
+
+ public:
+  ~ConstStatement() override;
+
+  const Expression& expression() { return *member_at<0>(); }
+
+ protected:
+  ConstStatement(const SourceCodeRange& range, Expression* expression);
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(ConstStatement);
+};
+
+//
 // ContinueStatement
 //
 class JOANA_PUBLIC_EXPORT ContinueStatement

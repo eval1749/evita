@@ -51,6 +51,7 @@ namespace ast {
   V(BlockStatement)               \
   V(BreakStatement)               \
   V(CaseClause)                   \
+  V(ConstStatement)               \
   V(ContinueStatement)            \
   V(DeclarationStatement)         \
   V(DoStatement)                  \

@@ -348,6 +348,12 @@ void SimpleFormatter::VisitCaseClause(ast::CaseClause* node) {
   Format(node->statement());
 }
 
+void SimpleFormatter::VisitConstStatement(ast::ConstStatement* node) {
+  *ostream_ << "const ";
+  Format(node->expression());
+  *ostream_ << ';';
+}
+
 void SimpleFormatter::VisitContinueStatement(ast::ContinueStatement* node) {
   if (node->label().Is<ast::Empty>()) {
     *ostream_ << "continue;";

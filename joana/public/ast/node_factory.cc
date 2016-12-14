@@ -281,6 +281,12 @@ CaseClause& NodeFactory::NewCaseClause(const Name& keyword,
   return *new (zone_) CaseClause(keyword, expression, statement);
 }
 
+ConstStatement& NodeFactory::NewConstStatement(const SourceCodeRange& range,
+                                               const Expression& expression) {
+  return *new (zone_)
+      ConstStatement(range, const_cast<Expression*>(&expression));
+}
+
 ContinueStatement& NodeFactory::NewContinueStatement(
     const SourceCodeRange& range,
     const Token& label) {

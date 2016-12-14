@@ -118,9 +118,10 @@ class JOANA_PUBLIC_EXPORT NodeFactory final {
   CaseClause& NewCaseClause(const Name& keyword,
                             const Expression& expression,
                             const Statement& statement);
+  ConstStatement& NewConstStatement(const SourceCodeRange& range,
+                                    const Expression& expression);
   ContinueStatement& NewContinueStatement(const SourceCodeRange& range,
                                           const Token& label);
-  ContinueStatement& NewContinueStatement(const Name& keyword);
   DeclarationStatement& NewDeclarationStatement(const Declaration& declaration);
   DoStatement& NewDoStatement(const Name& keyword,
                               const Statement& statement,

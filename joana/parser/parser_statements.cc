@@ -19,15 +19,6 @@
 namespace joana {
 namespace internal {
 
-namespace {
-
-bool IsLoopKeyword(const ast::Name& keyword) {
-  return keyword == ast::NameId::Do || keyword == ast::NameId::For ||
-         keyword == ast::NameId::While;
-}
-
-}  // namespace
-
 //
 // Parser::ExpectSemiColonScope
 //

@@ -144,7 +144,12 @@ class Parser final {
   std::unique_ptr<Lexer> lexer_;
   ast::ContainerNode& root_;
   std::stack<int> range_stack_;
+
+  // List of tokens to locate comment.
   std::vector<ast::Token*> tokens_;
+
+  // |token_stack_| is used for look ahead, e.g. detecting whether name is
+  // part of an expression or label.
   std::stack<ast::Token*> token_stack_;
 
   DISALLOW_COPY_AND_ASSIGN(Parser);

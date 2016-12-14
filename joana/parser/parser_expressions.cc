@@ -151,8 +151,8 @@ std::vector<ast::Expression*> Parser::ParseArgumentList() {
 }
 
 ast::Expression& Parser::ParseArrayLiteralExpression() {
-  DCHECK_EQ(PeekToken(), ast::PunctuatorKind::LeftBracket);
   SourceCodeRangeScope scope(this);
+  DCHECK_EQ(PeekToken(), ast::PunctuatorKind::LeftBracket);
   ConsumeToken();
   std::vector<ast::Expression*> elements;
   auto has_expression = false;
@@ -328,10 +328,10 @@ ast::Expression& Parser::ParseNewExpression() {
         token_target);
   }
   auto& expression = ParseLeftHandSideExpression();
-  if (!HasToken() || PeekToken() != ast::PunctuatorKind::LeftParenthesis)
+  if (!ConsumeTokenIf(ast::PunctuatorKind::LeftParenthesis)) {
     return node_factory().NewNewExpression(GetSourceCodeRange(), expression,
                                            {});
-  ConsumeToken();
+  }
   const auto& arguments = ParseArgumentList();
   return node_factory().NewNewExpression(GetSourceCodeRange(), expression,
                                          arguments);
@@ -412,6 +412,7 @@ ast::Expression& Parser::ParseObjectLiteralExpression() {
 
 ast::Expression& Parser::ParseParenthesis() {
   SourceCodeRangeScope scope(this);
+  DCHECK_EQ(PeekToken(), ast::PunctuatorKind::LeftParenthesis);
   ConsumeToken();
   if (ConsumeTokenIf(ast::PunctuatorKind::RightParenthesis)) {
     auto& parameter = node_factory().NewEmptyExpression(GetSourceCodeRange());

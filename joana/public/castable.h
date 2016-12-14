@@ -21,15 +21,16 @@ class Castable {
   template <class Class>
   Class& As() {
     auto* const result = TryAs<Class>();
-    DCHECK(result) << static_cast<Base&>(*this) << "is not " << class_name();
+    DCHECK(result) << " Expect " << Class::static_class_name() << " instead of "
+                   << class_name() << ": " << static_cast<Base&>(*this);
     return *result;
   }
 
   template <class Class>
   const Class& As() const {
     const auto* const result = TryAs<Class>();
-    DCHECK(result) << static_cast<const Base&>(*this) << "is not "
-                   << class_name();
+    DCHECK(result) << " Expect " << Class::static_class_name() << " instead of "
+                   << class_name() << ": " << static_cast<const Base&>(*this);
     return *result;
   }
 

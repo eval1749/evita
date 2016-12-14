@@ -162,6 +162,15 @@ NewExpression::NewExpression(const SourceCodeRange& range,
 NewExpression::~NewExpression() = default;
 
 //
+// ObjectLiteralExpression
+//
+ObjectLiteralExpression::ObjectLiteralExpression(const SourceCodeRange& range,
+                                                 ExpressionList* members)
+    : NodeTemplate(members, range) {}
+
+ObjectLiteralExpression::~ObjectLiteralExpression() = default;
+
+//
 // PropertyExpression
 //
 PropertyExpression::PropertyExpression(const SourceCodeRange& range,
@@ -170,6 +179,17 @@ PropertyExpression::PropertyExpression(const SourceCodeRange& range,
     : NodeTemplate(std::make_tuple(expression, name), range) {}
 
 PropertyExpression::~PropertyExpression() = default;
+
+//
+// PropertyDefinitionExpression
+//
+PropertyDefinitionExpression::PropertyDefinitionExpression(
+    const SourceCodeRange& range,
+    Expression* name,
+    Expression* value)
+    : NodeTemplate(std::make_tuple(name, value), range) {}
+
+PropertyDefinitionExpression::~PropertyDefinitionExpression() = default;
 
 //
 // ReferenceExpression

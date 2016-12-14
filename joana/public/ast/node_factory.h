@@ -53,6 +53,12 @@ class JOANA_PUBLIC_EXPORT NodeFactory final {
                         const Expression& parameter_list,
                         const Statement& body);
 
+  Method& NewMethod(const SourceCodeRange& range,
+                    FunctionKind kind,
+                    const Expression& name,
+                    const Expression& parameter_list,
+                    const Statement& body);
+
   // Expressions factory members
   ArrayLiteralExpression& NewArrayLiteralExpression(
       const SourceCodeRange& range,
@@ -91,9 +97,16 @@ class JOANA_PUBLIC_EXPORT NodeFactory final {
   NewExpression& NewNewExpression(const SourceCodeRange& range,
                                   const Expression& expression,
                                   const std::vector<Expression*>& arguments);
+  ObjectLiteralExpression& NewObjectLiteralExpression(
+      const SourceCodeRange& range,
+      const std::vector<Expression*>& elements);
   PropertyExpression& NewPropertyExpression(const SourceCodeRange& range,
                                             const Expression& expression,
                                             const Name& name);
+  PropertyDefinitionExpression& NewPropertyDefinitionExpression(
+      const SourceCodeRange& range,
+      const Expression& name,
+      const Expression& value);
   ReferenceExpression& NewReferenceExpression(const Name& name);
   UnaryExpression& NewUnaryExpression(const SourceCodeRange& range,
                                       const Token& op,

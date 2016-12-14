@@ -37,6 +37,14 @@ ast::Statement& Parser::ParseFunctionBody() {
   return ParseStatement();
 }
 
+ast::Method& Parser::ParseMethod(ast::FunctionKind kind) {
+  auto& method_name = ParsePropertyName();
+  auto& parameter_list = ParseParameterList();
+  auto& method_body = ParseFunctionBody();
+  return node_factory().NewMethod(GetSourceCodeRange(), kind, method_name,
+                                  parameter_list, method_body);
+}
+
 ast::Expression& Parser::ParseParameterList() {
   SourceCodeRangeScope scope(this);
   if (!ConsumeTokenIf(ast::PunctuatorKind::LeftParenthesis))
@@ -47,6 +55,17 @@ ast::Expression& Parser::ParseParameterList() {
   ExpectToken(ast::PunctuatorKind::RightParenthesis,
               ErrorCode::ERROR_FUNCTION_EXPECT_RPAREN);
   return node_factory().NewGroupExpression(GetSourceCodeRange(), expression);
+}
+
+ast::Expression& Parser::ParsePropertyName() {
+  if (PeekToken().Is<ast::Name>())
+    return ParsePrimaryExpression();
+  if (PeekToken() == ast::PunctuatorKind::LeftBrace)
+    return ParsePrimaryExpression();
+  if (PeekToken() == ast::PunctuatorKind::LeftBracket)
+    return ParsePrimaryExpression();
+  ConsumeToken();
+  return NewInvalidExpression(ErrorCode::ERROR_PROPERTY_INVALID_TOKEN);
 }
 
 }  // namespace internal

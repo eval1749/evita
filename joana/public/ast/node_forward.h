@@ -19,7 +19,8 @@ namespace ast {
 
 #define FOR_EACH_AST_DECLARATION(V) \
   V(ArrowFunction)                  \
-  V(Function)
+  V(Function)                       \
+  V(Method)
 
 #define FOR_EACH_AST_EXPRESSION(V) \
   V(ArrayLiteralExpression)        \
@@ -36,7 +37,9 @@ namespace ast {
   V(LiteralExpression)             \
   V(MemberExpression)              \
   V(NewExpression)                 \
+  V(ObjectLiteralExpression)       \
   V(PropertyExpression)            \
+  V(PropertyDefinitionExpression)  \
   V(ReferenceExpression)           \
   V(UnaryExpression)
 

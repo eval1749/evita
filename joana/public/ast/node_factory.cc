@@ -118,6 +118,16 @@ Function& NodeFactory::NewFunction(const SourceCodeRange& range,
                                const_cast<Statement*>(&body));
 }
 
+Method& NodeFactory::NewMethod(const SourceCodeRange& range,
+                               FunctionKind kind,
+                               const Expression& name,
+                               const Expression& parameter_list,
+                               const Statement& method_body) {
+  return *new (zone_) Method(range, kind, const_cast<Expression*>(&name),
+                             const_cast<Expression*>(&parameter_list),
+                             const_cast<Statement*>(&method_body));
+}
+
 // Expressions
 ArrayLiteralExpression& NodeFactory::NewArrayLiteralExpression(
     const SourceCodeRange& range,
@@ -223,12 +233,27 @@ NewExpression& NodeFactory::NewNewExpression(
       NewExpression(range, const_cast<Expression*>(&expression), list);
 }
 
+ObjectLiteralExpression& NodeFactory::NewObjectLiteralExpression(
+    const SourceCodeRange& range,
+    const std::vector<Expression*>& elements) {
+  auto* const list = new (zone_) ExpressionList(zone_, elements);
+  return *new (zone_) ObjectLiteralExpression(range, list);
+}
+
 PropertyExpression& NodeFactory::NewPropertyExpression(
     const SourceCodeRange& range,
     const Expression& expression,
     const Name& name) {
   return *new (zone_) PropertyExpression(
       range, const_cast<Expression*>(&expression), const_cast<Name*>(&name));
+}
+
+PropertyDefinitionExpression& NodeFactory::NewPropertyDefinitionExpression(
+    const SourceCodeRange& range,
+    const Expression& name,
+    const Expression& value) {
+  return *new (zone_) PropertyDefinitionExpression(
+      range, const_cast<Expression*>(&name), const_cast<Expression*>(&value));
 }
 
 ReferenceExpression& NodeFactory::NewReferenceExpression(const Name& name) {

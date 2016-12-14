@@ -82,8 +82,10 @@ namespace joana {
   V(Object, Object, OBJECT)                \
   V(constructor, Constructor, CONSTRUCTOR) \
   V(from, From, CONSTRUCTOR)               \
+  V(get, Get, GET)                         \
   V(of, Of, OF)                            \
   V(prototype, Prototype, PROTOTYPE)       \
+  V(set, Set, SET)                         \
   /** new.target */                        \
   V(target, Target, Target)                \
   V(undefined, Undefined, UNDEFINED)       \

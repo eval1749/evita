@@ -184,7 +184,10 @@ ast::Expression& Parser::ParseArrayLiteralExpression() {
                                                   elements);
 }
 
+// Yet another entry pointer used for parsing computed property name.
 ast::Expression& Parser::ParseAssignmentExpression() {
+  if (!HasToken())
+    return NewInvalidExpression(ErrorCode::ERROR_EXPRESSION_INVALID);
   SourceCodeRangeScope scope(this);
   auto& left_hand_side = ParseConditionalExpression();
   if (!HasToken() || !PeekToken().Is<ast::Punctuator>())
@@ -288,6 +291,10 @@ ast::Expression& Parser::ParseLeftHandSideExpression() {
   return *expression;
 }
 
+ast::Expression& Parser::ParseMethodExpression(ast::FunctionKind kind) {
+  return NewDeclarationExpression(ParseMethod(kind));
+}
+
 ast::Expression& Parser::ParseNameAsExpression(const ast::Name& name) {
   SourceCodeRangeScope scope(this);
   switch (static_cast<ast::NameId>(name.number())) {
@@ -344,6 +351,79 @@ ast::Expression& Parser::ParseNewExpression() {
                                          arguments);
 }
 
+ast::Expression& Parser::ParseObjectLiteralExpression() {
+  SourceCodeRangeScope scope(this);
+  DCHECK_EQ(PeekToken(), ast::PunctuatorKind::LeftBrace) << PeekToken();
+  ConsumeToken();
+  std::vector<ast::Expression*> members;
+  auto need_comma = false;
+  while (HasToken()) {
+    SourceCodeRangeScope scope(this);
+    if (ConsumeTokenIf(ast::PunctuatorKind::RightBrace))
+      break;
+    if (ConsumeTokenIf(ast::PunctuatorKind::Comma)) {
+      if (!need_comma)
+        members.push_back(&NewElisionExpression());
+      need_comma = true;
+      continue;
+    }
+    need_comma = false;
+    if (ConsumeTokenIf(ast::NameId::Async)) {
+      members.push_back(&ParseMethodExpression(ast::FunctionKind::Async));
+      continue;
+    }
+    if (ConsumeTokenIf(ast::NameId::Get)) {
+      members.push_back(&ParseMethodExpression(ast::FunctionKind::Getter));
+      continue;
+    }
+    if (ConsumeTokenIf(ast::NameId::Set)) {
+      members.push_back(&ParseMethodExpression(ast::FunctionKind::Setter));
+      continue;
+    }
+    if (ConsumeTokenIf(ast::PunctuatorKind::Times)) {
+      members.push_back(&ParseMethodExpression(ast::FunctionKind::Generator));
+      continue;
+    }
+    auto& property_name = ParsePropertyName();
+    if (PeekToken() == ast::PunctuatorKind::LeftParenthesis) {
+      auto& parameter_list = ParseParameterList();
+      auto& method_body = ParseFunctionBody();
+      auto& method = node_factory().NewMethod(
+          GetSourceCodeRange(), ast::FunctionKind::Normal, property_name,
+          parameter_list, method_body);
+      members.push_back(&NewDeclarationExpression(method));
+      continue;
+    }
+    need_comma = true;
+    if (PeekToken() == ast::PunctuatorKind::RightBrace) {
+      members.push_back(&property_name);
+      continue;
+    }
+    if (ConsumeTokenIf(ast::PunctuatorKind::Comma)) {
+      members.push_back(&property_name);
+      continue;
+    }
+    if (ConsumeTokenIf(ast::PunctuatorKind::Colon)) {
+      auto& expression = ParseAssignmentExpression();
+      members.push_back(&node_factory().NewPropertyDefinitionExpression(
+          GetSourceCodeRange(), property_name, expression));
+      continue;
+    }
+    if (PeekToken() == ast::PunctuatorKind::Equal) {
+      auto& op = ConsumeToken().As<ast::Punctuator>();
+      auto& expression = ParseAssignmentExpression();
+      members.push_back(&node_factory().NewAssignmentExpression(
+          GetSourceCodeRange(), op, property_name, expression));
+      continue;
+    }
+    AddError(ErrorCode::ERROR_PROPERTY_INVALID_TOKEN);
+    ConsumeToken();
+    need_comma = false;
+  }
+  return node_factory().NewObjectLiteralExpression(GetSourceCodeRange(),
+                                                   members);
+}
+
 ast::Expression& Parser::ParseParenthesis() {
   SourceCodeRangeScope scope(this);
   ConsumeToken();
@@ -377,7 +457,10 @@ const ast::Expression& Parser::ParseParenthesisExpression() {
   return expression;
 }
 
+// The entry point for parsing property name.
 ast::Expression& Parser::ParsePrimaryExpression() {
+  if (!HasToken())
+    return NewInvalidExpression(ErrorCode::ERROR_EXPRESSION_INVALID);
   const auto& token = PeekToken();
   if (token.Is<ast::Literal>())
     return NewLiteralExpression(ConsumeToken().As<ast::Literal>());
@@ -387,7 +470,8 @@ ast::Expression& Parser::ParsePrimaryExpression() {
     return ParseParenthesis();
   if (token == ast::PunctuatorKind::LeftBracket)
     return ParseArrayLiteralExpression();
-  // TODO(eval1749): NYI object literal
+  if (token == ast::PunctuatorKind::LeftBrace)
+    return ParseObjectLiteralExpression();
   // TODO(eval1749): NYI class expression
   // TODO(eval1749): NYI regular expression literal
   // TODO(eval1749): NYI template literal

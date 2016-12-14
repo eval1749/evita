@@ -21,7 +21,9 @@ enum class FunctionKind {
   Invalid,
   Async,
   Generator,
+  Getter,
   Normal,
+  Setter,
 };
 
 //
@@ -102,6 +104,39 @@ class Function final : public NodeTemplate<Declaration,
            Statement* body);
 
   DISALLOW_COPY_AND_ASSIGN(Function);
+};
+
+//
+// Method
+//
+// The parameter list is represented by |ast::Expression| with:
+//  - () = EmptyExpression
+//  - (a, b, ...) = GroupExpression with CommaExpression
+//
+class Method final : public NodeTemplate<Declaration,
+                                         FunctionKind,
+                                         Expression*,
+                                         Expression*,
+                                         Statement*> {
+  DECLARE_CONCRETE_AST_NODE(Method, Declaration);
+
+ public:
+  ~Method() final;
+
+  const Statement& body() const { return *member_at<3>(); }
+  FunctionKind kind() const { return member_at<0>(); }
+  const Expression& name() const { return *member_at<1>(); }
+  const Expression& parameter_list() const { return *member_at<2>(); }
+
+ private:
+  // |statement| should be either expression statement or block statement.
+  Method(const SourceCodeRange& range,
+         FunctionKind kind,
+         Expression* name,
+         Expression* parameter_list,
+         Statement* body);
+
+  DISALLOW_COPY_AND_ASSIGN(Method);
 };
 
 }  // namespace ast

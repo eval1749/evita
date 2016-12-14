@@ -39,5 +39,17 @@ Function::Function(const SourceCodeRange& range,
 
 Function::~Function() = default;
 
+//
+// Method
+//
+Method::Method(const SourceCodeRange& range,
+               FunctionKind kind,
+               Expression* name,
+               Expression* parameter_list,
+               Statement* body)
+    : NodeTemplate(std::make_tuple(kind, name, parameter_list, body), range) {}
+
+Method::~Method() = default;
+
 }  // namespace ast
 }  // namespace joana

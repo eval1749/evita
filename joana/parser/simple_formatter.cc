@@ -177,11 +177,13 @@ void SimpleFormatter::VisitFunction(ast::Function* node) {
     case ast::FunctionKind::Generator:
       *ostream_ << "function*";
       break;
+    case ast::FunctionKind::Getter:
+    case ast::FunctionKind::Invalid:
+    case ast::FunctionKind::Setter:
+      NOTREACHED();
+      break;
     case ast::FunctionKind::Normal:
       *ostream_ << "function";
-      break;
-    case ast::FunctionKind::Invalid:
-      NOTREACHED();
       break;
   }
   if (!node->name().Is<ast::Empty>()) {
@@ -194,6 +196,47 @@ void SimpleFormatter::VisitFunction(ast::Function* node) {
     return;
   }
   *ostream_ << ' ';
+  Format(node->body());
+}
+
+void SimpleFormatter::VisitMethod(ast::Method* node) {
+  switch (node->kind()) {
+    case ast::FunctionKind::Async:
+      *ostream_ << "async ";
+      break;
+    case ast::FunctionKind::Generator:
+      *ostream_ << '*';
+      break;
+    case ast::FunctionKind::Getter:
+      *ostream_ << "get ";
+      break;
+    case ast::FunctionKind::Normal:
+      break;
+    case ast::FunctionKind::Invalid:
+      NOTREACHED();
+      break;
+    case ast::FunctionKind::Setter:
+      *ostream_ << "set ";
+      break;
+  }
+  Format(node->name());
+  Format(node->parameter_list());
+  if (auto* block = node->body().TryAs<ast::BlockStatement>()) {
+    if (!block->first_child()) {
+      *ostream_ << " {}";
+      return;
+    }
+    if (block->first_child() == block->last_child()) {
+      *ostream_ << " { ";
+      Format(block->first_child()->As<ast::Statement>());
+      *ostream_ << " }";
+      return;
+    }
+    FormatChildStatement(*block);
+    return;
+  }
+  if (!node->body().Is<ast::EmptyStatement>())
+    *ostream_ << ' ';
   Format(node->body());
 }
 
@@ -292,10 +335,43 @@ void SimpleFormatter::VisitNewExpression(ast::NewExpression* node) {
   *ostream_ << ')';
 }
 
+void SimpleFormatter::VisitObjectLiteralExpression(
+    ast::ObjectLiteralExpression* node) {
+  const auto& members = node->members().elements();
+  if (members.empty()) {
+    *ostream_ << "{}";
+    return;
+  }
+  *ostream_ << '{' << std::endl;
+  IndentScope indent_scope(this);
+  size_t count = 0;
+  for (const auto& element : members) {
+    ++count;
+    if (element->Is<ast::DeclarationExpression>()) {
+      FormatWithIndent(*element);
+      *ostream_ << std::endl;
+      continue;
+    }
+    if (!element->Is<ast::ElisionExpression>())
+      FormatWithIndent(*element);
+    if (count < members.size())
+      *ostream_ << ',';
+    *ostream_ << std::endl;
+  }
+  *ostream_ << '}';
+}
+
 void SimpleFormatter::VisitPropertyExpression(ast::PropertyExpression* node) {
   Format(node->expression());
   *ostream_ << '.';
   Format(node->name());
+}
+
+void SimpleFormatter::VisitPropertyDefinitionExpression(
+    ast::PropertyDefinitionExpression* node) {
+  Format(node->name());
+  *ostream_ << ": ";
+  Format(node->value());
 }
 
 void SimpleFormatter::VisitReferenceExpression(ast::ReferenceExpression* node) {

@@ -322,6 +322,25 @@ class JOANA_PUBLIC_EXPORT NewExpression final
 };
 
 //
+// ObjectLiteralExpression
+//
+class JOANA_PUBLIC_EXPORT ObjectLiteralExpression final
+    : public NodeTemplate<Expression, ExpressionList*> {
+  DECLARE_CONCRETE_AST_NODE(ObjectLiteralExpression, Expression);
+
+ public:
+  ~ObjectLiteralExpression() final;
+
+  const ExpressionList& members() const { return *member_at<0>(); }
+
+ private:
+  ObjectLiteralExpression(const SourceCodeRange& range,
+                          ExpressionList* members);
+
+  DISALLOW_COPY_AND_ASSIGN(ObjectLiteralExpression);
+};
+
+//
 // PropertyExpression
 //
 class JOANA_PUBLIC_EXPORT PropertyExpression final
@@ -340,6 +359,27 @@ class JOANA_PUBLIC_EXPORT PropertyExpression final
                      Name* name);
 
   DISALLOW_COPY_AND_ASSIGN(PropertyExpression);
+};
+
+//
+// PropertyDefinitionExpression
+//
+class JOANA_PUBLIC_EXPORT PropertyDefinitionExpression final
+    : public NodeTemplate<Expression, Expression*, Expression*> {
+  DECLARE_CONCRETE_AST_NODE(PropertyDefinitionExpression, Expression);
+
+ public:
+  ~PropertyDefinitionExpression() final;
+
+  const Expression& name() const { return *member_at<0>(); }
+  const Expression& value() const { return *member_at<1>(); }
+
+ private:
+  PropertyDefinitionExpression(const SourceCodeRange& range,
+                               Expression* name,
+                               Expression* value);
+
+  DISALLOW_COPY_AND_ASSIGN(PropertyDefinitionExpression);
 };
 
 //

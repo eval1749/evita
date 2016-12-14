@@ -205,6 +205,20 @@ TEST_F(ParserTest, ExpressionStatementConditional) {
   TEST_PARSER("foo ? bar : baz;\n");
 }
 
+TEST_F(ParserTest, ExpressionObjectLiteral) {
+  TEST_PARSER(
+      "x = {\n"
+      "  foo: 1,\n"
+      "  bar() { 1; }\n"
+      "  *baz() { 2; }\n"
+      "  async quux() { 3; }\n"
+      "  get getter() { 4; }\n"
+      "  set setter() { 5; }\n"
+      "  [1]: 6,\n"
+      "  [2]() { 7; }\n"
+      "};\n");
+}
+
 TEST_F(ParserTest, ExpressionStatementUnary) {
   TEST_PARSER("!foo;\n");
 }

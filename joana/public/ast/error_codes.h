@@ -52,6 +52,9 @@ namespace ast {
   V(FUNCTION, INVALID_ARROW_FUNCTION_BODY)   \
   V(FUNCTION, INVALID_PARAMETER)             \
   V(FUNCTION, INVALID_PARAMETER_LIST)        \
+  V(PROPERTY, EXPECT_COMMA)                  \
+  V(PROPERTY, EXPECT_RBRACKET)               \
+  V(PROPERTY, INVALID_TOKEN)                 \
   V(STATEMENT, CATCH_EXPECT_NAME)            \
   V(STATEMENT, EXPECT_CATCH)                 \
   V(STATEMENT, EXPECT_COLON)                 \

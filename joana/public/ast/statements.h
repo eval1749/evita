@@ -91,18 +91,17 @@ class JOANA_PUBLIC_EXPORT CaseClause : public Statement {
 //
 // ContinueStatement
 //
-class JOANA_PUBLIC_EXPORT ContinueStatement : public Statement {
+class JOANA_PUBLIC_EXPORT ContinueStatement
+    : public NodeTemplate<Statement, Token*> {
   DECLARE_CONCRETE_AST_NODE(ContinueStatement, Statement);
 
  public:
   ~ContinueStatement() override;
 
-  bool has_label() const;
-  Name& label() const;
+  Token& label() const { return *member_at<0>(); }
 
  protected:
-  ContinueStatement(const Name& keyword, const Name& label);
-  explicit ContinueStatement(const Name& keyword);
+  ContinueStatement(const SourceCodeRange& range, Token* label);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(ContinueStatement);

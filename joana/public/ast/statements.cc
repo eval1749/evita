@@ -56,27 +56,10 @@ Statement& CaseClause::statement() const {
 //
 // ContinueStatement
 //
-ContinueStatement::ContinueStatement(const Name& keyword, const Name& label)
-    : ContinueStatement(keyword) {
-  DCHECK(!label.As<Name>().IsKeyword());
-  NodeEditor().AppendChild(this, const_cast<Name*>(&label));
-}
-
-ContinueStatement::ContinueStatement(const Name& keyword)
-    : Statement(keyword.range()) {
-  DCHECK_EQ(keyword, NameId::Continue);
-}
+ContinueStatement::ContinueStatement(const SourceCodeRange& range, Token* label)
+    : NodeTemplate(label, range) {}
 
 ContinueStatement::~ContinueStatement() = default;
-
-bool ContinueStatement::has_label() const {
-  return NodeTraversal::FirstChildOf(*this) != nullptr;
-}
-
-Name& ContinueStatement::label() const {
-  DCHECK(has_label()) << *this;
-  return NodeTraversal::FirstChildOf(*this)->As<Name>();
-}
 
 //
 // DeclarationStatement

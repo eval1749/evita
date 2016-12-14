@@ -120,18 +120,11 @@ ast::Statement& Parser::ParseConstStatement() {
 }
 
 ast::Statement& Parser::ParseContinueStatement() {
-  auto& keyword = ConsumeToken().As<ast::Name>();
-  if (!HasToken())
-    return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
-  if (ConsumeTokenIf(ast::PunctuatorKind::SemiColon))
-    return node_factory().NewContinueStatement(keyword);
-  if (!PeekToken().Is<ast::Name>())
-    AddError(PeekToken(), ErrorCode::ERROR_STATEMENT_EXPECT_LABEL);
-  auto& label = ConsumeToken().As<ast::Name>();
-  ExpectToken(ast::PunctuatorKind::SemiColon,
-              ErrorCode::ERROR_STATEMENT_EXPECT_SEMI_COLON);
-  // TODO(eval1749): Find label for |continue| statement
-  return node_factory().NewContinueStatement(keyword, label);
+  ConsumeToken();
+  ExpectSemiColonScope semi_colon_scope(this);
+  auto& label = HasToken() && PeekToken().Is<ast::Name>() ? ConsumeToken()
+                                                          : NewEmptyName();
+  return node_factory().NewContinueStatement(GetSourceCodeRange(), label);
 }
 
 ast::Statement& Parser::ParseDefaultLabel() {

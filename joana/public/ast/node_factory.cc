@@ -281,13 +281,10 @@ CaseClause& NodeFactory::NewCaseClause(const Name& keyword,
   return *new (zone_) CaseClause(keyword, expression, statement);
 }
 
-ContinueStatement& NodeFactory::NewContinueStatement(const Name& keyword,
-                                                     const Name& label) {
-  return *new (zone_) ContinueStatement(keyword, label);
-}
-
-ContinueStatement& NodeFactory::NewContinueStatement(const Name& keyword) {
-  return *new (zone_) ContinueStatement(keyword);
+ContinueStatement& NodeFactory::NewContinueStatement(
+    const SourceCodeRange& range,
+    const Token& label) {
+  return *new (zone_) ContinueStatement(range, const_cast<Token*>(&label));
 }
 
 DeclarationStatement& NodeFactory::NewDeclarationStatement(

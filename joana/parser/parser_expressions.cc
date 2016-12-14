@@ -303,8 +303,7 @@ ast::Expression& Parser::ParseNameAsExpression(const ast::Name& name) {
     auto& statement = ExpectArrowFunctionBody();
     auto& parameter = node_factory().NewReferenceExpression(name);
     return NewDeclarationExpression(node_factory().NewArrowFunction(
-        GetSourceCodeRange(), ast::FunctionKind::Normal, {&parameter},
-        statement));
+        GetSourceCodeRange(), ast::FunctionKind::Normal, parameter, statement));
   }
   return node_factory().NewReferenceExpression(name);
 }
@@ -336,23 +335,23 @@ ast::Expression& Parser::ParseParenthesis() {
   SourceCodeRangeScope scope(this);
   ConsumeToken();
   if (ConsumeTokenIf(ast::PunctuatorKind::RightParenthesis)) {
+    auto& parameter = node_factory().NewEmptyExpression(GetSourceCodeRange());
     ExpectToken(ast::PunctuatorKind::Arrow,
                 ErrorCode::ERROR_EXPRESSION_PRIMARY_EXPECT_ARROW);
     auto& statement = ExpectArrowFunctionBody();
     return NewDeclarationExpression(node_factory().NewArrowFunction(
-        GetSourceCodeRange(), ast::FunctionKind::Normal, {}, statement));
+        GetSourceCodeRange(), ast::FunctionKind::Normal, parameter, statement));
   }
-  auto& expression = ParseExpression();
+  auto& sub_expression = ParseExpression();
   ExpectToken(ast::PunctuatorKind::RightParenthesis,
               ErrorCode::ERROR_EXPRESSION_PRIMARY_EXPECT_RPAREN);
-  if (ConsumeTokenIf(ast::PunctuatorKind::Arrow)) {
-    const auto& parameters = ExpectParameterList(expression);
-    auto& statement = ExpectArrowFunctionBody();
-    return NewDeclarationExpression(node_factory().NewArrowFunction(
-        GetSourceCodeRange(), ast::FunctionKind::Normal, parameters,
-        statement));
-  }
-  return node_factory().NewGroupExpression(GetSourceCodeRange(), expression);
+  auto& expression =
+      node_factory().NewGroupExpression(GetSourceCodeRange(), sub_expression);
+  if (!ConsumeTokenIf(ast::PunctuatorKind::Arrow))
+    return expression;
+  auto& statement = ExpectArrowFunctionBody();
+  return NewDeclarationExpression(node_factory().NewArrowFunction(
+      GetSourceCodeRange(), ast::FunctionKind::Normal, expression, statement));
 }
 
 ast::Expression& Parser::ParsePrimaryExpression() {

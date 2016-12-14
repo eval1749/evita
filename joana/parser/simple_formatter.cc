@@ -155,14 +155,8 @@ void SimpleFormatter::VisitUndefinedLiteral(ast::UndefinedLiteral* node) {
 
 // Declarations
 void SimpleFormatter::VisitArrowFunction(ast::ArrowFunction* node) {
-  if (node->source_code().GetChar(node->range().start()) == '(') {
-    *ostream_ << '(';
-    FormatExpressionList(node->parameters());
-    *ostream_ << ") =>";
-  } else {
-    Format(*node->parameters().elements().front());
-    *ostream_ << " =>";
-  }
+  Format(node->parameter_list());
+  *ostream_ << " =>";
   if (auto* block = node->body().TryAs<ast::BlockStatement>()) {
     FormatChildStatement(*block);
     return;
@@ -234,6 +228,10 @@ void SimpleFormatter::VisitGroupExpression(ast::GroupExpression* node) {
 }
 
 void SimpleFormatter::VisitElisionExpression(ast::ElisionExpression* node) {}
+
+void SimpleFormatter::VisitEmptyExpression(ast::EmptyExpression* node) {
+  *ostream_ << "()";
+}
 
 void SimpleFormatter::VisitInvalidExpression(ast::InvalidExpression* node) {
   const auto string = ast::ErrorStringOf(node->error_code());

@@ -93,6 +93,14 @@ ElisionExpression::ElisionExpression(const SourceCodeRange& range)
 ElisionExpression::~ElisionExpression() = default;
 
 //
+// EmptyExpression
+//
+EmptyExpression::EmptyExpression(const SourceCodeRange& range)
+    : Expression(range) {}
+
+EmptyExpression::~EmptyExpression() = default;
+
+//
 // Expression
 //
 Expression::Expression(const SourceCodeRange& range) : ContainerNode(range) {}

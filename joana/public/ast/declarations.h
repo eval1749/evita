@@ -43,13 +43,14 @@ class JOANA_PUBLIC_EXPORT Declaration : public Node {
 //
 // ArrowFunction
 //
-// TODO(eval1749): Is it better to use |Expression| for parameter list?
-//  () = EmptyExpression
-//  x = ReferenceExpression
-//  (a, b, ...) = CommaExpression()
+// The parameter list is represented by |ast::Expression| with:
+//  - () = EmptyExpression
+//  - x = ReferenceExpression
+//  - (a, b, ...) = GroupExpression with CommaExpression
+//
 class ArrowFunction final : public NodeTemplate<Declaration,
                                                 FunctionKind,
-                                                ExpressionList*,
+                                                Expression*,
                                                 ArrowFunctionBody*> {
   DECLARE_CONCRETE_AST_NODE(ArrowFunction, Declaration);
 
@@ -58,13 +59,13 @@ class ArrowFunction final : public NodeTemplate<Declaration,
 
   const ArrowFunctionBody& body() const { return *member_at<2>(); }
   FunctionKind kind() const { return member_at<0>(); }
-  const ExpressionList& parameters() const { return *member_at<1>(); }
+  const Expression& parameter_list() const { return *member_at<1>(); }
 
  private:
   // |statement| should be either expression statement or block statement.
   ArrowFunction(const SourceCodeRange& range,
                 FunctionKind kind,
-                ExpressionList* parameters,
+                Expression* parameter_list,
                 ArrowFunctionBody* body);
 
   DISALLOW_COPY_AND_ASSIGN(ArrowFunction);

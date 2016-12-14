@@ -76,8 +76,6 @@ class Parser final {
 
   // Declarations
   ast::ArrowFunctionBody& ExpectArrowFunctionBody();
-  std::vector<ast::Expression*> ExpectParameterList(
-      const ast::Expression& expression);
 
   // Expressions
   OperatorPrecedence CategoryOf(const ast::Token& token) const;

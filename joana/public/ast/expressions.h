@@ -195,7 +195,7 @@ class JOANA_PUBLIC_EXPORT DeclarationExpression final
 };
 
 //
-// ElisionExpression
+// ElisionExpression represents '[' elision ',' ']' syntax for array literal.
 //
 class JOANA_PUBLIC_EXPORT ElisionExpression final : public Expression {
   DECLARE_CONCRETE_AST_NODE(ElisionExpression, Expression);
@@ -210,7 +210,22 @@ class JOANA_PUBLIC_EXPORT ElisionExpression final : public Expression {
 };
 
 //
-// GroupExpression
+// EmptyExpression represents '(' ')' for function parameter list.
+//
+class JOANA_PUBLIC_EXPORT EmptyExpression final : public Expression {
+  DECLARE_CONCRETE_AST_NODE(EmptyExpression, Expression);
+
+ public:
+  ~EmptyExpression() final;
+
+ private:
+  explicit EmptyExpression(const SourceCodeRange& range);
+
+  DISALLOW_COPY_AND_ASSIGN(EmptyExpression);
+};
+
+//
+// GroupExpression represents '(' expression ')' syntax.
 //
 class JOANA_PUBLIC_EXPORT GroupExpression final
     : public NodeTemplate<Expression, Expression*> {

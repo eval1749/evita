@@ -43,7 +43,7 @@ class JOANA_PUBLIC_EXPORT NodeFactory final {
   //
   ArrowFunction& NewArrowFunction(const SourceCodeRange& range,
                                   FunctionKind kind,
-                                  const std::vector<Expression*>& parameters,
+                                  const Expression& parameter_list,
                                   const Node& body);
 
   // Expressions factory members
@@ -73,6 +73,7 @@ class JOANA_PUBLIC_EXPORT NodeFactory final {
   DeclarationExpression& NewDeclarationExpression(
       const Declaration& declaration);
   ElisionExpression& NewElisionExpression(const SourceCodeRange& range);
+  EmptyExpression& NewEmptyExpression(const SourceCodeRange& range);
   GroupExpression& NewGroupExpression(const SourceCodeRange& range,
                                       const Expression& expression);
   InvalidExpression& NewInvalidExpression(const Node& node, int error_code);

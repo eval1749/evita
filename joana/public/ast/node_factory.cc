@@ -95,14 +95,13 @@ Punctuator& NodeFactory::NewPunctuator(const SourceCodeRange& range,
 }
 
 // Declarations
-ArrowFunction& NodeFactory::NewArrowFunction(
-    const SourceCodeRange& range,
-    FunctionKind kind,
-    const std::vector<Expression*>& parameters,
-    const ArrowFunctionBody& body) {
-  auto* const list = new (zone_) ExpressionList(zone_, parameters);
+ArrowFunction& NodeFactory::NewArrowFunction(const SourceCodeRange& range,
+                                             FunctionKind kind,
+                                             const Expression& parameter_list,
+                                             const ArrowFunctionBody& body) {
   return *new (zone_)
-      ArrowFunction(range, kind, list, const_cast<ArrowFunctionBody*>(&body));
+      ArrowFunction(range, kind, const_cast<Expression*>(&parameter_list),
+                    const_cast<ArrowFunctionBody*>(&body));
 }
 
 // Expressions
@@ -171,6 +170,10 @@ ElisionExpression& NodeFactory::NewElisionExpression(
     const SourceCodeRange& range) {
   DCHECK_EQ(range.start(), range.end()) << range;
   return *new (zone_) ElisionExpression(range);
+}
+
+EmptyExpression& NodeFactory::NewEmptyExpression(const SourceCodeRange& range) {
+  return *new (zone_) EmptyExpression(range);
 }
 
 GroupExpression& NodeFactory::NewGroupExpression(const SourceCodeRange& range,

@@ -29,6 +29,7 @@ namespace ast {
   V(DeclarationExpression)         \
   V(GroupExpression)               \
   V(ElisionExpression)             \
+  V(EmptyExpression)               \
   V(InvalidExpression)             \
   V(LiteralExpression)             \
   V(MemberExpression)              \

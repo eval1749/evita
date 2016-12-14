@@ -281,8 +281,9 @@ ast::Expression& Parser::ParseMethodExpression(ast::FunctionKind kind) {
   return NewDeclarationExpression(ParseMethod(kind));
 }
 
-ast::Expression& Parser::ParseNameAsExpression(const ast::Name& name) {
+ast::Expression& Parser::ParseNameAsExpression() {
   SourceCodeRangeScope scope(this);
+  auto& name = ConsumeToken().As<ast::Name>();
   switch (static_cast<ast::NameId>(name.number())) {
     case ast::NameId::Async:
       ExpectToken(ast::NameId::Function,
@@ -452,7 +453,7 @@ ast::Expression& Parser::ParsePrimaryExpression() {
   if (token.Is<ast::Literal>())
     return NewLiteralExpression(ConsumeToken().As<ast::Literal>());
   if (token.Is<ast::Name>())
-    return ParseNameAsExpression(ConsumeToken().As<ast::Name>());
+    return ParseNameAsExpression();
   if (token == ast::PunctuatorKind::LeftParenthesis)
     return ParseParenthesis();
   if (token == ast::PunctuatorKind::LeftBracket)

@@ -110,7 +110,7 @@ class Parser final {
   ast::Expression& ParseFunctionExpression(ast::FunctionKind kind);
   ast::Expression& ParseLeftHandSideExpression();
   ast::Expression& ParseMethodExpression(ast::FunctionKind kind);
-  ast::Expression& ParseNameAsExpression(const ast::Name& name);
+  ast::Expression& ParseNameAsExpression();
   ast::Expression& ParseNewExpression();
   ast::Expression& ParseObjectLiteralExpression();
   ast::Expression& ParseParenthesis();

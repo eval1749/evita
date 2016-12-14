@@ -338,6 +338,12 @@ LabeledStatement& NodeFactory::NewLabeledStatement(const Name& label,
   return *new (zone_) LabeledStatement(label, statement);
 }
 
+ReturnStatement& NodeFactory::NewReturnStatement(const SourceCodeRange& range,
+                                                 const Expression& expression) {
+  return *new (zone_)
+      ReturnStatement(range, const_cast<Expression*>(&expression));
+}
+
 SwitchStatement& NodeFactory::NewSwitchStatement(
     const Name& keyword,
     const Expression& expression,

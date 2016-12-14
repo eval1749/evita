@@ -245,6 +245,25 @@ class JOANA_PUBLIC_EXPORT LabeledStatement : public Statement {
 };
 
 //
+// ReturnStatement
+//
+class JOANA_PUBLIC_EXPORT ReturnStatement
+    : public NodeTemplate<Statement, Expression*> {
+  DECLARE_CONCRETE_AST_NODE(ReturnStatement, Statement);
+
+ public:
+  ~ReturnStatement() override;
+
+  // Returns an expression which may be |ElisionExpression|.
+  const Expression& expression() const { return *member_at<0>(); }
+
+ private:
+  ReturnStatement(const SourceCodeRange& range, Expression* expression);
+
+  DISALLOW_COPY_AND_ASSIGN(ReturnStatement);
+};
+
+//
 // SwitchStatement
 //
 class JOANA_PUBLIC_EXPORT SwitchStatement : public Statement {

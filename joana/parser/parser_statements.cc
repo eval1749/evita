@@ -255,7 +255,15 @@ ast::Statement& Parser::ParseLetStatement() {
 }
 
 ast::Statement& Parser::ParseReturnStatement() {
-  return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
+  ConsumeToken();
+  if (ConsumeTokenIf(ast::PunctuatorKind::SemiColon)) {
+    return node_factory().NewReturnStatement(GetSourceCodeRange(),
+                                             NewElisionExpression());
+  }
+  auto& expression = ParseExpression();
+  ExpectToken(ast::PunctuatorKind::SemiColon,
+              ErrorCode::ERROR_STATEMENT_EXPECT_SEMI_COLON);
+  return node_factory().NewReturnStatement(GetSourceCodeRange(), expression);
 }
 
 ast::Statement& Parser::ParseSwitchStatement() {

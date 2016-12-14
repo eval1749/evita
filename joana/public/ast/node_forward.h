@@ -59,6 +59,7 @@ namespace ast {
   V(IfStatement)                  \
   V(InvalidStatement)             \
   V(LabeledStatement)             \
+  V(ReturnStatement)              \
   V(ThrowStatement)               \
   V(SwitchStatement)              \
   V(TryCatchStatement)            \

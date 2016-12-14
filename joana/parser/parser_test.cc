@@ -264,6 +264,12 @@ TEST_F(ParserTest, LabeledStatement) {
       "}\n");
 }
 
+TEST_F(ParserTest, ReturnStatement) {
+  TEST_PARSER("return;\n");
+  TEST_PARSER("return 1;\n");
+  TEST_PARSER("return 1, 2;\n");
+}
+
 TEST_F(ParserTest, SwitchStatement) {
   TEST_PARSER(
       "switch (foo) {\n"

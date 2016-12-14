@@ -218,6 +218,15 @@ Statement& LabeledStatement::statement() const {
 }
 
 //
+// ReturnStatement
+//
+ReturnStatement::ReturnStatement(const SourceCodeRange& range,
+                                 Expression* expression)
+    : NodeTemplate(expression, range) {}
+
+ReturnStatement::~ReturnStatement() = default;
+
+//
 // Statement
 //
 Statement::Statement(const SourceCodeRange& range) : ContainerNode(range) {}

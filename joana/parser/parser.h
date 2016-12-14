@@ -38,7 +38,6 @@ class Parser final {
  private:
   class BracketStack;
   enum class ErrorCode;
-  class StatementScope;
 
   class SourceCodeRangeScope final {
    public:
@@ -112,8 +111,6 @@ class Parser final {
   ast::Expression& ParseYieldExpression();
 
   // Statements
-  bool CanUseBreak() const;
-  bool CanUseContinue() const;
   ast::Statement& NewInvalidStatement(ErrorCode error_code);
   ast::Statement& ParseStatement();
 
@@ -142,7 +139,6 @@ class Parser final {
   std::unique_ptr<Lexer> lexer_;
   ast::ContainerNode& root_;
   std::stack<int> range_stack_;
-  StatementScope* statement_scope_ = nullptr;
   std::vector<ast::Token*> tokens_;
   std::stack<ast::Token*> token_stack_;
 

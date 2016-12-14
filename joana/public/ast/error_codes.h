@@ -54,21 +54,17 @@ namespace ast {
   V(FUNCTION, INVALID_PARAMETER_LIST)        \
   V(STATEMENT, AWAIT)                        \
   V(STATEMENT, BRACE_NOT_CLSOED)             \
-  V(STATEMENT, BREAK_BAD_PLACE)              \
   V(STATEMENT, BREAK_NOT_LABEL)              \
   V(STATEMENT, BREAK_SEMI_COLON)             \
   V(STATEMENT, CASE_EXPECT_COLON)            \
-  V(STATEMENT, CASE_INVALID)                 \
   V(STATEMENT, CATCH)                        \
   V(STATEMENT, CATCH_EXPECT_LBRACE)          \
   V(STATEMENT, CATCH_EXPECT_LPAREN)          \
   V(STATEMENT, CATCH_EXPECT_NAME)            \
   V(STATEMENT, CATCH_EXPECT_RPAREN)          \
-  V(STATEMENT, CONTINUE_BAD_PLACE)           \
   V(STATEMENT, CONTINUE_NOT_LABEL)           \
   V(STATEMENT, CONTINUE_SEMI_COLON)          \
   V(STATEMENT, DEFAULT_EXPECT_COLON)         \
-  V(STATEMENT, DEFAULT_INVALID)              \
   V(STATEMENT, DO_EXPECT_LPAREN)             \
   V(STATEMENT, DO_EXPECT_RPAREN)             \
   V(STATEMENT, DO_EXPECT_SEMI_COLON)         \

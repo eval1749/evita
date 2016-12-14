@@ -29,111 +29,8 @@ bool IsLoopKeyword(const ast::Name& keyword) {
 }  // namespace
 
 //
-// StatementScope
-//
-class Parser::StatementScope final {
- public:
-  class Scopes final {
-   public:
-    class Iterator final
-        : public std::iterator<std::input_iterator_tag, StatementScope> {
-     public:
-      Iterator(const Iterator& other)
-          : owner_(other.owner_), scope_(other.scope_) {}
-
-      ~Iterator() = default;
-
-      reference operator*() const {
-        DCHECK(scope_);
-        return *scope_;
-      }
-
-      Iterator& operator++() {
-        scope_ = scope_->outer_;
-        return *this;
-      }
-
-      bool operator==(const Iterator& other) const {
-        DCHECK_EQ(owner_, other.owner_);
-        return scope_ == other.scope_;
-      }
-
-      bool operator!=(const Iterator& other) const {
-        return !operator==(other);
-      }
-
-     private:
-      friend class Scopes;
-
-      Iterator(const Scopes* owner, StatementScope* scope)
-          : owner_(owner), scope_(scope) {}
-
-      const Scopes* owner_;
-      StatementScope* scope_;
-    };
-
-    explicit Scopes(StatementScope* scope) : start_(scope) {}
-    Scopes(const Scopes& other) : start_(other.start_) {}
-    ~Scopes() = default;
-
-    Iterator begin() { return Iterator(this, start_); }
-    Iterator end() { return Iterator(this, nullptr); }
-
-   private:
-    StatementScope* start_;
-  };
-
-  StatementScope(Parser* parser, const ast::Node& keyword);
-  ~StatementScope();
-
-  ast::Name& keyword() const { return *keyword_; }
-  static Scopes ScopesOf(StatementScope* start) { return Scopes(start); }
-
- private:
-  ast::Name* keyword_;
-  StatementScope* const outer_;
-  Parser* const parser_;
-
-  DISALLOW_COPY_AND_ASSIGN(StatementScope);
-};
-
-Parser::StatementScope::StatementScope(Parser* parser, const ast::Node& keyword)
-    : keyword_(const_cast<ast::Name*>(&keyword.As<ast::Name>())),
-      outer_(parser->statement_scope_),
-      parser_(parser) {
-  DCHECK(keyword.As<ast::Name>().IsKeyword()) << keyword;
-  parser_->statement_scope_ = this;
-}
-
-Parser::StatementScope::~StatementScope() {
-  parser_->statement_scope_ = outer_;
-}
-
-//
 // Functions for parsing statements
 //
-bool Parser::CanUseBreak() const {
-  for (const auto& scope : StatementScope::ScopesOf(statement_scope_)) {
-    auto& keyword = scope.keyword();
-    if (IsLoopKeyword(keyword) || keyword == ast::NameId::Switch)
-      return true;
-    if (keyword == ast::NameId::Finally)
-      return false;
-  }
-  return false;
-}
-
-bool Parser::CanUseContinue() const {
-  for (const auto& scope : StatementScope::ScopesOf(statement_scope_)) {
-    auto& keyword = scope.keyword();
-    if (IsLoopKeyword(keyword))
-      return true;
-    if (keyword == ast::NameId::Finally)
-      return false;
-  }
-  return false;
-}
-
 ast::Statement& Parser::NewInvalidStatement(ErrorCode error_code) {
   auto& token = ComputeInvalidToken(error_code);
   AddError(token, error_code);
@@ -194,8 +91,6 @@ ast::Statement& Parser::ParseBlockStatement() {
 
 ast::Statement& Parser::ParseBreakStatement() {
   auto& keyword = ConsumeToken().As<ast::Name>();
-  if (!CanUseBreak())
-    AddError(keyword, ErrorCode::ERROR_STATEMENT_BREAK_BAD_PLACE);
   if (!HasToken())
     return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
   if (ConsumeTokenIf(ast::PunctuatorKind::SemiColon))
@@ -212,8 +107,6 @@ ast::Statement& Parser::ParseBreakStatement() {
 ast::Statement& Parser::ParseCaseClause() {
   auto& keyword = ConsumeToken().As<ast::Name>();
   DCHECK_EQ(keyword, ast::NameId::Case);
-  if (!statement_scope_ || statement_scope_->keyword() != ast::NameId::Switch)
-    return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_CASE_INVALID);
   auto& expression = ParseExpression();
   ExpectToken(ast::PunctuatorKind::Colon,
               ErrorCode::ERROR_STATEMENT_CASE_EXPECT_COLON);
@@ -226,8 +119,6 @@ ast::Statement& Parser::ParseConstStatement() {
 
 ast::Statement& Parser::ParseContinueStatement() {
   auto& keyword = ConsumeToken().As<ast::Name>();
-  if (!CanUseContinue())
-    AddError(keyword, ErrorCode::ERROR_STATEMENT_CONTINUE_BAD_PLACE);
   if (!HasToken())
     return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
   if (ConsumeTokenIf(ast::PunctuatorKind::SemiColon))
@@ -244,8 +135,6 @@ ast::Statement& Parser::ParseContinueStatement() {
 ast::Statement& Parser::ParseDefaultLabel() {
   auto& keyword = ConsumeToken().As<ast::Name>();
   DCHECK(keyword == ast::NameId::Default);
-  if (!statement_scope_ || statement_scope_->keyword() != ast::NameId::Switch)
-    return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_DEFAULT_INVALID);
   ExpectToken(ast::PunctuatorKind::Colon,
               ErrorCode::ERROR_STATEMENT_DEFAULT_EXPECT_COLON);
   return node_factory().NewLabeledStatement(keyword, ParseStatement());
@@ -253,7 +142,6 @@ ast::Statement& Parser::ParseDefaultLabel() {
 
 ast::Statement& Parser::ParseDoStatement() {
   auto& keyword = ConsumeToken().As<ast::Name>();
-  StatementScope do_scope(this, keyword);
   auto& statement = ParseStatement();
   if (!ConsumeTokenIf(ast::NameId::While))
     return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_DO_EXPECT_WHILE);
@@ -284,7 +172,6 @@ ast::Statement& Parser::ParseFunctionStatement(ast::FunctionKind kind) {
 
 ast::Statement& Parser::ParseIfStatement() {
   auto& keyword = ConsumeToken().As<ast::Name>();
-  StatementScope if_scope(this, keyword);
   DCHECK_EQ(keyword, ast::NameId::If);
   ExpectToken(ast::PunctuatorKind::LeftParenthesis,
               ErrorCode::ERROR_STATEMENT_IF_EXPECT_LPAREN);
@@ -376,7 +263,6 @@ ast::Statement& Parser::ParseReturnStatement() {
 
 ast::Statement& Parser::ParseSwitchStatement() {
   auto& keyword = ConsumeToken().As<ast::Name>();
-  StatementScope switch_scope(this, keyword);
   if (!ConsumeTokenIf(ast::PunctuatorKind::LeftParenthesis))
     return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_SWITCH_EXPECT_LPAREN);
   auto& expression = ParseExpression();
@@ -407,7 +293,6 @@ ast::Statement& Parser::ParseThrowStatement() {
 
 ast::Statement& Parser::ParseTryStatement() {
   auto& keyword = ConsumeToken().As<ast::Name>();
-  StatementScope while_scope(this, keyword);
   if (!HasToken() || PeekToken() != ast::PunctuatorKind::LeftBrace)
     return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_TRY_EXPECT_LBRACE);
   auto& block = ParseStatement();
@@ -450,7 +335,6 @@ ast::Statement& Parser::ParseVarStatement() {
 
 ast::Statement& Parser::ParseWhileStatement() {
   auto& keyword = ConsumeToken().As<ast::Name>();
-  StatementScope while_scope(this, keyword);
   ExpectToken(ast::PunctuatorKind::LeftParenthesis,
               ErrorCode::ERROR_STATEMENT_DO_EXPECT_LPAREN);
   auto& condition = ParseExpression();

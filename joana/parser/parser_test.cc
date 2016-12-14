@@ -84,11 +84,6 @@ TEST_F(ParserTest, BreakStatement) {
       "do {\n"
       "  break;\n"
       "} while (bar);\n");
-
-  EXPECT_EQ(
-      "break;\n"
-      "PASER_ERROR_STATEMENT_BREAK_BAD_PLACE@0:5\n",
-      Parse("break;"));
 }
 
 TEST_F(ParserTest, ContinueStatement) {
@@ -96,11 +91,6 @@ TEST_F(ParserTest, ContinueStatement) {
       "do {\n"
       "  continue;\n"
       "} while (bar);\n");
-
-  EXPECT_EQ(
-      "continue;\n"
-      "PASER_ERROR_STATEMENT_CONTINUE_BAD_PLACE@0:8\n",
-      Parse("continue;"));
 }
 
 TEST_F(ParserTest, DoStatement) {

@@ -308,8 +308,6 @@ ast::Statement& Parser::ParseKeywordStatement() {
   switch (static_cast<ast::NameId>(keyword.number())) {
     case ast::NameId::Async:
       return ParseAsyncStatement();
-    case ast::NameId::Await:
-      return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_AWAIT);
     case ast::NameId::Break:
       return ParseBreakStatement();
     case ast::NameId::Case:

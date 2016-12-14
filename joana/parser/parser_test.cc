@@ -193,6 +193,10 @@ TEST_F(ParserTest, ExpressionStatementUnary) {
   TEST_PARSER("!foo;\n");
 }
 
+TEST_F(ParserTest, ExpressionStatementUnaryAwait) {
+  TEST_PARSER("await foo;\n");
+}
+
 TEST_F(ParserTest, ExpressionStatementUnaryDelete) {
   TEST_PARSER("delete foo;\n");
 }

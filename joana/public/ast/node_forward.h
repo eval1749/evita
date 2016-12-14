@@ -67,6 +67,7 @@ namespace ast {
   V(TryCatchStatement)            \
   V(TryCatchFinallyStatement)     \
   V(TryFinallyStatement)          \
+  V(VarStatement)                 \
   V(WhileStatement)
 
 #define FOR_EACH_AST_TOKEN(V) \

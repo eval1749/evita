@@ -160,6 +160,8 @@ class JOANA_PUBLIC_EXPORT NodeFactory final {
   TryFinallyStatement& NewTryFinallyStatement(const SourceCodeRange& range,
                                               const Statement& try_block,
                                               const Statement& finally_block);
+  VarStatement& NewVarStatement(const SourceCodeRange& range,
+                                const Expression& expression);
   WhileStatement& NewWhileStatement(const Name& keyword,
                                     const Expression& condition,
                                     const Statement& statement);

@@ -310,7 +310,10 @@ ast::Statement& Parser::ParseTryStatement() {
 }
 
 ast::Statement& Parser::ParseVarStatement() {
-  return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
+  ExpectSemiColonScope semi_colon_scope(this);
+  ConsumeToken();
+  auto& expression = ParseExpression();
+  return node_factory().NewVarStatement(GetSourceCodeRange(), expression);
 }
 
 ast::Statement& Parser::ParseWhileStatement() {

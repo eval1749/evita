@@ -289,6 +289,14 @@ TryFinallyStatement::TryFinallyStatement(const SourceCodeRange& range,
 TryFinallyStatement::~TryFinallyStatement() = default;
 
 //
+// VarStatement
+//
+VarStatement::VarStatement(const SourceCodeRange& range, Expression* expression)
+    : NodeTemplate(expression, range) {}
+
+VarStatement::~VarStatement() = default;
+
+//
 // WhileStatement
 //
 WhileStatement::WhileStatement(const Name& keyword,

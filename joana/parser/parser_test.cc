@@ -323,6 +323,11 @@ TEST_F(ParserTest, TryStatement) {
       "}\n");
 }
 
+TEST_F(ParserTest, VarStatement) {
+  TEST_PARSER("var foo = 1;\n");
+  TEST_PARSER("var foo = 1, bar;\n");
+}
+
 TEST_F(ParserTest, WhileStatement) {
   TEST_PARSER(
       "while (foo) {\n"

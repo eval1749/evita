@@ -416,6 +416,25 @@ class JOANA_PUBLIC_EXPORT TryFinallyStatement
 };
 
 //
+// VarStatement
+//
+class JOANA_PUBLIC_EXPORT VarStatement
+    : public NodeTemplate<Statement, Expression*> {
+  DECLARE_CONCRETE_AST_NODE(VarStatement, Statement);
+
+ public:
+  ~VarStatement() override;
+
+  const Expression& expression() { return *member_at<0>(); }
+
+ protected:
+  VarStatement(const SourceCodeRange& range, Expression* expression);
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(VarStatement);
+};
+
+//
 // WhileStatement
 //
 class JOANA_PUBLIC_EXPORT WhileStatement : public Statement {

@@ -500,6 +500,12 @@ void SimpleFormatter::VisitTryFinallyStatement(ast::TryFinallyStatement* node) {
   FormatChildStatement(node->finally_block());
 }
 
+void SimpleFormatter::VisitVarStatement(ast::VarStatement* node) {
+  *ostream_ << "var ";
+  Format(node->expression());
+  *ostream_ << ';';
+}
+
 void SimpleFormatter::VisitWhileStatement(ast::WhileStatement* node) {
   *ostream_ << "while (";
   Format(node->condition());

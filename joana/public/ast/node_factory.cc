@@ -393,6 +393,11 @@ TryFinallyStatement& NodeFactory::NewTryFinallyStatement(
                           const_cast<Statement*>(&finally_block));
 }
 
+VarStatement& NodeFactory::NewVarStatement(const SourceCodeRange& range,
+                                           const Expression& expression) {
+  return *new (zone_) VarStatement(range, const_cast<Expression*>(&expression));
+}
+
 WhileStatement& NodeFactory::NewWhileStatement(const Name& keyword,
                                                const Expression& condition,
                                                const Statement& statement) {

@@ -95,6 +95,10 @@ class Parser final {
   // The entry of parsing an expression.
   ast::Expression& ParseExpression();
 
+  // Helper function for parsing an expression enclosed by parenthesis for
+  // do-while, if, switch, and while statements.
+  const ast::Expression& ParseParenthesisExpression();
+
   std::vector<ast::Expression*> ParseArgumentList();
   ast::Expression& ParseArrayLiteralExpression();
   ast::Expression& ParseAssignmentExpression();

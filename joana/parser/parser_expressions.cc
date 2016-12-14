@@ -367,6 +367,16 @@ ast::Expression& Parser::ParseParenthesis() {
       GetSourceCodeRange(), ast::FunctionKind::Normal, expression, statement));
 }
 
+// Yet another entry point called by statement parser.
+const ast::Expression& Parser::ParseParenthesisExpression() {
+  const auto& location = lexer_->location();
+  auto& expression = ParseExpression();
+  if (auto* grouping = expression.TryAs<ast::GroupExpression>())
+    return grouping->expression();
+  AddError(location, ErrorCode::ERROR_STATEMENT_EXPECT_LPAREN);
+  return expression;
+}
+
 ast::Expression& Parser::ParsePrimaryExpression() {
   const auto& token = PeekToken();
   if (token.Is<ast::Literal>())

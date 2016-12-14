@@ -141,11 +141,7 @@ ast::Statement& Parser::ParseDoStatement() {
   if (!ConsumeTokenIf(ast::NameId::While))
     return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_EXPECT_WHILE);
   ExpectSemiColonScope semi_colon_scope(this);
-  ExpectToken(ast::PunctuatorKind::LeftParenthesis,
-              ErrorCode::ERROR_STATEMENT_EXPECT_LPAREN);
-  auto& condition = ParseExpression();
-  ExpectToken(ast::PunctuatorKind::RightParenthesis,
-              ErrorCode::ERROR_STATEMENT_EXPECT_RPAREN);
+  auto& condition = ParseParenthesisExpression();
   return node_factory().NewDoStatement(keyword, statement, condition);
 }
 
@@ -165,11 +161,7 @@ ast::Statement& Parser::ParseFunctionStatement(ast::FunctionKind kind) {
 ast::Statement& Parser::ParseIfStatement() {
   auto& keyword = ConsumeToken().As<ast::Name>();
   DCHECK_EQ(keyword, ast::NameId::If);
-  ExpectToken(ast::PunctuatorKind::LeftParenthesis,
-              ErrorCode::ERROR_STATEMENT_EXPECT_LPAREN);
-  auto& condition = ParseExpression();
-  ExpectToken(ast::PunctuatorKind::RightParenthesis,
-              ErrorCode::ERROR_STATEMENT_EXPECT_RPAREN);
+  auto& condition = ParseParenthesisExpression();
   auto& then_clause = ParseStatement();
   if (!ConsumeTokenIf(ast::NameId::Else))
     return node_factory().NewIfStatement(keyword, condition, then_clause);
@@ -260,11 +252,7 @@ ast::Statement& Parser::ParseReturnStatement() {
 
 ast::Statement& Parser::ParseSwitchStatement() {
   auto& keyword = ConsumeToken().As<ast::Name>();
-  if (!ConsumeTokenIf(ast::PunctuatorKind::LeftParenthesis))
-    return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_EXPECT_LPAREN);
-  auto& expression = ParseExpression();
-  if (!ConsumeTokenIf(ast::PunctuatorKind::RightParenthesis))
-    return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_EXPECT_RPAREN);
+  auto& expression = ParseParenthesisExpression();
   std::vector<ast::Statement*> clauses;
   if (!ConsumeTokenIf(ast::PunctuatorKind::LeftBrace)) {
     AddError(ErrorCode::ERROR_STATEMENT_EXPECT_LBRACE);
@@ -318,11 +306,7 @@ ast::Statement& Parser::ParseVarStatement() {
 
 ast::Statement& Parser::ParseWhileStatement() {
   auto& keyword = ConsumeToken().As<ast::Name>();
-  ExpectToken(ast::PunctuatorKind::LeftParenthesis,
-              ErrorCode::ERROR_STATEMENT_EXPECT_LPAREN);
-  auto& condition = ParseExpression();
-  ExpectToken(ast::PunctuatorKind::RightParenthesis,
-              ErrorCode::ERROR_STATEMENT_EXPECT_RPAREN);
+  auto& condition = ParseParenthesisExpression();
   auto& statement = ParseStatement();
   return node_factory().NewWhileStatement(keyword, condition, statement);
 }

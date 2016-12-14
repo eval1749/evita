@@ -40,16 +40,6 @@ enum class Parser::OperatorPrecedence {
 
 namespace {
 
-bool CanAssign(const ast::Expression& expression) {
-  if (expression.Is<ast::MemberExpression>())
-    return true;
-  if (expression.Is<ast::PropertyExpression>())
-    return true;
-  if (expression.Is<ast::ReferenceExpression>())
-    return true;
-  return false;
-}
-
 // Convert |++| and |--| token to a token which represent post update
 // operator.
 ast::Punctuator& ConvertToPostOperator(ast::NodeFactory* factory,
@@ -195,10 +185,6 @@ ast::Expression& Parser::ParseAssignmentExpression() {
   if (CategoryOf(PeekToken()) != OperatorPrecedence::Assignment)
     return left_hand_side;
   const auto& op = ConsumeToken().As<ast::Punctuator>();
-  if (!CanAssign(left_hand_side)) {
-    AddError(left_hand_side.range(),
-             ErrorCode::ERROR_EXPRESSION_ASSIGNMENT_EXPECT_LHS);
-  }
   auto& right_hand_side = ParseAssignmentExpression();
   return node_factory().NewAssignmentExpression(
       GetSourceCodeRange(), op, left_hand_side, right_hand_side);
@@ -496,19 +482,12 @@ ast::Expression& Parser::ParseUpdateExpression() {
   if (IsUpdateOperator(PeekToken())) {
     auto& op = ConsumeToken().As<ast::Punctuator>();
     auto& expression = ParseLeftHandSideExpression();
-    if (!CanAssign(expression)) {
-      AddError(expression.range(),
-               ErrorCode::ERROR_EXPRESSION_UPDATE_EXPECT_LHS);
-    }
     return NewUnaryExpression(op, expression);
   }
   auto& expression = ParseLeftHandSideExpression();
   if (!HasToken() || !IsUpdateOperator(PeekToken()))
     return expression;
   auto& op = ConvertToPostOperator(&node_factory(), ConsumeToken());
-  if (!CanAssign(expression)) {
-    AddError(expression.range(), ErrorCode::ERROR_EXPRESSION_UPDATE_EXPECT_LHS);
-  }
   return NewUnaryExpression(op, expression);
 }
 

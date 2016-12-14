@@ -60,10 +60,7 @@ ast::Statement& Parser::ParseStatement() {
     auto& token2 = ConsumeToken();
     PushBackToken(token2);
     PushBackToken(*name);
-    auto& expression = ParseExpression();
-    ExpectToken(ast::PunctuatorKind::SemiColon,
-                ErrorCode::ERROR_STATEMENT_EXPECT_SEMI_COLON);
-    return node_factory().NewExpressionStatement(expression);
+    return ParseExpressionStatement();
   }
   if (token.Is<ast::Literal>())
     return ParseExpressionStatement();
@@ -140,21 +137,18 @@ ast::Statement& Parser::ParseDoStatement() {
   auto& statement = ParseStatement();
   if (!ConsumeTokenIf(ast::NameId::While))
     return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_EXPECT_WHILE);
+  ExpectSemiColonScope semi_colon_scope(this);
   ExpectToken(ast::PunctuatorKind::LeftParenthesis,
               ErrorCode::ERROR_STATEMENT_EXPECT_LPAREN);
   auto& condition = ParseExpression();
   ExpectToken(ast::PunctuatorKind::RightParenthesis,
               ErrorCode::ERROR_STATEMENT_EXPECT_RPAREN);
-  ExpectToken(ast::PunctuatorKind::SemiColon,
-              ErrorCode::ERROR_STATEMENT_EXPECT_SEMI_COLON);
   return node_factory().NewDoStatement(keyword, statement, condition);
 }
 
 ast::Statement& Parser::ParseExpressionStatement() {
-  auto& expression = ParseExpression();
-  ExpectToken(ast::PunctuatorKind::SemiColon,
-              ErrorCode::ERROR_STATEMENT_EXPECT_SEMI_COLON);
-  return node_factory().NewExpressionStatement(expression);
+  ExpectSemiColonScope semi_colon_scope(this);
+  return node_factory().NewExpressionStatement(ParseExpression());
 }
 
 ast::Statement& Parser::ParseForStatement() {
@@ -250,14 +244,11 @@ ast::Statement& Parser::ParseLetStatement() {
 }
 
 ast::Statement& Parser::ParseReturnStatement() {
+  ExpectSemiColonScope semi_colon_scope(this);
   ConsumeToken();
-  if (ConsumeTokenIf(ast::PunctuatorKind::SemiColon)) {
-    return node_factory().NewReturnStatement(GetSourceCodeRange(),
-                                             NewElisionExpression());
-  }
-  auto& expression = ParseExpression();
-  ExpectToken(ast::PunctuatorKind::SemiColon,
-              ErrorCode::ERROR_STATEMENT_EXPECT_SEMI_COLON);
+  auto& expression = HasToken() && PeekToken() == ast::PunctuatorKind::SemiColon
+                         ? NewElisionExpression()
+                         : ParseExpression();
   return node_factory().NewReturnStatement(GetSourceCodeRange(), expression);
 }
 
@@ -284,10 +275,9 @@ ast::Statement& Parser::ParseSwitchStatement() {
 }
 
 ast::Statement& Parser::ParseThrowStatement() {
+  ExpectSemiColonScope semi_colon_scope(this);
   auto& keyword = ConsumeToken().As<ast::Name>();
   auto& expression = ParseExpression();
-  ExpectToken(ast::PunctuatorKind::SemiColon,
-              ErrorCode::ERROR_STATEMENT_EXPECT_SEMI_COLON);
   return node_factory().NewThrowStatement(keyword, expression);
 }
 

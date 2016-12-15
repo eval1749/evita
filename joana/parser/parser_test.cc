@@ -376,9 +376,8 @@ TEST_F(ParserTest, WhileStatement) {
 
 TEST_F(ParserTest, WithStatement) {
   TEST_PARSER(
-      "with (foo) {\n"
-      "  bar;\n"
-      "}\n");
+      "with (foo)\n"
+      "  bar;\n");
 }
 
 }  // namespace internal

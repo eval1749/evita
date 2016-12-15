@@ -643,18 +643,14 @@ void SimpleFormatter::VisitWhileStatement(ast::WhileStatement* node) {
   *ostream_ << "while (";
   Format(node->condition());
   *ostream_ << ')';
-  if (FormatChildStatement(node->statement()))
-    return;
-  *ostream_ << ';';
+  FormatChildStatement(node->statement());
 }
 
 void SimpleFormatter::VisitWithStatement(ast::WithStatement* node) {
   *ostream_ << "with (";
   Format(node->expression());
   *ostream_ << ')';
-  if (FormatChildStatement(node->statement()))
-    return;
-  *ostream_ << ';';
+  FormatChildStatement(node->statement());
 }
 
 }  // namespace internal

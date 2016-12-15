@@ -648,5 +648,14 @@ void SimpleFormatter::VisitWhileStatement(ast::WhileStatement* node) {
   *ostream_ << ';';
 }
 
+void SimpleFormatter::VisitWithStatement(ast::WithStatement* node) {
+  *ostream_ << "with (";
+  Format(node->expression());
+  *ostream_ << ')';
+  if (FormatChildStatement(node->statement()))
+    return;
+  *ostream_ << ';';
+}
+
 }  // namespace internal
 }  // namespace joana

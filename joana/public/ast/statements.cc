@@ -351,5 +351,15 @@ Statement& WhileStatement::statement() const {
   return NodeTraversal::ChildAt(*this, 1).As<Statement>();
 }
 
+//
+// WithStatement
+//
+WithStatement::WithStatement(const SourceCodeRange& range,
+                             Expression* expression,
+                             Statement* statement)
+    : NodeTemplate(std::make_tuple(expression, statement), range) {}
+
+WithStatement::~WithStatement() = default;
+
 }  // namespace ast
 }  // namespace joana

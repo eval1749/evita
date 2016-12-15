@@ -535,6 +535,28 @@ class JOANA_PUBLIC_EXPORT WhileStatement : public Statement {
   DISALLOW_COPY_AND_ASSIGN(WhileStatement);
 };
 
+//
+// WithStatement
+//
+class JOANA_PUBLIC_EXPORT WithStatement
+    : public NodeTemplate<Statement, Expression*, Statement*> {
+  DECLARE_CONCRETE_AST_NODE(WithStatement, Statement);
+
+ public:
+  ~WithStatement() final;
+
+  Statement& statement() const { return *member_at<1>(); }
+  Expression& expression() const { return *member_at<0>(); }
+
+ protected:
+  WithStatement(const SourceCodeRange& range,
+                Expression* expression,
+                Statement* statement);
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(WithStatement);
+};
+
 }  // namespace ast
 }  // namespace joana
 

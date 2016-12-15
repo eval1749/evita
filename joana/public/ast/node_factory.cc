@@ -466,5 +466,12 @@ WhileStatement& NodeFactory::NewWhileStatement(const Name& keyword,
   return *new (zone_) WhileStatement(keyword, condition, statement);
 }
 
+WithStatement& NodeFactory::NewWithStatement(const SourceCodeRange& range,
+                                             const Expression& expression,
+                                             const Statement& statement) {
+  return *new (zone_) WithStatement(range, const_cast<Expression*>(&expression),
+                                    const_cast<Statement*>(&statement));
+}
+
 }  // namespace ast
 }  // namespace joana

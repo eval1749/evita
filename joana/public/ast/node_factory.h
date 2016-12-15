@@ -201,6 +201,10 @@ class JOANA_PUBLIC_EXPORT NodeFactory final {
                                     const Expression& condition,
                                     const Statement& statement);
 
+  WithStatement& NewWithStatement(const SourceCodeRange& range,
+                                  const Expression& expression,
+                                  const Statement& statement);
+
  private:
   class NameIdMap;
 

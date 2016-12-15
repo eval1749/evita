@@ -37,14 +37,17 @@ class JOANA_PUBLIC_EXPORT ExpressionList final : public ZoneAllocated {
  public:
   ~ExpressionList();
 
-  const ZoneVector<Expression*>& elements() const { return elements_; }
+  auto begin() const { return expressions_.begin(); }
+  bool empty() const { return expressions_.empty(); }
+  auto end() const { return expressions_.end(); }
+  size_t size() const { return expressions_.size(); }
 
  private:
   friend class NodeFactory;
 
-  ExpressionList(Zone* zone, const std::vector<Expression*>& elements);
+  ExpressionList(Zone* zone, const std::vector<Expression*>& expressions);
 
-  ZoneVector<Expression*> elements_;
+  ZoneVector<Expression*> expressions_;
 
   DISALLOW_COPY_AND_ASSIGN(ExpressionList);
 };

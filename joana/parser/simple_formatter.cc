@@ -71,7 +71,7 @@ bool SimpleFormatter::FormatChildStatement(const ast::Statement& statement) {
 
 void SimpleFormatter::FormatExpressionList(const ast::ExpressionList& list) {
   auto delimiter = "";
-  for (const auto& element : list.elements()) {
+  for (const auto& element : list) {
     if (element->Is<ast::ElisionExpression>()) {
       *ostream_ << ',';
       delimiter = "";
@@ -286,7 +286,7 @@ void SimpleFormatter::VisitCallExpression(ast::CallExpression* node) {
   Format(node->callee());
   *ostream_ << '(';
   auto delimiter = "";
-  for (const auto& argument : node->arguments().elements()) {
+  for (const auto& argument : node->arguments()) {
     *ostream_ << delimiter;
     delimiter = ", ";
     Format(*argument);
@@ -353,14 +353,14 @@ void SimpleFormatter::VisitNewExpression(ast::NewExpression* node) {
 
 void SimpleFormatter::VisitObjectLiteralExpression(
     ast::ObjectLiteralExpression* node) {
-  const auto& members = node->members().elements();
+  const auto& members = node->members();
   if (members.empty()) {
     *ostream_ << "{}";
     return;
   }
   if (members.size() == 1) {
     *ostream_ << "{ ";
-    Format(*members.front());
+    Format(**members.begin());
     *ostream_ << " }";
     return;
   }

@@ -460,10 +460,12 @@ VarStatement& NodeFactory::NewVarStatement(const SourceCodeRange& range,
   return *new (zone_) VarStatement(range, const_cast<Expression*>(&expression));
 }
 
-WhileStatement& NodeFactory::NewWhileStatement(const Name& keyword,
-                                               const Expression& condition,
+WhileStatement& NodeFactory::NewWhileStatement(const SourceCodeRange& range,
+                                               const Expression& expression,
                                                const Statement& statement) {
-  return *new (zone_) WhileStatement(keyword, condition, statement);
+  return *new (zone_)
+      WhileStatement(range, const_cast<Expression*>(&expression),
+                     const_cast<Statement*>(&statement));
 }
 
 WithStatement& NodeFactory::NewWithStatement(const SourceCodeRange& range,

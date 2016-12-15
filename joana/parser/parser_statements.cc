@@ -99,7 +99,7 @@ ast::Statement& Parser::ParseBreakStatement() {
   ConsumeToken();
   ExpectSemiColonScope semi_colon_scope(this);
   auto& label = CanPeekToken() && PeekToken().Is<ast::Name>() ? ConsumeToken()
-                                                          : NewEmptyName();
+                                                              : NewEmptyName();
   return node_factory().NewBreakStatement(GetSourceCodeRange(), label);
 }
 
@@ -123,7 +123,7 @@ ast::Statement& Parser::ParseContinueStatement() {
   ConsumeToken();
   ExpectSemiColonScope semi_colon_scope(this);
   auto& label = CanPeekToken() && PeekToken().Is<ast::Name>() ? ConsumeToken()
-                                                          : NewEmptyName();
+                                                              : NewEmptyName();
   return node_factory().NewContinueStatement(GetSourceCodeRange(), label);
 }
 
@@ -301,9 +301,10 @@ ast::Statement& Parser::ParseLetStatement() {
 ast::Statement& Parser::ParseReturnStatement() {
   ExpectSemiColonScope semi_colon_scope(this);
   ConsumeToken();
-  auto& expression = CanPeekToken() && PeekToken() == ast::PunctuatorKind::SemiColon
-                         ? NewElisionExpression()
-                         : ParseExpression();
+  auto& expression =
+      CanPeekToken() && PeekToken() == ast::PunctuatorKind::SemiColon
+          ? NewElisionExpression()
+          : ParseExpression();
   return node_factory().NewReturnStatement(GetSourceCodeRange(), expression);
 }
 
@@ -362,10 +363,12 @@ ast::Statement& Parser::ParseVarStatement() {
 }
 
 ast::Statement& Parser::ParseWhileStatement() {
-  auto& keyword = ConsumeToken().As<ast::Name>();
+  DCHECK_EQ(PeekToken(), ast::NameId::While);
+  ConsumeToken();
   auto& condition = ParseParenthesisExpression();
   auto& statement = ParseStatement();
-  return node_factory().NewWhileStatement(keyword, condition, statement);
+  return node_factory().NewWhileStatement(GetSourceCodeRange(), condition,
+                                          statement);
 }
 
 ast::Statement& Parser::ParseWithStatement() {

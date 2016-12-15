@@ -332,24 +332,12 @@ VarStatement::~VarStatement() = default;
 //
 // WhileStatement
 //
-WhileStatement::WhileStatement(const Name& keyword,
-                               const Expression& condition,
-                               const Statement& statement)
-    : Statement(keyword.range()) {
-  DCHECK_EQ(keyword, NameId::While);
-  NodeEditor().AppendChild(this, const_cast<Expression*>(&condition));
-  NodeEditor().AppendChild(this, const_cast<Statement*>(&statement));
-}
+WhileStatement::WhileStatement(const SourceCodeRange& range,
+                               Expression* expression,
+                               Statement* statement)
+    : NodeTemplate(std::make_tuple(expression, statement), range) {}
 
 WhileStatement::~WhileStatement() = default;
-
-Expression& WhileStatement::condition() const {
-  return NodeTraversal::ChildAt(*this, 0).As<Expression>();
-}
-
-Statement& WhileStatement::statement() const {
-  return NodeTraversal::ChildAt(*this, 1).As<Statement>();
-}
 
 //
 // WithStatement

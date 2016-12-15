@@ -197,8 +197,9 @@ class JOANA_PUBLIC_EXPORT NodeFactory final {
                                               const Statement& finally_block);
   VarStatement& NewVarStatement(const SourceCodeRange& range,
                                 const Expression& expression);
-  WhileStatement& NewWhileStatement(const Name& keyword,
-                                    const Expression& condition,
+
+  WhileStatement& NewWhileStatement(const SourceCodeRange& range,
+                                    const Expression& expression,
                                     const Statement& statement);
 
   WithStatement& NewWithStatement(const SourceCodeRange& range,

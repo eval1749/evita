@@ -641,7 +641,7 @@ void SimpleFormatter::VisitVarStatement(ast::VarStatement* node) {
 
 void SimpleFormatter::VisitWhileStatement(ast::WhileStatement* node) {
   *ostream_ << "while (";
-  Format(node->condition());
+  Format(node->expression());
   *ostream_ << ')';
   FormatChildStatement(node->statement());
 }

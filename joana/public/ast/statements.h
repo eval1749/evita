@@ -517,19 +517,20 @@ class JOANA_PUBLIC_EXPORT VarStatement
 //
 // WhileStatement
 //
-class JOANA_PUBLIC_EXPORT WhileStatement : public Statement {
+class JOANA_PUBLIC_EXPORT WhileStatement
+    : public NodeTemplate<Statement, Expression*, Statement*> {
   DECLARE_CONCRETE_AST_NODE(WhileStatement, Statement);
 
  public:
-  ~WhileStatement() override;
+  ~WhileStatement() final;
 
-  Expression& condition() const;
-  Statement& statement() const;
+  Statement& statement() const { return *member_at<1>(); }
+  Expression& expression() const { return *member_at<0>(); }
 
  protected:
-  explicit WhileStatement(const Name& keyword,
-                          const Expression& condition,
-                          const Statement& statement);
+  WhileStatement(const SourceCodeRange& range,
+                 Expression* expression,
+                 Statement* statement);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(WhileStatement);

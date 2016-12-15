@@ -169,14 +169,14 @@ class JOANA_PUBLIC_EXPORT DoStatement
 //
 // EmptyStatement
 //
-class JOANA_PUBLIC_EXPORT EmptyStatement : public Statement {
+class JOANA_PUBLIC_EXPORT EmptyStatement : public NodeTemplate<Statement> {
   DECLARE_CONCRETE_AST_NODE(EmptyStatement, Statement);
 
  public:
   ~EmptyStatement() override;
 
  protected:
-  explicit EmptyStatement(const Punctuator& semi_colon);
+  explicit EmptyStatement(const SourceCodeRange& range);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(EmptyStatement);

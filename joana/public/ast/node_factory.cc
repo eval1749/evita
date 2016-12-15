@@ -343,8 +343,8 @@ DoStatement& NodeFactory::NewDoStatement(const SourceCodeRange& range,
                   const_cast<Expression*>(&expression));
 }
 
-EmptyStatement& NodeFactory::NewEmptyStatement(const Punctuator& semi_colon) {
-  return *new (zone_) EmptyStatement(semi_colon);
+EmptyStatement& NodeFactory::NewEmptyStatement(const SourceCodeRange& range) {
+  return *new (zone_) EmptyStatement(range);
 }
 
 ExpressionStatement& NodeFactory::NewExpressionStatement(

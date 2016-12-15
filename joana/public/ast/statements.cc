@@ -91,10 +91,8 @@ DoStatement::~DoStatement() = default;
 //
 // EmptyStatement
 //
-EmptyStatement::EmptyStatement(const Punctuator& semi_colon)
-    : Statement(semi_colon.range()) {
-  DCHECK_EQ(semi_colon.kind(), PunctuatorKind::SemiColon);
-}
+EmptyStatement::EmptyStatement(const SourceCodeRange& range)
+    : NodeTemplate(std::make_tuple(), range) {}
 
 EmptyStatement::~EmptyStatement() = default;
 

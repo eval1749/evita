@@ -67,8 +67,10 @@ ast::Statement& Parser::ParseStatement() {
   if (token == ast::PunctuatorKind::LeftBrace)
     return ParseBlockStatement();
   if (token == ast::PunctuatorKind::SemiColon) {
-    return node_factory().NewEmptyStatement(
-        ConsumeToken().As<ast::Punctuator>());
+    auto& statement = node_factory().NewEmptyStatement(
+        SourceCodeRange::CollapseToStart(PeekToken().range()));
+    ConsumeToken();
+    return statement;
   }
   return ParseExpressionStatement();
 }

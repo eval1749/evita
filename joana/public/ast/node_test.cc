@@ -57,8 +57,7 @@ BlockStatement& NodeTest::NewBlockStatement() {
 }
 
 EmptyStatement& NodeTest::NewEmptyStatement() {
-  return factory().NewEmptyStatement(
-      factory().NewPunctuator(range(), PunctuatorKind::SemiColon));
+  return factory().NewEmptyStatement(range());
 }
 
 TEST_F(NodeTest, NodeContains) {

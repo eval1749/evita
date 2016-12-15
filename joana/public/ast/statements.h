@@ -185,16 +185,17 @@ class JOANA_PUBLIC_EXPORT EmptyStatement : public NodeTemplate<Statement> {
 //
 // ExpressionStatement
 //
-class JOANA_PUBLIC_EXPORT ExpressionStatement : public Statement {
+class JOANA_PUBLIC_EXPORT ExpressionStatement
+    : public NodeTemplate<Statement, Expression*> {
   DECLARE_CONCRETE_AST_NODE(ExpressionStatement, Statement);
 
  public:
   ~ExpressionStatement() override;
 
-  const Expression& expression() const;
+  const Expression& expression() const { return *member_at<0>(); }
 
  private:
-  explicit ExpressionStatement(const Expression& expression);
+  explicit ExpressionStatement(Expression* expression);
 
   DISALLOW_COPY_AND_ASSIGN(ExpressionStatement);
 };

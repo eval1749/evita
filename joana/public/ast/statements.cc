@@ -99,18 +99,10 @@ EmptyStatement::~EmptyStatement() = default;
 //
 // ExpressionStatement
 //
-ExpressionStatement::ExpressionStatement(const Expression& expression)
-    : Statement(expression.range()) {
-  NodeEditor().AppendChild(this, const_cast<Expression*>(&expression));
-}
+ExpressionStatement::ExpressionStatement(Expression* expression)
+    : NodeTemplate(expression, expression->range()) {}
 
 ExpressionStatement::~ExpressionStatement() = default;
-
-const Expression& ExpressionStatement::expression() const {
-  auto* const child = NodeTraversal::FirstChildOf(*this);
-  DCHECK(child) << *this;
-  return child->As<Expression>();
-}
 
 //
 // ForStatement

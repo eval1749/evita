@@ -349,7 +349,7 @@ EmptyStatement& NodeFactory::NewEmptyStatement(const SourceCodeRange& range) {
 
 ExpressionStatement& NodeFactory::NewExpressionStatement(
     const Expression& expression) {
-  return *new (zone_) ExpressionStatement(expression);
+  return *new (zone_) ExpressionStatement(const_cast<Expression*>(&expression));
 }
 
 ForStatement& NodeFactory::NewForStatement(const SourceCodeRange& range,

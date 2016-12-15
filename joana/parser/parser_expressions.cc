@@ -348,7 +348,7 @@ ast::Expression& Parser::ParseNewExpression() {
 
 ast::Expression& Parser::ParseObjectLiteralExpression() {
   SourceCodeRangeScope scope(this);
-  DCHECK_EQ(PeekToken(), ast::PunctuatorKind::LeftBrace) << PeekToken();
+  DCHECK_EQ(PeekToken(), ast::PunctuatorKind::LeftBrace);
   ConsumeToken();
   std::vector<ast::Expression*> members;
   auto need_comma = false;

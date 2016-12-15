@@ -199,6 +199,83 @@ class JOANA_PUBLIC_EXPORT ExpressionStatement : public Statement {
 };
 
 //
+// ForStatement
+//
+class JOANA_PUBLIC_EXPORT ForStatement : public NodeTemplate<Statement,
+                                                             Statement*,
+                                                             Expression*,
+                                                             Expression*,
+                                                             Statement*> {
+  DECLARE_CONCRETE_AST_NODE(ForStatement, Statement);
+
+ public:
+  ~ForStatement() override;
+
+  const Expression& condition() { return *member_at<1>(); }
+  const Statement& body() { return *member_at<3>(); }
+  const Statement& init() { return *member_at<0>(); }
+  const Expression& step() { return *member_at<2>(); }
+
+ protected:
+  ForStatement(const SourceCodeRange& range,
+               Statement* init,
+               Expression* condition,
+               Expression* step,
+               Statement* body);
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(ForStatement);
+};
+
+//
+// ForInStatement
+//
+class JOANA_PUBLIC_EXPORT ForInStatement
+    : public NodeTemplate<Statement, Statement*, Expression*, Statement*> {
+  DECLARE_CONCRETE_AST_NODE(ForInStatement, Statement);
+
+ public:
+  ~ForInStatement() override;
+
+  const Statement& body() { return *member_at<2>(); }
+  const Statement& binding() { return *member_at<0>(); }
+  const Expression& expression() { return *member_at<1>(); }
+
+ protected:
+  ForInStatement(const SourceCodeRange& range,
+                 Statement* binding,
+                 Expression* expression,
+                 Statement* body);
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(ForInStatement);
+};
+
+//
+// ForOfStatement
+//
+class JOANA_PUBLIC_EXPORT ForOfStatement
+    : public NodeTemplate<Statement, Statement*, Expression*, Statement*> {
+  DECLARE_CONCRETE_AST_NODE(ForOfStatement, Statement);
+
+ public:
+  ~ForOfStatement() override;
+
+  const Statement& body() { return *member_at<2>(); }
+  const Statement& binding() { return *member_at<0>(); }
+  const Expression& expression() { return *member_at<1>(); }
+
+ protected:
+  ForOfStatement(const SourceCodeRange& range,
+                 Statement* binding,
+                 Expression* expression,
+                 Statement* body);
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(ForOfStatement);
+};
+
+//
 // IfStatement
 //
 class JOANA_PUBLIC_EXPORT IfStatement : public Statement {

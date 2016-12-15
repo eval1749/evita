@@ -487,6 +487,34 @@ void SimpleFormatter::VisitExpressionStatement(ast::ExpressionStatement* node) {
   *ostream_ << ';';
 }
 
+void SimpleFormatter::VisitForStatement(ast::ForStatement* node) {
+  *ostream_ << "for (";
+  Format(node->init());
+  Format(node->condition());
+  *ostream_ << ';';
+  Format(node->step());
+  *ostream_ << ')';
+  FormatChildStatement(node->body());
+}
+
+void SimpleFormatter::VisitForInStatement(ast::ForInStatement* node) {
+  *ostream_ << "for (";
+  Format(node->binding());
+  *ostream_ << " in ";
+  Format(node->expression());
+  *ostream_ << ')';
+  FormatChildStatement(node->body());
+}
+
+void SimpleFormatter::VisitForOfStatement(ast::ForOfStatement* node) {
+  *ostream_ << "for (";
+  Format(node->binding());
+  *ostream_ << " of ";
+  Format(node->expression());
+  *ostream_ << ')';
+  FormatChildStatement(node->body());
+}
+
 void SimpleFormatter::VisitIfStatement(ast::IfStatement* node) {
   *ostream_ << "if (";
   Format(node->condition());

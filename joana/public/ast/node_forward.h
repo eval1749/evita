@@ -61,6 +61,9 @@ namespace ast {
   V(DoStatement)                  \
   V(EmptyStatement)               \
   V(ExpressionStatement)          \
+  V(ForStatement)                 \
+  V(ForInStatement)               \
+  V(ForOfStatement)               \
   V(IfStatement)                  \
   V(InvalidStatement)             \
   V(LabeledStatement)             \

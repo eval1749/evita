@@ -127,6 +127,40 @@ const Expression& ExpressionStatement::expression() const {
 }
 
 //
+// ForStatement
+//
+ForStatement::ForStatement(const SourceCodeRange& range,
+                           Statement* init,
+                           Expression* condition,
+                           Expression* step,
+                           Statement* body)
+    : NodeTemplate(std::make_tuple(init, condition, step, body), range) {}
+
+ForStatement::~ForStatement() = default;
+
+//
+// ForInStatement
+//
+ForInStatement::ForInStatement(const SourceCodeRange& range,
+                               Statement* binding,
+                               Expression* expression,
+                               Statement* body)
+    : NodeTemplate(std::make_tuple(binding, expression, body), range) {}
+
+ForInStatement::~ForInStatement() = default;
+
+//
+// ForOfStatement
+//
+ForOfStatement::ForOfStatement(const SourceCodeRange& range,
+                               Statement* binding,
+                               Expression* expression,
+                               Statement* body)
+    : NodeTemplate(std::make_tuple(binding, expression, body), range) {}
+
+ForOfStatement::~ForOfStatement() = default;
+
+//
 // IfStatement
 //
 IfStatement::IfStatement(const Name& keyword,

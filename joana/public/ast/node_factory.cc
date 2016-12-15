@@ -335,10 +335,12 @@ DeclarationStatement& NodeFactory::NewDeclarationStatement(
       DeclarationStatement(const_cast<Declaration*>(&declaration));
 }
 
-DoStatement& NodeFactory::NewDoStatement(const Name& keyword,
+DoStatement& NodeFactory::NewDoStatement(const SourceCodeRange& range,
                                          const Statement& statement,
-                                         const Expression& condition) {
-  return *new (zone_) DoStatement(keyword, statement, condition);
+                                         const Expression& expression) {
+  return *new (zone_)
+      DoStatement(range, const_cast<ast::Statement*>(&statement),
+                  const_cast<Expression*>(&expression));
 }
 
 EmptyStatement& NodeFactory::NewEmptyStatement(const Punctuator& semi_colon) {

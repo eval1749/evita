@@ -142,9 +142,11 @@ class JOANA_PUBLIC_EXPORT NodeFactory final {
   ContinueStatement& NewContinueStatement(const SourceCodeRange& range,
                                           const Token& label);
   DeclarationStatement& NewDeclarationStatement(const Declaration& declaration);
-  DoStatement& NewDoStatement(const Name& keyword,
+
+  DoStatement& NewDoStatement(const SourceCodeRange& range,
                               const Statement& statement,
-                              const Expression& condition);
+                              const Expression& expression);
+
   EmptyStatement& NewEmptyStatement(const Punctuator& semi_colon);
   ExpressionStatement& NewExpressionStatement(const Expression& expression);
 

@@ -81,24 +81,12 @@ DeclarationStatement::~DeclarationStatement() = default;
 //
 // DoStatement
 //
-DoStatement::DoStatement(const Name& keyword,
-                         const Statement& statement,
-                         const Expression& condition)
-    : Statement(keyword.range()) {
-  DCHECK_EQ(keyword, NameId::Do);
-  NodeEditor().AppendChild(this, const_cast<Statement*>(&statement));
-  NodeEditor().AppendChild(this, const_cast<Expression*>(&condition));
-}
+DoStatement::DoStatement(const SourceCodeRange& range,
+                         Statement* statement,
+                         Expression* expression)
+    : NodeTemplate(std::make_tuple(statement, expression), range) {}
 
 DoStatement::~DoStatement() = default;
-
-Expression& DoStatement::condition() const {
-  return NodeTraversal::ChildAt(*this, 1).As<Expression>();
-}
-
-Statement& DoStatement::statement() const {
-  return NodeTraversal::ChildAt(*this, 0).As<Statement>();
-}
 
 //
 // EmptyStatement

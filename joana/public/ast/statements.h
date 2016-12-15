@@ -147,19 +147,20 @@ class JOANA_PUBLIC_EXPORT DeclarationStatement final
 //
 // DoStatement
 //
-class JOANA_PUBLIC_EXPORT DoStatement : public Statement {
+class JOANA_PUBLIC_EXPORT DoStatement
+    : public NodeTemplate<Statement, Statement*, Expression*> {
   DECLARE_CONCRETE_AST_NODE(DoStatement, Statement);
 
  public:
-  ~DoStatement() override;
+  ~DoStatement() final;
 
-  Expression& condition() const;
-  Statement& statement() const;
+  Statement& statement() const { return *member_at<0>(); }
+  Expression& expression() const { return *member_at<1>(); }
 
  protected:
-  explicit DoStatement(const Name& keyword,
-                       const Statement& statement,
-                       const Expression& condition);
+  DoStatement(const SourceCodeRange& range,
+              Statement* statement,
+              Expression* expression);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(DoStatement);

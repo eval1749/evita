@@ -136,13 +136,15 @@ ast::Statement& Parser::ParseDefaultLabel() {
 }
 
 ast::Statement& Parser::ParseDoStatement() {
-  auto& keyword = ConsumeToken().As<ast::Name>();
+  DCHECK_EQ(PeekToken(), ast::NameId::Do);
+  ConsumeToken();
   auto& statement = ParseStatement();
   if (!ConsumeTokenIf(ast::NameId::While))
     return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_EXPECT_WHILE);
   ExpectSemiColonScope semi_colon_scope(this);
   auto& condition = ParseParenthesisExpression();
-  return node_factory().NewDoStatement(keyword, statement, condition);
+  return node_factory().NewDoStatement(GetSourceCodeRange(), statement,
+                                       condition);
 }
 
 ast::Statement& Parser::ParseExpressionStatement() {

@@ -474,7 +474,7 @@ void SimpleFormatter::VisitDoStatement(ast::DoStatement* node) {
   else
     *ostream_ << std::endl;
   *ostream_ << "while (";
-  Format(node->condition());
+  Format(node->expression());
   *ostream_ << ");";
 }
 

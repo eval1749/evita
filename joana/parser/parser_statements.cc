@@ -135,6 +135,10 @@ ast::Statement& Parser::ParseCaseClause() {
                                       statement);
 }
 
+ast::Statement& Parser::ParseClassStatement() {
+  return node_factory().NewDeclarationStatement(ParseClass());
+}
+
 ast::Statement& Parser::ParseConstStatement() {
   ExpectSemiColonScope semi_colon_scope(this);
   ConsumeToken();
@@ -263,6 +267,8 @@ ast::Statement& Parser::ParseKeywordStatement() {
       return ParseBreakStatement();
     case ast::NameId::Case:
       return ParseCaseClause();
+    case ast::NameId::Class:
+      return ParseClassStatement();
     case ast::NameId::Continue:
       return ParseContinueStatement();
     case ast::NameId::Const:

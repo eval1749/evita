@@ -132,6 +132,7 @@ class Parser final {
   ast::Statement& ParseBreakStatement();
   ast::Statement& ParseBlockStatement();
   ast::Statement& ParseCaseClause();
+  ast::Statement& ParseClassStatement();
   ast::Statement& ParseConstStatement();
   ast::Statement& ParseContinueStatement();
   ast::Statement& ParseDefaultLabel();

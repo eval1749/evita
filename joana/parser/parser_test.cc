@@ -86,6 +86,14 @@ TEST_F(ParserTest, BreakStatement) {
       "} while (bar);\n");
 }
 
+TEST_F(ParserTest, ClassStatement) {
+  TEST_PARSER(
+      "class Foo {\n"
+      "  foo() { return 1; }\n"
+      "  foo() { return 2; }\n"
+      "}\n");
+}
+
 TEST_F(ParserTest, ConstStatement) {
   TEST_PARSER("const foo = 1;\n");
   TEST_PARSER("const foo = 1, bar = 2;\n");

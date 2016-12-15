@@ -56,8 +56,8 @@ bool SimpleFormatter::FormatChildStatement(const ast::Statement& statement) {
   if (auto* block = statement.TryAs<ast::BlockStatement>()) {
     *ostream_ << " {" << std::endl;
     IndentScope scope(this);
-    for (const auto& child : ast::NodeTraversal::ChildrenOf(*block)) {
-      FormatWithIndent(child);
+    for (const auto& child : block->statements()) {
+      FormatWithIndent(*child);
       *ostream_ << std::endl;
     }
     *ostream_ << '}';
@@ -238,13 +238,13 @@ void SimpleFormatter::VisitMethod(ast::Method* node) {
   Format(node->name());
   Format(node->parameter_list());
   if (auto* block = node->body().TryAs<ast::BlockStatement>()) {
-    if (!block->first_child()) {
+    if (block->statements().empty()) {
       *ostream_ << " {}";
       return;
     }
-    if (block->first_child() == block->last_child()) {
+    if (block->statements().size() == 1) {
       *ostream_ << " { ";
-      Format(block->first_child()->As<ast::Statement>());
+      Format(**block->statements().begin());
       *ostream_ << " }";
       return;
     }
@@ -420,8 +420,8 @@ void SimpleFormatter::VisitBlockStatement(ast::BlockStatement* node) {
   *ostream_ << '{' << std::endl;
   {
     IndentScope scope(this);
-    for (const auto& child : ast::NodeTraversal::ChildrenOf(*node)) {
-      FormatWithIndent(child);
+    for (const auto& child : node->statements()) {
+      FormatWithIndent(*child);
       *ostream_ << std::endl;
     }
   }

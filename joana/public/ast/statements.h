@@ -58,14 +58,17 @@ class JOANA_PUBLIC_EXPORT StatementList final : public ZoneAllocated {
 //
 // BlockStatement
 //
-class JOANA_PUBLIC_EXPORT BlockStatement : public Statement {
+class JOANA_PUBLIC_EXPORT BlockStatement
+    : public NodeTemplate<Statement, StatementList*> {
   DECLARE_CONCRETE_AST_NODE(BlockStatement, Statement);
 
  public:
   ~BlockStatement() override;
 
+  const StatementList& statements() const { return *member_at<0>(); }
+
  protected:
-  explicit BlockStatement(const Punctuator& left_brace);
+  BlockStatement(const SourceCodeRange& range, StatementList* statements);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(BlockStatement);

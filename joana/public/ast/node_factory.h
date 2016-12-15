@@ -131,7 +131,9 @@ class JOANA_PUBLIC_EXPORT NodeFactory final {
   UndefinedLiteral& NewUndefinedLiteral(const Name& name);
 
   // Statements factory members
-  BlockStatement& NewBlockStatement(const Punctuator& left_brace);
+  BlockStatement& NewBlockStatement(const SourceCodeRange& range,
+                                    const std::vector<Statement*>& statements);
+
   BreakStatement& NewBreakStatement(const SourceCodeRange& range,
                                     const Token& label);
 

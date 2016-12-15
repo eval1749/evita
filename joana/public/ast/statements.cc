@@ -16,10 +16,9 @@ namespace ast {
 //
 // BlockStatement
 //
-BlockStatement::BlockStatement(const Punctuator& semi_colon)
-    : Statement(semi_colon.range()) {
-  DCHECK_EQ(semi_colon.kind(), PunctuatorKind::LeftBrace);
-}
+BlockStatement::BlockStatement(const SourceCodeRange& range,
+                               StatementList* statements)
+    : NodeTemplate(statements, range) {}
 
 BlockStatement::~BlockStatement() = default;
 

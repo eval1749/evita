@@ -302,8 +302,11 @@ UndefinedLiteral& NodeFactory::NewUndefinedLiteral(const Name& name) {
 }
 
 // Statements factory members
-BlockStatement& NodeFactory::NewBlockStatement(const Punctuator& left_brace) {
-  return *new (zone_) BlockStatement(left_brace);
+BlockStatement& NodeFactory::NewBlockStatement(
+    const SourceCodeRange& range,
+    const std::vector<Statement*>& statements) {
+  auto* const list = new (zone_) StatementList(zone_, statements);
+  return *new (zone_) BlockStatement(range, list);
 }
 
 BreakStatement& NodeFactory::NewBreakStatement(const SourceCodeRange& range,

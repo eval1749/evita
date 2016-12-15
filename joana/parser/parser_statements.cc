@@ -80,14 +80,16 @@ ast::Statement& Parser::ParseStatement() {
 }
 
 ast::Statement& Parser::ParseBlockStatement() {
-  auto& block =
-      node_factory().NewBlockStatement(ConsumeToken().As<ast::Punctuator>());
+  SourceCodeRangeScope scope(this);
+  DCHECK_EQ(PeekToken(), ast::PunctuatorKind::LeftBrace);
+  ConsumeToken();
+  std::vector<ast::Statement*> statements;
   while (CanPeekToken()) {
     if (ConsumeTokenIf(ast::PunctuatorKind::RightBrace))
       break;
     auto& token = PeekToken();
     if (token.Is<ast::Comment>()) {
-      ast::NodeEditor().AppendChild(&block, &ConsumeToken());
+      Advance();
       continue;
     }
     if (token.Is<ast::Invalid>()) {
@@ -96,9 +98,9 @@ ast::Statement& Parser::ParseBlockStatement() {
       Advance();
       continue;
     }
-    ast::NodeEditor().AppendChild(&block, &ParseStatement());
+    statements.push_back(&ParseStatement());
   }
-  return block;
+  return node_factory().NewBlockStatement(GetSourceCodeRange(), statements);
 }
 
 ast::Statement& Parser::ParseBreakStatement() {

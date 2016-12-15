@@ -139,7 +139,7 @@ std::vector<ast::Expression*> Parser::ParseArgumentList() {
   if (ConsumeTokenIf(ast::PunctuatorKind::RightParenthesis))
     return {};
   std::vector<ast::Expression*> arguments;
-  while (HasToken()) {
+  while (CanPeekToken()) {
     arguments.push_back(&ParseExpression());
     if (ConsumeTokenIf(ast::PunctuatorKind::RightParenthesis))
       return arguments;
@@ -160,7 +160,7 @@ ast::Expression& Parser::ParseArrayLiteralExpression() {
   ConsumeToken();
   std::vector<ast::Expression*> elements;
   auto has_expression = false;
-  while (HasToken()) {
+  while (CanPeekToken()) {
     if (ConsumeTokenIf(ast::PunctuatorKind::RightBracket)) {
       return node_factory().NewArrayLiteralExpression(GetSourceCodeRange(),
                                                       elements);
@@ -180,11 +180,11 @@ ast::Expression& Parser::ParseArrayLiteralExpression() {
 
 // Yet another entry pointer used for parsing computed property name.
 ast::Expression& Parser::ParseAssignmentExpression() {
-  if (!HasToken())
+  if (!CanPeekToken())
     return NewInvalidExpression(ErrorCode::ERROR_EXPRESSION_INVALID);
   SourceCodeRangeScope scope(this);
   auto& left_hand_side = ParseConditionalExpression();
-  if (!HasToken() || !PeekToken().Is<ast::Punctuator>())
+  if (!CanPeekToken() || !PeekToken().Is<ast::Punctuator>())
     return left_hand_side;
   if (CategoryOf(PeekToken()) != OperatorPrecedence::Assignment)
     return left_hand_side;
@@ -200,7 +200,7 @@ ast::Expression& Parser::ParseBinaryExpression(OperatorPrecedence category) {
     return ParseUnaryExpression();
   const auto lower_category = HigherPrecedenceOf(category);
   auto* left = &ParseBinaryExpression(lower_category);
-  while (HasToken() && CategoryOf(PeekToken()) == category) {
+  while (CanPeekToken() && CategoryOf(PeekToken()) == category) {
     auto& op = ConsumeToken();
     auto& right = ParseBinaryExpression(lower_category);
     left = &node_factory().NewBinaryExpression(GetSourceCodeRange(), op, *left,
@@ -235,7 +235,7 @@ ast::Expression& Parser::ParseConditionalExpression() {
 
 // The entry point of parsing an expression.
 ast::Expression& Parser::ParseExpression() {
-  if (!HasToken())
+  if (!CanPeekToken())
     return NewInvalidExpression(ErrorCode::ERROR_EXPRESSION_INVALID);
   SourceCodeRangeScope scope(this);
   return ParseCommaExpression();
@@ -248,12 +248,12 @@ ast::Expression& Parser::ParseFunctionExpression(ast::FunctionKind kind) {
 // The entry point of parsing a class heritage.
 ast::Expression& Parser::ParseLeftHandSideExpression() {
   SourceCodeRangeScope scope(this);
-  if (!HasToken())
+  if (!CanPeekToken())
     return NewInvalidExpression(ErrorCode::ERROR_EXPRESSION_INVALID);
   if (PeekToken() == ast::NameId::New)
     return ParseNewExpression();
   auto* expression = &ParsePrimaryExpression();
-  while (HasToken()) {
+  while (CanPeekToken()) {
     if (ConsumeTokenIf(ast::PunctuatorKind::LeftBracket)) {
       auto& name_expression = ParseExpression();
       ExpectToken(ast::PunctuatorKind::RightBracket,
@@ -263,7 +263,7 @@ ast::Expression& Parser::ParseLeftHandSideExpression() {
       continue;
     }
     if (ConsumeTokenIf(ast::PunctuatorKind::Dot)) {
-      if (!HasToken() || !PeekToken().Is<ast::Name>()) {
+      if (!CanPeekToken() || !PeekToken().Is<ast::Name>()) {
         AddError(ErrorCode::ERROR_EXPRESSION_LHS_EXPECT_NAME);
         return *expression;
       }
@@ -326,8 +326,8 @@ ast::Expression& Parser::ParseNameAsExpression() {
 ast::Expression& Parser::ParseNewExpression() {
   SourceCodeRangeScope scope(this);
   auto& token_new = ConsumeToken().As<ast::Name>();
-  if (HasToken() && PeekToken() == ast::PunctuatorKind::Dot) {
-    if (!HasToken() || PeekToken() != ast::NameId::Target) {
+  if (CanPeekToken() && PeekToken() == ast::PunctuatorKind::Dot) {
+    if (!CanPeekToken() || PeekToken() != ast::NameId::Target) {
       return NewInvalidExpression(
           ErrorCode::ERROR_EXPRESSION_NEW_EXPECT_TARGET);
     }
@@ -352,7 +352,7 @@ ast::Expression& Parser::ParseObjectLiteralExpression() {
   ConsumeToken();
   std::vector<ast::Expression*> members;
   auto need_comma = false;
-  while (HasToken()) {
+  while (CanPeekToken()) {
     SourceCodeRangeScope scope(this);
     if (ConsumeTokenIf(ast::PunctuatorKind::RightBrace))
       break;
@@ -387,7 +387,7 @@ ast::Expression& Parser::ParseObjectLiteralExpression() {
       continue;
     }
     auto& property_name = ParsePropertyName();
-    if (!HasToken())
+    if (!CanPeekToken())
       break;
     if (PeekToken() == ast::PunctuatorKind::LeftParenthesis) {
       auto& parameter_list = ParseParameterList();
@@ -466,7 +466,7 @@ const ast::Expression& Parser::ParseParenthesisExpression() {
 
 // The entry point for parsing property name.
 ast::Expression& Parser::ParsePrimaryExpression() {
-  if (!HasToken())
+  if (!CanPeekToken())
     return NewInvalidExpression(ErrorCode::ERROR_EXPRESSION_INVALID);
   const auto& token = PeekToken();
   if (token.Is<ast::Literal>())
@@ -507,7 +507,7 @@ ast::Expression& Parser::ParseUpdateExpression() {
     return NewUnaryExpression(op, expression);
   }
   auto& expression = ParseLeftHandSideExpression();
-  if (!HasToken() || !IsUpdateOperator(PeekToken()))
+  if (!CanPeekToken() || !IsUpdateOperator(PeekToken()))
     return expression;
   auto& op = ConvertToPostOperator(&node_factory(), ConsumeToken());
   return NewUnaryExpression(op, expression);
@@ -516,7 +516,7 @@ ast::Expression& Parser::ParseUpdateExpression() {
 ast::Expression& Parser::ParseYieldExpression() {
   SourceCodeRangeScope scope(this);
   auto& keyword = ConsumeToken().As<ast::Name>();
-  if (!HasToken())
+  if (!CanPeekToken())
     return NewUnaryExpression(keyword, NewElisionExpression());
   if (PeekToken() == ast::PunctuatorKind::Times) {
     auto& yield_star = node_factory().NewName(

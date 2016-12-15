@@ -33,7 +33,7 @@ class Lexer final {
 
   void Advance();
   // Returns true if |Lexer| has a token.
-  bool HasToken() const { return current_token_ != nullptr; }
+  bool CanPeekToken() const { return current_token_ != nullptr; }
   ast::Token& PeekToken() const;
 
  private:

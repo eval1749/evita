@@ -13,7 +13,7 @@ namespace joana {
 namespace internal {
 
 ast::ArrowFunctionBody& Parser::ParseArrowFunctionBody() {
-  if (!HasToken()) {
+  if (!CanPeekToken()) {
     return NewInvalidStatement(
         ErrorCode::ERROR_FUNCTION_INVALID_ARROW_FUNCTION_BODY);
   }
@@ -35,7 +35,7 @@ ast::Class& Parser::ParseClass() {
 
 ast::Expression& Parser::ParseClassBody() {
   SourceCodeRangeScope scope(this);
-  if (!HasToken() || PeekToken() != ast::PunctuatorKind::LeftBrace)
+  if (!CanPeekToken() || PeekToken() != ast::PunctuatorKind::LeftBrace)
     return NewInvalidExpression(ErrorCode::ERROR_CLASS_EXPECT_LBRACE);
   return ParsePrimaryExpression();
 }
@@ -47,7 +47,7 @@ ast::Expression& Parser::ParseClassHeritage() {
 }
 
 ast::Token& Parser::ParseClassName() {
-  if (!HasToken() || !PeekToken().Is<ast::Name>())
+  if (!CanPeekToken() || !PeekToken().Is<ast::Name>())
     return NewEmptyName();
   if (PeekToken() == ast::NameId::Extends)
     return NewEmptyName();
@@ -64,7 +64,7 @@ ast::Function& Parser::ParseFunction(ast::FunctionKind kind) {
 
 ast::Statement& Parser::ParseFunctionBody() {
   SourceCodeRangeScope scope(this);
-  if (!HasToken() || PeekToken() != ast::PunctuatorKind::LeftBrace)
+  if (!CanPeekToken() || PeekToken() != ast::PunctuatorKind::LeftBrace)
     return NewInvalidStatement(ErrorCode::ERROR_FUNCTION_EXPECT_LBRACE);
   return ParseStatement();
 }
@@ -91,7 +91,7 @@ ast::Expression& Parser::ParseParameterList() {
 }
 
 ast::Expression& Parser::ParsePropertyName() {
-  if (!HasToken())
+  if (!CanPeekToken())
     return NewInvalidExpression(ErrorCode::ERROR_PROPERTY_INVALID_TOKEN);
   if (PeekToken().Is<ast::Name>())
     return ParsePrimaryExpression();

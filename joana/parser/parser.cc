@@ -118,7 +118,7 @@ void Parser::Advance() {
     return;
   }
   lexer_->Advance();
-  if (!HasToken())
+  if (!CanPeekToken())
     return;
   auto& token = PeekToken();
   tokens_.push_back(&token);
@@ -135,14 +135,14 @@ ast::Token& Parser::ConsumeToken() {
 }
 
 ast::Token& Parser::ComputeInvalidToken(ErrorCode error_code) {
-  if (HasToken())
+  if (CanPeekToken())
     return PeekToken();
   return node_factory().NewInvalid(source_code().end(),
                                    static_cast<int>(error_code));
 }
 
 bool Parser::ConsumeTokenIf(ast::NameId name_id) {
-  if (!HasToken())
+  if (!CanPeekToken())
     return false;
   if (PeekToken() != name_id)
     return false;
@@ -151,7 +151,7 @@ bool Parser::ConsumeTokenIf(ast::NameId name_id) {
 }
 
 bool Parser::ConsumeTokenIf(ast::PunctuatorKind kind) {
-  if (!HasToken())
+  if (!CanPeekToken())
     return false;
   if (PeekToken() != kind)
     return false;
@@ -162,7 +162,7 @@ bool Parser::ConsumeTokenIf(ast::PunctuatorKind kind) {
 void Parser::ExpectToken(ast::NameId name_id, ErrorCode error_code) {
   if (ConsumeTokenIf(name_id))
     return;
-  if (HasToken())
+  if (CanPeekToken())
     return AddError(PeekToken(), error_code);
   return AddError(lexer_->location(), error_code);
 }
@@ -170,7 +170,7 @@ void Parser::ExpectToken(ast::NameId name_id, ErrorCode error_code) {
 void Parser::ExpectToken(ast::PunctuatorKind kind, ErrorCode error_code) {
   if (ConsumeTokenIf(kind))
     return;
-  if (HasToken())
+  if (CanPeekToken())
     return AddError(PeekToken(), error_code);
   return AddError(lexer_->location(), error_code);
 }
@@ -179,8 +179,8 @@ SourceCodeRange Parser::GetSourceCodeRange() const {
   return source_code().Slice(range_stack_.top(), lexer_->location().end());
 }
 
-bool Parser::HasToken() const {
-  return lexer_->HasToken() || !token_stack_.empty();
+bool Parser::CanPeekToken() const {
+  return lexer_->CanPeekToken() || !token_stack_.empty();
 }
 
 ast::Token& Parser::NewEmptyName() {
@@ -198,9 +198,9 @@ void Parser::PushBackToken(const ast::Token& token) {
 }
 
 const ast::Node& Parser::Run() {
-  if (HasToken())
+  if (CanPeekToken())
     bracket_stack_->Feed(PeekToken());
-  while (HasToken()) {
+  while (CanPeekToken()) {
     auto& token = PeekToken();
     if (token.Is<ast::Comment>()) {
       Advance();

@@ -165,7 +165,7 @@ std::string LexerTest::Parse() {
   Lexer lexer(context_.get(), source_code_->range());
   std::ostringstream ostream;
   auto delimiter = "";
-  while (lexer.HasToken()) {
+  while (lexer.CanPeekToken()) {
     ostream << delimiter;
     delimiter = " ";
     auto& node = lexer.PeekToken();

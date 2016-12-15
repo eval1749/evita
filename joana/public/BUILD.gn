@@ -62,6 +62,8 @@ component("public") {
     "source_code.h",
     "source_code_factory.cc",
     "source_code_factory.h",
+    "source_code_line.cc",
+    "source_code_line.h",
     "source_code_range.cc",
     "source_code_range.h",
     "visitable.h",

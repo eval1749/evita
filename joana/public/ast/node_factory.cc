@@ -400,9 +400,11 @@ InvalidStatement& NodeFactory::NewInvalidStatement(const Node& node,
   return *new (zone_) InvalidStatement(node.range(), error_code);
 }
 
-LabeledStatement& NodeFactory::NewLabeledStatement(const Name& label,
+LabeledStatement& NodeFactory::NewLabeledStatement(const SourceCodeRange& range,
+                                                   const Name& label,
                                                    const Statement& statement) {
-  return *new (zone_) LabeledStatement(label, statement);
+  return *new (zone_) LabeledStatement(range, const_cast<Name*>(&label),
+                                       const_cast<Statement*>(&statement));
 }
 
 LetStatement& NodeFactory::NewLetStatement(const SourceCodeRange& range,

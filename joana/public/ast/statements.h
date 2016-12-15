@@ -345,17 +345,20 @@ class JOANA_PUBLIC_EXPORT InvalidStatement
 //
 // LabeledStatement
 //
-class JOANA_PUBLIC_EXPORT LabeledStatement : public Statement {
+class JOANA_PUBLIC_EXPORT LabeledStatement
+    : public NodeTemplate<Statement, Name*, Statement*> {
   DECLARE_CONCRETE_AST_NODE(LabeledStatement, Statement);
 
  public:
   ~LabeledStatement() override;
 
-  Name& label() const;
-  Statement& statement() const;
+  Name& label() const { return *member_at<0>(); }
+  Statement& statement() const { return *member_at<1>(); }
 
  private:
-  LabeledStatement(const Name& label, const Statement& statement);
+  LabeledStatement(const SourceCodeRange& range,
+                   Name* label,
+                   Statement* statement);
 
   DISALLOW_COPY_AND_ASSIGN(LabeledStatement);
 };

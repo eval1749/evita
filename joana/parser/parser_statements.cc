@@ -48,6 +48,7 @@ ast::Statement& Parser::NewInvalidStatement(ErrorCode error_code) {
 }
 
 ast::Statement& Parser::ParseStatement() {
+  SourceCodeRangeScope scope(this);
   if (!CanPeekToken())
     return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
   const auto& token = PeekToken();
@@ -55,8 +56,11 @@ ast::Statement& Parser::ParseStatement() {
     if (name->IsKeyword())
       return ParseKeywordStatement();
     ConsumeToken();
-    if (ConsumeTokenIf(ast::PunctuatorKind::Colon))
-      return node_factory().NewLabeledStatement(*name, ParseStatement());
+    if (ConsumeTokenIf(ast::PunctuatorKind::Colon)) {
+      auto& statement = ParseStatement();
+      return node_factory().NewLabeledStatement(GetSourceCodeRange(), *name,
+                                                statement);
+    }
     auto& token2 = ConsumeToken();
     PushBackToken(token2);
     PushBackToken(*name);
@@ -130,11 +134,14 @@ ast::Statement& Parser::ParseContinueStatement() {
 }
 
 ast::Statement& Parser::ParseDefaultLabel() {
-  auto& keyword = ConsumeToken().As<ast::Name>();
-  DCHECK(keyword == ast::NameId::Default);
+  SourceCodeRangeScope scope(this);
+  DCHECK_EQ(PeekToken(), ast::NameId::Default);
+  auto& label = ConsumeToken().As<ast::Name>();
   ExpectToken(ast::PunctuatorKind::Colon,
               ErrorCode::ERROR_STATEMENT_EXPECT_COLON);
-  return node_factory().NewLabeledStatement(keyword, ParseStatement());
+  auto& statement = ParseStatement();
+  return node_factory().NewLabeledStatement(GetSourceCodeRange(), label,
+                                            statement);
 }
 
 ast::Statement& Parser::ParseDoStatement() {

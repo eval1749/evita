@@ -176,8 +176,11 @@ class JOANA_PUBLIC_EXPORT NodeFactory final {
                               const Statement& then_clause);
 
   InvalidStatement& NewInvalidStatement(const Node& node, int error_code);
-  LabeledStatement& NewLabeledStatement(const Name& label,
+
+  LabeledStatement& NewLabeledStatement(const SourceCodeRange& range,
+                                        const Name& label,
                                         const Statement& statement);
+
   LetStatement& NewLetStatement(const SourceCodeRange& range,
                                 const Expression& expression);
   ReturnStatement& NewReturnStatement(const SourceCodeRange& range,

@@ -170,22 +170,12 @@ InvalidStatement::~InvalidStatement() = default;
 //
 // LabeledStatement
 //
-LabeledStatement::LabeledStatement(const Name& label,
-                                   const Statement& statement)
-    : Statement(label.range()) {
-  NodeEditor().AppendChild(this, const_cast<Name*>(&label));
-  NodeEditor().AppendChild(this, const_cast<Statement*>(&statement));
-}
+LabeledStatement::LabeledStatement(const SourceCodeRange& range,
+                                   Name* label,
+                                   Statement* statement)
+    : NodeTemplate(std::make_tuple(label, statement), range) {}
 
 LabeledStatement::~LabeledStatement() = default;
-
-Name& LabeledStatement::label() const {
-  return NodeTraversal::ChildAt(*this, 0).As<Name>();
-}
-
-Statement& LabeledStatement::statement() const {
-  return NodeTraversal::ChildAt(*this, 1).As<Statement>();
-}
 
 //
 // LetStatement

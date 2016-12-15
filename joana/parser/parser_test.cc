@@ -277,6 +277,12 @@ TEST_F(ParserTest, ForInStatement) {
       "  call(foo.x);\n");
 }
 
+TEST_F(ParserTest, ForOfStatement) {
+  TEST_PARSER(
+      "for (const element of elements)\n"
+      "  call(element);\n");
+}
+
 TEST_F(ParserTest, FunctionStatement) {
   TEST_PARSER(
       "function foo(a, b, c) {\n"

@@ -19,6 +19,18 @@
 namespace joana {
 namespace internal {
 
+namespace {
+
+bool IsDeclarationKeyword(const ast::Token& token) {
+  auto* const name = token.TryAs<ast::Name>();
+  if (!name)
+    return false;
+  return *name == ast::NameId::Const || *name == ast::NameId::Let ||
+         *name == ast::NameId::Var;
+}
+
+}  // namespace
+
 //
 // Parser::ExpectSemiColonScope
 //
@@ -166,26 +178,20 @@ ast::Statement& Parser::ParseExpressionStatement() {
   return node_factory().NewExpressionStatement(ParseExpression());
 }
 
-ast::Statement& Parser::ParseForFirstPart() {
-  if (!CanPeekToken())
-    return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
-  if (PeekToken() == ast::PunctuatorKind::SemiColon)
-    return node_factory().NewExpressionStatement(NewElisionExpression());
-  if (PeekToken() == ast::NameId::Const)
-    return ParseStatement();
-  if (PeekToken() == ast::NameId::Let)
-    return ParseStatement();
-  if (PeekToken() == ast::NameId::Var)
-    return ParseStatement();
-  return node_factory().NewExpressionStatement(ParseExpression());
-}
-
 ast::Statement& Parser::ParseForStatement() {
   DCHECK_EQ(PeekToken(), ast::NameId::For);
   ConsumeToken();
   ExpectToken(ast::PunctuatorKind::LeftParenthesis,
               ErrorCode::ERROR_STATEMENT_EXPECT_LPAREN);
-  auto& first_part = ParseForFirstPart();
+
+  auto& keyword = CanPeekToken() && IsDeclarationKeyword(PeekToken())
+                      ? ConsumeToken()
+                      : NewEmptyName();
+  auto& expression =
+      CanPeekToken() && PeekToken() == ast::PunctuatorKind::SemiColon
+          ? NewElisionExpression()
+          : ParseExpression();
+
   if (ConsumeTokenIf(ast::PunctuatorKind::SemiColon)) {
     // 'for' '(' binding ';' condition ';' step ')' statement
     auto& condition =
@@ -201,25 +207,25 @@ ast::Statement& Parser::ParseForStatement() {
     ExpectToken(ast::PunctuatorKind::RightParenthesis,
                 ErrorCode::ERROR_STATEMENT_EXPECT_RPAREN);
     auto& body = ParseStatement();
-    return node_factory().NewForStatement(GetSourceCodeRange(), first_part,
-                                          condition, step, body);
+    return node_factory().NewForStatement(GetSourceCodeRange(), keyword,
+                                          expression, condition, step, body);
   }
 
   if (ConsumeTokenIf(ast::NameId::Of)) {
     // 'for' '(' binding 'of' expression ')' statement
-    auto& expression = ParseExpression();
+    auto& expression2 = ParseAssignmentExpression();
     ExpectToken(ast::PunctuatorKind::RightParenthesis,
                 ErrorCode::ERROR_STATEMENT_EXPECT_RPAREN);
     auto& body = ParseStatement();
-    return node_factory().NewForOfStatement(GetSourceCodeRange(), first_part,
-                                            expression, body);
+    return node_factory().NewForOfStatement(GetSourceCodeRange(), keyword,
+                                            expression, expression2, body);
   }
 
   if (ConsumeTokenIf(ast::PunctuatorKind::RightParenthesis)) {
     // 'for' '(' binding 'in' expression ')' statement
     auto& body = ParseStatement();
-    return node_factory().NewForInStatement(GetSourceCodeRange(), first_part,
-                                            body);
+    return node_factory().NewForInStatement(GetSourceCodeRange(), keyword,
+                                            expression, body);
   }
 
   return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);

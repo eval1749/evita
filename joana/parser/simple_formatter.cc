@@ -489,7 +489,12 @@ void SimpleFormatter::VisitExpressionStatement(ast::ExpressionStatement* node) {
 
 void SimpleFormatter::VisitForStatement(ast::ForStatement* node) {
   *ostream_ << "for (";
+  if (node->keyword().Is<ast::Name>()) {
+    Format(node->keyword());
+    *ostream_ << ' ';
+  }
   Format(node->init());
+  *ostream_ << ';';
   if (!node->condition().Is<ast::ElisionExpression>()) {
     *ostream_ << ' ';
     Format(node->condition());
@@ -505,16 +510,21 @@ void SimpleFormatter::VisitForStatement(ast::ForStatement* node) {
 
 void SimpleFormatter::VisitForInStatement(ast::ForInStatement* node) {
   *ostream_ << "for (";
-  if (node->statement().Is<ast::ExpressionStatement>())
-    Format(node->statement().As<ast::ExpressionStatement>().expression());
-  else
-    Format(node->statement());
+  if (node->keyword().Is<ast::Name>()) {
+    Format(node->keyword());
+    *ostream_ << ' ';
+  }
+  Format(node->expression());
   *ostream_ << ')';
   FormatChildStatement(node->body());
 }
 
 void SimpleFormatter::VisitForOfStatement(ast::ForOfStatement* node) {
   *ostream_ << "for (";
+  if (node->keyword().Is<ast::Name>()) {
+    Format(node->keyword());
+    *ostream_ << ' ';
+  }
   Format(node->binding());
   *ostream_ << " of ";
   Format(node->expression());

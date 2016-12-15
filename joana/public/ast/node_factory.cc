@@ -357,29 +357,34 @@ ExpressionStatement& NodeFactory::NewExpressionStatement(
 }
 
 ForStatement& NodeFactory::NewForStatement(const SourceCodeRange& range,
-                                           const Statement& init,
+                                           const Token& keyword,
+                                           const Expression& init,
                                            const Expression& condition,
                                            const Expression& step,
                                            const Statement& body) {
   return *new (zone_) ForStatement(
-      range, const_cast<Statement*>(&init), const_cast<Expression*>(&condition),
-      const_cast<Expression*>(&step), const_cast<Statement*>(&body));
+      range, const_cast<Token*>(&keyword), const_cast<Expression*>(&init),
+      const_cast<Expression*>(&condition), const_cast<Expression*>(&step),
+      const_cast<Statement*>(&body));
 }
 
 ForInStatement& NodeFactory::NewForInStatement(const SourceCodeRange& range,
-                                               const Statement& statement,
+                                               const Token& keyword,
+                                               const Expression& expression,
                                                const Statement& body) {
-  return *new (zone_) ForInStatement(range, const_cast<Statement*>(&statement),
+  return *new (zone_) ForInStatement(range, const_cast<Token*>(&keyword),
+                                     const_cast<Expression*>(&expression),
                                      const_cast<Statement*>(&body));
 }
 
 ForOfStatement& NodeFactory::NewForOfStatement(const SourceCodeRange& range,
-                                               const Statement& binding,
+                                               const Token& keyword,
+                                               const Expression& binding,
                                                const Expression& expression,
                                                const Statement& body) {
-  return *new (zone_) ForOfStatement(range, const_cast<Statement*>(&binding),
-                                     const_cast<Expression*>(&expression),
-                                     const_cast<Statement*>(&body));
+  return *new (zone_) ForOfStatement(
+      range, const_cast<Token*>(&keyword), const_cast<Expression*>(&binding),
+      const_cast<Expression*>(&expression), const_cast<Statement*>(&body));
 }
 
 IfElseStatement& NodeFactory::NewIfElseStatement(const SourceCodeRange& range,

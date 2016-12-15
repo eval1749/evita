@@ -95,11 +95,13 @@ ExpressionStatement::~ExpressionStatement() = default;
 // ForStatement
 //
 ForStatement::ForStatement(const SourceCodeRange& range,
-                           Statement* init,
+                           Token* keyword,
+                           Expression* init,
                            Expression* condition,
                            Expression* step,
                            Statement* body)
-    : NodeTemplate(std::make_tuple(init, condition, step, body), range) {}
+    : NodeTemplate(std::make_tuple(keyword, init, condition, step, body),
+                   range) {}
 
 ForStatement::~ForStatement() = default;
 
@@ -107,9 +109,10 @@ ForStatement::~ForStatement() = default;
 // ForInStatement
 //
 ForInStatement::ForInStatement(const SourceCodeRange& range,
-                               Statement* statement,
+                               Token* keyword,
+                               Expression* expression,
                                Statement* body)
-    : NodeTemplate(std::make_tuple(statement, body), range) {}
+    : NodeTemplate(std::make_tuple(keyword, expression, body), range) {}
 
 ForInStatement::~ForInStatement() = default;
 
@@ -117,10 +120,12 @@ ForInStatement::~ForInStatement() = default;
 // ForOfStatement
 //
 ForOfStatement::ForOfStatement(const SourceCodeRange& range,
-                               Statement* binding,
+                               Token* keyword,
+                               Expression* binding,
                                Expression* expression,
                                Statement* body)
-    : NodeTemplate(std::make_tuple(binding, expression, body), range) {}
+    : NodeTemplate(std::make_tuple(keyword, binding, expression, body), range) {
+}
 
 ForOfStatement::~ForOfStatement() = default;
 

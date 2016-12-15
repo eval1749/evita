@@ -230,7 +230,8 @@ class JOANA_PUBLIC_EXPORT ExpressionStatement
 // ForStatement
 //
 class JOANA_PUBLIC_EXPORT ForStatement : public NodeTemplate<Statement,
-                                                             Statement*,
+                                                             Token*,
+                                                             Expression*,
                                                              Expression*,
                                                              Expression*,
                                                              Statement*> {
@@ -239,14 +240,16 @@ class JOANA_PUBLIC_EXPORT ForStatement : public NodeTemplate<Statement,
  public:
   ~ForStatement() override;
 
-  const Expression& condition() { return *member_at<1>(); }
-  const Statement& body() { return *member_at<3>(); }
-  const Statement& init() { return *member_at<0>(); }
-  const Expression& step() { return *member_at<2>(); }
+  const Expression& condition() { return *member_at<2>(); }
+  const Statement& body() { return *member_at<4>(); }
+  const Expression& init() { return *member_at<1>(); }
+  const Token& keyword() const { return *member_at<0>(); }
+  const Expression& step() { return *member_at<3>(); }
 
  protected:
   ForStatement(const SourceCodeRange& range,
-               Statement* init,
+               Token* keyword,
+               Expression* init,
                Expression* condition,
                Expression* step,
                Statement* body);
@@ -264,18 +267,20 @@ class JOANA_PUBLIC_EXPORT ForStatement : public NodeTemplate<Statement,
 //    left-hand-side-expression 'in' expression
 //
 class JOANA_PUBLIC_EXPORT ForInStatement
-    : public NodeTemplate<Statement, Statement*, Statement*> {
+    : public NodeTemplate<Statement, Token*, Expression*, Statement*> {
   DECLARE_CONCRETE_AST_NODE(ForInStatement, Statement);
 
  public:
   ~ForInStatement() override;
 
-  const Statement& body() { return *member_at<1>(); }
-  const Statement& statement() { return *member_at<0>(); }
+  const Statement& body() { return *member_at<2>(); }
+  const Expression& expression() { return *member_at<1>(); }
+  const Token& keyword() const { return *member_at<0>(); }
 
  protected:
   ForInStatement(const SourceCodeRange& range,
-                 Statement* statement,
+                 Token* keyword,
+                 Expression* expression,
                  Statement* body);
 
  private:
@@ -285,20 +290,25 @@ class JOANA_PUBLIC_EXPORT ForInStatement
 //
 // ForOfStatement
 //
-class JOANA_PUBLIC_EXPORT ForOfStatement
-    : public NodeTemplate<Statement, Statement*, Expression*, Statement*> {
+class JOANA_PUBLIC_EXPORT ForOfStatement : public NodeTemplate<Statement,
+                                                               Token*,
+                                                               Expression*,
+                                                               Expression*,
+                                                               Statement*> {
   DECLARE_CONCRETE_AST_NODE(ForOfStatement, Statement);
 
  public:
   ~ForOfStatement() override;
 
-  const Statement& body() { return *member_at<2>(); }
-  const Statement& binding() { return *member_at<0>(); }
-  const Expression& expression() { return *member_at<1>(); }
+  const Expression& binding() { return *member_at<1>(); }
+  const Statement& body() { return *member_at<3>(); }
+  const Expression& expression() { return *member_at<2>(); }
+  const Token& keyword() const { return *member_at<0>(); }
 
  protected:
   ForOfStatement(const SourceCodeRange& range,
-                 Statement* binding,
+                 Token* keyword,
+                 Expression* binding,
                  Expression* expression,
                  Statement* body);
 

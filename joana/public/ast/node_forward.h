@@ -64,6 +64,7 @@ namespace ast {
   V(ForStatement)                 \
   V(ForInStatement)               \
   V(ForOfStatement)               \
+  V(IfElseStatement)              \
   V(IfStatement)                  \
   V(InvalidStatement)             \
   V(LabeledStatement)             \

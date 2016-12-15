@@ -378,17 +378,21 @@ ForOfStatement& NodeFactory::NewForOfStatement(const SourceCodeRange& range,
                                      const_cast<Statement*>(&body));
 }
 
-IfStatement& NodeFactory::NewIfStatement(const Name& keyword,
-                                         const Expression& condition,
-                                         const Statement& then_clause,
-                                         const Statement& else_clause) {
-  return *new (zone_) IfStatement(keyword, condition, then_clause, else_clause);
+IfElseStatement& NodeFactory::NewIfElseStatement(const SourceCodeRange& range,
+                                                 const Expression& expression,
+                                                 const Statement& then_clause,
+                                                 const Statement& else_clause) {
+  return *new (zone_)
+      IfElseStatement(range, const_cast<Expression*>(&expression),
+                      const_cast<Statement*>(&then_clause),
+                      const_cast<Statement*>(&else_clause));
 }
 
-IfStatement& NodeFactory::NewIfStatement(const Name& keyword,
-                                         const Expression& condition,
+IfStatement& NodeFactory::NewIfStatement(const SourceCodeRange& range,
+                                         const Expression& expression,
                                          const Statement& then_clause) {
-  return *new (zone_) IfStatement(keyword, condition, then_clause);
+  return *new (zone_) IfStatement(range, const_cast<Expression*>(&expression),
+                                  const_cast<Statement*>(&then_clause));
 }
 
 InvalidStatement& NodeFactory::NewInvalidStatement(const Node& node,

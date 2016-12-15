@@ -222,11 +222,13 @@ ast::Statement& Parser::ParseIfStatement() {
   DCHECK_EQ(keyword, ast::NameId::If);
   auto& condition = ParseParenthesisExpression();
   auto& then_clause = ParseStatement();
-  if (!ConsumeTokenIf(ast::NameId::Else))
-    return node_factory().NewIfStatement(keyword, condition, then_clause);
+  if (!ConsumeTokenIf(ast::NameId::Else)) {
+    return node_factory().NewIfStatement(GetSourceCodeRange(), condition,
+                                         then_clause);
+  }
   auto& else_clause = ParseStatement();
-  return node_factory().NewIfStatement(keyword, condition, then_clause,
-                                       else_clause);
+  return node_factory().NewIfElseStatement(GetSourceCodeRange(), condition,
+                                           then_clause, else_clause);
 }
 
 ast::Statement& Parser::ParseKeywordStatement() {

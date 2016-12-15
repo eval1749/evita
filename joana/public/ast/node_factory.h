@@ -166,13 +166,15 @@ class JOANA_PUBLIC_EXPORT NodeFactory final {
                                     const Expression& expression,
                                     const Statement& body);
 
-  IfStatement& NewIfStatement(const Name& keyword,
-                              const Expression& condition,
-                              const Statement& then_clause,
-                              const Statement& else_clause);
-  IfStatement& NewIfStatement(const Name& keyword,
+  IfElseStatement& NewIfElseStatement(const SourceCodeRange& range,
+                                      const Expression& condition,
+                                      const Statement& then_clause,
+                                      const Statement& else_clause);
+
+  IfStatement& NewIfStatement(const SourceCodeRange& range,
                               const Expression& condition,
                               const Statement& then_clause);
+
   InvalidStatement& NewInvalidStatement(const Node& node, int error_code);
   LabeledStatement& NewLabeledStatement(const Name& label,
                                         const Statement& statement);

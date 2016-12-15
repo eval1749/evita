@@ -522,21 +522,23 @@ void SimpleFormatter::VisitForOfStatement(ast::ForOfStatement* node) {
   FormatChildStatement(node->body());
 }
 
-void SimpleFormatter::VisitIfStatement(ast::IfStatement* node) {
+void SimpleFormatter::VisitIfElseStatement(ast::IfElseStatement* node) {
   *ostream_ << "if (";
-  Format(node->condition());
+  Format(node->expression());
   *ostream_ << ")";
-  if (!node->has_else()) {
-    FormatChildStatement(node->then_clause());
-    return;
-  }
-
   if (FormatChildStatement(node->then_clause()))
     *ostream_ << ' ';
   else
     *ostream_ << std::endl;
   *ostream_ << "else";
   FormatChildStatement(node->else_clause());
+}
+
+void SimpleFormatter::VisitIfStatement(ast::IfStatement* node) {
+  *ostream_ << "if (";
+  Format(node->expression());
+  *ostream_ << ")";
+  FormatChildStatement(node->then_clause());
 }
 
 void SimpleFormatter::VisitInvalidStatement(ast::InvalidStatement* node) {

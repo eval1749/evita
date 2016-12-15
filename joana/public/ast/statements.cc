@@ -138,42 +138,26 @@ ForOfStatement::ForOfStatement(const SourceCodeRange& range,
 ForOfStatement::~ForOfStatement() = default;
 
 //
+// IfElseStatement
+//
+IfElseStatement::IfElseStatement(const SourceCodeRange& range,
+                                 Expression* expression,
+                                 Statement* then_clause,
+                                 Statement* else_clause)
+    : NodeTemplate(std::make_tuple(expression, then_clause, else_clause),
+                   range) {}
+
+IfElseStatement::~IfElseStatement() = default;
+
+//
 // IfStatement
 //
-IfStatement::IfStatement(const Name& keyword,
-                         const Expression& condition,
-                         const Statement& then_clause,
-                         const Statement& else_clause)
-    : IfStatement(keyword, condition, then_clause) {
-  NodeEditor().AppendChild(this, const_cast<Statement*>(&else_clause));
-}
-
-IfStatement::IfStatement(const Name& keyword,
-                         const Expression& condition,
-                         const Statement& then_clause)
-    : Statement(keyword.range()) {
-  DCHECK_EQ(keyword, NameId::If);
-  NodeEditor().AppendChild(this, const_cast<Expression*>(&condition));
-  NodeEditor().AppendChild(this, const_cast<Statement*>(&then_clause));
-}
+IfStatement::IfStatement(const SourceCodeRange& range,
+                         Expression* expression,
+                         Statement* then_clause)
+    : NodeTemplate(std::make_tuple(expression, then_clause), range) {}
 
 IfStatement::~IfStatement() = default;
-
-Expression& IfStatement::condition() const {
-  return NodeTraversal::ChildAt(*this, 0).As<Expression>();
-}
-
-Statement& IfStatement::else_clause() const {
-  return NodeTraversal::ChildAt(*this, 2).As<Statement>();
-}
-
-Statement& IfStatement::then_clause() const {
-  return NodeTraversal::ChildAt(*this, 1).As<Statement>();
-}
-
-bool IfStatement::has_else() const {
-  return NodeTraversal::CountChildren(*this) == 3;
-}
 
 //
 // InvalidStatement

@@ -281,27 +281,45 @@ class JOANA_PUBLIC_EXPORT ForOfStatement
 };
 
 //
+// IfElseStatement
+//
+class JOANA_PUBLIC_EXPORT IfElseStatement
+    : public NodeTemplate<Statement, Expression*, Statement*, Statement*> {
+  DECLARE_CONCRETE_AST_NODE(IfElseStatement, Statement);
+
+ public:
+  ~IfElseStatement() override;
+
+  Statement& else_clause() const { return *member_at<2>(); }
+  Expression& expression() const { return *member_at<0>(); }
+  Statement& then_clause() const { return *member_at<1>(); }
+
+ private:
+  IfElseStatement(const SourceCodeRange& range,
+                  Expression* Expression,
+                  Statement* then_clause,
+                  Statement* else_clause);
+
+  DISALLOW_COPY_AND_ASSIGN(IfElseStatement);
+};
+
+//
 // IfStatement
 //
-class JOANA_PUBLIC_EXPORT IfStatement : public Statement {
+class JOANA_PUBLIC_EXPORT IfStatement
+    : public NodeTemplate<Statement, Expression*, Statement*> {
   DECLARE_CONCRETE_AST_NODE(IfStatement, Statement);
 
  public:
   ~IfStatement() override;
 
-  Expression& condition() const;
-  Statement& else_clause() const;
-  bool has_else() const;
-  Statement& then_clause() const;
+  Expression& expression() const { return *member_at<0>(); }
+  Statement& then_clause() const { return *member_at<1>(); }
 
  private:
-  IfStatement(const Name& keyword,
-              const Expression& condition,
-              const Statement& then_clause,
-              const Statement& else_clause);
-  IfStatement(const Name& keyword,
-              const Expression& condition,
-              const Statement& then_clause);
+  IfStatement(const SourceCodeRange& range,
+              Expression* Expression,
+              Statement* then_clause);
 
   DISALLOW_COPY_AND_ASSIGN(IfStatement);
 };

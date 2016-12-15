@@ -5,8 +5,8 @@
 #ifndef JOANA_PUBLIC_LINE_NUMBER_CACHE_H_
 #define JOANA_PUBLIC_LINE_NUMBER_CACHE_H_
 
-#include <map>
 #include <utility>
+#include <vector>
 
 #include "base/macros.h"
 #include "joana/public/public_export.h"
@@ -17,20 +17,32 @@ class SourceCode;
 
 class JOANA_PUBLIC_EXPORT LineNumberCache final {
  public:
+  // Zero origin column number
+  using ColumnNumber = int;
+
+  // One origin line number.
   using LineNumber = int;
+
+  // Zero origin offset in source code. The unit is UTF-16 code point.
   using Offset = int;
 
   explicit LineNumberCache(const SourceCode& source_code);
   ~LineNumberCache();
 
-  // Returns line number and start offset of line containing |offset|.
-  std::pair<LineNumber, Offset> Get(int offset) const;
+  // Returns line number and column number in the line containing |offset|.
+  std::pair<LineNumber, ColumnNumber> Get(int offset) const;
 
  private:
   bool IsEndOfLine(Offset offset) const;
-  std::pair<LineNumber, Offset> UpdateCache(Offset offset) const;
 
-  mutable std::map<LineNumber, Offset> map_;
+  // Last scanned offset.
+  mutable Offset last_offset_ = 0;
+
+  // First element is start offset of second line. The first line start at
+  // offset zero.
+  mutable std::vector<Offset> line_start_offsets_;
+
+  // The source code provider.
   const SourceCode& source_code_;
 
   DISALLOW_COPY_AND_ASSIGN(LineNumberCache);

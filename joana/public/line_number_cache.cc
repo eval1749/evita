@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <algorithm>
 #include <iterator>
 
 #include "joana/public/line_number_cache.h"
@@ -10,6 +11,10 @@
 #include "joana/public/source_code.h"
 
 namespace joana {
+
+using ColumnNumber = LineNumberCache::ColumnNumber;
+using LineNumber = LineNumberCache::LineNumber;
+using Offset = LineNumberCache::Offset;
 
 namespace {
 
@@ -25,9 +30,7 @@ bool IsLineTerminator(base::char16 char_code) {
 }  // namespace
 
 LineNumberCache::LineNumberCache(const SourceCode& source_code)
-    : source_code_(source_code) {
-  map_.emplace(0, 1);
-}
+    : source_code_(source_code) {}
 
 LineNumberCache::~LineNumberCache() = default;
 
@@ -35,42 +38,41 @@ std::pair<int, int> LineNumberCache::Get(int offset) const {
   DCHECK_GE(offset, 0);
   if (offset == 0)
     return std::make_pair(1, 0);
-  const auto& it = map_.lower_bound(offset);
-  if (it == map_.end()) {
-    // offset is after cache.
-    return UpdateCache(offset);
+  if (offset > last_offset_) {
+    // Extend offset cache until |offset|.
+    for (auto runner = last_offset_; runner < offset; ++runner) {
+      if (!IsEndOfLine(runner))
+        continue;
+      line_start_offsets_.push_back(runner + 1);
+    }
+    last_offset_ = offset;
   }
 
-  if (it->first == offset)
-    return std::make_pair(it->second, it->first);
+  if (line_start_offsets_.empty() || offset < line_start_offsets_.front()) {
+    // |offset| is still in the first line.
+    return std::make_pair(1, offset);
+  }
 
-  DCHECK(it != map_.begin());
-  const auto& previous = std::prev(it);
-  DCHECK_GT(offset, previous->first);
-  return std::make_pair(previous->second, previous->first);
+  if (offset >= line_start_offsets_.back()) {
+    // |offset| is in the last scanned line.
+    const auto line_number =
+        static_cast<LineNumber>(line_start_offsets_.size()) + 1;
+    const auto column_number = offset - line_start_offsets_.back();
+    return std::make_pair(line_number, column_number);
+  }
+
+  const auto& begin = line_start_offsets_.begin();
+  const auto& it = std::lower_bound(begin, line_start_offsets_.end(), offset);
+  const auto& start = *it == offset ? it : std::prev(it);
+  const auto line_number = static_cast<LineNumber>(start - begin) + 2;
+  const auto column_number = offset - *start;
+  return std::make_pair(line_number, column_number);
 }
 
 bool LineNumberCache::IsEndOfLine(Offset offset) const {
   DCHECK_LE(offset, source_code_.size());
   return offset == source_code_.size() ||
          IsLineTerminator(source_code_.GetChar(offset));
-}
-
-std::pair<int, int> LineNumberCache::UpdateCache(Offset offset) const {
-  DCHECK_LE(offset, source_code_.size());
-  DCHECK(!map_.empty());
-  auto line_number = map_.rbegin()->second;
-  auto line_start = map_.rbegin()->first;
-  DCHECK_LT(line_start, offset);
-  for (auto runner = line_start; runner < offset; ++runner) {
-    if (!IsEndOfLine(runner))
-      continue;
-    ++line_number;
-    line_start = runner + 1;
-    const auto& result = map_.emplace(line_start, line_number);
-    DCHECK(result.second) << line_start << " must be inserted.";
-  }
-  return std::make_pair(line_number, line_start);
 }
 
 }  // namespace joana

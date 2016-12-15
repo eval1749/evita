@@ -39,18 +39,24 @@ TEST_F(LineNumberCacheTest, Get) {
   LineNumberCache cache(source_code);
 
   EXPECT_EQ(std::make_pair(1, 0), cache.Get(0));
-  EXPECT_EQ(std::make_pair(1, 0), cache.Get(1)) << "no cache update";
+  EXPECT_EQ(std::make_pair(1, 1), cache.Get(1)) << "no cache update";
 
-  EXPECT_EQ(std::make_pair(3, 6), cache.Get(6)) << "populate cache";
-  EXPECT_EQ(std::make_pair(3, 6), cache.Get(7)) << "scan";
-  EXPECT_EQ(std::make_pair(3, 6), cache.Get(8)) << "scan";
-  EXPECT_EQ(std::make_pair(3, 6), cache.Get(9)) << "scan";
+  EXPECT_EQ(std::make_pair(3, 0), cache.Get(6)) << "populate cache";
+  EXPECT_EQ(std::make_pair(3, 1), cache.Get(7)) << "scan";
+  EXPECT_EQ(std::make_pair(3, 2), cache.Get(8)) << "scan";
+  EXPECT_EQ(std::make_pair(3, 3), cache.Get(9)) << "scan";
 
-  EXPECT_EQ(std::make_pair(1, 0), cache.Get(1)) << "cache hit";
-  EXPECT_EQ(std::make_pair(1, 0), cache.Get(2)) << "cache hit";
-  EXPECT_EQ(std::make_pair(2, 3), cache.Get(3)) << "cache hit";
-  EXPECT_EQ(std::make_pair(2, 3), cache.Get(4)) << "cache hit";
-  EXPECT_EQ(std::make_pair(2, 3), cache.Get(5)) << "cache hit";
+  EXPECT_EQ(std::make_pair(1, 1), cache.Get(1)) << "cache hit";
+  EXPECT_EQ(std::make_pair(1, 2), cache.Get(2)) << "cache hit";
+
+  EXPECT_EQ(std::make_pair(2, 0), cache.Get(3)) << "cache hit";
+  EXPECT_EQ(std::make_pair(2, 1), cache.Get(4)) << "cache hit";
+  EXPECT_EQ(std::make_pair(2, 2), cache.Get(5)) << "cache hit";
+
+  EXPECT_EQ(std::make_pair(3, 0), cache.Get(6)) << "cache hit";
+  EXPECT_EQ(std::make_pair(3, 1), cache.Get(7)) << "cache hit";
+  EXPECT_EQ(std::make_pair(3, 2), cache.Get(8)) << "cache hit";
+  EXPECT_EQ(std::make_pair(3, 3), cache.Get(9)) << "cache hit";
 }
 
 }  // namespace joana

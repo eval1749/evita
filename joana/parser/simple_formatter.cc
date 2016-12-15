@@ -490,9 +490,15 @@ void SimpleFormatter::VisitExpressionStatement(ast::ExpressionStatement* node) {
 void SimpleFormatter::VisitForStatement(ast::ForStatement* node) {
   *ostream_ << "for (";
   Format(node->init());
-  Format(node->condition());
+  if (!node->condition().Is<ast::ElisionExpression>()) {
+    *ostream_ << ' ';
+    Format(node->condition());
+  }
   *ostream_ << ';';
-  Format(node->step());
+  if (!node->step().Is<ast::ElisionExpression>()) {
+    *ostream_ << ' ';
+    Format(node->step());
+  }
   *ostream_ << ')';
   FormatChildStatement(node->body());
 }

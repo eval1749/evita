@@ -404,7 +404,7 @@ ast::Token& Lexer::HandleDigitZero() {
       reader_->Advance();
       return HandleInteger(16);
   }
-  return NewInvalid(ErrorCode::NUMERIC_LITERAL_PREFIX_ZERO);
+  return node_factory().NewNumericLiteral(MakeTokenRange(), 0);
 }
 
 ast::Token& Lexer::HandleInteger(int base) {

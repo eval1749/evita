@@ -222,18 +222,11 @@ Expression& SwitchStatement::expression() const {
 //
 // ThrowStatement
 //
-ThrowStatement::ThrowStatement(const Name& keyword,
-                               const Expression& expression)
-    : Statement(keyword.range()) {
-  DCHECK_EQ(keyword, NameId::Throw);
-  NodeEditor().AppendChild(this, const_cast<Expression*>(&expression));
-}
+ThrowStatement::ThrowStatement(const SourceCodeRange& range,
+                               Expression* expression)
+    : NodeTemplate(expression, range) {}
 
 ThrowStatement::~ThrowStatement() = default;
-
-Expression& ThrowStatement::expression() const {
-  return NodeTraversal::ChildAt(*this, 0).As<Expression>();
-}
 
 //
 // TryCatchFinallyStatement

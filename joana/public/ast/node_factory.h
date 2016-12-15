@@ -188,8 +188,10 @@ class JOANA_PUBLIC_EXPORT NodeFactory final {
   SwitchStatement& NewSwitchStatement(const Name& keyword,
                                       const Expression& expression,
                                       const std::vector<Statement*>& clauses);
-  ThrowStatement& NewThrowStatement(const Name& keyword,
-                                    const Expression& condition);
+
+  ThrowStatement& NewThrowStatement(const SourceCodeRange& range,
+                                    const Expression& expression);
+
   TryCatchFinallyStatement& NewTryCatchFinallyStatement(
       const SourceCodeRange& range,
       const Statement& try_block,

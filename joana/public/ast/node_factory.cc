@@ -425,9 +425,10 @@ SwitchStatement& NodeFactory::NewSwitchStatement(
   return *new (zone_) SwitchStatement(zone_, keyword, expression, clauses);
 }
 
-ThrowStatement& NodeFactory::NewThrowStatement(const Name& keyword,
+ThrowStatement& NodeFactory::NewThrowStatement(const SourceCodeRange& range,
                                                const Expression& expression) {
-  return *new (zone_) ThrowStatement(keyword, expression);
+  return *new (zone_)
+      ThrowStatement(range, const_cast<Expression*>(&expression));
 }
 
 TryCatchFinallyStatement& NodeFactory::NewTryCatchFinallyStatement(

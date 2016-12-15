@@ -427,16 +427,17 @@ class JOANA_PUBLIC_EXPORT SwitchStatement : public Statement {
 //
 // ThrowStatement
 //
-class JOANA_PUBLIC_EXPORT ThrowStatement : public Statement {
+class JOANA_PUBLIC_EXPORT ThrowStatement
+    : public NodeTemplate<Statement, Expression*> {
   DECLARE_CONCRETE_AST_NODE(ThrowStatement, Statement);
 
  public:
   ~ThrowStatement() override;
 
-  Expression& expression() const;
+  Expression& expression() const { return *member_at<0>(); }
 
  private:
-  ThrowStatement(const Name& keyword, const Expression& expression);
+  ThrowStatement(const SourceCodeRange& range, Expression* expression);
 
   DISALLOW_COPY_AND_ASSIGN(ThrowStatement);
 };

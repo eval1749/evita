@@ -340,10 +340,11 @@ ast::Statement& Parser::ParseSwitchStatement() {
 }
 
 ast::Statement& Parser::ParseThrowStatement() {
+  DCHECK_EQ(PeekToken(), ast::NameId::Throw);
+  ConsumeToken();
   ExpectSemiColonScope semi_colon_scope(this);
-  auto& keyword = ConsumeToken().As<ast::Name>();
   auto& expression = ParseExpression();
-  return node_factory().NewThrowStatement(keyword, expression);
+  return node_factory().NewThrowStatement(GetSourceCodeRange(), expression);
 }
 
 ast::Statement& Parser::ParseTryStatement() {

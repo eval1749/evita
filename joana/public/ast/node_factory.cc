@@ -350,6 +350,34 @@ ExpressionStatement& NodeFactory::NewExpressionStatement(
   return *new (zone_) ExpressionStatement(expression);
 }
 
+ForStatement& NodeFactory::NewForStatement(const SourceCodeRange& range,
+                                           const Statement& init,
+                                           const Expression& condition,
+                                           const Expression& step,
+                                           const Statement& body) {
+  return *new (zone_) ForStatement(
+      range, const_cast<Statement*>(&init), const_cast<Expression*>(&condition),
+      const_cast<Expression*>(&step), const_cast<Statement*>(&body));
+}
+
+ForInStatement& NodeFactory::NewForInStatement(const SourceCodeRange& range,
+                                               const Statement& binding,
+                                               const Expression& expression,
+                                               const Statement& body) {
+  return *new (zone_) ForInStatement(range, const_cast<Statement*>(&binding),
+                                     const_cast<Expression*>(&expression),
+                                     const_cast<Statement*>(&body));
+}
+
+ForOfStatement& NodeFactory::NewForOfStatement(const SourceCodeRange& range,
+                                               const Statement& binding,
+                                               const Expression& expression,
+                                               const Statement& body) {
+  return *new (zone_) ForOfStatement(range, const_cast<Statement*>(&binding),
+                                     const_cast<Expression*>(&expression),
+                                     const_cast<Statement*>(&body));
+}
+
 IfStatement& NodeFactory::NewIfStatement(const Name& keyword,
                                          const Expression& condition,
                                          const Statement& then_clause,

@@ -147,6 +147,23 @@ class JOANA_PUBLIC_EXPORT NodeFactory final {
                               const Expression& condition);
   EmptyStatement& NewEmptyStatement(const Punctuator& semi_colon);
   ExpressionStatement& NewExpressionStatement(const Expression& expression);
+
+  ForStatement& NewForStatement(const SourceCodeRange& range,
+                                const Statement& init,
+                                const Expression& condition,
+                                const Expression& step,
+                                const Statement& body);
+
+  ForInStatement& NewForInStatement(const SourceCodeRange& range,
+                                    const Statement& binding,
+                                    const Expression& expression,
+                                    const Statement& body);
+
+  ForOfStatement& NewForOfStatement(const SourceCodeRange& range,
+                                    const Statement& binding,
+                                    const Expression& expression,
+                                    const Statement& body);
+
   IfStatement& NewIfStatement(const Name& keyword,
                               const Expression& condition,
                               const Statement& then_clause,

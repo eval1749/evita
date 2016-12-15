@@ -134,9 +134,11 @@ class JOANA_PUBLIC_EXPORT NodeFactory final {
   BlockStatement& NewBlockStatement(const Punctuator& left_brace);
   BreakStatement& NewBreakStatement(const SourceCodeRange& range,
                                     const Token& label);
-  CaseClause& NewCaseClause(const Name& keyword,
+
+  CaseClause& NewCaseClause(const SourceCodeRange& range,
                             const Expression& expression,
                             const Statement& statement);
+
   ConstStatement& NewConstStatement(const SourceCodeRange& range,
                                     const Expression& expression);
   ContinueStatement& NewContinueStatement(const SourceCodeRange& range,

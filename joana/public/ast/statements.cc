@@ -34,24 +34,12 @@ BreakStatement::~BreakStatement() = default;
 //
 // CaseClause
 //
-CaseClause::CaseClause(const Name& keyword,
-                       const Expression& expression,
-                       const Statement& statement)
-    : Statement(keyword.range()) {
-  DCHECK_EQ(keyword, NameId::Case);
-  NodeEditor().AppendChild(this, const_cast<Expression*>(&expression));
-  NodeEditor().AppendChild(this, const_cast<Statement*>(&statement));
-}
+CaseClause::CaseClause(const SourceCodeRange& range,
+                       Expression* expression,
+                       Statement* statement)
+    : NodeTemplate(std::make_tuple(expression, statement), range) {}
 
 CaseClause::~CaseClause() = default;
-
-Expression& CaseClause::expression() const {
-  return NodeTraversal::ChildAt(*this, 0).As<Expression>();
-}
-
-Statement& CaseClause::statement() const {
-  return NodeTraversal::ChildAt(*this, 1).As<Statement>();
-}
 
 //
 // ConstStatement

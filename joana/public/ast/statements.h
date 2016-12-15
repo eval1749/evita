@@ -71,19 +71,20 @@ class JOANA_PUBLIC_EXPORT BreakStatement
 //
 // CaseClause
 //
-class JOANA_PUBLIC_EXPORT CaseClause : public Statement {
+class JOANA_PUBLIC_EXPORT CaseClause
+    : public NodeTemplate<Statement, Expression*, Statement*> {
   DECLARE_CONCRETE_AST_NODE(CaseClause, Statement);
 
  public:
   ~CaseClause() override;
 
-  Expression& expression() const;
-  Statement& statement() const;
+  Expression& expression() const { return *member_at<0>(); }
+  Statement& statement() const { return *member_at<1>(); }
 
  private:
-  CaseClause(const Name& keyword,
-             const Expression& expression,
-             const Statement& statement);
+  CaseClause(const SourceCodeRange& range,
+             Expression* expression,
+             Statement* statement);
 
   DISALLOW_COPY_AND_ASSIGN(CaseClause);
 };

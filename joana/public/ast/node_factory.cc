@@ -311,10 +311,11 @@ BreakStatement& NodeFactory::NewBreakStatement(const SourceCodeRange& range,
   return *new (zone_) BreakStatement(range, const_cast<Token*>(&label));
 }
 
-CaseClause& NodeFactory::NewCaseClause(const Name& keyword,
+CaseClause& NodeFactory::NewCaseClause(const SourceCodeRange& range,
                                        const Expression& expression,
                                        const Statement& statement) {
-  return *new (zone_) CaseClause(keyword, expression, statement);
+  return *new (zone_) CaseClause(range, const_cast<Expression*>(&expression),
+                                 const_cast<Statement*>(&statement));
 }
 
 ConstStatement& NodeFactory::NewConstStatement(const SourceCodeRange& range,

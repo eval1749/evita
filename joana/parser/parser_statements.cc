@@ -110,12 +110,15 @@ ast::Statement& Parser::ParseBreakStatement() {
 }
 
 ast::Statement& Parser::ParseCaseClause() {
-  auto& keyword = ConsumeToken().As<ast::Name>();
-  DCHECK_EQ(keyword, ast::NameId::Case);
+  SourceCodeRangeScope scope(this);
+  DCHECK_EQ(PeekToken(), ast::NameId::Case);
+  ConsumeToken();
   auto& expression = ParseExpression();
   ExpectToken(ast::PunctuatorKind::Colon,
               ErrorCode::ERROR_STATEMENT_EXPECT_COLON);
-  return node_factory().NewCaseClause(keyword, expression, ParseStatement());
+  auto& statement = ParseStatement();
+  return node_factory().NewCaseClause(GetSourceCodeRange(), expression,
+                                      statement);
 }
 
 ast::Statement& Parser::ParseConstStatement() {

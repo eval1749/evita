@@ -7,12 +7,10 @@
 #include "joana/public/ast/node.h"
 
 #include "base/macros.h"
-#include "joana/public/ast/module.h"
+#include "joana/public/ast/container_node.h"
 #include "joana/public/ast/node_editor.h"
 #include "joana/public/ast/node_factory.h"
 #include "joana/public/ast/node_traversal.h"
-#include "joana/public/ast/statements.h"
-#include "joana/public/ast/tokens.h"
 #include "joana/public/source_code.h"
 #include "joana/public/source_code_factory.h"
 #include "joana/public/source_code_range.h"
@@ -20,6 +18,24 @@
 
 namespace joana {
 namespace ast {
+
+namespace {
+
+class Element final : public ContainerNode {
+  DECLARE_CONCRETE_AST_NODE(Element, ContainerNode);
+
+ public:
+  Element(const SourceCodeRange& range) : ContainerNode(range) {}
+  ~Element() override = default;
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(Element);
+};
+
+// Implements Visitable
+void Element::Accept(NodeVisitor* visitor) {}
+
+}  // namespace
 
 //
 // NodeTest
@@ -32,8 +48,7 @@ class NodeTest : public ::testing::Test {
   NodeFactory& factory() { return node_factory_; }
   SourceCodeRange range() const { return source_code_->range(); }
 
-  BlockStatement& NewBlockStatement();
-  EmptyStatement& NewEmptyStatement();
+  Element& NewElement();
 
  private:
   Zone zone_;
@@ -51,22 +66,17 @@ NodeTest::NodeTest()
       source_code_(&source_code_factory_.New(base::FilePath(),
                                              base::StringPiece16({}, 0))) {}
 
-BlockStatement& NodeTest::NewBlockStatement() {
-  return factory().NewBlockStatement(
-      factory().NewPunctuator(range(), PunctuatorKind::LeftBrace));
-}
-
-EmptyStatement& NodeTest::NewEmptyStatement() {
-  return factory().NewEmptyStatement(range());
+Element& NodeTest::NewElement() {
+  return *new (&zone_) Element(range());
 }
 
 TEST_F(NodeTest, NodeContains) {
-  auto& module = factory().NewModule(range());
-  auto& statement1 = NewEmptyStatement();
+  auto& module = NewElement();
+  auto& statement1 = NewElement();
   NodeEditor().AppendChild(&module, &statement1);
-  auto& block2 = NewBlockStatement();
+  auto& block2 = NewElement();
   NodeEditor().AppendChild(&module, &block2);
-  auto& statement3 = NewEmptyStatement();
+  auto& statement3 = NewElement();
   NodeEditor().AppendChild(&block2, &statement3);
 
   EXPECT_TRUE(module.Contains(statement3));
@@ -74,8 +84,8 @@ TEST_F(NodeTest, NodeContains) {
 }
 
 TEST_F(NodeTest, NodeEditorAppendChild) {
-  auto& module = factory().NewModule(range());
-  auto& statement1 = NewEmptyStatement();
+  auto& module = NewElement();
+  auto& statement1 = NewElement();
   NodeEditor().AppendChild(&module, &statement1);
   EXPECT_EQ(statement1, NodeTraversal::FirstChildOf(module));
   EXPECT_EQ(statement1, NodeTraversal::LastChildOf(module));
@@ -84,7 +94,7 @@ TEST_F(NodeTest, NodeEditorAppendChild) {
   EXPECT_EQ(nullptr, NodeTraversal::PreviousSiblingOf(statement1));
   EXPECT_EQ(nullptr, NodeTraversal::NextSiblingOf(statement1));
 
-  auto& statement2 = NewEmptyStatement();
+  auto& statement2 = NewElement();
   NodeEditor().AppendChild(&module, &statement2);
   EXPECT_EQ(statement1, NodeTraversal::FirstChildOf(module));
   EXPECT_EQ(statement2, NodeTraversal::LastChildOf(module));
@@ -99,8 +109,8 @@ TEST_F(NodeTest, NodeEditorAppendChild) {
 }
 
 TEST_F(NodeTest, NodeEditorInsertBefore) {
-  auto& module = factory().NewModule(range());
-  auto& statement1 = NewEmptyStatement();
+  auto& module = NewElement();
+  auto& statement1 = NewElement();
   NodeEditor().InsertBefore(&module, &statement1, nullptr);
   EXPECT_EQ(statement1, NodeTraversal::FirstChildOf(module));
   EXPECT_EQ(statement1, NodeTraversal::LastChildOf(module));
@@ -109,7 +119,7 @@ TEST_F(NodeTest, NodeEditorInsertBefore) {
   EXPECT_EQ(nullptr, NodeTraversal::NextSiblingOf(statement1));
   EXPECT_EQ(nullptr, NodeTraversal::PreviousSiblingOf(statement1));
 
-  auto& statement2 = NewEmptyStatement();
+  auto& statement2 = NewElement();
   NodeEditor().InsertBefore(&module, &statement2, &statement1);
   EXPECT_EQ(statement2, NodeTraversal::FirstChildOf(module));
   EXPECT_EQ(statement1, NodeTraversal::LastChildOf(module));
@@ -124,12 +134,12 @@ TEST_F(NodeTest, NodeEditorInsertBefore) {
 }
 
 TEST_F(NodeTest, NodeEditorRemoveChild) {
-  auto& module = factory().NewModule(range());
-  auto& statement1 = NewEmptyStatement();
+  auto& module = NewElement();
+  auto& statement1 = NewElement();
   NodeEditor().AppendChild(&module, &statement1);
-  auto& statement2 = NewEmptyStatement();
+  auto& statement2 = NewElement();
   NodeEditor().AppendChild(&module, &statement2);
-  auto& statement3 = NewEmptyStatement();
+  auto& statement3 = NewElement();
   NodeEditor().AppendChild(&module, &statement3);
 
   NodeEditor().RemoveChild(&module, &statement2);
@@ -150,12 +160,12 @@ TEST_F(NodeTest, NodeEditorRemoveChild) {
 }
 
 TEST_F(NodeTest, NodeEditorRemoveNode) {
-  auto& module = factory().NewModule(range());
-  auto& statement1 = NewEmptyStatement();
+  auto& module = NewElement();
+  auto& statement1 = NewElement();
   NodeEditor().AppendChild(&module, &statement1);
-  auto& statement2 = NewEmptyStatement();
+  auto& statement2 = NewElement();
   NodeEditor().AppendChild(&module, &statement2);
-  auto& statement3 = NewEmptyStatement();
+  auto& statement3 = NewElement();
   NodeEditor().AppendChild(&module, &statement3);
 
   NodeEditor().RemoveNode(&statement2);
@@ -176,15 +186,15 @@ TEST_F(NodeTest, NodeEditorRemoveNode) {
 }
 
 TEST_F(NodeTest, NodeEditorReplaceChild) {
-  auto& module = factory().NewModule(range());
-  auto& statement1 = NewEmptyStatement();
+  auto& module = NewElement();
+  auto& statement1 = NewElement();
   NodeEditor().AppendChild(&module, &statement1);
-  auto& statement2 = NewEmptyStatement();
+  auto& statement2 = NewElement();
   NodeEditor().AppendChild(&module, &statement2);
-  auto& statement3 = NewEmptyStatement();
+  auto& statement3 = NewElement();
   NodeEditor().AppendChild(&module, &statement3);
 
-  auto& statement4 = NewEmptyStatement();
+  auto& statement4 = NewElement();
   NodeEditor().ReplaceChild(&module, &statement4, &statement2);
   EXPECT_EQ(statement1, NodeTraversal::FirstChildOf(module));
   EXPECT_EQ(statement3, NodeTraversal::LastChildOf(module));
@@ -207,12 +217,12 @@ TEST_F(NodeTest, NodeEditorReplaceChild) {
 }
 
 TEST_F(NodeTest, NodeTraversalAncestorsOf) {
-  auto& module = factory().NewModule(range());
-  auto& statement1 = NewEmptyStatement();
+  auto& module = NewElement();
+  auto& statement1 = NewElement();
   NodeEditor().AppendChild(&module, &statement1);
-  auto& block2 = NewBlockStatement();
+  auto& block2 = NewElement();
   NodeEditor().AppendChild(&module, &block2);
-  auto& statement3 = NewEmptyStatement();
+  auto& statement3 = NewElement();
   NodeEditor().AppendChild(&block2, &statement3);
 
   std::vector<const Node*> result;
@@ -223,12 +233,12 @@ TEST_F(NodeTest, NodeTraversalAncestorsOf) {
 }
 
 TEST_F(NodeTest, NodeTraversalChildrenOf) {
-  auto& module = factory().NewModule(range());
-  auto& statement1 = NewEmptyStatement();
+  auto& module = NewElement();
+  auto& statement1 = NewElement();
   NodeEditor().AppendChild(&module, &statement1);
-  auto& statement2 = NewEmptyStatement();
+  auto& statement2 = NewElement();
   NodeEditor().AppendChild(&module, &statement2);
-  auto& statement3 = NewEmptyStatement();
+  auto& statement3 = NewElement();
   NodeEditor().AppendChild(&module, &statement3);
 
   std::vector<const Node*> result;
@@ -240,12 +250,12 @@ TEST_F(NodeTest, NodeTraversalChildrenOf) {
 }
 
 TEST_F(NodeTest, NodeTraversalInclusiveAncestorsOf) {
-  auto& module = factory().NewModule(range());
-  auto& statement1 = NewEmptyStatement();
+  auto& module = NewElement();
+  auto& statement1 = NewElement();
   NodeEditor().AppendChild(&module, &statement1);
-  auto& block2 = NewBlockStatement();
+  auto& block2 = NewElement();
   NodeEditor().AppendChild(&module, &block2);
-  auto& statement3 = NewEmptyStatement();
+  auto& statement3 = NewElement();
   NodeEditor().AppendChild(&block2, &statement3);
 
   std::vector<const Node*> result;

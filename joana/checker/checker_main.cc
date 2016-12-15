@@ -19,6 +19,7 @@
 #include "joana/parser/public/parse.h"
 #include "joana/public/ast/edit_context.h"
 #include "joana/public/ast/edit_context_builder.h"
+#include "joana/public/ast/error_codes.h"
 #include "joana/public/ast/node_factory.h"
 #include "joana/public/error_sink.h"
 #include "joana/public/memory/zone.h"
@@ -120,7 +121,7 @@ int Checker::Run() {
   for (auto* const error : error_sink_.errors()) {
     std::cerr << error->range().source_code().file_path().LossyDisplayName()
               << '(' << error->range().start() << ':' << error->range().end()
-              << ':' << error->error_code() << std::endl;
+              << ") " << ast::ErrorStringOf(error->error_code()) << std::endl;
   }
   return error_sink_.errors().size() == 0 ? 0 : 1;
 }

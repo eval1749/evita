@@ -149,6 +149,7 @@ class Parser final {
   ast::Statement& ParseTryStatement();
   ast::Statement& ParseVarStatement();
   ast::Statement& ParseWhileStatement();
+  ast::Statement& ParseWithStatement();
 
   std::unique_ptr<BracketStack> bracket_stack_;
   ast::EditContext* const context_;

@@ -271,6 +271,9 @@ ast::Statement& Parser::ParseKeywordStatement() {
     case ast::NameId::While:
       return ParseWhileStatement();
 
+    case ast::NameId::With:
+      return ParseWithStatement();
+
     // Reserved keywords
     case ast::NameId::Catch:
     case ast::NameId::Else:
@@ -282,7 +285,6 @@ ast::Statement& Parser::ParseKeywordStatement() {
     case ast::NameId::Protected:
     case ast::NameId::Public:
     case ast::NameId::Static:
-    case ast::NameId::With:
       ConsumeToken();
       return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_RESERVED_WORD);
   }
@@ -364,6 +366,15 @@ ast::Statement& Parser::ParseWhileStatement() {
   auto& condition = ParseParenthesisExpression();
   auto& statement = ParseStatement();
   return node_factory().NewWhileStatement(keyword, condition, statement);
+}
+
+ast::Statement& Parser::ParseWithStatement() {
+  DCHECK_EQ(PeekToken(), ast::NameId::With);
+  ConsumeToken();
+  auto& expression = ParseParenthesisExpression();
+  auto& statement = ParseStatement();
+  return node_factory().NewWithStatement(GetSourceCodeRange(), expression,
+                                         statement);
 }
 
 }  // namespace internal

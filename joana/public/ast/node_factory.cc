@@ -423,10 +423,12 @@ ReturnStatement& NodeFactory::NewReturnStatement(const SourceCodeRange& range,
 }
 
 SwitchStatement& NodeFactory::NewSwitchStatement(
-    const Name& keyword,
+    const SourceCodeRange& range,
     const Expression& expression,
     const std::vector<Statement*>& clauses) {
-  return *new (zone_) SwitchStatement(zone_, keyword, expression, clauses);
+  auto* const list = new (zone_) StatementList(zone_, clauses);
+  return *new (zone_)
+      SwitchStatement(range, const_cast<Expression*>(&expression), list);
 }
 
 ThrowStatement& NodeFactory::NewThrowStatement(const SourceCodeRange& range,

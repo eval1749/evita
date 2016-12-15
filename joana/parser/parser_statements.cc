@@ -327,21 +327,22 @@ ast::Statement& Parser::ParseReturnStatement() {
 }
 
 ast::Statement& Parser::ParseSwitchStatement() {
-  auto& keyword = ConsumeToken().As<ast::Name>();
+  DCHECK_EQ(PeekToken(), ast::NameId::Switch);
+  ConsumeToken();
   auto& expression = ParseParenthesisExpression();
   std::vector<ast::Statement*> clauses;
   if (!ConsumeTokenIf(ast::PunctuatorKind::LeftBrace)) {
     AddError(ErrorCode::ERROR_STATEMENT_EXPECT_LBRACE);
-    return node_factory().NewSwitchStatement(keyword, expression, clauses);
+    return node_factory().NewSwitchStatement(GetSourceCodeRange(), expression,
+                                             clauses);
   }
   while (CanPeekToken()) {
     if (ConsumeTokenIf(ast::PunctuatorKind::RightBrace))
-      return node_factory().NewSwitchStatement(keyword, expression, clauses);
+      break;
     clauses.push_back(&ParseStatement());
   }
-  AddError(ComputeInvalidToken(ErrorCode::ERROR_STATEMENT_EXPECT_RBRACE),
-           ErrorCode::ERROR_STATEMENT_EXPECT_RBRACE);
-  return node_factory().NewSwitchStatement(keyword, expression, clauses);
+  return node_factory().NewSwitchStatement(GetSourceCodeRange(), expression,
+                                           clauses);
 }
 
 ast::Statement& Parser::ParseThrowStatement() {

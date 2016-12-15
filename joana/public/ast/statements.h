@@ -430,22 +430,20 @@ class JOANA_PUBLIC_EXPORT ReturnStatement
 //
 // SwitchStatement
 //
-class JOANA_PUBLIC_EXPORT SwitchStatement : public Statement {
+class JOANA_PUBLIC_EXPORT SwitchStatement
+    : public NodeTemplate<Statement, Expression*, StatementList*> {
   DECLARE_CONCRETE_AST_NODE(SwitchStatement, Statement);
 
  public:
   ~SwitchStatement() override;
 
-  Expression& expression() const;
-  const ZoneVector<Statement*>& clauses() const { return clauses_; }
+  Expression& expression() const { return *member_at<0>(); }
+  const StatementList& clauses() const { return *member_at<1>(); }
 
  private:
-  SwitchStatement(Zone* zone,
-                  const Name& keyword,
-                  const Expression& condition,
-                  const std::vector<Statement*>& clauses);
-
-  ZoneVector<Statement*> clauses_;
+  SwitchStatement(const SourceCodeRange& range,
+                  Expression* expression,
+                  StatementList* clauses);
 
   DISALLOW_COPY_AND_ASSIGN(SwitchStatement);
 };

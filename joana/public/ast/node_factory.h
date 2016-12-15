@@ -189,7 +189,8 @@ class JOANA_PUBLIC_EXPORT NodeFactory final {
                                 const Expression& expression);
   ReturnStatement& NewReturnStatement(const SourceCodeRange& range,
                                       const Expression& condition);
-  SwitchStatement& NewSwitchStatement(const Name& keyword,
+
+  SwitchStatement& NewSwitchStatement(const SourceCodeRange& range,
                                       const Expression& expression,
                                       const std::vector<Statement*>& clauses);
 

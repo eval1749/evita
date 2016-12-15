@@ -200,20 +200,12 @@ StatementList::~StatementList() = default;
 //
 // SwitchStatement
 //
-SwitchStatement::SwitchStatement(Zone* zone,
-                                 const Name& keyword,
-                                 const Expression& expression,
-                                 const std::vector<Statement*>& clauses)
-    : Statement(keyword.range()), clauses_(zone, clauses) {
-  DCHECK_EQ(keyword, NameId::Switch);
-  NodeEditor().AppendChild(this, const_cast<Expression*>(&expression));
-}
+SwitchStatement::SwitchStatement(const SourceCodeRange& range,
+                                 Expression* expression,
+                                 StatementList* clauses)
+    : NodeTemplate(std::make_tuple(expression, clauses), range) {}
 
 SwitchStatement::~SwitchStatement() = default;
-
-Expression& SwitchStatement::expression() const {
-  return NodeTraversal::ChildAt(*this, 0).As<Expression>();
-}
 
 //
 // ThrowStatement

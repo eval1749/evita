@@ -59,6 +59,7 @@ class Parser final {
   void AddError(ErrorCode error_code);
 
   void Advance();
+  bool CanPeekToken() const;
   ast::Token& ComputeInvalidToken(ErrorCode error_code);
   ast::Token& ConsumeToken();
   // Returns true if |Lexer| has a punctuator of |name_id| and advance to next
@@ -70,7 +71,6 @@ class Parser final {
   void ExpectToken(ast::NameId name_id, ErrorCode error_code);
   void ExpectToken(ast::PunctuatorKind kind, ErrorCode error_code);
   SourceCodeRange GetSourceCodeRange() const;
-  bool CanPeekToken() const;
   ast::Token& PeekToken();
   void PushBackToken(const ast::Token& token);
 

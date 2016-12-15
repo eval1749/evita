@@ -128,6 +128,10 @@ void Parser::Advance() {
   AddError(token, error_code);
 }
 
+bool Parser::CanPeekToken() const {
+  return lexer_->CanPeekToken() || !token_stack_.empty();
+}
+
 ast::Token& Parser::ConsumeToken() {
   auto& token = PeekToken();
   Advance();
@@ -177,10 +181,6 @@ void Parser::ExpectToken(ast::PunctuatorKind kind, ErrorCode error_code) {
 
 SourceCodeRange Parser::GetSourceCodeRange() const {
   return source_code().Slice(range_stack_.top(), lexer_->location().end());
-}
-
-bool Parser::CanPeekToken() const {
-  return lexer_->CanPeekToken() || !token_stack_.empty();
 }
 
 ast::Token& Parser::NewEmptyName() {

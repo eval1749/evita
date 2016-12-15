@@ -34,6 +34,28 @@ class JOANA_PUBLIC_EXPORT Statement : public ContainerNode {
 };
 
 //
+// StatementList
+//
+class JOANA_PUBLIC_EXPORT StatementList final : public ZoneAllocated {
+ public:
+  ~StatementList();
+
+  auto begin() const { return statements_.begin(); }
+  bool empty() const { return statements_.empty(); }
+  auto end() const { return statements_.end(); }
+  size_t size() const { return statements_.size(); }
+
+ private:
+  friend class NodeFactory;
+
+  StatementList(Zone* zone, const std::vector<Statement*>& statements);
+
+  ZoneVector<Statement*> statements_;
+
+  DISALLOW_COPY_AND_ASSIGN(StatementList);
+};
+
+//
 // BlockStatement
 //
 class JOANA_PUBLIC_EXPORT BlockStatement : public Statement {

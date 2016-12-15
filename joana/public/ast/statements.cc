@@ -190,6 +190,15 @@ Statement::Statement(const SourceCodeRange& range) : ContainerNode(range) {}
 Statement::~Statement() = default;
 
 //
+// StatementList
+//
+StatementList::StatementList(Zone* zone,
+                             const std::vector<Statement*>& statements)
+    : statements_(zone, statements) {}
+
+StatementList::~StatementList() = default;
+
+//
 // SwitchStatement
 //
 SwitchStatement::SwitchStatement(Zone* zone,

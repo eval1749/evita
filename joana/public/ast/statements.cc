@@ -162,8 +162,8 @@ IfStatement::~IfStatement() = default;
 //
 // InvalidStatement
 //
-InvalidStatement::InvalidStatement(const Node& node, int error_code)
-    : Statement(node.range()), error_code_(error_code) {}
+InvalidStatement::InvalidStatement(const SourceCodeRange& range, int error_code)
+    : NodeTemplate(error_code, range) {}
 
 InvalidStatement::~InvalidStatement() = default;
 

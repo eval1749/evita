@@ -397,7 +397,7 @@ IfStatement& NodeFactory::NewIfStatement(const SourceCodeRange& range,
 
 InvalidStatement& NodeFactory::NewInvalidStatement(const Node& node,
                                                    int error_code) {
-  return *new (zone_) InvalidStatement(node, error_code);
+  return *new (zone_) InvalidStatement(node.range(), error_code);
 }
 
 LabeledStatement& NodeFactory::NewLabeledStatement(const Name& label,

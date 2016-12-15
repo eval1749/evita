@@ -327,18 +327,17 @@ class JOANA_PUBLIC_EXPORT IfStatement
 //
 // InvalidStatement
 //
-class JOANA_PUBLIC_EXPORT InvalidStatement : public Statement {
+class JOANA_PUBLIC_EXPORT InvalidStatement
+    : public NodeTemplate<Statement, int> {
   DECLARE_CONCRETE_AST_NODE(InvalidStatement, Statement);
 
  public:
   ~InvalidStatement() override;
 
-  int error_code() const { return error_code_; }
+  int error_code() const { return member_at<0>(); }
 
  private:
-  InvalidStatement(const Node& node, int error_code);
-
-  const int error_code_;
+  InvalidStatement(const SourceCodeRange& range, int error_code);
 
   DISALLOW_COPY_AND_ASSIGN(InvalidStatement);
 };

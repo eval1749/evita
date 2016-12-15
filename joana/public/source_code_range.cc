@@ -40,6 +40,12 @@ base::StringPiece16 SourceCodeRange::GetString() const {
   return source_code_->GetString(start_, end_);
 }
 
+// static
+SourceCodeRange SourceCodeRange::CollapseToStart(const SourceCodeRange& range) {
+  return range.source_code_->Slice(range.start_, range.start_);
+}
+
+// static
 SourceCodeRange SourceCodeRange::Merge(const SourceCodeRange& range1,
                                        const SourceCodeRange& range2) {
   DCHECK_EQ(&range1.source_code(), &range2.source_code());

@@ -36,6 +36,12 @@ const SourceCode& SourceCodeRangeTest::NewSourceCode(
   return factory_.New(base::FilePath(), base::StringPiece16(source_text16));
 }
 
+TEST_F(SourceCodeRangeTest, CollapseToStart) {
+  const auto& source_code = NewSourceCode("0123456789abcdef");
+  const auto& range1 = source_code.Slice(1, 3);
+  EXPECT_EQ(source_code.Slice(1, 1), SourceCodeRange::CollapseToStart(range1));
+}
+
 TEST_F(SourceCodeRangeTest, Merge) {
   const auto& source_code = NewSourceCode("0123456789abcdef");
   const auto& range1 = source_code.Slice(1, 3);

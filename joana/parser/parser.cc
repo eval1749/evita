@@ -129,7 +129,11 @@ void Parser::Advance() {
 }
 
 bool Parser::CanPeekToken() const {
-  return lexer_->CanPeekToken() || !token_stack_.empty();
+  if (!token_stack_.empty())
+    return true;
+  while (lexer_->CanPeekToken() && PeekToken().Is<ast::Comment>())
+    lexer_->Advance();
+  return lexer_->CanPeekToken();
 }
 
 ast::Token& Parser::ConsumeToken() {
@@ -187,7 +191,7 @@ ast::Token& Parser::NewEmptyName() {
   return node_factory().NewEmpty(lexer_->location());
 }
 
-ast::Token& Parser::PeekToken() {
+ast::Token& Parser::PeekToken() const {
   if (token_stack_.empty())
     return lexer_->PeekToken();
   return *token_stack_.top();
@@ -202,10 +206,6 @@ const ast::Node& Parser::Run() {
     bracket_stack_->Feed(PeekToken());
   while (CanPeekToken()) {
     auto& token = PeekToken();
-    if (token.Is<ast::Comment>()) {
-      Advance();
-      continue;
-    }
     if (token.Is<ast::Invalid>()) {
       // TODO(eval1749): We should skip tokens until good point to restart
       // toplevel parsing.

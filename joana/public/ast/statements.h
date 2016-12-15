@@ -229,22 +229,25 @@ class JOANA_PUBLIC_EXPORT ForStatement : public NodeTemplate<Statement,
 
 //
 // ForInStatement
+//  |statement| is one of
+//    'const' binding 'in' expression
+//    'let' binding 'in' expression
+//    'var' binding 'in' expression
+//    left-hand-side-expression 'in' expression
 //
 class JOANA_PUBLIC_EXPORT ForInStatement
-    : public NodeTemplate<Statement, Statement*, Expression*, Statement*> {
+    : public NodeTemplate<Statement, Statement*, Statement*> {
   DECLARE_CONCRETE_AST_NODE(ForInStatement, Statement);
 
  public:
   ~ForInStatement() override;
 
-  const Statement& body() { return *member_at<2>(); }
-  const Statement& binding() { return *member_at<0>(); }
-  const Expression& expression() { return *member_at<1>(); }
+  const Statement& body() { return *member_at<1>(); }
+  const Statement& statement() { return *member_at<0>(); }
 
  protected:
   ForInStatement(const SourceCodeRange& range,
-                 Statement* binding,
-                 Expression* expression,
+                 Statement* statement,
                  Statement* body);
 
  private:

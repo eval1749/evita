@@ -505,9 +505,10 @@ void SimpleFormatter::VisitForStatement(ast::ForStatement* node) {
 
 void SimpleFormatter::VisitForInStatement(ast::ForInStatement* node) {
   *ostream_ << "for (";
-  Format(node->binding());
-  *ostream_ << " in ";
-  Format(node->expression());
+  if (node->statement().Is<ast::ExpressionStatement>())
+    Format(node->statement().As<ast::ExpressionStatement>().expression());
+  else
+    Format(node->statement());
   *ostream_ << ')';
   FormatChildStatement(node->body());
 }

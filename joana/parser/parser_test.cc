@@ -259,6 +259,24 @@ TEST_F(ParserTest, ExpressionYield) {
   TEST_PARSER("yield* foo();\n");
 }
 
+TEST_F(ParserTest, ForStatement) {
+  TEST_PARSER(
+      "for (index = 0; index < 10; ++index)\n"
+      "  call(index);\n");
+}
+
+TEST_F(ParserTest, ForStatementInfinite) {
+  TEST_PARSER(
+      "for (;;)\n"
+      "  call(index);\n");
+}
+
+TEST_F(ParserTest, ForInStatement) {
+  TEST_PARSER(
+      "for (foo.x in bar)\n"
+      "  call(foo.x);\n");
+}
+
 TEST_F(ParserTest, FunctionStatement) {
   TEST_PARSER(
       "function foo(a, b, c) {\n"

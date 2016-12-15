@@ -142,10 +142,9 @@ ForStatement::~ForStatement() = default;
 // ForInStatement
 //
 ForInStatement::ForInStatement(const SourceCodeRange& range,
-                               Statement* binding,
-                               Expression* expression,
+                               Statement* statement,
                                Statement* body)
-    : NodeTemplate(std::make_tuple(binding, expression, body), range) {}
+    : NodeTemplate(std::make_tuple(statement, body), range) {}
 
 ForInStatement::~ForInStatement() = default;
 

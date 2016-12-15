@@ -150,10 +150,63 @@ ast::Statement& Parser::ParseExpressionStatement() {
   return node_factory().NewExpressionStatement(ParseExpression());
 }
 
+ast::Statement& Parser::ParseForFirstPart() {
+  if (!HasToken())
+    return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
+  if (PeekToken() == ast::PunctuatorKind::SemiColon)
+    return node_factory().NewExpressionStatement(NewElisionExpression());
+  if (PeekToken() == ast::NameId::Const)
+    return ParseStatement();
+  if (PeekToken() == ast::NameId::Let)
+    return ParseStatement();
+  if (PeekToken() == ast::NameId::Var)
+    return ParseStatement();
+  return node_factory().NewExpressionStatement(ParseExpression());
+}
+
 ast::Statement& Parser::ParseForStatement() {
-  auto& statement = NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
+  DCHECK_EQ(PeekToken(), ast::NameId::For);
   ConsumeToken();
-  return statement;
+  ExpectToken(ast::PunctuatorKind::LeftParenthesis,
+              ErrorCode::ERROR_STATEMENT_EXPECT_LPAREN);
+  auto& first_part = ParseForFirstPart();
+  if (ConsumeTokenIf(ast::PunctuatorKind::SemiColon)) {
+    // 'for' '(' binding ';' condition ';' step ')' statement
+    auto& condition =
+        HasToken() && PeekToken() == ast::PunctuatorKind::SemiColon
+            ? NewElisionExpression()
+            : ParseExpression();
+    ExpectToken(ast::PunctuatorKind::SemiColon,
+                ErrorCode::ERROR_STATEMENT_EXPECT_SEMI_COLON);
+    auto& step =
+        HasToken() && PeekToken() == ast::PunctuatorKind::RightParenthesis
+            ? NewElisionExpression()
+            : ParseExpression();
+    ExpectToken(ast::PunctuatorKind::RightParenthesis,
+                ErrorCode::ERROR_STATEMENT_EXPECT_RPAREN);
+    auto& body = ParseStatement();
+    return node_factory().NewForStatement(GetSourceCodeRange(), first_part,
+                                          condition, step, body);
+  }
+
+  if (ConsumeTokenIf(ast::NameId::Of)) {
+    // 'for' '(' binding 'of' expression ')' statement
+    auto& expression = ParseExpression();
+    ExpectToken(ast::PunctuatorKind::RightParenthesis,
+                ErrorCode::ERROR_STATEMENT_EXPECT_RPAREN);
+    auto& body = ParseStatement();
+    return node_factory().NewForOfStatement(GetSourceCodeRange(), first_part,
+                                            expression, body);
+  }
+
+  if (ConsumeTokenIf(ast::PunctuatorKind::RightParenthesis)) {
+    // 'for' '(' binding 'in' expression ')' statement
+    auto& body = ParseStatement();
+    return node_factory().NewForInStatement(GetSourceCodeRange(), first_part,
+                                            body);
+  }
+
+  return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
 }
 
 ast::Statement& Parser::ParseFunctionStatement(ast::FunctionKind kind) {

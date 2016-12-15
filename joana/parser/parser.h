@@ -137,6 +137,7 @@ class Parser final {
   ast::Statement& ParseDefaultLabel();
   ast::Statement& ParseDoStatement();
   ast::Statement& ParseExpressionStatement();
+  ast::Statement& ParseForFirstPart();
   ast::Statement& ParseForStatement();
   ast::Statement& ParseFunctionStatement(ast::FunctionKind kind);
   ast::Statement& ParseIfStatement();

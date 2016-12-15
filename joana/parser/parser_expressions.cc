@@ -201,7 +201,7 @@ ast::Expression& Parser::ParseBinaryExpression(OperatorPrecedence category) {
   const auto lower_category = HigherPrecedenceOf(category);
   auto* left = &ParseBinaryExpression(lower_category);
   while (HasToken() && CategoryOf(PeekToken()) == category) {
-    auto& op = ConsumeToken().As<ast::Punctuator>();
+    auto& op = ConsumeToken();
     auto& right = ParseBinaryExpression(lower_category);
     left = &node_factory().NewBinaryExpression(GetSourceCodeRange(), op, *left,
                                                right);

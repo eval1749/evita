@@ -155,8 +155,7 @@ class JOANA_PUBLIC_EXPORT NodeFactory final {
                                 const Statement& body);
 
   ForInStatement& NewForInStatement(const SourceCodeRange& range,
-                                    const Statement& binding,
-                                    const Expression& expression,
+                                    const Statement& statement,
                                     const Statement& body);
 
   ForOfStatement& NewForOfStatement(const SourceCodeRange& range,

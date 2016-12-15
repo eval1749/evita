@@ -361,11 +361,9 @@ ForStatement& NodeFactory::NewForStatement(const SourceCodeRange& range,
 }
 
 ForInStatement& NodeFactory::NewForInStatement(const SourceCodeRange& range,
-                                               const Statement& binding,
-                                               const Expression& expression,
+                                               const Statement& statement,
                                                const Statement& body) {
-  return *new (zone_) ForInStatement(range, const_cast<Statement*>(&binding),
-                                     const_cast<Expression*>(&expression),
+  return *new (zone_) ForInStatement(range, const_cast<Statement*>(&statement),
                                      const_cast<Statement*>(&body));
 }
 

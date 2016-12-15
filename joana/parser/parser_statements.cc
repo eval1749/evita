@@ -151,7 +151,9 @@ ast::Statement& Parser::ParseExpressionStatement() {
 }
 
 ast::Statement& Parser::ParseForStatement() {
-  return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
+  auto& statement = NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
+  ConsumeToken();
+  return statement;
 }
 
 ast::Statement& Parser::ParseFunctionStatement(ast::FunctionKind kind) {

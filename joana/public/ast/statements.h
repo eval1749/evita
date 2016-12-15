@@ -20,8 +20,8 @@ class Expression;
 //
 // Statement
 //
-class JOANA_PUBLIC_EXPORT Statement : public ContainerNode {
-  DECLARE_ABSTRACT_AST_NODE(Statement, ContainerNode);
+class JOANA_PUBLIC_EXPORT Statement : public Node {
+  DECLARE_ABSTRACT_AST_NODE(Statement, Node);
 
  public:
   ~Statement() override;

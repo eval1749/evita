@@ -184,7 +184,7 @@ ReturnStatement::~ReturnStatement() = default;
 //
 // Statement
 //
-Statement::Statement(const SourceCodeRange& range) : ContainerNode(range) {}
+Statement::Statement(const SourceCodeRange& range) : Node(range) {}
 
 Statement::~Statement() = default;
 

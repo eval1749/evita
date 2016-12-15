@@ -45,6 +45,8 @@ component("public") {
     "error_sink.h",
     "escaped_string_piece.cc",
     "escaped_string_piece.h",
+    "line_number_cache.cc",
+    "line_number_cache.h",
     "memory/zone.cc",
     "memory/zone.h",
     "memory/zone_allocated.cc",
@@ -77,6 +79,7 @@ source_set("test_files") {
   sources = [
     "ast/node_test.cc",
     "castable_test.cc",
+    "line_number_cache_test.cc",
     "source_code_range_test.cc",
   ]
   deps = [

@@ -64,6 +64,10 @@ std::string ParserTest::Parse(base::StringPiece script_text) {
     EXPECT_EQ(source, Parse(script_text)); \
   }
 
+TEST_F(ParserTest, AsyncKeyword) {
+  TEST_PARSER("async = async(1);\n");
+}
+
 TEST_F(ParserTest, BlockStatement) {
   TEST_PARSER(
       "{\n"

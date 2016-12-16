@@ -36,7 +36,6 @@ namespace ast {
   V(CLASS, INVALID)                          \
   V(EXPRESSION, ARGUMENT_LIST_EXPECT_COMMA)  \
   V(EXPRESSION, ARGUMENT_LIST_EXPECT_RPAREN) \
-  V(EXPRESSION, ASYNC_EXPECT_FUNCTION)       \
   V(EXPRESSION, CONDITIONAL_EXPECT_COLON)    \
   V(EXPRESSION, LHS_EXPECT_NAME)             \
   V(EXPRESSION, INVALID)                     \
@@ -46,7 +45,6 @@ namespace ast {
   V(EXPRESSION, PRIMARY_EXPECT_ARROW)        \
   V(EXPRESSION, PRIMARY_EXPECT_RPAREN)       \
   V(EXPRESSION, UPDATE_EXPECT_LHS)           \
-  V(FUNCTION, EXPECT_FUNCTION)               \
   V(FUNCTION, EXPECT_LBRACE)                 \
   V(FUNCTION, EXPECT_LPAREN)                 \
   V(FUNCTION, EXPECT_RPAREN)                 \

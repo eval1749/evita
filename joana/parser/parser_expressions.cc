@@ -296,9 +296,11 @@ ast::Expression& Parser::ParseNameAsExpression() {
   auto& name = ConsumeToken().As<ast::Name>();
   switch (static_cast<ast::NameId>(name.number())) {
     case ast::NameId::Async:
-      ExpectToken(ast::NameId::Function,
-                  ErrorCode::ERROR_FUNCTION_EXPECT_FUNCTION);
-      return ParseFunctionExpression(ast::FunctionKind::Async);
+      if (CanPeekToken() && PeekToken() == ast::NameId::Function) {
+        ConsumeToken();
+        return ParseFunctionExpression(ast::FunctionKind::Async);
+      }
+      break;
     case ast::NameId::False:
       return NewLiteralExpression(
           node_factory().NewBooleanLiteral(name, false));

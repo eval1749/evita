@@ -260,9 +260,10 @@ ast::Statement& Parser::ParseKeywordStatement() {
   switch (static_cast<ast::NameId>(keyword.number())) {
     case ast::NameId::Async:
       ConsumeToken();
-      ExpectToken(ast::NameId::Function,
-                  ErrorCode::ERROR_FUNCTION_EXPECT_FUNCTION);
-      return ParseFunctionStatement(ast::FunctionKind::Async);
+      if (CanPeekToken() && PeekToken() == ast::NameId::Function)
+        return ParseFunctionStatement(ast::FunctionKind::Async);
+      PushBackToken(keyword);
+      break;
     case ast::NameId::Break:
       return ParseBreakStatement();
     case ast::NameId::Case:

@@ -103,6 +103,12 @@ class JOANA_PUBLIC_EXPORT NodeFactory final {
   NewExpression& NewNewExpression(const SourceCodeRange& range,
                                   const Expression& expression,
                                   const std::vector<Expression*>& arguments);
+
+  RegExpLiteralExpression& NewRegExpLiteralExpression(
+      const SourceCodeRange& range,
+      const RegExp& regexp,
+      const Token& flags);
+
   ObjectLiteralExpression& NewObjectLiteralExpression(
       const SourceCodeRange& range,
       const std::vector<Expression*>& elements);
@@ -129,6 +135,41 @@ class JOANA_PUBLIC_EXPORT NodeFactory final {
                                   base::StringPiece16 data);
 
   UndefinedLiteral& NewUndefinedLiteral(const Name& name);
+
+  // RegExp
+  RegExp& NewAnyCharRegExp(const SourceCodeRange& range);
+
+  RegExp& NewAssertionRegExp(const SourceCodeRange& range,
+                             RegExpAssertionKind kind);
+
+  RegExp& NewCaptureRegExp(const SourceCodeRange& range,
+                           const ast::RegExp& expression);
+
+  RegExp& NewCharSetRegExp(const SourceCodeRange& range);
+
+  RegExp& NewComplementCharSetRegExp(const SourceCodeRange& range);
+
+  RegExp& NewGreedyRepeatRegExp(const SourceCodeRange& range,
+                                const ast::RegExp& expression);
+
+  RegExp& NewInvalidRegExp(const SourceCodeRange& range, int error_code);
+
+  RegExp& NewLazyRepeatRegExp(const SourceCodeRange& range,
+                              const ast::RegExp& expression);
+
+  RegExp& NewLiteralRegExp(const SourceCodeRange& range);
+
+  RegExp& NewLookAheadRegExp(const SourceCodeRange& range,
+                             const ast::RegExp& expression);
+
+  RegExp& NewLookAheadNotRegExp(const SourceCodeRange& range,
+                                const ast::RegExp& expression);
+
+  RegExp& NewOrRegExp(const SourceCodeRange& range,
+                      const std::vector<RegExp*> expressions);
+
+  RegExp& NewSequenceRegExp(const SourceCodeRange& range,
+                            const std::vector<RegExp*> expressions);
 
   // Statements factory members
   BlockStatement& NewBlockStatement(const SourceCodeRange& range,

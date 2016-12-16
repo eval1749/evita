@@ -14,6 +14,7 @@ namespace ast {
   V(ContainerNode)                    \
   V(Literal)                          \
   V(Node)                             \
+  V(RegExp)                           \
   V(Statement)                        \
   V(Token)
 
@@ -39,6 +40,7 @@ namespace ast {
   V(MemberExpression)              \
   V(NewExpression)                 \
   V(ObjectLiteralExpression)       \
+  V(RegExpLiteralExpression)       \
   V(PropertyExpression)            \
   V(PropertyDefinitionExpression)  \
   V(ReferenceExpression)           \
@@ -50,6 +52,20 @@ namespace ast {
   V(NumericLiteral)             \
   V(StringLiteral)              \
   V(UndefinedLiteral)
+
+#define FOR_EACH_AST_REGEXP(V) \
+  V(AnyCharRegExp)             \
+  V(AssertionRegExp)           \
+  V(CaptureRegExp)             \
+  V(CharSetRegExp)             \
+  V(ComplementCharSetRegExp)   \
+  V(GreedyRepeatRegExp)        \
+  V(InvalidRegExp)             \
+  V(LazyRepeatRegExp)          \
+  V(LiteralRegExp)             \
+  V(LookAheadRegExp)           \
+  V(OrRegExp)                  \
+  V(SequenceRegExp)
 
 #define FOR_EACH_AST_STATEMENT(V) \
   V(BlockStatement)               \
@@ -90,6 +106,7 @@ namespace ast {
   FOR_EACH_AST_DECLARATION(V)         \
   FOR_EACH_AST_EXPRESSION(V)          \
   FOR_EACH_AST_LITERAL(V)             \
+  FOR_EACH_AST_REGEXP(V)              \
   FOR_EACH_AST_STATEMENT(V)           \
   FOR_EACH_AST_TOKEN(V)               \
   V(Module)
@@ -107,6 +124,7 @@ enum class MethodKind;
 enum class NameId;
 class NodeEditor;
 class NodeFactory;
+enum class RegExpAssertionKind;
 enum class PunctuatorKind;
 
 // Expression or BlockStatement

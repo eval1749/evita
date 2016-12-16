@@ -404,6 +404,25 @@ class JOANA_PUBLIC_EXPORT ReferenceExpression final
 };
 
 //
+// RegExpLiteralExpression
+//
+class JOANA_PUBLIC_EXPORT RegExpLiteralExpression final
+    : public NodeTemplate<Expression, RegExp*, Token*> {
+  DECLARE_CONCRETE_AST_NODE(RegExpLiteralExpression, Expression);
+
+ public:
+  ~RegExpLiteralExpression() final;
+
+  const Token& flags() const { return *member_at<1>(); }
+  const RegExp& regexp() const { return *member_at<0>(); }
+
+ private:
+  RegExpLiteralExpression(RegExp* regexp, Token* flags);
+
+  DISALLOW_COPY_AND_ASSIGN(RegExpLiteralExpression);
+};
+
+//
 // UnaryExpression
 //
 class JOANA_PUBLIC_EXPORT UnaryExpression final

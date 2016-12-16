@@ -55,6 +55,18 @@ namespace ast {
   V(PROPERTY, EXPECT_RBRACKET)               \
   V(PROPERTY, INVALID_TOKEN)                 \
   V(PROPERTY, INVALID_STATIC)                \
+  V(REGEXP, EXPECT_CHAR)                     \
+  V(REGEXP, EXPECT_PATTERN)                  \
+  V(REGEXP, EXPECT_PRIMARY)                  \
+  V(REGEXP, EXPECT_RBRACE)                   \
+  V(REGEXP, EXPECT_RBRACKET)                 \
+  V(REGEXP, EXPECT_RPAREN)                   \
+  V(REGEXP, INVALID_GROUPING)                \
+  V(REGEXP, INVALID_NUMBER)                  \
+  V(REGEXP, INVALID_OR)                      \
+  V(REGEXP, INVALID_REPEAT)                  \
+  V(REGEXP, INVALID_SEQUENCE)                \
+  V(REGEXP, UNEXPECT_RPAREN)                 \
   V(STATEMENT, CATCH_EXPECT_NAME)            \
   V(STATEMENT, EXPECT_CATCH)                 \
   V(STATEMENT, EXPECT_COLON)                 \

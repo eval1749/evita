@@ -8,6 +8,7 @@
 #include "joana/public/ast/expressions.h"
 #include "joana/public/ast/literals.h"
 #include "joana/public/ast/module.h"
+#include "joana/public/ast/regexp.h"
 #include "joana/public/ast/statements.h"
 #include "joana/public/ast/tokens.h"
 

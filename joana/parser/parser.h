@@ -23,6 +23,9 @@ class Lexer;
 
 class Parser final {
  public:
+  // Expose |ErrorCode| for RegExp parser and template parser.
+  enum class ErrorCode;
+
   // Expose |OperatorPrecedence| for implementing static helper functions.
   enum class OperatorPrecedence;
 
@@ -37,7 +40,6 @@ class Parser final {
 
  private:
   class BracketStack;
-  enum class ErrorCode;
   class ExpectSemiColonScope;
 
   class SourceCodeRangeScope final {
@@ -106,6 +108,8 @@ class Parser final {
   // do-while, if, switch, and while statements.
   const ast::Expression& ParseParenthesisExpression();
 
+  ast::RegExp& ParseRegExp();
+
   std::vector<ast::Expression*> ParseArgumentList();
   ast::Expression& ParseArrayLiteralExpression();
   ast::Expression& ParseAssignmentExpression();
@@ -121,6 +125,7 @@ class Parser final {
   ast::Expression& ParseObjectLiteralExpression();
   ast::Expression& ParseParenthesis();
   ast::Expression& ParsePrimaryExpression();
+  ast::Expression& ParseRegExpLiteral();
   ast::Expression& ParseUnaryExpression();
   ast::Expression& ParseUpdateExpression();
   ast::Expression& ParseYieldExpression();

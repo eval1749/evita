@@ -12,6 +12,7 @@
 #include "joana/public/ast/expressions.h"
 #include "joana/public/ast/literals.h"
 #include "joana/public/ast/node_factory.h"
+#include "joana/public/ast/regexp.h"
 #include "joana/public/ast/tokens.h"
 #include "joana/public/source_code.h"
 
@@ -489,6 +490,14 @@ ast::Expression& Parser::ParsePrimaryExpression() {
   // TODO(eval1749): NYI template literal
   Advance();
   return NewInvalidExpression(ErrorCode::ERROR_EXPRESSION_INVALID);
+}
+
+ast::Expression& Parser::ParseRegExpLiteral() {
+  auto& regexp = ParseRegExp();
+  auto& flags = !CanPeekToken() && PeekToken().Is<ast::Name>() ? ConsumeToken()
+                                                               : NewEmptyName();
+  return node_factory().NewRegExpLiteralExpression(GetSourceCodeRange(), regexp,
+                                                   flags);
 }
 
 ast::Expression& Parser::ParseUnaryExpression() {

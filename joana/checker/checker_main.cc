@@ -26,6 +26,8 @@
 #include "joana/public/memory/zone_allocated.h"
 #include "joana/public/source_code.h"
 #include "joana/public/source_code_factory.h"
+#include "joana/public/source_code_line.h"
+#include "joana/public/source_code_line_cache.h"
 #include "joana/public/source_code_range.h"
 
 namespace joana {
@@ -76,6 +78,37 @@ void SimpleErrorSink::AddError(const SourceCodeRange& range, int error_code) {
 SimpleErrorSink::SimpleErrorSink() : zone_("SimpleErrorSink") {}
 SimpleErrorSink::~SimpleErrorSink() = default;
 
+//
+// Module
+//
+class ScriptModule final {
+ public:
+  ScriptModule(const SourceCode& source_code, const ast::Node& root_node);
+  ScriptModule() = default;
+
+  SourceCodeLine SourceCodeLinetAt(int offset) const;
+
+ private:
+  const std::unique_ptr<SourceCodeLine::Cache> line_cache_;
+  const ast::Node& root_node_;
+  const SourceCode& source_code_;
+
+  DISALLOW_COPY_AND_ASSIGN(ScriptModule);
+};
+
+ScriptModule::ScriptModule(const SourceCode& source_code,
+                           const ast::Node& root_node)
+    : line_cache_(new SourceCodeLine::Cache(source_code)),
+      root_node_(root_node_),
+      source_code_(source_code) {}
+
+SourceCodeLine ScriptModule::SourceCodeLinetAt(int offset) const {
+  return line_cache_->Get(offset);
+}
+
+//
+// Checker
+//
 class Checker final {
  public:
   Checker();
@@ -87,6 +120,8 @@ class Checker final {
   int Run();
 
  private:
+  ScriptModule& ModuleOf(const SourceCode& source_code) const;
+
   SimpleErrorSink error_sink_;
   Zone node_zone_;
   ast::NodeFactory node_factory_;
@@ -94,7 +129,8 @@ class Checker final {
   std::vector<const SourceCode*> source_codes_;
   Zone source_code_zone_;
   SourceCode::Factory source_code_factory_;
-  std::unordered_map<const SourceCode*, const ast::Node*> ast_map_;
+  std::unordered_map<const SourceCode*, std::unique_ptr<ScriptModule>>
+      module_map_;
 
   DISALLOW_COPY_AND_ASSIGN(Checker);
 };
@@ -114,16 +150,39 @@ void Checker::AddSourceCode(const base::FilePath& file_path,
   const auto& source_code = source_code_factory_.New(file_path, file_contents);
   source_codes_.push_back(&source_code);
   const auto& module = Parse(context_.get(), source_code.range());
-  ast_map_.emplace(&source_code, &module);
+  module_map_.emplace(&source_code, new ScriptModule(source_code, module));
 }
 
 int Checker::Run() {
+  const auto kMoreContext = 20;
   for (auto* const error : error_sink_.errors()) {
-    std::cerr << error->range().source_code().file_path().LossyDisplayName()
-              << '(' << error->range().start() << ':' << error->range().end()
-              << ") " << ast::ErrorStringOf(error->error_code()) << std::endl;
+    const auto& source_code = error->range().source_code();
+    const auto& module = ModuleOf(source_code);
+    const auto& line = module.SourceCodeLinetAt(error->range().end());
+    std::cerr << source_code.file_path().value() << '(' << line.number() << ") "
+              << ast::ErrorStringOf(error->error_code()) << std::endl;
+
+    const auto& start_line = module.SourceCodeLinetAt(error->range().start());
+    if (start_line != line) {
+      std::cerr << base::UTF16ToUTF8(start_line.range().GetString());
+      if (start_line.number() + 1 != line.number())
+        std::cerr << "  ..." << std::endl;
+    }
+
+    std::cerr << base::UTF16ToUTF8(line.range().GetString());
+    const auto column = error->range().end() - line.range().start();
+    for (auto counter = 0; counter < column; ++counter)
+      std::cerr << ' ';
+    std::cerr << '^' << std::endl;
   }
   return error_sink_.errors().size() == 0 ? 0 : 1;
+}
+
+ScriptModule& Checker::ModuleOf(const SourceCode& source_code) const {
+  const auto& it = module_map_.find(&source_code);
+  DCHECK(it != module_map_.end()) << source_code.file_path().value()
+                                  << " is not found.";
+  return *it->second;
 }
 
 }  // namespace internal

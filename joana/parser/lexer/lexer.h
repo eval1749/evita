@@ -8,6 +8,7 @@
 #include <memory>
 
 #include "base/macros.h"
+#include "base/strings/string16.h"
 #include "joana/public/ast/node_forward.h"
 
 namespace joana {
@@ -32,8 +33,22 @@ class Lexer final {
   const SourceCode& source_code() const;
 
   void Advance();
+
+  // Returns true if |Lexer| has a character.
+  bool CanPeekChar() const;
+
   // Returns true if |Lexer| has a token.
   bool CanPeekToken() const { return current_token_ != nullptr; }
+
+  base::char16 ConsumeChar();
+
+  // Returns true if |PeekChar()| is |expected_char| and advance to next
+  // character.
+  bool ConsumeCharIf(base::char16 expected_char);
+
+  // Returns character.
+  base::char16 PeekChar() const;
+
   ast::Token& PeekToken() const;
 
  private:

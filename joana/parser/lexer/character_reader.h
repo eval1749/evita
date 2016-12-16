@@ -23,13 +23,13 @@ class CharacterReader final {
   int location() const { return current_; }
   const SourceCode& source_code() const;
 
-  void Advance();
-  bool AdvanceIf(base::char16 char_code);
-  bool CanPeek() const;
-  base::char16 Consume();
-  base::char16 Peek() const;
+  bool CanPeekChar() const;
+  base::char16 ConsumeChar();
+  base::char16 PeekChar() const;
 
  private:
+  void Advance();
+
   int current_;
   const SourceCodeRange& range_;
 

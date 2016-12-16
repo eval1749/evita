@@ -28,7 +28,7 @@ class JOANA_PUBLIC_EXPORT SourceCode final {
   int size() const;
   SourceCodeRange start() const;
 
-  base::char16 GetChar(int offset) const;
+  base::char16 CharAt(int offset) const;
   base::StringPiece16 GetString(int start, int end) const;
   SourceCodeRange Slice(int start, int end) const;
 

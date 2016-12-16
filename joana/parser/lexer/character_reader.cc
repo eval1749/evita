@@ -41,7 +41,7 @@ base::char16 CharacterReader::Consume() {
 
 base::char16 CharacterReader::Get() const {
   DCHECK(HasCharacter());
-  return range_.source_code().GetChar(current_);
+  return range_.source_code().CharAt(current_);
 }
 
 bool CharacterReader::HasCharacter() const {

@@ -38,7 +38,7 @@ SourceCodeLine SourceCodeLine::Cache::Get(int offset) const {
     // Extend offset cache until |offset|.
     while (runner_ < source_code_.size()) {
       ++runner_;
-      if (!IsLineTerminator(source_code_.GetChar(runner_ - 1)))
+      if (!IsLineTerminator(source_code_.CharAt(runner_ - 1)))
         continue;
       offsets_.push_back(runner_);
       if (runner_ > offset)

@@ -72,7 +72,7 @@ std::pair<int, int> LineNumberCache::Get(int offset) const {
 bool LineNumberCache::IsEndOfLine(Offset offset) const {
   DCHECK_LE(offset, source_code_.size());
   return offset == source_code_.size() ||
-         IsLineTerminator(source_code_.GetChar(offset));
+         IsLineTerminator(source_code_.CharAt(offset));
 }
 
 }  // namespace joana

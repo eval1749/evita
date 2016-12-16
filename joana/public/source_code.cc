@@ -30,7 +30,7 @@ SourceCodeRange SourceCode::start() const {
   return SourceCodeRange(*this, 0, 0);
 }
 
-base::char16 SourceCode::GetChar(int offset) const {
+base::char16 SourceCode::CharAt(int offset) const {
   DCHECK_GE(offset, 0);
   DCHECK_LT(static_cast<size_t>(offset), file_contents_.size());
   return file_contents_[offset];

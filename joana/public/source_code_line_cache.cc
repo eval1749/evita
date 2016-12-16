@@ -34,18 +34,18 @@ SourceCodeLine::Cache::~Cache() = default;
 
 SourceCodeLine SourceCodeLine::Cache::Get(int offset) const {
   DCHECK_GE(offset, 0);
-  if (offset > runner_) {
+  if (offset > runner_ || offsets_.empty()) {
     // Extend offset cache until |offset|.
     while (runner_ < source_code_.size()) {
-      const auto offset = runner_;
       ++runner_;
-      if (!IsLineTerminator(source_code_.GetChar(offset)))
+      if (!IsLineTerminator(source_code_.GetChar(runner_ - 1)))
         continue;
       offsets_.push_back(runner_);
       if (runner_ > offset)
         break;
     }
   }
+  DCHECK_LE(offset, runner_);
 
   if (offsets_.empty()) {
     // There is no line terminate in |source_code_|.
@@ -60,6 +60,7 @@ SourceCodeLine SourceCodeLine::Cache::Get(int offset) const {
   const auto& begin = offsets_.begin();
   const auto& end = offsets_.end();
   const auto& it = std::lower_bound(begin, end, offset);
+  DCHECK(it != end);
   const auto& start = *it == offset ? it : std::prev(it);
   const auto line_number = static_cast<int>(start - begin) + 2;
   const auto& next = std::next(start);

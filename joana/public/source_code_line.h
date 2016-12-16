@@ -5,6 +5,8 @@
 #ifndef JOANA_PUBLIC_SOURCE_CODE_LINE_H_
 #define JOANA_PUBLIC_SOURCE_CODE_LINE_H_
 
+#include <iosfwd>
+
 #include "joana/public/source_code_range.h"
 
 namespace joana {
@@ -32,6 +34,8 @@ class JOANA_PUBLIC_EXPORT SourceCodeLine final {
   int number_ = 0;
 };
 
+JOANA_PUBLIC_EXPORT std::ostream& operator<<(std::ostream& ostream,
+                                             const SourceCodeLine& line);
 }  // namespace joana
 
 #endif  // JOANA_PUBLIC_SOURCE_CODE_LINE_H_

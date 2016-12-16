@@ -17,6 +17,8 @@ class JOANA_PUBLIC_EXPORT SourceCodeLine::Cache final {
   Cache(const SourceCode& source_code);
   ~Cache();
 
+  const SourceCode& source_code() const { return source_code_; }
+
   SourceCodeLine Get(int offset) const;
 
  private:

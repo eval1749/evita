@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include <algorithm>
+#include <ostream>
 
 #include "joana/public/source_code_range.h"
 

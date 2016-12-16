@@ -25,9 +25,9 @@ class CharacterReader final {
 
   void Advance();
   bool AdvanceIf(base::char16 char_code);
+  bool CanPeek() const;
   base::char16 Consume();
-  base::char16 Get() const;
-  bool HasCharacter() const;
+  base::char16 Peek() const;
 
  private:
   int current_;

@@ -141,7 +141,7 @@ ast::Token& Lexer::PeekToken() const {
 
 ast::Token& Lexer::HandleBlockComment() {
   auto is_after_asterisk = false;
-  while (reader_->HasCharacter()) {
+  while (reader_->CanPeek()) {
     if (is_after_asterisk && reader_->AdvanceIf('/'))
       return node_factory().NewComment(MakeTokenRange());
     is_after_asterisk = reader_->Consume() == '*';
@@ -151,7 +151,7 @@ ast::Token& Lexer::HandleBlockComment() {
 
 ast::Token& Lexer::HandleCharacter() {
   token_start_ = reader_->location();
-  switch (reader_->Get()) {
+  switch (reader_->Peek()) {
     case ' ':
     case 0x0009:  // t TAB
     case 0x000A:  // n LF
@@ -310,9 +310,9 @@ ast::Token& Lexer::HandleCharacter() {
                             ast::PunctuatorKind::BitOrEqual);
     invalid_character:
     default:
-      if (reader_->Get() >= 'A' && reader_->Get() <= 'Z')
+      if (reader_->Peek() >= 'A' && reader_->Peek() <= 'Z')
         return HandleName();
-      if (reader_->Get() >= 'a' && reader_->Get() <= 'z')
+      if (reader_->Peek() >= 'a' && reader_->Peek() <= 'z')
         return HandleName();
       // TODO(eval1749): NYI: UnicodeIDStart
       // TODO(eval1749): NYI: \ UnicodeEscapeSequence
@@ -325,8 +325,8 @@ ast::Token& Lexer::HandleDecimal() {
   const auto kMaxIntegerPart = std::numeric_limits<uint64_t>::max() / 10 - 1;
   uint64_t digits_part = reader_->Consume() - '0';
   auto digits_scale = 0;
-  while (reader_->HasCharacter()) {
-    if (!IsDigitWithBase(reader_->Get(), 10))
+  while (reader_->CanPeek()) {
+    if (!IsDigitWithBase(reader_->Peek(), 10))
       break;
     const auto digit = FromDigitWithBase(reader_->Consume(), 10);
     if (digits_part > kMaxIntegerPart) {
@@ -337,8 +337,8 @@ ast::Token& Lexer::HandleDecimal() {
     digits_part += digit;
   }
   if (reader_->AdvanceIf('.')) {
-    while (reader_->HasCharacter()) {
-      if (!IsDigitWithBase(reader_->Get(), 10))
+    while (reader_->CanPeek()) {
+      if (!IsDigitWithBase(reader_->Peek(), 10))
         break;
       const auto digit = FromDigitWithBase(reader_->Consume(), 10);
       if (digits_part > kMaxIntegerPart) {
@@ -358,8 +358,8 @@ ast::Token& Lexer::HandleDecimal() {
       exponent_sign = 1;
     else if (reader_->AdvanceIf('-'))
       exponent_sign = -1;
-    while (reader_->HasCharacter()) {
-      if (!IsDigitWithBase(reader_->Get(), 10))
+    while (reader_->CanPeek()) {
+      if (!IsDigitWithBase(reader_->Peek(), 10))
         break;
       const auto digit = FromDigitWithBase(reader_->Consume(), 10);
       if (exponent_part > kMaxIntegerPart)
@@ -376,7 +376,7 @@ ast::Token& Lexer::HandleDecimal() {
 }
 
 ast::Token& Lexer::HandleDigitZero() {
-  switch (reader_->Get()) {
+  switch (reader_->Peek()) {
     case '0':
     case '1':
     case '2':
@@ -413,7 +413,7 @@ ast::Token& Lexer::HandleInteger(int base) {
   const auto kMaxInteger = static_cast<uint64_t>(1) << 53;
   auto number_of_digits = 0;
   auto is_overflow = false;
-  while (reader_->HasCharacter() && IsDigitWithBase(reader_->Get(), base)) {
+  while (reader_->CanPeek() && IsDigitWithBase(reader_->Peek(), base)) {
     const auto digit = FromDigitWithBase(reader_->Consume(), base);
     if (accumulator > kMaxInteger / base) {
       if (!is_overflow)
@@ -426,10 +426,10 @@ ast::Token& Lexer::HandleInteger(int base) {
     ++number_of_digits;
   }
 
-  if (reader_->HasCharacter() && IsIdentifierPart(reader_->Get())) {
+  if (reader_->CanPeek() && IsIdentifierPart(reader_->Peek())) {
     reader_->Advance();
     AddError(ErrorCode::NUMERIC_LITERAL_INTEGER_BAD_DIGIT);
-    while (reader_->HasCharacter() && IsIdentifierPart(reader_->Get()))
+    while (reader_->CanPeek() && IsIdentifierPart(reader_->Peek()))
       reader_->Advance();
     return NewInvalid(ErrorCode::NUMERIC_LITERAL_INTEGER_BAD_DIGIT);
   }
@@ -441,7 +441,7 @@ ast::Token& Lexer::HandleInteger(int base) {
 }
 
 ast::Token& Lexer::HandleLineComment() {
-  while (reader_->HasCharacter()) {
+  while (reader_->CanPeek()) {
     if (IsLineTerminator(reader_->Consume()))
       break;
   }
@@ -449,8 +449,8 @@ ast::Token& Lexer::HandleLineComment() {
 }
 
 ast::Token& Lexer::HandleName() {
-  while (reader_->HasCharacter()) {
-    if (!IsIdentifierPart(reader_->Get()))
+  while (reader_->CanPeek()) {
+    if (!IsIdentifierPart(reader_->Peek()))
       break;
     reader_->Advance();
   }
@@ -487,7 +487,7 @@ ast::Token& Lexer::HandleStringLiteral() {
   const auto delimiter = reader_->Consume();
   auto accumulator = 0;
   auto backslash_start = 0;
-  while (reader_->HasCharacter()) {
+  while (reader_->CanPeek()) {
     switch (state) {
       case State::Normal:
         if (reader_->AdvanceIf(delimiter)) {
@@ -495,23 +495,23 @@ ast::Token& Lexer::HandleStringLiteral() {
               MakeTokenRange(),
               base::StringPiece16(characters.data(), characters.size()));
         }
-        if (reader_->Get() == '\\') {
+        if (reader_->Peek() == '\\') {
           backslash_start = reader_->location();
           state = State::Backslash;
           break;
         }
-        if (IsLineTerminator(reader_->Get())) {
+        if (IsLineTerminator(reader_->Peek())) {
           AddError(RangeFrom(token_start_), ErrorCode::STRING_LITERAL_NEWLINE);
         }
-        characters.push_back(reader_->Get());
+        characters.push_back(reader_->Peek());
         break;
       case State::Backslash:
-        switch (reader_->Get()) {
+        switch (reader_->Peek()) {
           case '\'':
           case '"':
           case '\\':
             state = State::Normal;
-            characters.push_back(reader_->Get());
+            characters.push_back(reader_->Peek());
             break;
           case 'b':
             state = State::Normal;
@@ -564,12 +564,12 @@ ast::Token& Lexer::HandleStringLiteral() {
           break;
         continue;
       case State::BackslashU:
-        if (IsHexDigit(reader_->Get())) {
+        if (IsHexDigit(reader_->Peek())) {
           state = State::BackslashU1;
-          accumulator = FromHexDigit(reader_->Get());
+          accumulator = FromHexDigit(reader_->Peek());
           break;
         }
-        if (reader_->Get() == '{') {
+        if (reader_->Peek() == '{') {
           state = State::BackslashUB;
           break;
         }
@@ -578,30 +578,30 @@ ast::Token& Lexer::HandleStringLiteral() {
         state = State::Normal;
         break;
       case State::BackslashU1:
-        if (!IsHexDigit(reader_->Get()))
+        if (!IsHexDigit(reader_->Peek()))
           goto invalid_hex_digit;
         accumulator *= 16;
-        accumulator |= FromHexDigit(reader_->Get());
+        accumulator |= FromHexDigit(reader_->Peek());
         state = State::BackslashU2;
         break;
       case State::BackslashU2:
-        if (!IsHexDigit(reader_->Get()))
+        if (!IsHexDigit(reader_->Peek()))
           goto invalid_hex_digit;
         accumulator *= 16;
-        accumulator |= FromHexDigit(reader_->Get());
+        accumulator |= FromHexDigit(reader_->Peek());
         state = State::BackslashU3;
         break;
       case State::BackslashU3:
-        if (!IsHexDigit(reader_->Get()))
+        if (!IsHexDigit(reader_->Peek()))
           goto invalid_hex_digit;
         accumulator *= 16;
-        accumulator |= FromHexDigit(reader_->Get());
+        accumulator |= FromHexDigit(reader_->Peek());
         characters.push_back(static_cast<base::char16>(accumulator));
         state = State::Normal;
         break;
       case State::BackslashUB:
-        if (IsHexDigit(reader_->Get())) {
-          accumulator = FromHexDigit(reader_->Get());
+        if (IsHexDigit(reader_->Peek())) {
+          accumulator = FromHexDigit(reader_->Peek());
           state = State::BackslashUBx;
           break;
         }
@@ -610,7 +610,7 @@ ast::Token& Lexer::HandleStringLiteral() {
         state = State::Normal;
         break;
       case State::BackslashUBx:
-        if (reader_->Get() == '}') {
+        if (reader_->Peek() == '}') {
           if (accumulator > kMaxUnicodeCodePoint) {
             AddError(RangeFrom(backslash_start),
                      ErrorCode::STRING_LITERAL_BACKSLASH_UNICODE);
@@ -620,9 +620,9 @@ ast::Token& Lexer::HandleStringLiteral() {
           state = State::Normal;
           break;
         }
-        if (IsHexDigit(reader_->Get())) {
+        if (IsHexDigit(reader_->Peek())) {
           accumulator *= 16;
-          accumulator |= FromHexDigit(reader_->Get());
+          accumulator |= FromHexDigit(reader_->Peek());
           break;
         }
         AddError(RangeFrom(backslash_start),
@@ -630,16 +630,16 @@ ast::Token& Lexer::HandleStringLiteral() {
         state = State::Normal;
         break;
       case State::BackslashX:
-        if (!IsHexDigit(reader_->Get()))
+        if (!IsHexDigit(reader_->Peek()))
           goto invalid_hex_digit;
-        accumulator = FromHexDigit(reader_->Get());
+        accumulator = FromHexDigit(reader_->Peek());
         state = State::BackslashX1;
         break;
       case State::BackslashX1:
-        if (!IsHexDigit(reader_->Get()))
+        if (!IsHexDigit(reader_->Peek()))
           goto invalid_hex_digit;
         accumulator *= 16;
-        accumulator |= FromHexDigit(reader_->Get());
+        accumulator |= FromHexDigit(reader_->Peek());
         characters.push_back(static_cast<base::char16>(accumulator));
         state = State::Normal;
         break;
@@ -658,7 +658,7 @@ ast::Token& Lexer::HandleStringLiteral() {
 }
 
 SourceCodeRange Lexer::MakeTokenRange() const {
-  if (reader_->HasCharacter())
+  if (reader_->CanPeek())
     DCHECK_LT(token_start_, reader_->location());
   return source_code().Slice(token_start_, reader_->location());
 }
@@ -678,8 +678,8 @@ ast::Token& Lexer::NewPunctuator(ast::PunctuatorKind kind) {
 }
 
 ast::Token* Lexer::NextToken() {
-  while (reader_->HasCharacter()) {
-    if (!IsWhitespace(reader_->Get()))
+  while (reader_->CanPeek()) {
+    if (!IsWhitespace(reader_->Peek()))
       return &HandleCharacter();
     reader_->Advance();
   }

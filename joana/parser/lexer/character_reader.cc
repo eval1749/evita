@@ -24,28 +24,28 @@ void CharacterReader::Advance() {
   ++current_;
 }
 
+bool CharacterReader::CanPeek() const {
+  return current_ < range_.end();
+}
+
 bool CharacterReader::AdvanceIf(base::char16 char_code) {
-  if (!HasCharacter())
+  if (!CanPeek())
     return false;
-  if (Get() != char_code)
+  if (Peek() != char_code)
     return false;
   Advance();
   return true;
 }
 
 base::char16 CharacterReader::Consume() {
-  const auto result = Get();
+  const auto result = Peek();
   Advance();
   return result;
 }
 
-base::char16 CharacterReader::Get() const {
-  DCHECK(HasCharacter());
+base::char16 CharacterReader::Peek() const {
+  DCHECK(CanPeek());
   return range_.source_code().CharAt(current_);
-}
-
-bool CharacterReader::HasCharacter() const {
-  return current_ < range_.end();
 }
 
 }  // namespace internal

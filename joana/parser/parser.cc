@@ -170,21 +170,25 @@ bool Parser::ConsumeTokenIf(ast::PunctuatorKind kind) {
 void Parser::ExpectToken(ast::NameId name_id, ErrorCode error_code) {
   if (ConsumeTokenIf(name_id))
     return;
-  if (CanPeekToken())
-    return AddError(PeekToken(), error_code);
-  return AddError(lexer_->location(), error_code);
+  return AddError(
+      source_code().Slice(range_stack_.top(),
+                          tokens_[tokens_.size() - 2]->range().end()),
+      error_code);
 }
 
 void Parser::ExpectToken(ast::PunctuatorKind kind, ErrorCode error_code) {
   if (ConsumeTokenIf(kind))
     return;
-  if (CanPeekToken())
-    return AddError(PeekToken(), error_code);
-  return AddError(lexer_->location(), error_code);
+  return AddError(
+      source_code().Slice(range_stack_.top(),
+                          tokens_[tokens_.size() - 2]->range().end()),
+      error_code);
 }
 
 SourceCodeRange Parser::GetSourceCodeRange() const {
-  return source_code().Slice(range_stack_.top(), lexer_->location().end());
+  return source_code().Slice(
+      range_stack_.top(),
+      CanPeekToken() ? PeekToken().range().end() : lexer_->location().end());
 }
 
 ast::Token& Parser::NewEmptyName() {

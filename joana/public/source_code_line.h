@@ -12,14 +12,19 @@ namespace joana {
 // Line number starts with one.
 class JOANA_PUBLIC_EXPORT SourceCodeLine final {
  public:
+  class Cache;
+
   SourceCodeLine(const SourceCodeLine& other);
   ~SourceCodeLine();
 
   int number() const { return number_; }
   const SourceCodeRange& range() const { return range_; }
 
+  bool operator==(const SourceCodeLine& other) const;
+  bool operator!=(const SourceCodeLine& other) const;
+
  private:
-  friend class SourceCodeLineCache;
+  friend class SourceCodeLineTest;
 
   SourceCodeLine(const SourceCodeRange& range, int number);
 

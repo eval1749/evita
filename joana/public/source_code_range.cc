@@ -55,8 +55,8 @@ SourceCodeRange SourceCodeRange::Merge(const SourceCodeRange& range1,
 }
 
 std::ostream& operator<<(std::ostream& ostream, const SourceCodeRange& range) {
-  return ostream << '"' << range.source_code().file_path().value() << '('
-                 << range.start() << ':' << range.end() << ")\"";
+  return ostream << range.source_code().file_path().value() << '['
+                 << range.start() << '-' << range.end() << "]";
 }
 
 }  // namespace joana

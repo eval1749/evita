@@ -141,6 +141,8 @@ std::vector<ast::Expression*> Parser::ParseArgumentList() {
   std::vector<ast::Expression*> arguments;
   while (CanPeekToken()) {
     arguments.push_back(&ParseExpression());
+    if (!CanPeekToken())
+      break;
     if (ConsumeTokenIf(ast::PunctuatorKind::RightParenthesis))
       return arguments;
     if (PeekToken() == ast::PunctuatorKind::SemiColon) {

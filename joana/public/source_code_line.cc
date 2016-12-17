@@ -7,12 +7,17 @@
 #include "joana/public/source_code_line.h"
 
 #include "base/logging.h"
+#include "joana/public/source_code.h"
 
 namespace joana {
 
 SourceCodeLine::SourceCodeLine(const SourceCodeRange& range, int number)
     : number_(number), range_(range) {
   DCHECK_GE(number_, 1);
+#if DCHECK_IS_ON()
+  for (auto offset = range.start(); offset < range.end() - 1; ++offset)
+    DCHECK_NE(range.source_code().CharAt(offset), '\n') << offset;
+#endif
 }
 
 SourceCodeLine::SourceCodeLine(const SourceCodeLine& other)

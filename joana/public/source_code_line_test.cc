@@ -55,6 +55,13 @@ TEST_F(SourceCodeLineTest, Get) {
   EXPECT_EQ(NewSourceCodeLine(source_code, 0, 3, 1), cache.Get(1))
       << "no cache update";
 
+  EXPECT_EQ(NewSourceCodeLine(source_code, 3, 6, 2), cache.Get(3))
+      << "populate cache";
+  EXPECT_EQ(NewSourceCodeLine(source_code, 3, 6, 2), cache.Get(4))
+      << "cache hit";
+  EXPECT_EQ(NewSourceCodeLine(source_code, 3, 6, 2), cache.Get(5))
+      << "cache hit";
+
   EXPECT_EQ(NewSourceCodeLine(source_code, 6, 11, 3), cache.Get(6))
       << "populate cache";
   EXPECT_EQ(NewSourceCodeLine(source_code, 6, 11, 3), cache.Get(7)) << "scan";
@@ -64,13 +71,6 @@ TEST_F(SourceCodeLineTest, Get) {
   EXPECT_EQ(NewSourceCodeLine(source_code, 0, 3, 1), cache.Get(1))
       << "cache hit";
   EXPECT_EQ(NewSourceCodeLine(source_code, 0, 3, 1), cache.Get(2))
-      << "cache hit";
-
-  EXPECT_EQ(NewSourceCodeLine(source_code, 3, 6, 2), cache.Get(3))
-      << "cache hit";
-  EXPECT_EQ(NewSourceCodeLine(source_code, 3, 6, 2), cache.Get(4))
-      << "cache hit";
-  EXPECT_EQ(NewSourceCodeLine(source_code, 3, 6, 2), cache.Get(5))
       << "cache hit";
 
   EXPECT_EQ(NewSourceCodeLine(source_code, 6, 11, 3), cache.Get(6))

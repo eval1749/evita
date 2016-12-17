@@ -34,7 +34,7 @@ SourceCodeLine::Cache::~Cache() = default;
 
 SourceCodeLine SourceCodeLine::Cache::Get(int offset) const {
   DCHECK_GE(offset, 0);
-  if (offset > runner_ || offsets_.empty()) {
+  if (offsets_.empty() || offset >= offsets_.back()) {
     // Extend offset cache until |offset|.
     while (runner_ < source_code_.size()) {
       ++runner_;

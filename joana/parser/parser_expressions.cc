@@ -71,6 +71,8 @@ ast::Punctuator& ConvertToPostOperator(ast::NodeFactory* factory,
   return factory->NewPunctuator(op.range(), ast::PunctuatorKind::Invalid);
 }
 
+// "yield" is not unary operator since Since an expression after "yield" is
+// optional,
 bool IsUnaryOperator(const ast::Token& token) {
   return token == ast::NameId::Await || token == ast::NameId::Delete ||
          token == ast::NameId::TypeOf || token == ast::NameId::Void ||
@@ -84,11 +86,6 @@ bool IsUnaryOperator(const ast::Token& token) {
 bool IsUpdateOperator(const ast::Token& token) {
   return token == ast::PunctuatorKind::PlusPlus ||
          token == ast::PunctuatorKind::MinusMinus;
-}
-
-bool CanStartExpression(const ast::Token& token) {
-  return !token.Is<ast::Punctuator>() || IsUnaryOperator(token) ||
-         IsUpdateOperator(token);
 }
 
 }  // namespace
@@ -600,9 +597,9 @@ ast::Expression& Parser::ParseYieldExpression() {
     ConsumeToken();
     return NewUnaryExpression(yield_star, ParseAssignmentExpression());
   }
-  if (CanStartExpression(PeekToken()))
-    return NewUnaryExpression(keyword, ParseAssignmentExpression());
-  return NewUnaryExpression(keyword, NewElisionExpression());
+  if (PeekToken() == ast::PunctuatorKind::SemiColon)
+    return NewUnaryExpression(keyword, NewElisionExpression());
+  return NewUnaryExpression(keyword, ParseAssignmentExpression());
 }
 
 }  // namespace internal

@@ -247,6 +247,8 @@ TEST_F(ParserTest, ExpressionObjectLiteral) {
       "  async quux() { 3; }\n"
       "  get getter() { 4; }\n"
       "  set setter() { 5; }\n"
+      "  123: 456,\n"
+      "  'foo': 789,\n"
       "  [1]: 6,\n"
       "  [2]() { 7; }\n"
       "};\n");

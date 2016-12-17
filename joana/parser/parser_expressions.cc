@@ -397,8 +397,6 @@ ast::Expression& Parser::ParseObjectLiteralExpression() {
 
     if (PeekToken() == ast::NameId::Static) {
       // 'static' can be a property name and method name.
-      if (!CanPeekToken())
-        break;
       auto& property_name_static = ParsePropertyName();
       if (!CanPeekToken())
         break;

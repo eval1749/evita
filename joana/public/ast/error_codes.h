@@ -53,6 +53,7 @@ namespace ast {
   V(FUNCTION, INVALID_PARAMETER_LIST)        \
   V(PROPERTY, EXPECT_COMMA)                  \
   V(PROPERTY, EXPECT_RBRACKET)               \
+  V(PROPERTY, INVALID_PROPERTY_NAME)         \
   V(PROPERTY, INVALID_TOKEN)                 \
   V(PROPERTY, INVALID_STATIC)                \
   V(REGEXP, EXPECT_CHAR)                     \

@@ -492,7 +492,7 @@ function makeUniqueName(candidate) {
     if (!findTextDocument(uniqueName))
       return uniqueName;
     ++count;
-    body = ` (${count})`
+    body = ` (${count})`;
   }
 }
 

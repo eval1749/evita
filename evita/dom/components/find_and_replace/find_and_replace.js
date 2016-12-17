@@ -279,10 +279,10 @@ function parseReplacement(document, newSource, matches) {
             state = State.BACKSLASH_DIGIT;
             break;
           case Unicode.LATIN_SMALL_LETTER_A:
-            newText += '\a';
+            newText += '\u0007';  // BELL, C, Perl
             break;
           case Unicode.LATIN_SMALL_LETTER_B:
-            newText += '\b';
+            newText += '\u0008';  // BACKSPACE, C, JavaScript
             break;
           case Unicode.LATIN_SMALL_LETTER_C:
             state = State.BACKSLASH_C;

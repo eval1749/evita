@@ -336,6 +336,20 @@ ast::Statement& Parser::ParseLetStatement() {
   return node_factory().NewLetStatement(GetSourceCodeRange(), expression);
 }
 
+// Yet another entry point called by statement parser.
+const ast::Expression& Parser::ParseParenthesisExpression() {
+  if (!ConsumeTokenIf(ast::PunctuatorKind::LeftParenthesis)) {
+    // Some people think it is redundant that C++ statement requires
+    // parenthesis for an expression after keyword.
+    AddError(ErrorCode::ERROR_STATEMENT_EXPECT_LPAREN);
+    return ParseExpression();
+  }
+  auto& expression = ParseExpression();
+  ExpectToken(ast::PunctuatorKind::RightParenthesis,
+              ErrorCode::ERROR_STATEMENT_EXPECT_RPAREN);
+  return expression;
+}
+
 ast::Statement& Parser::ParseReturnStatement() {
   ExpectSemiColonScope semi_colon_scope(this);
   ConsumeToken();

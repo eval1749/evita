@@ -460,16 +460,6 @@ ast::Expression& Parser::ParseParenthesis() {
       GetSourceCodeRange(), ast::FunctionKind::Normal, expression, statement));
 }
 
-// Yet another entry point called by statement parser.
-const ast::Expression& Parser::ParseParenthesisExpression() {
-  const auto& location = CanPeekToken() ? PeekToken().range() : lexer_->location();
-  auto& expression = ParseExpression();
-  if (auto* grouping = expression.TryAs<ast::GroupExpression>())
-    return grouping->expression();
-  AddError(location, ErrorCode::ERROR_STATEMENT_EXPECT_LPAREN);
-  return expression;
-}
-
 // The entry point for parsing property name.
 ast::Expression& Parser::ParsePrimaryExpression() {
   if (!CanPeekToken())

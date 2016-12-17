@@ -58,10 +58,11 @@ class JOANA_PUBLIC_EXPORT Declaration : public Node {
 //  - x = ReferenceExpression
 //  - (a, b, ...) = GroupExpression with CommaExpression
 //
-class ArrowFunction final : public NodeTemplate<Declaration,
-                                                FunctionKind,
-                                                Expression*,
-                                                ArrowFunctionBody*> {
+class JOANA_PUBLIC_EXPORT ArrowFunction final
+    : public NodeTemplate<Declaration,
+                          FunctionKind,
+                          Expression*,
+                          ArrowFunctionBody*> {
   DECLARE_CONCRETE_AST_NODE(ArrowFunction, Declaration);
 
  public:
@@ -84,7 +85,7 @@ class ArrowFunction final : public NodeTemplate<Declaration,
 //
 // Class
 //
-class Class final
+class JOANA_PUBLIC_EXPORT Class final
     : public NodeTemplate<Declaration, Token*, Expression*, Expression*> {
   DECLARE_CONCRETE_AST_NODE(Class, Declaration);
 
@@ -111,11 +112,11 @@ class Class final
 //  - () = EmptyExpression
 //  - (a, b, ...) = GroupExpression with CommaExpression
 //
-class Function final : public NodeTemplate<Declaration,
-                                           FunctionKind,
-                                           Token*,
-                                           Expression*,
-                                           Statement*> {
+class JOANA_PUBLIC_EXPORT Function final : public NodeTemplate<Declaration,
+                                                               FunctionKind,
+                                                               Token*,
+                                                               Expression*,
+                                                               Statement*> {
   DECLARE_CONCRETE_AST_NODE(Function, Declaration);
 
  public:
@@ -144,12 +145,12 @@ class Function final : public NodeTemplate<Declaration,
 //  - () = EmptyExpression
 //  - (a, b, ...) = GroupExpression with CommaExpression
 //
-class Method final : public NodeTemplate<Declaration,
-                                         MethodKind,
-                                         FunctionKind,
-                                         Expression*,
-                                         Expression*,
-                                         Statement*> {
+class JOANA_PUBLIC_EXPORT Method final : public NodeTemplate<Declaration,
+                                                             MethodKind,
+                                                             FunctionKind,
+                                                             Expression*,
+                                                             Expression*,
+                                                             Statement*> {
   DECLARE_CONCRETE_AST_NODE(Method, Declaration);
 
  public:

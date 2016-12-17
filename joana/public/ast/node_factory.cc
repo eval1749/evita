@@ -10,6 +10,7 @@
 #include "joana/public/ast/expressions.h"
 #include "joana/public/ast/literals.h"
 #include "joana/public/ast/module.h"
+#include "joana/public/ast/regexp.h"
 #include "joana/public/ast/statements.h"
 #include "joana/public/ast/tokens.h"
 
@@ -271,6 +272,14 @@ ReferenceExpression& NodeFactory::NewReferenceExpression(const Name& name) {
   return *new (zone_) ReferenceExpression(const_cast<Name*>(&name));
 }
 
+RegExpLiteralExpression& NodeFactory::NewRegExpLiteralExpression(
+    const SourceCodeRange& range,
+    const RegExp& regexp,
+    const Token& flags) {
+  return *new (zone_) RegExpLiteralExpression(
+      range, const_cast<RegExp*>(&regexp), const_cast<Token*>(&flags));
+}
+
 UnaryExpression& NodeFactory::NewUnaryExpression(const SourceCodeRange& range,
                                                  const Token& op,
                                                  const Expression& expression) {
@@ -299,6 +308,74 @@ StringLiteral& NodeFactory::NewStringLiteral(const SourceCodeRange& range,
 
 UndefinedLiteral& NodeFactory::NewUndefinedLiteral(const Name& name) {
   return *new (zone_) UndefinedLiteral(name);
+}
+
+// RegExp
+RegExp& NodeFactory::NewAnyCharRegExp(const SourceCodeRange& range) {
+  return *new (zone_) AnyCharRegExp(range);
+}
+
+RegExp& NodeFactory::NewAssertionRegExp(const SourceCodeRange& range,
+                                        RegExpAssertionKind kind) {
+  return *new (zone_) AssertionRegExp(range, kind);
+}
+
+RegExp& NodeFactory::NewCaptureRegExp(const SourceCodeRange& range,
+                                      const RegExp& pattern) {
+  return *new (zone_) CaptureRegExp(range, const_cast<RegExp*>(&pattern));
+}
+
+RegExp& NodeFactory::NewCharSetRegExp(const SourceCodeRange& range) {
+  return *new (zone_) CharSetRegExp(range);
+}
+
+RegExp& NodeFactory::NewComplementCharSetRegExp(const SourceCodeRange& range) {
+  return *new (zone_) ComplementCharSetRegExp(range);
+}
+
+RegExp& NodeFactory::NewGreedyRepeatRegExp(const SourceCodeRange& range,
+                                           const ast::RegExp& pattern,
+                                           const RegExpRepeat& repeat) {
+  return *new (zone_)
+      GreedyRepeatRegExp(range, const_cast<RegExp*>(&pattern), repeat);
+}
+
+RegExp& NodeFactory::NewInvalidRegExp(const SourceCodeRange& range,
+                                      int error_code) {
+  return *new (zone_) InvalidRegExp(range, error_code);
+}
+
+RegExp& NodeFactory::NewLazyRepeatRegExp(const SourceCodeRange& range,
+                                         const ast::RegExp& pattern,
+                                         const RegExpRepeat& repeat) {
+  return *new (zone_)
+      LazyRepeatRegExp(range, const_cast<RegExp*>(&pattern), repeat);
+}
+
+RegExp& NodeFactory::NewLiteralRegExp(const SourceCodeRange& range) {
+  return *new (zone_) LiteralRegExp(range);
+}
+
+RegExp& NodeFactory::NewLookAheadRegExp(const SourceCodeRange& range,
+                                        const ast::RegExp& pattern) {
+  return *new (zone_) LookAheadRegExp(range, const_cast<RegExp*>(&pattern));
+}
+
+RegExp& NodeFactory::NewLookAheadNotRegExp(const SourceCodeRange& range,
+                                           const ast::RegExp& pattern) {
+  return *new (zone_) LookAheadNotRegExp(range, const_cast<RegExp*>(&pattern));
+}
+
+RegExp& NodeFactory::NewOrRegExp(const SourceCodeRange& range,
+                                 const std::vector<RegExp*> patterns) {
+  auto* const list = new (zone_) RegExpList(zone_, patterns);
+  return *new (zone_) OrRegExp(range, list);
+}
+
+RegExp& NodeFactory::NewSequenceRegExp(const SourceCodeRange& range,
+                                       const std::vector<RegExp*> patterns) {
+  auto* const list = new (zone_) RegExpList(zone_, patterns);
+  return *new (zone_) SequenceRegExp(range, list);
 }
 
 // Statements factory members

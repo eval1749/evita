@@ -64,6 +64,7 @@ namespace ast {
   V(LazyRepeatRegExp)          \
   V(LiteralRegExp)             \
   V(LookAheadRegExp)           \
+  V(LookAheadNotRegExp)        \
   V(OrRegExp)                  \
   V(SequenceRegExp)
 
@@ -125,6 +126,7 @@ enum class NameId;
 class NodeEditor;
 class NodeFactory;
 enum class RegExpAssertionKind;
+struct RegExpRepeat;
 enum class PunctuatorKind;
 
 // Expression or BlockStatement

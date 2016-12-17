@@ -14,6 +14,7 @@
 #include "joana/public/ast/literals.h"
 #include "joana/public/ast/module.h"
 #include "joana/public/ast/node_traversal.h"
+#include "joana/public/ast/regexp.h"
 #include "joana/public/ast/statements.h"
 #include "joana/public/ast/tokens.h"
 #include "joana/public/source_code.h"
@@ -413,6 +414,86 @@ void SimpleFormatter::VisitUnaryExpression(ast::UnaryExpression* node) {
   if (node->op().Is<ast::Name>())
     *ostream_ << ' ';
   Format(node->expression());
+}
+
+void SimpleFormatter::VisitRegExpLiteralExpression(
+    ast::RegExpLiteralExpression* node) {
+  *ostream_ << '/';
+  Format(node->pattern());
+  *ostream_ << '/';
+  OutputUsingSoourceCode(node->flags());
+}
+
+// RegExp
+void SimpleFormatter::VisitAnyCharRegExp(ast::AnyCharRegExp* node) {
+  *ostream_ << '.';
+}
+
+void SimpleFormatter::VisitAssertionRegExp(ast::AssertionRegExp* node) {
+  OutputUsingSoourceCode(*node);
+}
+
+void SimpleFormatter::VisitCaptureRegExp(ast::CaptureRegExp* node) {
+  *ostream_ << '(';
+  Format(node->pattern());
+  *ostream_ << ')';
+}
+
+void SimpleFormatter::VisitCharSetRegExp(ast::CharSetRegExp* node) {
+  OutputUsingSoourceCode(*node);
+}
+
+void SimpleFormatter::VisitComplementCharSetRegExp(
+    ast::ComplementCharSetRegExp* node) {
+  OutputUsingSoourceCode(*node);
+}
+
+void SimpleFormatter::VisitGreedyRepeatRegExp(ast::GreedyRepeatRegExp* node) {
+  Format(node->pattern());
+  *ostream_ << node->repeat();
+}
+
+void SimpleFormatter::VisitInvalidRegExp(ast::InvalidRegExp* node) {
+  const auto string = ast::ErrorStringOf(node->error_code());
+  if (string.empty())
+    *ostream_ << node->error_code();
+  else
+    *ostream_ << string;
+}
+
+void SimpleFormatter::VisitLiteralRegExp(ast::LiteralRegExp* node) {
+  OutputUsingSoourceCode(*node);
+}
+
+void SimpleFormatter::VisitLazyRepeatRegExp(ast::LazyRepeatRegExp* node) {
+  Format(node->pattern());
+  *ostream_ << node->repeat() << '?';
+}
+
+void SimpleFormatter::VisitLookAheadRegExp(ast::LookAheadRegExp* node) {
+  *ostream_ << "(?=";
+  Format(node->pattern());
+  *ostream_ << ')';
+}
+
+void SimpleFormatter::VisitLookAheadNotRegExp(ast::LookAheadNotRegExp* node) {
+  *ostream_ << "(?!";
+  Format(node->pattern());
+  *ostream_ << ')';
+}
+
+void SimpleFormatter::VisitOrRegExp(ast::OrRegExp* node) {
+  auto delimiter = "";
+  for (const auto& pattern : node->patterns()) {
+    *ostream_ << delimiter;
+    delimiter = "|";
+    Format(*pattern);
+  }
+}
+
+void SimpleFormatter::VisitSequenceRegExp(ast::SequenceRegExp* node) {
+  for (const auto& pattern : node->patterns())
+    Format(*pattern);
 }
 
 // Statements

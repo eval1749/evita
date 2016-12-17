@@ -200,6 +200,16 @@ ReferenceExpression::ReferenceExpression(Name* name)
 ReferenceExpression::~ReferenceExpression() = default;
 
 //
+// RegExpLiteralExpression
+//
+RegExpLiteralExpression::RegExpLiteralExpression(const SourceCodeRange& range,
+                                                 RegExp* pattern,
+                                                 Token* flags)
+    : NodeTemplate(std::make_tuple(pattern, flags), range) {}
+
+RegExpLiteralExpression::~RegExpLiteralExpression() = default;
+
+//
 // UnaryExpression
 //
 UnaryExpression::UnaryExpression(const SourceCodeRange& range,

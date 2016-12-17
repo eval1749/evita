@@ -104,14 +104,10 @@ class JOANA_PUBLIC_EXPORT NodeFactory final {
                                   const Expression& expression,
                                   const std::vector<Expression*>& arguments);
 
-  RegExpLiteralExpression& NewRegExpLiteralExpression(
-      const SourceCodeRange& range,
-      const RegExp& regexp,
-      const Token& flags);
-
   ObjectLiteralExpression& NewObjectLiteralExpression(
       const SourceCodeRange& range,
       const std::vector<Expression*>& elements);
+
   PropertyExpression& NewPropertyExpression(const SourceCodeRange& range,
                                             const Expression& expression,
                                             const Name& name);
@@ -119,7 +115,14 @@ class JOANA_PUBLIC_EXPORT NodeFactory final {
       const SourceCodeRange& range,
       const Expression& name,
       const Expression& value);
+
   ReferenceExpression& NewReferenceExpression(const Name& name);
+
+  RegExpLiteralExpression& NewRegExpLiteralExpression(
+      const SourceCodeRange& range,
+      const RegExp& regexp,
+      const Token& flags);
+
   UnaryExpression& NewUnaryExpression(const SourceCodeRange& range,
                                       const Token& op,
                                       const Expression& expression);
@@ -142,34 +145,35 @@ class JOANA_PUBLIC_EXPORT NodeFactory final {
   RegExp& NewAssertionRegExp(const SourceCodeRange& range,
                              RegExpAssertionKind kind);
 
-  RegExp& NewCaptureRegExp(const SourceCodeRange& range,
-                           const ast::RegExp& expression);
+  RegExp& NewCaptureRegExp(const SourceCodeRange& range, const RegExp& pattern);
 
   RegExp& NewCharSetRegExp(const SourceCodeRange& range);
 
   RegExp& NewComplementCharSetRegExp(const SourceCodeRange& range);
 
   RegExp& NewGreedyRepeatRegExp(const SourceCodeRange& range,
-                                const ast::RegExp& expression);
+                                const RegExp& pattern,
+                                const RegExpRepeat& repeat);
 
   RegExp& NewInvalidRegExp(const SourceCodeRange& range, int error_code);
 
   RegExp& NewLazyRepeatRegExp(const SourceCodeRange& range,
-                              const ast::RegExp& expression);
+                              const RegExp& pattern,
+                              const RegExpRepeat& repeat);
 
   RegExp& NewLiteralRegExp(const SourceCodeRange& range);
 
   RegExp& NewLookAheadRegExp(const SourceCodeRange& range,
-                             const ast::RegExp& expression);
+                             const RegExp& pattern);
 
   RegExp& NewLookAheadNotRegExp(const SourceCodeRange& range,
-                                const ast::RegExp& expression);
+                                const RegExp& pattern);
 
   RegExp& NewOrRegExp(const SourceCodeRange& range,
-                      const std::vector<RegExp*> expressions);
+                      const std::vector<RegExp*> patterns);
 
   RegExp& NewSequenceRegExp(const SourceCodeRange& range,
-                            const std::vector<RegExp*> expressions);
+                            const std::vector<RegExp*> patterns);
 
   // Statements factory members
   BlockStatement& NewBlockStatement(const SourceCodeRange& range,

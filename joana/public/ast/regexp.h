@@ -5,6 +5,8 @@
 #ifndef JOANA_PUBLIC_AST_REGEXP_H_
 #define JOANA_PUBLIC_AST_REGEXP_H_
 
+#include <limits>
+
 #include "joana/public/ast/node.h"
 
 namespace joana {
@@ -42,6 +44,19 @@ enum class RegExpAssertionKind {
 };
 
 //
+// RegExpRepeat
+//
+struct JOANA_PUBLIC_EXPORT RegExpRepeat {
+  static constexpr auto kInfinity = std::numeric_limits<int>::max();
+
+  int min = 0;
+  int max = 0;
+};
+
+JOANA_PUBLIC_EXPORT std::ostream& operator<<(std::ostream& ostream,
+                                             const RegExpRepeat& repeat);
+
+//
 // RegExp
 //
 class JOANA_PUBLIC_EXPORT RegExp : public Node {
@@ -64,17 +79,17 @@ class JOANA_PUBLIC_EXPORT RegExpList final : public ZoneAllocated {
  public:
   ~RegExpList();
 
-  auto begin() const { return expressions_.begin(); }
-  bool empty() const { return expressions_.empty(); }
-  auto end() const { return expressions_.end(); }
-  size_t size() const { return expressions_.size(); }
+  auto begin() const { return patterns_.begin(); }
+  bool empty() const { return patterns_.empty(); }
+  auto end() const { return patterns_.end(); }
+  size_t size() const { return patterns_.size(); }
 
  private:
   friend class NodeFactory;
 
-  RegExpList(Zone* zone, const std::vector<RegExp*>& expressions);
+  RegExpList(Zone* zone, const std::vector<RegExp*>& patterns);
 
-  ZoneVector<RegExp*> expressions_;
+  ZoneVector<RegExp*> patterns_;
 
   DISALLOW_COPY_AND_ASSIGN(RegExpList);
 };
@@ -104,10 +119,10 @@ class JOANA_PUBLIC_EXPORT AssertionRegExp final
  public:
   ~AssertionRegExp() final;
 
-  RegExpAssertionKind operation() const { return member_at<0>(); }
+  RegExpAssertionKind kind() const { return member_at<0>(); }
 
  private:
-  AssertionRegExp(const SourceCodeRange& range, RegExpAssertionKind operation);
+  AssertionRegExp(const SourceCodeRange& range, RegExpAssertionKind kind);
 
   DISALLOW_COPY_AND_ASSIGN(AssertionRegExp);
 };
@@ -132,7 +147,8 @@ class JOANA_PUBLIC_EXPORT CaptureRegExp final
 
 //
 // CharSetRegExp
-//
+// TODO(eval1749): We should make |CharSetRegExp| to hold list of character
+// ranges.
 class JOANA_PUBLIC_EXPORT CharSetRegExp final : public NodeTemplate<RegExp> {
   DECLARE_CONCRETE_AST_NODE(CharSetRegExp, RegExp);
 
@@ -147,7 +163,8 @@ class JOANA_PUBLIC_EXPORT CharSetRegExp final : public NodeTemplate<RegExp> {
 
 //
 // ComplementCharSetRegExp
-//
+// TODO(eval1749): We should make |CharSetRegExp| to hold list of character
+// ranges.
 class JOANA_PUBLIC_EXPORT ComplementCharSetRegExp final
     : public NodeTemplate<RegExp> {
   DECLARE_CONCRETE_AST_NODE(ComplementCharSetRegExp, RegExp);
@@ -165,16 +182,19 @@ class JOANA_PUBLIC_EXPORT ComplementCharSetRegExp final
 // GreedyRepeatRegExp
 //
 class JOANA_PUBLIC_EXPORT GreedyRepeatRegExp final
-    : public NodeTemplate<RegExp, RegExp*> {
+    : public NodeTemplate<RegExp, RegExp*, RegExpRepeat> {
   DECLARE_CONCRETE_AST_NODE(GreedyRepeatRegExp, RegExp);
 
  public:
   ~GreedyRepeatRegExp() final;
 
-  RegExp& expression() const { return *member_at<0>(); }
+  RegExp& pattern() const { return *member_at<0>(); }
+  const RegExpRepeat repeat() const { return member_at<1>(); }
 
  private:
-  GreedyRepeatRegExp(const SourceCodeRange& range, RegExp* pattern);
+  GreedyRepeatRegExp(const SourceCodeRange& range,
+                     RegExp* pattern,
+                     const RegExpRepeat& repeat);
 
   DISALLOW_COPY_AND_ASSIGN(GreedyRepeatRegExp);
 };
@@ -191,7 +211,7 @@ class JOANA_PUBLIC_EXPORT InvalidRegExp : public RegExp {
   int error_code() const { return error_code_; }
 
  private:
-  InvalidRegExp(const Node& node, int error_code);
+  InvalidRegExp(const SourceCodeRange& range, int error_code);
 
   const int error_code_;
 
@@ -202,16 +222,19 @@ class JOANA_PUBLIC_EXPORT InvalidRegExp : public RegExp {
 // LazyRepeatRegExp
 //
 class JOANA_PUBLIC_EXPORT LazyRepeatRegExp final
-    : public NodeTemplate<RegExp, RegExp*> {
+    : public NodeTemplate<RegExp, RegExp*, RegExpRepeat> {
   DECLARE_CONCRETE_AST_NODE(LazyRepeatRegExp, RegExp);
 
  public:
   ~LazyRepeatRegExp() final;
 
-  RegExp& expression() const { return *member_at<0>(); }
+  RegExp& pattern() const { return *member_at<0>(); }
+  const RegExpRepeat repeat() const { return member_at<1>(); }
 
  private:
-  LazyRepeatRegExp(const SourceCodeRange& range, RegExp* pattern);
+  LazyRepeatRegExp(const SourceCodeRange& range,
+                   RegExp* pattern,
+                   const RegExpRepeat& repeat);
 
   DISALLOW_COPY_AND_ASSIGN(LazyRepeatRegExp);
 };
@@ -226,7 +249,7 @@ class JOANA_PUBLIC_EXPORT LookAheadRegExp final
  public:
   ~LookAheadRegExp() final;
 
-  RegExp& expression() const { return *member_at<0>(); }
+  RegExp& pattern() const { return *member_at<0>(); }
 
  private:
   LookAheadRegExp(const SourceCodeRange& range, RegExp* pattern);
@@ -244,7 +267,7 @@ class JOANA_PUBLIC_EXPORT LookAheadNotRegExp final
  public:
   ~LookAheadNotRegExp() final;
 
-  RegExp& expression() const { return *member_at<0>(); }
+  RegExp& pattern() const { return *member_at<0>(); }
 
  private:
   LookAheadNotRegExp(const SourceCodeRange& range, RegExp* pattern);
@@ -277,7 +300,7 @@ class JOANA_PUBLIC_EXPORT OrRegExp final
  public:
   ~OrRegExp() final;
 
-  const RegExpList& elements() const { return *member_at<0>(); }
+  const RegExpList& patterns() const { return *member_at<0>(); }
 
  private:
   OrRegExp(const SourceCodeRange& range, RegExpList* elements);
@@ -295,7 +318,7 @@ class JOANA_PUBLIC_EXPORT SequenceRegExp final
  public:
   ~SequenceRegExp() final;
 
-  const RegExpList& elements() const { return *member_at<0>(); }
+  const RegExpList& patterns() const { return *member_at<0>(); }
 
  private:
   SequenceRegExp(const SourceCodeRange& range, RegExpList* elements);

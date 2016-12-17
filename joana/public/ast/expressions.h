@@ -414,10 +414,12 @@ class JOANA_PUBLIC_EXPORT RegExpLiteralExpression final
   ~RegExpLiteralExpression() final;
 
   const Token& flags() const { return *member_at<1>(); }
-  const RegExp& regexp() const { return *member_at<0>(); }
+  const RegExp& pattern() const { return *member_at<0>(); }
 
  private:
-  RegExpLiteralExpression(RegExp* regexp, Token* flags);
+  RegExpLiteralExpression(const SourceCodeRange& range,
+                          RegExp* pattern,
+                          Token* flags);
 
   DISALLOW_COPY_AND_ASSIGN(RegExpLiteralExpression);
 };

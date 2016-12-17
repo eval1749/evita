@@ -404,11 +404,12 @@ ast::Expression& Parser::ParseObjectLiteralExpression() {
         break;
       if (CanBePropertyName(PeekToken())) {
         // 'static' PropertyName
+        const auto function_kind = FunctionKindOf(PeekToken());
         auto& property_name = ParsePropertyName();
         if (!CanPeekToken())
           break;
         members.push_back(&ParsePropertyAfterName(
-            property_name, ast::MethodKind::Static, ast::FunctionKind::Normal));
+            property_name, ast::MethodKind::Static, function_kind));
         continue;
       }
       if (ConsumeTokenIf(ast::PunctuatorKind::Times)) {

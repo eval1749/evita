@@ -191,6 +191,13 @@ TEST_F(ParserTest, ExpressionClass) {
   TEST_PARSER("var x = class Foo { static foo() {} };\n");
 }
 
+TEST_F(ParserTest, ExpressionClassWithStatic) {
+  TEST_PARSER("class Foo { static *foo() {} }\n");
+  TEST_PARSER("class Foo { static async foo() {} }\n");
+  TEST_PARSER("class Foo { static get foo() {} }\n");
+  TEST_PARSER("class Foo { static set foo() {} }\n");
+}
+
 TEST_F(ParserTest, ExpressionCall3) {
   TEST_PARSER("foo(1, 2, 3);\n");
 }

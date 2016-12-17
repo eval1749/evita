@@ -599,7 +599,7 @@ ast::RegExp& RegExpParser::ParseSequence() {
 
 ast::RegExp& Parser::ParseRegExp() {
   auto& pattern = RegExpParser(context_, lexer_.get()).Run();
-  lexer_->Advance();
+  Advance();
   return pattern;
 }
 

@@ -96,6 +96,8 @@ class Parser final {
       const ast::Declaration& declaration);
   ast::Expression& NewElisionExpression();
   ast::Expression& NewEmptyExpression();
+  ast::Expression& NewInvalidExpression(const ast::Token& token,
+                                        ErrorCode error_code);
   ast::Expression& NewInvalidExpression(ErrorCode error_code);
   ast::Expression& NewLiteralExpression(const ast::Literal& literal);
   ast::Expression& NewUnaryExpression(const ast::Token& op,

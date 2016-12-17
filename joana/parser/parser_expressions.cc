@@ -118,11 +118,15 @@ ast::Expression& Parser::NewEmptyExpression() {
   return node_factory().NewEmptyExpression(GetSourceCodeRange());
 }
 
-ast::Expression& Parser::NewInvalidExpression(ErrorCode error_code) {
-  auto& token = ComputeInvalidToken(error_code);
+ast::Expression& Parser::NewInvalidExpression(const ast::Token& token,
+                                              ErrorCode error_code) {
   AddError(token, error_code);
   return node_factory().NewInvalidExpression(token,
                                              static_cast<int>(error_code));
+}
+
+ast::Expression& Parser::NewInvalidExpression(ErrorCode error_code) {
+  return NewInvalidExpression(ComputeInvalidToken(error_code), error_code);
 }
 
 ast::Expression& Parser::NewLiteralExpression(const ast::Literal& literal) {
@@ -318,7 +322,7 @@ ast::Expression& Parser::ParseNameAsExpression() {
       return NewLiteralExpression(node_factory().NewBooleanLiteral(name, true));
   }
   if (name.IsKeyword())
-    return NewInvalidExpression(ErrorCode::ERROR_EXPRESSION_INVALID);
+    return NewInvalidExpression(name, ErrorCode::ERROR_EXPRESSION_INVALID);
   if (ConsumeTokenIf(ast::PunctuatorKind::Arrow)) {
     auto& statement = ParseArrowFunctionBody();
     auto& parameter = node_factory().NewReferenceExpression(name);
@@ -332,9 +336,13 @@ ast::Expression& Parser::ParseNewExpression() {
   SourceCodeRangeScope scope(this);
   auto& token_new = ConsumeToken().As<ast::Name>();
   if (CanPeekToken() && PeekToken() == ast::PunctuatorKind::Dot) {
-    if (!CanPeekToken() || PeekToken() != ast::NameId::Target) {
+    if (!CanPeekToken()) {
       return NewInvalidExpression(
           ErrorCode::ERROR_EXPRESSION_NEW_EXPECT_TARGET);
+    }
+    if (PeekToken() != ast::NameId::Target) {
+      return NewInvalidExpression(
+          ConsumeToken(), ErrorCode::ERROR_EXPRESSION_NEW_EXPECT_TARGET);
     }
     auto& token_target = ConsumeToken().As<ast::Name>();
     return node_factory().NewPropertyExpression(
@@ -489,8 +497,8 @@ ast::Expression& Parser::ParsePrimaryExpression() {
   if (token == ast::PunctuatorKind::Divide)
     return ParseRegExpLiteral();
   // TODO(eval1749): NYI template literal
-  Advance();
-  return NewInvalidExpression(ErrorCode::ERROR_EXPRESSION_INVALID);
+  return NewInvalidExpression(ConsumeToken(),
+                              ErrorCode::ERROR_EXPRESSION_INVALID);
 }
 
 ast::Expression& Parser::ParseRegExpLiteral() {

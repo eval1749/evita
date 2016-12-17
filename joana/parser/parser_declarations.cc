@@ -99,8 +99,8 @@ ast::Expression& Parser::ParsePropertyName() {
     return ParsePrimaryExpression();
   if (PeekToken() == ast::PunctuatorKind::LeftBracket)
     return ParsePrimaryExpression();
-  ConsumeToken();
-  return NewInvalidExpression(ErrorCode::ERROR_PROPERTY_INVALID_TOKEN);
+  return NewInvalidExpression(ConsumeToken(),
+                              ErrorCode::ERROR_PROPERTY_INVALID_TOKEN);
 }
 
 }  // namespace internal

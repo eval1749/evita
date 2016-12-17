@@ -368,6 +368,8 @@ class ScopedNodeFactory final {
   ast::RegExp& NewOr(const std::vector<ast::RegExp*> members);
   ast::RegExp& NewSequence(const std::vector<ast::RegExp*> members);
 
+  void SetToken(const Token& token);
+
  private:
   ast::NodeFactory& factory() { return parser_.node_factory(); }
 
@@ -375,12 +377,15 @@ class ScopedNodeFactory final {
 
   RegExpParser& parser_;
   const int start_;
+  int end_;
 
   DISALLOW_COPY_AND_ASSIGN(ScopedNodeFactory);
 };
 
 ScopedNodeFactory::ScopedNodeFactory(RegExpParser* parser)
-    : parser_(*parser), start_(parser->location()) {}
+    : parser_(*parser),
+      start_(parser->PeekToken().start),
+      end_(parser->PeekToken().end) {}
 
 ScopedNodeFactory::~ScopedNodeFactory() = default;
 
@@ -390,7 +395,8 @@ void ScopedNodeFactory::AddError(ErrorCode error_code) {
 }
 
 SourceCodeRange ScopedNodeFactory::ComputeRange() const {
-  return parser_.source_code().Slice(start_, parser_.lexer_.location());
+  DCHECK_NE(start_, end_);
+  return parser_.source_code().Slice(start_, end_);
 }
 
 ast::RegExp& ScopedNodeFactory::NewAnyChar() {
@@ -457,6 +463,10 @@ ast::RegExp& ScopedNodeFactory::NewSequence(
   if (members.size() >= 2)
     return factory().NewSequenceRegExp(ComputeRange(), members);
   return NewError(ErrorCode::ERROR_REGEXP_INVALID_SEQUENCE);
+}
+
+void ScopedNodeFactory::SetToken(const Token& token) {
+  end_ = token.end;
 }
 
 // RegExpParser
@@ -551,6 +561,7 @@ ast::RegExp& RegExpParser::ParseRepeat() {
   if (!CanPeekToken())
     return pattern;
   auto repeat = PeekToken().repeat;
+  factory.SetToken(PeekToken());
   if (ConsumeTokenIf(Syntax::GreedyRepeat))
     return factory.NewGreedyRepeat(pattern, repeat);
   if (ConsumeTokenIf(Syntax::LazyRepeat))
@@ -567,6 +578,8 @@ ast::RegExp& RegExpParser::ParseSequence() {
   std::vector<ast::RegExp*> patterns;
   patterns.push_back(&ParseRepeat());
   while (CanPeekToken() && PeekToken().syntax != Syntax::Or) {
+    if (PeekToken().syntax == Syntax::End)
+      break;
     if (PeekToken().syntax == Syntax::Close && nesting_ > 0)
       break;
     auto& pattern = ParseRepeat();
@@ -585,7 +598,9 @@ ast::RegExp& RegExpParser::ParseSequence() {
 }  // namespace
 
 ast::RegExp& Parser::ParseRegExp() {
-  return RegExpParser(context_, lexer_.get()).Run();
+  auto& pattern = RegExpParser(context_, lexer_.get()).Run();
+  lexer_->Advance();
+  return pattern;
 }
 
 }  // namespace internal

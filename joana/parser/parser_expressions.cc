@@ -486,7 +486,8 @@ ast::Expression& Parser::ParsePrimaryExpression() {
     return ParseArrayLiteralExpression();
   if (token == ast::PunctuatorKind::LeftBrace)
     return ParseObjectLiteralExpression();
-  // TODO(eval1749): NYI regular expression literal
+  if (token == ast::PunctuatorKind::Divide)
+    return ParseRegExpLiteral();
   // TODO(eval1749): NYI template literal
   Advance();
   return NewInvalidExpression(ErrorCode::ERROR_EXPRESSION_INVALID);
@@ -494,8 +495,8 @@ ast::Expression& Parser::ParsePrimaryExpression() {
 
 ast::Expression& Parser::ParseRegExpLiteral() {
   auto& regexp = ParseRegExp();
-  auto& flags = !CanPeekToken() && PeekToken().Is<ast::Name>() ? ConsumeToken()
-                                                               : NewEmptyName();
+  auto& flags = CanPeekToken() && PeekToken().Is<ast::Name>() ? ConsumeToken()
+                                                              : NewEmptyName();
   return node_factory().NewRegExpLiteralExpression(GetSourceCodeRange(), regexp,
                                                    flags);
 }

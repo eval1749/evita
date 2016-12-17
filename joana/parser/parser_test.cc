@@ -265,6 +265,11 @@ TEST_F(ParserTest, ExpressionName) {
   TEST_PARSER("true;\n");
 }
 
+TEST_F(ParserTest, ExpressionRegExp) {
+  TEST_PARSER("var re = /ab*c/;\n");
+  TEST_PARSER("var re = /bar/u;\n");
+}
+
 TEST_F(ParserTest, ExpressionYield) {
   TEST_PARSER("yield;\n");
   TEST_PARSER("yield 1;\n");

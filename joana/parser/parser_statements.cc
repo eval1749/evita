@@ -10,6 +10,7 @@
 #include "joana/parser/lexer/lexer.h"
 #include "joana/parser/parser_error_codes.h"
 #include "joana/public/ast/declarations.h"
+#include "joana/public/ast/expressions.h"
 #include "joana/public/ast/literals.h"
 #include "joana/public/ast/node_editor.h"
 #include "joana/public/ast/node_factory.h"
@@ -178,8 +179,14 @@ ast::Statement& Parser::ParseDoStatement() {
 }
 
 ast::Statement& Parser::ParseExpressionStatement() {
+  auto& expression = ParseExpression();
+  if (auto* decl_expr = expression.TryAs<ast::DeclarationExpression>()) {
+    auto& declaration = decl_expr->declaration();
+    if (!declaration.Is<ast::ArrowFunction>())
+      return node_factory().NewDeclarationStatement(declaration);
+  }
   ExpectSemiColonScope semi_colon_scope(this);
-  return node_factory().NewExpressionStatement(ParseExpression());
+  return node_factory().NewExpressionStatement(expression);
 }
 
 ast::Statement& Parser::ParseForStatement() {

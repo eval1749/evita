@@ -25,40 +25,53 @@ namespace internal {
 //
 class Parser::BracketStack final {
  public:
-  BracketStack() = default;
+  explicit BracketStack(ErrorSink* error_sink);
   ~BracketStack() = default;
 
   const std::vector<const ast::Node*>& tokens() const { return stack_; }
 
-  ErrorCode Feed(const ast::Node& token);
+  void Feed(const ast::Node& token);
 
  private:
-  ErrorCode Check(const ast::Node& token, ast::PunctuatorKind expected);
+  void Check(const ast::Node& token, ast::PunctuatorKind expected);
 
+  ErrorSink& error_sink_;
   std::vector<const ast::Node*> stack_;
+
   DISALLOW_COPY_AND_ASSIGN(BracketStack);
 };
 
-Parser::ErrorCode Parser::BracketStack::Check(const ast::Node& token,
-                                              ast::PunctuatorKind expected) {
-  if (stack_.empty())
-    return ErrorCode::ERROR_BRACKET_UNEXPECTED;
-  if (*stack_.back() != expected)
-    return ErrorCode::ERROR_BRACKET_MISMATCHED;
-  stack_.pop_back();
-  return ErrorCode::None;
+Parser::BracketStack::BracketStack(ErrorSink* error_sink)
+    : error_sink_(*error_sink) {}
+
+void Parser::BracketStack::Check(const ast::Node& token,
+                                 ast::PunctuatorKind expected) {
+  if (stack_.empty()) {
+    error_sink_.AddError(token.range(),
+                         static_cast<int>(ErrorCode::ERROR_BRACKET_UNEXPECTED));
+    return;
+  }
+  const auto& start_token = *stack_.back();
+  if (start_token == expected) {
+    stack_.pop_back();
+    return;
+  }
+  error_sink_.AddError(
+      SourceCodeRange::Merge(SourceCodeRange::CollapseToStart(token.range()),
+                             start_token.range()),
+      static_cast<int>(ErrorCode::ERROR_BRACKET_MISMATCHED));
 }
 
-Parser::ErrorCode Parser::BracketStack::Feed(const ast::Node& token) {
+void Parser::BracketStack::Feed(const ast::Node& token) {
   auto* const bracket = token.TryAs<ast::Punctuator>();
   if (!bracket)
-    return ErrorCode::None;
+    return;
   switch (static_cast<ast::PunctuatorKind>(bracket->kind())) {
     case ast::PunctuatorKind::LeftParenthesis:
     case ast::PunctuatorKind::LeftBracket:
     case ast::PunctuatorKind::LeftBrace:
       stack_.push_back(bracket);
-      return ErrorCode::None;
+      return;
     case ast::PunctuatorKind::RightParenthesis:
       return Check(token, ast::PunctuatorKind::LeftParenthesis);
     case ast::PunctuatorKind::RightBracket:
@@ -66,7 +79,6 @@ Parser::ErrorCode Parser::BracketStack::Feed(const ast::Node& token) {
     case ast::PunctuatorKind::RightBrace:
       return Check(token, ast::PunctuatorKind::LeftBrace);
   }
-  return ErrorCode::None;
 }
 
 //
@@ -85,7 +97,7 @@ Parser::SourceCodeRangeScope::~SourceCodeRangeScope() {
 // Parser
 //
 Parser::Parser(ast::EditContext* context, const SourceCodeRange& range)
-    : bracket_stack_(new BracketStack()),
+    : bracket_stack_(new BracketStack(&context->error_sink())),
       context_(context),
       lexer_(new Lexer(context, range)),
       root_(context->node_factory().NewModule(range)) {}
@@ -122,10 +134,7 @@ void Parser::Advance() {
     return;
   auto& token = PeekToken();
   tokens_.push_back(&token);
-  const auto error_code = bracket_stack_->Feed(token);
-  if (error_code == ErrorCode::None)
-    return;
-  AddError(token, error_code);
+  bracket_stack_->Feed(token);
 }
 
 bool Parser::CanPeekToken() const {

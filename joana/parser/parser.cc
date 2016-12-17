@@ -98,14 +98,14 @@ Parser::SourceCodeRangeScope::~SourceCodeRangeScope() {
 //
 Parser::Parser(ast::EditContext* context, const SourceCodeRange& range)
     : bracket_stack_(new BracketStack(&context->error_sink())),
-      context_(context),
+      context_(*context),
       lexer_(new Lexer(context, range)),
       root_(context->node_factory().NewModule(range)) {}
 
 Parser::~Parser() = default;
 
 ast::NodeFactory& Parser::node_factory() const {
-  return context_->node_factory();
+  return context_.node_factory();
 }
 
 const SourceCode& Parser::source_code() const {
@@ -117,7 +117,7 @@ void Parser::AddError(const ast::Node& token, ErrorCode error_code) {
 }
 
 void Parser::AddError(const SourceCodeRange& range, ErrorCode error_code) {
-  context_->error_sink().AddError(range, static_cast<int>(error_code));
+  context_.error_sink().AddError(range, static_cast<int>(error_code));
 }
 
 void Parser::AddError(ErrorCode error_code) {

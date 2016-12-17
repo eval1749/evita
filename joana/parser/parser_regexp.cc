@@ -598,7 +598,7 @@ ast::RegExp& RegExpParser::ParseSequence() {
 }  // namespace
 
 ast::RegExp& Parser::ParseRegExp() {
-  auto& pattern = RegExpParser(context_, lexer_.get()).Run();
+  auto& pattern = RegExpParser(&context_, lexer_.get()).Run();
   Advance();
   return pattern;
 }

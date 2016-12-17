@@ -157,7 +157,7 @@ class Parser final {
   ast::Statement& ParseWithStatement();
 
   std::unique_ptr<BracketStack> bracket_stack_;
-  ast::EditContext* const context_;
+  ast::EditContext& context_;
   std::unique_ptr<Lexer> lexer_;
   ast::ContainerNode& root_;
   std::stack<int> range_stack_;

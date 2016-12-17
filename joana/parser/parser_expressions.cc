@@ -462,7 +462,7 @@ ast::Expression& Parser::ParseParenthesis() {
 
 // Yet another entry point called by statement parser.
 const ast::Expression& Parser::ParseParenthesisExpression() {
-  const auto& location = lexer_->location();
+  const auto& location = CanPeekToken() ? PeekToken().range() : lexer_->location();
   auto& expression = ParseExpression();
   if (auto* grouping = expression.TryAs<ast::GroupExpression>())
     return grouping->expression();

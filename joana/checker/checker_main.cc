@@ -170,10 +170,12 @@ int Checker::Run() {
     }
 
     std::cerr << base::UTF16ToUTF8(line.range().GetString());
-    const auto column = error->range().end() - line.range().start();
-    for (auto counter = 0; counter < column; ++counter)
-      std::cerr << ' ';
-    std::cerr << '^' << std::endl;
+    const auto end_column = error->range().end() - line.range().start();
+    for (auto offset = line.range().start(); offset < error->range().end();
+         ++offset) {
+      std::cerr << (offset >= error->range().start() ? '^' : ' ');
+    }
+    std::cerr << std::endl;
   }
   return error_sink_.errors().size() == 0 ? 0 : 1;
 }

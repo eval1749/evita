@@ -42,6 +42,15 @@ TEST_F(SourceCodeRangeTest, CollapseToStart) {
   EXPECT_EQ(source_code.Slice(1, 1), SourceCodeRange::CollapseToStart(range1));
 }
 
+TEST_F(SourceCodeRangeTest, Contains) {
+  const auto& source_code = NewSourceCode("0123456789abcdef");
+  const auto& range1 = source_code.Slice(1, 3);
+  EXPECT_FALSE(range1.Contains(0));
+  EXPECT_TRUE(range1.Contains(1));
+  EXPECT_TRUE(range1.Contains(2));
+  EXPECT_FALSE(range1.Contains(3));
+}
+
 TEST_F(SourceCodeRangeTest, Merge) {
   const auto& source_code = NewSourceCode("0123456789abcdef");
   const auto& range1 = source_code.Slice(1, 3);

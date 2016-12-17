@@ -37,6 +37,10 @@ bool SourceCodeRange::operator!=(const SourceCodeRange& other) const {
   return !operator==(other);
 }
 
+bool SourceCodeRange::Contains(int offset) const {
+  return offset >= start_ && offset < end_;
+}
+
 base::StringPiece16 SourceCodeRange::GetString() const {
   return source_code_->GetString(start_, end_);
 }

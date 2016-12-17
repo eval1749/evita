@@ -93,8 +93,11 @@ ast::Expression& Parser::ParseParameterList() {
 ast::Expression& Parser::ParsePropertyName() {
   if (!CanPeekToken())
     return NewInvalidExpression(ErrorCode::ERROR_PROPERTY_INVALID_TOKEN);
-  if (PeekToken().Is<ast::Name>())
-    return ParsePrimaryExpression();
+  if (PeekToken().Is<ast::Name>()) {
+    // Note: we can use any name as property name including keywords.
+    return node_factory().NewReferenceExpression(
+        ConsumeToken().As<ast::Name>());
+  }
   if (PeekToken() == ast::PunctuatorKind::LeftBracket)
     return ParsePrimaryExpression();
   return NewInvalidExpression(ConsumeToken(),

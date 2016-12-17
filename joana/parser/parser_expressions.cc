@@ -41,6 +41,20 @@ enum class Parser::OperatorPrecedence {
 
 namespace {
 
+bool CanBePropertyName(const ast::Token& token) {
+  return token.Is<ast::Name>() || token == ast::PunctuatorKind::LeftBracket;
+}
+
+ast::FunctionKind FunctionKindOf(const ast::Token& token) {
+  if (token == ast::NameId::Async)
+    return ast::FunctionKind::Async;
+  if (token == ast::NameId::Get)
+    return ast::FunctionKind::Getter;
+  if (token == ast::NameId::Set)
+    return ast::FunctionKind::Setter;
+  return ast::FunctionKind::Normal;
+}
+
 // Convert |++| and |--| token to a token which represent post update
 // operator.
 ast::Punctuator& ConvertToPostOperator(ast::NodeFactory* factory,
@@ -364,80 +378,58 @@ ast::Expression& Parser::ParseObjectLiteralExpression() {
   DCHECK_EQ(PeekToken(), ast::PunctuatorKind::LeftBrace);
   ConsumeToken();
   std::vector<ast::Expression*> members;
-  auto need_comma = false;
   while (CanPeekToken()) {
     SourceCodeRangeScope scope(this);
     if (ConsumeTokenIf(ast::PunctuatorKind::RightBrace))
       break;
     if (ConsumeTokenIf(ast::PunctuatorKind::Comma)) {
-      if (!need_comma)
+      if (members.empty() || members.back()->Is<ast::DeclarationExpression>() ||
+          members.back()->Is<ast::ElisionExpression>()) {
         members.push_back(&NewElisionExpression());
-      need_comma = true;
-      continue;
-    }
-    auto is_static = ConsumeTokenIf(ast::NameId::Static)
-                         ? ast::MethodKind::Static
-                         : ast::MethodKind::NonStatic;
-    need_comma = false;
-    if (ConsumeTokenIf(ast::NameId::Async)) {
-      members.push_back(
-          &ParseMethodExpression(is_static, ast::FunctionKind::Async));
-      continue;
-    }
-    if (ConsumeTokenIf(ast::NameId::Get)) {
-      members.push_back(
-          &ParseMethodExpression(is_static, ast::FunctionKind::Getter));
-      continue;
-    }
-    if (ConsumeTokenIf(ast::NameId::Set)) {
-      members.push_back(
-          &ParseMethodExpression(is_static, ast::FunctionKind::Setter));
+      }
       continue;
     }
     if (ConsumeTokenIf(ast::PunctuatorKind::Times)) {
-      members.push_back(
-          &ParseMethodExpression(is_static, ast::FunctionKind::Generator));
+      members.push_back(&ParseMethodExpression(ast::MethodKind::NonStatic,
+                                               ast::FunctionKind::Generator));
       continue;
     }
+
+    if (PeekToken() == ast::NameId::Static) {
+      // 'static' can be a property name and method name.
+      if (!CanPeekToken())
+        break;
+      auto& property_name_static = ParsePropertyName();
+      if (!CanPeekToken())
+        break;
+      if (CanBePropertyName(PeekToken())) {
+        // 'static' PropertyName
+        auto& property_name = ParsePropertyName();
+        if (!CanPeekToken())
+          break;
+        members.push_back(&ParsePropertyAfterName(
+            property_name, ast::MethodKind::Static, ast::FunctionKind::Normal));
+        continue;
+      }
+      if (ConsumeTokenIf(ast::PunctuatorKind::Times)) {
+        // 'static' '*' PropertyName
+        members.push_back(&ParseMethodExpression(ast::MethodKind::Static,
+                                                 ast::FunctionKind::Generator));
+        continue;
+      }
+      // Found property or method named 'static'.
+      members.push_back(&ParsePropertyAfterName(property_name_static,
+                                                ast::MethodKind::NonStatic,
+                                                ast::FunctionKind::Normal));
+      continue;
+    }
+
+    const auto function_kind = FunctionKindOf(PeekToken());
     auto& property_name = ParsePropertyName();
     if (!CanPeekToken())
       break;
-    if (PeekToken() == ast::PunctuatorKind::LeftParenthesis) {
-      auto& parameter_list = ParseParameterList();
-      auto& method_body = ParseFunctionBody();
-      auto& method = node_factory().NewMethod(
-          GetSourceCodeRange(), is_static, ast::FunctionKind::Normal,
-          property_name, parameter_list, method_body);
-      members.push_back(&NewDeclarationExpression(method));
-      continue;
-    }
-    if (is_static == ast::MethodKind::Static)
-      AddError(ErrorCode::ERROR_PROPERTY_INVALID_STATIC);
-    need_comma = true;
-    if (PeekToken() == ast::PunctuatorKind::RightBrace) {
-      members.push_back(&property_name);
-      continue;
-    }
-    if (ConsumeTokenIf(ast::PunctuatorKind::Comma)) {
-      members.push_back(&property_name);
-      continue;
-    }
-    if (ConsumeTokenIf(ast::PunctuatorKind::Colon)) {
-      auto& expression = ParseAssignmentExpression();
-      members.push_back(&node_factory().NewPropertyDefinitionExpression(
-          GetSourceCodeRange(), property_name, expression));
-      continue;
-    }
-    if (PeekToken() == ast::PunctuatorKind::Equal) {
-      auto& op = ConsumeToken().As<ast::Punctuator>();
-      auto& expression = ParseAssignmentExpression();
-      members.push_back(&node_factory().NewAssignmentExpression(
-          GetSourceCodeRange(), op, property_name, expression));
-      continue;
-    }
-    AddError(ErrorCode::ERROR_PROPERTY_INVALID_TOKEN);
-    ConsumeToken();
-    need_comma = false;
+    members.push_back(&ParsePropertyAfterName(
+        property_name, ast::MethodKind::NonStatic, function_kind));
   }
   return node_factory().NewObjectLiteralExpression(GetSourceCodeRange(),
                                                    members);
@@ -499,6 +491,57 @@ ast::Expression& Parser::ParsePrimaryExpression() {
   // TODO(eval1749): NYI template literal
   return NewInvalidExpression(ConsumeToken(),
                               ErrorCode::ERROR_EXPRESSION_INVALID);
+}
+
+ast::Expression& Parser::ParsePropertyAfterName(
+    ast::Expression& property_name,
+    ast::MethodKind is_static,
+    ast::FunctionKind function_kind) {
+  DCHECK(CanPeekToken());
+
+  if (function_kind != ast::FunctionKind::Normal &&
+      CanBePropertyName(PeekToken())) {
+    // 'async' PropertyName '(' ParameterList ')' '{' StatementList '}'
+    // 'get' PropertyName '(' ParameterList ')' '{' StatementList '}'
+    // 'set' PropertyName '(' ParameterList ')' '{' StatementList '}'
+    DCHECK(property_name.Is<ast::ReferenceExpression>()) << property_name;
+    return ParseMethodExpression(is_static, function_kind);
+  }
+
+  if (PeekToken() == ast::PunctuatorKind::LeftParenthesis) {
+    // PropertyName '(' ParameterList ')' '{' StatementList '}'
+    auto& parameter_list = ParseParameterList();
+    auto& method_body = ParseFunctionBody();
+    auto& method = node_factory().NewMethod(
+        GetSourceCodeRange(), is_static, ast::FunctionKind::Normal,
+        property_name, parameter_list, method_body);
+    return NewDeclarationExpression(method);
+  }
+
+  if (is_static == ast::MethodKind::Static)
+    AddError(ErrorCode::ERROR_PROPERTY_INVALID_STATIC);
+
+  if (PeekToken() == ast::PunctuatorKind::RightBrace)
+    return property_name;
+
+  if (ConsumeTokenIf(ast::PunctuatorKind::Comma))
+    return property_name;
+
+  if (ConsumeTokenIf(ast::PunctuatorKind::Colon)) {
+    auto& expression = ParseAssignmentExpression();
+    return node_factory().NewPropertyDefinitionExpression(
+        GetSourceCodeRange(), property_name, expression);
+  }
+
+  if (PeekToken() == ast::PunctuatorKind::Equal) {
+    auto& op = ConsumeToken().As<ast::Punctuator>();
+    auto& expression = ParseAssignmentExpression();
+    return node_factory().NewAssignmentExpression(GetSourceCodeRange(), op,
+                                                  property_name, expression);
+  }
+
+  return NewInvalidExpression(ConsumeToken(),
+                              ErrorCode::ERROR_PROPERTY_INVALID_TOKEN);
 }
 
 ast::Expression& Parser::ParseRegExpLiteral() {

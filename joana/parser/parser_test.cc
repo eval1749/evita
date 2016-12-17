@@ -238,6 +238,18 @@ TEST_F(ParserTest, ExpressionObjectLiteral) {
       "};\n");
 }
 
+TEST_F(ParserTest, ExpressionObjectLiteralWithKeywords) {
+  TEST_PARSER("x = { aync: 1 };\n");
+  TEST_PARSER("x = { get: 1 };\n");
+  TEST_PARSER("x = { set: 1 };\n");
+  TEST_PARSER("x = { static: 1 };\n");
+
+  TEST_PARSER("x = { aync() {} };\n");
+  TEST_PARSER("x = { get() {} };\n");
+  TEST_PARSER("x = { set() {} };\n");
+  TEST_PARSER("x = { static() {} };\n");
+}
+
 TEST_F(ParserTest, ExpressionUnary) {
   TEST_PARSER("!foo;\n");
 }

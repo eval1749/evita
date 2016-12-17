@@ -127,6 +127,9 @@ class Parser final {
   ast::Expression& ParseObjectLiteralExpression();
   ast::Expression& ParseParenthesis();
   ast::Expression& ParsePrimaryExpression();
+  ast::Expression& ParsePropertyAfterName(ast::Expression& property_name,
+                                          ast::MethodKind is_static,
+                                          ast::FunctionKind function_kind);
   ast::Expression& ParseRegExpLiteral();
   ast::Expression& ParseUnaryExpression();
   ast::Expression& ParseUpdateExpression();

@@ -63,14 +63,14 @@ highlights.Painter = function(document) {};
  * @param {number} delta
  * Exposed for embed language tokenizer.
  */
-highlights.Painter.prototype.didChangeTextDocument =
-    function(headCount, tailCount, delta) {}
+highlights.Painter.prototype.didChangeTextDocument = function(
+    headCount, tailCount, delta) {};
 
-    /**
-     * @public
-     * Exposed for embed language tokenizer.
-     */
-    highlights.Painter.prototype.didLoadTextDocument = function() {};
+/**
+ * @public
+ * Exposed for embed language tokenizer.
+ */
+highlights.Painter.prototype.didLoadTextDocument = function() {};
 
 /**
  * @public

@@ -58,36 +58,35 @@ var RowModel;
 
 // "imageres.dll,-2" and "shell32.dll,-1" are a blank document icon.
 /** @const @type {!Uint8ClampedArray} 16x16 RGBA pixels */
-const kBlankDocumentImageData = new Uint8ClampedArray(
-    base.atob(
-        'AAAAAAAAAAClpaX_o6Sk_6Kiov+hoaH_n5+g_56env+cnZ3_m5' +
-        'ub_5mamv+dnZ3vlpeXMAAAAAAAAAAAAAAAAAAAAAAAAAAAo6Sk' +
-        '__39_f_9_f3__f39__z9_f_8_P3__Pz9__z8_f+mpqb_1tbW_5' +
-        'qbm++TlJUwAAAAAAAAAAAAAAAAAAAAAKKiov_9_f3_+vv7__r6' +
-        '+__5+vr_+fn6__j5+v_4+fr_pqam_+rq6v_V1dX_l5iZ7wAAAA' +
-        'AAAAAAAAAAAAAAAAChoaH__f39__r6+__5+vr_+fr6__n5+v_4' +
-        '+fr_+Pn5_6ampv+MjIz_jIyM_5CSkv8AAAAAAAAAAAAAAAAAAA' +
-        'AAn5+g__39_f_5+vr_+fr6__n5+v_4+fr_+Pn6__j5+f_4+Pn_' +
-        '9_j5__v7_P+PkJH_AAAAAAAAAAAAAAAAAAAAAJ6env_8_f3_+f' +
-        'r6__n5+v_4+fr_+Pn6__j5+v_4+Pn_9_j5__f4+f_7+_z_jY+P' +
-        '_wAAAAAAAAAAAAAAAAAAAACcnZ3__Pz9__n5+v_4+fr_+Pn6__' +
-        'j5+v_4+fn_9_j5__f4+f_3+Pj_+_v8_4yNjv8AAAAAAAAAAAAA' +
-        'AAAAAAAAm5ub__z8_f_4+fr_+Pn6__j5+v_4+fn_+Pj5__f4+f' +
-        '_3+Pj_9vf4__v7_P+LjI3_AAAAAAAAAAAAAAAAAAAAAJmamv_8' +
-        '_P3_+Pn5__j5+f_4+Pn_9_j5__f4+f_3+Pn_9_f4__b3+P_7+_' +
-        'z_iYqL_wAAAAAAAAAAAAAAAAAAAACYmJn__Pz8__j4+f_3+Pn_' +
-        '9_j5__f4+f_3+Pj_9_f4__b3+P_29_j_+_v7_4iJiv8AAAAAAA' +
-        'AAAAAAAAAAAAAAlpeX__v8_P_3+Pn_9_j5__f4+f_3+Pj_9vf4' +
-        '__b3+P_29_j_9vb3__r7+_+GiIj_AAAAAAAAAAAAAAAAAAAAAJ' +
-        'WWlv_7_Pz_9_f4__f3+P_29_j_9vf4__b3+P_29_j_9fb3__X2' +
-        '9__6+_v_hYaH_wAAAAAAAAAAAAAAAAAAAACTlJX_+_v8__b3+P' +
-        '_29_j_9vf4__b3+P_29_f_9fb3__X29__19vf_+vv7_4OFhv8A' +
-        'AAAAAAAAAAAAAAAAAAAAkpOT__v7_P_29_j_9vf4__b29__19v' +
-        'f_9fb3__X29__19vf_9fb3__r7+_+ChIT_AAAAAAAAAAAAAAAA' +
-        'AAAAAJCSkv_6+_v_+vv7__r7+__6+_v_+vv7__r7+__6+_v_+v' +
-        'v7__r7+__6+_v_gIKD_wAAAAAAAAAAAAAAAAAAAACPkJH_jY+P' +
-        '_4yNjv+LjI3_iYqL_4iJiv+GiIj_hYaH_4OFhv+ChIT_gIKD_3' +
-        '+Bgv8AAAAAAAAAAA=='.replace(/_/g, '/')));
+const kBlankDocumentImageData = new Uint8ClampedArray(base.atob(
+    'AAAAAAAAAAClpaX_o6Sk_6Kiov+hoaH_n5+g_56env+cnZ3_m5' +
+    'ub_5mamv+dnZ3vlpeXMAAAAAAAAAAAAAAAAAAAAAAAAAAAo6Sk' +
+    '__39_f_9_f3__f39__z9_f_8_P3__Pz9__z8_f+mpqb_1tbW_5' +
+    'qbm++TlJUwAAAAAAAAAAAAAAAAAAAAAKKiov_9_f3_+vv7__r6' +
+    '+__5+vr_+fn6__j5+v_4+fr_pqam_+rq6v_V1dX_l5iZ7wAAAA' +
+    'AAAAAAAAAAAAAAAAChoaH__f39__r6+__5+vr_+fr6__n5+v_4' +
+    '+fr_+Pn5_6ampv+MjIz_jIyM_5CSkv8AAAAAAAAAAAAAAAAAAA' +
+    'AAn5+g__39_f_5+vr_+fr6__n5+v_4+fr_+Pn6__j5+f_4+Pn_' +
+    '9_j5__v7_P+PkJH_AAAAAAAAAAAAAAAAAAAAAJ6env_8_f3_+f' +
+    'r6__n5+v_4+fr_+Pn6__j5+v_4+Pn_9_j5__f4+f_7+_z_jY+P' +
+    '_wAAAAAAAAAAAAAAAAAAAACcnZ3__Pz9__n5+v_4+fr_+Pn6__' +
+    'j5+v_4+fn_9_j5__f4+f_3+Pj_+_v8_4yNjv8AAAAAAAAAAAAA' +
+    'AAAAAAAAm5ub__z8_f_4+fr_+Pn6__j5+v_4+fn_+Pj5__f4+f' +
+    '_3+Pj_9vf4__v7_P+LjI3_AAAAAAAAAAAAAAAAAAAAAJmamv_8' +
+    '_P3_+Pn5__j5+f_4+Pn_9_j5__f4+f_3+Pn_9_f4__b3+P_7+_' +
+    'z_iYqL_wAAAAAAAAAAAAAAAAAAAACYmJn__Pz8__j4+f_3+Pn_' +
+    '9_j5__f4+f_3+Pj_9_f4__b3+P_29_j_+_v7_4iJiv8AAAAAAA' +
+    'AAAAAAAAAAAAAAlpeX__v8_P_3+Pn_9_j5__f4+f_3+Pj_9vf4' +
+    '__b3+P_29_j_9vb3__r7+_+GiIj_AAAAAAAAAAAAAAAAAAAAAJ' +
+    'WWlv_7_Pz_9_f4__f3+P_29_j_9vf4__b3+P_29_j_9fb3__X2' +
+    '9__6+_v_hYaH_wAAAAAAAAAAAAAAAAAAAACTlJX_+_v8__b3+P' +
+    '_29_j_9vf4__b3+P_29_f_9fb3__X29__19vf_+vv7_4OFhv8A' +
+    'AAAAAAAAAAAAAAAAAAAAkpOT__v7_P_29_j_9vf4__b29__19v' +
+    'f_9fb3__X29__19vf_9fb3__r7+_+ChIT_AAAAAAAAAAAAAAAA' +
+    'AAAAAJCSkv_6+_v_+vv7__r7+__6+_v_+vv7__r7+__6+_v_+v' +
+    'v7__r7+__6+_v_gIKD_wAAAAAAAAAAAAAAAAAAAACPkJH_jY+P' +
+    '_4yNjv+LjI3_iYqL_4iJiv+GiIj_hYaH_4OFhv+ChIT_gIKD_3' +
+    '+Bgv8AAAAAAAAAAA=='.replace(/_/g, '/')));
 
 /**
  * @param {string} fileName
@@ -214,9 +213,9 @@ function createDocumentTree(rowMap) {
 
   /** @const @type {!Array<!TextDocument>} */
   const textDocuments = TextDocument.list.sort(
-      (doc1, doc2) => { return compareString(doc1.name, doc2.name); })
+      (doc1, doc2) => { return compareString(doc1.name, doc2.name); });
 
-                            for (const textDocument of textDocuments) {
+  for (const textDocument of textDocuments) {
     /** @const @type {?TextDocumentState} */
     const state = TextDocumentState.get(textDocument);
     if (!state) {

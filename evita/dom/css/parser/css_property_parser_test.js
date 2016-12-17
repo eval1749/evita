@@ -38,7 +38,7 @@ testing.test('css.PropertyParser.border', function(t) {
 testing.test('css.PropertyParser.border_color', function(t) {
   t.expect(sample('border-color: red'))
       .toEqual(
-          'border-bottom-color: red;border-left-color: red;border-right-color: red;border-top-color: red')
+          'border-bottom-color: red;border-left-color: red;border-right-color: red;border-top-color: red');
 });
 
 testing.test('css.PropertyParser.color', function(t) {
@@ -51,7 +51,7 @@ testing.test('css.PropertyParser.color', function(t) {
 testing.test('css.PropertyParser.padding', function(t) {
   t.expect(sample('padding: 2px'))
       .toEqual(
-          "padding-bottom: 2px;padding-left: 2px;padding-right: 2px;padding-top: 2px");
+          'padding-bottom: 2px;padding-left: 2px;padding-right: 2px;padding-top: 2px');
 });
 
 testing.test('css.PropertyParser.text-decoration', function(t) {

@@ -45,7 +45,7 @@ class Node {
 
   /** @return {string} */
   get nodeName() {
-    throw new Error('derived class should implement nodeName()')
+    throw new Error('derived class should implement nodeName()');
   }
 
   /** @return {!Document} */

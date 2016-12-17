@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 function NewRegExp(source, options) {
-  return new RegExp(source, options)
+  return new RegExp(source, options);
 }
 
 if (!Array.prototype.values)

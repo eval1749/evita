@@ -7,7 +7,7 @@
    * @constructor
    */
   Os.File.Error = (function() {
-    return function Error(winLastError) { this.winLastError = winLastError; }
+    return function Error(winLastError) { this.winLastError = winLastError; };
   })();
 
   /**

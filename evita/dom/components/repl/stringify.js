@@ -15,9 +15,9 @@ const ESCAPE_MAP = {
  * @return {!Array<!Object>}
  */
 function inclusiveAncestorsOf(object) {
-  const result = []
+  const result = [];
   for (let runner = object; runner; runner = Object.getPrototypeOf(runner))
-    result.push(runner)
+    result.push(runner);
   return result;
 }
 
@@ -125,7 +125,7 @@ function collectProperties(object) {
     if (isPrivatePropertyName(name))
       return undefined;
     /** @type {!ObjectPropertyDescriptor} */
-    const descriptor = /** @type {!ObjectPropertyDescriptor} */(
+    const descriptor = /** @type {!ObjectPropertyDescriptor} */ (
         Object.getOwnPropertyDescriptor(object, name));
     const value = descriptor['value'];
     if (removeFunction && typeof(value) === 'function')

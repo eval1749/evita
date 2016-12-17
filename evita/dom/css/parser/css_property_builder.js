@@ -49,7 +49,7 @@ class PropertyBuilder extends base.Logger {
     /** @type {!Token} */
     this.name_ = kDummyToken;
     /** @type {!Array<!Token>} */
-    this.values_ = []
+    this.values_ = [];
   }
 
   /**

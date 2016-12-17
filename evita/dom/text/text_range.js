@@ -210,7 +210,7 @@ function rangeMatch(regexp) {
  * @param {!Editor.RegExp} regexp
  * @return {!Generator<!Array<RegExpMatch>>}
  */
-function * rangeMatches(regexp) {
+function* rangeMatches(regexp) {
   /** @type {number} */
   let runner = this.start;
   while (runner < this.end) {
@@ -265,7 +265,7 @@ function moveEndWhile(charSet, count = Count.FORWARD) {
     this.collapseTo(position);
   else
     this.end = position;
-  return this
+  return this;
 }
 
 /**
@@ -297,7 +297,7 @@ function moveStartWhile(charSet, count = Count.FORWARD) {
     this.collapseTo(position);
   else
     this.start = position;
-  return this
+  return this;
 }
 
 /**

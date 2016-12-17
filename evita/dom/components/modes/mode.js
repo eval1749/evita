@@ -203,9 +203,9 @@ class Mode {
       return modeId;
     }
     /** @const @type {string} */
-    const extension = matches[1]
-        /** @const @type {ExtensionDescription} */
-        const description = staticExtensionMap.get(extension) || null;
+    const extension = matches[1];
+    /** @const @type {ExtensionDescription} */
+    const description = staticExtensionMap.get(extension) || null;
     if (!description)
       return kDefaultModeId;
     return description.modeId;

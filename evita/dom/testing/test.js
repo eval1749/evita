@@ -121,7 +121,7 @@ function getLocation() {
     } catch (error) {
       stack = error.stack.split('\n').slice(1);
     }
-    return stack
+    return stack;
   }
   const locations = getStack();
   let index = locations.findIndex(

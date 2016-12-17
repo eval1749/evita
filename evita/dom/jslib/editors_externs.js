@@ -7,4 +7,4 @@
 var editors;
 
 /** @param {!Array.<string>} args */
-editors.start = function(args) {}
+editors.start = function(args) {};

@@ -29,5 +29,5 @@ function async(makeGenerator) {
     } catch (ex) {
       return Promise.reject(ex);
     }
-  }
+  };
 }

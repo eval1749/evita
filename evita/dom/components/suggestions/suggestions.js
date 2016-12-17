@@ -22,10 +22,10 @@ Provider.prototype.next = function() {};
 /**
  * @typedef {function(new:Provider, !Session)}
  */
-var ProviderFactory
+var ProviderFactory;
 
-    /** @const @type {!Map<!TextDocument, !Session>} */
-    const staticSessionMap = new Map();
+/** @const @type {!Map<!TextDocument, !Session>} */
+const staticSessionMap = new Map();
 
 /** @const @type {!Array<!ProviderFactory>} */
 const staticProvider = [];
@@ -438,7 +438,7 @@ class Session extends Logger {
    * @param {!TextDocument} document
    * @return {?Session}
    */
-  static for (document) { return staticSessionMap.get(document) || null; }
+  static for(document) { return staticSessionMap.get(document) || null; }
 }
 
 Session.addProvider(WordExtracter);

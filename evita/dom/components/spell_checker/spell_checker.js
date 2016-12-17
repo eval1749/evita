@@ -182,7 +182,7 @@ class Scanner {
   }
 
   /** @return {boolean} */
-  isDead() { return this.life_ === 0 }
+  isDead() { return this.life_ === 0; }
 
   /**
    * @param {!Unicode.Script} script

@@ -16,8 +16,9 @@ const Document = visuals.Document;
 function createDocument() {
   const document = new Document();
   document.elementIdMap_ = new Map();
-  document.getElementById = function(
-      id) { return this.elementIdMap_.get(id) || null; }
+  document.getElementById = function(id) {
+    return this.elementIdMap_.get(id) || null;
+  };
 
   // body
   const body = document.createElement('body');

@@ -67,7 +67,7 @@ function caseReplace(string, stringCase) {
     case CaseAnalysisResult.MIXED:
       return string;
     case CaseAnalysisResult.UPPER:
-      return string.toLocaleUpperCase()
+      return string.toLocaleUpperCase();
   }
   throw `Invalid CaseAnalysisResult ${stringCase}`;
 }
@@ -581,7 +581,7 @@ class FindAndReplace {
    * @return {Editor.RegExp}
    */
   static replaceOne(window, searchText, replaceText, findOptions) {
-    return replaceOne(window, searchText, replaceText, findOptions)
+    return replaceOne(window, searchText, replaceText, findOptions);
   }
 
   /**

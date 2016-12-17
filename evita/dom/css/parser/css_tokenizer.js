@@ -306,7 +306,7 @@ class Tokenizer extends base.Logger {
           if (isNameChar(charCode)) {
             tokenType = Token.Type.HASH;
             state = '#name';
-            continue
+            continue;
           }
           yield newToken(Token.Type.DELIM, source, tokenStart, offset);
           state = 'start';
@@ -315,7 +315,7 @@ class Tokenizer extends base.Logger {
         case '#name':
           if (isNameChar(charCode)) {
             tokenType = Token.Type.HASH;
-            continue
+            continue;
           }
           yield newToken(Token.Type.HASH, source, tokenStart, offset);
           state = 'start';
@@ -369,7 +369,7 @@ class Tokenizer extends base.Logger {
         case '@':
           if (isNameChar(charCode)) {
             tokenType = Token.Type.AT;
-            continue
+            continue;
           }
           yield newToken(Token.Type.DELIM, source, tokenStart, offset);
           state = 'start';
@@ -392,7 +392,7 @@ class Tokenizer extends base.Logger {
         case 'ident':
           if (isNameChar(charCode)) {
             tokenType = Token.Type.IDENT;
-            continue
+            continue;
           }
           if (charCode === Unicode.LEFT_PARENTHESIS) {
             yield newToken(Token.Type.FUNCTION, source, tokenStart, offset + 1);

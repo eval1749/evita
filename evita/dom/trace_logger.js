@@ -18,8 +18,7 @@
     /** @return {!Promise.<number>} */
     stop() {
       let resultResolver;
-      const resultPromise =
-          new Promise((resolver) => {resultResolver = resolver});
+      const resultPromise = new Promise(resolver => resultResolver = resolver);
       let json = '\u005b';
       let delimiter = '';
       Editor.stopTraceLog((chunk, more) => {
@@ -41,7 +40,7 @@
       let file = null;
       /** @type {!TextEncoder} */
       const encoder = new TextEncoder('utf-8');
-      return async(function * (events) {
+      return async(function* (events) {
                file = yield Os.File.open(fileName, 'w');
                const json = JSON.stringify(events);
                yield file.write(encoder.encode(json));

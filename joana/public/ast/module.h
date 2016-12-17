@@ -11,7 +11,7 @@ namespace joana {
 namespace ast {
 
 class JOANA_PUBLIC_EXPORT Module final : public ContainerNode {
-  DECLARE_CONCRETE_AST_NODE(BooleanLiteral, ContainerNode);
+  DECLARE_CONCRETE_AST_NODE(Module, ContainerNode);
 
  public:
   ~Module() final;

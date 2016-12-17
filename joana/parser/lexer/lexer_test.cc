@@ -413,8 +413,8 @@ TEST_F(LexerTest, StringLiteral) {
   PrepareSouceCode("'\\b\\t\\n\\v\\f\\r\\\\\\''");
   EXPECT_EQ(NewStringLiteral("\b\t\n\v\f\r\\'"), Parse());
 
-  PrepareSouceCode("'\\x12\\xAB'");
-  EXPECT_EQ(NewStringLiteral({0x12, 0xAB}), Parse());
+  PrepareSouceCode("'\\0\\x12\\xAB'");
+  EXPECT_EQ(NewStringLiteral({0x00, 0x12, 0xAB}), Parse());
 
   PrepareSouceCode("'\\u1234'");
   EXPECT_EQ(NewStringLiteral({0x1234}), Parse());

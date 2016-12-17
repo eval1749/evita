@@ -534,6 +534,19 @@ ast::Token& Lexer::HandleStringLiteral() {
             state = State::Normal;
             characters.push_back(PeekChar());
             break;
+          case '0':
+            ConsumeChar();
+            if (!CanPeekChar())
+              return NewError(ErrorCode::STRING_LITERAL_NOT_CLOSED);
+            if (IsDigitWithBase(PeekChar(), 10)) {
+              AddError(RangeFrom(backslash_start),
+                       ErrorCode::STRING_LITERAL_BACKSLASH);
+              state = State::Normal;
+              continue;
+            }
+            characters.push_back('\0');
+            state = State::Normal;
+            continue;
           case 'b':
             state = State::Normal;
             characters.push_back('\b');

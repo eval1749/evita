@@ -95,8 +95,6 @@ ast::Expression& Parser::ParsePropertyName() {
     return NewInvalidExpression(ErrorCode::ERROR_PROPERTY_INVALID_TOKEN);
   if (PeekToken().Is<ast::Name>())
     return ParsePrimaryExpression();
-  if (PeekToken() == ast::PunctuatorKind::LeftBrace)
-    return ParsePrimaryExpression();
   if (PeekToken() == ast::PunctuatorKind::LeftBracket)
     return ParsePrimaryExpression();
   return NewInvalidExpression(ConsumeToken(),

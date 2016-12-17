@@ -533,6 +533,27 @@ ast::Expression& Parser::ParsePropertyAfterName(
                               ErrorCode::ERROR_PROPERTY_INVALID_TOKEN);
 }
 
+// PropertyName ::= LiteralPropertyName | ComputedPropertyName
+// LiteralPropertyName ::= IdentifierName | StringLiteral | NumericLiteral
+// ComputedPropertyName ::= '[' AssignmentExpression ']'
+ast::Expression& Parser::ParsePropertyName() {
+  if (!CanPeekToken()) {
+    return NewInvalidExpression(
+        ErrorCode::ERROR_PROPERTY_INVALID_PROPERTY_NAME);
+  }
+  if (PeekToken().Is<ast::Name>()) {
+    // Note: we can use any name as property name including keywords.
+    return node_factory().NewReferenceExpression(
+        ConsumeToken().As<ast::Name>());
+  }
+  if (PeekToken().Is<ast::Literal>())
+    return NewLiteralExpression(ConsumeToken().As<ast::Literal>());
+  if (PeekToken() == ast::PunctuatorKind::LeftBracket)
+    return ParsePrimaryExpression();
+  return NewInvalidExpression(ConsumeToken(),
+                              ErrorCode::ERROR_PROPERTY_INVALID_PROPERTY_NAME);
+}
+
 ast::Expression& Parser::ParseRegExpLiteral() {
   auto& regexp = ParseRegExp();
   auto& flags = CanPeekToken() && PeekToken().Is<ast::Name>() ? ConsumeToken()

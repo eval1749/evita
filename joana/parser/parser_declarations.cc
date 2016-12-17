@@ -6,7 +6,6 @@
 
 #include "joana/parser/parser_error_codes.h"
 #include "joana/public/ast/expressions.h"
-#include "joana/public/ast/literals.h"
 #include "joana/public/ast/node_factory.h"
 #include "joana/public/ast/statements.h"
 
@@ -89,27 +88,6 @@ ast::Expression& Parser::ParseParameterList() {
   ExpectToken(ast::PunctuatorKind::RightParenthesis,
               ErrorCode::ERROR_FUNCTION_EXPECT_RPAREN);
   return node_factory().NewGroupExpression(GetSourceCodeRange(), expression);
-}
-
-// PropertyName ::= LiteralPropertyName | ComputedPropertyName
-// LiteralPropertyName ::= IdentifierName | StringLiteral | NumericLiteral
-// ComputedPropertyName ::= '[' AssignmentExpression ']'
-ast::Expression& Parser::ParsePropertyName() {
-  if (!CanPeekToken()) {
-    return NewInvalidExpression(
-        ErrorCode::ERROR_PROPERTY_INVALID_PROPERTY_NAME);
-  }
-  if (PeekToken().Is<ast::Name>()) {
-    // Note: we can use any name as property name including keywords.
-    return node_factory().NewReferenceExpression(
-        ConsumeToken().As<ast::Name>());
-  }
-  if (PeekToken().Is<ast::Literal>())
-    return NewLiteralExpression(ConsumeToken().As<ast::Literal>());
-  if (PeekToken() == ast::PunctuatorKind::LeftBracket)
-    return ParsePrimaryExpression();
-  return NewInvalidExpression(ConsumeToken(),
-                              ErrorCode::ERROR_PROPERTY_INVALID_PROPERTY_NAME);
 }
 
 }  // namespace internal

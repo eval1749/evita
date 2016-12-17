@@ -165,6 +165,11 @@ int Checker::Run() {
     const auto& start_line = module.SourceCodeLinetAt(error->range().start());
     if (start_line != line) {
       std::cerr << base::UTF16ToUTF8(start_line.range().GetString());
+      for (auto offset = start_line.range().start();
+           offset < start_line.range().end(); ++offset) {
+        std::cerr << (error->range().Contains(offset) ? '~' : ' ');
+      }
+      std::cerr << std::endl;
       if (start_line.number() + 1 != line.number())
         std::cerr << "  ..." << std::endl;
     }
@@ -173,7 +178,7 @@ int Checker::Run() {
     const auto end_column = error->range().end() - line.range().start();
     for (auto offset = line.range().start(); offset < error->range().end();
          ++offset) {
-      std::cerr << (offset >= error->range().start() ? '^' : ' ');
+      std::cerr << (error->range().Contains(offset) ? '~' : ' ');
     }
     std::cerr << std::endl;
   }

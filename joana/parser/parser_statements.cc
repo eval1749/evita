@@ -69,6 +69,10 @@ ast::Statement& Parser::ParseStatement() {
     if (name->IsKeyword())
       return ParseKeywordStatement();
     ConsumeToken();
+    if (!CanPeekToken()) {
+      PushBackToken(*name);
+      return ParseExpressionStatement();
+    }
     if (ConsumeTokenIf(ast::PunctuatorKind::Colon)) {
       auto& statement = ParseStatement();
       return node_factory().NewLabeledStatement(GetSourceCodeRange(), *name,

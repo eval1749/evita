@@ -40,8 +40,8 @@ class Parser::ExpectSemiColonScope final {
   explicit ExpectSemiColonScope(Parser* parser) : parser_(parser) {}
 
   ~ExpectSemiColonScope() {
-    parser_->ExpectToken(ast::PunctuatorKind::SemiColon,
-                         ErrorCode::ERROR_STATEMENT_EXPECT_SEMI_COLON);
+    parser_->ExpectPunctuator(ast::PunctuatorKind::SemiColon,
+                              ErrorCode::ERROR_STATEMENT_EXPECT_SEMI_COLON);
   }
 
  private:
@@ -129,8 +129,8 @@ ast::Statement& Parser::ParseCaseClause() {
   DCHECK_EQ(PeekToken(), ast::NameId::Case);
   ConsumeToken();
   auto& expression = ParseExpression();
-  ExpectToken(ast::PunctuatorKind::Colon,
-              ErrorCode::ERROR_STATEMENT_EXPECT_COLON);
+  ExpectPunctuator(ast::PunctuatorKind::Colon,
+                   ErrorCode::ERROR_STATEMENT_EXPECT_COLON);
   auto& statement = ParseStatement();
   return node_factory().NewCaseClause(GetSourceCodeRange(), expression,
                                       statement);
@@ -159,8 +159,8 @@ ast::Statement& Parser::ParseDefaultLabel() {
   SourceCodeRangeScope scope(this);
   DCHECK_EQ(PeekToken(), ast::NameId::Default);
   auto& label = ConsumeToken().As<ast::Name>();
-  ExpectToken(ast::PunctuatorKind::Colon,
-              ErrorCode::ERROR_STATEMENT_EXPECT_COLON);
+  ExpectPunctuator(ast::PunctuatorKind::Colon,
+                   ErrorCode::ERROR_STATEMENT_EXPECT_COLON);
   auto& statement = ParseStatement();
   return node_factory().NewLabeledStatement(GetSourceCodeRange(), label,
                                             statement);
@@ -192,8 +192,8 @@ ast::Statement& Parser::ParseExpressionStatement() {
 ast::Statement& Parser::ParseForStatement() {
   DCHECK_EQ(PeekToken(), ast::NameId::For);
   ConsumeToken();
-  ExpectToken(ast::PunctuatorKind::LeftParenthesis,
-              ErrorCode::ERROR_STATEMENT_EXPECT_LPAREN);
+  ExpectPunctuator(ast::PunctuatorKind::LeftParenthesis,
+                   ErrorCode::ERROR_STATEMENT_EXPECT_LPAREN);
 
   auto& keyword = CanPeekToken() && IsDeclarationKeyword(PeekToken())
                       ? ConsumeToken()
@@ -209,14 +209,14 @@ ast::Statement& Parser::ParseForStatement() {
         CanPeekToken() && PeekToken() == ast::PunctuatorKind::SemiColon
             ? NewElisionExpression()
             : ParseExpression();
-    ExpectToken(ast::PunctuatorKind::SemiColon,
-                ErrorCode::ERROR_STATEMENT_EXPECT_SEMI_COLON);
+    ExpectPunctuator(ast::PunctuatorKind::SemiColon,
+                     ErrorCode::ERROR_STATEMENT_EXPECT_SEMI_COLON);
     auto& step =
         CanPeekToken() && PeekToken() == ast::PunctuatorKind::RightParenthesis
             ? NewElisionExpression()
             : ParseExpression();
-    ExpectToken(ast::PunctuatorKind::RightParenthesis,
-                ErrorCode::ERROR_STATEMENT_EXPECT_RPAREN);
+    ExpectPunctuator(ast::PunctuatorKind::RightParenthesis,
+                     ErrorCode::ERROR_STATEMENT_EXPECT_RPAREN);
     auto& body = ParseStatement();
     return node_factory().NewForStatement(GetSourceCodeRange(), keyword,
                                           expression, condition, step, body);
@@ -225,8 +225,8 @@ ast::Statement& Parser::ParseForStatement() {
   if (ConsumeTokenIf(ast::NameId::Of)) {
     // 'for' '(' binding 'of' expression ')' statement
     auto& expression2 = ParseAssignmentExpression();
-    ExpectToken(ast::PunctuatorKind::RightParenthesis,
-                ErrorCode::ERROR_STATEMENT_EXPECT_RPAREN);
+    ExpectPunctuator(ast::PunctuatorKind::RightParenthesis,
+                     ErrorCode::ERROR_STATEMENT_EXPECT_RPAREN);
     auto& body = ParseStatement();
     return node_factory().NewForOfStatement(GetSourceCodeRange(), keyword,
                                             expression, expression2, body);
@@ -345,8 +345,8 @@ const ast::Expression& Parser::ParseParenthesisExpression() {
     return ParseExpression();
   }
   auto& expression = ParseExpression();
-  ExpectToken(ast::PunctuatorKind::RightParenthesis,
-              ErrorCode::ERROR_STATEMENT_EXPECT_RPAREN);
+  ExpectPunctuator(ast::PunctuatorKind::RightParenthesis,
+                   ErrorCode::ERROR_STATEMENT_EXPECT_RPAREN);
   return expression;
 }
 

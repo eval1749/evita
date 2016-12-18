@@ -243,8 +243,8 @@ ast::Expression& Parser::ParseConditionalExpression() {
   if (!ConsumeTokenIf(ast::PunctuatorKind::Question))
     return expression;
   auto& true_expression = ParseAssignmentExpression();
-  ExpectToken(ast::PunctuatorKind::Colon,
-              ErrorCode::ERROR_EXPRESSION_CONDITIONAL_EXPECT_COLON);
+  ExpectPunctuator(ast::PunctuatorKind::Colon,
+                   ErrorCode::ERROR_EXPRESSION_CONDITIONAL_EXPECT_COLON);
   auto& false_expression = ParseAssignmentExpression();
   return node_factory().NewConditionalExpression(
       GetSourceCodeRange(), expression, true_expression, false_expression);
@@ -273,8 +273,8 @@ ast::Expression& Parser::ParseLeftHandSideExpression() {
   while (CanPeekToken()) {
     if (ConsumeTokenIf(ast::PunctuatorKind::LeftBracket)) {
       auto& name_expression = ParseExpression();
-      ExpectToken(ast::PunctuatorKind::RightBracket,
-                  ErrorCode::ERROR_EXPRESSION_LHS_EXPECT_RBRACKET);
+      ExpectPunctuator(ast::PunctuatorKind::RightBracket,
+                       ErrorCode::ERROR_EXPRESSION_LHS_EXPECT_RBRACKET);
       expression = &node_factory().NewMemberExpression(
           GetSourceCodeRange(), *expression, name_expression);
       continue;
@@ -436,15 +436,15 @@ ast::Expression& Parser::ParseParenthesis() {
   ConsumeToken();
   if (ConsumeTokenIf(ast::PunctuatorKind::RightParenthesis)) {
     auto& parameter = NewEmptyExpression();
-    ExpectToken(ast::PunctuatorKind::Arrow,
-                ErrorCode::ERROR_EXPRESSION_PRIMARY_EXPECT_ARROW);
+    ExpectPunctuator(ast::PunctuatorKind::Arrow,
+                     ErrorCode::ERROR_EXPRESSION_PRIMARY_EXPECT_ARROW);
     auto& statement = ParseArrowFunctionBody();
     return NewDeclarationExpression(node_factory().NewArrowFunction(
         GetSourceCodeRange(), ast::FunctionKind::Normal, parameter, statement));
   }
   auto& sub_expression = ParseExpression();
-  ExpectToken(ast::PunctuatorKind::RightParenthesis,
-              ErrorCode::ERROR_EXPRESSION_PRIMARY_EXPECT_RPAREN);
+  ExpectPunctuator(ast::PunctuatorKind::RightParenthesis,
+                   ErrorCode::ERROR_EXPRESSION_PRIMARY_EXPECT_RPAREN);
   auto& expression =
       node_factory().NewGroupExpression(GetSourceCodeRange(), sub_expression);
   if (!ConsumeTokenIf(ast::PunctuatorKind::Arrow))

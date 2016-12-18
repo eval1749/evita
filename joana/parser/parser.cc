@@ -178,7 +178,7 @@ bool Parser::ConsumeTokenIf(ast::PunctuatorKind kind) {
   return true;
 }
 
-void Parser::ExpectToken(ast::PunctuatorKind kind, ErrorCode error_code) {
+void Parser::ExpectPunctuator(ast::PunctuatorKind kind, ErrorCode error_code) {
   if (ConsumeTokenIf(kind))
     return;
   return AddError(

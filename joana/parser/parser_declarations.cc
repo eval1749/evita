@@ -85,8 +85,8 @@ ast::Expression& Parser::ParseParameterList() {
   if (ConsumeTokenIf(ast::PunctuatorKind::RightParenthesis))
     return NewEmptyExpression();
   auto& expression = ParseExpression();
-  ExpectToken(ast::PunctuatorKind::RightParenthesis,
-              ErrorCode::ERROR_FUNCTION_EXPECT_RPAREN);
+  ExpectPunctuator(ast::PunctuatorKind::RightParenthesis,
+                   ErrorCode::ERROR_FUNCTION_EXPECT_RPAREN);
   return node_factory().NewGroupExpression(GetSourceCodeRange(), expression);
 }
 

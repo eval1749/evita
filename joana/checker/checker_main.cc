@@ -108,8 +108,9 @@ SourceCodeLine ScriptModule::SourceCodeLinetAt(int offset) const {
 }
 
 void PrintSourceCodeLine(int start, int end, const SourceCodeRange& range) {
-  std::cerr << base::UTF16ToUTF8(range.source_code().GetString(start, end))
-            << std::endl;
+  std::cerr << base::UTF16ToUTF8(range.source_code().GetString(start, end));
+  if (range.source_code().CharAt(end - 1) != '\n')
+    std::cerr << std::endl;
   const auto stop = std::min(end, range.end());
   if (range.IsCollapsed()) {
     for (auto runner = start; runner < stop; ++runner)
@@ -132,14 +133,14 @@ void PrintSourceCodeRange(const SourceCodeLine& start_line,
   const auto start_line_start =
       std::max(start_line.range().start(), range.start() - kBeforeContext);
   const auto start_line_end =
-      std::min(start_line_start + kLineWidth, start_line.range().end() - 1);
+      std::min(start_line_start + kLineWidth, start_line.range().end());
   PrintSourceCodeLine(start_line_start, start_line_end, range);
   if (range.end() <= start_line_end)
     return;
   std::cerr << "  ...." << std::endl;
   PrintSourceCodeLine(
       std::max(end_line.range().start(), range.end() - kBeforeContext),
-      std::min(end_line.range().end() - 1, range.end() + kAfterContext), range);
+      std::min(end_line.range().end(), range.end() + kAfterContext), range);
 }
 
 //

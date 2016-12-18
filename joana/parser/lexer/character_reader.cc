@@ -48,5 +48,10 @@ bool CharacterReader::ConsumeCharIf(base::char16 char_code) {
   return true;
 }
 
+void CharacterReader::MoveBackward() {
+  DCHECK_GT(current_, range_.start());
+  --current_;
+}
+
 }  // namespace internal
 }  // namespace joana

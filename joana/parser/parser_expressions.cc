@@ -471,8 +471,10 @@ ast::Expression& Parser::ParsePrimaryExpression() {
     return ParseArrayLiteralExpression();
   if (token == ast::PunctuatorKind::LeftBrace)
     return ParseObjectLiteralExpression();
-  if (token == ast::PunctuatorKind::Divide)
+  if (token == ast::PunctuatorKind::Divide ||
+      token == ast::PunctuatorKind::DivideEqual) {
     return ParseRegExpLiteral();
+  }
   // TODO(eval1749): NYI template literal
   return NewInvalidExpression(ConsumeToken(),
                               ErrorCode::ERROR_EXPRESSION_INVALID);

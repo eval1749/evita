@@ -628,6 +628,8 @@ ast::RegExp& RegExpParser::ParseSequence() {
 }  // namespace
 
 ast::RegExp& Lexer::ConsumeRegExp() {
+  if (PeekToken() == ast::PunctuatorKind::DivideEqual)
+    reader_->MoveBackward();
   return RegExpParser(context_, reader_.get()).Run();
 }
 

@@ -30,6 +30,9 @@ class CharacterReader final {
   // character.
   bool ConsumeCharIf(base::char16 expected_char);
 
+  // For handling an RegExp starts with "=".
+  void MoveBackward();
+
   base::char16 PeekChar() const;
 
  private:

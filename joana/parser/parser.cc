@@ -97,10 +97,13 @@ Parser::SourceCodeRangeScope::~SourceCodeRangeScope() {
 //
 // Parser
 //
-Parser::Parser(ast::EditContext* context, const SourceCodeRange& range)
+Parser::Parser(ast::EditContext* context,
+               const SourceCodeRange& range,
+               const ParserOptions& options)
     : bracket_stack_(new BracketStack(&context->error_sink())),
       context_(*context),
       lexer_(new Lexer(context, range)),
+      options_(options),
       root_(context->node_factory().NewModule(range)) {}
 
 Parser::~Parser() = default;
@@ -197,6 +200,19 @@ void Parser::ExpectPunctuator(ast::PunctuatorKind kind, ErrorCode error_code) {
       source_code().Slice(range_stack_.top(),
                           (*std::next(tokens_.rbegin()))->range().end()),
       error_code);
+}
+
+void Parser::ExpectSemiColon() {
+  if (options_.enable_auto_semi_colon) {
+    if (!CanPeekToken())
+      return;
+    if (ConsumeTokenIf(ast::PunctuatorKind::SemiColon))
+      return;
+    if (PeekToken() == ast::PunctuatorKind::RightBrace)
+      return;
+  }
+  ExpectPunctuator(ast::PunctuatorKind::SemiColon,
+                   ErrorCode::ERROR_STATEMENT_EXPECT_SEMI_COLON);
 }
 
 SourceCodeRange Parser::GetSourceCodeRange() const {

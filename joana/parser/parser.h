@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "base/macros.h"
+#include "joana/parser/public/parse.h"
 #include "joana/public/ast/node_forward.h"
 
 namespace joana {
@@ -21,12 +22,17 @@ namespace internal {
 
 class Lexer;
 
+//
+// Parser
+//
 class Parser final {
  public:
   // Expose |OperatorPrecedence| for implementing static helper functions.
   enum class OperatorPrecedence;
 
-  Parser(ast::EditContext* context, const SourceCodeRange& range);
+  Parser(ast::EditContext* context,
+         const SourceCodeRange& range,
+         const ParserOptions& options);
 
   ~Parser();
 
@@ -69,6 +75,7 @@ class Parser final {
   // token.
   bool ConsumeTokenIf(ast::PunctuatorKind kind);
   void ExpectPunctuator(ast::PunctuatorKind kind, ErrorCode error_code);
+  void ExpectSemiColon();
   SourceCodeRange GetSourceCodeRange() const;
   ast::Token& PeekToken() const;
   void PushBackToken(const ast::Token& token);
@@ -162,6 +169,7 @@ class Parser final {
   ast::EditContext& context_;
   std::unique_ptr<Lexer> lexer_;
   ast::ContainerNode& root_;
+  const ParserOptions& options_;
   std::stack<int> range_stack_;
 
   // List of tokens to locate comment.

@@ -10,6 +10,7 @@
 #include "base/macros.h"
 #include "base/strings/string_piece.h"
 #include "base/strings/utf_string_conversions.h"
+#include "joana/parser/public/parse.h"
 #include "joana/parser/simple_error_sink.h"
 #include "joana/parser/simple_formatter.h"
 #include "joana/public/ast/edit_context.h"
@@ -51,7 +52,8 @@ std::string ParserTest::Parse(base::StringPiece script_text) {
       base::FilePath(), base::StringPiece16(script_text16));
 
   std::ostringstream ostream;
-  Parser parser(context.get(), source_code.range());
+  ParserOptions options;
+  Parser parser(context.get(), source_code.range(), options);
   SimpleFormatter(&ostream).Format(parser.Run());
   for (const auto& error : error_sink.errors())
     ostream << error << std::endl;

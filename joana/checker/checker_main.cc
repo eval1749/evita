@@ -148,16 +148,17 @@ void PrintSourceCodeRange(const SourceCodeLine& start_line,
 //
 class Checker final {
  public:
-  Checker();
+  static int Main(const ParserOptions& options);
+
+ private:
+  explicit Checker(const ParserOptions& options);
   ~Checker() = default;
 
   void AddSourceCode(const base::FilePath& file_path,
                      base::StringPiece16 file_contents);
 
-  int Run();
-
- private:
   ScriptModule& ModuleOf(const SourceCode& source_code) const;
+  int Run();
 
   SimpleErrorSink error_sink_;
   Zone node_zone_;
@@ -168,11 +169,12 @@ class Checker final {
   SourceCode::Factory source_code_factory_;
   std::unordered_map<const SourceCode*, std::unique_ptr<ScriptModule>>
       module_map_;
+  ParserOptions options_;
 
   DISALLOW_COPY_AND_ASSIGN(Checker);
 };
 
-Checker::Checker()
+Checker::Checker(const ParserOptions& options)
     : node_zone_("Checker.Node"),
       node_factory_(&node_zone_),
       context_(ast::EditContext::Builder()
@@ -180,14 +182,33 @@ Checker::Checker()
                    .SetNodeFactory(&node_factory_)
                    .Build()),
       source_code_zone_("Checker.SourceCode"),
-      source_code_factory_(&source_code_zone_) {}
+      source_code_factory_(&source_code_zone_),
+      options_(options) {}
 
 void Checker::AddSourceCode(const base::FilePath& file_path,
                             base::StringPiece16 file_contents) {
   const auto& source_code = source_code_factory_.New(file_path, file_contents);
   source_codes_.push_back(&source_code);
-  const auto& module = Parse(context_.get(), source_code.range());
+  const auto& module = Parse(context_.get(), source_code.range(), options_);
   module_map_.emplace(&source_code, new ScriptModule(source_code, module));
+}
+
+int Checker::Main(const ParserOptions& options) {
+  joana::internal::Checker checker(options);
+  const auto* const command_line = base::CommandLine::ForCurrentProcess();
+  for (const auto& file_name : command_line->GetArgs()) {
+    base::FilePath file_path =
+        base::MakeAbsoluteFilePath(base::FilePath(file_name));
+    std::string file_contents8;
+    if (!base::ReadFileToString(file_path, &file_contents8)) {
+      LOG(ERROR) << "Cannot read file " << file_path.value();
+      continue;
+    }
+    VLOG(0) << "Process " << file_path.value();
+    const auto& file_contents = base::UTF8ToUTF16(file_contents8);
+    checker.AddSourceCode(file_path, base::StringPiece16(file_contents));
+  }
+  return checker.Run();
 }
 
 int Checker::Run() {
@@ -226,19 +247,9 @@ extern "C" int main() {
     logging::InitLogging(settings);
   }
 
-  joana::internal::Checker checker;
-  const auto* const command_line = base::CommandLine::ForCurrentProcess();
-  for (const auto& file_name : command_line->GetArgs()) {
-    base::FilePath file_path =
-        base::MakeAbsoluteFilePath(base::FilePath(file_name));
-    std::string file_contents8;
-    if (!base::ReadFileToString(file_path, &file_contents8)) {
-      LOG(ERROR) << "Cannot read file " << file_path.value();
-      continue;
-    }
-    VLOG(0) << "Process " << file_path.value();
-    const auto& file_contents = base::UTF8ToUTF16(file_contents8);
-    checker.AddSourceCode(file_path, base::StringPiece16(file_contents));
-  }
-  return checker.Run();
+  auto* const command_line = base::CommandLine::ForCurrentProcess();
+
+  joana::ParserOptions options;
+  options.enable_auto_semi_colon = command_line->HasSwitch("auto_semi_colon");
+  return joana::internal::Checker::Main(options);
 }

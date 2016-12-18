@@ -39,10 +39,7 @@ class Parser::ExpectSemiColonScope final {
  public:
   explicit ExpectSemiColonScope(Parser* parser) : parser_(parser) {}
 
-  ~ExpectSemiColonScope() {
-    parser_->ExpectPunctuator(ast::PunctuatorKind::SemiColon,
-                              ErrorCode::ERROR_STATEMENT_EXPECT_SEMI_COLON);
-  }
+  ~ExpectSemiColonScope() { parser_->ExpectSemiColon(); }
 
  private:
   Parser* const parser_;

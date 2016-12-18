@@ -11,8 +11,9 @@ namespace joana {
 using Parser = internal::Parser;
 
 const ast::Node& Parse(ast::EditContext* context,
-                       const SourceCodeRange& range) {
-  Parser parser(context, range);
+                       const SourceCodeRange& range,
+                       const ParserOptions& options) {
+  Parser parser(context, range, options);
   return parser.Run();
 }
 

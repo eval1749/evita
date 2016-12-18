@@ -16,8 +16,19 @@ class Node;
 
 class SourceCodeRange;
 
+//
+// ParserOptions
+//
+JOANA_PARSER_EXPORT struct ParserOptions {
+  // Insert semi-colon
+  //  - before right brace, e.g. {return 1}
+  //  - before newline or end of script
+  bool enable_auto_semi_colon = false;
+};
+
 JOANA_PARSER_EXPORT const ast::Node& Parse(ast::EditContext* context,
-                                           const SourceCodeRange& range);
+                                           const SourceCodeRange& range,
+                                           const ParserOptions& options);
 
 }  // namespace joana
 

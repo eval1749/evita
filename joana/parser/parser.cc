@@ -117,6 +117,8 @@ void Parser::AddError(const ast::Node& token, ErrorCode error_code) {
 }
 
 void Parser::AddError(const SourceCodeRange& range, ErrorCode error_code) {
+  if (range.IsCollapsed())
+    DCHECK_EQ(range, source_code().end());
   context_.error_sink().AddError(range, static_cast<int>(error_code));
 }
 

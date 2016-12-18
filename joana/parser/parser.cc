@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <iterator>
 #include <vector>
 
 #include "joana/parser/parser.h"
@@ -181,13 +182,20 @@ void Parser::ExpectPunctuator(ast::PunctuatorKind kind, ErrorCode error_code) {
   if (ConsumeTokenIf(kind))
     return;
   if (!CanPeekToken()) {
+    // Unfinished statement or expression, e.g. just "foo" in source code.
     return AddError(
         source_code().Slice(range_stack_.top(), tokens_.back()->range().end()),
         error_code);
   }
+  // We use previous token instead of current token, since current token may
+  // be next line, e.g.
+  // {
+  //    foo()
+  //    ~~~~~
+  // }
   return AddError(
       source_code().Slice(range_stack_.top(),
-                          tokens_[tokens_.size() - 2]->range().end()),
+                          (*std::next(tokens_.rbegin()))->range().end()),
       error_code);
 }
 

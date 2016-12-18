@@ -168,7 +168,6 @@ std::vector<ast::Expression*> Parser::ParseArgumentList() {
     if (!ConsumeTokenIf(ast::PunctuatorKind::Comma))
       AddError(ErrorCode::ERROR_EXPRESSION_ARGUMENT_LIST_EXPECT_COMMA);
   }
-  AddError(ErrorCode::ERROR_EXPRESSION_ARGUMENT_LIST_EXPECT_RPAREN);
   return arguments;
 }
 

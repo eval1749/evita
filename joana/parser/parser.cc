@@ -181,6 +181,11 @@ bool Parser::ConsumeTokenIf(ast::PunctuatorKind kind) {
 void Parser::ExpectPunctuator(ast::PunctuatorKind kind, ErrorCode error_code) {
   if (ConsumeTokenIf(kind))
     return;
+  if (!CanPeekToken()) {
+    return AddError(
+        source_code().Slice(range_stack_.top(), tokens_.back()->range().end()),
+        error_code);
+  }
   return AddError(
       source_code().Slice(range_stack_.top(),
                           tokens_[tokens_.size() - 2]->range().end()),

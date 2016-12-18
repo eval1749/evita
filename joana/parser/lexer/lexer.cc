@@ -439,10 +439,8 @@ ast::Token& Lexer::HandleDigitZero() {
     case 'X':
       ConsumeChar();
       return HandleInteger(16);
-    case '.':
-      return HandleDecimalAfterDot(0, 0);
   }
-  return node_factory().NewNumericLiteral(MakeTokenRange(), 0);
+  return HandleDecimalAfterDot(0, 0);
 }
 
 ast::Token& Lexer::HandleInteger(int base) {

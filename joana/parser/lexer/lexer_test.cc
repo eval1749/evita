@@ -278,6 +278,9 @@ TEST_F(LexerTest, NumericLiteral) {
   PrepareSouceCode("0.5");
   EXPECT_EQ(NewNumericLiteral(0.5), Parse());
 
+  PrepareSouceCode("0e3");
+  EXPECT_EQ(NewNumericLiteral(0), Parse());
+
   PrepareSouceCode(".123");
   EXPECT_EQ(NewNumericLiteral(.123), Parse());
 }
@@ -306,6 +309,10 @@ TEST_F(LexerTest, NumericLiteralError) {
   PrepareSouceCode("0123");
   EXPECT_EQ(NewInvalid(0, 4, 4, ERROR_NUMERIC_LITERAL_INTEGER_OCTAL), Parse())
       << "Strict mode does not allow legacy octal literal";
+
+  PrepareSouceCode("0f0");
+  EXPECT_EQ(NewInvalid(0, 2, 3, ERROR_NUMERIC_LITERAL_DECIMAL_BAD_DIGIT),
+            Parse());
 
   PrepareSouceCode("12x43");
   EXPECT_EQ(NewInvalid(0, 3, 5, ERROR_NUMERIC_LITERAL_DECIMAL_BAD_DIGIT),

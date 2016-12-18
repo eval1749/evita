@@ -108,9 +108,17 @@ SourceCodeLine ScriptModule::SourceCodeLinetAt(int offset) const {
 }
 
 void PrintSourceCodeLine(int start, int end, const SourceCodeRange& range) {
-  std::cerr << base::UTF16ToUTF8(range.source_code().GetString(start, end));
-  if (range.source_code().CharAt(end - 1) != '\n')
-    std::cerr << std::endl;
+  for (const auto& ch :
+       base::UTF16ToUTF8(range.source_code().GetString(start, end))) {
+    if (ch == '\t') {
+      std::cerr << ' ';
+      continue;
+    }
+    if (ch == '\n')
+      break;
+    std::cerr << ch;
+  }
+  std::cerr << std::endl;
   const auto stop = std::min(end, range.end());
   if (range.IsCollapsed()) {
     for (auto runner = start; runner < stop; ++runner)

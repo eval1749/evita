@@ -300,6 +300,11 @@ TEST_F(LexerTest, NumericLiteralError) {
   PrepareSouceCode("0123");
   EXPECT_EQ(NewInvalid(0, 4, 4, ERROR_NUMERIC_LITERAL_INTEGER_OCTAL), Parse())
       << "Strict mode does not allow legacy octal literal";
+
+  PrepareSouceCode("12x43");
+  EXPECT_EQ(NewInvalid(0, 3, 5, ERROR_NUMERIC_LITERAL_DECIMAL_BAD_DIGIT),
+            Parse())
+      << "Decimal contains letter.";
 }
 
 TEST_F(LexerTest, Punctuator) {

@@ -35,6 +35,11 @@ class Lexer final {
 
   // Returns source code location where |Lexer| reads.
   SourceCodeRange location() const;
+
+  // Returns true if there are at least one line terminate between current token
+  // and previous token.
+  bool is_separated_by_newline() const { return is_separated_by_newline_; }
+
   const SourceCode& source_code() const;
 
   void Advance();
@@ -89,6 +94,10 @@ class Lexer final {
 
   ast::EditContext& context_;
   ast::Token* current_token_ = nullptr;
+
+  // True if current token and previous token is separated by at least one
+  // line terminator.
+  bool is_separated_by_newline_ = false;
   const SourceCodeRange& range_;
   const std::unique_ptr<CharacterReader> reader_;
   int token_start_;

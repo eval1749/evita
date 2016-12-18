@@ -79,6 +79,7 @@ class Parser final {
   SourceCodeRange GetSourceCodeRange() const;
   ast::Token& PeekToken() const;
   void PushBackToken(const ast::Token& token);
+  void SkipCommentTokens();
 
   // Declarations
   ast::Token& NewEmptyName();
@@ -168,6 +169,11 @@ class Parser final {
   std::unique_ptr<BracketStack> bracket_stack_;
   ast::EditContext& context_;
   std::unique_ptr<Lexer> lexer_;
+
+  // True if current token and previous token is separated by at least one
+  // line terminator.
+  bool is_separated_by_newline_ = false;
+
   ast::ContainerNode& root_;
   const ParserOptions& options_;
   std::stack<int> range_stack_;

@@ -725,7 +725,10 @@ ast::Token& Lexer::NewPunctuator(ast::PunctuatorKind kind) {
 }
 
 ast::Token* Lexer::NextToken() {
+  is_separated_by_newline_ = false;
   while (reader_->CanPeekChar()) {
+    if (IsLineTerminator(PeekChar()))
+      is_separated_by_newline_ = true;
     if (!IsWhitespace(PeekChar()))
       return &HandleCharacter();
     ConsumeChar();

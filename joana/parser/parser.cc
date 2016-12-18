@@ -134,19 +134,16 @@ void Parser::Advance() {
     token_stack_.pop();
     return;
   }
-  lexer_->Advance();
-  if (!CanPeekToken())
+  is_separated_by_newline_ = false;
+  if (!lexer_->CanPeekToken())
     return;
-  auto& token = PeekToken();
-  tokens_.push_back(&token);
-  bracket_stack_->Feed(token);
+  lexer_->Advance();
+  SkipCommentTokens();
 }
 
 bool Parser::CanPeekToken() const {
   if (!token_stack_.empty())
     return true;
-  while (lexer_->CanPeekToken() && PeekToken().Is<ast::Comment>())
-    lexer_->Advance();
   return lexer_->CanPeekToken();
 }
 
@@ -210,6 +207,8 @@ void Parser::ExpectSemicolon() {
       return;
     if (PeekToken() == ast::PunctuatorKind::RightBrace)
       return;
+    if (is_separated_by_newline_)
+      return;
   }
   ExpectPunctuator(ast::PunctuatorKind::Semicolon,
                    ErrorCode::ERROR_STATEMENT_EXPECT_SEMICOLON);
@@ -236,10 +235,7 @@ void Parser::PushBackToken(const ast::Token& token) {
 }
 
 const ast::Node& Parser::Run() {
-  if (CanPeekToken()) {
-    bracket_stack_->Feed(PeekToken());
-    tokens_.push_back(&PeekToken());
-  }
+  SkipCommentTokens();
   while (CanPeekToken()) {
     auto& token = PeekToken();
     if (token.Is<ast::Invalid>()) {
@@ -256,5 +252,16 @@ const ast::Node& Parser::Run() {
   return root_;
 }
 
+void Parser::SkipCommentTokens() {
+  while (lexer_->CanPeekToken()) {
+    if (lexer_->is_separated_by_newline())
+      is_separated_by_newline_ = true;
+    bracket_stack_->Feed(PeekToken());
+    tokens_.push_back(&PeekToken());
+    if (!PeekToken().Is<ast::Comment>())
+      return;
+    lexer_->Advance();
+  }
+}
 }  // namespace internal
 }  // namespace joana

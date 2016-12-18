@@ -354,10 +354,22 @@ const ast::Expression& Parser::ParseParenthesisExpression() {
 ast::Statement& Parser::ParseReturnStatement() {
   ExpectSemicolonScope semicolon_scope(this);
   ConsumeToken();
-  auto& expression =
-      CanPeekToken() && PeekToken() == ast::PunctuatorKind::Semicolon
-          ? NewElisionExpression()
-          : ParseExpression();
+  if (is_separated_by_newline_) {
+    if (options_.enable_strict_semicolon)
+      AddError(ErrorCode::ERROR_STATEMENT_UNEXPECT_NEWLINE);
+    return node_factory().NewReturnStatement(GetSourceCodeRange(),
+                                             NewElisionExpression());
+  } else {
+    if (CanPeekToken() && PeekToken() == ast::PunctuatorKind::RightBrace) {
+      return node_factory().NewReturnStatement(GetSourceCodeRange(),
+                                               NewElisionExpression());
+    }
+  }
+  if (CanPeekToken() && PeekToken() == ast::PunctuatorKind::Semicolon) {
+    return node_factory().NewReturnStatement(GetSourceCodeRange(),
+                                             NewElisionExpression());
+  }
+  auto& expression = ParseExpression();
   return node_factory().NewReturnStatement(GetSourceCodeRange(), expression);
 }
 

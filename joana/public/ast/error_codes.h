@@ -82,6 +82,7 @@ namespace ast {
   V(STATEMENT, EXPECT_WHILE)                 \
   V(STATEMENT, INVALID)                      \
   V(STATEMENT, RESERVED_WORD)                \
+  V(STATEMENT, UNEXPECT_NEWLINE)             \
   V(STATEMENT, SWITCH_INVALID_CLAUSE)
 
 const auto kLexerErrorCodeBase = 10000;

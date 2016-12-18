@@ -586,10 +586,11 @@ ast::Token& Lexer::HandleStringLiteral() {
             state = State::BackslashU;
             break;
           default:
+            characters.push_back(ConsumeChar());
             AddError(RangeFrom(backslash_start),
                      ErrorCode::STRING_LITERAL_BACKSLASH);
             state = State::Normal;
-            break;
+            continue;
         }
         break;
       case State::BackslashCr:

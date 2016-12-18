@@ -452,7 +452,7 @@ TEST_F(LexerTest, StringLiteralError) {
 
   PrepareSouceCode("'\\a'");
   EXPECT_EQ(
-      NewStringLiteral("") + NewError(ERROR_STRING_LITERAL_BACKSLASH, 1, 2),
+      NewStringLiteral("a") + NewError(ERROR_STRING_LITERAL_BACKSLASH, 1, 3),
       Parse())
       << "'\\a' is not backslash escape sequence";
 

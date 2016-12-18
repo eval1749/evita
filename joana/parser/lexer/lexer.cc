@@ -95,7 +95,7 @@ bool IsWhitespace(base::char16 char_code) {
 }  // namespace
 
 Lexer::Lexer(ast::EditContext* context, const SourceCodeRange& range)
-    : context_(context),
+    : context_(*context),
       range_(range),
       reader_(new CharacterReader(range)),
       token_start_(range.start()) {
@@ -109,7 +109,7 @@ SourceCodeRange Lexer::location() const {
 }
 
 ast::NodeFactory& Lexer::node_factory() const {
-  return context_->node_factory();
+  return context_.node_factory();
 }
 
 const SourceCode& Lexer::source_code() const {
@@ -117,7 +117,7 @@ const SourceCode& Lexer::source_code() const {
 }
 
 void Lexer::AddError(const SourceCodeRange& range, ErrorCode error_code) {
-  context_->error_sink().AddError(range, static_cast<int>(error_code));
+  context_.error_sink().AddError(range, static_cast<int>(error_code));
 }
 
 void Lexer::AddError(ErrorCode error_code) {

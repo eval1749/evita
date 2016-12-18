@@ -87,7 +87,7 @@ class Lexer final {
 
   SourceCodeRange RangeFrom(int start) const;
 
-  ast::EditContext* const context_;
+  ast::EditContext& context_;
   ast::Token* current_token_ = nullptr;
   const SourceCodeRange& range_;
   const std::unique_ptr<CharacterReader> reader_;

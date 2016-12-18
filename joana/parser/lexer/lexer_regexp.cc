@@ -645,7 +645,7 @@ ast::RegExp& RegExpParser::ParseSequence() {
 ast::RegExp& Lexer::ConsumeRegExp() {
   if (PeekToken() == ast::PunctuatorKind::DivideEqual)
     reader_->MoveBackward();
-  return RegExpParser(context_, reader_.get()).Run();
+  return RegExpParser(&context_, reader_.get()).Run();
 }
 
 }  // namespace internal

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <stack>
+
 #include "joana/parser/parser.h"
 
 #include "base/logging.h"
@@ -337,8 +339,15 @@ class RegExpParser final {
   const Token& PeekToken() const { return lexer_.PeekToken(); }
 
   ast::EditContext& context_;
+
+  // |groups_| holds start offset of left parenthesis for checking matched
+  // parenthesis.
+  std::stack<int> groups_;
+
+  // The last consumed token before |ConsumeTokenIf()|.
+  Token last_token_;
+
   RegExpLexer lexer_;
-  int nesting_ = 0;
 
   DISALLOW_COPY_AND_ASSIGN(RegExpParser);
 };
@@ -351,12 +360,14 @@ class ScopedNodeFactory final {
   ScopedNodeFactory(RegExpParser* parser);
   ~ScopedNodeFactory();
 
+  void AddError(const SourceCodeRange& range, ErrorCode error_code);
   void AddError(ErrorCode error_code);
   ast::RegExp& NewAnyChar();
   ast::RegExp& NewAssertion(ast::RegExpAssertionKind kind);
   ast::RegExp& NewCapture(ast::RegExp& pattern);
   ast::RegExp& NewCharSet();
   ast::RegExp& NewComplementCharSet();
+  ast::RegExp& NewInvalid(ErrorCode error_code);
   ast::RegExp& NewError(ErrorCode error_code);
   ast::RegExp& NewGreedyRepeat(ast::RegExp& pattern,
                                const ast::RegExpRepeat& repeat);
@@ -389,9 +400,13 @@ ScopedNodeFactory::ScopedNodeFactory(RegExpParser* parser)
 
 ScopedNodeFactory::~ScopedNodeFactory() = default;
 
+void ScopedNodeFactory::AddError(const SourceCodeRange& range,
+                                 ErrorCode error_code) {
+  parser_.context().error_sink().AddError(range, static_cast<int>(error_code));
+}
+
 void ScopedNodeFactory::AddError(ErrorCode error_code) {
-  parser_.context().error_sink().AddError(ComputeRange(),
-                                          static_cast<int>(error_code));
+  AddError(ComputeRange(), error_code);
 }
 
 SourceCodeRange ScopedNodeFactory::ComputeRange() const {
@@ -421,14 +436,18 @@ ast::RegExp& ScopedNodeFactory::NewComplementCharSet() {
 
 ast::RegExp& ScopedNodeFactory::NewError(ErrorCode error_code) {
   AddError(error_code);
-  return factory().NewInvalidRegExp(ComputeRange(),
-                                    static_cast<int>(error_code));
+  return NewInvalid(error_code);
 }
 
 ast::RegExp& ScopedNodeFactory::NewGreedyRepeat(
     ast::RegExp& pattern,
     const ast::RegExpRepeat& repeat) {
   return factory().NewGreedyRepeatRegExp(ComputeRange(), pattern, repeat);
+}
+
+ast::RegExp& ScopedNodeFactory::NewInvalid(ErrorCode error_code) {
+  return factory().NewInvalidRegExp(ComputeRange(),
+                                    static_cast<int>(error_code));
 }
 
 ast::RegExp& ScopedNodeFactory::NewLazyRepeat(ast::RegExp& pattern,
@@ -482,6 +501,7 @@ ast::RegExp& RegExpParser::Run() {
 bool RegExpParser::ConsumeTokenIf(Syntax syntax) {
   if (!CanPeekToken() || PeekToken().syntax != syntax)
     return false;
+  last_token_ = PeekToken();
   lexer_.Advance();
   return true;
 }
@@ -542,6 +562,9 @@ ast::RegExp& RegExpParser::ParsePrimary() {
   if (ConsumeTokenIf(Syntax::Or))
     return factory.NewError(ErrorCode::ERROR_REGEXP_INVALID_OR);
 
+  if (PeekToken().syntax == Syntax::End && !groups_.empty())
+    return factory.NewInvalid(ErrorCode::ERROR_REGEXP_EXPECT_RPAREN);
+
   NOTREACHED() << "We should support Syntax "
                << static_cast<int>(PeekToken().syntax);
   return factory.NewError(ErrorCode::ERROR_REGEXP_EXPECT_PRIMARY);
@@ -549,12 +572,14 @@ ast::RegExp& RegExpParser::ParsePrimary() {
 
 ast::RegExp& RegExpParser::ParseParenthesis() {
   ScopedNodeFactory factory(this);
-  ++nesting_;
+  groups_.push(last_token_.start);
   auto& pattern = ParseOr();
-  DCHECK_GE(nesting_, 1);
-  --nesting_;
-  if (!ConsumeTokenIf(Syntax::Close))
-    factory.AddError(ErrorCode::ERROR_REGEXP_EXPECT_RPAREN);
+  DCHECK(!groups_.empty());
+  if (!ConsumeTokenIf(Syntax::Close)) {
+    factory.AddError(source_code().Slice(groups_.top(), last_token_.end),
+                     ErrorCode::ERROR_REGEXP_EXPECT_RPAREN);
+  }
+  groups_.pop();
   return pattern;
 }
 
@@ -583,7 +608,7 @@ ast::RegExp& RegExpParser::ParseSequence() {
   while (CanPeekToken() && PeekToken().syntax != Syntax::Or) {
     if (PeekToken().syntax == Syntax::End)
       break;
-    if (PeekToken().syntax == Syntax::Close && nesting_ > 0)
+    if (PeekToken().syntax == Syntax::Close && !groups_.empty())
       break;
     auto& pattern = ParseRepeat();
     if (!patterns.empty() && CanMergeNodes(*patterns.back(), pattern)) {

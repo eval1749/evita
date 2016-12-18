@@ -11,6 +11,7 @@
 #include "joana/parser/lexer/lexer.h"
 
 #include "joana/parser/lexer/character_reader.h"
+#include "joana/parser/lexer/lexer_error_codes.h"
 #include "joana/public/ast/edit_context.h"
 #include "joana/public/ast/error_codes.h"
 #include "joana/public/ast/literals.h"
@@ -92,13 +93,6 @@ bool IsWhitespace(base::char16 char_code) {
 
 }  // namespace
 
-enum class Lexer::ErrorCode {
-  None = ast::kLexerErrorCodeBase,
-#define V(token, reason) token##_##reason,
-  FOR_EACH_LEXER_ERROR_CODE(V)
-#undef V
-};
-
 Lexer::Lexer(ast::EditContext* context, const SourceCodeRange& range)
     : context_(context),
       range_(range),
@@ -143,12 +137,7 @@ base::char16 Lexer::ConsumeChar() {
 }
 
 bool Lexer::ConsumeCharIf(base::char16 char_code) {
-  if (!CanPeekChar())
-    return false;
-  if (PeekChar() != char_code)
-    return false;
-  ConsumeChar();
-  return true;
+  return reader_->ConsumeCharIf(char_code);
 }
 
 base::char16 Lexer::PeekChar() const {

@@ -8,7 +8,6 @@ source_set("parser") {
     "parser.h",
     "parser_declarations.cc",
     "parser_expressions.cc",
-    "parser_regexp.cc",
     "parser_statements.cc",
   ]
   public_deps = [

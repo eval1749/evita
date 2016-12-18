@@ -39,5 +39,14 @@ base::char16 CharacterReader::ConsumeChar() {
   return result;
 }
 
+bool CharacterReader::ConsumeCharIf(base::char16 char_code) {
+  if (!CanPeekChar())
+    return false;
+  if (PeekChar() != char_code)
+    return false;
+  ConsumeChar();
+  return true;
+}
+
 }  // namespace internal
 }  // namespace joana

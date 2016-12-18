@@ -25,6 +25,11 @@ class CharacterReader final {
 
   bool CanPeekChar() const;
   base::char16 ConsumeChar();
+
+  // Returns true if |PeekChar()| is |expected_char| and advance to next
+  // character.
+  bool ConsumeCharIf(base::char16 expected_char);
+
   base::char16 PeekChar() const;
 
  private:

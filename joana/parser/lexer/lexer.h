@@ -24,6 +24,9 @@ class CharacterReader;
 
 class Lexer final {
  public:
+  // Expose |ErrorCode| for RegExp parser.
+  enum class ErrorCode;
+
   Lexer(ast::EditContext* context, const SourceCodeRange& range);
 
   ~Lexer();
@@ -34,11 +37,22 @@ class Lexer final {
 
   void Advance();
 
-  // Returns true if |Lexer| has a character.
-  bool CanPeekChar() const;
-
   // Returns true if |Lexer| has a token.
   bool CanPeekToken() const { return current_token_ != nullptr; }
+
+  // Returns |ast::RegExp| after "/".
+  ast::RegExp& ConsumeRegExp();
+
+  ast::Token& PeekToken() const;
+
+ private:
+  ast::NodeFactory& node_factory() const;
+
+  void AddError(const SourceCodeRange& range, ErrorCode error_code);
+  void AddError(ErrorCode error_code);
+
+  // Returns true if |Lexer| has a character.
+  bool CanPeekChar() const;
 
   base::char16 ConsumeChar();
 
@@ -48,17 +62,6 @@ class Lexer final {
 
   // Returns character.
   base::char16 PeekChar() const;
-
-  ast::Token& PeekToken() const;
-
- private:
-  enum class ErrorCode;
-
-  ast::NodeFactory& node_factory() const;
-
-  void AddError(const SourceCodeRange& range, ErrorCode error_code);
-  void AddError(ErrorCode error_code);
-
   ast::Token& HandleBlockComment();
   ast::Token& HandleCharacter();
   ast::Token& HandleDecimal();

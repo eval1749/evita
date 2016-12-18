@@ -23,9 +23,6 @@ class Lexer;
 
 class Parser final {
  public:
-  // Expose |ErrorCode| for RegExp parser and template parser.
-  enum class ErrorCode;
-
   // Expose |OperatorPrecedence| for implementing static helper functions.
   enum class OperatorPrecedence;
 
@@ -40,6 +37,7 @@ class Parser final {
 
  private:
   class BracketStack;
+  enum class ErrorCode;
   class ExpectSemiColonScope;
 
   class SourceCodeRangeScope final {

@@ -8,6 +8,7 @@ source_set("lexer") {
     "character_reader.h",
     "lexer.cc",
     "lexer.h",
+    "lexer_regexp.cc",
   ]
   deps = [
     "//joana/public",

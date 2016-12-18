@@ -551,7 +551,8 @@ ast::Expression& Parser::ParsePropertyName() {
 }
 
 ast::Expression& Parser::ParseRegExpLiteral() {
-  auto& regexp = ParseRegExp();
+  auto& regexp = lexer_->ConsumeRegExp();
+  Advance();
   auto& flags = CanPeekToken() && PeekToken().Is<ast::Name>() ? ConsumeToken()
                                                               : NewEmptyName();
   return node_factory().NewRegExpLiteralExpression(GetSourceCodeRange(), regexp,

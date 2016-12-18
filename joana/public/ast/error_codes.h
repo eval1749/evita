@@ -23,6 +23,18 @@ namespace ast {
   V(NUMERIC_LITERAL, INTEGER_OVERFLOW)   \
   V(NUMERIC_LITERAL, PREFIX_ZERO)        \
   V(PUNCTUATOR, DOT_DOT)                 \
+  V(REGEXP, EXPECT_CHAR)                 \
+  V(REGEXP, EXPECT_PATTERN)              \
+  V(REGEXP, EXPECT_PRIMARY)              \
+  V(REGEXP, EXPECT_RBRACE)               \
+  V(REGEXP, EXPECT_RBRACKET)             \
+  V(REGEXP, EXPECT_RPAREN)               \
+  V(REGEXP, INVALID_GROUPING)            \
+  V(REGEXP, INVALID_NUMBER)              \
+  V(REGEXP, INVALID_OR)                  \
+  V(REGEXP, INVALID_REPEAT)              \
+  V(REGEXP, INVALID_SEQUENCE)            \
+  V(REGEXP, UNEXPECT_RPAREN)             \
   V(STRING_LITERAL, BACKSLASH)           \
   V(STRING_LITERAL, BACKSLASH_HEX_DIGIT) \
   V(STRING_LITERAL, BACKSLASH_UNICODE)   \
@@ -57,18 +69,6 @@ namespace ast {
   V(PROPERTY, INVALID_PROPERTY_NAME)         \
   V(PROPERTY, INVALID_TOKEN)                 \
   V(PROPERTY, INVALID_STATIC)                \
-  V(REGEXP, EXPECT_CHAR)                     \
-  V(REGEXP, EXPECT_PATTERN)                  \
-  V(REGEXP, EXPECT_PRIMARY)                  \
-  V(REGEXP, EXPECT_RBRACE)                   \
-  V(REGEXP, EXPECT_RBRACKET)                 \
-  V(REGEXP, EXPECT_RPAREN)                   \
-  V(REGEXP, INVALID_GROUPING)                \
-  V(REGEXP, INVALID_NUMBER)                  \
-  V(REGEXP, INVALID_OR)                      \
-  V(REGEXP, INVALID_REPEAT)                  \
-  V(REGEXP, INVALID_SEQUENCE)                \
-  V(REGEXP, UNEXPECT_RPAREN)                 \
   V(STATEMENT, CATCH_EXPECT_NAME)            \
   V(STATEMENT, EXPECT_CATCH)                 \
   V(STATEMENT, EXPECT_COLON)                 \

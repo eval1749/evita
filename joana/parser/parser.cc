@@ -178,15 +178,6 @@ bool Parser::ConsumeTokenIf(ast::PunctuatorKind kind) {
   return true;
 }
 
-void Parser::ExpectToken(ast::NameId name_id, ErrorCode error_code) {
-  if (ConsumeTokenIf(name_id))
-    return;
-  return AddError(
-      source_code().Slice(range_stack_.top(),
-                          tokens_[tokens_.size() - 2]->range().end()),
-      error_code);
-}
-
 void Parser::ExpectToken(ast::PunctuatorKind kind, ErrorCode error_code) {
   if (ConsumeTokenIf(kind))
     return;

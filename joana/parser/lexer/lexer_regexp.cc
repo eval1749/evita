@@ -75,6 +75,7 @@ bool IsDigitChar(base::char16 char_code, int base) {
   V(CharSetNot, "[^range]")           \
   V(Close, "")                        \
   V(End, "/")                         \
+  V(Invalid, "")                      \
   V(GreedyRepeat, "pattern{min,max}") \
   V(Group, "(?:pattern)")             \
   V(LazyRepeat, "pattern{min,max}?")  \
@@ -87,7 +88,7 @@ bool IsDigitChar(base::char16 char_code, int base) {
 // Syntax
 //
 enum Syntax {
-  Invalid,
+  None,
 
 #define V(name, string) name,
   FOR_EACH_REGEXP_SYNTAX(V)
@@ -101,6 +102,7 @@ struct Token {
   Syntax syntax = Syntax::Invalid;
   int start = 0;
   int end = 0;
+  ErrorCode error_code = ErrorCode::None;
   ast::RegExpRepeat repeat;
 };
 
@@ -157,7 +159,7 @@ void RegExpLexer::Advance() {
 }
 
 bool RegExpLexer::CanPeekToken() const {
-  return token_.syntax != Syntax::Invalid;
+  return token_.syntax != Syntax::None;
 }
 
 void RegExpLexer::AddError(ErrorCode error_code) {
@@ -337,6 +339,7 @@ class RegExpParser final {
 
   // Helper functions for Lexer
   bool CanPeekToken() const { return lexer_.CanPeekToken(); }
+  void ConsumeToken();
   bool ConsumeTokenIf(Syntax syntax);
   const Token& PeekToken() const { return lexer_.PeekToken(); }
 
@@ -500,11 +503,15 @@ ast::RegExp& RegExpParser::Run() {
   return ParseOr();
 }
 
+void RegExpParser::ConsumeToken() {
+  last_token_ = PeekToken();
+  lexer_.Advance();
+}
+
 bool RegExpParser::ConsumeTokenIf(Syntax syntax) {
   if (!CanPeekToken() || PeekToken().syntax != syntax)
     return false;
-  last_token_ = PeekToken();
-  lexer_.Advance();
+  ConsumeToken();
   return true;
 }
 
@@ -566,6 +573,12 @@ ast::RegExp& RegExpParser::ParsePrimary() {
 
   if (PeekToken().syntax == Syntax::End && !groups_.empty())
     return factory.NewInvalid(ErrorCode::REGEXP_EXPECT_RPAREN);
+
+  if (PeekToken().syntax == Syntax::Invalid) {
+    auto& node = factory.NewInvalid(PeekToken().error_code);
+    ConsumeToken();
+    return node;
+  }
 
   NOTREACHED() << "We should support Syntax "
                << static_cast<int>(PeekToken().syntax);

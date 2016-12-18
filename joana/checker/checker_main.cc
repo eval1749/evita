@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <algorithm>
 #include <iostream>
 #include <string>
 #include <unordered_map>
@@ -106,6 +107,41 @@ SourceCodeLine ScriptModule::SourceCodeLinetAt(int offset) const {
   return line_cache_->Get(offset);
 }
 
+void PrintSourceCodeLine(int start, int end, const SourceCodeRange& range) {
+  std::cerr << base::UTF16ToUTF8(range.source_code().GetString(start, end))
+            << std::endl;
+  const auto stop = std::min(end, range.end());
+  if (range.IsCollapsed()) {
+    for (auto runner = start; runner < stop; ++runner)
+      std::cerr << ' ';
+    std::cerr << '^' << std::endl;
+    return;
+  }
+  for (auto runner = start; runner < stop; ++runner)
+    std::cerr << (range.Contains(runner) ? '~' : ' ');
+  std::cerr << std::endl;
+}
+
+void PrintSourceCodeRange(const SourceCodeLine& start_line,
+                          const SourceCodeLine& end_line,
+                          const SourceCodeRange& range) {
+  const auto kBeforeContext = 20;
+  const auto kAfterContext = 40;
+  const auto kLineWidth = 80;
+
+  const auto start_line_start =
+      std::max(start_line.range().start(), range.start() - kBeforeContext);
+  const auto start_line_end =
+      std::min(start_line_start + kLineWidth, start_line.range().end() - 1);
+  PrintSourceCodeLine(start_line_start, start_line_end, range);
+  if (range.end() <= start_line_end)
+    return;
+  std::cerr << "  ...." << std::endl;
+  PrintSourceCodeLine(
+      std::max(end_line.range().start(), range.end() - kBeforeContext),
+      std::min(end_line.range().end() - 1, range.end() + kAfterContext), range);
+}
+
 //
 // Checker
 //
@@ -158,29 +194,11 @@ int Checker::Run() {
   for (auto* const error : error_sink_.errors()) {
     const auto& source_code = error->range().source_code();
     const auto& module = ModuleOf(source_code);
-    const auto& line = module.SourceCodeLinetAt(error->range().end());
-    std::cerr << source_code.file_path().value() << '(' << line.number() << ") "
-              << ast::ErrorStringOf(error->error_code()) << std::endl;
-
     const auto& start_line = module.SourceCodeLinetAt(error->range().start());
-    if (start_line != line) {
-      std::cerr << base::UTF16ToUTF8(start_line.range().GetString());
-      for (auto offset = start_line.range().start();
-           offset < start_line.range().end(); ++offset) {
-        std::cerr << (error->range().Contains(offset) ? '~' : ' ');
-      }
-      std::cerr << std::endl;
-      if (start_line.number() + 1 != line.number())
-        std::cerr << "  ..." << std::endl;
-    }
-
-    std::cerr << base::UTF16ToUTF8(line.range().GetString());
-    const auto end_column = error->range().end() - line.range().start();
-    for (auto offset = line.range().start(); offset < error->range().end();
-         ++offset) {
-      std::cerr << (error->range().Contains(offset) ? '~' : ' ');
-    }
-    std::cerr << std::endl;
+    const auto& end_line = module.SourceCodeLinetAt(error->range().end());
+    std::cerr << source_code.file_path().value() << '(' << end_line.number()
+              << ") " << ast::ErrorStringOf(error->error_code()) << std::endl;
+    PrintSourceCodeRange(start_line, end_line, error->range());
   }
   return error_sink_.errors().size() == 0 ? 0 : 1;
 }

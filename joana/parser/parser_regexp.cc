@@ -539,6 +539,9 @@ ast::RegExp& RegExpParser::ParsePrimary() {
   if (ConsumeTokenIf(Syntax::Close))
     return factory.NewError(ErrorCode::ERROR_REGEXP_UNEXPECT_RPAREN);
 
+  if (ConsumeTokenIf(Syntax::Or))
+    return factory.NewError(ErrorCode::ERROR_REGEXP_INVALID_OR);
+
   NOTREACHED() << "We should support Syntax "
                << static_cast<int>(PeekToken().syntax);
   return factory.NewError(ErrorCode::ERROR_REGEXP_EXPECT_PRIMARY);

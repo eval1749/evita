@@ -5,6 +5,8 @@
 #ifndef JOANA_PARSER_LEXER_LEXER_H_
 #define JOANA_PARSER_LEXER_LEXER_H_
 
+#include <stdint.h>
+
 #include <memory>
 
 #include "base/macros.h"
@@ -65,6 +67,7 @@ class Lexer final {
   ast::Token& HandleBlockComment();
   ast::Token& HandleCharacter();
   ast::Token& HandleDecimal();
+  ast::Token& HandleDecimalAfterDot(uint64_t integer_part, int integer_scale);
   ast::Token& HandleDigitZero();
   ast::Token& HandleInteger(int base);
   ast::Token& HandleLineComment();

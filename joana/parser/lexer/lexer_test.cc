@@ -274,6 +274,9 @@ TEST_F(LexerTest, NumericLiteral) {
 
   PrepareSouceCode("12345678901234567890");
   EXPECT_EQ(NewNumericLiteral(1.23457e+19), Parse());
+
+  PrepareSouceCode(".123");
+  EXPECT_EQ(NewNumericLiteral(.123), Parse());
 }
 
 TEST_F(LexerTest, NumericLiteralError) {

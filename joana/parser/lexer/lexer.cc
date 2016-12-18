@@ -26,6 +26,7 @@ namespace internal {
 
 namespace {
 
+const auto kMaxIntegerPart = static_cast<uint64_t>(1) << 53;
 const int kMaxUnicodeCodePoint = 0x10FFFF;
 const base::char16 kLineSeparator = 0x2028;
 const base::char16 kParagraphSeparator = 0x2029;
@@ -226,6 +227,10 @@ ast::Token& Lexer::HandleCharacter() {
           return NewPunctuator(ast::PunctuatorKind::DotDotDot);
         return NewError(ErrorCode::PUNCTUATOR_DOT_DOT);
       }
+      if (CanPeekChar() && IsDigitWithBase(PeekChar(), 10)) {
+        reader_->MoveBackward();
+        return HandleDecimalAfterDot(0, 0);
+      }
       return NewPunctuator(ast::PunctuatorKind::Dot);
     case '/':
       ConsumeChar();
@@ -332,20 +337,26 @@ ast::Token& Lexer::HandleCharacter() {
 }
 
 ast::Token& Lexer::HandleDecimal() {
-  const auto kMaxIntegerPart = std::numeric_limits<uint64_t>::max() / 10 - 1;
-  uint64_t digits_part = ConsumeChar() - '0';
-  auto digits_scale = 0;
+  uint64_t integer_part = FromDigitWithBase(ConsumeChar(), 10);
+  auto integer_scale = 0;
   while (reader_->CanPeekChar()) {
     if (!IsDigitWithBase(PeekChar(), 10))
       break;
     const auto digit = FromDigitWithBase(ConsumeChar(), 10);
-    if (digits_part > kMaxIntegerPart) {
-      ++digits_scale;
+    if (integer_part > std::numeric_limits<uint64_t>::max() / 10 - digit) {
+      ++integer_scale;
       continue;
     }
-    digits_part *= 10;
-    digits_part += digit;
+    integer_part *= 10;
+    integer_part += digit;
   }
+  return HandleDecimalAfterDot(integer_part, integer_scale);
+}
+
+ast::Token& Lexer::HandleDecimalAfterDot(uint64_t integer_part,
+                                         int integer_scale) {
+  auto digits_part = integer_part;
+  auto digits_scale = integer_scale;
   if (ConsumeCharIf('.')) {
     while (reader_->CanPeekChar()) {
       if (!IsDigitWithBase(PeekChar(), 10))

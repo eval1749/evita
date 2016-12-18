@@ -51,6 +51,12 @@ TEST_F(SourceCodeRangeTest, Contains) {
   EXPECT_FALSE(range1.Contains(3));
 }
 
+TEST_F(SourceCodeRangeTest, IsCollapsed) {
+  const auto& source_code = NewSourceCode("0123456789abcdef");
+  EXPECT_TRUE(source_code.Slice(1, 1).IsCollapsed());
+  EXPECT_FALSE(source_code.Slice(1, 2).IsCollapsed());
+}
+
 TEST_F(SourceCodeRangeTest, Merge) {
   const auto& source_code = NewSourceCode("0123456789abcdef");
   const auto& range1 = source_code.Slice(1, 3);

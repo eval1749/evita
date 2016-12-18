@@ -19,7 +19,6 @@ SourceCodeRange::SourceCodeRange(const SourceCode& source_code,
   DCHECK_GE(start_, 0);
   DCHECK_LE(start_, end_);
   DCHECK_LE(end_, source_code_->size());
-  DCHECK(source_code_);
 }
 
 SourceCodeRange::SourceCodeRange(const SourceCodeRange& other) {
@@ -43,6 +42,10 @@ bool SourceCodeRange::Contains(int offset) const {
 
 base::StringPiece16 SourceCodeRange::GetString() const {
   return source_code_->GetString(start_, end_);
+}
+
+bool SourceCodeRange::IsCollapsed() const {
+  return start_ == end_;
 }
 
 // static

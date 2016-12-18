@@ -28,6 +28,7 @@ class JOANA_PUBLIC_EXPORT SourceCodeRange final {
 
   bool Contains(int offset) const;
   base::StringPiece16 GetString() const;
+  bool IsCollapsed() const;
 
   static SourceCodeRange CollapseToStart(const SourceCodeRange& range);
 

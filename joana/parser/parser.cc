@@ -215,8 +215,10 @@ void Parser::PushBackToken(const ast::Token& token) {
 }
 
 const ast::Node& Parser::Run() {
-  if (CanPeekToken())
+  if (CanPeekToken()) {
     bracket_stack_->Feed(PeekToken());
+    tokens_.push_back(&PeekToken());
+  }
   while (CanPeekToken()) {
     auto& token = PeekToken();
     if (token.Is<ast::Invalid>()) {

@@ -202,17 +202,17 @@ void Parser::ExpectPunctuator(ast::PunctuatorKind kind, ErrorCode error_code) {
       error_code);
 }
 
-void Parser::ExpectSemiColon() {
-  if (options_.enable_auto_semi_colon) {
+void Parser::ExpectSemicolon() {
+  if (options_.enable_auto_semicolon) {
     if (!CanPeekToken())
       return;
-    if (ConsumeTokenIf(ast::PunctuatorKind::SemiColon))
+    if (ConsumeTokenIf(ast::PunctuatorKind::Semicolon))
       return;
     if (PeekToken() == ast::PunctuatorKind::RightBrace)
       return;
   }
-  ExpectPunctuator(ast::PunctuatorKind::SemiColon,
-                   ErrorCode::ERROR_STATEMENT_EXPECT_SEMI_COLON);
+  ExpectPunctuator(ast::PunctuatorKind::Semicolon,
+                   ErrorCode::ERROR_STATEMENT_EXPECT_SEMICOLON);
 }
 
 SourceCodeRange Parser::GetSourceCodeRange() const {

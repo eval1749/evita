@@ -161,7 +161,7 @@ std::vector<ast::Expression*> Parser::ParseArgumentList() {
       break;
     if (ConsumeTokenIf(ast::PunctuatorKind::RightParenthesis))
       return arguments;
-    if (PeekToken() == ast::PunctuatorKind::SemiColon) {
+    if (PeekToken() == ast::PunctuatorKind::Semicolon) {
       AddError(ErrorCode::ERROR_EXPRESSION_ARGUMENT_LIST_EXPECT_RPAREN);
       return arguments;
     }
@@ -599,7 +599,7 @@ ast::Expression& Parser::ParseYieldExpression() {
     ConsumeToken();
     return NewUnaryExpression(yield_star, ParseAssignmentExpression());
   }
-  if (PeekToken() == ast::PunctuatorKind::SemiColon)
+  if (PeekToken() == ast::PunctuatorKind::Semicolon)
     return NewUnaryExpression(keyword, NewElisionExpression());
   return NewUnaryExpression(keyword, ParseAssignmentExpression());
 }

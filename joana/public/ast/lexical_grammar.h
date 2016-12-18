@@ -108,7 +108,7 @@ namespace joana {
   V(")", RightParenthesis, RIGHT_PARENTHESIS, None)                         \
   V(".", Dot, DOT, None)                                                    \
   V("...", DotDotDot, DOT_DOT_DOT, None)                                    \
-  V(";", SemiColon, SEMI_COLON, None)                                       \
+  V(";", Semicolon, SEMICOLON, None)                                        \
   V(",", Comma, COMMA, None)                                                \
   V("<", LessThan, LEFT_THAN, Relational)                                   \
   V("<=", LessThanOrEqual, LESS_THAN_OR_EQUAL, Relational)                  \

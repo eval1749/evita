@@ -77,7 +77,7 @@ namespace ast {
   V(STATEMENT, EXPECT_LPAREN)                \
   V(STATEMENT, EXPECT_RBRACE)                \
   V(STATEMENT, EXPECT_RPAREN)                \
-  V(STATEMENT, EXPECT_SEMI_COLON)            \
+  V(STATEMENT, EXPECT_SEMICOLON)             \
   V(STATEMENT, EXPECT_STATEMENT)             \
   V(STATEMENT, EXPECT_WHILE)                 \
   V(STATEMENT, INVALID)                      \

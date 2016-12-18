@@ -44,7 +44,7 @@ class Parser final {
  private:
   class BracketStack;
   enum class ErrorCode;
-  class ExpectSemiColonScope;
+  class ExpectSemicolonScope;
 
   class SourceCodeRangeScope final {
    public:
@@ -75,7 +75,7 @@ class Parser final {
   // token.
   bool ConsumeTokenIf(ast::PunctuatorKind kind);
   void ExpectPunctuator(ast::PunctuatorKind kind, ErrorCode error_code);
-  void ExpectSemiColon();
+  void ExpectSemicolon();
   SourceCodeRange GetSourceCodeRange() const;
   ast::Token& PeekToken() const;
   void PushBackToken(const ast::Token& token);

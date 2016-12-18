@@ -250,6 +250,6 @@ extern "C" int main() {
   auto* const command_line = base::CommandLine::ForCurrentProcess();
 
   joana::ParserOptions options;
-  options.enable_auto_semi_colon = command_line->HasSwitch("auto_semi_colon");
+  options.enable_auto_semicolon = command_line->HasSwitch("auto_semicolon");
   return joana::internal::Checker::Main(options);
 }

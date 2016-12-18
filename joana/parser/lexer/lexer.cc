@@ -259,7 +259,7 @@ ast::Token& Lexer::HandleCharacter() {
       return NewPunctuator(ast::PunctuatorKind::Colon);
     case ';':
       ConsumeChar();
-      return NewPunctuator(ast::PunctuatorKind::SemiColon);
+      return NewPunctuator(ast::PunctuatorKind::Semicolon);
     case '<':
       ConsumeChar();
       if (ConsumeCharIf('='))

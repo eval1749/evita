@@ -313,7 +313,7 @@ TEST_F(LexerTest, NumericLiteralError) {
 TEST_F(LexerTest, Punctuator) {
   // ";"
   PrepareSouceCode(";");
-  EXPECT_EQ(NewPunctuator(ast::PunctuatorKind::SemiColon), Parse());
+  EXPECT_EQ(NewPunctuator(ast::PunctuatorKind::Semicolon), Parse());
 
   // ":"
   PrepareSouceCode(":");
@@ -325,11 +325,11 @@ TEST_F(LexerTest, Punctuator) {
 
   // "("
   PrepareSouceCode("(");
-  EXPECT_EQ(NewPunctuator(ast::PunctuatorKind::SemiColon), Parse());
+  EXPECT_EQ(NewPunctuator(ast::PunctuatorKind::Semicolon), Parse());
 
   // ")"
   PrepareSouceCode(")");
-  EXPECT_EQ(NewPunctuator(ast::PunctuatorKind::SemiColon), Parse());
+  EXPECT_EQ(NewPunctuator(ast::PunctuatorKind::Semicolon), Parse());
 
   // "?"
   PrepareSouceCode("?");
@@ -337,19 +337,19 @@ TEST_F(LexerTest, Punctuator) {
 
   // "["
   PrepareSouceCode("[");
-  EXPECT_EQ(NewPunctuator(ast::PunctuatorKind::SemiColon), Parse());
+  EXPECT_EQ(NewPunctuator(ast::PunctuatorKind::Semicolon), Parse());
 
   // "]"
   PrepareSouceCode("]");
-  EXPECT_EQ(NewPunctuator(ast::PunctuatorKind::SemiColon), Parse());
+  EXPECT_EQ(NewPunctuator(ast::PunctuatorKind::Semicolon), Parse());
 
   // "{"
   PrepareSouceCode("{");
-  EXPECT_EQ(NewPunctuator(ast::PunctuatorKind::SemiColon), Parse());
+  EXPECT_EQ(NewPunctuator(ast::PunctuatorKind::Semicolon), Parse());
 
   // "}"
   PrepareSouceCode("}");
-  EXPECT_EQ(NewPunctuator(ast::PunctuatorKind::SemiColon), Parse());
+  EXPECT_EQ(NewPunctuator(ast::PunctuatorKind::Semicolon), Parse());
 
   // "."
   PrepareSouceCode(".");

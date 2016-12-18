@@ -33,18 +33,18 @@ bool IsDeclarationKeyword(const ast::Token& token) {
 }  // namespace
 
 //
-// Parser::ExpectSemiColonScope
+// Parser::ExpectSemicolonScope
 //
-class Parser::ExpectSemiColonScope final {
+class Parser::ExpectSemicolonScope final {
  public:
-  explicit ExpectSemiColonScope(Parser* parser) : parser_(parser) {}
+  explicit ExpectSemicolonScope(Parser* parser) : parser_(parser) {}
 
-  ~ExpectSemiColonScope() { parser_->ExpectSemiColon(); }
+  ~ExpectSemicolonScope() { parser_->ExpectSemicolon(); }
 
  private:
   Parser* const parser_;
 
-  DISALLOW_COPY_AND_ASSIGN(ExpectSemiColonScope);
+  DISALLOW_COPY_AND_ASSIGN(ExpectSemicolonScope);
 };
 
 //
@@ -84,7 +84,7 @@ ast::Statement& Parser::ParseStatement() {
     return ParseExpressionStatement();
   if (token == ast::PunctuatorKind::LeftBrace)
     return ParseBlockStatement();
-  if (token == ast::PunctuatorKind::SemiColon) {
+  if (token == ast::PunctuatorKind::Semicolon) {
     auto& statement = node_factory().NewEmptyStatement(
         SourceCodeRange::CollapseToStart(PeekToken().range()));
     ConsumeToken();
@@ -119,7 +119,7 @@ ast::Statement& Parser::ParseBlockStatement() {
 
 ast::Statement& Parser::ParseBreakStatement() {
   ConsumeToken();
-  ExpectSemiColonScope semi_colon_scope(this);
+  ExpectSemicolonScope semicolon_scope(this);
   auto& label = CanPeekToken() && PeekToken().Is<ast::Name>() ? ConsumeToken()
                                                               : NewEmptyName();
   return node_factory().NewBreakStatement(GetSourceCodeRange(), label);
@@ -142,7 +142,7 @@ ast::Statement& Parser::ParseClassStatement() {
 }
 
 ast::Statement& Parser::ParseConstStatement() {
-  ExpectSemiColonScope semi_colon_scope(this);
+  ExpectSemicolonScope semicolon_scope(this);
   ConsumeToken();
   auto& expression = ParseExpression();
   return node_factory().NewConstStatement(GetSourceCodeRange(), expression);
@@ -150,7 +150,7 @@ ast::Statement& Parser::ParseConstStatement() {
 
 ast::Statement& Parser::ParseContinueStatement() {
   ConsumeToken();
-  ExpectSemiColonScope semi_colon_scope(this);
+  ExpectSemicolonScope semicolon_scope(this);
   auto& label = CanPeekToken() && PeekToken().Is<ast::Name>() ? ConsumeToken()
                                                               : NewEmptyName();
   return node_factory().NewContinueStatement(GetSourceCodeRange(), label);
@@ -173,7 +173,7 @@ ast::Statement& Parser::ParseDoStatement() {
   auto& statement = ParseStatement();
   if (!ConsumeTokenIf(ast::NameId::While))
     return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_EXPECT_WHILE);
-  ExpectSemiColonScope semi_colon_scope(this);
+  ExpectSemicolonScope semicolon_scope(this);
   auto& condition = ParseParenthesisExpression();
   return node_factory().NewDoStatement(GetSourceCodeRange(), statement,
                                        condition);
@@ -186,7 +186,7 @@ ast::Statement& Parser::ParseExpressionStatement() {
     if (!declaration.Is<ast::ArrowFunction>())
       return node_factory().NewDeclarationStatement(declaration);
   }
-  ExpectSemiColonScope semi_colon_scope(this);
+  ExpectSemicolonScope semicolon_scope(this);
   return node_factory().NewExpressionStatement(expression);
 }
 
@@ -200,18 +200,18 @@ ast::Statement& Parser::ParseForStatement() {
                       ? ConsumeToken()
                       : NewEmptyName();
   auto& expression =
-      CanPeekToken() && PeekToken() == ast::PunctuatorKind::SemiColon
+      CanPeekToken() && PeekToken() == ast::PunctuatorKind::Semicolon
           ? NewElisionExpression()
           : ParseExpression();
 
-  if (ConsumeTokenIf(ast::PunctuatorKind::SemiColon)) {
+  if (ConsumeTokenIf(ast::PunctuatorKind::Semicolon)) {
     // 'for' '(' binding ';' condition ';' step ')' statement
     auto& condition =
-        CanPeekToken() && PeekToken() == ast::PunctuatorKind::SemiColon
+        CanPeekToken() && PeekToken() == ast::PunctuatorKind::Semicolon
             ? NewElisionExpression()
             : ParseExpression();
-    ExpectPunctuator(ast::PunctuatorKind::SemiColon,
-                     ErrorCode::ERROR_STATEMENT_EXPECT_SEMI_COLON);
+    ExpectPunctuator(ast::PunctuatorKind::Semicolon,
+                     ErrorCode::ERROR_STATEMENT_EXPECT_SEMICOLON);
     auto& step =
         CanPeekToken() && PeekToken() == ast::PunctuatorKind::RightParenthesis
             ? NewElisionExpression()
@@ -331,7 +331,7 @@ ast::Statement& Parser::ParseKeywordStatement() {
 }
 
 ast::Statement& Parser::ParseLetStatement() {
-  ExpectSemiColonScope semi_colon_scope(this);
+  ExpectSemicolonScope semicolon_scope(this);
   ConsumeToken();
   auto& expression = ParseExpression();
   return node_factory().NewLetStatement(GetSourceCodeRange(), expression);
@@ -352,10 +352,10 @@ const ast::Expression& Parser::ParseParenthesisExpression() {
 }
 
 ast::Statement& Parser::ParseReturnStatement() {
-  ExpectSemiColonScope semi_colon_scope(this);
+  ExpectSemicolonScope semicolon_scope(this);
   ConsumeToken();
   auto& expression =
-      CanPeekToken() && PeekToken() == ast::PunctuatorKind::SemiColon
+      CanPeekToken() && PeekToken() == ast::PunctuatorKind::Semicolon
           ? NewElisionExpression()
           : ParseExpression();
   return node_factory().NewReturnStatement(GetSourceCodeRange(), expression);
@@ -383,7 +383,7 @@ ast::Statement& Parser::ParseSwitchStatement() {
 ast::Statement& Parser::ParseThrowStatement() {
   DCHECK_EQ(PeekToken(), ast::NameId::Throw);
   ConsumeToken();
-  ExpectSemiColonScope semi_colon_scope(this);
+  ExpectSemicolonScope semicolon_scope(this);
   auto& expression = ParseExpression();
   return node_factory().NewThrowStatement(GetSourceCodeRange(), expression);
 }
@@ -411,7 +411,7 @@ ast::Statement& Parser::ParseTryStatement() {
 }
 
 ast::Statement& Parser::ParseVarStatement() {
-  ExpectSemiColonScope semi_colon_scope(this);
+  ExpectSemicolonScope semicolon_scope(this);
   ConsumeToken();
   auto& expression = ParseExpression();
   return node_factory().NewVarStatement(GetSourceCodeRange(), expression);

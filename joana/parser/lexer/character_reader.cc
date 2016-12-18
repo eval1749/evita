@@ -19,11 +19,6 @@ const SourceCode& CharacterReader::source_code() const {
   return range_.source_code();
 }
 
-void CharacterReader::Advance() {
-  DCHECK_LT(current_, range_.end());
-  ++current_;
-}
-
 bool CharacterReader::CanPeekChar() const {
   return current_ < range_.end();
 }
@@ -35,7 +30,7 @@ base::char16 CharacterReader::PeekChar() const {
 
 base::char16 CharacterReader::ConsumeChar() {
   const auto result = PeekChar();
-  Advance();
+  MoveForward();
   return result;
 }
 
@@ -51,6 +46,11 @@ bool CharacterReader::ConsumeCharIf(base::char16 char_code) {
 void CharacterReader::MoveBackward() {
   DCHECK_GT(current_, range_.start());
   --current_;
+}
+
+void CharacterReader::MoveForward() {
+  DCHECK_LT(current_, range_.end());
+  ++current_;
 }
 
 }  // namespace internal

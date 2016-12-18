@@ -36,7 +36,7 @@ class CharacterReader final {
   base::char16 PeekChar() const;
 
  private:
-  void Advance();
+  void MoveForward();
 
   int current_;
   const SourceCodeRange& range_;

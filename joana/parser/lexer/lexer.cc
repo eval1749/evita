@@ -407,6 +407,8 @@ ast::Token& Lexer::HandleDecimalAfterDot(uint64_t integer_part,
 }
 
 ast::Token& Lexer::HandleDigitZero() {
+  if (!CanPeekChar())
+    return node_factory().NewNumericLiteral(MakeTokenRange(), 0);
   switch (PeekChar()) {
     case '0':
     case '1':

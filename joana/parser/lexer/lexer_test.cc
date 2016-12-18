@@ -335,6 +335,10 @@ TEST_F(LexerTest, Punctuator) {
   PrepareSouceCode("?");
   EXPECT_EQ(NewPunctuator(ast::PunctuatorKind::Question), Parse());
 
+  // "~"
+  PrepareSouceCode("~");
+  EXPECT_EQ(NewPunctuator(ast::PunctuatorKind::BitNot), Parse());
+
   // "["
   PrepareSouceCode("[");
   EXPECT_EQ(NewPunctuator(ast::PunctuatorKind::Semicolon), Parse());

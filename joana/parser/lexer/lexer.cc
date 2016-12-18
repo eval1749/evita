@@ -313,6 +313,9 @@ ast::Token& Lexer::HandleCharacter() {
       return HandleOperator(ast::PunctuatorKind::BitXor,
                             ast::PunctuatorKind::Invalid,
                             ast::PunctuatorKind::BitXorEqual);
+    case '~':
+      ConsumeChar();
+      return NewPunctuator(ast::PunctuatorKind::BitNot);
     case '{':
       ConsumeChar();
       return NewPunctuator(ast::PunctuatorKind::LeftBrace);

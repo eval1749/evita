@@ -582,8 +582,6 @@ ast::RegExp& RegExpParser::ParsePrimary() {
     return node;
   }
 
-  NOTREACHED() << "We should support Syntax "
-               << static_cast<int>(PeekToken().syntax);
   return factory.NewError(ErrorCode::REGEXP_EXPECT_PRIMARY);
 }
 

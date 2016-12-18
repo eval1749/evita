@@ -215,7 +215,9 @@ void RegExpLexer::HandleRepeat() {
   }
   if (!ConsumeCharIf(','))
     return NewError(ErrorCode::REGEXP_INVALID_REPEAT);
-  const auto max = HandleDigits(10);
+  const auto max = CanPeekChar() && IsDigitChar(PeekChar(), 10)
+                       ? HandleDigits(10)
+                       : kInfinity;
   if (!ConsumeCharIf(kRightBrace))
     return NewError(ErrorCode::REGEXP_EXPECT_RBRACE);
   if (ConsumeCharIf('?'))

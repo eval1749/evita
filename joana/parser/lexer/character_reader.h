@@ -20,7 +20,7 @@ class CharacterReader final {
   explicit CharacterReader(const SourceCodeRange& range);
   ~CharacterReader();
 
-  int location() const { return current_; }
+  int location() const;
   const SourceCode& source_code() const;
 
   bool CanPeekChar() const;
@@ -33,12 +33,16 @@ class CharacterReader final {
   // For handling an RegExp starts with "=".
   void MoveBackward();
 
+  // Should be called after |CanPeekChar()|.
+  void MoveForward();
+
   base::char16 PeekChar() const;
 
  private:
-  void MoveForward();
+  void FetchChar();
 
-  int current_;
+  int current_char_ = -1;
+  int current_char_offset_;
   const SourceCodeRange& range_;
 
   DISALLOW_COPY_AND_ASSIGN(CharacterReader);

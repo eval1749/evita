@@ -11,21 +11,27 @@ namespace joana {
 namespace internal {
 
 CharacterReader::CharacterReader(const SourceCodeRange& range)
-    : current_(range.start()), range_(range) {}
+    : current_char_offset_(range.start()), range_(range) {
+  FetchChar();
+}
 
 CharacterReader::~CharacterReader() = default;
+
+int CharacterReader::location() const {
+  return current_char_offset_;
+}
 
 const SourceCode& CharacterReader::source_code() const {
   return range_.source_code();
 }
 
 bool CharacterReader::CanPeekChar() const {
-  return current_ < range_.end();
+  return current_char_ >= 0;
 }
 
 base::char16 CharacterReader::PeekChar() const {
   DCHECK(CanPeekChar());
-  return range_.source_code().CharAt(current_);
+  return current_char_;
 }
 
 base::char16 CharacterReader::ConsumeChar() {
@@ -35,22 +41,30 @@ base::char16 CharacterReader::ConsumeChar() {
 }
 
 bool CharacterReader::ConsumeCharIf(base::char16 char_code) {
-  if (!CanPeekChar())
-    return false;
-  if (PeekChar() != char_code)
+  if (!CanPeekChar() || PeekChar() != char_code)
     return false;
   ConsumeChar();
   return true;
 }
 
+void CharacterReader::FetchChar() {
+  if (current_char_offset_ == range_.end()) {
+    current_char_ = -1;
+    return;
+  }
+  current_char_ = source_code().CharAt(current_char_offset_);
+}
+
 void CharacterReader::MoveBackward() {
-  DCHECK_GT(current_, range_.start());
-  --current_;
+  DCHECK_GT(current_char_offset_, range_.start());
+  --current_char_offset_;
+  FetchChar();
 }
 
 void CharacterReader::MoveForward() {
-  DCHECK_LT(current_, range_.end());
-  ++current_;
+  DCHECK_LT(current_char_offset_, range_.end());
+  ++current_char_offset_;
+  FetchChar();
 }
 
 }  // namespace internal

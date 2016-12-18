@@ -20,10 +20,8 @@ class SourceCodeRange;
 // ParserOptions
 //
 JOANA_PARSER_EXPORT struct ParserOptions {
-  // Insert semi-colon
-  //  - before right brace, e.g. {return 1}
-  //  - before newline or end of script
-  bool enable_auto_semicolon = false;
+  // Disable automatic semicolon insertion.
+  bool enable_strict_semicolon = false;
 };
 
 JOANA_PARSER_EXPORT const ast::Node& Parse(ast::EditContext* context,

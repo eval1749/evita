@@ -200,7 +200,7 @@ void Parser::ExpectPunctuator(ast::PunctuatorKind kind, ErrorCode error_code) {
 }
 
 void Parser::ExpectSemicolon() {
-  if (options_.enable_auto_semicolon) {
+  if (!options_.enable_strict_semicolon) {
     if (!CanPeekToken())
       return;
     if (ConsumeTokenIf(ast::PunctuatorKind::Semicolon))

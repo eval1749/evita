@@ -355,7 +355,7 @@ ast::Statement& Parser::ParseReturnStatement() {
   ExpectSemicolonScope semicolon_scope(this);
   ConsumeToken();
   if (is_separated_by_newline_) {
-    if (options_.enable_strict_semicolon)
+    if (options_.disable_automatic_semicolon)
       AddError(ErrorCode::ERROR_STATEMENT_UNEXPECT_NEWLINE);
     return node_factory().NewReturnStatement(GetSourceCodeRange(),
                                              NewElisionExpression());

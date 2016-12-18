@@ -21,7 +21,7 @@ class SourceCodeRange;
 //
 JOANA_PARSER_EXPORT struct ParserOptions {
   // Disable automatic semicolon insertion.
-  bool enable_strict_semicolon = false;
+  bool disable_automatic_semicolon = false;
 };
 
 JOANA_PARSER_EXPORT const ast::Node& Parse(ast::EditContext* context,

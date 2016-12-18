@@ -55,15 +55,15 @@ class Parser::ExpectSemiColonScope final {
 //
 ast::Statement& Parser::NewInvalidStatement(ErrorCode error_code) {
   auto& token = ComputeInvalidToken(error_code);
-  AddError(token, error_code);
+  AddError(GetSourceCodeRange(), error_code);
   return node_factory().NewInvalidStatement(token,
                                             static_cast<int>(error_code));
 }
 
 ast::Statement& Parser::ParseStatement() {
-  SourceCodeRangeScope scope(this);
   if (!CanPeekToken())
-    return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
+    return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_EXPECT_STATEMENT);
+  SourceCodeRangeScope scope(this);
   const auto& token = PeekToken();
   if (auto* name = token.TryAs<ast::Name>()) {
     if (name->IsKeyword())

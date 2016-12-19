@@ -353,8 +353,6 @@ ast::Statement& Parser::ParseNameAsStatement() {
   }
   if (CanPeekToken() && PeekToken() == ast::PunctuatorKind::Colon)
     return ParseLabeledStatement(&name);
-  auto& token2 = ConsumeToken();
-  PushBackToken(token2);
   PushBackToken(name);
   return ParseExpressionStatement();
 }

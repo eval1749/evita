@@ -154,7 +154,6 @@ RegExpLexer::RegExpLexer(ast::EditContext* context, CharacterReader* reader)
 RegExpLexer::~RegExpLexer() = default;
 
 void RegExpLexer::Advance() {
-  DCHECK(CanPeekChar());
   NextToken();
 }
 

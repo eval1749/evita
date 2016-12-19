@@ -24,6 +24,7 @@ class JOANA_PUBLIC_EXPORT SourceCodeRange final {
 
   int end() const { return end_; }
   const SourceCode& source_code() const { return *source_code_; }
+  int size() const { return end_ - start_; }
   int start() const { return start_; }
 
   bool Contains(int offset) const;

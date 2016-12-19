@@ -139,18 +139,23 @@ void PrintSourceCodeRange(const SourceCodeLine& start_line,
   const auto kAfterContext = 40;
   const auto kLineWidth = 80;
 
+  if (start_line == end_line && start_line.size() <= kLineWidth) {
+    PrintSourceCodeLine(start_line.start(), start_line.end(), range);
+    return;
+  }
+
   const auto start_line_start =
-      std::max(start_line.range().start(), range.start() - kBeforeContext);
+      std::max(start_line.start(), range.start() - kBeforeContext);
   const auto start_line_end =
-      std::min(start_line_start + kLineWidth, start_line.range().end());
+      std::min(start_line_start + kLineWidth, start_line.end());
   PrintSourceCodeLine(start_line_start, start_line_end, range);
   if (range.end() <= start_line_end)
     return;
-  if (start_line.range().end() != end_line.range().start())
+  if (start_line.end() != end_line.start())
     std::cout << "  ...." << std::endl;
-  PrintSourceCodeLine(
-      std::max(end_line.range().start(), range.end() - kBeforeContext),
-      std::min(end_line.range().end(), range.end() + kAfterContext), range);
+  PrintSourceCodeLine(std::max(end_line.start(), range.end() - kBeforeContext),
+                      std::min(end_line.end(), range.end() + kAfterContext),
+                      range);
 }
 
 //

@@ -135,6 +135,10 @@ TEST_F(ParserTest, ContinueStatement) {
             "if (bar) continue\n"));
 }
 
+TEST_F(ParserTest, DebuggerStatement) {
+  EXPECT_EQ("debugger;\n", Parse("debugger")) << "automatic semicolon";
+}
+
 TEST_F(ParserTest, DoStatement) {
   TEST_PARSER(
       "do {\n"

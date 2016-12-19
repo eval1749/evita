@@ -296,6 +296,12 @@ ast::Statement& Parser::ParseKeywordStatement() {
       return ParseContinueStatement();
     case ast::NameId::Const:
       return ParseConstStatement();
+    case ast::NameId::Debugger: {
+      ExpectSemicolonScope semicolon_scope(this);
+      auto& expression =
+          node_factory().NewReferenceExpression(ConsumeToken().As<ast::Name>());
+      return node_factory().NewExpressionStatement(expression);
+    }
     case ast::NameId::Default:
       return ParseDefaultLabel();
     case ast::NameId::Do:

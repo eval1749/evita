@@ -19,7 +19,7 @@ ast::ArrowFunctionBody& Parser::ParseArrowFunctionBody() {
   }
   if (PeekToken() == ast::PunctuatorKind::LeftBrace)
     return ParseStatement();
-  return ParseExpression();
+  return ParseAssignmentExpression();
 }
 
 ast::Class& Parser::ParseClass() {

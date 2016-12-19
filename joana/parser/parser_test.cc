@@ -263,9 +263,7 @@ TEST_F(ParserTest, ExpressionMember) {
   TEST_PARSER("foo.bar[0](1)(2);\n");
   TEST_PARSER("foo.bar[0](1)(2).baz;\n");
 
-  EXPECT_EQ(
-      "foo;\nPASER_ERROR_EXPRESSION_EXPECT_NAME@4:4\n",
-      Parse("foo."));
+  EXPECT_EQ("foo;\nPASER_ERROR_EXPRESSION_EXPECT_NAME@4:4\n", Parse("foo."));
 }
 
 TEST_F(ParserTest, ExpressionNew) {
@@ -289,6 +287,10 @@ TEST_F(ParserTest, ExpressionObjectLiteral) {
       "  [1]: 6,\n"
       "  [2]() { 7; }\n"
       "};\n");
+}
+
+TEST_F(ParserTest, ExpressionObjectLiteralWithArrowFunction) {
+  TEST_PARSER("x = { foo: x => x + 1, };\n");
 }
 
 TEST_F(ParserTest, ExpressionObjectLiteralWithKeywords) {

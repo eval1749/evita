@@ -398,17 +398,23 @@ ast::Expression& Parser::ParseObjectLiteralExpression() {
   DCHECK_EQ(PeekToken(), ast::PunctuatorKind::LeftBrace);
   ConsumeToken();
   std::vector<ast::Expression*> members;
+  auto comma = false;
   while (CanPeekToken()) {
     SourceCodeRangeScope scope(this);
-    if (ConsumeTokenIf(ast::PunctuatorKind::RightBrace))
+    if (ConsumeTokenIf(ast::PunctuatorKind::RightBrace)) {
+      if (comma)
+        members.push_back(&NewElisionExpression());
       break;
+    }
     if (ConsumeTokenIf(ast::PunctuatorKind::Comma)) {
       if (members.empty() || members.back()->Is<ast::DeclarationExpression>() ||
           members.back()->Is<ast::ElisionExpression>()) {
         members.push_back(&NewElisionExpression());
       }
+      comma = true;
       continue;
     }
+    comma = false;
     if (ConsumeTokenIf(ast::PunctuatorKind::Times)) {
       members.push_back(&ParseMethodExpression(ast::MethodKind::NonStatic,
                                                ast::FunctionKind::Generator));

@@ -49,6 +49,10 @@ bool SourceCodeRange::IsCollapsed() const {
 }
 
 // static
+SourceCodeRange SourceCodeRange::CollapseToEnd(const SourceCodeRange& range) {
+  return range.source_code_->Slice(range.end_, range.end_);
+}
+
 SourceCodeRange SourceCodeRange::CollapseToStart(const SourceCodeRange& range) {
   return range.source_code_->Slice(range.start_, range.start_);
 }

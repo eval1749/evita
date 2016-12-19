@@ -30,6 +30,7 @@ class JOANA_PUBLIC_EXPORT SourceCodeRange final {
   base::StringPiece16 GetString() const;
   bool IsCollapsed() const;
 
+  static SourceCodeRange CollapseToEnd(const SourceCodeRange& range);
   static SourceCodeRange CollapseToStart(const SourceCodeRange& range);
 
   static SourceCodeRange Merge(const SourceCodeRange& range1,

@@ -221,7 +221,6 @@ int Checker::Main(const ParserOptions& options) {
 }
 
 int Checker::Run() {
-  const auto kMoreContext = 20;
   for (auto* const error : error_sink_.errors()) {
     const auto& source_code = error->range().source_code();
     const auto& module = ModuleOf(source_code);

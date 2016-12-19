@@ -32,13 +32,16 @@ class ParserTest : public ::testing::Test {
   ParserTest() = default;
   ~ParserTest() override = default;
 
+  std::string Parse(base::StringPiece script_text,
+                    const ParserOptions& options);
   std::string Parse(base::StringPiece script_text);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(ParserTest);
 };
 
-std::string ParserTest::Parse(base::StringPiece script_text) {
+std::string ParserTest::Parse(base::StringPiece script_text,
+                              const ParserOptions& options) {
   Zone zone("ParserTest");
   SimpleErrorSink error_sink;
   ast::NodeFactory node_factory(&zone);
@@ -52,12 +55,15 @@ std::string ParserTest::Parse(base::StringPiece script_text) {
       base::FilePath(), base::StringPiece16(script_text16));
 
   std::ostringstream ostream;
-  ParserOptions options;
   Parser parser(context.get(), source_code.range(), options);
   SimpleFormatter(&ostream).Format(parser.Run());
   for (const auto& error : error_sink.errors())
     ostream << error << std::endl;
   return ostream.str();
+}
+
+std::string ParserTest::Parse(base::StringPiece script_text) {
+  return Parse(script_text, ParserOptions());
 }
 
 #define TEST_PARSER(script_text)           \
@@ -92,11 +98,19 @@ TEST_F(ParserTest, AutomaticSemicolon) {
       "foo;\n"
       "bar;\n",
       Parse("foo /* comment\n */bar"));
-
   EXPECT_EQ(
       "foo;\n"
       "++bar;\n",
       Parse("foo\n++bar"));
+  EXPECT_EQ(
+      "foo;\n"
+      "++bar;\n"
+      "PASER_ERROR_STATEMENT_UNEXPECT_NEWLINE@4:6\n"
+      "PASER_ERROR_STATEMENT_UNEXPECT_NEWLINE@4:6\n"
+      "PASER_ERROR_STATEMENT_EXPECT_SEMICOLON@0:3\n"
+      "PASER_ERROR_STATEMENT_EXPECT_SEMICOLON@4:9\n",
+      Parse("foo\n++bar",
+            ParserOptionsBuilder().SetAutomaticSemicolon(false).Build()));
 }
 
 TEST_F(ParserTest, BlockStatement) {

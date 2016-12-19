@@ -622,6 +622,11 @@ ast::Expression& Parser::ParseUpdateExpression() {
   auto& expression = ParseLeftHandSideExpression();
   if (!CanPeekToken() || !IsUpdateOperator(PeekToken()))
     return expression;
+  if (is_separated_by_newline_) {
+    if (options_.disable_automatic_semicolon)
+      AddError(ErrorCode::ERROR_STATEMENT_UNEXPECT_NEWLINE);
+    return expression;
+  }
   auto& op = ConvertToPostOperator(&node_factory(), ConsumeToken());
   return NewUnaryExpression(op, expression);
 }

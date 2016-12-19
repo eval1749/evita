@@ -92,6 +92,11 @@ TEST_F(ParserTest, AutomaticSemicolon) {
       "foo;\n"
       "bar;\n",
       Parse("foo /* comment\n */bar"));
+
+  EXPECT_EQ(
+      "foo;\n"
+      "++bar;\n",
+      Parse("foo\n++bar"));
 }
 
 TEST_F(ParserTest, BlockStatement) {

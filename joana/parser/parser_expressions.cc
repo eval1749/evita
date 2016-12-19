@@ -42,7 +42,8 @@ enum class Parser::OperatorPrecedence {
 namespace {
 
 bool CanBePropertyName(const ast::Token& token) {
-  return token.Is<ast::Name>() || token == ast::PunctuatorKind::LeftBracket;
+  return token.Is<ast::Name>() || token == ast::PunctuatorKind::LeftBracket ||
+         token.Is<ast::Literal>();
 }
 
 ast::FunctionKind FunctionKindOf(const ast::Token& token) {

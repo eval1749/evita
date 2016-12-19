@@ -268,6 +268,12 @@ TEST_F(ParserTest, ExpressionObjectLiteralWithKeywords) {
   TEST_PARSER("x = { static() {} };\n");
 }
 
+TEST_F(ParserTest, ExpressionObjectLiteralAndPropertyName) {
+  TEST_PARSER("x = { get 5e0() { 1; } };\n");
+  TEST_PARSER("x = { get 'foo'() { 1; } };\n");
+  TEST_PARSER("x = { get [1]() { 1; } };\n");
+}
+
 TEST_F(ParserTest, ExpressionUnary) {
   TEST_PARSER("!foo;\n");
 }

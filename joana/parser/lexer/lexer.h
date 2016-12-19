@@ -16,7 +16,8 @@
 namespace joana {
 
 class ErrorSink;
-class PunctuatorKind;
+struct ParserOptions;
+struct PunctuatorKind;
 class SourceCode;
 class SourceCodeRange;
 
@@ -24,12 +25,17 @@ namespace internal {
 
 class CharacterReader;
 
+//
+// Lexer
+//
 class Lexer final {
  public:
   // Expose |ErrorCode| for RegExp parser.
   enum class ErrorCode;
 
-  Lexer(ast::EditContext* context, const SourceCodeRange& range);
+  Lexer(ast::EditContext* context,
+        const SourceCodeRange& range,
+        const ParserOptions& options);
 
   ~Lexer();
 
@@ -98,6 +104,7 @@ class Lexer final {
   // True if current token and previous token is separated by at least one
   // line terminator.
   bool is_separated_by_newline_ = false;
+  const ParserOptions& options_;
   const SourceCodeRange& range_;
   const std::unique_ptr<CharacterReader> reader_;
   int token_start_;

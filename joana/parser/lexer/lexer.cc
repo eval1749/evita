@@ -12,6 +12,7 @@
 
 #include "joana/parser/lexer/character_reader.h"
 #include "joana/parser/lexer/lexer_error_codes.h"
+#include "joana/parser/public/parse.h"
 #include "joana/public/ast/edit_context.h"
 #include "joana/public/ast/error_codes.h"
 #include "joana/public/ast/literals.h"
@@ -94,8 +95,11 @@ bool IsWhitespace(base::char16 char_code) {
 
 }  // namespace
 
-Lexer::Lexer(ast::EditContext* context, const SourceCodeRange& range)
+Lexer::Lexer(ast::EditContext* context,
+             const SourceCodeRange& range,
+             const ParserOptions& options)
     : context_(*context),
+      options_(options),
       range_(range),
       reader_(new CharacterReader(range)),
       token_start_(range.start()) {
@@ -553,7 +557,8 @@ ast::Token& Lexer::HandleStringLiteral() {
             ConsumeChar();
             if (!CanPeekChar())
               return NewError(ErrorCode::STRING_LITERAL_NOT_CLOSED);
-            if (IsDigitWithBase(PeekChar(), 10)) {
+            if (options_.enable_strict_backslash &&
+                IsDigitWithBase(PeekChar(), 10)) {
               AddError(RangeFrom(backslash_start),
                        ErrorCode::STRING_LITERAL_BACKSLASH);
               state = State::Normal;
@@ -602,8 +607,10 @@ ast::Token& Lexer::HandleStringLiteral() {
             break;
           default:
             characters.push_back(ConsumeChar());
-            AddError(RangeFrom(backslash_start),
-                     ErrorCode::STRING_LITERAL_BACKSLASH);
+            if (options_.enable_strict_backslash) {
+              AddError(RangeFrom(backslash_start),
+                       ErrorCode::STRING_LITERAL_BACKSLASH);
+            }
             state = State::Normal;
             continue;
         }

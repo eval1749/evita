@@ -102,7 +102,7 @@ Parser::Parser(ast::EditContext* context,
                const ParserOptions& options)
     : bracket_stack_(new BracketStack(&context->error_sink())),
       context_(*context),
-      lexer_(new Lexer(context, range)),
+      lexer_(new Lexer(context, range, options)),
       options_(options),
       root_(context->node_factory().NewModule(range)) {}
 

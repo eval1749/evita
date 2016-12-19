@@ -225,6 +225,8 @@ int Checker::Main() {
   ParserOptions options;
   options.disable_automatic_semicolon =
       command_line->HasSwitch("disable_automatic_semicolon");
+  options.enable_strict_backslash =
+      command_line->HasSwitch("enable_strict_backslash");
 
   Checker checker(options);
   for (const auto& file_name : command_line->GetArgs()) {

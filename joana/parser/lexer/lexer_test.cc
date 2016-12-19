@@ -11,6 +11,7 @@
 #include "base/macros.h"
 #include "base/strings/string_piece.h"
 #include "base/strings/utf_string_conversions.h"
+#include "joana/parser/public/parse.h"
 #include "joana/parser/simple_error_sink.h"
 #include "joana/public/ast/edit_context.h"
 #include "joana/public/ast/edit_context_builder.h"
@@ -51,6 +52,7 @@ class LexerTest : public ::testing::Test {
   LexerTest();
 
   ast::NodeFactory& factory() { return node_factory_; }
+  const ParserOptions& options() const { return options_; }
 
   SourceCodeRange MakeRange(int start, int end) const;
   SourceCodeRange MakeRange() const;
@@ -75,6 +77,7 @@ class LexerTest : public ::testing::Test {
   Zone zone_;
   ast::NodeFactory node_factory_;
   std::unique_ptr<ast::EditContext> context_;
+  ParserOptions options_;
   const SourceCode* source_code_ = nullptr;
   SourceCode::Factory source_code_factory_;
 
@@ -162,7 +165,7 @@ void LexerTest::PrepareSouceCode(base::StringPiece script_text) {
 
 std::string LexerTest::Parse() {
   DCHECK(source_code_);
-  Lexer lexer(context_.get(), source_code_->range());
+  Lexer lexer(context_.get(), source_code_->range(), options());
   std::ostringstream ostream;
   auto delimiter = "";
   while (lexer.CanPeekToken()) {

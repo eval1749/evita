@@ -22,6 +22,10 @@ class SourceCodeRange;
 JOANA_PARSER_EXPORT struct ParserOptions {
   // Disable automatic semicolon insertion.
   bool disable_automatic_semicolon = false;
+
+  // When |enable_strict_backslash| is true, a character after backslash
+  // not '"\bfnrtv are error.
+  bool enable_strict_backslash = false;
 };
 
 JOANA_PARSER_EXPORT const ast::Node& Parse(ast::EditContext* context,

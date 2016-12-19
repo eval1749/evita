@@ -366,8 +366,8 @@ class ScopedNodeFactory final {
   ast::RegExp& NewCapture(ast::RegExp& pattern);
   ast::RegExp& NewCharSet();
   ast::RegExp& NewComplementCharSet();
-  ast::RegExp& NewInvalid(ErrorCode error_code);
   ast::RegExp& NewError(ErrorCode error_code);
+  ast::RegExp& NewInvalid(ErrorCode error_code);
   ast::RegExp& NewGreedyRepeat(ast::RegExp& pattern,
                                const ast::RegExpRepeat& repeat);
   ast::RegExp& NewLazyRepeat(ast::RegExp& pattern,
@@ -474,13 +474,12 @@ ast::RegExp& ScopedNodeFactory::NewOr(const std::vector<ast::RegExp*> members) {
   return NewError(ErrorCode::REGEXP_INVALID_OR);
 }
 
+// Note: /(?:)/ calls |NewSequence()| with |members.size() == 0|.
 ast::RegExp& ScopedNodeFactory::NewSequence(
     const std::vector<ast::RegExp*> members) {
   if (members.size() == 1)
     return *members.front();
-  if (members.size() >= 2)
-    return factory().NewSequenceRegExp(ComputeRange(), members);
-  return NewError(ErrorCode::REGEXP_INVALID_SEQUENCE);
+  return factory().NewSequenceRegExp(ComputeRange(), members);
 }
 
 void ScopedNodeFactory::SetToken(const Token& token) {
@@ -578,6 +577,10 @@ ast::RegExp& RegExpParser::ParsePrimary() {
 
 ast::RegExp& RegExpParser::ParseParenthesis() {
   ScopedNodeFactory factory(this);
+  if (ConsumeTokenIf(Syntax::Close)) {
+    // In case of /(?:)/
+    return factory.NewSequence({});
+  }
   groups_.push(last_token_.start);
   auto& pattern = ParseOr();
   DCHECK(!groups_.empty());

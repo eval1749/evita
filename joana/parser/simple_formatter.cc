@@ -519,6 +519,10 @@ void SimpleFormatter::VisitOrRegExp(ast::OrRegExp* node) {
 }
 
 void SimpleFormatter::VisitSequenceRegExp(ast::SequenceRegExp* node) {
+  if (node->patterns().empty()) {
+    *ostream_ << "(?:)";
+    return;
+  }
   for (const auto& pattern : node->patterns())
     Format(*pattern);
 }

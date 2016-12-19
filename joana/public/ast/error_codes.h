@@ -33,7 +33,6 @@ namespace ast {
   V(REGEXP, INVALID_NUMBER)              \
   V(REGEXP, INVALID_OR)                  \
   V(REGEXP, INVALID_REPEAT)              \
-  V(REGEXP, INVALID_SEQUENCE)            \
   V(STRING_LITERAL, BACKSLASH)           \
   V(STRING_LITERAL, BACKSLASH_HEX_DIGIT) \
   V(STRING_LITERAL, BACKSLASH_UNICODE)   \

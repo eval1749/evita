@@ -173,8 +173,14 @@ ast::Statement& Parser::ParseDoStatement() {
   auto& statement = ParseStatement();
   if (!ConsumeTokenIf(ast::NameId::While))
     return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_EXPECT_WHILE);
-  ExpectSemicolonScope semicolon_scope(this);
+  if (options_.disable_automatic_semicolon) {
+    ExpectSemicolonScope semicolon_scope(this);
+    auto& condition = ParseParenthesisExpression();
+    return node_factory().NewDoStatement(GetSourceCodeRange(), statement,
+                                         condition);
+  }
   auto& condition = ParseParenthesisExpression();
+  ConsumeTokenIf(ast::PunctuatorKind::Semicolon);
   return node_factory().NewDoStatement(GetSourceCodeRange(), statement,
                                        condition);
 }

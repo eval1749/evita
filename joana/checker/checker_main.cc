@@ -236,6 +236,14 @@ int Checker::Main() {
       continue;
     }
     VLOG(0) << "Process " << file_path.value();
+    if (file_contents8.find("\n<include ") != std::string::npos) {
+      VLOG(0) << "Ignore " << file_path.value() << " contains <include>";
+      continue;
+    }
+    if (file_contents8.find("\n<if ") != std::string::npos) {
+      VLOG(0) << "Ignore " << file_path.value() << " contains <include>";
+      continue;
+    }
     const auto& file_contents = base::UTF8ToUTF16(file_contents8);
     checker.AddSourceCode(file_path, base::StringPiece16(file_contents));
   }

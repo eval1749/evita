@@ -413,8 +413,10 @@ ast::Token& Lexer::HandleInteger(int base) {
 
 ast::Token& Lexer::HandleLineComment() {
   while (reader_->CanPeekChar()) {
-    if (IsLineTerminator(ConsumeChar()))
+    if (IsLineTerminator(ConsumeChar())) {
+      is_separated_by_newline_ = true;
       break;
+    }
   }
   return node_factory().NewComment(MakeTokenRange());
 }

@@ -77,6 +77,14 @@ TEST_F(ParserTest, AsyncKeyword) {
   TEST_PARSER("async = async(1);\n");
 }
 
+TEST_F(ParserTest, AutomaticSemicolon) {
+  EXPECT_EQ("foo;\n", Parse("foo // comment"));
+  EXPECT_EQ(
+      "foo;\n"
+      "bar;\n",
+      Parse("foo // comment\nbar"));
+}
+
 TEST_F(ParserTest, BlockStatement) {
   TEST_PARSER(
       "{\n"

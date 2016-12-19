@@ -1,0 +1,33 @@
+// Copyright (c) 2016 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#ifndef JOANA_PARSER_LEXER_LEXER_UTILS_H_
+#define JOANA_PARSER_LEXER_LEXER_UTILS_H_
+
+#include "base/logging.h"
+#include "base/strings/string16.h"
+
+namespace joana {
+namespace internal {
+
+constexpr auto kBackslash = '\\';
+constexpr auto kLeftBrace = '{';
+constexpr auto kRightBrace = '}';
+constexpr auto kLeftBracket = '[';
+constexpr auto kRightBracket = ']';
+constexpr auto kLeftParenthesis = '(';
+constexpr auto kRightParenthesis = ')';
+
+// Returns a digit from digit character |char_code| in |base|. It is error
+// if |char_code| is not valid digit character.
+int FromDigitChar(base::char16 char_code, int base);
+
+// Returns true if |char_code| reprsents a digit of |base|. |base| >= 2 &&
+// |base| <= 16.
+bool IsDigitChar(base::char16 char_code, int base);
+
+}  // namespace internal
+}  // namespace joana
+
+#endif  // JOANA_PARSER_LEXER_LEXER_UTILS_H_

@@ -6,9 +6,9 @@
 
 #include "joana/parser/lexer/lexer.h"
 
-#include "base/logging.h"
 #include "joana/parser/lexer/character_reader.h"
 #include "joana/parser/lexer/lexer_error_codes.h"
+#include "joana/parser/lexer/lexer_utils.h"
 #include "joana/public/ast/edit_context.h"
 #include "joana/public/ast/node_factory.h"
 #include "joana/public/ast/regexp.h"
@@ -21,48 +21,9 @@ namespace internal {
 
 namespace {
 
-using ErrorCode = Lexer::ErrorCode;
-
-const auto kBackslash = '\\';
-const auto kLeftBrace = '{';
-const auto kRightBrace = '}';
-const auto kLeftBracket = '[';
-const auto kRightBracket = ']';
-const auto kLeftParenthesis = '(';
-const auto kRightParenthesis = ')';
 constexpr auto kInfinity = ast::RegExpRepeat::kInfinity;
 
-int FromDigitChar(base::char16 char_code, int base) {
-  DCHECK_GE(base, 2);
-  DCHECK_LE(base, 16);
-  if (base == 16) {
-    if (char_code >= '0' && char_code <= '9')
-      return char_code - '0';
-    if (char_code >= 'A' && char_code <= 'F')
-      return char_code - 'A' + 10;
-    if (char_code >= 'a' && char_code <= 'f')
-      return char_code - 'a' + 10;
-    NOTREACHED() << char_code;
-    return 0;
-  }
-  if (char_code >= '0' && char_code <= '0' + base - 1)
-    return char_code - '0';
-  NOTREACHED() << char_code;
-  return 0;
-}
-
-bool IsDigitChar(base::char16 char_code, int base) {
-  DCHECK_GE(base, 2);
-  DCHECK_LE(base, 16);
-  if (base == 16) {
-    if (char_code >= '0' && char_code <= '9')
-      return true;
-    if (char_code >= 'A' && char_code <= 'F')
-      return true;
-    return char_code >= 'a' && char_code <= 'f';
-  }
-  return char_code >= '0' && char_code <= '0' + base - 1;
-}
+using ErrorCode = Lexer::ErrorCode;
 
 #define FOR_EACH_REGEXP_SYNTAX(V)     \
   V(AssertBoundary, "\\b")            \

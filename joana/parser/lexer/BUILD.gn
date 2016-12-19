@@ -9,6 +9,8 @@ source_set("lexer") {
     "lexer.cc",
     "lexer.h",
     "lexer_regexp.cc",
+    "lexer_utils.cc",
+    "lexer_utils.h",
   ]
   deps = [
     "//joana/public",

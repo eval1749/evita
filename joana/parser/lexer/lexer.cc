@@ -96,6 +96,8 @@ ast::Token& Lexer::HandleBlockComment() {
   while (reader_->CanPeekChar()) {
     if (is_after_asterisk && ConsumeCharIf('/'))
       return node_factory().NewComment(MakeTokenRange());
+    if (IsLineTerminator(PeekChar()))
+      is_separated_by_newline_ = true;
     is_after_asterisk = ConsumeChar() == '*';
   }
   return NewInvalid(ErrorCode::BLOCK_COMMENT_NOT_CLOSED);

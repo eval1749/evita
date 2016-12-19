@@ -79,10 +79,19 @@ TEST_F(ParserTest, AsyncKeyword) {
 
 TEST_F(ParserTest, AutomaticSemicolon) {
   EXPECT_EQ("foo;\n", Parse("foo // comment"));
+  EXPECT_EQ("foo;\n", Parse("foo /* comment */"));
   EXPECT_EQ(
       "foo;\n"
       "bar;\n",
       Parse("foo // comment\nbar"));
+  EXPECT_EQ(
+      "foo;\n"
+      "bar;\n",
+      Parse("foo /* comment */\nbar"));
+  EXPECT_EQ(
+      "foo;\n"
+      "bar;\n",
+      Parse("foo /* comment\n */bar"));
 }
 
 TEST_F(ParserTest, BlockStatement) {

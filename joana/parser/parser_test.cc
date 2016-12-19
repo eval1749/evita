@@ -125,6 +125,14 @@ TEST_F(ParserTest, ContinueStatement) {
       "do {\n"
       "  continue;\n"
       "} while (bar);\n");
+  TEST_PARSER("continue foo;\n");
+  EXPECT_EQ(
+      "if (foo)\n"
+      "  continue;\n"
+      "if (bar)\n"
+      "  continue;\n",
+      Parse("if (foo) continue\n"
+            "if (bar) continue\n"));
 }
 
 TEST_F(ParserTest, DoStatement) {

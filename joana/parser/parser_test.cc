@@ -358,6 +358,13 @@ TEST_F(ParserTest, IfStatement) {
       "  bar;\n"
       "else\n"
       "  baz;\n");
+  EXPECT_EQ(
+      "if (foo)\n"
+      "  foo2;\n"
+      "if (bar)\n"
+      "  bar2;\n",
+      Parse("if (foo) foo2\n"
+            "if (bar) bar2\n"));
 }
 
 TEST_F(ParserTest, LabeledStatement) {

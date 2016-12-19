@@ -351,8 +351,13 @@ ast::Statement& Parser::ParseNameAsStatement() {
     PushBackToken(name);
     return ParseExpressionStatement();
   }
-  if (CanPeekToken() && PeekToken() == ast::PunctuatorKind::Colon)
-    return ParseLabeledStatement(&name);
+  if (is_separated_by_newline_) {
+    if (options_.disable_automatic_semicolon)
+      AddError(ErrorCode::ERROR_STATEMENT_UNEXPECT_NEWLINE);
+  } else {
+    if (CanPeekToken() && PeekToken() == ast::PunctuatorKind::Colon)
+      return ParseLabeledStatement(&name);
+  }
   PushBackToken(name);
   return ParseExpressionStatement();
 }

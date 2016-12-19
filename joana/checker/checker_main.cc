@@ -216,7 +216,7 @@ int Checker::Main() {
         return EXIT_FAILURE;
       }
       const auto& inputs = base::SplitString(
-          string8, "\n", base::TRIM_WHITESPACE, base::SPLIT_WANT_ALL);
+          string8, "\n", base::TRIM_WHITESPACE, base::SPLIT_WANT_NONEMPTY);
       for (const auto& input : inputs)
         command_line->AppendArg(input);
     }

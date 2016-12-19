@@ -220,6 +220,10 @@ ast::Expression& Parser::ParseBinaryExpression(OperatorPrecedence category) {
   auto* left = &ParseBinaryExpression(lower_category);
   while (CanPeekToken() && CategoryOf(PeekToken()) == category) {
     auto& op = ConsumeToken();
+    if (!CanPeekToken()) {
+      AddError(ErrorCode::ERROR_EXPRESSION_EXPECT_EXPRESSION);
+      return *left;
+    }
     auto& right = ParseBinaryExpression(lower_category);
     left = &node_factory().NewBinaryExpression(GetSourceCodeRange(), op, *left,
                                                right);

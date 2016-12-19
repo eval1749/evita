@@ -16,6 +16,7 @@
 #include "base/macros.h"
 #include "base/strings/string16.h"
 #include "base/strings/string_piece.h"
+#include "base/strings/string_split.h"
 #include "base/strings/utf_string_conversions.h"
 #include "joana/parser/public/parse.h"
 #include "joana/public/ast/edit_context.h"
@@ -205,12 +206,29 @@ void Checker::AddSourceCode(const base::FilePath& file_path,
 int Checker::Main() {
   auto* const command_line = base::CommandLine::ForCurrentProcess();
 
+  {
+    const auto& file_path = command_line->GetSwitchValuePath("input");
+    if (!file_path.empty()) {
+      const auto& abs_file_path = base::MakeAbsoluteFilePath(file_path);
+      std::string string8;
+      if (!base::ReadFileToString(abs_file_path, &string8)) {
+        std::cerr << "Failed to read " << file_path.value();
+        return EXIT_FAILURE;
+      }
+      const auto& inputs = base::SplitString(
+          string8, "\n", base::TRIM_WHITESPACE, base::SPLIT_WANT_ALL);
+      for (const auto& input : inputs)
+        command_line->AppendArg(input);
+    }
+  }
+
   ParserOptions options;
   options.disable_automatic_semicolon =
       command_line->HasSwitch("disable_automatic_semicolon");
+
   Checker checker(options);
   for (const auto& file_name : command_line->GetArgs()) {
-    base::FilePath file_path =
+    const auto& file_path =
         base::MakeAbsoluteFilePath(base::FilePath(file_name));
     std::string file_contents8;
     if (!base::ReadFileToString(file_path, &file_contents8)) {

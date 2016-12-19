@@ -84,6 +84,13 @@ class JOANA_PUBLIC_EXPORT NodeFactory final {
   CommaExpression& NewCommaExpression(
       const SourceCodeRange& range,
       const std::vector<Expression*> expressions);
+
+  // expression '[' expression ']'
+  ComputedMemberExpression& NewComputedMemberExpression(
+      const SourceCodeRange& range,
+      const Expression& expression,
+      const Expression& name_expression);
+
   ConditionalExpression& NewConditionalExpression(
       const SourceCodeRange& range,
       const Expression& condition,
@@ -97,10 +104,7 @@ class JOANA_PUBLIC_EXPORT NodeFactory final {
                                       const Expression& expression);
   InvalidExpression& NewInvalidExpression(const Node& node, int error_code);
   LiteralExpression& NewLiteralExpression(const Literal& literal);
-  ComputedMemberExpression& NewComputedMemberExpression(
-      const SourceCodeRange& range,
-      const Expression& expression,
-      const Expression& name_expression);
+
   NewExpression& NewNewExpression(const SourceCodeRange& range,
                                   const Expression& expression,
                                   const std::vector<Expression*>& arguments);

@@ -185,6 +185,15 @@ CommaExpression& NodeFactory::NewCommaExpression(
   return *new (zone_) CommaExpression(range, list);
 }
 
+ComputedMemberExpression& NodeFactory::NewComputedMemberExpression(
+    const SourceCodeRange& range,
+    const Expression& expression,
+    const Expression& name_expression) {
+  return *new (zone_)
+      ComputedMemberExpression(range, const_cast<Expression*>(&expression),
+                               const_cast<Expression*>(&name_expression));
+}
+
 ConditionalExpression& NodeFactory::NewConditionalExpression(
     const SourceCodeRange& range,
     const Expression& condition,
@@ -225,15 +234,6 @@ InvalidExpression& NodeFactory::NewInvalidExpression(const Node& node,
 
 LiteralExpression& NodeFactory::NewLiteralExpression(const Literal& literal) {
   return *new (zone_) LiteralExpression(const_cast<Literal*>(&literal));
-}
-
-ComputedMemberExpression& NodeFactory::NewComputedMemberExpression(
-    const SourceCodeRange& range,
-    const Expression& expression,
-    const Expression& name_expression) {
-  return *new (zone_)
-      ComputedMemberExpression(range, const_cast<Expression*>(&expression),
-                               const_cast<Expression*>(&name_expression));
 }
 
 NewExpression& NodeFactory::NewNewExpression(

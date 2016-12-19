@@ -157,6 +157,28 @@ class JOANA_PUBLIC_EXPORT CommaExpression final
 };
 
 //
+// ComputedMemberExpression represents:
+//  Expression '[' Expression ']'
+//
+class JOANA_PUBLIC_EXPORT ComputedMemberExpression
+    : public NodeTemplate<Expression, Expression*, Expression*> {
+  DECLARE_CONCRETE_AST_NODE(ComputedMemberExpression, Expression);
+
+ public:
+  ~ComputedMemberExpression() final;
+
+  const Expression& expression() const { return *member_at<0>(); }
+  const Expression& name_expression() const { return *member_at<1>(); }
+
+ private:
+  ComputedMemberExpression(const SourceCodeRange& range,
+                           Expression* expression,
+                           Expression* name_Expression);
+
+  DISALLOW_COPY_AND_ASSIGN(ComputedMemberExpression);
+};
+
+//
 // ConditionalExpression
 //
 class JOANA_PUBLIC_EXPORT ConditionalExpression final
@@ -280,27 +302,6 @@ class JOANA_PUBLIC_EXPORT LiteralExpression final
   explicit LiteralExpression(Literal* literal);
 
   DISALLOW_COPY_AND_ASSIGN(LiteralExpression);
-};
-
-//
-// ComputedMemberExpression
-//
-class JOANA_PUBLIC_EXPORT ComputedMemberExpression
-    : public NodeTemplate<Expression, Expression*, Expression*> {
-  DECLARE_CONCRETE_AST_NODE(ComputedMemberExpression, Expression);
-
- public:
-  ~ComputedMemberExpression() final;
-
-  const Expression& expression() const { return *member_at<0>(); }
-  const Expression& name_expression() const { return *member_at<1>(); }
-
- private:
-  ComputedMemberExpression(const SourceCodeRange& range,
-                           Expression* expression,
-                           Expression* name_Expression);
-
-  DISALLOW_COPY_AND_ASSIGN(ComputedMemberExpression);
 };
 
 //

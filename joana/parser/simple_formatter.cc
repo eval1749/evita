@@ -308,6 +308,14 @@ void SimpleFormatter::VisitConditionalExpression(
   Format(node->false_expression());
 }
 
+void SimpleFormatter::VisitComputedMemberExpression(
+    ast::ComputedMemberExpression* node) {
+  Format(node->expression());
+  *ostream_ << '[';
+  Format(node->name_expression());
+  *ostream_ << ']';
+}
+
 void SimpleFormatter::VisitDeclarationExpression(
     ast::DeclarationExpression* node) {
   Format(node->declaration());
@@ -335,14 +343,6 @@ void SimpleFormatter::VisitInvalidExpression(ast::InvalidExpression* node) {
 
 void SimpleFormatter::VisitLiteralExpression(ast::LiteralExpression* node) {
   OutputUsingSoourceCode(node->literal());
-}
-
-void SimpleFormatter::VisitComputedMemberExpression(
-    ast::ComputedMemberExpression* node) {
-  Format(node->expression());
-  *ostream_ << '[';
-  Format(node->name_expression());
-  *ostream_ << ']';
 }
 
 void SimpleFormatter::VisitNewExpression(ast::NewExpression* node) {

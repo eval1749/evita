@@ -64,6 +64,16 @@ CommaExpression::CommaExpression(const SourceCodeRange& range,
 CommaExpression::~CommaExpression() = default;
 
 //
+// ComputedMemberExpression
+//
+ComputedMemberExpression::ComputedMemberExpression(const SourceCodeRange& range,
+                                                   Expression* expression,
+                                                   Expression* name_expression)
+    : NodeTemplate(std::make_tuple(expression, name_expression), range) {}
+
+ComputedMemberExpression::~ComputedMemberExpression() = default;
+
+//
 // ConditionalExpression
 //
 ConditionalExpression::ConditionalExpression(const SourceCodeRange& range,
@@ -140,16 +150,6 @@ LiteralExpression::LiteralExpression(Literal* literal)
     : NodeTemplate(std::make_tuple(literal), literal->range()) {}
 
 LiteralExpression::~LiteralExpression() = default;
-
-//
-// ComputedMemberExpression
-//
-ComputedMemberExpression::ComputedMemberExpression(const SourceCodeRange& range,
-                                                   Expression* expression,
-                                                   Expression* name_expression)
-    : NodeTemplate(std::make_tuple(expression, name_expression), range) {}
-
-ComputedMemberExpression::~ComputedMemberExpression() = default;
 
 //
 // NewExpression

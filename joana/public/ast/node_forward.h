@@ -29,6 +29,7 @@ namespace ast {
   V(AssignmentExpression)          \
   V(BinaryExpression)              \
   V(CallExpression)                \
+  V(ComputedMemberExpression)      \
   V(CommaExpression)               \
   V(ConditionalExpression)         \
   V(DeclarationExpression)         \
@@ -37,7 +38,6 @@ namespace ast {
   V(EmptyExpression)               \
   V(InvalidExpression)             \
   V(LiteralExpression)             \
-  V(ComputedMemberExpression)      \
   V(NewExpression)                 \
   V(ObjectLiteralExpression)       \
   V(RegExpLiteralExpression)       \

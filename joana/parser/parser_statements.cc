@@ -62,21 +62,8 @@ ast::Statement& Parser::ParseStatement() {
     return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_EXPECT_STATEMENT);
   SourceCodeRangeScope scope(this);
   const auto& token = PeekToken();
-  if (auto* name = token.TryAs<ast::Name>()) {
-    if (name->IsKeyword())
-      return ParseKeywordStatement();
-    ConsumeToken();
-    if (!CanPeekToken()) {
-      PushBackToken(*name);
-      return ParseExpressionStatement();
-    }
-    if (CanPeekToken() && PeekToken() == ast::PunctuatorKind::Colon)
-      return ParseLabeledStatement(name);
-    auto& token2 = ConsumeToken();
-    PushBackToken(token2);
-    PushBackToken(*name);
-    return ParseExpressionStatement();
-  }
+  if (token.Is<ast::Name>())
+    return ParseNameAsStatement();
   if (token.Is<ast::Literal>())
     return ParseExpressionStatement();
   if (token == ast::PunctuatorKind::LeftBrace)
@@ -353,6 +340,23 @@ ast::Statement& Parser::ParseLetStatement() {
   ConsumeToken();
   auto& expression = ParseExpression();
   return node_factory().NewLetStatement(GetSourceCodeRange(), expression);
+}
+
+ast::Statement& Parser::ParseNameAsStatement() {
+  auto& name = PeekToken().As<ast::Name>();
+  if (name.IsKeyword())
+    return ParseKeywordStatement();
+  ConsumeToken();
+  if (!CanPeekToken()) {
+    PushBackToken(name);
+    return ParseExpressionStatement();
+  }
+  if (CanPeekToken() && PeekToken() == ast::PunctuatorKind::Colon)
+    return ParseLabeledStatement(&name);
+  auto& token2 = ConsumeToken();
+  PushBackToken(token2);
+  PushBackToken(name);
+  return ParseExpressionStatement();
 }
 
 // Yet another entry point called by statement parser.

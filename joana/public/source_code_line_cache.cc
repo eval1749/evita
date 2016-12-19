@@ -60,7 +60,12 @@ SourceCodeLine SourceCodeLine::Cache::Get(int offset) const {
   const auto& begin = offsets_.begin();
   const auto& end = offsets_.end();
   const auto& it = std::lower_bound(begin, end, offset);
-  DCHECK(it != end);
+  if (it == end) {
+    // |offset| is the last line w/o newline
+    return SourceCodeLine(
+        source_code_.Slice(offsets_.back(), source_code_.size()),
+        static_cast<int>(offsets_.size()) + 1);
+  }
   const auto& start = *it == offset ? it : std::prev(it);
   const auto line_number = static_cast<int>(start - begin) + 2;
   const auto& next = std::next(start);

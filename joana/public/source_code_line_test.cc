@@ -99,4 +99,16 @@ TEST_F(SourceCodeLineTest, GetOnNoNewline) {
   EXPECT_EQ(NewSourceCodeLine(source_code, 0, 2, 1), cache.Get(2));
 }
 
+TEST_F(SourceCodeLineTest, GetOnNoNewline2) {
+  const auto& source_code = NewSourceCode("01\n34");
+  SourceCodeLine::Cache cache(source_code);
+
+  EXPECT_EQ(NewSourceCodeLine(source_code, 0, 3, 1), cache.Get(0));
+  EXPECT_EQ(NewSourceCodeLine(source_code, 0, 3, 1), cache.Get(1));
+  EXPECT_EQ(NewSourceCodeLine(source_code, 0, 3, 1), cache.Get(2));
+
+  EXPECT_EQ(NewSourceCodeLine(source_code, 3, 5, 2), cache.Get(3));
+  EXPECT_EQ(NewSourceCodeLine(source_code, 3, 5, 2), cache.Get(4));
+}
+
 }  // namespace joana

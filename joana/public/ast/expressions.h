@@ -345,24 +345,24 @@ class JOANA_PUBLIC_EXPORT ObjectLiteralExpression final
 };
 
 //
-// PropertyExpression
+// MemberExpression
 //
-class JOANA_PUBLIC_EXPORT PropertyExpression final
+class JOANA_PUBLIC_EXPORT MemberExpression final
     : public NodeTemplate<Expression, Expression*, Name*> {
-  DECLARE_CONCRETE_AST_NODE(PropertyExpression, Expression);
+  DECLARE_CONCRETE_AST_NODE(MemberExpression, Expression);
 
  public:
-  ~PropertyExpression() final;
+  ~MemberExpression() final;
 
   const Expression& expression() const { return *member_at<0>(); }
   const Name& name() const { return *member_at<1>(); }
 
  private:
-  PropertyExpression(const SourceCodeRange& range,
-                     Expression* expression,
-                     Name* name);
+  MemberExpression(const SourceCodeRange& range,
+                   Expression* expression,
+                   Name* name);
 
-  DISALLOW_COPY_AND_ASSIGN(PropertyExpression);
+  DISALLOW_COPY_AND_ASSIGN(MemberExpression);
 };
 
 //

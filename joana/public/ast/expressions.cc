@@ -171,14 +171,14 @@ ObjectLiteralExpression::ObjectLiteralExpression(const SourceCodeRange& range,
 ObjectLiteralExpression::~ObjectLiteralExpression() = default;
 
 //
-// PropertyExpression
+// MemberExpression
 //
-PropertyExpression::PropertyExpression(const SourceCodeRange& range,
-                                       Expression* expression,
-                                       Name* name)
+MemberExpression::MemberExpression(const SourceCodeRange& range,
+                                   Expression* expression,
+                                   Name* name)
     : NodeTemplate(std::make_tuple(expression, name), range) {}
 
-PropertyExpression::~PropertyExpression() = default;
+MemberExpression::~MemberExpression() = default;
 
 //
 // PropertyDefinitionExpression

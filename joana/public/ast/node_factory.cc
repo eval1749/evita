@@ -252,11 +252,10 @@ ObjectLiteralExpression& NodeFactory::NewObjectLiteralExpression(
   return *new (zone_) ObjectLiteralExpression(range, list);
 }
 
-PropertyExpression& NodeFactory::NewPropertyExpression(
-    const SourceCodeRange& range,
-    const Expression& expression,
-    const Name& name) {
-  return *new (zone_) PropertyExpression(
+MemberExpression& NodeFactory::NewMemberExpression(const SourceCodeRange& range,
+                                                   const Expression& expression,
+                                                   const Name& name) {
+  return *new (zone_) MemberExpression(
       range, const_cast<Expression*>(&expression), const_cast<Name*>(&name));
 }
 

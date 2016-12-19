@@ -385,7 +385,7 @@ void SimpleFormatter::VisitObjectLiteralExpression(
   *ostream_ << '}';
 }
 
-void SimpleFormatter::VisitPropertyExpression(ast::PropertyExpression* node) {
+void SimpleFormatter::VisitMemberExpression(ast::MemberExpression* node) {
   Format(node->expression());
   *ostream_ << '.';
   Format(node->name());

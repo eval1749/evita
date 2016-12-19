@@ -41,7 +41,7 @@ namespace ast {
   V(NewExpression)                 \
   V(ObjectLiteralExpression)       \
   V(RegExpLiteralExpression)       \
-  V(PropertyExpression)            \
+  V(MemberExpression)              \
   V(PropertyDefinitionExpression)  \
   V(ReferenceExpression)           \
   V(UnaryExpression)

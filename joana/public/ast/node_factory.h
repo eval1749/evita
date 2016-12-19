@@ -113,9 +113,9 @@ class JOANA_PUBLIC_EXPORT NodeFactory final {
       const SourceCodeRange& range,
       const std::vector<Expression*>& elements);
 
-  PropertyExpression& NewPropertyExpression(const SourceCodeRange& range,
-                                            const Expression& expression,
-                                            const Name& name);
+  MemberExpression& NewMemberExpression(const SourceCodeRange& range,
+                                        const Expression& expression,
+                                        const Name& name);
   PropertyDefinitionExpression& NewPropertyDefinitionExpression(
       const SourceCodeRange& range,
       const Expression& name,

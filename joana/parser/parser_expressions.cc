@@ -286,8 +286,8 @@ ast::Expression& Parser::ParseLeftHandSideExpression() {
         return *expression;
       }
       auto& name = ConsumeToken().As<ast::Name>();
-      expression = &node_factory().NewPropertyExpression(GetSourceCodeRange(),
-                                                         *expression, name);
+      expression = &node_factory().NewMemberExpression(GetSourceCodeRange(),
+                                                       *expression, name);
       continue;
     }
     if (ConsumeTokenIf(ast::PunctuatorKind::LeftParenthesis)) {
@@ -356,7 +356,7 @@ ast::Expression& Parser::ParseNewExpression() {
           ConsumeToken(), ErrorCode::ERROR_EXPRESSION_NEW_EXPECT_TARGET);
     }
     auto& token_target = ConsumeToken().As<ast::Name>();
-    return node_factory().NewPropertyExpression(
+    return node_factory().NewMemberExpression(
         GetSourceCodeRange(), node_factory().NewReferenceExpression(token_new),
         token_target);
   }

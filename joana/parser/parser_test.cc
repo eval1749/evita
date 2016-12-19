@@ -256,6 +256,18 @@ TEST_F(ParserTest, ExpressionConditional) {
   TEST_PARSER("foo ? bar : baz;\n");
 }
 
+TEST_F(ParserTest, ExpressionMember) {
+  TEST_PARSER("foo.bar;\n");
+  TEST_PARSER("foo.bar[0];\n");
+  TEST_PARSER("foo.bar[0](1);\n");
+  TEST_PARSER("foo.bar[0](1)(2);\n");
+  TEST_PARSER("foo.bar[0](1)(2).baz;\n");
+
+  EXPECT_EQ(
+      "foo;\nPASER_ERROR_EXPRESSION_EXPECT_NAME@4:4\n",
+      Parse("foo."));
+}
+
 TEST_F(ParserTest, ExpressionNew) {
   EXPECT_EQ("var foo = new Foo();\n", Parse("var foo = new Foo\n"));
   TEST_PARSER("var foo = new Foo(1);\n");

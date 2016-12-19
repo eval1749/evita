@@ -310,7 +310,7 @@ ast::Expression& Parser::ParseLeftHandSideExpression() {
   auto* expression = &ParseNewExpression();
   while (CanPeekToken()) {
     if (ConsumeTokenIf(ast::PunctuatorKind::LeftBracket)) {
-      expression = &HandleMember(expression);
+      expression = &HandleComputedMember(expression);
       continue;
     }
     if (ConsumeTokenIf(ast::PunctuatorKind::Dot)) {

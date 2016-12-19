@@ -30,6 +30,15 @@ int FromDigitChar(base::char16 char_code, int base);
 // |base| <= 16.
 bool IsDigitChar(base::char16 char_code, int base);
 
+// Returns true if |char_code| is valid for ECMAScript identifier part.
+bool IsIdentifierPart(base::char16 char_code);
+
+// Returns true if |char_code| is a line terminator of ECMAScript.
+bool IsLineTerminator(base::char16 char_code);
+
+// Returns true if |char_code| is a whitespace of ECMAScript.
+bool IsWhitespace(base::char16 char_code);
+
 }  // namespace internal
 }  // namespace joana
 

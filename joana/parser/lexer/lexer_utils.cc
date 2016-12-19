@@ -39,5 +39,28 @@ bool IsDigitChar(base::char16 char_code, int base) {
   return char_code >= '0' && char_code <= '0' + base - 1;
 }
 
+bool IsIdentifierPart(base::char16 char_code) {
+  if (char_code >= '0' && char_code <= '9')
+    return true;
+  if (char_code >= 'A' && char_code <= 'Z')
+    return true;
+  if (char_code >= 'a' && char_code <= 'z')
+    return true;
+  // TODO(eval1749): NYI: UnicodeIDContinue
+  // TODO(eval1749): NYI: \ UnicodeEscapeSequence
+  // TODO(eval1749): NYI: <ZWNJ> <ZWJ>
+  return char_code == '$' || char_code == '_';
+}
+
+bool IsLineTerminator(base::char16 char_code) {
+  return char_code == '\n' || char_code == '\r' ||
+         char_code == kLineSeparator || char_code == kParagraphSeparator;
+}
+
+bool IsWhitespace(base::char16 char_code) {
+  return IsLineTerminator(char_code) || char_code == ' ' || char_code == '\t' ||
+         char_code == '\v' || char_code == '\f' || char_code == '\r';
+}
+
 }  // namespace internal
 }  // namespace joana

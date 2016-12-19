@@ -157,7 +157,7 @@ void PrintSourceCodeRange(const SourceCodeLine& start_line,
 //
 class Checker final {
  public:
-  static int Main(const ParserOptions& options);
+  static int Main();
 
  private:
   explicit Checker(const ParserOptions& options);
@@ -202,9 +202,13 @@ void Checker::AddSourceCode(const base::FilePath& file_path,
   module_map_.emplace(&source_code, new ScriptModule(source_code, module));
 }
 
-int Checker::Main(const ParserOptions& options) {
-  joana::internal::Checker checker(options);
-  const auto* const command_line = base::CommandLine::ForCurrentProcess();
+int Checker::Main() {
+  auto* const command_line = base::CommandLine::ForCurrentProcess();
+
+  ParserOptions options;
+  options.disable_automatic_semicolon =
+      command_line->HasSwitch("disable_automatic_semicolon");
+  Checker checker(options);
   for (const auto& file_name : command_line->GetArgs()) {
     base::FilePath file_path =
         base::MakeAbsoluteFilePath(base::FilePath(file_name));
@@ -255,10 +259,5 @@ extern "C" int main() {
     logging::InitLogging(settings);
   }
 
-  auto* const command_line = base::CommandLine::ForCurrentProcess();
-
-  joana::ParserOptions options;
-  options.disable_automatic_semicolon =
-      command_line->HasSwitch("disable_automatic_semicolon");
-  return joana::internal::Checker::Main(options);
+  return joana::internal::Checker::Main();
 }

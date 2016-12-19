@@ -589,7 +589,7 @@ ast::Expression& Parser::ParseRegExpLiteral() {
   if (is_separated_by_newline_) {
     if (options_.disable_automatic_semicolon) {
       AddError(GetSourceCodeRange(),
-               ErrorCode::ERROR_STATEMENT_UNEXPECT_NEWLINE);
+               ErrorCode::ERROR_EXPRESSION_UNEXPECT_NEWLINE);
     }
     return node_factory().NewRegExpLiteralExpression(GetSourceCodeRange(),
                                                      regexp, NewEmptyName());
@@ -624,7 +624,7 @@ ast::Expression& Parser::ParseUpdateExpression() {
     return expression;
   if (is_separated_by_newline_) {
     if (options_.disable_automatic_semicolon)
-      AddError(ErrorCode::ERROR_STATEMENT_UNEXPECT_NEWLINE);
+      AddError(ErrorCode::ERROR_EXPRESSION_UNEXPECT_NEWLINE);
     return expression;
   }
   auto& op = ConvertToPostOperator(&node_factory(), ConsumeToken());

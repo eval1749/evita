@@ -553,8 +553,17 @@ ast::Expression& Parser::ParsePropertyName() {
 }
 
 ast::Expression& Parser::ParseRegExpLiteral() {
+  SourceCodeRangeScope scope(this);
   auto& regexp = lexer_->ConsumeRegExp();
   Advance();
+  if (is_separated_by_newline_) {
+    if (options_.disable_automatic_semicolon) {
+      AddError(GetSourceCodeRange(),
+               ErrorCode::ERROR_STATEMENT_UNEXPECT_NEWLINE);
+    }
+    return node_factory().NewRegExpLiteralExpression(GetSourceCodeRange(),
+                                                     regexp, NewEmptyName());
+  }
   auto& flags = CanPeekToken() && PeekToken().Is<ast::Name>() ? ConsumeToken()
                                                               : NewEmptyName();
   return node_factory().NewRegExpLiteralExpression(GetSourceCodeRange(), regexp,

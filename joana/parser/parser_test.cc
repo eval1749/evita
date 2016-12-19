@@ -302,6 +302,8 @@ TEST_F(ParserTest, ExpressionRegExp) {
   TEST_PARSER("var re = /=/;\n");  // "'/=' is not assignment operator";
   TEST_PARSER("var re = /a{2}/;\n");
   TEST_PARSER("var re = /a{2,}/;\n");
+  EXPECT_EQ("var re = /a/;\nfoo;\n", Parse("var re = /a/\nfoo\n"))
+      << "'foo' is not regexp flags.";
 }
 
 TEST_F(ParserTest, ExpressionYield) {

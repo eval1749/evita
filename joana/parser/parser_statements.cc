@@ -51,6 +51,11 @@ class Parser::ExpectSemicolonScope final {
 //
 // Functions for parsing statements
 //
+ast::Statement& Parser::NewEmptyStatement(const SourceCodeRange& range) {
+  DCHECK(range.IsCollapsed()) << range;
+  return node_factory().NewEmptyStatement(range);
+}
+
 ast::Statement& Parser::NewInvalidStatement(ErrorCode error_code) {
   auto& token = ComputeInvalidToken(error_code);
   AddError(GetSourceCodeRange(), error_code);
@@ -60,7 +65,7 @@ ast::Statement& Parser::NewInvalidStatement(ErrorCode error_code) {
 
 ast::Statement& Parser::ParseStatement() {
   if (!CanPeekToken())
-    return node_factory().NewEmptyStatement(source_code().end());
+    return NewEmptyStatement(source_code().end());
   SourceCodeRangeScope scope(this);
   const auto& token = PeekToken();
   if (token.Is<ast::Name>())
@@ -70,7 +75,7 @@ ast::Statement& Parser::ParseStatement() {
   if (token == ast::PunctuatorKind::LeftBrace)
     return ParseBlockStatement();
   if (token == ast::PunctuatorKind::Semicolon) {
-    auto& statement = node_factory().NewEmptyStatement(
+    auto& statement = NewEmptyStatement(
         SourceCodeRange::CollapseToStart(PeekToken().range()));
     ConsumeToken();
     return statement;
@@ -130,8 +135,7 @@ ast::Statement& Parser::ParseCaseClause() {
         AddError(ErrorCode::ERROR_STATEMENT_EXPECT_SEMICOLON);
       return node_factory().NewCaseClause(
           GetSourceCodeRange(), expression,
-          node_factory().NewEmptyStatement(
-              SourceCodeRange::CollapseToEnd(colon.range())));
+          NewEmptyStatement(SourceCodeRange::CollapseToEnd(colon.range())));
     }
   }
   auto& statement = ParseStatement();
@@ -279,8 +283,8 @@ ast::Statement& Parser::ParseLabeledStatement(const ast::Name* label) {
   DCHECK_EQ(colon, ast::PunctuatorKind::Colon);
   if (!options_.disable_automatic_semicolon) {
     if (!CanPeekToken() || PeekToken() == ast::PunctuatorKind::RightBrace) {
-      auto& statement = node_factory().NewEmptyStatement(
-          SourceCodeRange::CollapseToEnd(colon.range()));
+      auto& statement =
+          NewEmptyStatement(SourceCodeRange::CollapseToEnd(colon.range()));
       return node_factory().NewLabeledStatement(GetSourceCodeRange(), *label,
                                                 statement);
     }

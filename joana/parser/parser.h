@@ -147,6 +147,8 @@ class Parser final {
 
   // Statements
   ast::Statement& NewInvalidStatement(ErrorCode error_code);
+  ast::Statement& NewEmptyStatement(const SourceCodeRange& range);
+
   ast::Statement& ParseStatement();
 
   ast::Statement& ParseBreakStatement();

@@ -9,6 +9,7 @@
 #include "joana/parser/lexer/character_reader.h"
 #include "joana/parser/lexer/lexer_error_codes.h"
 #include "joana/parser/lexer/lexer_utils.h"
+#include "joana/parser/public/parse.h"
 #include "joana/public/ast/edit_context.h"
 #include "joana/public/ast/node_factory.h"
 #include "joana/public/ast/regexp.h"
@@ -72,7 +73,9 @@ struct Token {
 //
 class RegExpLexer final {
  public:
-  RegExpLexer(ast::EditContext* context, CharacterReader* reader);
+  RegExpLexer(ast::EditContext* context,
+              CharacterReader* reader,
+              const ParserOptions& options);
   ~RegExpLexer();
 
   int location() const { return reader_.location(); }
@@ -101,14 +104,17 @@ class RegExpLexer final {
   base::char16 PeekChar() const { return reader_.PeekChar(); }
 
   ast::EditContext& context_;
+  const ParserOptions& options_;
   CharacterReader& reader_;
   Token token_;
 
   DISALLOW_COPY_AND_ASSIGN(RegExpLexer);
 };
 
-RegExpLexer::RegExpLexer(ast::EditContext* context, CharacterReader* reader)
-    : context_(*context), reader_(*reader) {
+RegExpLexer::RegExpLexer(ast::EditContext* context,
+                         CharacterReader* reader,
+                         const ParserOptions& options)
+    : context_(*context), options_(options), reader_(*reader) {
   NextToken();
 }
 
@@ -167,6 +173,10 @@ int RegExpLexer::HandleDigits(int base) {
 }
 
 void RegExpLexer::HandleRepeat() {
+  if (!options_.enable_strict_regexp) {
+    if (!CanPeekChar() || !IsDigitChar(PeekChar(), 10))
+      return NewLiteral('{');
+  }
   const auto min = HandleDigits(10);
   if (ConsumeCharIf(kRightBrace)) {
     if (ConsumeCharIf('?'))
@@ -192,8 +202,13 @@ void RegExpLexer::NextToken() {
   const auto char_code = ConsumeChar();
   switch (char_code) {
     case '$':
-      return CanPeekChar() ? NewLiteral(char_code)
-                           : NewSyntaxChar(Syntax::AssertEnd);
+      if (options_.enable_strict_regexp)
+        return NewSyntaxChar(Syntax::AssertEnd);
+      if (!CanPeekChar() || PeekChar() == kRightParenthesis ||
+          PeekChar() == '/') {
+        return NewSyntaxChar(Syntax::AssertEnd);
+      }
+      return NewLiteral(char_code);
     case '*':
       if (ConsumeCharIf('?'))
         return NewRepeat(Syntax::LazyRepeat, 0, kInfinity);
@@ -211,16 +226,22 @@ void RegExpLexer::NextToken() {
         return NewRepeat(Syntax::LazyRepeat, 0, 1);
       return NewRepeat(Syntax::GreedyRepeat, 0, 1);
     case '(':
-      if (!ConsumeCharIf('?'))
-        return NewSyntaxChar(Syntax::Capture);
-      if (ConsumeCharIf(':'))
+      if (ConsumeCharIf('?')) {
+        if (ConsumeCharIf(':'))
+          return NewSyntaxChar(Syntax::Group);
+        if (ConsumeCharIf('='))
+          return NewSyntaxChar(Syntax::LookAhead);
+        if (ConsumeCharIf('!'))
+          return NewSyntaxChar(Syntax::LookAheadNot);
+        if (options_.enable_strict_regexp)
+          AddError(ErrorCode::REGEXP_INVALID_GROUPING);
         return NewSyntaxChar(Syntax::Group);
-      if (ConsumeCharIf('='))
-        return NewSyntaxChar(Syntax::LookAhead);
-      if (ConsumeCharIf('!'))
-        return NewSyntaxChar(Syntax::LookAheadNot);
-      AddError(ErrorCode::REGEXP_INVALID_GROUPING);
-      return NewSyntaxChar(Syntax::Group);
+      }
+      if (options_.enable_strict_regexp)
+        return NewSyntaxChar(Syntax::Group);
+      if (!CanPeekChar() || PeekChar() == kRightParenthesis)
+        return NewLiteral(char_code);
+      return NewSyntaxChar(Syntax::Capture);
     case ')':
       return NewSyntaxChar(Syntax::Close);
     case '[':
@@ -232,9 +253,16 @@ void RegExpLexer::NextToken() {
     case '}':
       return NewLiteral(char_code);
     case '^':
-      return CanPeekToken() ? NewLiteral(char_code)
-                            : NewSyntaxChar(Syntax::AssertStart);
+      if (options_.enable_strict_regexp)
+        return NewSyntaxChar(Syntax::AssertStart);
+      return NewLiteral(char_code);
     case '|':
+      if (options_.enable_strict_regexp)
+        return NewSyntaxChar(Syntax::Or);
+      if (!CanPeekToken() || PeekChar() == '/' ||
+          PeekChar() == kRightParenthesis) {
+        return NewLiteral(char_code);
+      }
       return NewSyntaxChar(Syntax::Or);
     case '\\':
       // TODO(eval1749): NYI parse backslash
@@ -280,7 +308,9 @@ const Token& RegExpLexer::PeekToken() const {
 //
 class RegExpParser final {
  public:
-  RegExpParser(ast::EditContext* context, CharacterReader* reader);
+  RegExpParser(ast::EditContext* context,
+               CharacterReader* reader,
+               const ParserOptions& options);
   ~RegExpParser();
 
   ast::RegExp& Run();
@@ -310,6 +340,8 @@ class RegExpParser final {
   // |groups_| holds start offset of left parenthesis for checking matched
   // parenthesis.
   std::stack<int> groups_;
+
+  const ParserOptions& options_;
 
   // The last consumed token before |ConsumeTokenIf()|.
   Token last_token_;
@@ -456,8 +488,10 @@ void ScopedNodeFactory::SetToken(const Token& token) {
 }
 
 // RegExpParser
-RegExpParser::RegExpParser(ast::EditContext* context, CharacterReader* reader)
-    : context_(*context), lexer_(context, reader) {}
+RegExpParser::RegExpParser(ast::EditContext* context,
+                           CharacterReader* reader,
+                           const ParserOptions& options)
+    : context_(*context), lexer_(context, reader, options), options_(options) {}
 
 RegExpParser::~RegExpParser() = default;
 
@@ -527,12 +561,6 @@ ast::RegExp& RegExpParser::ParsePrimary() {
   if (ConsumeTokenIf(Syntax::LookAheadNot))
     return factory.NewLookAheadNot(ParseParenthesis());
 
-  if (ConsumeTokenIf(Syntax::Close))
-    return factory.NewError(ErrorCode::REGEXP_UNEXPECT_RPAREN);
-
-  if (ConsumeTokenIf(Syntax::Or))
-    return factory.NewError(ErrorCode::REGEXP_INVALID_OR);
-
   if (PeekToken().syntax == Syntax::End && !groups_.empty())
     return factory.NewInvalid(ErrorCode::REGEXP_EXPECT_RPAREN);
 
@@ -542,7 +570,10 @@ ast::RegExp& RegExpParser::ParsePrimary() {
     return node;
   }
 
-  return factory.NewError(ErrorCode::REGEXP_EXPECT_PRIMARY);
+  ConsumeToken();
+  if (options_.enable_strict_regexp)
+    return factory.NewError(ErrorCode::REGEXP_EXPECT_PRIMARY);
+  return factory.NewLiteral();
 }
 
 ast::RegExp& RegExpParser::ParseParenthesis() {
@@ -603,7 +634,7 @@ ast::RegExp& RegExpParser::ParseSequence() {
 ast::RegExp& Lexer::ConsumeRegExp() {
   if (PeekToken() == ast::PunctuatorKind::DivideEqual)
     reader_->MoveBackward();
-  return RegExpParser(&context_, reader_.get()).Run();
+  return RegExpParser(&context_, reader_.get(), options_).Run();
 }
 
 }  // namespace internal

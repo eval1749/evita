@@ -26,6 +26,10 @@ JOANA_PARSER_EXPORT struct ParserOptions {
   // When |enable_strict_backslash| is true, a character after backslash
   // not '"\bfnrtv are error.
   bool enable_strict_backslash = false;
+
+  // When |enable_strict_regex| is true, RegExp syntax character should be
+  // escaped.
+  bool enable_strict_regexp = false;
 };
 
 JOANA_PARSER_EXPORT const ast::Node& Parse(ast::EditContext* context,

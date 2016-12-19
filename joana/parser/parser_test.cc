@@ -351,6 +351,11 @@ TEST_F(ParserTest, ExpressionRegExp) {
   TEST_PARSER("var re = /a{2,}/;\n");
   EXPECT_EQ("var re = /a/;\nfoo;\n", Parse("var re = /a/\nfoo\n"))
       << "'foo' is not regexp flags.";
+
+  // non-strict regexp
+  TEST_PARSER("/(foo|)/;\n");  // '|' is non-syntax char
+  TEST_PARSER("/()foo/;\n");   // '()' is non-syntax char
+  TEST_PARSER("/#{foo}/;\n");  // '{}' is non-syntax char
 }
 
 TEST_F(ParserTest, ExpressionYield) {

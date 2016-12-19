@@ -232,6 +232,8 @@ int Checker::Main() {
       command_line->HasSwitch("disable_automatic_semicolon");
   options.enable_strict_backslash =
       command_line->HasSwitch("enable_strict_backslash");
+  options.enable_strict_regexp =
+      command_line->HasSwitch("enable_strict_regexp");
 
   Checker checker(options);
   for (const auto& file_name : command_line->GetArgs()) {

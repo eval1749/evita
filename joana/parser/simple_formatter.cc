@@ -356,28 +356,54 @@ void SimpleFormatter::VisitNewExpression(ast::NewExpression* node) {
 void SimpleFormatter::VisitObjectLiteralExpression(
     ast::ObjectLiteralExpression* node) {
   const auto& members = node->members();
-  if (members.empty()) {
+  auto number_of_members = 0;
+  for (const auto& member : node->members()) {
+    if (member->Is<ast::ElisionExpression>())
+      continue;
+    ++number_of_members;
+  }
+  if (number_of_members == 0) {
     *ostream_ << "{}";
     return;
   }
-  if (members.size() == 1) {
-    *ostream_ << "{ ";
-    Format(**members.begin());
+  if (number_of_members == 1) {
+    *ostream_ << '{';
+    auto delimiter = "";
+    for (const auto& member : node->members()) {
+      *ostream_ << delimiter;
+      if (member->Is<ast::DeclarationExpression>()) {
+        *ostream_ << ' ';
+        delimiter = "";
+        FormatWithIndent(*member);
+        continue;
+      }
+      if (member->Is<ast::ElisionExpression>()) {
+        delimiter = ",";
+        continue;
+      }
+      *ostream_ << ' ';
+      FormatWithIndent(*member);
+      delimiter = ",";
+    }
     *ostream_ << " }";
     return;
   }
   *ostream_ << '{' << std::endl;
   IndentScope indent_scope(this);
   size_t count = 0;
-  for (const auto& element : members) {
+  for (const auto& member : members) {
     ++count;
-    if (element->Is<ast::DeclarationExpression>()) {
-      FormatWithIndent(*element);
+    if (member->Is<ast::DeclarationExpression>()) {
+      FormatWithIndent(*member);
       *ostream_ << std::endl;
       continue;
     }
-    if (!element->Is<ast::ElisionExpression>())
-      FormatWithIndent(*element);
+    if (member->Is<ast::ElisionExpression>()) {
+      if (count < members.size())
+        *ostream_ << ',' << std::endl;
+      continue;
+    }
+    FormatWithIndent(*member);
     if (count < members.size())
       *ostream_ << ',';
     *ostream_ << std::endl;

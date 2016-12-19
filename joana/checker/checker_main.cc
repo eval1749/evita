@@ -112,24 +112,24 @@ void PrintSourceCodeLine(int start, int end, const SourceCodeRange& range) {
   for (const auto& ch :
        base::UTF16ToUTF8(range.source_code().GetString(start, end))) {
     if (ch == '\t') {
-      std::cerr << ' ';
+      std::cout << ' ';
       continue;
     }
     if (ch == '\n')
       break;
-    std::cerr << ch;
+    std::cout << ch;
   }
-  std::cerr << std::endl;
+  std::cout << std::endl;
   const auto stop = std::min(end, range.end());
   if (range.IsCollapsed()) {
     for (auto runner = start; runner < stop; ++runner)
-      std::cerr << ' ';
-    std::cerr << '^' << std::endl;
+      std::cout << ' ';
+    std::cout << '^' << std::endl;
     return;
   }
   for (auto runner = start; runner < stop; ++runner)
-    std::cerr << (range.Contains(runner) ? '~' : ' ');
-  std::cerr << std::endl;
+    std::cout << (range.Contains(runner) ? '~' : ' ');
+  std::cout << std::endl;
 }
 
 void PrintSourceCodeRange(const SourceCodeLine& start_line,
@@ -147,7 +147,7 @@ void PrintSourceCodeRange(const SourceCodeLine& start_line,
   if (range.end() <= start_line_end)
     return;
   if (start_line.range().end() != end_line.range().start())
-    std::cerr << "  ...." << std::endl;
+    std::cout << "  ...." << std::endl;
   PrintSourceCodeLine(
       std::max(end_line.range().start(), range.end() - kBeforeContext),
       std::min(end_line.range().end(), range.end() + kAfterContext), range);
@@ -212,7 +212,7 @@ int Checker::Main() {
       const auto& abs_file_path = base::MakeAbsoluteFilePath(file_path);
       std::string string8;
       if (!base::ReadFileToString(abs_file_path, &string8)) {
-        std::cerr << "Failed to read " << file_path.value();
+        std::cout << "Failed to read " << file_path.value();
         return EXIT_FAILURE;
       }
       const auto& inputs = base::SplitString(
@@ -256,7 +256,7 @@ int Checker::Run() {
     const auto& module = ModuleOf(source_code);
     const auto& start_line = module.SourceCodeLinetAt(error->range().start());
     const auto& end_line = module.SourceCodeLinetAt(error->range().end());
-    std::cerr << source_code.file_path().value() << '(' << end_line.number()
+    std::cout << source_code.file_path().value() << '(' << end_line.number()
               << ") " << ast::ErrorStringOf(error->error_code()) << std::endl;
     PrintSourceCodeRange(start_line, end_line, error->range());
   }

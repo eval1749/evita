@@ -33,6 +33,9 @@ bool IsDigitChar(base::char16 char_code, int base);
 // Returns true if |char_code| is valid for ECMAScript identifier part.
 bool IsIdentifierPart(base::char16 char_code);
 
+// Returns true if |char_code| is valid for ECMAScript identifier start.
+bool IsIdentifierStart(base::char16 char_code);
+
 // Returns true if |char_code| is a line terminator of ECMAScript.
 bool IsLineTerminator(base::char16 char_code);
 

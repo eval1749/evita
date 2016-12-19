@@ -42,11 +42,17 @@ bool IsDigitChar(base::char16 char_code, int base) {
 bool IsIdentifierPart(base::char16 char_code) {
   if (char_code >= '0' && char_code <= '9')
     return true;
+  return IsIdentifierStart(char_code);
+}
+
+bool IsIdentifierStart(base::char16 char_code) {
   if (char_code >= 'A' && char_code <= 'Z')
     return true;
   if (char_code >= 'a' && char_code <= 'z')
     return true;
   // TODO(eval1749): NYI: UnicodeIDContinue
+  if (char_code >= 0xA1)
+    return true;
   // TODO(eval1749): NYI: \ UnicodeEscapeSequence
   // TODO(eval1749): NYI: <ZWNJ> <ZWJ>
   return char_code == '$' || char_code == '_';

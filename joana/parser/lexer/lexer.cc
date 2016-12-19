@@ -269,12 +269,8 @@ ast::Token& Lexer::HandleCharacter() {
                             ast::PunctuatorKind::BitOrEqual);
     invalid_character:
     default:
-      if (PeekChar() >= 'A' && PeekChar() <= 'Z')
+      if (IsIdentifierStart(PeekChar()))
         return HandleName();
-      if (PeekChar() >= 'a' && PeekChar() <= 'z')
-        return HandleName();
-      // TODO(eval1749): NYI: UnicodeIDStart
-      // TODO(eval1749): NYI: \ UnicodeEscapeSequence
       ConsumeChar();
       return NewInvalid(ErrorCode::CHARACTER_INVALID);
   }

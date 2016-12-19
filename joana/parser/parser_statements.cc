@@ -51,6 +51,24 @@ class Parser::ExpectSemicolonScope final {
 //
 // Functions for parsing statements
 //
+
+// Called after before consuming ':'
+ast::Statement& Parser::HandleLabeledStatement(const ast::Name* label) {
+  auto& colon = ConsumeToken();
+  DCHECK_EQ(colon, ast::PunctuatorKind::Colon);
+  if (!options_.disable_automatic_semicolon) {
+    if (!CanPeekToken() || PeekToken() == ast::PunctuatorKind::RightBrace) {
+      auto& statement =
+          NewEmptyStatement(SourceCodeRange::CollapseToEnd(colon.range()));
+      return node_factory().NewLabeledStatement(GetSourceCodeRange(), *label,
+                                                statement);
+    }
+  }
+  auto& statement = ParseStatement();
+  return node_factory().NewLabeledStatement(GetSourceCodeRange(), *label,
+                                            statement);
+}
+
 ast::Statement& Parser::NewEmptyStatement(const SourceCodeRange& range) {
   DCHECK(range.IsCollapsed()) << range;
   return node_factory().NewEmptyStatement(range);
@@ -61,26 +79,6 @@ ast::Statement& Parser::NewInvalidStatement(ErrorCode error_code) {
   AddError(GetSourceCodeRange(), error_code);
   return node_factory().NewInvalidStatement(token,
                                             static_cast<int>(error_code));
-}
-
-ast::Statement& Parser::ParseStatement() {
-  if (!CanPeekToken())
-    return NewEmptyStatement(source_code().end());
-  SourceCodeRangeScope scope(this);
-  const auto& token = PeekToken();
-  if (token.Is<ast::Name>())
-    return ParseNameAsStatement();
-  if (token.Is<ast::Literal>())
-    return ParseExpressionStatement();
-  if (token == ast::PunctuatorKind::LeftBrace)
-    return ParseBlockStatement();
-  if (token == ast::PunctuatorKind::Semicolon) {
-    auto& statement = NewEmptyStatement(
-        SourceCodeRange::CollapseToStart(PeekToken().range()));
-    ConsumeToken();
-    return statement;
-  }
-  return ParseExpressionStatement();
 }
 
 ast::Statement& Parser::ParseBlockStatement() {
@@ -174,7 +172,7 @@ ast::Statement& Parser::ParseDefaultLabel() {
   auto& label = ConsumeToken().As<ast::Name>();
   if (!CanPeekToken() || PeekToken() != ast::PunctuatorKind::Colon)
     return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_EXPECT_COLON);
-  return ParseLabeledStatement(&label);
+  return HandleLabeledStatement(&label);
 }
 
 ast::Statement& Parser::ParseDoStatement() {
@@ -277,23 +275,6 @@ ast::Statement& Parser::ParseIfStatement() {
                                            then_clause, else_clause);
 }
 
-// Called after before consuming ':'
-ast::Statement& Parser::ParseLabeledStatement(const ast::Name* label) {
-  auto& colon = ConsumeToken();
-  DCHECK_EQ(colon, ast::PunctuatorKind::Colon);
-  if (!options_.disable_automatic_semicolon) {
-    if (!CanPeekToken() || PeekToken() == ast::PunctuatorKind::RightBrace) {
-      auto& statement =
-          NewEmptyStatement(SourceCodeRange::CollapseToEnd(colon.range()));
-      return node_factory().NewLabeledStatement(GetSourceCodeRange(), *label,
-                                                statement);
-    }
-  }
-  auto& statement = ParseStatement();
-  return node_factory().NewLabeledStatement(GetSourceCodeRange(), *label,
-                                            statement);
-}
-
 ast::Statement& Parser::ParseKeywordStatement() {
   SourceCodeRangeScope scope(this);
   const auto& keyword = PeekToken().As<ast::Name>();
@@ -384,7 +365,7 @@ ast::Statement& Parser::ParseNameAsStatement() {
       AddError(ErrorCode::ERROR_STATEMENT_UNEXPECT_NEWLINE);
   } else {
     if (CanPeekToken() && PeekToken() == ast::PunctuatorKind::Colon)
-      return ParseLabeledStatement(&name);
+      return HandleLabeledStatement(&name);
   }
   PushBackToken(name);
   return ParseExpressionStatement();
@@ -424,6 +405,27 @@ ast::Statement& Parser::ParseReturnStatement() {
   }
   auto& expression = ParseExpression();
   return node_factory().NewReturnStatement(GetSourceCodeRange(), expression);
+}
+
+// The entry point
+ast::Statement& Parser::ParseStatement() {
+  if (!CanPeekToken())
+    return NewEmptyStatement(source_code().end());
+  SourceCodeRangeScope scope(this);
+  const auto& token = PeekToken();
+  if (token.Is<ast::Name>())
+    return ParseNameAsStatement();
+  if (token.Is<ast::Literal>())
+    return ParseExpressionStatement();
+  if (token == ast::PunctuatorKind::LeftBrace)
+    return ParseBlockStatement();
+  if (token == ast::PunctuatorKind::Semicolon) {
+    auto& statement = NewEmptyStatement(
+        SourceCodeRange::CollapseToStart(PeekToken().range()));
+    ConsumeToken();
+    return statement;
+  }
+  return ParseExpressionStatement();
 }
 
 ast::Statement& Parser::ParseSwitchStatement() {

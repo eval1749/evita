@@ -146,6 +146,8 @@ class Parser final {
   ast::Expression& ParseYieldExpression();
 
   // Statements
+  ast::Statement& HandleLabeledStatement(const ast::Name* name);
+
   ast::Statement& NewInvalidStatement(ErrorCode error_code);
   ast::Statement& NewEmptyStatement(const SourceCodeRange& range);
 
@@ -164,7 +166,6 @@ class Parser final {
   ast::Statement& ParseFunctionStatement(ast::FunctionKind kind);
   ast::Statement& ParseIfStatement();
   ast::Statement& ParseKeywordStatement();
-  ast::Statement& ParseLabeledStatement(const ast::Name* name);
   ast::Statement& ParseLetStatement();
   ast::Statement& ParseNameAsStatement();
   ast::Statement& ParseReturnStatement();

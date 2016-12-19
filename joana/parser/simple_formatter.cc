@@ -516,7 +516,7 @@ void SimpleFormatter::VisitBreakStatement(ast::BreakStatement* node) {
     *ostream_ << "break;";
     return;
   }
-  *ostream_ << ' ';
+  *ostream_ << "break ";
   Format(node->label());
   *ostream_ << ';';
 }
@@ -539,7 +539,7 @@ void SimpleFormatter::VisitContinueStatement(ast::ContinueStatement* node) {
     *ostream_ << "continue;";
     return;
   }
-  *ostream_ << ' ';
+  *ostream_ << "continue ";
   Format(node->label());
   *ostream_ << ';';
 }

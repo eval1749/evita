@@ -103,6 +103,12 @@ ast::Statement& Parser::ParseBlockStatement() {
 
 ast::Statement& Parser::ParseBreakStatement() {
   ConsumeToken();
+  if (is_separated_by_newline_) {
+    if (options_.disable_automatic_semicolon)
+      AddError(ErrorCode::ERROR_STATEMENT_UNEXPECT_NEWLINE);
+    return node_factory().NewBreakStatement(GetSourceCodeRange(),
+                                            NewEmptyName());
+  }
   ExpectSemicolonScope semicolon_scope(this);
   auto& label = CanPeekToken() && PeekToken().Is<ast::Name>() ? ConsumeToken()
                                                               : NewEmptyName();

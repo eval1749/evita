@@ -97,6 +97,14 @@ TEST_F(ParserTest, BreakStatement) {
       "do {\n"
       "  break;\n"
       "} while (bar);\n");
+  TEST_PARSER("break foo;\n");
+  EXPECT_EQ(
+      "if (foo)\n"
+      "  break;\n"
+      "if (bar)\n"
+      "  break;\n",
+      Parse("if (foo) break\n"
+            "if (bar) break\n"));
 }
 
 TEST_F(ParserTest, ClassStatement) {

@@ -70,6 +70,7 @@ class LexerTest : public ::testing::Test {
   std::string NewStringLiteral(base::StringPiece data);
   std::string NewStringLiteral(const std::vector<base::char16> data);
   void PrepareSouceCode(base::StringPiece script_text);
+  std::string Parse(const ParserOptions& options);
   std::string Parse();
 
  private:
@@ -163,9 +164,9 @@ void LexerTest::PrepareSouceCode(base::StringPiece script_text) {
   error_sink_.Reset();
 }
 
-std::string LexerTest::Parse() {
+std::string LexerTest::Parse(const ParserOptions& options) {
   DCHECK(source_code_);
-  Lexer lexer(context_.get(), source_code_->range(), options());
+  Lexer lexer(context_.get(), source_code_->range(), options);
   std::ostringstream ostream;
   auto delimiter = "";
   while (lexer.CanPeekToken()) {
@@ -179,6 +180,10 @@ std::string LexerTest::Parse() {
     ostream << ' ' << error->error_code() << '@' << error->range();
   }
   return ostream.str();
+}
+
+std::string LexerTest::Parse() {
+  return Parse({});
 }
 
 TEST_F(LexerTest, BlockComment) {
@@ -475,11 +480,15 @@ TEST_F(LexerTest, StringLiteralError) {
   EXPECT_EQ(NewInvalid(0, 3, 3, ERROR_STRING_LITERAL_NOT_CLOSED), Parse())
       << "No hexadecimal digit after '\\x'";
 
-  PrepareSouceCode("'\\a'");
-  EXPECT_EQ(
-      NewStringLiteral("a") + NewError(ERROR_STRING_LITERAL_BACKSLASH, 1, 3),
-      Parse())
-      << "'\\a' is not backslash escape sequence";
+  {
+    ParserOptions options;
+    options.enable_strict_backslash = true;
+    PrepareSouceCode("'\\a'");
+    EXPECT_EQ(
+        NewStringLiteral("a") + NewError(ERROR_STRING_LITERAL_BACKSLASH, 1, 3),
+        Parse(options))
+        << "'\\a' is not backslash escape sequence";
+  }
 
   PrepareSouceCode("'\\xY'");
   EXPECT_EQ(NewStringLiteral("") +

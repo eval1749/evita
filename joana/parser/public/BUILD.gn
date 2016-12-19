@@ -11,6 +11,7 @@ component("public") {
   sources = [
     "parse.cc",
     "parse.h",
+    "parser_export.h",
   ]
 
   public_deps = [

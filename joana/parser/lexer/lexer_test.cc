@@ -52,7 +52,6 @@ class LexerTest : public ::testing::Test {
   LexerTest();
 
   ast::NodeFactory& factory() { return node_factory_; }
-  const ParserOptions& options() const { return options_; }
 
   SourceCodeRange MakeRange(int start, int end) const;
   SourceCodeRange MakeRange() const;
@@ -78,7 +77,6 @@ class LexerTest : public ::testing::Test {
   Zone zone_;
   ast::NodeFactory node_factory_;
   std::unique_ptr<ast::EditContext> context_;
-  ParserOptions options_;
   const SourceCode* source_code_ = nullptr;
   SourceCode::Factory source_code_factory_;
 
@@ -295,7 +293,7 @@ TEST_F(LexerTest, NumericLiteral) {
   // From protobuf/js/binary/proto_test.js
   PrepareSouceCode("0X7FFFFFFF00000000");
   EXPECT_EQ(NewNumericLiteral(0X7FFFFFFF00000000), Parse())
-    << "More 0's does not cause overflow";
+      << "More 0's does not cause overflow";
 }
 
 TEST_F(LexerTest, NumericLiteralError) {
@@ -485,15 +483,11 @@ TEST_F(LexerTest, StringLiteralError) {
   EXPECT_EQ(NewInvalid(0, 3, 3, ERROR_STRING_LITERAL_NOT_CLOSED), Parse())
       << "No hexadecimal digit after '\\x'";
 
-  {
-    ParserOptions options;
-    options.enable_strict_backslash = true;
-    PrepareSouceCode("'\\a'");
-    EXPECT_EQ(
-        NewStringLiteral("a") + NewError(ERROR_STRING_LITERAL_BACKSLASH, 1, 3),
-        Parse(options))
-        << "'\\a' is not backslash escape sequence";
-  }
+  PrepareSouceCode("'\\a'");
+  EXPECT_EQ(
+      NewStringLiteral("a") + NewError(ERROR_STRING_LITERAL_BACKSLASH, 1, 3),
+      Parse(ParserOptionsBuilder().SetStrictBackslash(true).Build()))
+      << "'\\a' is not backslash escape sequence";
 
   PrepareSouceCode("'\\xY'");
   EXPECT_EQ(NewStringLiteral("") +

@@ -5,6 +5,7 @@
 #ifndef JOANA_PARSER_PUBLIC_PARSE_H_
 #define JOANA_PARSER_PUBLIC_PARSE_H_
 
+#include "base/macros.h"
 #include "joana/parser/public/parser_export.h"
 
 namespace joana {
@@ -19,7 +20,7 @@ class SourceCodeRange;
 //
 // ParserOptions
 //
-JOANA_PARSER_EXPORT struct ParserOptions {
+struct JOANA_PARSER_EXPORT ParserOptions {
   // Disable automatic semicolon insertion.
   bool disable_automatic_semicolon = false;
 
@@ -32,6 +33,29 @@ JOANA_PARSER_EXPORT struct ParserOptions {
   bool enable_strict_regexp = false;
 };
 
+//
+// ParserOptionsBuilder
+//
+class JOANA_PARSER_EXPORT ParserOptionsBuilder final {
+ public:
+  ParserOptionsBuilder();
+  ~ParserOptionsBuilder();
+
+  ParserOptions Build();
+
+  ParserOptionsBuilder& SetAutomaticSemicolon(bool value);
+  ParserOptionsBuilder& SetStrictBackslash(bool value);
+  ParserOptionsBuilder& SetStrictRegExp(bool value);
+
+ private:
+  ParserOptions options_;
+
+  DISALLOW_COPY_AND_ASSIGN(ParserOptionsBuilder);
+};
+
+//
+// The parser entry point.
+//
 JOANA_PARSER_EXPORT const ast::Node& Parse(ast::EditContext* context,
                                            const SourceCodeRange& range,
                                            const ParserOptions& options);

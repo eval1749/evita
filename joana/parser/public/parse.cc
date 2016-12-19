@@ -10,6 +10,34 @@ namespace joana {
 
 using Parser = internal::Parser;
 
+//
+// ParserOptionsBuilder
+//
+ParserOptionsBuilder::ParserOptionsBuilder() = default;
+ParserOptionsBuilder::~ParserOptionsBuilder() = default;
+
+ParserOptions ParserOptionsBuilder::Build() {
+  return options_;
+}
+
+ParserOptionsBuilder& ParserOptionsBuilder::SetAutomaticSemicolon(bool value) {
+  options_.disable_automatic_semicolon = !value;
+  return *this;
+}
+
+ParserOptionsBuilder& ParserOptionsBuilder::SetStrictBackslash(bool value) {
+  options_.enable_strict_backslash = value;
+  return *this;
+}
+
+ParserOptionsBuilder& ParserOptionsBuilder::SetStrictRegExp(bool value) {
+  options_.enable_strict_regexp = value;
+  return *this;
+}
+
+//
+// Parse; the entry point
+//
 const ast::Node& Parse(ast::EditContext* context,
                        const SourceCodeRange& range,
                        const ParserOptions& options) {

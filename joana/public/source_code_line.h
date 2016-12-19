@@ -19,8 +19,11 @@ class JOANA_PUBLIC_EXPORT SourceCodeLine final {
   SourceCodeLine(const SourceCodeLine& other);
   ~SourceCodeLine();
 
+  int end() const { return range_.end(); }
   int number() const { return number_; }
   const SourceCodeRange& range() const { return range_; }
+  int size() const { return range_.size(); }
+  int start() const { return range_.start(); }
 
   bool operator==(const SourceCodeLine& other) const;
   bool operator!=(const SourceCodeLine& other) const;

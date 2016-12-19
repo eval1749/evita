@@ -70,11 +70,8 @@ ast::Statement& Parser::ParseStatement() {
       PushBackToken(*name);
       return ParseExpressionStatement();
     }
-    if (ConsumeTokenIf(ast::PunctuatorKind::Colon)) {
-      auto& statement = ParseStatement();
-      return node_factory().NewLabeledStatement(GetSourceCodeRange(), *name,
-                                                statement);
-    }
+    if (CanPeekToken() && PeekToken() == ast::PunctuatorKind::Colon)
+      return ParseLabeledStatement(name);
     auto& token2 = ConsumeToken();
     PushBackToken(token2);
     PushBackToken(*name);
@@ -160,11 +157,9 @@ ast::Statement& Parser::ParseDefaultLabel() {
   SourceCodeRangeScope scope(this);
   DCHECK_EQ(PeekToken(), ast::NameId::Default);
   auto& label = ConsumeToken().As<ast::Name>();
-  ExpectPunctuator(ast::PunctuatorKind::Colon,
-                   ErrorCode::ERROR_STATEMENT_EXPECT_COLON);
-  auto& statement = ParseStatement();
-  return node_factory().NewLabeledStatement(GetSourceCodeRange(), label,
-                                            statement);
+  if (!CanPeekToken() || PeekToken() != ast::PunctuatorKind::Colon)
+    return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_EXPECT_COLON);
+  return ParseLabeledStatement(&label);
 }
 
 ast::Statement& Parser::ParseDoStatement() {
@@ -265,6 +260,23 @@ ast::Statement& Parser::ParseIfStatement() {
   auto& else_clause = ParseStatement();
   return node_factory().NewIfElseStatement(GetSourceCodeRange(), condition,
                                            then_clause, else_clause);
+}
+
+// Called after before consuming ':'
+ast::Statement& Parser::ParseLabeledStatement(const ast::Name* label) {
+  auto& colon = ConsumeToken();
+  DCHECK_EQ(colon, ast::PunctuatorKind::Colon);
+  if (!options_.disable_automatic_semicolon) {
+    if (!CanPeekToken() || PeekToken() == ast::PunctuatorKind::RightBrace) {
+      auto& statement = node_factory().NewEmptyStatement(
+          SourceCodeRange::CollapseToEnd(colon.range()));
+      return node_factory().NewLabeledStatement(GetSourceCodeRange(), *label,
+                                                statement);
+    }
+  }
+  auto& statement = ParseStatement();
+  return node_factory().NewLabeledStatement(GetSourceCodeRange(), *label,
+                                            statement);
 }
 
 ast::Statement& Parser::ParseKeywordStatement() {

@@ -157,6 +157,7 @@ class Parser final {
   ast::Statement& ParseFunctionStatement(ast::FunctionKind kind);
   ast::Statement& ParseIfStatement();
   ast::Statement& ParseKeywordStatement();
+  ast::Statement& ParseLabeledStatement(const ast::Name* name);
   ast::Statement& ParseLetStatement();
   ast::Statement& ParseReturnStatement();
   ast::Statement& ParseSwitchStatement();

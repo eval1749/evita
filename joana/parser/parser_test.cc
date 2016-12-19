@@ -371,6 +371,16 @@ TEST_F(ParserTest, LabeledStatement) {
       " label:\n"
       "  foo;\n"
       "}\n");
+
+  EXPECT_EQ(
+      "switch (foo) {\n"
+      "  default:\n"
+      "    ;\n"
+      "}\n",
+      Parse("switch (foo) {\n"
+            "  default:\n"
+            "}\n"))
+      << "Insert semicolon for 'default' label";
 }
 
 TEST_F(ParserTest, LetStatement) {

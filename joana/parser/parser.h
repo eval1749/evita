@@ -12,6 +12,7 @@
 #include "base/macros.h"
 #include "joana/parser/public/parse.h"
 #include "joana/public/ast/node_forward.h"
+#include "joana/public/source_code_range.h"
 
 namespace joana {
 
@@ -183,6 +184,10 @@ class Parser final {
   // True if current token and previous token is separated by at least one
   // line terminator.
   bool is_separated_by_newline_ = false;
+
+  // Tracking last error to avoid adding duplicated error.
+  ErrorCode last_error_code_;
+  SourceCodeRange last_error_range_;
 
   ast::ContainerNode& root_;
   const ParserOptions& options_;

@@ -102,6 +102,8 @@ Parser::Parser(ast::EditContext* context,
                const ParserOptions& options)
     : bracket_stack_(new BracketStack(&context->error_sink())),
       context_(*context),
+      last_error_code_(ErrorCode::None),
+      last_error_range_(range),
       lexer_(new Lexer(context, range, options)),
       options_(options),
       root_(context->node_factory().NewModule(range)) {}
@@ -123,6 +125,12 @@ void Parser::AddError(const ast::Node& token, ErrorCode error_code) {
 void Parser::AddError(const SourceCodeRange& range, ErrorCode error_code) {
   if (range.IsCollapsed())
     DCHECK_EQ(range, source_code().end());
+  if (last_error_code_ == error_code && last_error_range_ == range) {
+    // "foo\n++bar" reaches here with two UNEXPECT_NEWLINE after "foo".
+    return;
+  }
+  last_error_code_ = error_code;
+  last_error_range_ = range;
   context_.error_sink().AddError(range, static_cast<int>(error_code));
 }
 

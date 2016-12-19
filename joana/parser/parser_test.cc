@@ -450,6 +450,13 @@ TEST_F(ParserTest, SwitchStatement) {
       "  default:\n"
       "    others;\n"
       "}\n");
+  EXPECT_EQ(
+      "switch (foo) {\n"
+      "  case 1:\n"
+      "    ;\n"
+      "}\n",
+      Parse("switch (foo) { case 1: }"))
+      << "Insert empty statement";
 }
 
 TEST_F(ParserTest, ThrowStatement) {

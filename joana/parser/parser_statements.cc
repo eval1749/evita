@@ -16,6 +16,7 @@
 #include "joana/public/ast/node_factory.h"
 #include "joana/public/ast/statements.h"
 #include "joana/public/ast/tokens.h"
+#include "joana/public/source_code.h"
 
 namespace joana {
 namespace internal {
@@ -59,7 +60,7 @@ ast::Statement& Parser::NewInvalidStatement(ErrorCode error_code) {
 
 ast::Statement& Parser::ParseStatement() {
   if (!CanPeekToken())
-    return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_EXPECT_STATEMENT);
+    return node_factory().NewEmptyStatement(source_code().end());
   SourceCodeRangeScope scope(this);
   const auto& token = PeekToken();
   if (token.Is<ast::Name>())
@@ -120,8 +121,19 @@ ast::Statement& Parser::ParseCaseClause() {
   DCHECK_EQ(PeekToken(), ast::NameId::Case);
   ConsumeToken();
   auto& expression = ParseExpression();
-  ExpectPunctuator(ast::PunctuatorKind::Colon,
-                   ErrorCode::ERROR_STATEMENT_EXPECT_COLON);
+  if (!CanPeekToken() || PeekToken() != ast::PunctuatorKind::Colon) {
+    AddError(ErrorCode::ERROR_STATEMENT_EXPECT_COLON);
+  } else {
+    auto& colon = ConsumeToken();
+    if (CanPeekToken() && PeekToken() == ast::PunctuatorKind::RightBrace) {
+      if (options_.disable_automatic_semicolon)
+        AddError(ErrorCode::ERROR_STATEMENT_EXPECT_SEMICOLON);
+      return node_factory().NewCaseClause(
+          GetSourceCodeRange(), expression,
+          node_factory().NewEmptyStatement(
+              SourceCodeRange::CollapseToEnd(colon.range())));
+    }
+  }
   auto& statement = ParseStatement();
   return node_factory().NewCaseClause(GetSourceCodeRange(), expression,
                                       statement);

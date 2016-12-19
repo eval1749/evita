@@ -18,6 +18,9 @@ constexpr auto kLeftBracket = '[';
 constexpr auto kRightBracket = ']';
 constexpr auto kLeftParenthesis = '(';
 constexpr auto kRightParenthesis = ')';
+constexpr auto kLineSeparator = 0x2028;
+constexpr auto kParagraphSeparator = 0x2029;
+constexpr auto kMaxUnicodeCodePoint = 0x10FFFF;
 
 // Returns a digit from digit character |char_code| in |base|. It is error
 // if |char_code| is not valid digit character.

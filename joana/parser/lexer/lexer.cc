@@ -12,6 +12,7 @@
 
 #include "joana/parser/lexer/character_reader.h"
 #include "joana/parser/lexer/lexer_error_codes.h"
+#include "joana/parser/lexer/lexer_utils.h"
 #include "joana/parser/public/parse.h"
 #include "joana/public/ast/edit_context.h"
 #include "joana/public/ast/error_codes.h"
@@ -28,47 +29,6 @@ namespace internal {
 namespace {
 
 const auto kMaxIntegerPart = static_cast<uint64_t>(1) << 53;
-const int kMaxUnicodeCodePoint = 0x10FFFF;
-const base::char16 kLineSeparator = 0x2028;
-const base::char16 kParagraphSeparator = 0x2029;
-
-int FromDigitWithBase(base::char16 char_code, int base) {
-  DCHECK(base == 2 || base == 8 || base == 10 || base == 16) << base;
-  if (base == 16) {
-    if (char_code >= '0' && char_code <= '9')
-      return char_code - '0';
-    if (char_code >= 'A' && char_code <= 'F')
-      return char_code - 'A' + 10;
-    if (char_code >= 'a' && char_code <= 'f')
-      return char_code - 'a' + 10;
-    NOTREACHED() << char_code;
-    return 0;
-  }
-  if (char_code >= '0' && char_code <= '0' + base - 1)
-    return char_code - '0';
-  NOTREACHED() << char_code;
-  return 0;
-}
-
-int FromHexDigit(base::char16 char_code) {
-  return FromDigitWithBase(char_code, 16);
-}
-
-bool IsDigitWithBase(base::char16 char_code, int base) {
-  DCHECK(base == 2 || base == 8 || base == 10 || base == 16) << base;
-  if (base == 16) {
-    if (char_code >= '0' && char_code <= '9')
-      return true;
-    if (char_code >= 'A' && char_code <= 'F')
-      return true;
-    return char_code >= 'a' && char_code <= 'f';
-  }
-  return char_code >= '0' && char_code <= '0' + base - 1;
-}
-
-bool IsHexDigit(base::char16 char_code) {
-  return IsDigitWithBase(char_code, 16);
-}
 
 bool IsIdentifierPart(base::char16 char_code) {
   if (char_code >= '0' && char_code <= '9')
@@ -231,7 +191,7 @@ ast::Token& Lexer::HandleCharacter() {
           return NewPunctuator(ast::PunctuatorKind::DotDotDot);
         return NewError(ErrorCode::PUNCTUATOR_DOT_DOT);
       }
-      if (CanPeekChar() && IsDigitWithBase(PeekChar(), 10)) {
+      if (CanPeekChar() && IsDigitChar(PeekChar(), 10)) {
         reader_->MoveBackward();
         return HandleDecimalAfterDot(0, 0);
       }
@@ -344,12 +304,12 @@ ast::Token& Lexer::HandleCharacter() {
 }
 
 ast::Token& Lexer::HandleDecimal() {
-  uint64_t integer_part = FromDigitWithBase(ConsumeChar(), 10);
+  uint64_t integer_part = FromDigitChar(ConsumeChar(), 10);
   auto integer_scale = 0;
   while (reader_->CanPeekChar()) {
-    if (!IsDigitWithBase(PeekChar(), 10))
+    if (!IsDigitChar(PeekChar(), 10))
       break;
-    const auto digit = FromDigitWithBase(ConsumeChar(), 10);
+    const auto digit = FromDigitChar(ConsumeChar(), 10);
     if (integer_part > std::numeric_limits<uint64_t>::max() / 10 - digit) {
       ++integer_scale;
       continue;
@@ -366,9 +326,9 @@ ast::Token& Lexer::HandleDecimalAfterDot(uint64_t integer_part,
   auto digits_scale = integer_scale;
   if (ConsumeCharIf('.')) {
     while (reader_->CanPeekChar()) {
-      if (!IsDigitWithBase(PeekChar(), 10))
+      if (!IsDigitChar(PeekChar(), 10))
         break;
-      const auto digit = FromDigitWithBase(ConsumeChar(), 10);
+      const auto digit = FromDigitChar(ConsumeChar(), 10);
       if (digits_part > kMaxIntegerPart) {
         // Since we've already had number of digits more than precision, just
         // ignore digit digits_part decimal point.
@@ -387,9 +347,9 @@ ast::Token& Lexer::HandleDecimalAfterDot(uint64_t integer_part,
     else if (ConsumeCharIf('-'))
       exponent_sign = -1;
     while (reader_->CanPeekChar()) {
-      if (!IsDigitWithBase(PeekChar(), 10))
+      if (!IsDigitChar(PeekChar(), 10))
         break;
-      const auto digit = FromDigitWithBase(ConsumeChar(), 10);
+      const auto digit = FromDigitChar(ConsumeChar(), 10);
       if (exponent_part > kMaxIntegerPart)
         continue;
       exponent_part *= 10;
@@ -453,8 +413,8 @@ ast::Token& Lexer::HandleInteger(int base) {
   const auto kMaxInteger = static_cast<uint64_t>(1) << 53;
   auto number_of_digits = 0;
   auto is_overflow = false;
-  while (reader_->CanPeekChar() && IsDigitWithBase(PeekChar(), base)) {
-    const auto digit = FromDigitWithBase(ConsumeChar(), base);
+  while (reader_->CanPeekChar() && IsDigitChar(PeekChar(), base)) {
+    const auto digit = FromDigitChar(ConsumeChar(), base);
     if (accumulator > kMaxInteger / base) {
       if (!is_overflow)
         AddError(ErrorCode::NUMERIC_LITERAL_INTEGER_OVERFLOW);
@@ -558,7 +518,7 @@ ast::Token& Lexer::HandleStringLiteral() {
             if (!CanPeekChar())
               return NewError(ErrorCode::STRING_LITERAL_NOT_CLOSED);
             if (options_.enable_strict_backslash &&
-                IsDigitWithBase(PeekChar(), 10)) {
+                IsDigitChar(PeekChar(), 10)) {
               AddError(RangeFrom(backslash_start),
                        ErrorCode::STRING_LITERAL_BACKSLASH);
               state = State::Normal;
@@ -621,9 +581,9 @@ ast::Token& Lexer::HandleStringLiteral() {
           break;
         continue;
       case State::BackslashU:
-        if (IsHexDigit(PeekChar())) {
+        if (IsDigitChar(PeekChar(), 16)) {
           state = State::BackslashU1;
-          accumulator = FromHexDigit(PeekChar());
+          accumulator = FromDigitChar(PeekChar(), 16);
           break;
         }
         if (PeekChar() == '{') {
@@ -635,30 +595,30 @@ ast::Token& Lexer::HandleStringLiteral() {
         state = State::Normal;
         break;
       case State::BackslashU1:
-        if (!IsHexDigit(PeekChar()))
+        if (!IsDigitChar(PeekChar(), 16))
           goto invalid_hex_digit;
         accumulator *= 16;
-        accumulator |= FromHexDigit(PeekChar());
+        accumulator |= FromDigitChar(PeekChar(), 16);
         state = State::BackslashU2;
         break;
       case State::BackslashU2:
-        if (!IsHexDigit(PeekChar()))
+        if (!IsDigitChar(PeekChar(), 16))
           goto invalid_hex_digit;
         accumulator *= 16;
-        accumulator |= FromHexDigit(PeekChar());
+        accumulator |= FromDigitChar(PeekChar(), 16);
         state = State::BackslashU3;
         break;
       case State::BackslashU3:
-        if (!IsHexDigit(PeekChar()))
+        if (!IsDigitChar(PeekChar(), 16))
           goto invalid_hex_digit;
         accumulator *= 16;
-        accumulator |= FromHexDigit(PeekChar());
+        accumulator |= FromDigitChar(PeekChar(), 16);
         characters.push_back(static_cast<base::char16>(accumulator));
         state = State::Normal;
         break;
       case State::BackslashUB:
-        if (IsHexDigit(PeekChar())) {
-          accumulator = FromHexDigit(PeekChar());
+        if (IsDigitChar(PeekChar(), 16)) {
+          accumulator = FromDigitChar(PeekChar(), 16);
           state = State::BackslashUBx;
           break;
         }
@@ -677,9 +637,9 @@ ast::Token& Lexer::HandleStringLiteral() {
           state = State::Normal;
           break;
         }
-        if (IsHexDigit(PeekChar())) {
+        if (IsDigitChar(PeekChar(), 16)) {
           accumulator *= 16;
-          accumulator |= FromHexDigit(PeekChar());
+          accumulator |= FromDigitChar(PeekChar(), 16);
           break;
         }
         AddError(RangeFrom(backslash_start),
@@ -687,16 +647,16 @@ ast::Token& Lexer::HandleStringLiteral() {
         state = State::Normal;
         break;
       case State::BackslashX:
-        if (!IsHexDigit(PeekChar()))
+        if (!IsDigitChar(PeekChar(), 16))
           goto invalid_hex_digit;
-        accumulator = FromHexDigit(PeekChar());
+        accumulator = FromDigitChar(PeekChar(), 16);
         state = State::BackslashX1;
         break;
       case State::BackslashX1:
-        if (!IsHexDigit(PeekChar()))
+        if (!IsDigitChar(PeekChar(), 16))
           goto invalid_hex_digit;
         accumulator *= 16;
-        accumulator |= FromHexDigit(PeekChar());
+        accumulator |= FromDigitChar(PeekChar(), 16);
         characters.push_back(static_cast<base::char16>(accumulator));
         state = State::Normal;
         break;

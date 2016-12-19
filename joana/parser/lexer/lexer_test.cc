@@ -291,6 +291,11 @@ TEST_F(LexerTest, NumericLiteral) {
 
   PrepareSouceCode(".123");
   EXPECT_EQ(NewNumericLiteral(.123), Parse());
+
+  // From protobuf/js/binary/proto_test.js
+  PrepareSouceCode("0X7FFFFFFF00000000");
+  EXPECT_EQ(NewNumericLiteral(0X7FFFFFFF00000000), Parse())
+    << "More 0's does not cause overflow";
 }
 
 TEST_F(LexerTest, NumericLiteralError) {

@@ -388,7 +388,7 @@ ast::Token& Lexer::HandleInteger(int base) {
   auto is_overflow = false;
   while (reader_->CanPeekChar() && IsDigitChar(PeekChar(), base)) {
     const auto digit = FromDigitChar(ConsumeChar(), base);
-    if (accumulator > kMaxInteger / base) {
+    if (digit != 0 && accumulator > kMaxInteger / base) {
       if (!is_overflow)
         AddError(ErrorCode::NUMERIC_LITERAL_INTEGER_OVERFLOW);
       is_overflow = true;
@@ -406,8 +406,6 @@ ast::Token& Lexer::HandleInteger(int base) {
       ConsumeChar();
     return NewInvalid(ErrorCode::NUMERIC_LITERAL_INTEGER_BAD_DIGIT);
   }
-  if (is_overflow)
-    return NewInvalid(ErrorCode::NUMERIC_LITERAL_INTEGER_OVERFLOW);
   if (number_of_digits == 0)
     return NewError(ErrorCode::NUMERIC_LITERAL_INTEGER_NO_DIGITS);
   return node_factory().NewNumericLiteral(MakeTokenRange(), accumulator);

@@ -227,13 +227,13 @@ LiteralExpression& NodeFactory::NewLiteralExpression(const Literal& literal) {
   return *new (zone_) LiteralExpression(const_cast<Literal*>(&literal));
 }
 
-MemberExpression& NodeFactory::NewMemberExpression(
+ComputedMemberExpression& NodeFactory::NewComputedMemberExpression(
     const SourceCodeRange& range,
     const Expression& expression,
     const Expression& name_expression) {
   return *new (zone_)
-      MemberExpression(range, const_cast<Expression*>(&expression),
-                       const_cast<Expression*>(&name_expression));
+      ComputedMemberExpression(range, const_cast<Expression*>(&expression),
+                               const_cast<Expression*>(&name_expression));
 }
 
 NewExpression& NodeFactory::NewNewExpression(

@@ -337,7 +337,8 @@ void SimpleFormatter::VisitLiteralExpression(ast::LiteralExpression* node) {
   OutputUsingSoourceCode(node->literal());
 }
 
-void SimpleFormatter::VisitMemberExpression(ast::MemberExpression* node) {
+void SimpleFormatter::VisitComputedMemberExpression(
+    ast::ComputedMemberExpression* node) {
   Format(node->expression());
   *ostream_ << '[';
   Format(node->name_expression());

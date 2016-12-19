@@ -97,9 +97,10 @@ class JOANA_PUBLIC_EXPORT NodeFactory final {
                                       const Expression& expression);
   InvalidExpression& NewInvalidExpression(const Node& node, int error_code);
   LiteralExpression& NewLiteralExpression(const Literal& literal);
-  MemberExpression& NewMemberExpression(const SourceCodeRange& range,
-                                        const Expression& expression,
-                                        const Expression& name_expression);
+  ComputedMemberExpression& NewComputedMemberExpression(
+      const SourceCodeRange& range,
+      const Expression& expression,
+      const Expression& name_expression);
   NewExpression& NewNewExpression(const SourceCodeRange& range,
                                   const Expression& expression,
                                   const std::vector<Expression*>& arguments);

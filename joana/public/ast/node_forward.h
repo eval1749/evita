@@ -37,7 +37,7 @@ namespace ast {
   V(EmptyExpression)               \
   V(InvalidExpression)             \
   V(LiteralExpression)             \
-  V(MemberExpression)              \
+  V(ComputedMemberExpression)      \
   V(NewExpression)                 \
   V(ObjectLiteralExpression)       \
   V(RegExpLiteralExpression)       \

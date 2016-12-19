@@ -142,14 +142,14 @@ LiteralExpression::LiteralExpression(Literal* literal)
 LiteralExpression::~LiteralExpression() = default;
 
 //
-// MemberExpression
+// ComputedMemberExpression
 //
-MemberExpression::MemberExpression(const SourceCodeRange& range,
-                                   Expression* expression,
-                                   Expression* name_expression)
+ComputedMemberExpression::ComputedMemberExpression(const SourceCodeRange& range,
+                                                   Expression* expression,
+                                                   Expression* name_expression)
     : NodeTemplate(std::make_tuple(expression, name_expression), range) {}
 
-MemberExpression::~MemberExpression() = default;
+ComputedMemberExpression::~ComputedMemberExpression() = default;
 
 //
 // NewExpression

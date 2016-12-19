@@ -276,7 +276,7 @@ ast::Expression& Parser::ParseLeftHandSideExpression() {
       auto& name_expression = ParseExpression();
       ExpectPunctuator(ast::PunctuatorKind::RightBracket,
                        ErrorCode::ERROR_EXPRESSION_LHS_EXPECT_RBRACKET);
-      expression = &node_factory().NewMemberExpression(
+      expression = &node_factory().NewComputedMemberExpression(
           GetSourceCodeRange(), *expression, name_expression);
       continue;
     }

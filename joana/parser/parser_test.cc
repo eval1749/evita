@@ -256,6 +256,13 @@ TEST_F(ParserTest, ExpressionConditional) {
   TEST_PARSER("foo ? bar : baz;\n");
 }
 
+TEST_F(ParserTest, ExpressionNew) {
+  EXPECT_EQ("var foo = new Foo();\n", Parse("var foo = new Foo\n"));
+  TEST_PARSER("var foo = new Foo(1);\n");
+  TEST_PARSER("var foo = new testing.Test(1);\n");
+  TEST_PARSER("if (new.target)\n  ok;\n");
+}
+
 TEST_F(ParserTest, ExpressionObjectLiteral) {
   TEST_PARSER(
       "x = {\n"

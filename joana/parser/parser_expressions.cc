@@ -111,6 +111,40 @@ Parser::OperatorPrecedence Parser::CategoryOf(const ast::Token& token) const {
   return *it;
 }
 
+ast::Expression& Parser::HandleComputedMember(ast::Expression* expression) {
+  auto& name_expression = ParseExpression();
+  ExpectPunctuator(ast::PunctuatorKind::RightBracket,
+                   ErrorCode::ERROR_EXPRESSION_EXPECT_RBRACKET);
+  return node_factory().NewComputedMemberExpression(
+      GetSourceCodeRange(), *expression, name_expression);
+}
+
+ast::Expression& Parser::HandleMember(ast::Expression* expression) {
+  if (!CanPeekToken() || !PeekToken().Is<ast::Name>()) {
+    AddError(ErrorCode::ERROR_EXPRESSION_EXPECT_NAME);
+    return *expression;
+  }
+  auto& name = ConsumeToken().As<ast::Name>();
+  return node_factory().NewMemberExpression(GetSourceCodeRange(), *expression,
+                                            name);
+}
+
+ast::Expression& Parser::HandleNewExpression(ast::Expression* expression) {
+  while (CanPeekToken()) {
+    if (ConsumeTokenIf(ast::PunctuatorKind::LeftBracket)) {
+      expression = &HandleComputedMember(expression);
+      continue;
+    }
+    if (ConsumeTokenIf(ast::PunctuatorKind::Dot)) {
+      expression = &HandleMember(expression);
+      continue;
+    }
+    // TODO(eval1749): NYI MembeExpression TemplateLiteral
+    return *expression;
+  }
+  return *expression;
+}
+
 Parser::OperatorPrecedence Parser::HigherPrecedenceOf(
     OperatorPrecedence category) const {
   DCHECK_NE(category, OperatorPrecedence::None);
@@ -268,30 +302,19 @@ ast::Expression& Parser::ParseFunctionExpression(ast::FunctionKind kind) {
 }
 
 // The entry point of parsing a class heritage.
+//  LeftHandSideExpression ::= NewExpression | CallExpression
 ast::Expression& Parser::ParseLeftHandSideExpression() {
   SourceCodeRangeScope scope(this);
   if (!CanPeekToken())
     return NewInvalidExpression(ErrorCode::ERROR_EXPRESSION_INVALID);
-  if (PeekToken() == ast::NameId::New)
-    return ParseNewExpression();
-  auto* expression = &ParsePrimaryExpression();
+  auto* expression = &ParseNewExpression();
   while (CanPeekToken()) {
     if (ConsumeTokenIf(ast::PunctuatorKind::LeftBracket)) {
-      auto& name_expression = ParseExpression();
-      ExpectPunctuator(ast::PunctuatorKind::RightBracket,
-                       ErrorCode::ERROR_EXPRESSION_LHS_EXPECT_RBRACKET);
-      expression = &node_factory().NewComputedMemberExpression(
-          GetSourceCodeRange(), *expression, name_expression);
+      expression = &HandleMember(expression);
       continue;
     }
     if (ConsumeTokenIf(ast::PunctuatorKind::Dot)) {
-      if (!CanPeekToken() || !PeekToken().Is<ast::Name>()) {
-        AddError(ErrorCode::ERROR_EXPRESSION_LHS_EXPECT_NAME);
-        return *expression;
-      }
-      auto& name = ConsumeToken().As<ast::Name>();
-      expression = &node_factory().NewMemberExpression(GetSourceCodeRange(),
-                                                       *expression, name);
+      expression = &HandleMember(expression);
       continue;
     }
     if (ConsumeTokenIf(ast::PunctuatorKind::LeftParenthesis)) {
@@ -300,7 +323,6 @@ ast::Expression& Parser::ParseLeftHandSideExpression() {
                                                      *expression, arguments);
       continue;
     }
-    // TODO(eval1749): NYI MembeExpression TemplateLiteral
     return *expression;
   }
   return *expression;
@@ -347,31 +369,28 @@ ast::Expression& Parser::ParseNameAsExpression() {
   return node_factory().NewReferenceExpression(name);
 }
 
+// NewExpression ::= MemberExpression | 'new' NewExpression
 ast::Expression& Parser::ParseNewExpression() {
   SourceCodeRangeScope scope(this);
-  auto& token_new = ConsumeToken().As<ast::Name>();
-  if (CanPeekToken() && PeekToken() == ast::PunctuatorKind::Dot) {
+  if (PeekToken() == ast::NameId::New) {
+    auto& name_new = ConsumeToken().As<ast::Name>();
     if (!CanPeekToken()) {
       return NewInvalidExpression(
-          ErrorCode::ERROR_EXPRESSION_NEW_EXPECT_TARGET);
+          ErrorCode::ERROR_EXPRESSION_EXPECT_EXPRESSION);
     }
-    if (PeekToken() != ast::NameId::Target) {
-      return NewInvalidExpression(
-          ConsumeToken(), ErrorCode::ERROR_EXPRESSION_NEW_EXPECT_TARGET);
+    if (PeekToken() == ast::PunctuatorKind::Dot)
+      return HandleNewExpression(
+          &node_factory().NewReferenceExpression(name_new));
+    auto& member_expression = ParseNewExpression();
+    if (ConsumeTokenIf(ast::PunctuatorKind::LeftParenthesis)) {
+      const auto& arguments = ParseArgumentList();
+      return node_factory().NewNewExpression(GetSourceCodeRange(),
+                                             member_expression, arguments);
     }
-    auto& token_target = ConsumeToken().As<ast::Name>();
-    return node_factory().NewMemberExpression(
-        GetSourceCodeRange(), node_factory().NewReferenceExpression(token_new),
-        token_target);
+    return HandleNewExpression(&node_factory().NewNewExpression(
+        GetSourceCodeRange(), member_expression, {}));
   }
-  auto& expression = ParseLeftHandSideExpression();
-  if (!ConsumeTokenIf(ast::PunctuatorKind::LeftParenthesis)) {
-    return node_factory().NewNewExpression(GetSourceCodeRange(), expression,
-                                           {});
-  }
-  const auto& arguments = ParseArgumentList();
-  return node_factory().NewNewExpression(GetSourceCodeRange(), expression,
-                                         arguments);
+  return HandleNewExpression(&ParsePrimaryExpression());
 }
 
 ast::Expression& Parser::ParseObjectLiteralExpression() {

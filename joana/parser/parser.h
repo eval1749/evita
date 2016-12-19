@@ -96,6 +96,11 @@ class Parser final {
 
   // Expressions
   OperatorPrecedence CategoryOf(const ast::Token& token) const;
+
+  ast::Expression& HandleComputedMember(ast::Expression* expression);
+  ast::Expression& HandleMember(ast::Expression* expression);
+  ast::Expression& HandleNewExpression(ast::Expression* expression);
+
   OperatorPrecedence HigherPrecedenceOf(OperatorPrecedence category) const;
   ast::Expression& NewDeclarationExpression(
       const ast::Declaration& declaration);

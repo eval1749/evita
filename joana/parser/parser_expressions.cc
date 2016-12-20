@@ -415,6 +415,11 @@ ast::Expression& Parser::ParseObjectLiteralExpression() {
       continue;
     }
     comma = false;
+    if (ConsumeTokenIf(ast::PunctuatorKind::Semicolon)) {
+      // TODO(eval1749): We should keep semicolon token.
+      // Note: Semicolon is valid only for ClassElement.
+      continue;
+    }
     if (ConsumeTokenIf(ast::PunctuatorKind::Times)) {
       members.push_back(&ParseMethodExpression(ast::MethodKind::NonStatic,
                                                ast::FunctionKind::Generator));

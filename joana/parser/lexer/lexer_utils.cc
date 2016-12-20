@@ -63,9 +63,11 @@ bool IsLineTerminator(base::char16 char_code) {
          char_code == kLineSeparator || char_code == kParagraphSeparator;
 }
 
+// TODO(eval1749): We should support Unicode category Zs.
 bool IsWhitespace(base::char16 char_code) {
   return IsLineTerminator(char_code) || char_code == ' ' || char_code == '\t' ||
-         char_code == '\v' || char_code == '\f' || char_code == '\r';
+         char_code == '\v' || char_code == '\f' || char_code == '\r' ||
+         char_code == kNonBreakSpace || char_code == kZeroWidthNoBreakSpace;
 }
 
 }  // namespace internal

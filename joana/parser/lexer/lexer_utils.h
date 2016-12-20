@@ -18,8 +18,10 @@ constexpr auto kLeftBracket = '[';
 constexpr auto kRightBracket = ']';
 constexpr auto kLeftParenthesis = '(';
 constexpr auto kRightParenthesis = ')';
+constexpr auto kNonBreakSpace = 0x00A0;
 constexpr auto kLineSeparator = 0x2028;
 constexpr auto kParagraphSeparator = 0x2029;
+constexpr auto kZeroWidthNoBreakSpace = 0xFEFF;  // aka BOM, byte order mark
 constexpr auto kMaxUnicodeCodePoint = 0x10FFFF;
 
 // Returns a digit from digit character |char_code| in |base|. It is error

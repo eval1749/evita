@@ -4,8 +4,8 @@
 
 #include "joana/parser/lexer/character_reader.h"
 
-#include "joana/public/source_code.h"
-#include "joana/public/source_code_range.h"
+#include "joana/base/source_code.h"
+#include "joana/base/source_code_range.h"
 
 namespace joana {
 namespace internal {

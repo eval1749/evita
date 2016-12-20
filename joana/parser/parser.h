@@ -11,8 +11,8 @@
 
 #include "base/macros.h"
 #include "joana/ast/node_forward.h"
+#include "joana/base/source_code_range.h"
 #include "joana/parser/public/parse.h"
-#include "joana/public/source_code_range.h"
 
 namespace joana {
 

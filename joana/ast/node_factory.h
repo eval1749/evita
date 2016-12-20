@@ -9,9 +9,9 @@
 #include <vector>
 
 #include "base/strings/string_piece.h"
-#include "joana/ast/node_forward.h"
-#include "joana/public/memory/zone.h"
 #include "joana/ast/ast_export.h"
+#include "joana/ast/node_forward.h"
+#include "joana/base/memory/zone.h"
 
 namespace joana {
 

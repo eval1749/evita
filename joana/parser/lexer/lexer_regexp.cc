@@ -10,12 +10,12 @@
 #include "joana/ast/node_factory.h"
 #include "joana/ast/regexp.h"
 #include "joana/ast/tokens.h"
+#include "joana/base/error_sink.h"
+#include "joana/base/source_code.h"
 #include "joana/parser/lexer/character_reader.h"
 #include "joana/parser/lexer/lexer_error_codes.h"
 #include "joana/parser/lexer/lexer_utils.h"
 #include "joana/parser/public/parse.h"
-#include "joana/public/error_sink.h"
-#include "joana/public/source_code.h"
 
 namespace joana {
 namespace internal {

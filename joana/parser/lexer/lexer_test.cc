@@ -18,13 +18,13 @@
 #include "joana/ast/node.h"
 #include "joana/ast/node_factory.h"
 #include "joana/ast/tokens.h"
+#include "joana/base/error_sink.h"
+#include "joana/base/memory/zone.h"
+#include "joana/base/source_code.h"
+#include "joana/base/source_code_factory.h"
+#include "joana/base/source_code_range.h"
 #include "joana/parser/public/parse.h"
 #include "joana/parser/simple_error_sink.h"
-#include "joana/public/error_sink.h"
-#include "joana/public/memory/zone.h"
-#include "joana/public/source_code.h"
-#include "joana/public/source_code_factory.h"
-#include "joana/public/source_code_range.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
 namespace joana {

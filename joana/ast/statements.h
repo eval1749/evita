@@ -9,7 +9,7 @@
 
 #include "joana/ast/container_node.h"
 #include "joana/ast/node_forward.h"
-#include "joana/public/memory/zone_vector.h"
+#include "joana/base/memory/zone_vector.h"
 
 namespace joana {
 namespace ast {
@@ -77,8 +77,7 @@ class JOANA_AST_EXPORT BlockStatement
 //
 // BreakStatement
 //
-class JOANA_AST_EXPORT BreakStatement
-    : public NodeTemplate<Statement, Token*> {
+class JOANA_AST_EXPORT BreakStatement : public NodeTemplate<Statement, Token*> {
   DECLARE_CONCRETE_AST_NODE(BreakStatement, Statement);
 
  public:
@@ -230,11 +229,11 @@ class JOANA_AST_EXPORT ExpressionStatement
 // ForStatement
 //
 class JOANA_AST_EXPORT ForStatement : public NodeTemplate<Statement,
-                                                             Token*,
-                                                             Expression*,
-                                                             Expression*,
-                                                             Expression*,
-                                                             Statement*> {
+                                                          Token*,
+                                                          Expression*,
+                                                          Expression*,
+                                                          Expression*,
+                                                          Statement*> {
   DECLARE_CONCRETE_AST_NODE(ForStatement, Statement);
 
  public:
@@ -291,10 +290,10 @@ class JOANA_AST_EXPORT ForInStatement
 // ForOfStatement
 //
 class JOANA_AST_EXPORT ForOfStatement : public NodeTemplate<Statement,
-                                                               Token*,
-                                                               Expression*,
-                                                               Expression*,
-                                                               Statement*> {
+                                                            Token*,
+                                                            Expression*,
+                                                            Expression*,
+                                                            Statement*> {
   DECLARE_CONCRETE_AST_NODE(ForOfStatement, Statement);
 
  public:
@@ -363,8 +362,7 @@ class JOANA_AST_EXPORT IfStatement
 //
 // InvalidStatement
 //
-class JOANA_AST_EXPORT InvalidStatement
-    : public NodeTemplate<Statement, int> {
+class JOANA_AST_EXPORT InvalidStatement : public NodeTemplate<Statement, int> {
   DECLARE_CONCRETE_AST_NODE(InvalidStatement, Statement);
 
  public:

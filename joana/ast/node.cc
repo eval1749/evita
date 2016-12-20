@@ -8,8 +8,8 @@
 #include "joana/ast/container_node.h"
 #include "joana/ast/node_traversal.h"
 #include "joana/ast/tokens.h"
-#include "joana/public/escaped_string_piece.h"
-#include "joana/public/source_code.h"
+#include "joana/base/escaped_string_piece.h"
+#include "joana/base/source_code.h"
 
 namespace joana {
 namespace ast {

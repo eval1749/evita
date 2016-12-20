@@ -9,10 +9,10 @@
 #include <vector>
 
 #include "base/macros.h"
-#include "joana/public/error_sink.h"
-#include "joana/public/memory/zone.h"
-#include "joana/public/memory/zone_allocated.h"
-#include "joana/public/source_code_range.h"
+#include "joana/base/error_sink.h"
+#include "joana/base/memory/zone.h"
+#include "joana/base/memory/zone_allocated.h"
+#include "joana/base/source_code_range.h"
 
 namespace joana {
 namespace internal {

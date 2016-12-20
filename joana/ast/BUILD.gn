@@ -46,7 +46,7 @@ component("ast") {
 
   public_deps = [
     "//base",
-    "//joana/public",
+    "//joana/base",
   ]
 
   configs += [ ":ast_implementation" ]

@@ -17,7 +17,7 @@
 #include "joana/ast/regexp.h"
 #include "joana/ast/statements.h"
 #include "joana/ast/tokens.h"
-#include "joana/public/source_code.h"
+#include "joana/base/source_code.h"
 
 namespace joana {
 namespace internal {

@@ -1,0 +1,62 @@
+# Copyright (c) 2016 Project Vogue. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+config("public_implementation") {
+  defines = [ "JOANA_BASE_IMPLEMENTATION" ]
+}
+
+component("base") {
+  output_name = "joana_base"
+  sources = [
+    "castable.h",
+    "error_sink.cc",
+    "error_sink.h",
+    "escaped_string_piece.cc",
+    "escaped_string_piece.h",
+    "line_number_cache.cc",
+    "line_number_cache.h",
+    "memory/zone.cc",
+    "memory/zone.h",
+    "memory/zone_allocated.cc",
+    "memory/zone_allocated.h",
+    "memory/zone_allocator.h",
+    "memory/zone_owner.cc",
+    "memory/zone_owner.h",
+    "memory/zone_user.cc",
+    "memory/zone_user.h",
+    "memory/zone_vector.h",
+    "public_export.h",
+    "source_code.cc",
+    "source_code.h",
+    "source_code_factory.cc",
+    "source_code_factory.h",
+    "source_code_line.cc",
+    "source_code_line.h",
+    "source_code_line_cache.cc",
+    "source_code_line_cache.h",
+    "source_code_range.cc",
+    "source_code_range.h",
+    "visitable.h",
+  ]
+
+  public_deps = [
+    "//base",
+  ]
+
+  configs += [ ":public_implementation" ]
+}
+
+source_set("test_files") {
+  testonly = true
+  sources = [
+    "castable_test.cc",
+    "line_number_cache_test.cc",
+    "source_code_line_test.cc",
+    "source_code_range_test.cc",
+  ]
+  deps = [
+    ":base",
+    "//testing/gtest",
+  ]
+}

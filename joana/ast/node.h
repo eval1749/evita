@@ -12,11 +12,11 @@
 
 #include "base/macros.h"
 #include "joana/ast/ast_export.h"
-#include "joana/public/castable.h"
-#include "joana/public/memory/zone_allocated.h"
-#include "joana/public/memory/zone_vector.h"
-#include "joana/public/source_code_range.h"
-#include "joana/public/visitable.h"
+#include "joana/base/castable.h"
+#include "joana/base/memory/zone_allocated.h"
+#include "joana/base/memory/zone_vector.h"
+#include "joana/base/source_code_range.h"
+#include "joana/base/visitable.h"
 
 namespace joana {
 namespace ast {
@@ -27,8 +27,8 @@ class NodeVisitor;
 enum class PunctuatorKind;
 
 class JOANA_AST_EXPORT Node : public Castable<Node>,
-                                 public Visitable<NodeVisitor>,
-                                 public ZoneAllocated {
+                              public Visitable<NodeVisitor>,
+                              public ZoneAllocated {
   DECLARE_CASTABLE_CLASS(Node, Castable);
 
  public:
@@ -81,9 +81,9 @@ class JOANA_AST_EXPORT Node : public Castable<Node>,
 };
 
 JOANA_AST_EXPORT std::ostream& operator<<(std::ostream& ostream,
-                                             const Node& node);
+                                          const Node& node);
 JOANA_AST_EXPORT std::ostream& operator<<(std::ostream& ostream,
-                                             const Node* node);
+                                          const Node* node);
 
 #define DECLARE_AST_NODE(name, base)  \
   DECLARE_CASTABLE_CLASS(name, base); \

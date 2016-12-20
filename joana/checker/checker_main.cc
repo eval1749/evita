@@ -22,15 +22,15 @@
 #include "joana/ast/edit_context_builder.h"
 #include "joana/ast/error_codes.h"
 #include "joana/ast/node_factory.h"
+#include "joana/base/error_sink.h"
+#include "joana/base/memory/zone.h"
+#include "joana/base/memory/zone_allocated.h"
+#include "joana/base/source_code.h"
+#include "joana/base/source_code_factory.h"
+#include "joana/base/source_code_line.h"
+#include "joana/base/source_code_line_cache.h"
+#include "joana/base/source_code_range.h"
 #include "joana/parser/public/parse.h"
-#include "joana/public/error_sink.h"
-#include "joana/public/memory/zone.h"
-#include "joana/public/memory/zone_allocated.h"
-#include "joana/public/source_code.h"
-#include "joana/public/source_code_factory.h"
-#include "joana/public/source_code_line.h"
-#include "joana/public/source_code_line_cache.h"
-#include "joana/public/source_code_range.h"
 
 namespace joana {
 namespace internal {

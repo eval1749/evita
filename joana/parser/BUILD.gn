@@ -12,8 +12,8 @@ source_set("parser") {
   ]
   public_deps = [
     "//joana/ast",
+    "//joana/base",
     "//joana/parser/lexer",
-    "//joana/public",
   ]
 }
 

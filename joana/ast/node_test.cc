@@ -11,9 +11,9 @@
 #include "joana/ast/node_editor.h"
 #include "joana/ast/node_factory.h"
 #include "joana/ast/node_traversal.h"
-#include "joana/public/source_code.h"
-#include "joana/public/source_code_factory.h"
-#include "joana/public/source_code_range.h"
+#include "joana/base/source_code.h"
+#include "joana/base/source_code_factory.h"
+#include "joana/base/source_code_range.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
 namespace joana {
@@ -25,7 +25,7 @@ class Element final : public ContainerNode {
   DECLARE_CONCRETE_AST_NODE(Element, ContainerNode);
 
  public:
-  Element(const SourceCodeRange& range) : ContainerNode(range) {}
+  explicit Element(const SourceCodeRange& range) : ContainerNode(range) {}
   ~Element() override = default;
 
  private:

@@ -4,7 +4,7 @@
 
 #include "joana/ast/literals.h"
 
-#include "joana/public/escaped_string_piece.h"
+#include "joana/base/escaped_string_piece.h"
 
 namespace joana {
 namespace ast {

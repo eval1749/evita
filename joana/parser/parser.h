@@ -12,6 +12,7 @@
 #include "base/macros.h"
 #include "joana/parser/public/parse.h"
 #include "joana/public/ast/node_forward.h"
+#include "joana/public/source_code_range.h"
 
 namespace joana {
 
@@ -137,7 +138,7 @@ class Parser final {
   ast::Expression& ParseObjectLiteralExpression();
   ast::Expression& ParseParenthesis();
   ast::Expression& ParsePrimaryExpression();
-  ast::Expression& ParsePropertyAfterName(ast::Expression& property_name,
+  ast::Expression& ParsePropertyAfterName(ast::Expression* property_name,
                                           ast::MethodKind is_static,
                                           ast::FunctionKind function_kind);
   ast::Expression& ParseRegExpLiteral();

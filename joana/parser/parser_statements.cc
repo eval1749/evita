@@ -7,15 +7,15 @@
 
 #include "joana/parser/parser.h"
 
+#include "joana/ast/declarations.h"
+#include "joana/ast/expressions.h"
+#include "joana/ast/literals.h"
+#include "joana/ast/node_editor.h"
+#include "joana/ast/node_factory.h"
+#include "joana/ast/statements.h"
+#include "joana/ast/tokens.h"
 #include "joana/parser/lexer/lexer.h"
 #include "joana/parser/parser_error_codes.h"
-#include "joana/public/ast/declarations.h"
-#include "joana/public/ast/expressions.h"
-#include "joana/public/ast/literals.h"
-#include "joana/public/ast/node_editor.h"
-#include "joana/public/ast/node_factory.h"
-#include "joana/public/ast/statements.h"
-#include "joana/public/ast/tokens.h"
 #include "joana/public/source_code.h"
 
 namespace joana {

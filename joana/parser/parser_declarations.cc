@@ -4,10 +4,10 @@
 
 #include "joana/parser/parser.h"
 
+#include "joana/ast/expressions.h"
+#include "joana/ast/node_factory.h"
+#include "joana/ast/statements.h"
 #include "joana/parser/parser_error_codes.h"
-#include "joana/public/ast/expressions.h"
-#include "joana/public/ast/node_factory.h"
-#include "joana/public/ast/statements.h"
 
 namespace joana {
 namespace internal {

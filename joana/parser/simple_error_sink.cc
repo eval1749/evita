@@ -6,7 +6,7 @@
 
 #include "joana/parser/simple_error_sink.h"
 
-#include "joana/public/ast/error_codes.h"
+#include "joana/ast/error_codes.h"
 
 namespace joana {
 namespace internal {

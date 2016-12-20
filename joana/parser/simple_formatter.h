@@ -7,9 +7,9 @@
 
 #include <iosfwd>
 
-#include "joana/public/ast/node_visitor.h"
+#include "joana/ast/node_visitor.h"
 
-#include "joana/public/ast/node_forward.h"
+#include "joana/ast/node_forward.h"
 
 namespace joana {
 namespace internal {

@@ -1,0 +1,64 @@
+# Copyright (c) 2016 Project Vogue. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+config("ast_implementation") {
+  defines = [ "JOANA_AST_IMPLEMENTATION" ]
+}
+
+component("ast") {
+  output_name = "joana_ast"
+  sources = [
+    "container_node.cc",
+    "container_node.h",
+    "declarations.cc",
+    "declarations.h",
+    "edit_context.cc",
+    "edit_context.h",
+    "edit_context_builder.cc",
+    "edit_context_builder.h",
+    "error_codes.cc",
+    "error_codes.h",
+    "expressions.cc",
+    "expressions.h",
+    "literals.cc",
+    "literals.h",
+    "module.cc",
+    "module.h",
+    "node.cc",
+    "node.h",
+    "node_editor.cc",
+    "node_editor.h",
+    "node_factory.cc",
+    "node_factory.h",
+    "node_forward.h",
+    "node_traversal.cc",
+    "node_traversal.h",
+    "node_visitor.cc",
+    "node_visitor.h",
+    "regexp.cc",
+    "regexp.h",
+    "statements.cc",
+    "statements.h",
+    "tokens.cc",
+    "tokens.h",
+  ]
+
+  public_deps = [
+    "//base",
+    "//joana/public",
+  ]
+
+  configs += [ ":ast_implementation" ]
+}
+
+source_set("test_files") {
+  testonly = true
+  sources = [
+    "node_test.cc",
+  ]
+  deps = [
+    ":ast",
+    "//testing/gtest",
+  ]
+}

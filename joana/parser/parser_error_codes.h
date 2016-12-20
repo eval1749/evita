@@ -5,7 +5,7 @@
 #ifndef JOANA_PARSER_PARSER_ERROR_CODES_H_
 #define JOANA_PARSER_PARSER_ERROR_CODES_H_
 
-#include "joana/public/ast/error_codes.h"
+#include "joana/ast/error_codes.h"
 
 #include "joana/parser/parser.h"
 

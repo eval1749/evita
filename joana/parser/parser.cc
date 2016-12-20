@@ -7,14 +7,14 @@
 
 #include "joana/parser/parser.h"
 
+#include "joana/ast/edit_context.h"
+#include "joana/ast/module.h"
+#include "joana/ast/node_editor.h"
+#include "joana/ast/node_factory.h"
+#include "joana/ast/statements.h"
+#include "joana/ast/tokens.h"
 #include "joana/parser/lexer/lexer.h"
 #include "joana/parser/parser_error_codes.h"
-#include "joana/public/ast/edit_context.h"
-#include "joana/public/ast/module.h"
-#include "joana/public/ast/node_editor.h"
-#include "joana/public/ast/node_factory.h"
-#include "joana/public/ast/statements.h"
-#include "joana/public/ast/tokens.h"
 #include "joana/public/error_sink.h"
 #include "joana/public/source_code.h"
 

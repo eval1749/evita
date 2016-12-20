@@ -57,6 +57,7 @@ v8.log
 /third_party/markupsafe/
 /third_party/modp_b64/
 /third_party/pep8/
+/third_party/ply/
 /third_party/v8
 /third_party/zlib/
 /tools/grit/

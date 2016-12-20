@@ -112,7 +112,7 @@ def main():
         if len(line) == 0:
             continue
         words = line.split()
-        if words[0] == 'D':
+        if words[0] == 'D' or words[0][0] == 'R':
             continue
         dispatch(words[1])
 

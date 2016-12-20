@@ -52,6 +52,10 @@ v8.log
 /third_party/ced/src
 /third_party/cygwin/
 /third_party/icu
+/third_party/instrumented_libraries/
+/third_party/jinja2/
+/third_party/markupsafe/
+/third_party/modp_b64/
 /third_party/pep8/
 /third_party/ply/
 /third_party/v8

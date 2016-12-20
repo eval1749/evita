@@ -17,6 +17,10 @@ vars = {
   'gyp_revision': 'e7079f0e0e14108ab0dba58728ff219637458563',
   'icu_revision': '9cd2828740572ba6f694b9365236a8356fd06147',
   'idl_parser_revision': 'fce24a3e157ff80b88a514fb469dacf82358f1f0',
+  'instrumented_libraries_revision': '45f5814b1543e41ea0be54c771e3840ea52cca4a',
+  'jinja2_revision': 'b61a2c009a579593a259c1b300e0ad02bf48fd78',
+  'markupsafe_revision': '484a5661041cac13bfc688a26ec5434b05d18961',
+  'modp_b64_revision': '28e3fbba4cb4ec3ffd85b53d0a3904525d08f5a6',
   'ply_revision': '4a6baf95860033d4c69d3e3087696b30c687622c',
   'testing_revision': 'e66da27ea326c183115d399432a393dbc8e492cf',
   'v8_revision': '017e985b9c81782ac6548fdad2c66b34bc30d72b', # 5.7.292
@@ -63,6 +67,18 @@ deps = {
 
   'src/tools/idl_parser':
     Var('chromium_git') + '/chromium/src/tools/idl_parser' + '@' + Var('idl_parser_revision'),
+
+  'src/third_party/instrumented_libraries':
+    Var('chromium_git') + '/chromium/src/third_party/instrumented_libraries.git' + '@' + Var('instrumented_libraries_revision'),
+
+  'src/third_party/jinja2':
+    Var('chromium_git') + '/chromium/src/third_party/jinja2.git' + '@' + Var('jinja2_revision'),
+
+  'src/third_party/markupsafe':
+    Var('chromium_git') + '/chromium/src/third_party/markupsafe.git' + '@' + Var('markupsafe_revision'),
+
+  'src/third_party/modp_b64':
+    Var('chromium_git') + '/chromium/src/third_party/modp_b64.git' + '@' + Var('modp_b64_revision'),
 
   'src/third_party/ply':
     Var('chromium_git') + '/chromium/src/third_party/ply' + '@' +  Var('ply_revision'),

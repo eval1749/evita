@@ -6,14 +6,14 @@
 
 #include "joana/parser/lexer/lexer.h"
 
+#include "joana/ast/edit_context.h"
+#include "joana/ast/node_factory.h"
+#include "joana/ast/regexp.h"
+#include "joana/ast/tokens.h"
 #include "joana/parser/lexer/character_reader.h"
 #include "joana/parser/lexer/lexer_error_codes.h"
 #include "joana/parser/lexer/lexer_utils.h"
 #include "joana/parser/public/parse.h"
-#include "joana/public/ast/edit_context.h"
-#include "joana/public/ast/node_factory.h"
-#include "joana/public/ast/regexp.h"
-#include "joana/public/ast/tokens.h"
 #include "joana/public/error_sink.h"
 #include "joana/public/source_code.h"
 
@@ -356,24 +356,24 @@ class RegExpParser final {
 //
 class ScopedNodeFactory final {
  public:
-  ScopedNodeFactory(RegExpParser* parser);
+  explicit ScopedNodeFactory(RegExpParser* parser);
   ~ScopedNodeFactory();
 
   void AddError(const SourceCodeRange& range, ErrorCode error_code);
   void AddError(ErrorCode error_code);
   ast::RegExp& NewAnyChar();
   ast::RegExp& NewAssertion(ast::RegExpAssertionKind kind);
-  ast::RegExp& NewCapture(ast::RegExp& pattern);
+  ast::RegExp& NewCapture(const ast::RegExp& pattern);
   ast::RegExp& NewCharSet();
   ast::RegExp& NewComplementCharSet();
   ast::RegExp& NewError(ErrorCode error_code);
   ast::RegExp& NewInvalid(ErrorCode error_code);
-  ast::RegExp& NewGreedyRepeat(ast::RegExp& pattern,
+  ast::RegExp& NewGreedyRepeat(const ast::RegExp& pattern,
                                const ast::RegExpRepeat& repeat);
-  ast::RegExp& NewLazyRepeat(ast::RegExp& pattern,
+  ast::RegExp& NewLazyRepeat(const ast::RegExp& pattern,
                              const ast::RegExpRepeat& repeat);
-  ast::RegExp& NewLookAhead(ast::RegExp& pattern);
-  ast::RegExp& NewLookAheadNot(ast::RegExp& pattern);
+  ast::RegExp& NewLookAhead(const ast::RegExp& pattern);
+  ast::RegExp& NewLookAheadNot(const ast::RegExp& pattern);
   ast::RegExp& NewLiteral();
   ast::RegExp& NewOr(const std::vector<ast::RegExp*> members);
   ast::RegExp& NewSequence(const std::vector<ast::RegExp*> members);
@@ -421,7 +421,7 @@ ast::RegExp& ScopedNodeFactory::NewAssertion(ast::RegExpAssertionKind kind) {
   return factory().NewAssertionRegExp(ComputeRange(), kind);
 }
 
-ast::RegExp& ScopedNodeFactory::NewCapture(ast::RegExp& pattern) {
+ast::RegExp& ScopedNodeFactory::NewCapture(const ast::RegExp& pattern) {
   return factory().NewCaptureRegExp(ComputeRange(), pattern);
 }
 
@@ -439,7 +439,7 @@ ast::RegExp& ScopedNodeFactory::NewError(ErrorCode error_code) {
 }
 
 ast::RegExp& ScopedNodeFactory::NewGreedyRepeat(
-    ast::RegExp& pattern,
+    const ast::RegExp& pattern,
     const ast::RegExpRepeat& repeat) {
   return factory().NewGreedyRepeatRegExp(ComputeRange(), pattern, repeat);
 }
@@ -449,16 +449,16 @@ ast::RegExp& ScopedNodeFactory::NewInvalid(ErrorCode error_code) {
                                     static_cast<int>(error_code));
 }
 
-ast::RegExp& ScopedNodeFactory::NewLazyRepeat(ast::RegExp& pattern,
+ast::RegExp& ScopedNodeFactory::NewLazyRepeat(const ast::RegExp& pattern,
                                               const ast::RegExpRepeat& repeat) {
   return factory().NewLazyRepeatRegExp(ComputeRange(), pattern, repeat);
 }
 
-ast::RegExp& ScopedNodeFactory::NewLookAhead(ast::RegExp& pattern) {
+ast::RegExp& ScopedNodeFactory::NewLookAhead(const ast::RegExp& pattern) {
   return factory().NewLookAheadRegExp(ComputeRange(), pattern);
 }
 
-ast::RegExp& ScopedNodeFactory::NewLookAheadNot(ast::RegExp& pattern) {
+ast::RegExp& ScopedNodeFactory::NewLookAheadNot(const ast::RegExp& pattern) {
   return factory().NewLookAheadNotRegExp(ComputeRange(), pattern);
 }
 

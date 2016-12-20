@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef JOANA_PARSER_PARSER_LEXER_ERROR_CODES_H_
-#define JOANA_PARSER_PARSER_LEXER_ERROR_CODES_H_
+#ifndef JOANA_PARSER_LEXER_LEXER_ERROR_CODES_H_
+#define JOANA_PARSER_LEXER_LEXER_ERROR_CODES_H_
 
-#include "joana/public/ast/error_codes.h"
+#include "joana/ast/error_codes.h"
 
 #include "joana/parser/lexer/lexer.h"
 
@@ -22,4 +22,4 @@ enum class Lexer::ErrorCode {
 }  // namespace internal
 }  // namespace joana
 
-#endif  // JOANA_PARSER_PARSER_LEXER_ERROR_CODES_H_
+#endif  // JOANA_PARSER_LEXER_LEXER_ERROR_CODES_H_

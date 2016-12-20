@@ -576,10 +576,7 @@ ast::Expression& Parser::ParsePropertyName() {
   }
   if (PeekToken().Is<ast::Literal>())
     return NewLiteralExpression(ConsumeToken().As<ast::Literal>());
-  if (PeekToken() == ast::PunctuatorKind::LeftBracket)
-    return ParsePrimaryExpression();
-  return NewInvalidExpression(ConsumeToken(),
-                              ErrorCode::ERROR_PROPERTY_INVALID_PROPERTY_NAME);
+  return ParsePrimaryExpression();
 }
 
 ast::Expression& Parser::ParseRegExpLiteral() {

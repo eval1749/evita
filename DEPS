@@ -6,7 +6,6 @@ vars = {
   'chromium_git': 'https://chromium.googlesource.com',
   'github.git': 'https://github.com',
 
-  'autopep8_revision': '9eb1121f357077c7d71fc770e25d3678f906a401',
   'base_revision': '520a03b3961bf29ff32b5b28b65921a2a7aef968',
   'build_revision': '29ac3ae139551d342de8a95f4641157d0153fc33',
   'buildtools_revision': '0ef801087682b271e9ace93cfa93e9d3dea98079',
@@ -18,11 +17,14 @@ vars = {
   'gyp_revision': 'e7079f0e0e14108ab0dba58728ff219637458563',
   'icu_revision': '9cd2828740572ba6f694b9365236a8356fd06147',
   'idl_parser_revision': 'fce24a3e157ff80b88a514fb469dacf82358f1f0',
-  'pep8_revision': '4dc42d842274ba27d2724e76eb83ff69e7db226f',
   'ply_revision': '4a6baf95860033d4c69d3e3087696b30c687622c',
   'testing_revision': 'e66da27ea326c183115d399432a393dbc8e492cf',
   'v8_revision': '017e985b9c81782ac6548fdad2c66b34bc30d72b', # 5.7.292
   'zlib_revision': '8086cc8849617783f1b05be03cb893bb23977186',
+
+  # github
+  'autopep8_revision': '9eb1121f357077c7d71fc770e25d3678f906a401',
+  'pep8_revision': '4dc42d842274ba27d2724e76eb83ff69e7db226f',
 }
 
 deps = {
@@ -44,26 +46,11 @@ deps = {
   'src/testing/gtest':
     Var('chromium_git') + '/external/github.com/google/googletest.git' + '@' + Var('gtest_revision'),
 
-  'src/third_party/autopep8':
-    Var('github.git') + '/hhatto/autopep8.git' + '@' + Var('autopep8_revision'),
-
   'src/third_party/ced/src':
     Var('chromium_git') + '/external/github.com/google/compact_enc_det.git' + '@' + Var('ced_revision'),
 
   'src/third_party/cygwin':
     Var('chromium_git') + '/chromium/deps/cygwin.git' + '@' + Var('cygwin_revision'),
-
-  'src/third_party/icu':
-    Var('chromium_git') + '/chromium/deps/icu.git' + '@' + Var('icu_revision'),
-
-  'src/third_party/pep8':
-    Var('github.git') + '/PyCQA/pep8.git' + '@' + Var('pep8_revision'),
-
-  'src/third_party/ply':
-    Var('chromium_git') + '/chromium/src/third_party/ply' + '@' +  Var('ply_revision'),
-
-  'src/third_party/zlib':
-    Var('chromium_git') + '/chromium/src/third_party/zlib' + '@' +  Var('zlib_revision'),
 
   'src/tools/grit':
     Var('chromium_git') + '/chromium/src/tools/grit' + '@' + Var('grit_revision'),
@@ -71,11 +58,28 @@ deps = {
   'src/tools/gyp':
     Var('chromium_git') + '/external/gyp.git' + '@' + Var('gyp_revision'),
 
+  'src/third_party/icu':
+    Var('chromium_git') + '/chromium/deps/icu.git' + '@' + Var('icu_revision'),
+
   'src/tools/idl_parser':
     Var('chromium_git') + '/chromium/src/tools/idl_parser' + '@' + Var('idl_parser_revision'),
 
+  'src/third_party/ply':
+    Var('chromium_git') + '/chromium/src/third_party/ply' + '@' +  Var('ply_revision'),
+
   'src/v8':
     Var('chromium_git') + '/v8/v8.git' + '@' +  Var('v8_revision'),
+
+  'src/third_party/zlib':
+    Var('chromium_git') + '/chromium/src/third_party/zlib' + '@' +  Var('zlib_revision'),
+
+  # From github
+  'src/third_party/autopep8':
+    Var('github.git') + '/hhatto/autopep8.git' + '@' + Var('autopep8_revision'),
+
+  'src/third_party/pep8':
+    Var('github.git') + '/PyCQA/pep8.git' + '@' + Var('pep8_revision'),
+
 }
 
 hooks = [

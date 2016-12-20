@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-config("public_implementation") {
+config("base_implementation") {
   defines = [ "JOANA_BASE_IMPLEMENTATION" ]
 }
 
@@ -45,7 +45,7 @@ component("base") {
     "//base",
   ]
 
-  configs += [ ":public_implementation" ]
+  configs += [ ":base_implementation" ]
 }
 
 source_set("test_files") {

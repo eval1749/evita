@@ -18,11 +18,11 @@
 #include "base/strings/string_piece.h"
 #include "base/strings/string_split.h"
 #include "base/strings/utf_string_conversions.h"
+#include "joana/ast/edit_context.h"
+#include "joana/ast/edit_context_builder.h"
+#include "joana/ast/error_codes.h"
+#include "joana/ast/node_factory.h"
 #include "joana/parser/public/parse.h"
-#include "joana/public/ast/edit_context.h"
-#include "joana/public/ast/edit_context_builder.h"
-#include "joana/public/ast/error_codes.h"
-#include "joana/public/ast/node_factory.h"
 #include "joana/public/error_sink.h"
 #include "joana/public/memory/zone.h"
 #include "joana/public/memory/zone_allocated.h"
@@ -101,7 +101,7 @@ class ScriptModule final {
 ScriptModule::ScriptModule(const SourceCode& source_code,
                            const ast::Node& root_node)
     : line_cache_(new SourceCodeLine::Cache(source_code)),
-      root_node_(root_node_),
+      root_node_(root_node),
       source_code_(source_code) {}
 
 SourceCodeLine ScriptModule::SourceCodeLinetAt(int offset) const {

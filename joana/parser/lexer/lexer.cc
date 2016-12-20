@@ -475,9 +475,8 @@ ast::Token& Lexer::HandleStringLiteral() {
           state = State::Backslash;
           break;
         }
-        if (IsLineTerminator(PeekChar())) {
+        if (delimiter != '`' && IsLineTerminator(PeekChar()))
           AddError(RangeFrom(token_start_), ErrorCode::STRING_LITERAL_NEWLINE);
-        }
         characters.push_back(PeekChar());
         break;
       case State::Backslash:

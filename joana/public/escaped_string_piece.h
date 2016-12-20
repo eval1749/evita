@@ -30,8 +30,9 @@ class JOANA_PUBLIC_EXPORT EscapedStringPiece16 {
   DISALLOW_COPY_AND_ASSIGN(EscapedStringPiece16);
 };
 
-std::ostream& operator<<(std::ostream& ostream,
-                         const EscapedStringPiece16& escaped);
+JOANA_PUBLIC_EXPORT std::ostream& operator<<(
+    std::ostream& ostream,
+    const EscapedStringPiece16& escaped);
 
 }  // namespace joana
 

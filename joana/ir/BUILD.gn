@@ -13,11 +13,19 @@ config("ir_implementation") {
 component("ir") {
   output_name = "joana_ir"
   sources = [
+    "common_operators.cc",
+    "common_operators.h",
     "composite_type_factory.cc",
     "composite_type_factory.h",
     "composite_types.cc",
     "composite_types.h",
     "ir_export.h",
+    "operator.cc",
+    "operator.h",
+    "operator_factory.cc",
+    "operator_factory.h",
+    "operator_forward.h",
+    "operator_printer.cc",
     "primitive_type_factory.cc",
     "primitive_type_factory.h",
     "primitive_types.cc",
@@ -41,6 +49,7 @@ component("ir") {
 source_set("test_files") {
   testonly = true
   sources = [
+    "operator_test.cc",
     "type_test.cc",
   ]
   deps = [

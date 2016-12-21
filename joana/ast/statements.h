@@ -9,6 +9,7 @@
 
 #include "joana/ast/container_node.h"
 #include "joana/ast/node_forward.h"
+#include "joana/base/iterator_utils.h"
 #include "joana/base/memory/zone_vector.h"
 
 namespace joana {
@@ -40,9 +41,9 @@ class JOANA_AST_EXPORT StatementList final : public ZoneAllocated {
  public:
   ~StatementList();
 
-  auto begin() const { return statements_.begin(); }
+  auto begin() const { return ReferenceRangeOf(statements_).begin(); }
   bool empty() const { return statements_.empty(); }
-  auto end() const { return statements_.end(); }
+  auto end() const { return ReferenceRangeOf(statements_).end(); }
   size_t size() const { return statements_.size(); }
 
  private:

@@ -58,7 +58,7 @@ bool SimpleFormatter::FormatChildStatement(const ast::Statement& statement) {
     *ostream_ << " {" << std::endl;
     IndentScope scope(this);
     for (const auto& child : block->statements()) {
-      FormatWithIndent(*child);
+      FormatWithIndent(child);
       *ostream_ << std::endl;
     }
     *ostream_ << '}';
@@ -245,7 +245,7 @@ void SimpleFormatter::VisitMethod(ast::Method* node) {
     }
     if (block->statements().size() == 1) {
       *ostream_ << " { ";
-      Format(**block->statements().begin());
+      Format(*block->statements().begin());
       *ostream_ << " }";
       return;
     }
@@ -533,7 +533,7 @@ void SimpleFormatter::VisitBlockStatement(ast::BlockStatement* node) {
   {
     IndentScope scope(this);
     for (const auto& child : node->statements()) {
-      FormatWithIndent(*child);
+      FormatWithIndent(child);
       *ostream_ << std::endl;
     }
   }
@@ -697,7 +697,7 @@ void SimpleFormatter::VisitSwitchStatement(ast::SwitchStatement* node) {
   *ostream_ << ") {" << std::endl;
   IndentScope switch_scope(this);
   for (const auto& clause : node->clauses()) {
-    auto* runner = clause;
+    auto* runner = &clause;
     for (;;) {
       if (auto* labeled = runner->TryAs<ast::LabeledStatement>()) {
         OutputIndent();

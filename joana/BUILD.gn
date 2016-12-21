@@ -15,6 +15,7 @@ test("joana_tests") {
   deps = [
     "//base/test:run_all_unittests",
     "//joana/base:test_files",
+    "//joana/ir:test_files",
     "//joana/parser:test_files",
     "//testing/gtest",
   ]

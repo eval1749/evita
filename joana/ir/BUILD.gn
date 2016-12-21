@@ -1,0 +1,50 @@
+# Copyright (c) 2016 Project Vogue. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Copyright (c) 2016 Project Vogue. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+config("ir_implementation") {
+  defines = [ "JOANA_IR_IMPLEMENTATION" ]
+}
+
+component("ir") {
+  output_name = "joana_ir"
+  sources = [
+    "composite_type_factory.cc",
+    "composite_type_factory.h",
+    "composite_types.cc",
+    "composite_types.h",
+    "ir_export.h",
+    "primitive_type_factory.cc",
+    "primitive_type_factory.h",
+    "primitive_types.cc",
+    "primitive_types.h",
+    "type.cc",
+    "type.h",
+    "type_factory.cc",
+    "type_factory.h",
+    "type_forward.h",
+    "type_printer.cc",
+  ]
+
+  public_deps = [
+    "//base",
+    "//joana/base",
+  ]
+
+  configs += [ ":ir_implementation" ]
+}
+
+source_set("test_files") {
+  testonly = true
+  sources = [
+    "type_test.cc",
+  ]
+  deps = [
+    ":ir",
+    "//testing/gtest",
+  ]
+}

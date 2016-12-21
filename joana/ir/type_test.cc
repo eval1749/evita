@@ -1,0 +1,119 @@
+// Copyright (c) 2016 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#include <sstream>
+#include <string>
+
+#include "joana/ir/type.h"
+
+#include "joana/base/memory/zone.h"
+#include "joana/ir/type_factory.h"
+#include "testing/gtest/include/gtest/gtest.h"
+
+namespace joana {
+namespace ir {
+
+namespace {
+
+std::string ToString(const Type& type) {
+  std::ostringstream ostream;
+  ostream << type;
+  return ostream.str();
+}
+
+}  // namespace
+
+//
+// IrTypeTest
+//
+class IrTypeTest : public ::testing::Test {
+ public:
+  ~IrTypeTest() override = default;
+
+  TypeFactory& factory() { return type_factory_; }
+
+ protected:
+  IrTypeTest();
+
+#define V(capital, underscore) \
+  auto& underscore##_type() { return factory().underscore##_type(); }
+  FOR_EACH_IR_PRIMITIVE_TYPE(V)
+#undef V
+
+ private:
+  Zone zone_;
+  TypeFactory type_factory_;
+
+  DISALLOW_COPY_AND_ASSIGN(IrTypeTest);
+};
+
+IrTypeTest::IrTypeTest() : zone_("IrTypeTest"), type_factory_(&zone_) {}
+
+TEST_F(IrTypeTest, FunctionType) {
+  auto& type1 = factory().NewFunctionType(
+      factory().NewTupleType({&control_type(), &effect_type(), &int64_type()}),
+      int64_type());
+  EXPECT_EQ("Function<(Control, Effect, Int64) => Int64>", ToString(type1));
+}
+
+TEST_F(IrTypeTest, PrimitiveTypes) {
+  EXPECT_EQ(any_type(), factory().any_type())
+      << "AnyType should be a singleton.";
+  EXPECT_EQ("Any", ToString(any_type()));
+
+  EXPECT_EQ(bool_type(), factory().bool_type())
+      << "BoolType should be a singleton.";
+  EXPECT_NE(bool_type(), any_type());
+  EXPECT_EQ("Bool", ToString(bool_type()));
+
+  EXPECT_EQ(float64_type(), factory().float64_type())
+      << "Float64Type should be a singleton.";
+  EXPECT_NE(float64_type(), any_type());
+  EXPECT_EQ("Float64", ToString(float64_type()));
+
+  EXPECT_EQ(nil_type(), factory().nil_type())
+      << "NilType should be a singleton.";
+  EXPECT_NE(nil_type(), any_type());
+  EXPECT_EQ("Nil", ToString(nil_type()));
+
+  EXPECT_EQ(void_type(), factory().void_type())
+      << "VoidType should be a singleton.";
+  EXPECT_NE(void_type(), any_type());
+  EXPECT_EQ("Void", ToString(void_type()));
+}
+
+TEST_F(IrTypeTest, ReferenceType) {
+  auto& type1 = factory().NewReferenceType(int64_type());
+  EXPECT_EQ(type1, factory().NewReferenceType(int64_type()));
+  EXPECT_EQ("Reference<Int64>", ToString(type1));
+}
+
+TEST_F(IrTypeTest, TupleType) {
+  auto& tuple0 = factory().NewTupleType({});
+  EXPECT_EQ(factory().NewTupleType({}), tuple0);
+  EXPECT_EQ("Tuple<>", ToString(tuple0));
+
+  auto& tuple1 = factory().NewTupleType({&any_type()});
+  EXPECT_EQ(factory().NewTupleType({&any_type()}), tuple1);
+  EXPECT_NE(tuple0, tuple1);
+  EXPECT_EQ("Tuple<Any>", ToString(tuple1));
+
+  auto& tuple2 = factory().NewTupleType({&control_type(), &bool_type()});
+  EXPECT_NE(tuple0, tuple2);
+  EXPECT_NE(tuple1, tuple2);
+  EXPECT_EQ(factory().NewTupleType({&control_type(), &bool_type()}), tuple2);
+  EXPECT_EQ("Tuple<Control, Bool>", ToString(tuple2));
+
+  auto& tuple3 =
+      factory().NewTupleType({&control_type(), &effect_type(), &int64_type()});
+  EXPECT_NE(tuple0, tuple3);
+  EXPECT_NE(tuple1, tuple3);
+  EXPECT_EQ(
+      factory().NewTupleType({&control_type(), &effect_type(), &int64_type()}),
+      tuple3);
+  EXPECT_EQ("Tuple<Control, Effect, Int64>", ToString(tuple3));
+}
+
+}  // namespace ir
+}  // namespace joana

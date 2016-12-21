@@ -73,14 +73,14 @@ bool SimpleFormatter::FormatChildStatement(const ast::Statement& statement) {
 void SimpleFormatter::FormatExpressionList(const ast::ExpressionList& list) {
   auto delimiter = "";
   for (const auto& element : list) {
-    if (element->Is<ast::ElisionExpression>()) {
+    if (element.Is<ast::ElisionExpression>()) {
       *ostream_ << ',';
       delimiter = "";
       continue;
     }
     *ostream_ << delimiter;
     delimiter = ", ";
-    Format(*element);
+    Format(element);
   }
 }
 
@@ -290,7 +290,7 @@ void SimpleFormatter::VisitCallExpression(ast::CallExpression* node) {
   for (const auto& argument : node->arguments()) {
     *ostream_ << delimiter;
     delimiter = ", ";
-    Format(*argument);
+    Format(argument);
   }
   *ostream_ << ')';
 }
@@ -358,7 +358,7 @@ void SimpleFormatter::VisitObjectLiteralExpression(
   const auto& members = node->members();
   auto number_of_members = 0;
   for (const auto& member : node->members()) {
-    if (member->Is<ast::ElisionExpression>())
+    if (member.Is<ast::ElisionExpression>())
       continue;
     ++number_of_members;
   }
@@ -371,18 +371,18 @@ void SimpleFormatter::VisitObjectLiteralExpression(
     auto delimiter = "";
     for (const auto& member : node->members()) {
       *ostream_ << delimiter;
-      if (member->Is<ast::DeclarationExpression>()) {
+      if (member.Is<ast::DeclarationExpression>()) {
         *ostream_ << ' ';
         delimiter = "";
-        FormatWithIndent(*member);
+        FormatWithIndent(member);
         continue;
       }
-      if (member->Is<ast::ElisionExpression>()) {
+      if (member.Is<ast::ElisionExpression>()) {
         delimiter = ",";
         continue;
       }
       *ostream_ << ' ';
-      FormatWithIndent(*member);
+      FormatWithIndent(member);
       delimiter = ",";
     }
     *ostream_ << " }";
@@ -393,17 +393,17 @@ void SimpleFormatter::VisitObjectLiteralExpression(
   size_t count = 0;
   for (const auto& member : members) {
     ++count;
-    if (member->Is<ast::DeclarationExpression>()) {
-      FormatWithIndent(*member);
+    if (member.Is<ast::DeclarationExpression>()) {
+      FormatWithIndent(member);
       *ostream_ << std::endl;
       continue;
     }
-    if (member->Is<ast::ElisionExpression>()) {
+    if (member.Is<ast::ElisionExpression>()) {
       if (count < members.size())
         *ostream_ << ',' << std::endl;
       continue;
     }
-    FormatWithIndent(*member);
+    FormatWithIndent(member);
     if (count < members.size())
       *ostream_ << ',';
     *ostream_ << std::endl;

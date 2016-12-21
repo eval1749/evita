@@ -10,6 +10,7 @@
 #include "joana/ast/container_node.h"
 #include "joana/ast/node_forward.h"
 #include "joana/ast/tokens.h"
+#include "joana/base/iterator_utils.h"
 
 namespace joana {
 namespace ast {
@@ -37,9 +38,9 @@ class JOANA_AST_EXPORT ExpressionList final : public ZoneAllocated {
  public:
   ~ExpressionList();
 
-  auto begin() const { return expressions_.begin(); }
+  auto begin() const { return ReferenceRangeOf(expressions_).begin(); }
   bool empty() const { return expressions_.empty(); }
-  auto end() const { return expressions_.end(); }
+  auto end() const { return ReferenceRangeOf(expressions_).end(); }
   size_t size() const { return expressions_.size(); }
 
  private:

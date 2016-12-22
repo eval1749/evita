@@ -61,15 +61,23 @@ class JOANA_IR_EXPORT Operator : public Castable<Operator>,
     Format();
     ~Format();
 
+    bool is_variadic() const { return is_variadic_; }
+    size_t number_of_inputs() const { return number_of_inputs_; }
     size_t number_of_members() const { return number_of_members_; }
 
    private:
+    bool is_variadic_ = false;
+    size_t number_of_inputs_ = 0;
     size_t number_of_members_ = 0;
   };
 
   ~Operator();
 
   const Format& format() const { return format_; }
+
+  // Shortcuts of format
+  bool is_variadic_operator() const { return format_.is_variadic(); }
+  size_t number_of_inputs() const { return format_.number_of_inputs(); }
 
   base::StringPiece mnemonic() const;
 
@@ -98,8 +106,10 @@ class Operator::Format::Builder final {
   Builder();
   ~Builder();
 
-  Format Build() { return format_; }
+  Format Build();
 
+  Builder& set_is_variadic(bool value);
+  Builder& set_number_of_inputs(size_t value);
   Builder& set_number_of_members(size_t value);
 
  private:

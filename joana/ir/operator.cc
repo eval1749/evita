@@ -17,6 +17,24 @@ Operator::Format::~Format() = default;
 Operator::Format::Builder::Builder() = default;
 Operator::Format::Builder::~Builder() = default;
 
+Operator::Format Operator::Format::Builder::Build() {
+  if (format_.is_variadic())
+    DCHECK_EQ(format_.number_of_inputs(), 0);
+  return format_;
+}
+
+Operator::Format::Builder& Operator::Format::Builder::set_is_variadic(
+    bool value) {
+  format_.is_variadic_ = value;
+  return *this;
+}
+
+Operator::Format::Builder& Operator::Format::Builder::set_number_of_inputs(
+    size_t value) {
+  format_.number_of_inputs_ = value;
+  return *this;
+}
+
 Operator::Format::Builder& Operator::Format::Builder::set_number_of_members(
     size_t value) {
   format_.number_of_members_ = value;

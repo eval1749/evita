@@ -5,6 +5,10 @@
 #ifndef JOANA_IR_TYPE_FORWARD_H_
 #define JOANA_IR_TYPE_FORWARD_H_
 
+#include <iosfwd>
+
+#include "joana/ir/ir_export.h"
+
 namespace joana {
 namespace ir {
 
@@ -51,6 +55,13 @@ class Type;
 #define V(capital, ...) class capital##Type;
 FOR_EACH_IR_TYPE(V)
 #undef V
+
+// Implemented in "joana/ir/type_printer.cc"
+JOANA_IR_EXPORT std::ostream& operator<<(std::ostream& ostream,
+                                         const Type& type);
+
+JOANA_IR_EXPORT std::ostream& operator<<(std::ostream& ostream,
+                                         const Type* type);
 
 }  // namespace ir
 }  // namespace joana

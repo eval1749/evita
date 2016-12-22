@@ -46,13 +46,6 @@ class JOANA_IR_EXPORT Type : public Castable<Type>, public ZoneAllocated {
   DISALLOW_COPY_AND_ASSIGN(Type);
 };
 
-// Implemented in "joana/ir/type_printer.cc"
-JOANA_IR_EXPORT std::ostream& operator<<(std::ostream& ostream,
-                                         const Type& type);
-
-JOANA_IR_EXPORT std::ostream& operator<<(std::ostream& ostream,
-                                         const Type* type);
-
 }  // namespace ir
 }  // namespace joana
 

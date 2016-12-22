@@ -5,9 +5,10 @@
 #ifndef JOANA_IR_OPERATOR_FORWARD_H_
 #define JOANA_IR_OPERATOR_FORWARD_H_
 
-#include <stdint.h>
+#include <iosfwd>
 
 #include "joana/base/float_type.h"
+#include "joana/ir/ir_export.h"
 #include "joana/ir/type_forward.h"
 
 namespace joana {
@@ -31,6 +32,13 @@ enum class OperationCode;
 #define V(name) class name##Operator;
 FOR_EACH_IR_OPERATOR(V)
 #undef V
+
+// Implemented in "joana/ir/operator_printer.cc"
+JOANA_IR_EXPORT std::ostream& operator<<(std::ostream& ostream,
+                                         const Operator& op);
+
+JOANA_IR_EXPORT std::ostream& operator<<(std::ostream& ostream,
+                                         const Operator* op);
 
 }  // namespace ir
 }  // namespace joana

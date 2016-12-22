@@ -6,7 +6,6 @@
 #define JOANA_IR_OPERATOR_H_
 
 #include <functional>
-#include <iosfwd>
 #include <tuple>
 
 #include "base/macros.h"
@@ -92,13 +91,6 @@ class JOANA_IR_EXPORT Operator : public Castable<Operator>,
 
   DISALLOW_COPY_AND_ASSIGN(Operator);
 };
-
-// Implemented in "joana/ir/operator_printer.cc"
-JOANA_IR_EXPORT std::ostream& operator<<(std::ostream& ostream,
-                                         const Operator& op);
-
-JOANA_IR_EXPORT std::ostream& operator<<(std::ostream& ostream,
-                                         const Operator* op);
 
 // Operator::Format::Builder
 class Operator::Format::Builder final {

@@ -8,6 +8,7 @@
 #include "joana/ir/type.h"
 
 #include "joana/base/memory/zone.h"
+#include "joana/ir/composite_types.h"
 #include "joana/ir/type_factory.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
@@ -90,23 +91,36 @@ TEST_F(IrTypeTest, ReferenceType) {
 }
 
 TEST_F(IrTypeTest, TupleType) {
-  auto& tuple0 = factory().NewTupleType({});
+  auto& tuple0 = factory().NewTupleType({}).As<TupleType>();
+  EXPECT_EQ(0u, tuple0.size());
   EXPECT_EQ(factory().NewTupleType({}), tuple0);
   EXPECT_EQ("Tuple<>", ToString(tuple0));
 
-  auto& tuple1 = factory().NewTupleType({&any_type()});
+  auto& tuple1 = factory().NewTupleType({&any_type()}).As<TupleType>();
+  EXPECT_EQ(1u, tuple1.size());
+  EXPECT_EQ(any_type(), tuple1.get(0));
   EXPECT_EQ(factory().NewTupleType({&any_type()}), tuple1);
   EXPECT_NE(tuple0, tuple1);
   EXPECT_EQ("Tuple<Any>", ToString(tuple1));
 
-  auto& tuple2 = factory().NewTupleType({&control_type(), &bool_type()});
+  auto& tuple2 =
+      factory().NewTupleType({&control_type(), &bool_type()}).As<TupleType>();
+  EXPECT_EQ(2u, tuple2.size());
+  EXPECT_EQ(control_type(), tuple2.get(0));
+  EXPECT_EQ(bool_type(), tuple2.get(1));
   EXPECT_NE(tuple0, tuple2);
   EXPECT_NE(tuple1, tuple2);
   EXPECT_EQ(factory().NewTupleType({&control_type(), &bool_type()}), tuple2);
   EXPECT_EQ("Tuple<Control, Bool>", ToString(tuple2));
 
   auto& tuple3 =
-      factory().NewTupleType({&control_type(), &effect_type(), &int64_type()});
+      factory()
+          .NewTupleType({&control_type(), &effect_type(), &int64_type()})
+          .As<TupleType>();
+  EXPECT_EQ(3u, tuple3.size());
+  EXPECT_EQ(control_type(), tuple3.get(0));
+  EXPECT_EQ(effect_type(), tuple3.get(1));
+  EXPECT_EQ(int64_type(), tuple3.get(2));
   EXPECT_NE(tuple0, tuple3);
   EXPECT_NE(tuple1, tuple3);
   EXPECT_EQ(

@@ -114,7 +114,9 @@ class JOANA_IR_EXPORT TupleType : public CompositeType {
  public:
   ~TupleType();
 
+  const Type& get(size_t index) const { return *members_[index]; }
   auto members() const { return ReferenceRangeOf(members_); }
+  size_t size() const { return members_.size(); }
 
  private:
   friend class CompositeTypeFactory;

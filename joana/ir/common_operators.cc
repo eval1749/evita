@@ -13,12 +13,10 @@ namespace ir {
 // ExitOperator
 //
 ExitOperator::ExitOperator()
-    : OperatorTemplate(std::tuple<>(),
-                       OperationCode::Exit,
-                       Format::Builder()
-                           .set_number_of_inputs(1)
-                           .set_number_of_members(0)
-                           .Build()) {}
+    : OperatorTemplate(
+          std::tuple<>(),
+          OperationCode::Exit,
+          Format::Builder().set_arity(1).set_number_of_members(0).Build()) {}
 
 ExitOperator::~ExitOperator() = default;
 
@@ -76,12 +74,10 @@ LiteralVoidOperator::~LiteralVoidOperator() = default;
 // ProjectionOperator
 //
 ProjectionOperator::ProjectionOperator(size_t index)
-    : OperatorTemplate(index,
-                       OperationCode::Projection,
-                       Format::Builder()
-                           .set_number_of_inputs(1)
-                           .set_number_of_members(1)
-                           .Build()) {}
+    : OperatorTemplate(
+          index,
+          OperationCode::Projection,
+          Format::Builder().set_arity(1).set_number_of_members(1).Build()) {}
 
 ProjectionOperator::~ProjectionOperator() = default;
 
@@ -89,12 +85,10 @@ ProjectionOperator::~ProjectionOperator() = default;
 // RetOperator
 //
 RetOperator::RetOperator()
-    : OperatorTemplate(std::tuple<>(),
-                       OperationCode::Ret,
-                       Format::Builder()
-                           .set_number_of_inputs(2)
-                           .set_number_of_members(0)
-                           .Build()) {}
+    : OperatorTemplate(
+          std::tuple<>(),
+          OperationCode::Ret,
+          Format::Builder().set_arity(2).set_number_of_members(0).Build()) {}
 
 RetOperator::~RetOperator() = default;
 
@@ -112,12 +106,10 @@ StartOperator::~StartOperator() = default;
 // TupleOperator
 //
 TupleOperator::TupleOperator(size_t size)
-    : OperatorTemplate(size,
-                       OperationCode::Tuple,
-                       Format::Builder()
-                           .set_number_of_inputs(size)
-                           .set_number_of_members(1)
-                           .Build()) {}
+    : OperatorTemplate(
+          size,
+          OperationCode::Tuple,
+          Format::Builder().set_arity(size).set_number_of_members(1).Build()) {}
 
 TupleOperator::~TupleOperator() = default;
 

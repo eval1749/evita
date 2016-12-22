@@ -23,7 +23,8 @@ namespace ir {
   V(LiteralVoid)                       \
   V(Projection)                        \
   V(Ret)                               \
-  V(Start)
+  V(Start)                             \
+  V(Tuple)
 
 #define FOR_EACH_IR_OPERATOR(V) FOR_EACH_COMMON_IR_OPERATOR(V)
 

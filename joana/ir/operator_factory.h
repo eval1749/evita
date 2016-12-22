@@ -36,6 +36,7 @@ class JOANA_IR_EXPORT OperatorFactory final {
   const Operator& NewLiteralVoid();
   const Operator& NewProjection(size_t index);
   const Operator& NewRet();
+  const Operator& NewTuple(size_t size);
   const Operator& NewStart();
 
  private:

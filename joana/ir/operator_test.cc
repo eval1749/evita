@@ -64,5 +64,13 @@ TEST_F(IrOperatorTest, Simple) {
   EXPECT_EQ(factory().NewStart(), factory().NewStart());
 }
 
+TEST_F(IrOperatorTest, Tuple) {
+  EXPECT_EQ(factory().NewTuple(0), factory().NewTuple(0));
+  EXPECT_EQ(factory().NewTuple(1), factory().NewTuple(1));
+  EXPECT_NE(factory().NewTuple(1), factory().NewTuple(0));
+  EXPECT_FALSE(factory().NewTuple(3).is_variadic());
+  EXPECT_EQ(3, factory().NewTuple(3).number_of_inputs());
+}
+
 }  // namespace ir
 }  // namespace joana

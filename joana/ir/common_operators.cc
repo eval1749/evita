@@ -92,7 +92,7 @@ RetOperator::RetOperator()
     : OperatorTemplate(std::tuple<>(),
                        OperationCode::Ret,
                        Format::Builder()
-                           .set_number_of_inputs(1)
+                           .set_number_of_inputs(2)
                            .set_number_of_members(0)
                            .Build()) {}
 
@@ -107,6 +107,19 @@ StartOperator::StartOperator()
                        Format::Builder().set_number_of_members(0).Build()) {}
 
 StartOperator::~StartOperator() = default;
+
+//
+// TupleOperator
+//
+TupleOperator::TupleOperator(size_t size)
+    : OperatorTemplate(size,
+                       OperationCode::Tuple,
+                       Format::Builder()
+                           .set_number_of_inputs(size)
+                           .set_number_of_members(1)
+                           .Build()) {}
+
+TupleOperator::~TupleOperator() = default;
 
 }  // namespace ir
 }  // namespace joana

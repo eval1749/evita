@@ -70,6 +70,7 @@ IMPLEMENT_IR_OPERATOR_PRINTER_0(LiteralVoid)
 IMPLEMENT_IR_OPERATOR_PRINTER_1(Projection, index)
 IMPLEMENT_IR_OPERATOR_PRINTER_0(Ret)
 IMPLEMENT_IR_OPERATOR_PRINTER_0(Start)
+IMPLEMENT_IR_OPERATOR_PRINTER_1(Tuple, size)
 
 // |PrintableOperator| is a dispatcher.
 std::ostream& operator<<(std::ostream& ostream,

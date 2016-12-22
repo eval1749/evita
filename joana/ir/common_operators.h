@@ -19,6 +19,7 @@ DECLARE_IR_OPERATOR_0(LiteralVoid)
 DECLARE_IR_OPERATOR_1(Projection, size_t, index)
 DECLARE_IR_OPERATOR_0(Ret)
 DECLARE_IR_OPERATOR_0(Start)
+DECLARE_IR_OPERATOR_1(Tuple, size_t, size)
 
 }  // namespace ir
 }  // namespace joana

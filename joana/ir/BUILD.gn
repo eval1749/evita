@@ -20,6 +20,13 @@ component("ir") {
     "composite_types.cc",
     "composite_types.h",
     "ir_export.h",
+    "node.cc",
+    "node.h",
+    "node_factory.cc",
+    "node_factory.h",
+    "node_inputs.cc",
+    "node_inputs.h",
+    "node_printer.cc",
     "operator.cc",
     "operator.h",
     "operator_factory.cc",
@@ -49,6 +56,7 @@ component("ir") {
 source_set("test_files") {
   testonly = true
   sources = [
+    "node_test.cc",
     "operator_test.cc",
     "type_test.cc",
   ]

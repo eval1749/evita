@@ -9,9 +9,47 @@
 namespace joana {
 namespace ir {
 
+namespace {
+
+enum FlagBit {
+#define V(capital, underscore) kIndexOf##capital,
+  FOR_EACH_IR_OPERATOR_FLAG_BIT(V)
+#undef V
+};
+
+#define V(capital, underscore) \
+  constexpr uint32_t k##capital = 1 << kIndexOf##capital;
+FOR_EACH_IR_OPERATOR_FLAG_BIT(V)
+#undef V
+
+#define V(capital, underscore, value) constexpr auto k##capital = value;
+FOR_EACH_IR_OPERATOR_FLAG_MASK(V)
+#undef V
+
+}  // namespace
+
 // Operator::Format::Format
 Operator::Format::Format() = default;
 Operator::Format::~Format() = default;
+
+#define V(capital, underscore, ...)                                       \
+  bool Operator::Format::is_##underscore() const {                        \
+    return (flags_ & k##capital) == k##capital;                           \
+  }                                                                       \
+                                                                          \
+  Operator::Format::Builder& Operator::Format::Builder::set_##underscore( \
+      bool value) {                                                       \
+    if (value) {                                                          \
+      format_.flags_ |= k##capital;                                       \
+      return *this;                                                       \
+    }                                                                     \
+    format_.flags_ &= ~k##capital;                                        \
+    return *this;                                                         \
+  }
+
+FOR_EACH_IR_OPERATOR_FLAG_BIT(V)
+FOR_EACH_IR_OPERATOR_FLAG_MASK(V)
+#undef V
 
 // Operator::Format::Builder
 Operator::Format::Builder::Builder() = default;
@@ -21,12 +59,6 @@ Operator::Format Operator::Format::Builder::Build() {
   if (format_.is_variadic())
     DCHECK_EQ(format_.arity(), 0);
   return format_;
-}
-
-Operator::Format::Builder& Operator::Format::Builder::set_is_variadic(
-    bool value) {
-  format_.is_variadic_ = value;
-  return *this;
 }
 
 Operator::Format::Builder& Operator::Format::Builder::set_arity(size_t value) {

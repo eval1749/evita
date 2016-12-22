@@ -49,8 +49,13 @@ TEST_F(IrOperatorTest, LiteralFloat64) {
 }
 
 TEST_F(IrOperatorTest, LiteralInt64) {
-  EXPECT_EQ(factory().NewLiteralInt64(0), factory().NewLiteralInt64(0));
-  EXPECT_NE(factory().NewLiteralInt64(0), factory().NewLiteralInt64(1));
+  auto& lit0 = factory().NewLiteralInt64(0);
+  auto& lit1 = factory().NewLiteralInt64(1);
+
+  EXPECT_EQ(factory().NewLiteralInt64(0), lit0);
+  EXPECT_NE(lit1, lit0);
+  EXPECT_TRUE(lit0.is_pure());
+  EXPECT_TRUE(lit1.is_pure());
 }
 
 TEST_F(IrOperatorTest, Projection) {
@@ -61,7 +66,10 @@ TEST_F(IrOperatorTest, Projection) {
 
 TEST_F(IrOperatorTest, Simple) {
   EXPECT_EQ(factory().NewExit(), factory().NewExit());
+  EXPECT_TRUE(factory().NewExit().is_control());
+
   EXPECT_EQ(factory().NewStart(), factory().NewStart());
+  EXPECT_TRUE(factory().NewStart().is_control());
 }
 
 TEST_F(IrOperatorTest, Tuple) {

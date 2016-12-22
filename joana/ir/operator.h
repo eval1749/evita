@@ -34,6 +34,25 @@ const size_t kNumberOfOperations =
     static_cast<size_t>(OperationCode::NumberOfOperations);
 
 //
+// Operator flags
+//
+#define FOR_EACH_IR_OPERATOR_FLAG_BIT(V)                               \
+  V(Associative, associative) /* OP(a, OP(b, c)) == OP(OP(a, b), c) */ \
+  V(Commutative, commutative) /* OP(a, b) == OP(b, a) */               \
+  V(Idempotent, idempotent)   /* OP(a) == OP(a) */                     \
+  V(NoRead, no_read)                                                   \
+  V(NoThrow, no_throw)                                                 \
+  V(NoWrite, no_write)                                                 \
+  V(Schedule, schedule)                                                \
+  V(Variadic, variadic)
+
+#define FOR_EACH_IR_OPERATOR_FLAG_MASK(V)             \
+  V(Control, control, kNoRead | kNoWrite | kSchedule) \
+  V(Eliminatable, eliminatable, kNoThrow | kNoWrite)  \
+  V(Foldable, foldable, kNoRead | kNoWrite)           \
+  V(Pure, pure, kNoRead | kNoWrite | kNoThrow | kIdempotent)
+
+//
 // Help macros for |Operator| class declaration
 //
 #define DECLARE_IR_OPERATOR(name, base) DECLARE_CASTABLE_CLASS(name, base);
@@ -62,12 +81,18 @@ class JOANA_IR_EXPORT Operator : public Castable<Operator>,
     ~Format();
 
     size_t arity() const { return arity_; }
-    bool is_variadic() const { return is_variadic_; }
+
+#define V(capital, underscore, ...) bool is_##underscore() const;
+    FOR_EACH_IR_OPERATOR_FLAG_BIT(V)
+    FOR_EACH_IR_OPERATOR_FLAG_MASK(V)
+#undef V
+
+    // Returns number of member(parameter) of operator.
     size_t number_of_members() const { return number_of_members_; }
 
    private:
-    bool is_variadic_ = false;
     size_t arity_ = 0;
+    uint32_t flags_ = 0;
     size_t number_of_members_ = 0;
   };
 
@@ -76,8 +101,12 @@ class JOANA_IR_EXPORT Operator : public Castable<Operator>,
   const Format& format() const { return format_; }
 
   // Shortcuts of format
-  bool is_variadic() const { return format_.is_variadic(); }
   size_t arity() const { return format_.arity(); }
+#define V(capital, underscore, ...) \
+  bool is_##underscore() const { return format_.is_##underscore(); }
+  FOR_EACH_IR_OPERATOR_FLAG_BIT(V)
+  FOR_EACH_IR_OPERATOR_FLAG_MASK(V)
+#undef V
 
   base::StringPiece mnemonic() const;
 
@@ -108,9 +137,13 @@ class Operator::Format::Builder final {
 
   Format Build();
 
-  Builder& set_is_variadic(bool value);
   Builder& set_arity(size_t value);
   Builder& set_number_of_members(size_t value);
+
+#define V(capital, underscore, ...) Builder& set_##underscore(bool value);
+  FOR_EACH_IR_OPERATOR_FLAG_BIT(V)
+  FOR_EACH_IR_OPERATOR_FLAG_MASK(V)
+#undef V
 
  private:
   Format format_;

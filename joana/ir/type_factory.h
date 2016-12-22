@@ -37,7 +37,12 @@ class JOANA_IR_EXPORT TypeFactory final {
 
   const Type& NewReferenceType(const Type& to);
 
-  const Type& NewTupleType(const std::vector<const Type*>& members);
+  const Type& NewTupleTypeFromVector(const std::vector<const Type*>& members);
+
+  template <typename... Members>
+  const Type& NewTupleType(const Members&... members) {
+    return NewTupleTypeFromVector({&members...});
+  }
 
   const Type& NewUnionType(const std::vector<const Type*>& members);
 

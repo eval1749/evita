@@ -37,7 +37,8 @@ const Type& TypeFactory::NewReferenceType(const Type& to) {
   return composite_type_factory_->NewReferenceType(to);
 }
 
-const Type& TypeFactory::NewTupleType(const std::vector<const Type*>& members) {
+const Type& TypeFactory::NewTupleTypeFromVector(
+    const std::vector<const Type*>& members) {
   return composite_type_factory_->NewTupleType(members);
 }
 

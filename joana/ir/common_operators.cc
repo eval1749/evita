@@ -15,7 +15,7 @@ namespace ir {
 ExitOperator::ExitOperator()
     : OperatorTemplate(std::tuple<>(),
                        OperationCode::Exit,
-                       Format::Builder().SetNumberOfMembers(0).Build()) {}
+                       Format::Builder().set_number_of_members(0).Build()) {}
 
 ExitOperator::~ExitOperator() = default;
 
@@ -25,7 +25,7 @@ ExitOperator::~ExitOperator() = default;
 LiteralBoolOperator::LiteralBoolOperator(bool data)
     : OperatorTemplate(data,
                        OperationCode::LiteralBool,
-                       Format::Builder().SetNumberOfMembers(1).Build()) {}
+                       Format::Builder().set_number_of_members(1).Build()) {}
 
 LiteralBoolOperator::~LiteralBoolOperator() = default;
 
@@ -35,7 +35,7 @@ LiteralBoolOperator::~LiteralBoolOperator() = default;
 LiteralFloat64Operator::LiteralFloat64Operator(float64_t data)
     : OperatorTemplate(data,
                        OperationCode::LiteralFloat64,
-                       Format::Builder().SetNumberOfMembers(1).Build()) {}
+                       Format::Builder().set_number_of_members(1).Build()) {}
 
 LiteralFloat64Operator::~LiteralFloat64Operator() = default;
 
@@ -45,7 +45,7 @@ LiteralFloat64Operator::~LiteralFloat64Operator() = default;
 LiteralInt64Operator::LiteralInt64Operator(int64_t data)
     : OperatorTemplate(data,
                        OperationCode::LiteralInt64,
-                       Format::Builder().SetNumberOfMembers(1).Build()) {}
+                       Format::Builder().set_number_of_members(1).Build()) {}
 
 LiteralInt64Operator::~LiteralInt64Operator() = default;
 
@@ -55,7 +55,7 @@ LiteralInt64Operator::~LiteralInt64Operator() = default;
 LiteralStringOperator::LiteralStringOperator(base::StringPiece16 data)
     : OperatorTemplate(data,
                        OperationCode::LiteralString,
-                       Format::Builder().SetNumberOfMembers(1).Build()) {}
+                       Format::Builder().set_number_of_members(1).Build()) {}
 
 LiteralStringOperator::~LiteralStringOperator() = default;
 
@@ -65,7 +65,7 @@ LiteralStringOperator::~LiteralStringOperator() = default;
 LiteralVoidOperator::LiteralVoidOperator()
     : OperatorTemplate(std::tuple<>(),
                        OperationCode::LiteralVoid,
-                       Format::Builder().SetNumberOfMembers(0).Build()) {}
+                       Format::Builder().set_number_of_members(0).Build()) {}
 
 LiteralVoidOperator::~LiteralVoidOperator() = default;
 
@@ -75,7 +75,7 @@ LiteralVoidOperator::~LiteralVoidOperator() = default;
 ProjectionOperator::ProjectionOperator(size_t index)
     : OperatorTemplate(index,
                        OperationCode::Projection,
-                       Format::Builder().SetNumberOfMembers(1).Build()) {}
+                       Format::Builder().set_number_of_members(1).Build()) {}
 
 ProjectionOperator::~ProjectionOperator() = default;
 
@@ -85,7 +85,7 @@ ProjectionOperator::~ProjectionOperator() = default;
 RetOperator::RetOperator()
     : OperatorTemplate(std::tuple<>(),
                        OperationCode::Ret,
-                       Format::Builder().SetNumberOfMembers(0).Build()) {}
+                       Format::Builder().set_number_of_members(0).Build()) {}
 
 RetOperator::~RetOperator() = default;
 
@@ -95,7 +95,7 @@ RetOperator::~RetOperator() = default;
 StartOperator::StartOperator()
     : OperatorTemplate(std::tuple<>(),
                        OperationCode::Start,
-                       Format::Builder().SetNumberOfMembers(0).Build()) {}
+                       Format::Builder().set_number_of_members(0).Build()) {}
 
 StartOperator::~StartOperator() = default;
 

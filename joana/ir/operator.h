@@ -100,7 +100,7 @@ class Operator::Format::Builder final {
 
   Format Build() { return format_; }
 
-  Builder& SetNumberOfMembers(size_t value);
+  Builder& set_number_of_members(size_t value);
 
  private:
   Format format_;

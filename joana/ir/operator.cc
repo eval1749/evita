@@ -17,7 +17,7 @@ Operator::Format::~Format() = default;
 Operator::Format::Builder::Builder() = default;
 Operator::Format::Builder::~Builder() = default;
 
-Operator::Format::Builder& Operator::Format::Builder::SetNumberOfMembers(
+Operator::Format::Builder& Operator::Format::Builder::set_number_of_members(
     size_t value) {
   format_.number_of_members_ = value;
   return *this;

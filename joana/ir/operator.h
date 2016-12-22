@@ -76,7 +76,7 @@ class JOANA_IR_EXPORT Operator : public Castable<Operator>,
   const Format& format() const { return format_; }
 
   // Shortcuts of format
-  bool is_variadic_operator() const { return format_.is_variadic(); }
+  bool is_variadic() const { return format_.is_variadic(); }
   size_t number_of_inputs() const { return format_.number_of_inputs(); }
 
   base::StringPiece mnemonic() const;

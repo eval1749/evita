@@ -87,6 +87,18 @@ std::ostream& operator<<(std::ostream& ostream,
 }
 
 std::ostream& operator<<(std::ostream& ostream,
+                         const PrintableUnion& printable) {
+  const auto& type = *printable.type;
+  ostream << "Union<";
+  auto* delimiter = "";
+  for (const auto& member : type.members()) {
+    ostream << delimiter << AsPrintable(member);
+    delimiter = ", ";
+  }
+  return ostream << '>';
+}
+
+std::ostream& operator<<(std::ostream& ostream,
                          const PrintableType& printable) {
   const auto& type = *printable.type;
 #define V(capital, ...)         \

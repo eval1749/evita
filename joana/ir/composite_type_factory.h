@@ -34,6 +34,8 @@ class CompositeTypeFactory final {
 
   const Type& NewTupleType(const std::vector<const Type*>& members);
 
+  const Type& NewUnionType(const std::vector<const Type*>& members);
+
  private:
   class Cache;
 

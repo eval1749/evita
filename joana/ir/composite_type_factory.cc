@@ -97,5 +97,12 @@ const Type& CompositeTypeFactory::NewTupleType(
   return cache_->Register(members, *new (&zone_) TupleType(&zone_, members));
 }
 
+const Type& CompositeTypeFactory::NewUnionType(
+    const std::vector<const Type*>& members) {
+  if (const auto* present = cache_->Find(members))
+    return *present;
+  return cache_->Register(members, *new (&zone_) UnionType(&zone_, members));
+}
+
 }  // namespace ir
 }  // namespace joana

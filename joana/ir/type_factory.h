@@ -39,6 +39,8 @@ class JOANA_IR_EXPORT TypeFactory final {
 
   const Type& NewTupleType(const std::vector<const Type*>& members);
 
+  const Type& NewUnionType(const std::vector<const Type*>& members);
+
  private:
   const std::unique_ptr<CompositeTypeFactory> composite_type_factory_;
 

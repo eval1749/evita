@@ -27,7 +27,8 @@ namespace ir {
 #define FOR_EACH_IR_COMPOSITE_TYPE(V) \
   V(Function)                         \
   V(Reference)                        \
-  V(Tuple)
+  V(Tuple)                            \
+  V(Union)
 
 #define FOR_EACH_IR_PRIMITIVE_TYPE(V) \
   V(Any, any)                         \
@@ -39,7 +40,7 @@ namespace ir {
   V(JsNull, js_null)                  \
   V(JsSymbol, js_symbol)              \
   V(Nil, nil)                         \
-  V(String, string)  /* NOLINT */     \
+  V(String, string) /* NOLINT */      \
   V(Void, void)
 
 #define FOR_EACH_IR_TYPE(V)     \

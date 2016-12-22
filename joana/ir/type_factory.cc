@@ -2,10 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <set>
+
 #include "joana/ir/type_factory.h"
 
 #include "joana/ir/composite_type_factory.h"
+#include "joana/ir/composite_types.h"
 #include "joana/ir/primitive_type_factory.h"
+#include "joana/ir/primitive_types.h"
 
 namespace joana {
 namespace ir {
@@ -35,6 +39,27 @@ const Type& TypeFactory::NewReferenceType(const Type& to) {
 
 const Type& TypeFactory::NewTupleType(const std::vector<const Type*>& members) {
   return composite_type_factory_->NewTupleType(members);
+}
+
+const Type& TypeFactory::NewUnionType(
+    const std::vector<const Type*>& passed_members) {
+  std::set<const Type*> members;
+  for (const auto& member : passed_members) {
+    if (member->Is<NilType>())
+      continue;
+    if (member->Is<UnionType>()) {
+      for (const auto& member2 : member->As<UnionType>().members())
+        members.emplace(&member2);
+      continue;
+    }
+    members.emplace(member);
+  }
+  if (members.empty())
+    return nil_type();
+  if (members.size() == 1)
+    return **members.begin();
+  return composite_type_factory_->NewUnionType(
+      std::vector<const Type*>(members.begin(), members.end()));
 }
 
 }  // namespace ir

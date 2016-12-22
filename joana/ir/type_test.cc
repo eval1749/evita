@@ -115,5 +115,34 @@ TEST_F(IrTypeTest, TupleType) {
   EXPECT_EQ("Tuple<Control, Effect, Int64>", ToString(tuple3));
 }
 
+TEST_F(IrTypeTest, UnionType) {
+  auto& union0 = factory().NewUnionType({});
+  EXPECT_EQ(factory().NewUnionType({}), union0);
+  EXPECT_EQ("Nil", ToString(union0)) << "No member union type is nil type";
+
+  auto& union1 = factory().NewUnionType({&int64_type()});
+  EXPECT_EQ(factory().NewUnionType({&int64_type()}), union1);
+  EXPECT_EQ(int64_type(), union1)
+      << "Single member union should be its member type";
+  EXPECT_EQ("Int64", ToString(union1));
+
+  auto& union2 = factory().NewUnionType({&int64_type(), &bool_type()});
+  EXPECT_EQ(union2, factory().NewUnionType({&int64_type(), &bool_type()}));
+  EXPECT_EQ(union2, factory().NewUnionType({&bool_type(), &int64_type()}))
+      << "Order of members does not affect identity of union type";
+  EXPECT_EQ("Union<Bool, Int64>", ToString(union2));
+
+  auto& union3 = factory().NewUnionType({&float64_type(), &union2});
+  EXPECT_EQ(union3, factory().NewUnionType({&float64_type(), &union2}))
+      << "Unions have same member should be identical";
+  EXPECT_EQ(union3, factory().NewUnionType({&union2, &float64_type()}))
+      << "Order of members does not affect identity of union type";
+  EXPECT_EQ(
+      factory().NewUnionType({&bool_type(), &float64_type(), &int64_type()}),
+      union3)
+      << "Union should be flat";
+  EXPECT_EQ("Union<Bool, Float64, Int64>", ToString(union3));
+}
+
 }  // namespace ir
 }  // namespace joana

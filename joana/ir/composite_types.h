@@ -126,6 +126,27 @@ class JOANA_IR_EXPORT TupleType : public CompositeType {
   DISALLOW_COPY_AND_ASSIGN(TupleType);
 };
 
+//
+// UnionType
+//
+class JOANA_IR_EXPORT UnionType : public CompositeType {
+  DECLARE_CONCRETE_IR_TYPE(UnionType, CompositeType);
+
+ public:
+  ~UnionType();
+
+  auto members() const { return ReferenceRangeOf(members_); }
+
+ private:
+  friend class CompositeTypeFactory;
+
+  UnionType(Zone* zone, const std::vector<const Type*>& members);
+
+  ZoneVector<const Type*> members_;
+
+  DISALLOW_COPY_AND_ASSIGN(UnionType);
+};
+
 }  // namespace ir
 }  // namespace joana
 

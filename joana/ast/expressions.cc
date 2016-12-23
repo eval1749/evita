@@ -78,11 +78,11 @@ ComputedMemberExpression::~ComputedMemberExpression() = default;
 // ConditionalExpression
 //
 ConditionalExpression::ConditionalExpression(const SourceCodeRange& range,
-                                             Expression* condition,
-                                             Expression* true_expression,
-                                             Expression* false_expression)
+                                             const Expression& condition,
+                                             const Expression& true_expression,
+                                             const Expression& false_expression)
     : NodeTemplate(
-          std::make_tuple(condition, true_expression, false_expression),
+          std::make_tuple(&condition, &true_expression, &false_expression),
           range) {}
 
 ConditionalExpression::~ConditionalExpression() = default;

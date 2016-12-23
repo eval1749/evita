@@ -192,7 +192,10 @@ class JOANA_AST_EXPORT ComputedMemberExpression
 // ConditionalExpression
 //
 class JOANA_AST_EXPORT ConditionalExpression final
-    : public NodeTemplate<Expression, Expression*, Expression*, Expression*> {
+    : public NodeTemplate<Expression,
+                          const Expression*,
+                          const Expression*,
+                          const Expression*> {
   DECLARE_CONCRETE_AST_NODE(ConditionalExpression, Expression);
 
  public:
@@ -204,9 +207,9 @@ class JOANA_AST_EXPORT ConditionalExpression final
 
  private:
   ConditionalExpression(const SourceCodeRange& range,
-                        Expression* condition,
-                        Expression* true_expression,
-                        Expression* false_expression);
+                        const Expression& condition,
+                        const Expression& true_expression,
+                        const Expression& false_expression);
 
   DISALLOW_COPY_AND_ASSIGN(ConditionalExpression);
 };

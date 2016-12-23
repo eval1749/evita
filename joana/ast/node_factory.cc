@@ -191,10 +191,8 @@ ConditionalExpression& NodeFactory::NewConditionalExpression(
     const Expression& condition,
     const Expression& true_expression,
     const Expression& false_expression) {
-  return *new (zone_)
-      ConditionalExpression(range, const_cast<Expression*>(&condition),
-                            const_cast<Expression*>(&true_expression),
-                            const_cast<Expression*>(&false_expression));
+  return *new (zone_) ConditionalExpression(range, condition, true_expression,
+                                            false_expression);
 }
 
 DeclarationExpression& NodeFactory::NewDeclarationExpression(

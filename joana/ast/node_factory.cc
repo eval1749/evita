@@ -143,7 +143,7 @@ Method& NodeFactory::NewMethod(const SourceCodeRange& range,
 // Expressions
 ArrayLiteralExpression& NodeFactory::NewArrayLiteralExpression(
     const SourceCodeRange& range,
-    const std::vector<Expression*>& elements) {
+    const std::vector<const Expression*>& elements) {
   auto* const list = new (zone_) ExpressionList(zone_, elements);
   return *new (zone_) ArrayLiteralExpression(range, *list);
 }
@@ -166,14 +166,14 @@ BinaryExpression& NodeFactory::NewBinaryExpression(const SourceCodeRange& range,
 CallExpression& NodeFactory::NewCallExpression(
     const SourceCodeRange& range,
     const Expression& callee,
-    const std::vector<Expression*>& arguments) {
+    const std::vector<const Expression*>& arguments) {
   auto* const list = new (zone_) ExpressionList(zone_, arguments);
   return *new (zone_) CallExpression(range, callee, *list);
 }
 
 CommaExpression& NodeFactory::NewCommaExpression(
     const SourceCodeRange& range,
-    const std::vector<Expression*> expressions) {
+    const std::vector<const Expression*> expressions) {
   auto* const list = new (zone_) ExpressionList(zone_, expressions);
   return *new (zone_) CommaExpression(range, list);
 }
@@ -232,7 +232,7 @@ LiteralExpression& NodeFactory::NewLiteralExpression(const Literal& literal) {
 NewExpression& NodeFactory::NewNewExpression(
     const SourceCodeRange& range,
     const Expression& expression,
-    const std::vector<Expression*>& arguments) {
+    const std::vector<const Expression*>& arguments) {
   auto* const list = new (zone_) ExpressionList(zone_, arguments);
   return *new (zone_)
       NewExpression(range, const_cast<Expression*>(&expression), list);
@@ -240,7 +240,7 @@ NewExpression& NodeFactory::NewNewExpression(
 
 ObjectLiteralExpression& NodeFactory::NewObjectLiteralExpression(
     const SourceCodeRange& range,
-    const std::vector<Expression*>& elements) {
+    const std::vector<const Expression*>& elements) {
   auto* const list = new (zone_) ExpressionList(zone_, elements);
   return *new (zone_) ObjectLiteralExpression(range, list);
 }

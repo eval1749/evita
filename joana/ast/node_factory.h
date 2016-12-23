@@ -68,7 +68,7 @@ class JOANA_AST_EXPORT NodeFactory final {
   // Expressions factory members
   ArrayLiteralExpression& NewArrayLiteralExpression(
       const SourceCodeRange& range,
-      const std::vector<Expression*>& elements);
+      const std::vector<const Expression*>& elements);
   AssignmentExpression& NewAssignmentExpression(
       const SourceCodeRange& range,
       const Punctuator& op,
@@ -78,12 +78,13 @@ class JOANA_AST_EXPORT NodeFactory final {
                                         const Token& op,
                                         const Expression& left_hand_side,
                                         const Expression& right_hand_side);
-  CallExpression& NewCallExpression(const SourceCodeRange& range,
-                                    const Expression& callee,
-                                    const std::vector<Expression*>& arguments);
+  CallExpression& NewCallExpression(
+      const SourceCodeRange& range,
+      const Expression& callee,
+      const std::vector<const Expression*>& arguments);
   CommaExpression& NewCommaExpression(
       const SourceCodeRange& range,
-      const std::vector<Expression*> expressions);
+      const std::vector<const Expression*> expressions);
 
   // expression '[' expression ']'
   ComputedMemberExpression& NewComputedMemberExpression(
@@ -105,13 +106,14 @@ class JOANA_AST_EXPORT NodeFactory final {
   InvalidExpression& NewInvalidExpression(const Node& node, int error_code);
   LiteralExpression& NewLiteralExpression(const Literal& literal);
 
-  NewExpression& NewNewExpression(const SourceCodeRange& range,
-                                  const Expression& expression,
-                                  const std::vector<Expression*>& arguments);
+  NewExpression& NewNewExpression(
+      const SourceCodeRange& range,
+      const Expression& expression,
+      const std::vector<const Expression*>& arguments);
 
   ObjectLiteralExpression& NewObjectLiteralExpression(
       const SourceCodeRange& range,
-      const std::vector<Expression*>& elements);
+      const std::vector<const Expression*>& elements);
 
   MemberExpression& NewMemberExpression(const SourceCodeRange& range,
                                         const Expression& expression,

@@ -186,10 +186,10 @@ ast::Expression& Parser::NewUnaryExpression(const ast::Token& op,
 }
 
 // Parse argument list after consuming left parenthesis.
-std::vector<ast::Expression*> Parser::ParseArgumentList() {
+std::vector<const ast::Expression*> Parser::ParseArgumentList() {
   if (ConsumeTokenIf(ast::PunctuatorKind::RightParenthesis))
     return {};
-  std::vector<ast::Expression*> arguments;
+  std::vector<const ast::Expression*> arguments;
   while (CanPeekToken()) {
     arguments.push_back(&ParseExpression());
     if (!CanPeekToken())
@@ -210,7 +210,7 @@ ast::Expression& Parser::ParseArrayLiteralExpression() {
   SourceCodeRangeScope scope(this);
   DCHECK_EQ(PeekToken(), ast::PunctuatorKind::LeftBracket);
   ConsumeToken();
-  std::vector<ast::Expression*> elements;
+  std::vector<const ast::Expression*> elements;
   auto has_expression = false;
   while (CanPeekToken()) {
     if (ConsumeTokenIf(ast::PunctuatorKind::RightBracket)) {
@@ -267,12 +267,12 @@ ast::Expression& Parser::ParseBinaryExpression(OperatorPrecedence category) {
 
 ast::Expression& Parser::ParseCommaExpression() {
   SourceCodeRangeScope scope(this);
-  std::vector<ast::Expression*> expressions;
+  std::vector<const ast::Expression*> expressions;
   expressions.push_back(&ParseAssignmentExpression());
   while (ConsumeTokenIf(ast::PunctuatorKind::Comma))
     expressions.push_back(&ParseAssignmentExpression());
   if (expressions.size() == 1)
-    return *expressions.front();
+    return const_cast<ast::Expression&>(*expressions.front());
   return node_factory().NewCommaExpression(GetSourceCodeRange(), expressions);
 }
 
@@ -397,7 +397,7 @@ ast::Expression& Parser::ParseObjectLiteralExpression() {
   SourceCodeRangeScope scope(this);
   DCHECK_EQ(PeekToken(), ast::PunctuatorKind::LeftBrace);
   ConsumeToken();
-  std::vector<ast::Expression*> members;
+  std::vector<const ast::Expression*> members;
   auto comma = false;
   while (CanPeekToken()) {
     SourceCodeRangeScope scope(this);

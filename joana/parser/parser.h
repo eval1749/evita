@@ -123,7 +123,7 @@ class Parser final {
 
   ast::RegExp& ParseRegExp();
 
-  std::vector<ast::Expression*> ParseArgumentList();
+  std::vector<const ast::Expression*> ParseArgumentList();
   ast::Expression& ParseArrayLiteralExpression();
   ast::Expression& ParseAssignmentExpression();
   ast::Expression& ParseBinaryExpression(OperatorPrecedence category);

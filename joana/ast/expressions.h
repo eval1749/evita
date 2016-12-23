@@ -46,9 +46,9 @@ class JOANA_AST_EXPORT ExpressionList final : public ZoneAllocated {
  private:
   friend class NodeFactory;
 
-  ExpressionList(Zone* zone, const std::vector<Expression*>& expressions);
+  ExpressionList(Zone* zone, const std::vector<const Expression*>& expressions);
 
-  ZoneVector<Expression*> expressions_;
+  const ZoneVector<const Expression*> expressions_;
 
   DISALLOW_COPY_AND_ASSIGN(ExpressionList);
 };

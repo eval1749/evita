@@ -120,8 +120,9 @@ Expression::~Expression() = default;
 //
 // ExpressionList
 //
-ExpressionList::ExpressionList(Zone* zone,
-                               const std::vector<Expression*>& expressions)
+ExpressionList::ExpressionList(
+    Zone* zone,
+    const std::vector<const Expression*>& expressions)
     : expressions_(zone, expressions) {}
 
 ExpressionList::~ExpressionList() = default;

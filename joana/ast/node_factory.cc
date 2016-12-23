@@ -183,8 +183,7 @@ ComputedMemberExpression& NodeFactory::NewComputedMemberExpression(
     const Expression& expression,
     const Expression& name_expression) {
   return *new (zone_)
-      ComputedMemberExpression(range, const_cast<Expression*>(&expression),
-                               const_cast<Expression*>(&name_expression));
+      ComputedMemberExpression(range, expression, name_expression);
 }
 
 ConditionalExpression& NodeFactory::NewConditionalExpression(

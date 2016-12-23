@@ -66,10 +66,11 @@ CommaExpression::~CommaExpression() = default;
 //
 // ComputedMemberExpression
 //
-ComputedMemberExpression::ComputedMemberExpression(const SourceCodeRange& range,
-                                                   Expression* expression,
-                                                   Expression* name_expression)
-    : NodeTemplate(std::make_tuple(expression, name_expression), range) {}
+ComputedMemberExpression::ComputedMemberExpression(
+    const SourceCodeRange& range,
+    const Expression& expression,
+    const Expression& name_expression)
+    : NodeTemplate(std::make_tuple(&expression, &name_expression), range) {}
 
 ComputedMemberExpression::~ComputedMemberExpression() = default;
 

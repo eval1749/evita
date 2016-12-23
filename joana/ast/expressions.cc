@@ -122,7 +122,7 @@ EmptyExpression::~EmptyExpression() = default;
 //
 // Expression
 //
-Expression::Expression(const SourceCodeRange& range) : ContainerNode(range) {}
+Expression::Expression(const SourceCodeRange& range) : Node(range) {}
 
 Expression::~Expression() = default;
 

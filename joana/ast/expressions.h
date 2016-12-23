@@ -7,7 +7,7 @@
 
 #include <vector>
 
-#include "joana/ast/container_node.h"
+#include "joana/ast/node.h"
 #include "joana/ast/node_forward.h"
 #include "joana/ast/tokens.h"
 #include "joana/base/iterator_utils.h"
@@ -18,8 +18,8 @@ namespace ast {
 //
 // Expression is a base class of expression nodes.
 //
-class JOANA_AST_EXPORT Expression : public ContainerNode {
-  DECLARE_ABSTRACT_AST_NODE(Expression, ContainerNode);
+class JOANA_AST_EXPORT Expression : public Node {
+  DECLARE_ABSTRACT_AST_NODE(Expression, Node);
 
  public:
   ~Expression() override;

@@ -83,68 +83,71 @@ class Parser final {
   void SkipCommentTokens();
 
   // Declarations
-  ast::Token& NewEmptyName();
-  ast::ArrowFunctionBody& ParseArrowFunctionBody();
-  ast::Class& ParseClass();
-  ast::Expression& ParseClassBody();
-  ast::Expression& ParseClassHeritage();
-  ast::Token& ParseClassName();
-  ast::Function& ParseFunction(ast::FunctionKind kind);
-  ast::Statement& ParseFunctionBody();
-  ast::Method& ParseMethod(ast::MethodKind is_static, ast::FunctionKind kind);
-  ast::Expression& ParseParameterList();
-  ast::Expression& ParsePropertyName();
+  const ast::Token& NewEmptyName();
+  const ast::ArrowFunctionBody& ParseArrowFunctionBody();
+  const ast::Class& ParseClass();
+  const ast::Expression& ParseClassBody();
+  const ast::Expression& ParseClassHeritage();
+  const ast::Token& ParseClassName();
+  const ast::Function& ParseFunction(ast::FunctionKind kind);
+  const ast::Statement& ParseFunctionBody();
+  const ast::Method& ParseMethod(ast::MethodKind is_static,
+                                 ast::FunctionKind kind);
+  const ast::Expression& ParseParameterList();
+  const ast::Expression& ParsePropertyName();
 
   // Expressions
   OperatorPrecedence CategoryOf(const ast::Token& token) const;
 
-  ast::Expression& HandleComputedMember(ast::Expression* expression);
-  ast::Expression& HandleMember(ast::Expression* expression);
-  ast::Expression& HandleNewExpression(ast::Expression* expression);
+  const ast::Expression& HandleComputedMember(
+      const ast::Expression& expression);
+  const ast::Expression& HandleMember(const ast::Expression& expression);
+  const ast::Expression& HandleNewExpression(const ast::Expression& expression);
 
   OperatorPrecedence HigherPrecedenceOf(OperatorPrecedence category) const;
-  ast::Expression& NewDeclarationExpression(
+  const ast::Expression& NewDeclarationExpression(
       const ast::Declaration& declaration);
-  ast::Expression& NewElisionExpression();
-  ast::Expression& NewEmptyExpression();
-  ast::Expression& NewInvalidExpression(const ast::Token& token,
-                                        ErrorCode error_code);
-  ast::Expression& NewInvalidExpression(ErrorCode error_code);
-  ast::Expression& NewLiteralExpression(const ast::Literal& literal);
-  ast::Expression& NewUnaryExpression(const ast::Token& op,
-                                      const ast::Expression& expression);
+  const ast::Expression& NewElisionExpression();
+  const ast::Expression& NewEmptyExpression();
+  const ast::Expression& NewInvalidExpression(const ast::Token& token,
+                                              ErrorCode error_code);
+  const ast::Expression& NewInvalidExpression(ErrorCode error_code);
+  const ast::Expression& NewLiteralExpression(const ast::Literal& literal);
+  const ast::Expression& NewUnaryExpression(const ast::Token& op,
+                                            const ast::Expression& expression);
 
   // The entry of parsing an expression.
-  ast::Expression& ParseExpression();
+  const ast::Expression& ParseExpression();
 
   // Helper function for parsing an expression enclosed by parenthesis for
   // do-while, if, switch, and while statements.
   const ast::Expression& ParseParenthesisExpression();
 
-  ast::RegExp& ParseRegExp();
+  const ast::RegExp& ParseRegExp();
 
   std::vector<const ast::Expression*> ParseArgumentList();
-  ast::Expression& ParseArrayLiteralExpression();
-  ast::Expression& ParseAssignmentExpression();
-  ast::Expression& ParseBinaryExpression(OperatorPrecedence category);
-  ast::Expression& ParseCommaExpression();
-  ast::Expression& ParseConditionalExpression();
-  ast::Expression& ParseFunctionExpression(ast::FunctionKind kind);
-  ast::Expression& ParseLeftHandSideExpression();
-  ast::Expression& ParseMethodExpression(ast::MethodKind is_static,
-                                         ast::FunctionKind kind);
-  ast::Expression& ParseNameAsExpression();
-  ast::Expression& ParseNewExpression();
-  ast::Expression& ParseObjectLiteralExpression();
-  ast::Expression& ParseParenthesis();
-  ast::Expression& ParsePrimaryExpression();
-  ast::Expression& ParsePropertyAfterName(ast::Expression* property_name,
-                                          ast::MethodKind is_static,
-                                          ast::FunctionKind function_kind);
-  ast::Expression& ParseRegExpLiteral();
-  ast::Expression& ParseUnaryExpression();
-  ast::Expression& ParseUpdateExpression();
-  ast::Expression& ParseYieldExpression();
+  const ast::Expression& ParseArrayLiteralExpression();
+  const ast::Expression& ParseAssignmentExpression();
+  const ast::Expression& ParseBinaryExpression(OperatorPrecedence category);
+  const ast::Expression& ParseCommaExpression();
+  const ast::Expression& ParseConditionalExpression();
+  const ast::Expression& ParseFunctionExpression(ast::FunctionKind kind);
+  const ast::Expression& ParseLeftHandSideExpression();
+  const ast::Expression& ParseMethodExpression(ast::MethodKind is_static,
+                                               ast::FunctionKind kind);
+  const ast::Expression& ParseNameAsExpression();
+  const ast::Expression& ParseNewExpression();
+  const ast::Expression& ParseObjectLiteralExpression();
+  const ast::Expression& ParseParenthesis();
+  const ast::Expression& ParsePrimaryExpression();
+  const ast::Expression& ParsePropertyAfterName(
+      const ast::Expression& property_name,
+      ast::MethodKind is_static,
+      ast::FunctionKind function_kind);
+  const ast::Expression& ParseRegExpLiteral();
+  const ast::Expression& ParseUnaryExpression();
+  const ast::Expression& ParseUpdateExpression();
+  const ast::Expression& ParseYieldExpression();
 
   // Statements
   ast::Statement& HandleLabeledStatement(const ast::Name* name);

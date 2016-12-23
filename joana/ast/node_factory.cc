@@ -100,40 +100,41 @@ Punctuator& NodeFactory::NewPunctuator(const SourceCodeRange& range,
 }
 
 // Declarations
-ArrowFunction& NodeFactory::NewArrowFunction(const SourceCodeRange& range,
-                                             FunctionKind kind,
-                                             const Expression& parameter_list,
-                                             const ArrowFunctionBody& body) {
+const ArrowFunction& NodeFactory::NewArrowFunction(
+    const SourceCodeRange& range,
+    FunctionKind kind,
+    const Expression& parameter_list,
+    const ArrowFunctionBody& body) {
   return *new (zone_)
       ArrowFunction(range, kind, const_cast<Expression*>(&parameter_list),
                     const_cast<ArrowFunctionBody*>(&body));
 }
 
-Class& NodeFactory::NewClass(const SourceCodeRange& range,
-                             const Token& name,
-                             const Expression& heritage,
-                             const Expression& body) {
+const Class& NodeFactory::NewClass(const SourceCodeRange& range,
+                                   const Token& name,
+                                   const Expression& heritage,
+                                   const Expression& body) {
   return *new (zone_)
       Class(range, const_cast<Token*>(&name),
             const_cast<Expression*>(&heritage), const_cast<Expression*>(&body));
 }
 
-Function& NodeFactory::NewFunction(const SourceCodeRange& range,
-                                   FunctionKind kind,
-                                   const Token& name,
-                                   const Expression& parameter_list,
-                                   const Statement& body) {
+const Function& NodeFactory::NewFunction(const SourceCodeRange& range,
+                                         FunctionKind kind,
+                                         const Token& name,
+                                         const Expression& parameter_list,
+                                         const Statement& body) {
   return *new (zone_) Function(range, kind, const_cast<Token*>(&name),
                                const_cast<Expression*>(&parameter_list),
                                const_cast<Statement*>(&body));
 }
 
-Method& NodeFactory::NewMethod(const SourceCodeRange& range,
-                               MethodKind is_static,
-                               FunctionKind kind,
-                               const Expression& name,
-                               const Expression& parameter_list,
-                               const Statement& method_body) {
+const Method& NodeFactory::NewMethod(const SourceCodeRange& range,
+                                     MethodKind is_static,
+                                     FunctionKind kind,
+                                     const Expression& name,
+                                     const Expression& parameter_list,
+                                     const Statement& method_body) {
   return *new (zone_)
       Method(range, is_static, kind, const_cast<Expression*>(&name),
              const_cast<Expression*>(&parameter_list),
@@ -141,14 +142,14 @@ Method& NodeFactory::NewMethod(const SourceCodeRange& range,
 }
 
 // Expressions
-ArrayLiteralExpression& NodeFactory::NewArrayLiteralExpression(
+const Expression& NodeFactory::NewArrayLiteralExpression(
     const SourceCodeRange& range,
     const std::vector<const Expression*>& elements) {
   auto* const list = new (zone_) ExpressionList(zone_, elements);
   return *new (zone_) ArrayLiteralExpression(range, *list);
 }
 
-AssignmentExpression& NodeFactory::NewAssignmentExpression(
+const Expression& NodeFactory::NewAssignmentExpression(
     const SourceCodeRange& range,
     const Punctuator& op,
     const Expression& lhs,
@@ -156,14 +157,14 @@ AssignmentExpression& NodeFactory::NewAssignmentExpression(
   return *new (zone_) AssignmentExpression(range, op, lhs, rhs);
 }
 
-BinaryExpression& NodeFactory::NewBinaryExpression(const SourceCodeRange& range,
+const Expression& NodeFactory::NewBinaryExpression(const SourceCodeRange& range,
                                                    const Token& op,
                                                    const Expression& lhs,
                                                    const Expression& rhs) {
   return *new (zone_) BinaryExpression(range, op, lhs, rhs);
 }
 
-CallExpression& NodeFactory::NewCallExpression(
+const Expression& NodeFactory::NewCallExpression(
     const SourceCodeRange& range,
     const Expression& callee,
     const std::vector<const Expression*>& arguments) {
@@ -171,14 +172,14 @@ CallExpression& NodeFactory::NewCallExpression(
   return *new (zone_) CallExpression(range, callee, *list);
 }
 
-CommaExpression& NodeFactory::NewCommaExpression(
+const Expression& NodeFactory::NewCommaExpression(
     const SourceCodeRange& range,
     const std::vector<const Expression*>& expressions) {
   auto* const list = new (zone_) ExpressionList(zone_, expressions);
   return *new (zone_) CommaExpression(range, *list);
 }
 
-ComputedMemberExpression& NodeFactory::NewComputedMemberExpression(
+const Expression& NodeFactory::NewComputedMemberExpression(
     const SourceCodeRange& range,
     const Expression& expression,
     const Expression& name_expression) {
@@ -186,7 +187,7 @@ ComputedMemberExpression& NodeFactory::NewComputedMemberExpression(
       ComputedMemberExpression(range, expression, name_expression);
 }
 
-ConditionalExpression& NodeFactory::NewConditionalExpression(
+const Expression& NodeFactory::NewConditionalExpression(
     const SourceCodeRange& range,
     const Expression& condition,
     const Expression& true_expression,
@@ -195,37 +196,39 @@ ConditionalExpression& NodeFactory::NewConditionalExpression(
                                             false_expression);
 }
 
-DeclarationExpression& NodeFactory::NewDeclarationExpression(
+const Expression& NodeFactory::NewDeclarationExpression(
     const Declaration& declaration) {
   return *new (zone_) DeclarationExpression(declaration);
 }
 
-ElisionExpression& NodeFactory::NewElisionExpression(
+const Expression& NodeFactory::NewElisionExpression(
     const SourceCodeRange& range) {
   DCHECK_EQ(range.start(), range.end()) << range;
   return *new (zone_) ElisionExpression(range);
 }
 
-EmptyExpression& NodeFactory::NewEmptyExpression(const SourceCodeRange& range) {
+const Expression& NodeFactory::NewEmptyExpression(
+    const SourceCodeRange& range) {
   return *new (zone_) EmptyExpression(range);
 }
 
-GroupExpression& NodeFactory::NewGroupExpression(const SourceCodeRange& range,
-                                                 const Expression& expression) {
+const Expression& NodeFactory::NewGroupExpression(
+    const SourceCodeRange& range,
+    const Expression& expression) {
   return *new (zone_)
       GroupExpression(range, const_cast<Expression*>(&expression));
 }
 
-InvalidExpression& NodeFactory::NewInvalidExpression(const Node& node,
-                                                     int error_code) {
+const Expression& NodeFactory::NewInvalidExpression(const Node& node,
+                                                    int error_code) {
   return *new (zone_) InvalidExpression(node, error_code);
 }
 
-LiteralExpression& NodeFactory::NewLiteralExpression(const Literal& literal) {
+const Expression& NodeFactory::NewLiteralExpression(const Literal& literal) {
   return *new (zone_) LiteralExpression(literal);
 }
 
-NewExpression& NodeFactory::NewNewExpression(
+const Expression& NodeFactory::NewNewExpression(
     const SourceCodeRange& range,
     const Expression& expression,
     const std::vector<const Expression*>& arguments) {
@@ -234,21 +237,21 @@ NewExpression& NodeFactory::NewNewExpression(
       NewExpression(range, const_cast<Expression*>(&expression), list);
 }
 
-ObjectLiteralExpression& NodeFactory::NewObjectLiteralExpression(
+const Expression& NodeFactory::NewObjectLiteralExpression(
     const SourceCodeRange& range,
     const std::vector<const Expression*>& elements) {
   auto* const list = new (zone_) ExpressionList(zone_, elements);
   return *new (zone_) ObjectLiteralExpression(range, list);
 }
 
-MemberExpression& NodeFactory::NewMemberExpression(const SourceCodeRange& range,
+const Expression& NodeFactory::NewMemberExpression(const SourceCodeRange& range,
                                                    const Expression& expression,
                                                    const Name& name) {
   return *new (zone_) MemberExpression(
       range, const_cast<Expression*>(&expression), const_cast<Name*>(&name));
 }
 
-PropertyDefinitionExpression& NodeFactory::NewPropertyDefinitionExpression(
+const Expression& NodeFactory::NewPropertyDefinitionExpression(
     const SourceCodeRange& range,
     const Expression& name,
     const Expression& value) {
@@ -256,11 +259,11 @@ PropertyDefinitionExpression& NodeFactory::NewPropertyDefinitionExpression(
       range, const_cast<Expression*>(&name), const_cast<Expression*>(&value));
 }
 
-ReferenceExpression& NodeFactory::NewReferenceExpression(const Name& name) {
+const Expression& NodeFactory::NewReferenceExpression(const Name& name) {
   return *new (zone_) ReferenceExpression(const_cast<Name*>(&name));
 }
 
-RegExpLiteralExpression& NodeFactory::NewRegExpLiteralExpression(
+const Expression& NodeFactory::NewRegExpLiteralExpression(
     const SourceCodeRange& range,
     const RegExp& regexp,
     const Token& flags) {
@@ -268,9 +271,10 @@ RegExpLiteralExpression& NodeFactory::NewRegExpLiteralExpression(
       range, const_cast<RegExp*>(&regexp), const_cast<Token*>(&flags));
 }
 
-UnaryExpression& NodeFactory::NewUnaryExpression(const SourceCodeRange& range,
-                                                 const Token& op,
-                                                 const Expression& expression) {
+const Expression& NodeFactory::NewUnaryExpression(
+    const SourceCodeRange& range,
+    const Token& op,
+    const Expression& expression) {
   return *new (zone_) UnaryExpression(range, const_cast<Token*>(&op),
                                       const_cast<Expression*>(&expression));
 }

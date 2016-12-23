@@ -42,97 +42,94 @@ class JOANA_AST_EXPORT NodeFactory final {
   //
   // Declarations factory members
   //
-  ArrowFunction& NewArrowFunction(const SourceCodeRange& range,
-                                  FunctionKind kind,
-                                  const Expression& parameter_list,
-                                  const Node& body);
+  const ArrowFunction& NewArrowFunction(const SourceCodeRange& range,
+                                        FunctionKind kind,
+                                        const Expression& parameter_list,
+                                        const Node& body);
 
-  Class& NewClass(const SourceCodeRange& range,
-                  const Token& name,
-                  const Expression& heritage,
-                  const Expression& body);
-
-  Function& NewFunction(const SourceCodeRange& range,
-                        FunctionKind kind,
+  const Class& NewClass(const SourceCodeRange& range,
                         const Token& name,
-                        const Expression& parameter_list,
-                        const Statement& body);
+                        const Expression& heritage,
+                        const Expression& body);
 
-  Method& NewMethod(const SourceCodeRange& range,
-                    MethodKind is_static,
-                    FunctionKind kind,
-                    const Expression& name,
-                    const Expression& parameter_list,
-                    const Statement& body);
+  const Function& NewFunction(const SourceCodeRange& range,
+                              FunctionKind kind,
+                              const Token& name,
+                              const Expression& parameter_list,
+                              const Statement& body);
+
+  const Method& NewMethod(const SourceCodeRange& range,
+                          MethodKind is_static,
+                          FunctionKind kind,
+                          const Expression& name,
+                          const Expression& parameter_list,
+                          const Statement& body);
 
   // Expressions factory members
-  ArrayLiteralExpression& NewArrayLiteralExpression(
+  const Expression& NewArrayLiteralExpression(
       const SourceCodeRange& range,
       const std::vector<const Expression*>& elements);
-  AssignmentExpression& NewAssignmentExpression(
-      const SourceCodeRange& range,
-      const Punctuator& op,
-      const Expression& left_hand_side,
-      const Expression& right_hand_side);
-  BinaryExpression& NewBinaryExpression(const SourceCodeRange& range,
+  const Expression& NewAssignmentExpression(const SourceCodeRange& range,
+                                            const Punctuator& op,
+                                            const Expression& left_hand_side,
+                                            const Expression& right_hand_side);
+  const Expression& NewBinaryExpression(const SourceCodeRange& range,
                                         const Token& op,
                                         const Expression& left_hand_side,
                                         const Expression& right_hand_side);
-  CallExpression& NewCallExpression(
+  const Expression& NewCallExpression(
       const SourceCodeRange& range,
       const Expression& callee,
       const std::vector<const Expression*>& arguments);
-  CommaExpression& NewCommaExpression(
+  const Expression& NewCommaExpression(
       const SourceCodeRange& range,
       const std::vector<const Expression*>& expressions);
 
   // expression '[' expression ']'
-  ComputedMemberExpression& NewComputedMemberExpression(
+  const Expression& NewComputedMemberExpression(
       const SourceCodeRange& range,
       const Expression& expression,
       const Expression& name_expression);
 
-  ConditionalExpression& NewConditionalExpression(
+  const Expression& NewConditionalExpression(
       const SourceCodeRange& range,
       const Expression& condition,
       const Expression& true_expression,
       const Expression& false_expression);
-  DeclarationExpression& NewDeclarationExpression(
-      const Declaration& declaration);
-  ElisionExpression& NewElisionExpression(const SourceCodeRange& range);
-  EmptyExpression& NewEmptyExpression(const SourceCodeRange& range);
-  GroupExpression& NewGroupExpression(const SourceCodeRange& range,
-                                      const Expression& expression);
-  InvalidExpression& NewInvalidExpression(const Node& node, int error_code);
-  LiteralExpression& NewLiteralExpression(const Literal& literal);
+  const Expression& NewDeclarationExpression(const Declaration& declaration);
+  const Expression& NewElisionExpression(const SourceCodeRange& range);
+  const Expression& NewEmptyExpression(const SourceCodeRange& range);
+  const Expression& NewGroupExpression(const SourceCodeRange& range,
+                                       const Expression& expression);
+  const Expression& NewInvalidExpression(const Node& node, int error_code);
+  const Expression& NewLiteralExpression(const Literal& literal);
 
-  NewExpression& NewNewExpression(
+  const Expression& NewNewExpression(
       const SourceCodeRange& range,
       const Expression& expression,
       const std::vector<const Expression*>& arguments);
 
-  ObjectLiteralExpression& NewObjectLiteralExpression(
+  const Expression& NewObjectLiteralExpression(
       const SourceCodeRange& range,
       const std::vector<const Expression*>& elements);
 
-  MemberExpression& NewMemberExpression(const SourceCodeRange& range,
+  const Expression& NewMemberExpression(const SourceCodeRange& range,
                                         const Expression& expression,
                                         const Name& name);
-  PropertyDefinitionExpression& NewPropertyDefinitionExpression(
+  const Expression& NewPropertyDefinitionExpression(
       const SourceCodeRange& range,
       const Expression& name,
       const Expression& value);
 
-  ReferenceExpression& NewReferenceExpression(const Name& name);
+  const Expression& NewReferenceExpression(const Name& name);
 
-  RegExpLiteralExpression& NewRegExpLiteralExpression(
-      const SourceCodeRange& range,
-      const RegExp& regexp,
-      const Token& flags);
+  const Expression& NewRegExpLiteralExpression(const SourceCodeRange& range,
+                                               const RegExp& regexp,
+                                               const Token& flags);
 
-  UnaryExpression& NewUnaryExpression(const SourceCodeRange& range,
-                                      const Token& op,
-                                      const Expression& expression);
+  const Expression& NewUnaryExpression(const SourceCodeRange& range,
+                                       const Token& op,
+                                       const Expression& expression);
 
   // Literals factory members
   BooleanLiteral& NewBooleanLiteral(const Name& name, bool value);

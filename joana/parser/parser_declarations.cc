@@ -12,7 +12,7 @@
 namespace joana {
 namespace internal {
 
-ast::ArrowFunctionBody& Parser::ParseArrowFunctionBody() {
+const ast::ArrowFunctionBody& Parser::ParseArrowFunctionBody() {
   if (!CanPeekToken()) {
     return NewInvalidStatement(
         ErrorCode::ERROR_FUNCTION_INVALID_ARROW_FUNCTION_BODY);
@@ -22,7 +22,7 @@ ast::ArrowFunctionBody& Parser::ParseArrowFunctionBody() {
   return ParseAssignmentExpression();
 }
 
-ast::Class& Parser::ParseClass() {
+const ast::Class& Parser::ParseClass() {
   SourceCodeRangeScope scope(this);
   DCHECK_EQ(PeekToken(), ast::NameId::Class);
   ConsumeToken();
@@ -33,20 +33,20 @@ ast::Class& Parser::ParseClass() {
                                  class_body);
 }
 
-ast::Expression& Parser::ParseClassBody() {
+const ast::Expression& Parser::ParseClassBody() {
   SourceCodeRangeScope scope(this);
   if (!CanPeekToken() || PeekToken() != ast::PunctuatorKind::LeftBrace)
     return NewInvalidExpression(ErrorCode::ERROR_CLASS_EXPECT_LBRACE);
   return ParsePrimaryExpression();
 }
 
-ast::Expression& Parser::ParseClassHeritage() {
+const ast::Expression& Parser::ParseClassHeritage() {
   if (!ConsumeTokenIf(ast::NameId::Extends))
     return NewEmptyExpression();
   return ParseLeftHandSideExpression();
 }
 
-ast::Token& Parser::ParseClassName() {
+const ast::Token& Parser::ParseClassName() {
   if (!CanPeekToken() || !PeekToken().Is<ast::Name>())
     return NewEmptyName();
   if (PeekToken() == ast::NameId::Extends)
@@ -54,7 +54,7 @@ ast::Token& Parser::ParseClassName() {
   return ConsumeToken().As<ast::Name>();
 }
 
-ast::Function& Parser::ParseFunction(ast::FunctionKind kind) {
+const ast::Function& Parser::ParseFunction(ast::FunctionKind kind) {
   auto& name = PeekToken().Is<ast::Name>() ? ConsumeToken() : NewEmptyName();
   auto& parameter_list = ParseParameterList();
   auto& body = ParseFunctionBody();
@@ -62,15 +62,15 @@ ast::Function& Parser::ParseFunction(ast::FunctionKind kind) {
                                     parameter_list, body);
 }
 
-ast::Statement& Parser::ParseFunctionBody() {
+const ast::Statement& Parser::ParseFunctionBody() {
   SourceCodeRangeScope scope(this);
   if (!CanPeekToken() || PeekToken() != ast::PunctuatorKind::LeftBrace)
     return NewInvalidStatement(ErrorCode::ERROR_FUNCTION_EXPECT_LBRACE);
   return ParseStatement();
 }
 
-ast::Method& Parser::ParseMethod(ast::MethodKind is_static,
-                                 ast::FunctionKind kind) {
+const ast::Method& Parser::ParseMethod(ast::MethodKind is_static,
+                                       ast::FunctionKind kind) {
   auto& method_name = ParsePropertyName();
   auto& parameter_list = ParseParameterList();
   auto& method_body = ParseFunctionBody();
@@ -78,7 +78,7 @@ ast::Method& Parser::ParseMethod(ast::MethodKind is_static,
                                   method_name, parameter_list, method_body);
 }
 
-ast::Expression& Parser::ParseParameterList() {
+const ast::Expression& Parser::ParseParameterList() {
   SourceCodeRangeScope scope(this);
   if (!ConsumeTokenIf(ast::PunctuatorKind::LeftParenthesis))
     return NewInvalidExpression(ErrorCode::ERROR_FUNCTION_EXPECT_LPAREN);

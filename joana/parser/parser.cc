@@ -221,7 +221,7 @@ SourceCodeRange Parser::GetSourceCodeRange() const {
       CanPeekToken() ? PeekToken().range().end() : lexer_->location().end());
 }
 
-ast::Token& Parser::NewEmptyName() {
+const ast::Token& Parser::NewEmptyName() {
   return node_factory().NewEmpty(lexer_->location());
 }
 

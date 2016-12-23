@@ -106,9 +106,7 @@ const ArrowFunction& NodeFactory::NewArrowFunction(
     FunctionKind kind,
     const Expression& parameter_list,
     const ArrowFunctionBody& body) {
-  return *new (zone_)
-      ArrowFunction(range, kind, const_cast<Expression*>(&parameter_list),
-                    const_cast<ArrowFunctionBody*>(&body));
+  return *new (zone_) ArrowFunction(range, kind, parameter_list, body);
 }
 
 const Class& NodeFactory::NewClass(const SourceCodeRange& range,

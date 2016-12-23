@@ -14,9 +14,9 @@ namespace ast {
 //
 ArrowFunction::ArrowFunction(const SourceCodeRange& range,
                              FunctionKind kind,
-                             Expression* parameter_list,
-                             ArrowFunctionBody* body)
-    : NodeTemplate(std::make_tuple(kind, parameter_list, body), range) {}
+                             const Expression& parameter_list,
+                             const ArrowFunctionBody& body)
+    : NodeTemplate(std::make_tuple(kind, &parameter_list, &body), range) {}
 
 ArrowFunction::~ArrowFunction() = default;
 

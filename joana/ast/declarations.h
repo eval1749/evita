@@ -61,8 +61,8 @@ class JOANA_AST_EXPORT Declaration : public Node {
 class JOANA_AST_EXPORT ArrowFunction final
     : public NodeTemplate<Declaration,
                           FunctionKind,
-                          Expression*,
-                          ArrowFunctionBody*> {
+                          const Expression*,
+                          const ArrowFunctionBody*> {
   DECLARE_CONCRETE_AST_NODE(ArrowFunction, Declaration);
 
  public:
@@ -76,8 +76,8 @@ class JOANA_AST_EXPORT ArrowFunction final
   // |statement| should be either expression statement or block statement.
   ArrowFunction(const SourceCodeRange& range,
                 FunctionKind kind,
-                Expression* parameter_list,
-                ArrowFunctionBody* body);
+                const Expression& parameter_list,
+                const ArrowFunctionBody& body);
 
   DISALLOW_COPY_AND_ASSIGN(ArrowFunction);
 };
@@ -113,10 +113,10 @@ class JOANA_AST_EXPORT Class final
 //  - (a, b, ...) = GroupExpression with CommaExpression
 //
 class JOANA_AST_EXPORT Function final : public NodeTemplate<Declaration,
-                                                               FunctionKind,
-                                                               Token*,
-                                                               Expression*,
-                                                               Statement*> {
+                                                            FunctionKind,
+                                                            Token*,
+                                                            Expression*,
+                                                            Statement*> {
   DECLARE_CONCRETE_AST_NODE(Function, Declaration);
 
  public:
@@ -146,11 +146,11 @@ class JOANA_AST_EXPORT Function final : public NodeTemplate<Declaration,
 //  - (a, b, ...) = GroupExpression with CommaExpression
 //
 class JOANA_AST_EXPORT Method final : public NodeTemplate<Declaration,
-                                                             MethodKind,
-                                                             FunctionKind,
-                                                             Expression*,
-                                                             Expression*,
-                                                             Statement*> {
+                                                          MethodKind,
+                                                          FunctionKind,
+                                                          Expression*,
+                                                          Expression*,
+                                                          Statement*> {
   DECLARE_CONCRETE_AST_NODE(Method, Declaration);
 
  public:

@@ -10,6 +10,7 @@ executable("checker") {
   ]
 
   deps = [
+    "//joana/analyzer/public",
     "//joana/parser/public",
   ]
 

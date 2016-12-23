@@ -1,0 +1,24 @@
+# Copyright (c) 2016 Project Vogue. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+source_set("analyzer") {
+  sources = [
+    "analyzer.cc",
+    "analyzer.h",
+  ]
+  public_deps = [
+    "//joana/ast",
+    "//joana/base",
+  ]
+}
+
+source_set("test_files") {
+  testonly = true
+  sources = []
+  deps = [
+    ":analyzer",
+    "//joana/analyzer/public",
+    "//testing/gtest",
+  ]
+}

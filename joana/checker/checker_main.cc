@@ -18,6 +18,7 @@
 #include "base/strings/string_piece.h"
 #include "base/strings/string_split.h"
 #include "base/strings/utf_string_conversions.h"
+#include "joana/analyzer/public/analyze.h"
 #include "joana/ast/edit_context.h"
 #include "joana/ast/edit_context_builder.h"
 #include "joana/ast/error_codes.h"
@@ -172,6 +173,8 @@ class Checker final {
   void AddSourceCode(const base::FilePath& file_path,
                      base::StringPiece16 file_contents);
 
+  void Analyze();
+
   ScriptModule& ModuleOf(const SourceCode& source_code) const;
   int Run();
 
@@ -179,11 +182,12 @@ class Checker final {
   Zone node_zone_;
   ast::NodeFactory node_factory_;
   std::unique_ptr<ast::EditContext> context_;
+  std::vector<const ast::Node*> modules_;
+  std::unordered_map<const SourceCode*, std::unique_ptr<ScriptModule>>
+      module_map_;
   std::vector<const SourceCode*> source_codes_;
   Zone source_code_zone_;
   SourceCode::Factory source_code_factory_;
-  std::unordered_map<const SourceCode*, std::unique_ptr<ScriptModule>>
-      module_map_;
   ParserOptions options_;
 
   DISALLOW_COPY_AND_ASSIGN(Checker);
@@ -205,7 +209,17 @@ void Checker::AddSourceCode(const base::FilePath& file_path,
   const auto& source_code = source_code_factory_.New(file_path, file_contents);
   source_codes_.push_back(&source_code);
   const auto& module = Parse(context_.get(), source_code.range(), options_);
+  modules_.push_back(&module);
   module_map_.emplace(&source_code, new ScriptModule(source_code, module));
+}
+
+// Analyze modules after we parse all modules.
+void Checker::Analyze() {
+  Zone zone("AnalyzeContext");
+  const auto& options = joana::AnalyzeContext::Options::Builder().Build();
+  joana::AnalyzeContext context(&zone, &error_sink_, options);
+  for (const auto& module : modules_)
+    joana::Analyze(&context, *module);
 }
 
 int Checker::Main() {
@@ -260,6 +274,8 @@ int Checker::Main() {
 }
 
 int Checker::Run() {
+  Analyze();
+
   for (auto* const error : error_sink_.errors()) {
     const auto& source_code = error->range().source_code();
     const auto& module = ModuleOf(source_code);

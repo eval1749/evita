@@ -69,15 +69,16 @@ NodeFactory::NodeFactory(Zone* zone)
 NodeFactory::~NodeFactory() = default;
 
 // Nodes
-Comment& NodeFactory::NewComment(const SourceCodeRange& range) {
+const Token& NodeFactory::NewComment(const SourceCodeRange& range) {
   return *new (zone_) Comment(range);
 }
 
-Empty& NodeFactory::NewEmpty(const SourceCodeRange& range) {
+const Token& NodeFactory::NewEmpty(const SourceCodeRange& range) {
   return *new (zone_) Empty(range);
 }
 
-Invalid& NodeFactory::NewInvalid(const SourceCodeRange& range, int error_code) {
+const Token& NodeFactory::NewInvalid(const SourceCodeRange& range,
+                                     int error_code) {
   return *new (zone_) Invalid(range, error_code);
 }
 
@@ -85,17 +86,17 @@ Module& NodeFactory::NewModule(const SourceCodeRange& range) {
   return *new (zone_) Module(range);
 }
 
-Name& NodeFactory::NewName(const SourceCodeRange& range, NameId name_id) {
+const Name& NodeFactory::NewName(const SourceCodeRange& range, NameId name_id) {
   DCHECK_EQ(name_id, NameId::YieldStar);
   return *new (zone_) Name(range, static_cast<int>(name_id));
 }
 
-Name& NodeFactory::NewName(const SourceCodeRange& range) {
+const Name& NodeFactory::NewName(const SourceCodeRange& range) {
   return *new (zone_) Name(range, name_id_map_->Register(range.GetString()));
 }
 
-Punctuator& NodeFactory::NewPunctuator(const SourceCodeRange& range,
-                                       PunctuatorKind kind) {
+const Punctuator& NodeFactory::NewPunctuator(const SourceCodeRange& range,
+                                             PunctuatorKind kind) {
   return *new (zone_) Punctuator(range, kind);
 }
 

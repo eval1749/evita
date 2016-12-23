@@ -148,13 +148,13 @@ bool Parser::CanPeekToken() const {
   return lexer_->CanPeekToken();
 }
 
-ast::Token& Parser::ConsumeToken() {
+const ast::Token& Parser::ConsumeToken() {
   auto& token = PeekToken();
   Advance();
   return token;
 }
 
-ast::Token& Parser::ComputeInvalidToken(ErrorCode error_code) {
+const ast::Token& Parser::ComputeInvalidToken(ErrorCode error_code) {
   if (CanPeekToken())
     return PeekToken();
   return node_factory().NewInvalid(source_code().end(),
@@ -225,7 +225,7 @@ const ast::Token& Parser::NewEmptyName() {
   return node_factory().NewEmpty(lexer_->location());
 }
 
-ast::Token& Parser::PeekToken() const {
+const ast::Token& Parser::PeekToken() const {
   if (token_stack_.empty())
     return lexer_->PeekToken();
   return *token_stack_.top();

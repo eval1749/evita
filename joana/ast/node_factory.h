@@ -25,19 +25,20 @@ class JOANA_AST_EXPORT NodeFactory final {
   ~NodeFactory();
 
   // Factory member functions
-  Comment& NewComment(const SourceCodeRange& range);
-  Empty& NewEmpty(const SourceCodeRange& range);
+  const Token& NewComment(const SourceCodeRange& range);
+  const Token& NewEmpty(const SourceCodeRange& range);
 
-  Invalid& NewInvalid(const SourceCodeRange& range, int error_code);
+  const Token& NewInvalid(const SourceCodeRange& range, int error_code);
 
   Module& NewModule(const SourceCodeRange& range);
 
   // Returns new |Name| token with specified |name_id|. This function is used
   // for constructing pseudo name "yield*".
-  Name& NewName(const SourceCodeRange& range, NameId name_id);
-  Name& NewName(const SourceCodeRange& range);
+  const Name& NewName(const SourceCodeRange& range, NameId name_id);
+  const Name& NewName(const SourceCodeRange& range);
 
-  Punctuator& NewPunctuator(const SourceCodeRange& range, PunctuatorKind kind);
+  const Punctuator& NewPunctuator(const SourceCodeRange& range,
+                                  PunctuatorKind kind);
 
   //
   // Declarations factory members

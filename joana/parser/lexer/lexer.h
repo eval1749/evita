@@ -56,7 +56,7 @@ class Lexer final {
   // Returns |ast::RegExp| after "/".
   ast::RegExp& ConsumeRegExp();
 
-  ast::Token& PeekToken() const;
+  const ast::Token& PeekToken() const;
 
  private:
   ast::NodeFactory& node_factory() const;
@@ -75,31 +75,32 @@ class Lexer final {
 
   // Returns character.
   base::char16 PeekChar() const;
-  ast::Token& HandleBlockComment();
-  ast::Token& HandleCharacter();
-  ast::Token& HandleDecimal();
-  ast::Token& HandleDecimalAfterDot(uint64_t integer_part, int integer_scale);
-  ast::Token& HandleDigitZero();
-  ast::Token& HandleInteger(int base);
-  ast::Token& HandleLineComment();
-  ast::Token& HandleName();
-  ast::Token& HandleOperator(ast::PunctuatorKind one,
-                             ast::PunctuatorKind two,
-                             ast::PunctuatorKind equal);
-  ast::Token& HandleStringLiteral();
+  const ast::Token& HandleBlockComment();
+  const ast::Token& HandleCharacter();
+  const ast::Token& HandleDecimal();
+  const ast::Token& HandleDecimalAfterDot(uint64_t integer_part,
+                                          int integer_scale);
+  const ast::Token& HandleDigitZero();
+  const ast::Token& HandleInteger(int base);
+  const ast::Token& HandleLineComment();
+  const ast::Token& HandleName();
+  const ast::Token& HandleOperator(ast::PunctuatorKind one,
+                                   ast::PunctuatorKind two,
+                                   ast::PunctuatorKind equal);
+  const ast::Token& HandleStringLiteral();
 
   SourceCodeRange MakeTokenRange() const;
 
-  ast::Token& NewError(ErrorCode error_code);
-  ast::Token& NewInvalid(ErrorCode error_code);
-  ast::Token& NewPunctuator(ast::PunctuatorKind kind);
+  const ast::Token& NewError(ErrorCode error_code);
+  const ast::Token& NewInvalid(ErrorCode error_code);
+  const ast::Token& NewPunctuator(ast::PunctuatorKind kind);
 
-  ast::Token* NextToken();
+  const ast::Token* NextToken();
 
   SourceCodeRange RangeFrom(int start) const;
 
   ast::EditContext& context_;
-  ast::Token* current_token_ = nullptr;
+  const ast::Token* current_token_ = nullptr;
 
   // True if current token and previous token is separated by at least one
   // line terminator.

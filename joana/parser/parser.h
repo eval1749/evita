@@ -67,8 +67,8 @@ class Parser final {
 
   void Advance();
   bool CanPeekToken() const;
-  ast::Token& ComputeInvalidToken(ErrorCode error_code);
-  ast::Token& ConsumeToken();
+  const ast::Token& ComputeInvalidToken(ErrorCode error_code);
+  const ast::Token& ConsumeToken();
   // Returns true if |Lexer| has a punctuator of |name_id| and advance to next
   // token.
   bool ConsumeTokenIf(ast::NameId keyword_id);
@@ -78,7 +78,7 @@ class Parser final {
   void ExpectPunctuator(ast::PunctuatorKind kind, ErrorCode error_code);
   void ExpectSemicolon();
   SourceCodeRange GetSourceCodeRange() const;
-  ast::Token& PeekToken() const;
+  const ast::Token& PeekToken() const;
   void PushBackToken(const ast::Token& token);
   void SkipCommentTokens();
 
@@ -193,11 +193,11 @@ class Parser final {
   std::stack<int> range_stack_;
 
   // List of tokens to locate comment.
-  std::vector<ast::Token*> tokens_;
+  std::vector<const ast::Token*> tokens_;
 
   // |token_stack_| is used for look ahead, e.g. detecting whether name is
   // part of an expression or label.
-  std::stack<ast::Token*> token_stack_;
+  std::stack<const ast::Token*> token_stack_;
 
   DISALLOW_COPY_AND_ASSIGN(Parser);
 };

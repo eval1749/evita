@@ -58,8 +58,8 @@ CallExpression::~CallExpression() = default;
 // CommaExpression
 //
 CommaExpression::CommaExpression(const SourceCodeRange& range,
-                                 ExpressionList* expressions)
-    : NodeTemplate(expressions, range) {}
+                                 const ExpressionList& expressions)
+    : NodeTemplate(&expressions, range) {}
 
 CommaExpression::~CommaExpression() = default;
 

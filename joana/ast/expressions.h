@@ -151,7 +151,7 @@ class JOANA_AST_EXPORT CallExpression final
 // CommaExpression
 //
 class JOANA_AST_EXPORT CommaExpression final
-    : public NodeTemplate<Expression, ExpressionList*> {
+    : public NodeTemplate<Expression, const ExpressionList*> {
   DECLARE_CONCRETE_AST_NODE(CommaExpression, Expression);
 
  public:
@@ -160,7 +160,8 @@ class JOANA_AST_EXPORT CommaExpression final
   const ExpressionList& expressions() const { return *member_at<0>(); }
 
  private:
-  CommaExpression(const SourceCodeRange& range, ExpressionList* expressions);
+  CommaExpression(const SourceCodeRange& range,
+                  const ExpressionList& expressions);
 
   DISALLOW_COPY_AND_ASSIGN(CommaExpression);
 };

@@ -173,9 +173,9 @@ CallExpression& NodeFactory::NewCallExpression(
 
 CommaExpression& NodeFactory::NewCommaExpression(
     const SourceCodeRange& range,
-    const std::vector<const Expression*> expressions) {
+    const std::vector<const Expression*>& expressions) {
   auto* const list = new (zone_) ExpressionList(zone_, expressions);
-  return *new (zone_) CommaExpression(range, list);
+  return *new (zone_) CommaExpression(range, *list);
 }
 
 ComputedMemberExpression& NodeFactory::NewComputedMemberExpression(

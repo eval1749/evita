@@ -84,7 +84,7 @@ class JOANA_AST_EXPORT NodeFactory final {
       const std::vector<const Expression*>& arguments);
   CommaExpression& NewCommaExpression(
       const SourceCodeRange& range,
-      const std::vector<const Expression*> expressions);
+      const std::vector<const Expression*>& expressions);
 
   // expression '[' expression ']'
   ComputedMemberExpression& NewComputedMemberExpression(

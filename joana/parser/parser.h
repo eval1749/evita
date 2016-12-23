@@ -180,9 +180,9 @@ class Parser final {
   const ast::Statement& ParseWhileStatement();
   const ast::Statement& ParseWithStatement();
 
-  std::unique_ptr<BracketStack> bracket_stack_;
+  const std::unique_ptr<BracketStack> bracket_stack_;
   ast::EditContext& context_;
-  std::unique_ptr<Lexer> lexer_;
+  const std::unique_ptr<Lexer> lexer_;
 
   // True if current token and previous token is separated by at least one
   // line terminator.

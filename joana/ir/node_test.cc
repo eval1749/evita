@@ -56,6 +56,22 @@ IrNodeTest::IrNodeTest()
       type_factory_(&zone_),
       node_factory_(&zone_, &operator_factory_, &type_factory_) {}
 
+TEST_F(IrNodeTest, If) {
+  auto& output_type = type_factory().NewTupleType(
+      type_factory().control_type(), type_factory().effect_type(),
+      type_factory().NewTupleType());
+
+  auto& start = node_factory().NewStartNode(output_type);
+  auto& control = node_factory().NewProjectionNode(start, 0);
+
+  auto& condition = node_factory().NewLiteralBool(true);
+  auto& if_node = node_factory().NewIfNode(control, condition);
+  node_factory().NewIfTrueNode(if_node);
+  node_factory().NewIfTrueNode(if_node);
+
+  EXPECT_EQ("4:If(%r2, true):Control", ToString(if_node));
+}
+
 TEST_F(IrNodeTest, LiteralBool) {
   auto& literal_true = node_factory().NewLiteralBool(true);
   auto& literal_false = node_factory().NewLiteralBool(false);

@@ -41,6 +41,17 @@ class JOANA_IR_EXPORT NodeFactory final {
   //  - One input node of Control.
   const Node& NewExitNode(const Node& control);
 
+  // Returns new If node.
+  //  - control output
+  const Node& NewIfNode(const Node& control, const Node& condition);
+
+  // Returns new IfXXX node.
+  //  - control output
+  const Node& NewIfExceptionNode(const Node& control);
+  const Node& NewIfFalseNode(const Node& control);
+  const Node& NewIfTrueNode(const Node& control);
+  const Node& NewIfSuccessNode(const Node& control);
+
   const Node& NewLiteralBool(bool data);
   const Node& NewLiteralFloat64(float64_t data);
   const Node& NewLiteralInt64(int64_t data);

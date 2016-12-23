@@ -11,6 +11,11 @@ namespace joana {
 namespace ir {
 
 DECLARE_IR_OPERATOR_0(Exit)
+DECLARE_IR_OPERATOR_0(If)
+DECLARE_IR_OPERATOR_0(IfException)
+DECLARE_IR_OPERATOR_0(IfFalse)
+DECLARE_IR_OPERATOR_0(IfSuccess)
+DECLARE_IR_OPERATOR_0(IfTrue)
 DECLARE_IR_OPERATOR_1(LiteralBool, bool, data)
 DECLARE_IR_OPERATOR_1(LiteralFloat64, float64_t, data)
 DECLARE_IR_OPERATOR_1(LiteralInt64, int64_t, data)

@@ -24,6 +24,61 @@ ExitOperator::ExitOperator()
 ExitOperator::~ExitOperator() = default;
 
 //
+// IfOperator
+//
+IfOperator::IfOperator()
+    : OperatorTemplate(
+          std::tuple<>(),
+          OperationCode::If,
+          Format::Builder().set_arity(2).set_control(true).Build()) {}
+
+IfOperator::~IfOperator() = default;
+
+//
+// IfExceptionOperator
+//
+IfExceptionOperator::IfExceptionOperator()
+    : OperatorTemplate(
+          std::tuple<>(),
+          OperationCode::IfException,
+          Format::Builder().set_arity(1).set_control(true).Build()) {}
+
+IfExceptionOperator::~IfExceptionOperator() = default;
+
+//
+// IfFalseOperator
+//
+IfFalseOperator::IfFalseOperator()
+    : OperatorTemplate(
+          std::tuple<>(),
+          OperationCode::IfFalse,
+          Format::Builder().set_arity(1).set_control(true).Build()) {}
+
+IfFalseOperator::~IfFalseOperator() = default;
+
+//
+// IfSuccessOperator
+//
+IfSuccessOperator::IfSuccessOperator()
+    : OperatorTemplate(
+          std::tuple<>(),
+          OperationCode::IfSuccess,
+          Format::Builder().set_arity(1).set_control(true).Build()) {}
+
+IfSuccessOperator::~IfSuccessOperator() = default;
+
+//
+// IfTrueOperator
+//
+IfTrueOperator::IfTrueOperator()
+    : OperatorTemplate(
+          std::tuple<>(),
+          OperationCode::IfTrue,
+          Format::Builder().set_arity(1).set_control(true).Build()) {}
+
+IfTrueOperator::~IfTrueOperator() = default;
+
+//
 // LiteralBoolOperator
 //
 LiteralBoolOperator::LiteralBoolOperator(bool data)

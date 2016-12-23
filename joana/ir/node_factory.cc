@@ -203,6 +203,36 @@ const Node& NodeFactory::NewExitNode(const Node& control) {
                   control);
 }
 
+const Node& NodeFactory::NewIfNode(const Node& control, const Node& condition) {
+  DCHECK(control.is_control()) << control;
+  return NewNode2(operator_factory_.NewIf(), type_factory_.control_type(),
+                  control, condition);
+}
+
+const Node& NodeFactory::NewIfExceptionNode(const Node& control) {
+  DCHECK(control.is_control()) << control;
+  return NewNode1(operator_factory_.NewIfException(),
+                  type_factory_.control_type(), control);
+}
+
+const Node& NodeFactory::NewIfFalseNode(const Node& control) {
+  DCHECK(control.is_control()) << control;
+  return NewNode1(operator_factory_.NewIfFalse(), type_factory_.control_type(),
+                  control);
+}
+
+const Node& NodeFactory::NewIfSuccessNode(const Node& control) {
+  DCHECK(control.is_control()) << control;
+  return NewNode1(operator_factory_.NewIfSuccess(),
+                  type_factory_.control_type(), control);
+}
+
+const Node& NodeFactory::NewIfTrueNode(const Node& control) {
+  DCHECK(control.is_control()) << control;
+  return NewNode1(operator_factory_.NewIfTrue(), type_factory_.control_type(),
+                  control);
+}
+
 const Node& NodeFactory::NewLiteralBool(bool data) {
   auto& op = operator_factory_.NewLiteralBool(data);
   auto& type = type_factory_.bool_type();

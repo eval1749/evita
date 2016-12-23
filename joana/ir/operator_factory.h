@@ -29,6 +29,11 @@ class JOANA_IR_EXPORT OperatorFactory final {
   ~OperatorFactory();
 
   const Operator& NewExit();
+  const Operator& NewIf();
+  const Operator& NewIfException();
+  const Operator& NewIfFalse();
+  const Operator& NewIfSuccess();
+  const Operator& NewIfTrue();
   const Operator& NewLiteralBool(bool data);
   const Operator& NewLiteralFloat64(float64_t data);
   const Operator& NewLiteralInt64(int64_t data);

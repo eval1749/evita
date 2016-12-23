@@ -118,15 +118,20 @@ OperatorFactory::~OperatorFactory() = default;
     return cache_->Set(*new (&zone_) name##Operator());   \
   }
 
-#define IMPLEMENT_FACTORY_FUNCTION_1(name, type1)                        \
-  const Operator& OperatorFactory::New##name(type1 value1) {             \
-    const auto& key = std::make_pair(OperationCode::##name, value1);     \
-    if (auto* op = cache_->Find(key))                                    \
-      return *op;                                                        \
-    return cache_->Register(key, *new (&zone_) name##Operator(value1));  \
+#define IMPLEMENT_FACTORY_FUNCTION_1(name, type1)                       \
+  const Operator& OperatorFactory::New##name(type1 value1) {            \
+    const auto& key = std::make_pair(OperationCode::##name, value1);    \
+    if (auto* op = cache_->Find(key))                                   \
+      return *op;                                                       \
+    return cache_->Register(key, *new (&zone_) name##Operator(value1)); \
   }
 
 IMPLEMENT_FACTORY_FUNCTION_0(Exit)
+IMPLEMENT_FACTORY_FUNCTION_0(If)
+IMPLEMENT_FACTORY_FUNCTION_0(IfException)
+IMPLEMENT_FACTORY_FUNCTION_0(IfFalse)
+IMPLEMENT_FACTORY_FUNCTION_0(IfSuccess)
+IMPLEMENT_FACTORY_FUNCTION_0(IfTrue)
 
 const Operator& OperatorFactory::NewLiteralBool(bool data) {
   return cache_->GetBoolOperator(data);

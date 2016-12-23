@@ -16,6 +16,11 @@ namespace ir {
 
 #define FOR_EACH_COMMON_IR_OPERATOR(V) \
   V(Exit)                              \
+  V(If)                                \
+  V(IfException)                       \
+  V(IfFalse)                           \
+  V(IfSuccess)                         \
+  V(IfTrue)                            \
   V(LiteralBool)                       \
   V(LiteralFloat64)                    \
   V(LiteralInt64)                      \

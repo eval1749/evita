@@ -145,7 +145,7 @@ ArrayLiteralExpression& NodeFactory::NewArrayLiteralExpression(
     const SourceCodeRange& range,
     const std::vector<Expression*>& elements) {
   auto* const list = new (zone_) ExpressionList(zone_, elements);
-  return *new (zone_) ArrayLiteralExpression(range, list);
+  return *new (zone_) ArrayLiteralExpression(range, *list);
 }
 
 AssignmentExpression& NodeFactory::NewAssignmentExpression(

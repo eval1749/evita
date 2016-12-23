@@ -17,8 +17,8 @@ namespace ast {
 // ArrayLiteralExpression
 //
 ArrayLiteralExpression::ArrayLiteralExpression(const SourceCodeRange& range,
-                                               ExpressionList* elements)
-    : NodeTemplate(elements, range) {}
+                                               const ExpressionList& elements)
+    : NodeTemplate(&elements, range) {}
 
 ArrayLiteralExpression::~ArrayLiteralExpression() = default;
 

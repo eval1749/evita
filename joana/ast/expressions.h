@@ -57,7 +57,7 @@ class JOANA_AST_EXPORT ExpressionList final : public ZoneAllocated {
 // ArrayLiteralExpression
 //
 class JOANA_AST_EXPORT ArrayLiteralExpression final
-    : public NodeTemplate<Expression, ExpressionList*> {
+    : public NodeTemplate<Expression, const ExpressionList*> {
   DECLARE_CONCRETE_AST_NODE(ArrayLiteralExpression, Expression);
 
  public:
@@ -67,7 +67,7 @@ class JOANA_AST_EXPORT ArrayLiteralExpression final
 
  private:
   ArrayLiteralExpression(const SourceCodeRange& range,
-                         ExpressionList* elements);
+                         const ExpressionList& elements);
 
   DISALLOW_COPY_AND_ASSIGN(ArrayLiteralExpression);
 };

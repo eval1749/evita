@@ -85,8 +85,10 @@ class JOANA_AST_EXPORT ArrowFunction final
 //
 // Class
 //
-class JOANA_AST_EXPORT Class final
-    : public NodeTemplate<Declaration, Token*, Expression*, Expression*> {
+class JOANA_AST_EXPORT Class final : public NodeTemplate<Declaration,
+                                                         const Token*,
+                                                         const Expression*,
+                                                         const Expression*> {
   DECLARE_CONCRETE_AST_NODE(Class, Declaration);
 
  public:
@@ -98,9 +100,9 @@ class JOANA_AST_EXPORT Class final
 
  private:
   Class(const SourceCodeRange& range,
-        Token* name,
-        Expression* heritage,
-        Expression* body);
+        const Token& name,
+        const Expression& heritage,
+        const Expression& body);
 
   DISALLOW_COPY_AND_ASSIGN(Class);
 };

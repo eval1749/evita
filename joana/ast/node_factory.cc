@@ -113,9 +113,7 @@ const Class& NodeFactory::NewClass(const SourceCodeRange& range,
                                    const Token& name,
                                    const Expression& heritage,
                                    const Expression& body) {
-  return *new (zone_)
-      Class(range, const_cast<Token*>(&name),
-            const_cast<Expression*>(&heritage), const_cast<Expression*>(&body));
+  return *new (zone_) Class(range, name, heritage, body);
 }
 
 const Function& NodeFactory::NewFunction(const SourceCodeRange& range,

@@ -24,10 +24,10 @@ ArrowFunction::~ArrowFunction() = default;
 // Class
 //
 Class::Class(const SourceCodeRange& range,
-             Token* name,
-             Expression* heritage,
-             Expression* body)
-    : NodeTemplate(std::make_tuple(name, heritage, body), range) {}
+             const Token& name,
+             const Expression& heritage,
+             const Expression& body)
+    : NodeTemplate(std::make_tuple(&name, &heritage, &body), range) {}
 
 Class::~Class() = default;
 

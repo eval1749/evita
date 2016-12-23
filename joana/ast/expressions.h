@@ -233,7 +233,10 @@ class JOANA_AST_EXPORT DeclarationExpression final
 };
 
 //
-// ElisionExpression represents '[' elision ',' ']' syntax for array literal.
+// ElisionExpression represents
+//  - '[' elision ',' ']' syntax for array literal.
+//  - No class heritage
+//  - No expression after 'yield'
 //
 class JOANA_AST_EXPORT ElisionExpression final : public Expression {
   DECLARE_CONCRETE_AST_NODE(ElisionExpression, Expression);

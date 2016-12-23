@@ -42,7 +42,7 @@ const ast::Expression& Parser::ParseClassBody() {
 
 const ast::Expression& Parser::ParseClassHeritage() {
   if (!ConsumeTokenIf(ast::NameId::Extends))
-    return NewEmptyExpression();
+    return NewElisionExpression();
   return ParseLeftHandSideExpression();
 }
 

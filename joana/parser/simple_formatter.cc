@@ -180,7 +180,7 @@ void SimpleFormatter::VisitClass(ast::Class* node) {
     *ostream_ << ' ';
     Format(node->name());
   }
-  if (!node->heritage().Is<ast::EmptyExpression>()) {
+  if (!node->heritage().Is<ast::ElisionExpression>()) {
     *ostream_ << " extends ";
     Format(node->heritage());
   }

@@ -197,7 +197,7 @@ Statement::~Statement() = default;
 // StatementList
 //
 StatementList::StatementList(Zone* zone,
-                             const std::vector<Statement*>& statements)
+                             const std::vector<const Statement*>& statements)
     : statements_(zone, statements) {}
 
 StatementList::~StatementList() = default;

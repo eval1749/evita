@@ -85,7 +85,7 @@ ast::Statement& Parser::ParseBlockStatement() {
   SourceCodeRangeScope scope(this);
   DCHECK_EQ(PeekToken(), ast::PunctuatorKind::LeftBrace);
   ConsumeToken();
-  std::vector<ast::Statement*> statements;
+  std::vector<const ast::Statement*> statements;
   while (CanPeekToken()) {
     if (ConsumeTokenIf(ast::PunctuatorKind::RightBrace))
       break;
@@ -438,7 +438,7 @@ ast::Statement& Parser::ParseSwitchStatement() {
   DCHECK_EQ(PeekToken(), ast::NameId::Switch);
   ConsumeToken();
   auto& expression = ParseParenthesisExpression();
-  std::vector<ast::Statement*> clauses;
+  std::vector<const ast::Statement*> clauses;
   if (!ConsumeTokenIf(ast::PunctuatorKind::LeftBrace)) {
     AddError(ErrorCode::ERROR_STATEMENT_EXPECT_LBRACE);
     return node_factory().NewSwitchStatement(GetSourceCodeRange(), expression,

@@ -369,7 +369,7 @@ RegExp& NodeFactory::NewSequenceRegExp(const SourceCodeRange& range,
 // Statements factory members
 BlockStatement& NodeFactory::NewBlockStatement(
     const SourceCodeRange& range,
-    const std::vector<Statement*>& statements) {
+    const std::vector<const Statement*>& statements) {
   auto* const list = new (zone_) StatementList(zone_, statements);
   return *new (zone_) BlockStatement(range, list);
 }
@@ -495,7 +495,7 @@ ReturnStatement& NodeFactory::NewReturnStatement(const SourceCodeRange& range,
 SwitchStatement& NodeFactory::NewSwitchStatement(
     const SourceCodeRange& range,
     const Expression& expression,
-    const std::vector<Statement*>& clauses) {
+    const std::vector<const Statement*>& clauses) {
   auto* const list = new (zone_) StatementList(zone_, clauses);
   return *new (zone_)
       SwitchStatement(range, const_cast<Expression*>(&expression), list);

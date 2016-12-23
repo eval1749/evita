@@ -183,8 +183,9 @@ class JOANA_AST_EXPORT NodeFactory final {
                             const std::vector<RegExp*> patterns);
 
   // Statements factory members
-  BlockStatement& NewBlockStatement(const SourceCodeRange& range,
-                                    const std::vector<Statement*>& statements);
+  BlockStatement& NewBlockStatement(
+      const SourceCodeRange& range,
+      const std::vector<const Statement*>& statements);
 
   BreakStatement& NewBreakStatement(const SourceCodeRange& range,
                                     const Token& label);
@@ -245,9 +246,10 @@ class JOANA_AST_EXPORT NodeFactory final {
   ReturnStatement& NewReturnStatement(const SourceCodeRange& range,
                                       const Expression& condition);
 
-  SwitchStatement& NewSwitchStatement(const SourceCodeRange& range,
-                                      const Expression& expression,
-                                      const std::vector<Statement*>& clauses);
+  SwitchStatement& NewSwitchStatement(
+      const SourceCodeRange& range,
+      const Expression& expression,
+      const std::vector<const Statement*>& clauses);
 
   ThrowStatement& NewThrowStatement(const SourceCodeRange& range,
                                     const Expression& expression);

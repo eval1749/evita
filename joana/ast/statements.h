@@ -49,9 +49,9 @@ class JOANA_AST_EXPORT StatementList final : public ZoneAllocated {
  private:
   friend class NodeFactory;
 
-  StatementList(Zone* zone, const std::vector<Statement*>& statements);
+  StatementList(Zone* zone, const std::vector<const Statement*>& statements);
 
-  ZoneVector<Statement*> statements_;
+  ZoneVector<const Statement*> statements_;
 
   DISALLOW_COPY_AND_ASSIGN(StatementList);
 };

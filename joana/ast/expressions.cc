@@ -132,8 +132,8 @@ ExpressionList::~ExpressionList() = default;
 // GroupExpression
 //
 GroupExpression::GroupExpression(const SourceCodeRange& range,
-                                 Expression* expression)
-    : NodeTemplate(expression, range) {}
+                                 const Expression& expression)
+    : NodeTemplate(&expression, range) {}
 
 GroupExpression::~GroupExpression() = default;
 

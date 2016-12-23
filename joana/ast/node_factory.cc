@@ -216,8 +216,7 @@ const Expression& NodeFactory::NewEmptyExpression(
 const Expression& NodeFactory::NewGroupExpression(
     const SourceCodeRange& range,
     const Expression& expression) {
-  return *new (zone_)
-      GroupExpression(range, const_cast<Expression*>(&expression));
+  return *new (zone_) GroupExpression(range, expression);
 }
 
 const Expression& NodeFactory::NewInvalidExpression(const Node& node,

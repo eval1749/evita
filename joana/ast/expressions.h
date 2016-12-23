@@ -266,7 +266,7 @@ class JOANA_AST_EXPORT EmptyExpression final : public Expression {
 // GroupExpression represents '(' expression ')' syntax.
 //
 class JOANA_AST_EXPORT GroupExpression final
-    : public NodeTemplate<Expression, Expression*> {
+    : public NodeTemplate<Expression, const Expression*> {
   DECLARE_CONCRETE_AST_NODE(GroupExpression, Expression);
 
  public:
@@ -275,7 +275,7 @@ class JOANA_AST_EXPORT GroupExpression final
   const Expression& expression() const { return *member_at<0>(); }
 
  private:
-  GroupExpression(const SourceCodeRange& range, Expression* expression);
+  GroupExpression(const SourceCodeRange& range, const Expression& expression);
 
   DISALLOW_COPY_AND_ASSIGN(GroupExpression);
 };

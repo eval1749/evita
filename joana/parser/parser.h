@@ -7,6 +7,7 @@
 
 #include <memory>
 #include <stack>
+#include <unordered_map>
 #include <vector>
 
 #include "base/macros.h"
@@ -66,6 +67,10 @@ class Parser final {
   void AddError(ErrorCode error_code);
 
   void Advance();
+
+  // Associate |annotation| to |node|.
+  void AssociateAnnotation(const ast::Annotation& annotation,
+                           const ast::Node& node);
   bool CanPeekToken() const;
   const ast::Token& ComputeInvalidToken(ErrorCode error_code);
   const ast::Token& ConsumeToken();
@@ -183,6 +188,8 @@ class Parser final {
   const ast::Statement& ParseWhileStatement();
   const ast::Statement& ParseWithStatement();
 
+  // Map node to annotation
+  std::unordered_map<const ast::Node*, const ast::Annotation*> annotation_map_;
   const std::unique_ptr<BracketStack> bracket_stack_;
   ast::EditContext& context_;
   const std::unique_ptr<Lexer> lexer_;

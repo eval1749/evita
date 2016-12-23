@@ -5,11 +5,15 @@
 #ifndef JOANA_AST_MODULE_H_
 #define JOANA_AST_MODULE_H_
 
-#include "joana/ast/container_node.h"
+#include <unordered_map>
+
+#include "joana/ast/node.h"
+#include "joana/base/memory/zone_unordered_map.h"
 
 namespace joana {
 namespace ast {
 
+class Annotation;
 class StatementList;
 
 //
@@ -24,8 +28,16 @@ class JOANA_AST_EXPORT Module final
 
   const StatementList& statements() const { return *member_at<0>(); }
 
+  const Annotation* AnnotationFor(const ast::Node& node) const;
+
  private:
-  Module(const SourceCodeRange& range, const StatementList& statements);
+  Module(Zone* zone,
+         const SourceCodeRange& range,
+         const StatementList& statements,
+         const std::unordered_map<const Node*, const ast::Annotation*>&
+             annotation_map);
+
+  const ZoneUnorderedMap<const Node*, const ast::Annotation*> annotation_map_;
 
   DISALLOW_COPY_AND_ASSIGN(Module);
 };

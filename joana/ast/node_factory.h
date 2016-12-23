@@ -6,6 +6,7 @@
 #define JOANA_AST_NODE_FACTORY_H_
 
 #include <memory>
+#include <unordered_map>
 #include <vector>
 
 #include "base/strings/string_piece.h"
@@ -28,8 +29,10 @@ class JOANA_AST_EXPORT NodeFactory final {
   ~NodeFactory();
 
   // Factory member functions
-  Module& NewModule(const SourceCodeRange& range,
-                    const std::vector<const Statement*>& statements);
+  Module& NewModule(
+      const SourceCodeRange& range,
+      const std::vector<const Statement*>& statements,
+      const std::unordered_map<const Node*, const Annotation*>& annotation_map);
 
   //
   // Tokens factory members

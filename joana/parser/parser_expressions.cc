@@ -204,8 +204,11 @@ const ast::Expression& Parser::NewUnaryExpression(
 const ast::Expression& Parser::ParseAnnotationAsExpression() {
   auto& annotation = ConsumeToken().As<ast::Annotation>();
   auto& expression = ParsePrimaryExpression();
-  if (!CanHaveAnnotation(expression))
+  if (!CanHaveAnnotation(expression)) {
     AddError(annotation, ErrorCode::ERROR_EXPRESSION_UNEXPECT_ANNOTATION);
+    return expression;
+  }
+  AssociateAnnotation(annotation, expression);
   return expression;
 }
 

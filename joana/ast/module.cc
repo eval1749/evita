@@ -7,10 +7,20 @@
 namespace joana {
 namespace ast {
 
-Module::Module(const SourceCodeRange& range, const StatementList& statements)
-    : NodeTemplate(&statements, range) {}
+Module::Module(Zone* zone,
+               const SourceCodeRange& range,
+               const StatementList& statements,
+               const std::unordered_map<const Node*, const ast::Annotation*>&
+                   annotation_map)
+    : NodeTemplate(&statements, range),
+      annotation_map_(zone, annotation_map.begin(), annotation_map.end()) {}
 
 Module::~Module() = default;
+
+const Annotation* Module::AnnotationFor(const ast::Node& node) const {
+  const auto& it = annotation_map_.find(&node);
+  return it == annotation_map_.end() ? nullptr : it->second;
+}
 
 }  // namespace ast
 }  // namespace joana

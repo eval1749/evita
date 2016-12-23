@@ -107,6 +107,7 @@ const ast::Statement& Parser::ParseAnnotationAsStatement() {
   auto& statement = ParseStatement();
   if (!CanHaveAnnotation(statement))
     AddError(annotation, ErrorCode::ERROR_STATEMENT_UNEXPECT_ANNOTATION);
+  AssociateAnnotation(annotation, statement);
   return statement;
 }
 
@@ -240,20 +241,24 @@ const ast::Statement& Parser::ParseForStatement() {
                    ErrorCode::ERROR_STATEMENT_EXPECT_LPAREN);
 
   auto* const annotation = CanPeekToken() && PeekToken().Is<ast::Annotation>()
-                               ? &ConsumeToken()
+                               ? &ConsumeToken().As<ast::Annotation>()
                                : nullptr;
 
   auto& keyword = CanPeekToken() && IsDeclarationKeyword(PeekToken())
                       ? ConsumeToken()
                       : NewEmptyName();
 
-  if (annotation && keyword.Is<ast::Empty>())
-    AddError(*annotation, ErrorCode::ERROR_STATEMENT_UNEXPECT_ANNOTATION);
-
   auto& expression =
       CanPeekToken() && PeekToken() == ast::PunctuatorKind::Semicolon
           ? NewElisionExpression()
           : ParseExpression();
+
+  if (annotation) {
+    if (keyword.Is<ast::Empty>())
+      AddError(*annotation, ErrorCode::ERROR_STATEMENT_UNEXPECT_ANNOTATION);
+    else
+      AssociateAnnotation(*annotation, expression);
+  }
 
   if (ConsumeTokenIf(ast::PunctuatorKind::Semicolon)) {
     // 'for' '(' binding ';' condition ';' step ')' statement

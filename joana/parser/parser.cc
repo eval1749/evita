@@ -141,6 +141,14 @@ void Parser::Advance() {
   SkipCommentTokens();
 }
 
+void Parser::AssociateAnnotation(const ast::Annotation& annotation,
+                                 const ast::Node& node) {
+  const auto& result = annotation_map_.emplace(&node, &annotation);
+  if (result.second)
+    return;
+  AddError(annotation, ErrorCode::ERROR_STATEMENT_UNEXPECT_ANNOTATION);
+}
+
 bool Parser::CanPeekToken() const {
   if (!token_stack_.empty())
     return true;
@@ -245,13 +253,19 @@ const ast::Node& Parser::Run() {
       Advance();
       continue;
     }
-    if (token.Is<ast::Annotation>())
-      ConsumeToken();
-    statements.push_back(&ParseStatement());
+    if (!token.Is<ast::Annotation>()) {
+      statements.push_back(&ParseStatement());
+      continue;
+    }
+    auto& annotation = ConsumeToken().As<ast::Annotation>();
+    auto& statement = ParseStatement();
+    AssociateAnnotation(annotation, statement);
+    statements.push_back(&statement);
   }
   for (const auto& bracket : bracket_stack_->tokens())
     AddError(*bracket, ErrorCode::ERROR_BRACKET_NOT_CLOSED);
-  return node_factory().NewModule(source_code().range(), statements);
+  return node_factory().NewModule(source_code().range(), statements,
+                                  annotation_map_);
 }
 
 void Parser::SkipCommentTokens() {

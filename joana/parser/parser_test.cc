@@ -13,7 +13,10 @@
 #include "joana/ast/edit_context.h"
 #include "joana/ast/edit_context_builder.h"
 #include "joana/ast/error_codes.h"
+#include "joana/ast/module.h"
 #include "joana/ast/node_factory.h"
+#include "joana/ast/statements.h"
+#include "joana/ast/tokens.h"
 #include "joana/base/error_sink.h"
 #include "joana/base/memory/zone.h"
 #include "joana/base/source_code.h"
@@ -56,9 +59,16 @@ std::string ParserTest::Parse(base::StringPiece script_text,
 
   std::ostringstream ostream;
   Parser parser(context.get(), source_code.range(), options);
-  SimpleFormatter(&ostream).Format(parser.Run());
+  const auto& module = parser.Run().As<ast::Module>();
+  SimpleFormatter(&ostream).Format(module);
   for (const auto& error : error_sink.errors())
     ostream << error << std::endl;
+  for (const auto& statement : module.statements()) {
+    auto* annotation = module.AnnotationFor(statement);
+    if (!annotation)
+      continue;
+    ostream << statement << ':' << *annotation << std::endl;
+  }
   return ostream.str();
 }
 
@@ -71,6 +81,14 @@ std::string ParserTest::Parse(base::StringPiece script_text) {
     auto* const source = script_text;      \
     EXPECT_EQ(source, Parse(script_text)); \
   }
+
+TEST_F(ParserTest, Annotation) {
+  EXPECT_EQ(
+      "let foo = 1;\n"
+      "LetStatement([22-34], \"let foo = 1;\"):"
+      "Annotation([0-21], \"/** @type {number} */\")\n",
+      Parse("/** @type {number} */ let foo = 1;"));
+}
 
 TEST_F(ParserTest, AsyncFunction) {
   TEST_PARSER(

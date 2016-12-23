@@ -53,35 +53,35 @@ class Parser::ExpectSemicolonScope final {
 //
 
 // Called after before consuming ':'
-ast::Statement& Parser::HandleLabeledStatement(const ast::Name* label) {
+const ast::Statement& Parser::HandleLabeledStatement(const ast::Name& label) {
   auto& colon = ConsumeToken();
   DCHECK_EQ(colon, ast::PunctuatorKind::Colon);
   if (!options_.disable_automatic_semicolon) {
     if (!CanPeekToken() || PeekToken() == ast::PunctuatorKind::RightBrace) {
       auto& statement =
           NewEmptyStatement(SourceCodeRange::CollapseToEnd(colon.range()));
-      return node_factory().NewLabeledStatement(GetSourceCodeRange(), *label,
+      return node_factory().NewLabeledStatement(GetSourceCodeRange(), label,
                                                 statement);
     }
   }
   auto& statement = ParseStatement();
-  return node_factory().NewLabeledStatement(GetSourceCodeRange(), *label,
+  return node_factory().NewLabeledStatement(GetSourceCodeRange(), label,
                                             statement);
 }
 
-ast::Statement& Parser::NewEmptyStatement(const SourceCodeRange& range) {
+const ast::Statement& Parser::NewEmptyStatement(const SourceCodeRange& range) {
   DCHECK(range.IsCollapsed()) << range;
   return node_factory().NewEmptyStatement(range);
 }
 
-ast::Statement& Parser::NewInvalidStatement(ErrorCode error_code) {
+const ast::Statement& Parser::NewInvalidStatement(ErrorCode error_code) {
   auto& token = ComputeInvalidToken(error_code);
   AddError(GetSourceCodeRange(), error_code);
   return node_factory().NewInvalidStatement(token,
                                             static_cast<int>(error_code));
 }
 
-ast::Statement& Parser::ParseBlockStatement() {
+const ast::Statement& Parser::ParseBlockStatement() {
   SourceCodeRangeScope scope(this);
   DCHECK_EQ(PeekToken(), ast::PunctuatorKind::LeftBrace);
   ConsumeToken();
@@ -105,7 +105,7 @@ ast::Statement& Parser::ParseBlockStatement() {
   return node_factory().NewBlockStatement(GetSourceCodeRange(), statements);
 }
 
-ast::Statement& Parser::ParseBreakStatement() {
+const ast::Statement& Parser::ParseBreakStatement() {
   ConsumeToken();
   if (is_separated_by_newline_) {
     if (options_.disable_automatic_semicolon)
@@ -119,7 +119,7 @@ ast::Statement& Parser::ParseBreakStatement() {
   return node_factory().NewBreakStatement(GetSourceCodeRange(), label);
 }
 
-ast::Statement& Parser::ParseCaseClause() {
+const ast::Statement& Parser::ParseCaseClause() {
   SourceCodeRangeScope scope(this);
   DCHECK_EQ(PeekToken(), ast::NameId::Case);
   ConsumeToken();
@@ -141,18 +141,18 @@ ast::Statement& Parser::ParseCaseClause() {
                                       statement);
 }
 
-ast::Statement& Parser::ParseClassStatement() {
+const ast::Statement& Parser::ParseClassStatement() {
   return node_factory().NewDeclarationStatement(ParseClass());
 }
 
-ast::Statement& Parser::ParseConstStatement() {
+const ast::Statement& Parser::ParseConstStatement() {
   ExpectSemicolonScope semicolon_scope(this);
   ConsumeToken();
   auto& expression = ParseExpression();
   return node_factory().NewConstStatement(GetSourceCodeRange(), expression);
 }
 
-ast::Statement& Parser::ParseContinueStatement() {
+const ast::Statement& Parser::ParseContinueStatement() {
   ConsumeToken();
   if (is_separated_by_newline_) {
     if (options_.disable_automatic_semicolon)
@@ -166,16 +166,16 @@ ast::Statement& Parser::ParseContinueStatement() {
   return node_factory().NewContinueStatement(GetSourceCodeRange(), label);
 }
 
-ast::Statement& Parser::ParseDefaultLabel() {
+const ast::Statement& Parser::ParseDefaultLabel() {
   SourceCodeRangeScope scope(this);
   DCHECK_EQ(PeekToken(), ast::NameId::Default);
   auto& label = ConsumeToken().As<ast::Name>();
   if (!CanPeekToken() || PeekToken() != ast::PunctuatorKind::Colon)
     return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_EXPECT_COLON);
-  return HandleLabeledStatement(&label);
+  return HandleLabeledStatement(label);
 }
 
-ast::Statement& Parser::ParseDoStatement() {
+const ast::Statement& Parser::ParseDoStatement() {
   DCHECK_EQ(PeekToken(), ast::NameId::Do);
   ConsumeToken();
   auto& statement = ParseStatement();
@@ -193,7 +193,7 @@ ast::Statement& Parser::ParseDoStatement() {
                                        condition);
 }
 
-ast::Statement& Parser::ParseExpressionStatement() {
+const ast::Statement& Parser::ParseExpressionStatement() {
   auto& expression = ParseExpression();
   if (auto* decl_expr = expression.TryAs<ast::DeclarationExpression>()) {
     auto& declaration = decl_expr->declaration();
@@ -204,7 +204,7 @@ ast::Statement& Parser::ParseExpressionStatement() {
   return node_factory().NewExpressionStatement(expression);
 }
 
-ast::Statement& Parser::ParseForStatement() {
+const ast::Statement& Parser::ParseForStatement() {
   DCHECK_EQ(PeekToken(), ast::NameId::For);
   ConsumeToken();
   ExpectPunctuator(ast::PunctuatorKind::LeftParenthesis,
@@ -257,11 +257,11 @@ ast::Statement& Parser::ParseForStatement() {
   return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
 }
 
-ast::Statement& Parser::ParseFunctionStatement(ast::FunctionKind kind) {
+const ast::Statement& Parser::ParseFunctionStatement(ast::FunctionKind kind) {
   return node_factory().NewDeclarationStatement(ParseFunction(kind));
 }
 
-ast::Statement& Parser::ParseIfStatement() {
+const ast::Statement& Parser::ParseIfStatement() {
   auto& keyword = ConsumeToken().As<ast::Name>();
   DCHECK_EQ(keyword, ast::NameId::If);
   auto& condition = ParseParenthesisExpression();
@@ -275,7 +275,7 @@ ast::Statement& Parser::ParseIfStatement() {
                                            then_clause, else_clause);
 }
 
-ast::Statement& Parser::ParseKeywordStatement() {
+const ast::Statement& Parser::ParseKeywordStatement() {
   SourceCodeRangeScope scope(this);
   const auto& keyword = PeekToken().As<ast::Name>();
   DCHECK(keyword.IsKeyword()) << keyword;
@@ -350,14 +350,14 @@ ast::Statement& Parser::ParseKeywordStatement() {
   return ParseExpressionStatement();
 }
 
-ast::Statement& Parser::ParseLetStatement() {
+const ast::Statement& Parser::ParseLetStatement() {
   ExpectSemicolonScope semicolon_scope(this);
   ConsumeToken();
   auto& expression = ParseExpression();
   return node_factory().NewLetStatement(GetSourceCodeRange(), expression);
 }
 
-ast::Statement& Parser::ParseNameAsStatement() {
+const ast::Statement& Parser::ParseNameAsStatement() {
   auto& name = PeekToken().As<ast::Name>();
   if (name.IsKeyword())
     return ParseKeywordStatement();
@@ -371,7 +371,7 @@ ast::Statement& Parser::ParseNameAsStatement() {
       AddError(ErrorCode::ERROR_STATEMENT_UNEXPECT_NEWLINE);
   } else {
     if (CanPeekToken() && PeekToken() == ast::PunctuatorKind::Colon)
-      return HandleLabeledStatement(&name);
+      return HandleLabeledStatement(name);
   }
   PushBackToken(name);
   return ParseExpressionStatement();
@@ -391,7 +391,7 @@ const ast::Expression& Parser::ParseParenthesisExpression() {
   return expression;
 }
 
-ast::Statement& Parser::ParseReturnStatement() {
+const ast::Statement& Parser::ParseReturnStatement() {
   ExpectSemicolonScope semicolon_scope(this);
   ConsumeToken();
   if (is_separated_by_newline_) {
@@ -414,7 +414,7 @@ ast::Statement& Parser::ParseReturnStatement() {
 }
 
 // The entry point
-ast::Statement& Parser::ParseStatement() {
+const ast::Statement& Parser::ParseStatement() {
   if (!CanPeekToken())
     return NewEmptyStatement(source_code().end());
   SourceCodeRangeScope scope(this);
@@ -434,7 +434,7 @@ ast::Statement& Parser::ParseStatement() {
   return ParseExpressionStatement();
 }
 
-ast::Statement& Parser::ParseSwitchStatement() {
+const ast::Statement& Parser::ParseSwitchStatement() {
   DCHECK_EQ(PeekToken(), ast::NameId::Switch);
   ConsumeToken();
   auto& expression = ParseParenthesisExpression();
@@ -453,7 +453,7 @@ ast::Statement& Parser::ParseSwitchStatement() {
                                            clauses);
 }
 
-ast::Statement& Parser::ParseThrowStatement() {
+const ast::Statement& Parser::ParseThrowStatement() {
   DCHECK_EQ(PeekToken(), ast::NameId::Throw);
   ConsumeToken();
   ExpectSemicolonScope semicolon_scope(this);
@@ -461,7 +461,7 @@ ast::Statement& Parser::ParseThrowStatement() {
   return node_factory().NewThrowStatement(GetSourceCodeRange(), expression);
 }
 
-ast::Statement& Parser::ParseTryStatement() {
+const ast::Statement& Parser::ParseTryStatement() {
   ConsumeToken();
   auto& try_block = ParseStatement();
   if (ConsumeTokenIf(ast::NameId::Finally)) {
@@ -483,14 +483,14 @@ ast::Statement& Parser::ParseTryStatement() {
                                                     catch_block, finally_block);
 }
 
-ast::Statement& Parser::ParseVarStatement() {
+const ast::Statement& Parser::ParseVarStatement() {
   ExpectSemicolonScope semicolon_scope(this);
   ConsumeToken();
   auto& expression = ParseExpression();
   return node_factory().NewVarStatement(GetSourceCodeRange(), expression);
 }
 
-ast::Statement& Parser::ParseWhileStatement() {
+const ast::Statement& Parser::ParseWhileStatement() {
   DCHECK_EQ(PeekToken(), ast::NameId::While);
   ConsumeToken();
   auto& condition = ParseParenthesisExpression();
@@ -499,7 +499,7 @@ ast::Statement& Parser::ParseWhileStatement() {
                                           statement);
 }
 
-ast::Statement& Parser::ParseWithStatement() {
+const ast::Statement& Parser::ParseWithStatement() {
   DCHECK_EQ(PeekToken(), ast::NameId::With);
   ConsumeToken();
   auto& expression = ParseParenthesisExpression();

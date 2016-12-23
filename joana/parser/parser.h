@@ -150,35 +150,35 @@ class Parser final {
   const ast::Expression& ParseYieldExpression();
 
   // Statements
-  ast::Statement& HandleLabeledStatement(const ast::Name* name);
+  const ast::Statement& HandleLabeledStatement(const ast::Name& name);
 
-  ast::Statement& NewInvalidStatement(ErrorCode error_code);
-  ast::Statement& NewEmptyStatement(const SourceCodeRange& range);
+  const ast::Statement& NewInvalidStatement(ErrorCode error_code);
+  const ast::Statement& NewEmptyStatement(const SourceCodeRange& range);
 
-  ast::Statement& ParseStatement();
+  const ast::Statement& ParseStatement();
 
-  ast::Statement& ParseBreakStatement();
-  ast::Statement& ParseBlockStatement();
-  ast::Statement& ParseCaseClause();
-  ast::Statement& ParseClassStatement();
-  ast::Statement& ParseConstStatement();
-  ast::Statement& ParseContinueStatement();
-  ast::Statement& ParseDefaultLabel();
-  ast::Statement& ParseDoStatement();
-  ast::Statement& ParseExpressionStatement();
-  ast::Statement& ParseForStatement();
-  ast::Statement& ParseFunctionStatement(ast::FunctionKind kind);
-  ast::Statement& ParseIfStatement();
-  ast::Statement& ParseKeywordStatement();
-  ast::Statement& ParseLetStatement();
-  ast::Statement& ParseNameAsStatement();
-  ast::Statement& ParseReturnStatement();
-  ast::Statement& ParseSwitchStatement();
-  ast::Statement& ParseThrowStatement();
-  ast::Statement& ParseTryStatement();
-  ast::Statement& ParseVarStatement();
-  ast::Statement& ParseWhileStatement();
-  ast::Statement& ParseWithStatement();
+  const ast::Statement& ParseBreakStatement();
+  const ast::Statement& ParseBlockStatement();
+  const ast::Statement& ParseCaseClause();
+  const ast::Statement& ParseClassStatement();
+  const ast::Statement& ParseConstStatement();
+  const ast::Statement& ParseContinueStatement();
+  const ast::Statement& ParseDefaultLabel();
+  const ast::Statement& ParseDoStatement();
+  const ast::Statement& ParseExpressionStatement();
+  const ast::Statement& ParseForStatement();
+  const ast::Statement& ParseFunctionStatement(ast::FunctionKind kind);
+  const ast::Statement& ParseIfStatement();
+  const ast::Statement& ParseKeywordStatement();
+  const ast::Statement& ParseLetStatement();
+  const ast::Statement& ParseNameAsStatement();
+  const ast::Statement& ParseReturnStatement();
+  const ast::Statement& ParseSwitchStatement();
+  const ast::Statement& ParseThrowStatement();
+  const ast::Statement& ParseTryStatement();
+  const ast::Statement& ParseVarStatement();
+  const ast::Statement& ParseWhileStatement();
+  const ast::Statement& ParseWithStatement();
 
   std::unique_ptr<BracketStack> bracket_stack_;
   ast::EditContext& context_;

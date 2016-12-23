@@ -246,7 +246,8 @@ const ast::Node& Parser::Run() {
       continue;
     }
     SourceCodeRangeScope(this);
-    ast::NodeEditor().AppendChild(&root_, &ParseStatement());
+    ast::NodeEditor().AppendChild(
+        &root_, const_cast<ast::Statement*>(&ParseStatement()));
   }
   for (const auto& bracket : bracket_stack_->tokens())
     AddError(*bracket, ErrorCode::ERROR_BRACKET_NOT_CLOSED);

@@ -99,6 +99,7 @@ class JOANA_AST_EXPORT NodeFactory final {
       const Expression& true_expression,
       const Expression& false_expression);
   const Expression& NewDeclarationExpression(const Declaration& declaration);
+  const Expression& NewDelimiterExpression(const SourceCodeRange& range);
   const Expression& NewElisionExpression(const SourceCodeRange& range);
   const Expression& NewEmptyExpression(const SourceCodeRange& range);
   const Expression& NewGroupExpression(const SourceCodeRange& range,

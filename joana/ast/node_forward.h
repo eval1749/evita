@@ -33,6 +33,7 @@ namespace ast {
   V(CommaExpression)               \
   V(ConditionalExpression)         \
   V(DeclarationExpression)         \
+  V(DelimiterExpression)           \
   V(GroupExpression)               \
   V(ElisionExpression)             \
   V(EmptyExpression)               \

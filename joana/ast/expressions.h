@@ -233,9 +233,26 @@ class JOANA_AST_EXPORT DeclarationExpression final
 };
 
 //
+// DelimiterExpression represents ',' or ';' in object literal
+//
+class JOANA_AST_EXPORT DelimiterExpression final : public Expression {
+  DECLARE_CONCRETE_AST_NODE(DelimiterExpression, Expression);
+
+ public:
+  ~DelimiterExpression() final;
+
+ private:
+  explicit DelimiterExpression(const SourceCodeRange& range);
+
+  DISALLOW_COPY_AND_ASSIGN(DelimiterExpression);
+};
+
+//
 // ElisionExpression represents
 //  - '[' elision ',' ']' syntax for array literal.
 //  - No class heritage
+//  - Expression in 'for' statement
+//  - No expression after 'return'
 //  - No expression after 'yield'
 //
 class JOANA_AST_EXPORT ElisionExpression final : public Expression {

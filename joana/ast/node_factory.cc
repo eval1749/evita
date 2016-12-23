@@ -198,6 +198,12 @@ const Expression& NodeFactory::NewDeclarationExpression(
   return *new (zone_) DeclarationExpression(declaration);
 }
 
+const Expression& NodeFactory::NewDelimiterExpression(
+    const SourceCodeRange& range) {
+  DCHECK(!range.IsCollapsed()) << range;
+  return *new (zone_) DelimiterExpression(range);
+}
+
 const Expression& NodeFactory::NewElisionExpression(
     const SourceCodeRange& range) {
   DCHECK_EQ(range.start(), range.end()) << range;

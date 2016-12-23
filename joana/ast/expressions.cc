@@ -96,6 +96,14 @@ DeclarationExpression::DeclarationExpression(const Declaration& declaration)
 DeclarationExpression::~DeclarationExpression() = default;
 
 //
+// DelimiterExpression
+//
+DelimiterExpression::DelimiterExpression(const SourceCodeRange& range)
+    : Expression(range) {}
+
+DelimiterExpression::~DelimiterExpression() = default;
+
+//
 // ElisionExpression
 //
 ElisionExpression::ElisionExpression(const SourceCodeRange& range)

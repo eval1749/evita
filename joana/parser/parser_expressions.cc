@@ -165,6 +165,11 @@ const ast::Expression& Parser::NewDeclarationExpression(
   return node_factory().NewDeclarationExpression(declaration);
 }
 
+const ast::Expression& Parser::NewDelimiterExpression(
+    const ast::Token& delimiter) {
+  return node_factory().NewDelimiterExpression(delimiter.range());
+}
+
 const ast::Expression& Parser::NewElisionExpression() {
   return node_factory().NewElisionExpression(lexer_->location());
 }
@@ -418,31 +423,21 @@ const ast::Expression& Parser::ParseObjectLiteralExpression() {
   DCHECK_EQ(PeekToken(), ast::PunctuatorKind::LeftBrace);
   ConsumeToken();
   std::vector<const ast::Expression*> members;
-  auto comma = false;
   while (CanPeekToken()) {
     SourceCodeRangeScope scope(this);
-    if (ConsumeTokenIf(ast::PunctuatorKind::RightBrace)) {
-      if (comma)
-        members.push_back(&NewElisionExpression());
+    if (ConsumeTokenIf(ast::PunctuatorKind::RightBrace))
       break;
+    if (PeekToken() == ast::PunctuatorKind::Comma) {
+      members.push_back(&NewDelimiterExpression(ConsumeToken()));
+      continue;
     }
-    if (ConsumeTokenIf(ast::PunctuatorKind::Comma)) {
-      if (members.empty() || members.back()->Is<ast::DeclarationExpression>() ||
-          members.back()->Is<ast::ElisionExpression>()) {
-        members.push_back(&NewElisionExpression());
-      }
-      comma = true;
+    if (PeekToken() == ast::PunctuatorKind::Semicolon) {
+      members.push_back(&NewDelimiterExpression(ConsumeToken()));
       continue;
     }
     if (PeekToken().Is<ast::Annotation>()) {
       // TODO(eval1749): We should handle annotation in object literal.
       ConsumeToken();
-      continue;
-    }
-    comma = false;
-    if (ConsumeTokenIf(ast::PunctuatorKind::Semicolon)) {
-      // TODO(eval1749): We should keep semicolon token.
-      // Note: Semicolon is valid only for ClassElement.
       continue;
     }
     if (ConsumeTokenIf(ast::PunctuatorKind::Times)) {

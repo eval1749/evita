@@ -107,6 +107,7 @@ class Parser final {
   OperatorPrecedence HigherPrecedenceOf(OperatorPrecedence category) const;
   const ast::Expression& NewDeclarationExpression(
       const ast::Declaration& declaration);
+  const ast::Expression& NewDelimiterExpression(const ast::Token& delimiter);
   const ast::Expression& NewElisionExpression();
   const ast::Expression& NewEmptyExpression();
   const ast::Expression& NewInvalidExpression(const ast::Token& token,

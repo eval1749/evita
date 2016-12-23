@@ -68,8 +68,11 @@ NodeFactory::NodeFactory(Zone* zone)
 
 NodeFactory::~NodeFactory() = default;
 
-Module& NodeFactory::NewModule(const SourceCodeRange& range) {
-  return *new (zone_) Module(range);
+Module& NodeFactory::NewModule(
+    const SourceCodeRange& range,
+    const std::vector<const Statement*>& statements) {
+  auto* const list = new (zone_) StatementList(zone_, statements);
+  return *new (zone_) Module(range, *list);
 }
 
 // Tokens

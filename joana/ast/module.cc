@@ -7,7 +7,8 @@
 namespace joana {
 namespace ast {
 
-Module::Module(const SourceCodeRange& range) : ContainerNode(range) {}
+Module::Module(const SourceCodeRange& range, const StatementList& statements)
+    : NodeTemplate(&statements, range) {}
 
 Module::~Module() = default;
 

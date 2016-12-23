@@ -103,8 +103,7 @@ Parser::Parser(ast::EditContext* context,
     : bracket_stack_(new BracketStack(&context->error_sink())),
       context_(*context),
       lexer_(new Lexer(context, range, options)),
-      options_(options),
-      root_(context->node_factory().NewModule(range)) {}
+      options_(options) {}
 
 Parser::~Parser() = default;
 
@@ -236,6 +235,7 @@ void Parser::PushBackToken(const ast::Token& token) {
 }
 
 const ast::Node& Parser::Run() {
+  std::vector<const ast::Statement*> statements;
   SkipCommentTokens();
   while (CanPeekToken()) {
     auto& token = PeekToken();
@@ -245,19 +245,13 @@ const ast::Node& Parser::Run() {
       Advance();
       continue;
     }
-    if (token.Is<ast::Annotation>()) {
+    if (token.Is<ast::Annotation>())
       ConsumeToken();
-      SourceCodeRangeScope(this);
-      ParseStatement();
-      continue;
-    }
-    SourceCodeRangeScope(this);
-    ast::NodeEditor().AppendChild(
-        &root_, const_cast<ast::Statement*>(&ParseStatement()));
+    statements.push_back(&ParseStatement());
   }
   for (const auto& bracket : bracket_stack_->tokens())
     AddError(*bracket, ErrorCode::ERROR_BRACKET_NOT_CLOSED);
-  return root_;
+  return node_factory().NewModule(source_code().range(), statements);
 }
 
 void Parser::SkipCommentTokens() {

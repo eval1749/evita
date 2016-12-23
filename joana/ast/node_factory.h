@@ -19,13 +19,17 @@ class SourceCodeRange;
 
 namespace ast {
 
+//
+// NodeFactory
+//
 class JOANA_AST_EXPORT NodeFactory final {
  public:
   explicit NodeFactory(Zone* zone);
   ~NodeFactory();
 
   // Factory member functions
-  Module& NewModule(const SourceCodeRange& range);
+  Module& NewModule(const SourceCodeRange& range,
+                    const std::vector<const Statement*>& statements);
 
   //
   // Tokens factory members

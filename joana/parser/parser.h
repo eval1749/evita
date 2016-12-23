@@ -191,7 +191,6 @@ class Parser final {
   // line terminator.
   bool is_separated_by_newline_ = false;
 
-  ast::ContainerNode& root_;
   const ParserOptions& options_;
   std::stack<int> range_stack_;
 

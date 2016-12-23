@@ -10,14 +10,22 @@
 namespace joana {
 namespace ast {
 
-class JOANA_AST_EXPORT Module final : public ContainerNode {
-  DECLARE_CONCRETE_AST_NODE(Module, ContainerNode);
+class StatementList;
+
+//
+// Module
+//
+class JOANA_AST_EXPORT Module final
+    : public NodeTemplate<Node, const StatementList*> {
+  DECLARE_CONCRETE_AST_NODE(Module, Node);
 
  public:
   ~Module() final;
 
+  const StatementList& statements() const { return *member_at<0>(); }
+
  private:
-  explicit Module(const SourceCodeRange& range);
+  Module(const SourceCodeRange& range, const StatementList& statements);
 
   DISALLOW_COPY_AND_ASSIGN(Module);
 };

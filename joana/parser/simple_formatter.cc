@@ -131,8 +131,8 @@ void SimpleFormatter::VisitPunctuator(ast::Punctuator* node) {
 }
 
 void SimpleFormatter::VisitModule(ast::Module* node) {
-  for (const auto& child : ast::NodeTraversal::ChildrenOf(*node)) {
-    FormatWithIndent(child);
+  for (const auto& statement : node->statements()) {
+    FormatWithIndent(statement);
     *ostream_ << std::endl;
   }
 }

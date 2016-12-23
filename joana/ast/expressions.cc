@@ -148,8 +148,8 @@ InvalidExpression::~InvalidExpression() = default;
 //
 // LiteralExpression
 //
-LiteralExpression::LiteralExpression(Literal* literal)
-    : NodeTemplate(std::make_tuple(literal), literal->range()) {}
+LiteralExpression::LiteralExpression(const Literal& literal)
+    : NodeTemplate(std::make_tuple(&literal), literal.range()) {}
 
 LiteralExpression::~LiteralExpression() = default;
 

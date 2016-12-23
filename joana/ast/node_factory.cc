@@ -222,7 +222,7 @@ InvalidExpression& NodeFactory::NewInvalidExpression(const Node& node,
 }
 
 LiteralExpression& NodeFactory::NewLiteralExpression(const Literal& literal) {
-  return *new (zone_) LiteralExpression(const_cast<Literal*>(&literal));
+  return *new (zone_) LiteralExpression(literal);
 }
 
 NewExpression& NodeFactory::NewNewExpression(

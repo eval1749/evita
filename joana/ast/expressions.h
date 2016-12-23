@@ -303,7 +303,7 @@ class JOANA_AST_EXPORT InvalidExpression : public Expression {
 // LiteralExpression
 //
 class JOANA_AST_EXPORT LiteralExpression final
-    : public NodeTemplate<Expression, Literal*> {
+    : public NodeTemplate<Expression, const Literal*> {
   DECLARE_CONCRETE_AST_NODE(LiteralExpression, Expression);
 
  public:
@@ -312,7 +312,7 @@ class JOANA_AST_EXPORT LiteralExpression final
   const Literal& literal() const { return *member_at<0>(); }
 
  private:
-  explicit LiteralExpression(Literal* literal);
+  explicit LiteralExpression(const Literal& literal);
 
   DISALLOW_COPY_AND_ASSIGN(LiteralExpression);
 };

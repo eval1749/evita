@@ -121,9 +121,7 @@ const Function& NodeFactory::NewFunction(const SourceCodeRange& range,
                                          const Token& name,
                                          const Expression& parameter_list,
                                          const Statement& body) {
-  return *new (zone_) Function(range, kind, const_cast<Token*>(&name),
-                               const_cast<Expression*>(&parameter_list),
-                               const_cast<Statement*>(&body));
+  return *new (zone_) Function(range, kind, name, parameter_list, body);
 }
 
 const Method& NodeFactory::NewMethod(const SourceCodeRange& range,

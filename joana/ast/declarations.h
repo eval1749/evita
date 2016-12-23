@@ -116,9 +116,9 @@ class JOANA_AST_EXPORT Class final : public NodeTemplate<Declaration,
 //
 class JOANA_AST_EXPORT Function final : public NodeTemplate<Declaration,
                                                             FunctionKind,
-                                                            Token*,
-                                                            Expression*,
-                                                            Statement*> {
+                                                            const Token*,
+                                                            const Expression*,
+                                                            const Statement*> {
   DECLARE_CONCRETE_AST_NODE(Function, Declaration);
 
  public:
@@ -133,9 +133,9 @@ class JOANA_AST_EXPORT Function final : public NodeTemplate<Declaration,
   // |statement| should be either expression statement or block statement.
   Function(const SourceCodeRange& range,
            FunctionKind kind,
-           Token* name,
-           Expression* parameter_list,
-           Statement* body);
+           const Token& name,
+           const Expression& parameter_list,
+           const Statement& body);
 
   DISALLOW_COPY_AND_ASSIGN(Function);
 };

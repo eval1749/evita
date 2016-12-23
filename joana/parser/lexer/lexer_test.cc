@@ -55,6 +55,8 @@ class LexerTest : public ::testing::Test {
 
   SourceCodeRange MakeRange(int start, int end) const;
   SourceCodeRange MakeRange() const;
+  std::string NewAnnotation(int start, int end);
+  std::string NewAnnotation();
   std::string NewComment(int start, int end);
   std::string NewComment();
   std::string NewError(ErrorCode error_code, int start, int end);
@@ -100,6 +102,14 @@ SourceCodeRange LexerTest::MakeRange(int start, int end) const {
 SourceCodeRange LexerTest::MakeRange() const {
   DCHECK(source_code_);
   return source_code_->range();
+}
+
+std::string LexerTest::NewAnnotation(int start, int end) {
+  return ToString(factory().NewAnnotation(MakeRange(start, end)));
+}
+
+std::string LexerTest::NewAnnotation() {
+  return ToString(factory().NewAnnotation(MakeRange()));
 }
 
 std::string LexerTest::NewComment(int start, int end) {
@@ -184,14 +194,19 @@ std::string LexerTest::Parse() {
   return Parse({});
 }
 
-TEST_F(LexerTest, BlockComment) {
-  PrepareSouceCode("/**/");
-  EXPECT_EQ(NewComment(), Parse());
-
-  PrepareSouceCode("/* abc */");
-  EXPECT_EQ(NewComment(), Parse());
+TEST_F(LexerTest, Annotation) {
+  PrepareSouceCode("/** @type {number} */");
+  EXPECT_EQ(NewAnnotation(), Parse());
 
   PrepareSouceCode("/** */");
+  EXPECT_EQ(NewAnnotation(), Parse());
+}
+
+TEST_F(LexerTest, BlockComment) {
+  PrepareSouceCode("/**/");
+  EXPECT_EQ(NewComment(), Parse()) << "/**/ is a block comment";
+
+  PrepareSouceCode("/* abc */");
   EXPECT_EQ(NewComment(), Parse());
 
   PrepareSouceCode("/* * */");

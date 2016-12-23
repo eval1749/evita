@@ -97,6 +97,7 @@ namespace ast {
   V(WithStatement)
 
 #define FOR_EACH_AST_TOKEN(V) \
+  V(Annotation)               \
   V(Comment)                  \
   V(Empty)                    \
   V(Invalid)                  \

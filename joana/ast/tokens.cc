@@ -12,6 +12,13 @@ namespace joana {
 namespace ast {
 
 //
+// Annotation
+//
+Annotation::Annotation(const SourceCodeRange& range) : Token(range) {}
+
+Annotation::~Annotation() = default;
+
+//
 // Comment
 //
 Comment::Comment(const SourceCodeRange& range) : Token(range) {}

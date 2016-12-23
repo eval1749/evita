@@ -68,7 +68,11 @@ NodeFactory::NodeFactory(Zone* zone)
 
 NodeFactory::~NodeFactory() = default;
 
-// Nodes
+// Tokens
+const Token& NodeFactory::NewAnnotation(const SourceCodeRange& range) {
+  return *new (zone_) Annotation(range);
+}
+
 const Token& NodeFactory::NewComment(const SourceCodeRange& range) {
   return *new (zone_) Comment(range);
 }

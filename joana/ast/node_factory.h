@@ -25,6 +25,7 @@ class JOANA_AST_EXPORT NodeFactory final {
   ~NodeFactory();
 
   // Factory member functions
+  const Token& NewAnnotation(const SourceCodeRange& range);
   const Token& NewComment(const SourceCodeRange& range);
   const Token& NewEmpty(const SourceCodeRange& range);
 

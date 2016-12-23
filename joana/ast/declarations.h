@@ -150,9 +150,9 @@ class JOANA_AST_EXPORT Function final : public NodeTemplate<Declaration,
 class JOANA_AST_EXPORT Method final : public NodeTemplate<Declaration,
                                                           MethodKind,
                                                           FunctionKind,
-                                                          Expression*,
-                                                          Expression*,
-                                                          Statement*> {
+                                                          const Expression*,
+                                                          const Expression*,
+                                                          const Statement*> {
   DECLARE_CONCRETE_AST_NODE(Method, Declaration);
 
  public:
@@ -169,9 +169,9 @@ class JOANA_AST_EXPORT Method final : public NodeTemplate<Declaration,
   Method(const SourceCodeRange& range,
          MethodKind is_static,
          FunctionKind kind,
-         Expression* name,
-         Expression* parameter_list,
-         Statement* body);
+         const Expression& name,
+         const Expression& parameter_list,
+         const Statement& body);
 
   DISALLOW_COPY_AND_ASSIGN(Method);
 };

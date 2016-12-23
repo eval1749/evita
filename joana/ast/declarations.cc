@@ -57,11 +57,12 @@ Function::~Function() = default;
 Method::Method(const SourceCodeRange& range,
                MethodKind is_static,
                FunctionKind kind,
-               Expression* name,
-               Expression* parameter_list,
-               Statement* body)
-    : NodeTemplate(std::make_tuple(is_static, kind, name, parameter_list, body),
-                   range) {}
+               const Expression& name,
+               const Expression& parameter_list,
+               const Statement& body)
+    : NodeTemplate(
+          std::make_tuple(is_static, kind, &name, &parameter_list, &body),
+          range) {}
 
 Method::~Method() = default;
 

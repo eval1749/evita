@@ -83,8 +83,8 @@ bool Node::IsDescendantOf(const Node& other) const {
 }
 
 void Node::PrintTo(std::ostream* ostream) const {
-  *ostream << class_name() << '(' << range_ << ", \""
-           << EscapedStringPiece16(range_.GetString(), '"') << '"';
+  *ostream << class_name() << '(' << range_ << ", "
+           << EscapedStringPiece16(range_.GetString(), '"');
   PrintMoreTo(ostream);
   *ostream << ')';
 }

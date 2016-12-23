@@ -37,10 +37,10 @@ AssignmentExpression::~AssignmentExpression() = default;
 // BinaryExpression
 //
 BinaryExpression::BinaryExpression(const SourceCodeRange& range,
-                                   Token* op,
-                                   Expression* lhs,
-                                   Expression* rhs)
-    : NodeTemplate(std::make_tuple(op, lhs, rhs), range) {}
+                                   const Token& op,
+                                   const Expression& lhs,
+                                   const Expression& rhs)
+    : NodeTemplate(std::make_tuple(&op, &lhs, &rhs), range) {}
 
 BinaryExpression::~BinaryExpression() = default;
 

@@ -102,7 +102,10 @@ class JOANA_AST_EXPORT AssignmentExpression final
 // BinaryExpression
 //
 class JOANA_AST_EXPORT BinaryExpression final
-    : public NodeTemplate<Expression, Token*, Expression*, Expression*> {
+    : public NodeTemplate<Expression,
+                          const Token*,
+                          const Expression*,
+                          const Expression*> {
   DECLARE_CONCRETE_AST_NODE(BinaryExpression, Expression);
 
  public:
@@ -114,9 +117,9 @@ class JOANA_AST_EXPORT BinaryExpression final
 
  private:
   BinaryExpression(const SourceCodeRange& range,
-                   Token* op,
-                   Expression* lhs,
-                   Expression* rhs);
+                   const Token& op,
+                   const Expression& lhs,
+                   const Expression& rhs);
 
   DISALLOW_COPY_AND_ASSIGN(BinaryExpression);
 };

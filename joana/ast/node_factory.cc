@@ -156,14 +156,11 @@ AssignmentExpression& NodeFactory::NewAssignmentExpression(
   return *new (zone_) AssignmentExpression(range, op, lhs, rhs);
 }
 
-BinaryExpression& NodeFactory::NewBinaryExpression(
-    const SourceCodeRange& range,
-    const Token& op,
-    const Expression& left_hand_side,
-    const Expression& right_hand_side) {
-  return *new (zone_) BinaryExpression(
-      range, const_cast<Token*>(&op), const_cast<Expression*>(&left_hand_side),
-      const_cast<Expression*>(&right_hand_side));
+BinaryExpression& NodeFactory::NewBinaryExpression(const SourceCodeRange& range,
+                                                   const Token& op,
+                                                   const Expression& lhs,
+                                                   const Expression& rhs) {
+  return *new (zone_) BinaryExpression(range, op, lhs, rhs);
 }
 
 CallExpression& NodeFactory::NewCallExpression(

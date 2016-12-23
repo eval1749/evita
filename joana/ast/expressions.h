@@ -218,7 +218,7 @@ class JOANA_AST_EXPORT ConditionalExpression final
 // DeclarationExpression
 //
 class JOANA_AST_EXPORT DeclarationExpression final
-    : public NodeTemplate<Expression, Declaration*> {
+    : public NodeTemplate<Expression, const Declaration*> {
   DECLARE_CONCRETE_AST_NODE(DeclarationExpression, Expression);
 
  public:
@@ -227,7 +227,7 @@ class JOANA_AST_EXPORT DeclarationExpression final
   const Declaration& declaration() const { return *member_at<0>(); }
 
  private:
-  explicit DeclarationExpression(Declaration* declaration);
+  explicit DeclarationExpression(const Declaration& declaration);
 
   DISALLOW_COPY_AND_ASSIGN(DeclarationExpression);
 };

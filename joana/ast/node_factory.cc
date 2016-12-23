@@ -197,8 +197,7 @@ ConditionalExpression& NodeFactory::NewConditionalExpression(
 
 DeclarationExpression& NodeFactory::NewDeclarationExpression(
     const Declaration& declaration) {
-  return *new (zone_)
-      DeclarationExpression(const_cast<Declaration*>(&declaration));
+  return *new (zone_) DeclarationExpression(declaration);
 }
 
 ElisionExpression& NodeFactory::NewElisionExpression(

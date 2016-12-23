@@ -90,8 +90,8 @@ ConditionalExpression::~ConditionalExpression() = default;
 //
 // DeclarationExpression
 //
-DeclarationExpression::DeclarationExpression(Declaration* declaration)
-    : NodeTemplate(declaration, declaration->range()) {}
+DeclarationExpression::DeclarationExpression(const Declaration& declaration)
+    : NodeTemplate(&declaration, declaration.range()) {}
 
 DeclarationExpression::~DeclarationExpression() = default;
 

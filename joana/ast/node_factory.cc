@@ -168,8 +168,7 @@ CallExpression& NodeFactory::NewCallExpression(
     const Expression& callee,
     const std::vector<Expression*>& arguments) {
   auto* const list = new (zone_) ExpressionList(zone_, arguments);
-  return *new (zone_)
-      CallExpression(range, const_cast<Expression*>(&callee), list);
+  return *new (zone_) CallExpression(range, callee, *list);
 }
 
 CommaExpression& NodeFactory::NewCommaExpression(

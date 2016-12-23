@@ -48,9 +48,9 @@ BinaryExpression::~BinaryExpression() = default;
 // CallExpression
 //
 CallExpression::CallExpression(const SourceCodeRange& range,
-                               Expression* callee,
-                               ExpressionList* arguments)
-    : NodeTemplate(std::make_tuple(callee, arguments), range) {}
+                               const Expression& callee,
+                               const ExpressionList& arguments)
+    : NodeTemplate(std::make_tuple(&callee, &arguments), range) {}
 
 CallExpression::~CallExpression() = default;
 

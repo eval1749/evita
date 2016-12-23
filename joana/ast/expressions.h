@@ -128,7 +128,9 @@ class JOANA_AST_EXPORT BinaryExpression final
 // CallExpression
 //
 class JOANA_AST_EXPORT CallExpression final
-    : public NodeTemplate<Expression, Expression*, ExpressionList*> {
+    : public NodeTemplate<Expression,
+                          const Expression*,
+                          const ExpressionList*> {
   DECLARE_CONCRETE_AST_NODE(CallExpression, Expression);
 
  public:
@@ -139,8 +141,8 @@ class JOANA_AST_EXPORT CallExpression final
 
  private:
   CallExpression(const SourceCodeRange& range,
-                 Expression* callee,
-                 ExpressionList* arguments);
+                 const Expression& callee,
+                 const ExpressionList& arguments);
 
   DISALLOW_COPY_AND_ASSIGN(CallExpression);
 };

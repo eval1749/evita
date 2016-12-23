@@ -372,92 +372,91 @@ RegExp& NodeFactory::NewSequenceRegExp(const SourceCodeRange& range,
 }
 
 // Statements factory members
-BlockStatement& NodeFactory::NewBlockStatement(
+const Statement& NodeFactory::NewBlockStatement(
     const SourceCodeRange& range,
     const std::vector<const Statement*>& statements) {
   auto* const list = new (zone_) StatementList(zone_, statements);
   return *new (zone_) BlockStatement(range, list);
 }
 
-BreakStatement& NodeFactory::NewBreakStatement(const SourceCodeRange& range,
-                                               const Token& label) {
+const Statement& NodeFactory::NewBreakStatement(const SourceCodeRange& range,
+                                                const Token& label) {
   return *new (zone_) BreakStatement(range, const_cast<Token*>(&label));
 }
 
-CaseClause& NodeFactory::NewCaseClause(const SourceCodeRange& range,
-                                       const Expression& expression,
-                                       const Statement& statement) {
+const Statement& NodeFactory::NewCaseClause(const SourceCodeRange& range,
+                                            const Expression& expression,
+                                            const Statement& statement) {
   return *new (zone_) CaseClause(range, const_cast<Expression*>(&expression),
                                  const_cast<Statement*>(&statement));
 }
 
-ConstStatement& NodeFactory::NewConstStatement(const SourceCodeRange& range,
-                                               const Expression& expression) {
+const Statement& NodeFactory::NewConstStatement(const SourceCodeRange& range,
+                                                const Expression& expression) {
   return *new (zone_)
       ConstStatement(range, const_cast<Expression*>(&expression));
 }
 
-ContinueStatement& NodeFactory::NewContinueStatement(
-    const SourceCodeRange& range,
-    const Token& label) {
+const Statement& NodeFactory::NewContinueStatement(const SourceCodeRange& range,
+                                                   const Token& label) {
   return *new (zone_) ContinueStatement(range, const_cast<Token*>(&label));
 }
 
-DeclarationStatement& NodeFactory::NewDeclarationStatement(
+const Statement& NodeFactory::NewDeclarationStatement(
     const Declaration& declaration) {
   return *new (zone_)
       DeclarationStatement(const_cast<Declaration*>(&declaration));
 }
 
-DoStatement& NodeFactory::NewDoStatement(const SourceCodeRange& range,
-                                         const Statement& statement,
-                                         const Expression& expression) {
+const Statement& NodeFactory::NewDoStatement(const SourceCodeRange& range,
+                                             const Statement& statement,
+                                             const Expression& expression) {
   return *new (zone_)
       DoStatement(range, const_cast<ast::Statement*>(&statement),
                   const_cast<Expression*>(&expression));
 }
 
-EmptyStatement& NodeFactory::NewEmptyStatement(const SourceCodeRange& range) {
+const Statement& NodeFactory::NewEmptyStatement(const SourceCodeRange& range) {
   return *new (zone_) EmptyStatement(range);
 }
 
-ExpressionStatement& NodeFactory::NewExpressionStatement(
+const Statement& NodeFactory::NewExpressionStatement(
     const Expression& expression) {
   return *new (zone_) ExpressionStatement(const_cast<Expression*>(&expression));
 }
 
-ForStatement& NodeFactory::NewForStatement(const SourceCodeRange& range,
-                                           const Token& keyword,
-                                           const Expression& init,
-                                           const Expression& condition,
-                                           const Expression& step,
-                                           const Statement& body) {
+const Statement& NodeFactory::NewForStatement(const SourceCodeRange& range,
+                                              const Token& keyword,
+                                              const Expression& init,
+                                              const Expression& condition,
+                                              const Expression& step,
+                                              const Statement& body) {
   return *new (zone_) ForStatement(
       range, const_cast<Token*>(&keyword), const_cast<Expression*>(&init),
       const_cast<Expression*>(&condition), const_cast<Expression*>(&step),
       const_cast<Statement*>(&body));
 }
 
-ForInStatement& NodeFactory::NewForInStatement(const SourceCodeRange& range,
-                                               const Token& keyword,
-                                               const Expression& expression,
-                                               const Statement& body) {
+const Statement& NodeFactory::NewForInStatement(const SourceCodeRange& range,
+                                                const Token& keyword,
+                                                const Expression& expression,
+                                                const Statement& body) {
   return *new (zone_) ForInStatement(range, const_cast<Token*>(&keyword),
                                      const_cast<Expression*>(&expression),
                                      const_cast<Statement*>(&body));
 }
 
-ForOfStatement& NodeFactory::NewForOfStatement(const SourceCodeRange& range,
-                                               const Token& keyword,
-                                               const Expression& binding,
-                                               const Expression& expression,
-                                               const Statement& body) {
+const Statement& NodeFactory::NewForOfStatement(const SourceCodeRange& range,
+                                                const Token& keyword,
+                                                const Expression& binding,
+                                                const Expression& expression,
+                                                const Statement& body) {
   return *new (zone_) ForOfStatement(
       range, const_cast<Token*>(&keyword), const_cast<Expression*>(&binding),
       const_cast<Expression*>(&expression), const_cast<Statement*>(&body));
 }
 
-IfElseStatement& NodeFactory::NewIfElseStatement(const SourceCodeRange& range,
+const Statement& NodeFactory::NewIfElseStatement(const SourceCodeRange& range,
                                                  const Expression& expression,
                                                  const Statement& then_clause,
                                                  const Statement& else_clause) {
@@ -467,37 +466,37 @@ IfElseStatement& NodeFactory::NewIfElseStatement(const SourceCodeRange& range,
                       const_cast<Statement*>(&else_clause));
 }
 
-IfStatement& NodeFactory::NewIfStatement(const SourceCodeRange& range,
-                                         const Expression& expression,
-                                         const Statement& then_clause) {
+const Statement& NodeFactory::NewIfStatement(const SourceCodeRange& range,
+                                             const Expression& expression,
+                                             const Statement& then_clause) {
   return *new (zone_) IfStatement(range, const_cast<Expression*>(&expression),
                                   const_cast<Statement*>(&then_clause));
 }
 
-InvalidStatement& NodeFactory::NewInvalidStatement(const Node& node,
-                                                   int error_code) {
+const Statement& NodeFactory::NewInvalidStatement(const Node& node,
+                                                  int error_code) {
   return *new (zone_) InvalidStatement(node.range(), error_code);
 }
 
-LabeledStatement& NodeFactory::NewLabeledStatement(const SourceCodeRange& range,
-                                                   const Name& label,
-                                                   const Statement& statement) {
+const Statement& NodeFactory::NewLabeledStatement(const SourceCodeRange& range,
+                                                  const Name& label,
+                                                  const Statement& statement) {
   return *new (zone_) LabeledStatement(range, const_cast<Name*>(&label),
                                        const_cast<Statement*>(&statement));
 }
 
-LetStatement& NodeFactory::NewLetStatement(const SourceCodeRange& range,
-                                           const Expression& expression) {
+const Statement& NodeFactory::NewLetStatement(const SourceCodeRange& range,
+                                              const Expression& expression) {
   return *new (zone_) LetStatement(range, const_cast<Expression*>(&expression));
 }
 
-ReturnStatement& NodeFactory::NewReturnStatement(const SourceCodeRange& range,
+const Statement& NodeFactory::NewReturnStatement(const SourceCodeRange& range,
                                                  const Expression& expression) {
   return *new (zone_)
       ReturnStatement(range, const_cast<Expression*>(&expression));
 }
 
-SwitchStatement& NodeFactory::NewSwitchStatement(
+const Statement& NodeFactory::NewSwitchStatement(
     const SourceCodeRange& range,
     const Expression& expression,
     const std::vector<const Statement*>& clauses) {
@@ -506,13 +505,13 @@ SwitchStatement& NodeFactory::NewSwitchStatement(
       SwitchStatement(range, const_cast<Expression*>(&expression), list);
 }
 
-ThrowStatement& NodeFactory::NewThrowStatement(const SourceCodeRange& range,
-                                               const Expression& expression) {
+const Statement& NodeFactory::NewThrowStatement(const SourceCodeRange& range,
+                                                const Expression& expression) {
   return *new (zone_)
       ThrowStatement(range, const_cast<Expression*>(&expression));
 }
 
-TryCatchFinallyStatement& NodeFactory::NewTryCatchFinallyStatement(
+const Statement& NodeFactory::NewTryCatchFinallyStatement(
     const SourceCodeRange& range,
     const Statement& try_block,
     const Expression& catch_parameter,
@@ -525,7 +524,7 @@ TryCatchFinallyStatement& NodeFactory::NewTryCatchFinallyStatement(
                                const_cast<Statement*>(&finally_block));
 }
 
-TryCatchStatement& NodeFactory::NewTryCatchStatement(
+const Statement& NodeFactory::NewTryCatchStatement(
     const SourceCodeRange& range,
     const Statement& try_block,
     const Expression& catch_parameter,
@@ -536,7 +535,7 @@ TryCatchStatement& NodeFactory::NewTryCatchStatement(
                         const_cast<Statement*>(&catch_block));
 }
 
-TryFinallyStatement& NodeFactory::NewTryFinallyStatement(
+const Statement& NodeFactory::NewTryFinallyStatement(
     const SourceCodeRange& range,
     const Statement& try_block,
     const Statement& finally_block) {
@@ -545,22 +544,22 @@ TryFinallyStatement& NodeFactory::NewTryFinallyStatement(
                           const_cast<Statement*>(&finally_block));
 }
 
-VarStatement& NodeFactory::NewVarStatement(const SourceCodeRange& range,
-                                           const Expression& expression) {
+const Statement& NodeFactory::NewVarStatement(const SourceCodeRange& range,
+                                              const Expression& expression) {
   return *new (zone_) VarStatement(range, const_cast<Expression*>(&expression));
 }
 
-WhileStatement& NodeFactory::NewWhileStatement(const SourceCodeRange& range,
-                                               const Expression& expression,
-                                               const Statement& statement) {
+const Statement& NodeFactory::NewWhileStatement(const SourceCodeRange& range,
+                                                const Expression& expression,
+                                                const Statement& statement) {
   return *new (zone_)
       WhileStatement(range, const_cast<Expression*>(&expression),
                      const_cast<Statement*>(&statement));
 }
 
-WithStatement& NodeFactory::NewWithStatement(const SourceCodeRange& range,
-                                             const Expression& expression,
-                                             const Statement& statement) {
+const Statement& NodeFactory::NewWithStatement(const SourceCodeRange& range,
+                                               const Expression& expression,
+                                               const Statement& statement) {
   return *new (zone_) WithStatement(range, const_cast<Expression*>(&expression),
                                     const_cast<Statement*>(&statement));
 }

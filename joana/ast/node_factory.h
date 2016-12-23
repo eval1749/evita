@@ -181,100 +181,106 @@ class JOANA_AST_EXPORT NodeFactory final {
                             const std::vector<RegExp*> patterns);
 
   // Statements factory members
-  BlockStatement& NewBlockStatement(
+  const Statement& NewBlockStatement(
       const SourceCodeRange& range,
       const std::vector<const Statement*>& statements);
 
-  BreakStatement& NewBreakStatement(const SourceCodeRange& range,
-                                    const Token& label);
+  const Statement& NewBreakStatement(const SourceCodeRange& range,
+                                     const Token& label);
 
-  CaseClause& NewCaseClause(const SourceCodeRange& range,
-                            const Expression& expression,
-                            const Statement& statement);
+  const Statement& NewCaseClause(const SourceCodeRange& range,
+                                 const Expression& expression,
+                                 const Statement& statement);
 
-  ConstStatement& NewConstStatement(const SourceCodeRange& range,
-                                    const Expression& expression);
-  ContinueStatement& NewContinueStatement(const SourceCodeRange& range,
-                                          const Token& label);
-  DeclarationStatement& NewDeclarationStatement(const Declaration& declaration);
+  const Statement& NewConstStatement(const SourceCodeRange& range,
+                                     const Expression& expression);
 
-  DoStatement& NewDoStatement(const SourceCodeRange& range,
-                              const Statement& statement,
-                              const Expression& expression);
+  const Statement& NewContinueStatement(const SourceCodeRange& range,
+                                        const Token& label);
 
-  EmptyStatement& NewEmptyStatement(const SourceCodeRange& range);
+  const Statement& NewDeclarationStatement(const Declaration& declaration);
 
-  ExpressionStatement& NewExpressionStatement(const Expression& expression);
+  const Statement& NewDoStatement(const SourceCodeRange& range,
+                                  const Statement& statement,
+                                  const Expression& expression);
 
-  ForStatement& NewForStatement(const SourceCodeRange& range,
-                                const Token& keyword,
-                                const Expression& init,
-                                const Expression& condition,
-                                const Expression& step,
-                                const Statement& body);
+  const Statement& NewEmptyStatement(const SourceCodeRange& range);
 
-  ForInStatement& NewForInStatement(const SourceCodeRange& range,
-                                    const Token& keyword,
-                                    const Expression& expression,
-                                    const Statement& body);
+  const Statement& NewExpressionStatement(const Expression& expression);
 
-  ForOfStatement& NewForOfStatement(const SourceCodeRange& range,
-                                    const Token& keyword,
-                                    const Expression& binding,
-                                    const Expression& expression,
-                                    const Statement& body);
+  const Statement& NewForStatement(const SourceCodeRange& range,
+                                   const Token& keyword,
+                                   const Expression& init,
+                                   const Expression& condition,
+                                   const Expression& step,
+                                   const Statement& body);
 
-  IfElseStatement& NewIfElseStatement(const SourceCodeRange& range,
+  const Statement& NewForInStatement(const SourceCodeRange& range,
+                                     const Token& keyword,
+                                     const Expression& expression,
+                                     const Statement& body);
+
+  const Statement& NewForOfStatement(const SourceCodeRange& range,
+                                     const Token& keyword,
+                                     const Expression& binding,
+                                     const Expression& expression,
+                                     const Statement& body);
+
+  const Statement& NewIfElseStatement(const SourceCodeRange& range,
                                       const Expression& condition,
                                       const Statement& then_clause,
                                       const Statement& else_clause);
 
-  IfStatement& NewIfStatement(const SourceCodeRange& range,
-                              const Expression& condition,
-                              const Statement& then_clause);
+  const Statement& NewIfStatement(const SourceCodeRange& range,
+                                  const Expression& condition,
+                                  const Statement& then_clause);
 
-  InvalidStatement& NewInvalidStatement(const Node& node, int error_code);
+  const Statement& NewInvalidStatement(const Node& node, int error_code);
 
-  LabeledStatement& NewLabeledStatement(const SourceCodeRange& range,
-                                        const Name& label,
-                                        const Statement& statement);
+  const Statement& NewLabeledStatement(const SourceCodeRange& range,
+                                       const Name& label,
+                                       const Statement& statement);
 
-  LetStatement& NewLetStatement(const SourceCodeRange& range,
-                                const Expression& expression);
-  ReturnStatement& NewReturnStatement(const SourceCodeRange& range,
+  const Statement& NewLetStatement(const SourceCodeRange& range,
+                                   const Expression& expression);
+
+  const Statement& NewReturnStatement(const SourceCodeRange& range,
                                       const Expression& condition);
 
-  SwitchStatement& NewSwitchStatement(
+  const Statement& NewSwitchStatement(
       const SourceCodeRange& range,
       const Expression& expression,
       const std::vector<const Statement*>& clauses);
 
-  ThrowStatement& NewThrowStatement(const SourceCodeRange& range,
-                                    const Expression& expression);
+  const Statement& NewThrowStatement(const SourceCodeRange& range,
+                                     const Expression& expression);
 
-  TryCatchFinallyStatement& NewTryCatchFinallyStatement(
+  const Statement& NewTryCatchFinallyStatement(
       const SourceCodeRange& range,
       const Statement& try_block,
       const Expression& catch_parameter,
       const Statement& catch_block,
       const Statement& finally_block);
-  TryCatchStatement& NewTryCatchStatement(const SourceCodeRange& range,
-                                          const Statement& try_block,
-                                          const Expression& catch_parameter,
-                                          const Statement& catch_block);
-  TryFinallyStatement& NewTryFinallyStatement(const SourceCodeRange& range,
-                                              const Statement& try_block,
-                                              const Statement& finally_block);
-  VarStatement& NewVarStatement(const SourceCodeRange& range,
-                                const Expression& expression);
 
-  WhileStatement& NewWhileStatement(const SourceCodeRange& range,
+  const Statement& NewTryCatchStatement(const SourceCodeRange& range,
+                                        const Statement& try_block,
+                                        const Expression& catch_parameter,
+                                        const Statement& catch_block);
+
+  const Statement& NewTryFinallyStatement(const SourceCodeRange& range,
+                                          const Statement& try_block,
+                                          const Statement& finally_block);
+
+  const Statement& NewVarStatement(const SourceCodeRange& range,
+                                   const Expression& expression);
+
+  const Statement& NewWhileStatement(const SourceCodeRange& range,
+                                     const Expression& expression,
+                                     const Statement& statement);
+
+  const Statement& NewWithStatement(const SourceCodeRange& range,
                                     const Expression& expression,
                                     const Statement& statement);
-
-  WithStatement& NewWithStatement(const SourceCodeRange& range,
-                                  const Expression& expression,
-                                  const Statement& statement);
 
  private:
   class NameIdMap;

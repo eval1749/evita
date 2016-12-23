@@ -68,6 +68,10 @@ NodeFactory::NodeFactory(Zone* zone)
 
 NodeFactory::~NodeFactory() = default;
 
+Module& NodeFactory::NewModule(const SourceCodeRange& range) {
+  return *new (zone_) Module(range);
+}
+
 // Tokens
 const Token& NodeFactory::NewAnnotation(const SourceCodeRange& range) {
   return *new (zone_) Annotation(range);
@@ -84,10 +88,6 @@ const Token& NodeFactory::NewEmpty(const SourceCodeRange& range) {
 const Token& NodeFactory::NewInvalid(const SourceCodeRange& range,
                                      int error_code) {
   return *new (zone_) Invalid(range, error_code);
-}
-
-Module& NodeFactory::NewModule(const SourceCodeRange& range) {
-  return *new (zone_) Module(range);
 }
 
 const Name& NodeFactory::NewName(const SourceCodeRange& range, NameId name_id) {

@@ -26,10 +26,10 @@ ArrayLiteralExpression::~ArrayLiteralExpression() = default;
 // AssignmentExpression
 //
 AssignmentExpression::AssignmentExpression(const SourceCodeRange& range,
-                                           Punctuator* op,
-                                           Expression* lhs,
-                                           Expression* rhs)
-    : NodeTemplate(std::make_tuple(op, lhs, rhs), range) {}
+                                           const Punctuator& op,
+                                           const Expression& lhs,
+                                           const Expression& rhs)
+    : NodeTemplate(std::make_tuple(&op, &lhs, &rhs), range) {}
 
 AssignmentExpression::~AssignmentExpression() = default;
 

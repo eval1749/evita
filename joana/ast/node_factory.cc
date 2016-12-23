@@ -151,12 +151,9 @@ ArrayLiteralExpression& NodeFactory::NewArrayLiteralExpression(
 AssignmentExpression& NodeFactory::NewAssignmentExpression(
     const SourceCodeRange& range,
     const Punctuator& op,
-    const Expression& left_hand_side,
-    const Expression& right_hand_side) {
-  return *new (zone_)
-      AssignmentExpression(range, const_cast<Punctuator*>(&op),
-                           const_cast<Expression*>(&left_hand_side),
-                           const_cast<Expression*>(&right_hand_side));
+    const Expression& lhs,
+    const Expression& rhs) {
+  return *new (zone_) AssignmentExpression(range, op, lhs, rhs);
 }
 
 BinaryExpression& NodeFactory::NewBinaryExpression(

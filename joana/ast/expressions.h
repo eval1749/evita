@@ -76,7 +76,10 @@ class JOANA_AST_EXPORT ArrayLiteralExpression final
 // AssignmentExpression
 //
 class JOANA_AST_EXPORT AssignmentExpression final
-    : public NodeTemplate<Expression, Punctuator*, Expression*, Expression*> {
+    : public NodeTemplate<Expression,
+                          const Punctuator*,
+                          const Expression*,
+                          const Expression*> {
   DECLARE_CONCRETE_AST_NODE(AssignmentExpression, Expression);
 
  public:
@@ -88,9 +91,9 @@ class JOANA_AST_EXPORT AssignmentExpression final
 
  private:
   AssignmentExpression(const SourceCodeRange& range,
-                       Punctuator* op,
-                       Expression* lhs,
-                       Expression* rhs);
+                       const Punctuator& op,
+                       const Expression& lhs,
+                       const Expression& rhs);
 
   DISALLOW_COPY_AND_ASSIGN(AssignmentExpression);
 };

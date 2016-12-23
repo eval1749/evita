@@ -225,50 +225,45 @@ const Expression& NodeFactory::NewNewExpression(
     const Expression& expression,
     const std::vector<const Expression*>& arguments) {
   auto* const list = new (zone_) ExpressionList(zone_, arguments);
-  return *new (zone_)
-      NewExpression(range, const_cast<Expression*>(&expression), list);
+  return *new (zone_) NewExpression(range, expression, *list);
 }
 
 const Expression& NodeFactory::NewObjectLiteralExpression(
     const SourceCodeRange& range,
     const std::vector<const Expression*>& elements) {
   auto* const list = new (zone_) ExpressionList(zone_, elements);
-  return *new (zone_) ObjectLiteralExpression(range, list);
+  return *new (zone_) ObjectLiteralExpression(range, *list);
 }
 
 const Expression& NodeFactory::NewMemberExpression(const SourceCodeRange& range,
                                                    const Expression& expression,
                                                    const Name& name) {
-  return *new (zone_) MemberExpression(
-      range, const_cast<Expression*>(&expression), const_cast<Name*>(&name));
+  return *new (zone_) MemberExpression(range, expression, name);
 }
 
 const Expression& NodeFactory::NewPropertyDefinitionExpression(
     const SourceCodeRange& range,
     const Expression& name,
     const Expression& value) {
-  return *new (zone_) PropertyDefinitionExpression(
-      range, const_cast<Expression*>(&name), const_cast<Expression*>(&value));
+  return *new (zone_) PropertyDefinitionExpression(range, name, value);
 }
 
 const Expression& NodeFactory::NewReferenceExpression(const Name& name) {
-  return *new (zone_) ReferenceExpression(const_cast<Name*>(&name));
+  return *new (zone_) ReferenceExpression(name);
 }
 
 const Expression& NodeFactory::NewRegExpLiteralExpression(
     const SourceCodeRange& range,
     const RegExp& regexp,
     const Token& flags) {
-  return *new (zone_) RegExpLiteralExpression(
-      range, const_cast<RegExp*>(&regexp), const_cast<Token*>(&flags));
+  return *new (zone_) RegExpLiteralExpression(range, regexp, flags);
 }
 
 const Expression& NodeFactory::NewUnaryExpression(
     const SourceCodeRange& range,
     const Token& op,
     const Expression& expression) {
-  return *new (zone_) UnaryExpression(range, const_cast<Token*>(&op),
-                                      const_cast<Expression*>(&expression));
+  return *new (zone_) UnaryExpression(range, op, expression);
 }
 
 // Literals

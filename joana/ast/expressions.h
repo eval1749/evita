@@ -321,7 +321,9 @@ class JOANA_AST_EXPORT LiteralExpression final
 // NewExpression
 //
 class JOANA_AST_EXPORT NewExpression final
-    : public NodeTemplate<Expression, Expression*, ExpressionList*> {
+    : public NodeTemplate<Expression,
+                          const Expression*,
+                          const ExpressionList*> {
   DECLARE_CONCRETE_AST_NODE(NewExpression, Expression);
 
  public:
@@ -332,8 +334,8 @@ class JOANA_AST_EXPORT NewExpression final
 
  private:
   NewExpression(const SourceCodeRange& range,
-                Expression* expression,
-                ExpressionList* arguments);
+                const Expression& expression,
+                const ExpressionList& arguments);
 
   DISALLOW_COPY_AND_ASSIGN(NewExpression);
 };
@@ -342,7 +344,7 @@ class JOANA_AST_EXPORT NewExpression final
 // ObjectLiteralExpression
 //
 class JOANA_AST_EXPORT ObjectLiteralExpression final
-    : public NodeTemplate<Expression, ExpressionList*> {
+    : public NodeTemplate<Expression, const ExpressionList*> {
   DECLARE_CONCRETE_AST_NODE(ObjectLiteralExpression, Expression);
 
  public:
@@ -352,7 +354,7 @@ class JOANA_AST_EXPORT ObjectLiteralExpression final
 
  private:
   ObjectLiteralExpression(const SourceCodeRange& range,
-                          ExpressionList* members);
+                          const ExpressionList& members);
 
   DISALLOW_COPY_AND_ASSIGN(ObjectLiteralExpression);
 };
@@ -361,7 +363,7 @@ class JOANA_AST_EXPORT ObjectLiteralExpression final
 // MemberExpression
 //
 class JOANA_AST_EXPORT MemberExpression final
-    : public NodeTemplate<Expression, Expression*, Name*> {
+    : public NodeTemplate<Expression, const Expression*, const Name*> {
   DECLARE_CONCRETE_AST_NODE(MemberExpression, Expression);
 
  public:
@@ -372,8 +374,8 @@ class JOANA_AST_EXPORT MemberExpression final
 
  private:
   MemberExpression(const SourceCodeRange& range,
-                   Expression* expression,
-                   Name* name);
+                   const Expression& expression,
+                   const Name& name);
 
   DISALLOW_COPY_AND_ASSIGN(MemberExpression);
 };
@@ -382,7 +384,7 @@ class JOANA_AST_EXPORT MemberExpression final
 // PropertyDefinitionExpression
 //
 class JOANA_AST_EXPORT PropertyDefinitionExpression final
-    : public NodeTemplate<Expression, Expression*, Expression*> {
+    : public NodeTemplate<Expression, const Expression*, const Expression*> {
   DECLARE_CONCRETE_AST_NODE(PropertyDefinitionExpression, Expression);
 
  public:
@@ -393,8 +395,8 @@ class JOANA_AST_EXPORT PropertyDefinitionExpression final
 
  private:
   PropertyDefinitionExpression(const SourceCodeRange& range,
-                               Expression* name,
-                               Expression* value);
+                               const Expression& name,
+                               const Expression& value);
 
   DISALLOW_COPY_AND_ASSIGN(PropertyDefinitionExpression);
 };
@@ -403,7 +405,7 @@ class JOANA_AST_EXPORT PropertyDefinitionExpression final
 // ReferenceExpression
 //
 class JOANA_AST_EXPORT ReferenceExpression final
-    : public NodeTemplate<Expression, Name*> {
+    : public NodeTemplate<Expression, const Name*> {
   DECLARE_CONCRETE_AST_NODE(ReferenceExpression, Expression);
 
  public:
@@ -412,7 +414,7 @@ class JOANA_AST_EXPORT ReferenceExpression final
   const Name& name() const { return *member_at<0>(); }
 
  private:
-  explicit ReferenceExpression(Name* name);
+  explicit ReferenceExpression(const Name& name);
 
   DISALLOW_COPY_AND_ASSIGN(ReferenceExpression);
 };
@@ -421,7 +423,7 @@ class JOANA_AST_EXPORT ReferenceExpression final
 // RegExpLiteralExpression
 //
 class JOANA_AST_EXPORT RegExpLiteralExpression final
-    : public NodeTemplate<Expression, RegExp*, Token*> {
+    : public NodeTemplate<Expression, const RegExp*, const Token*> {
   DECLARE_CONCRETE_AST_NODE(RegExpLiteralExpression, Expression);
 
  public:
@@ -432,8 +434,8 @@ class JOANA_AST_EXPORT RegExpLiteralExpression final
 
  private:
   RegExpLiteralExpression(const SourceCodeRange& range,
-                          RegExp* pattern,
-                          Token* flags);
+                          const RegExp& pattern,
+                          const Token& flags);
 
   DISALLOW_COPY_AND_ASSIGN(RegExpLiteralExpression);
 };
@@ -442,7 +444,7 @@ class JOANA_AST_EXPORT RegExpLiteralExpression final
 // UnaryExpression
 //
 class JOANA_AST_EXPORT UnaryExpression final
-    : public NodeTemplate<Expression, Token*, Expression*> {
+    : public NodeTemplate<Expression, const Token*, const Expression*> {
   DECLARE_CONCRETE_AST_NODE(UnaryExpression, Expression);
 
  public:
@@ -453,8 +455,8 @@ class JOANA_AST_EXPORT UnaryExpression final
 
  private:
   UnaryExpression(const SourceCodeRange& range,
-                  Token* op,
-                  Expression* expression);
+                  const Token& op,
+                  const Expression& expression);
 
   DISALLOW_COPY_AND_ASSIGN(UnaryExpression);
 };

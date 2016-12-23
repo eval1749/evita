@@ -157,9 +157,9 @@ LiteralExpression::~LiteralExpression() = default;
 // NewExpression
 //
 NewExpression::NewExpression(const SourceCodeRange& range,
-                             Expression* expression,
-                             ExpressionList* arguments)
-    : NodeTemplate(std::make_tuple(expression, arguments), range) {}
+                             const Expression& expression,
+                             const ExpressionList& arguments)
+    : NodeTemplate(std::make_tuple(&expression, &arguments), range) {}
 
 NewExpression::~NewExpression() = default;
 
@@ -167,8 +167,8 @@ NewExpression::~NewExpression() = default;
 // ObjectLiteralExpression
 //
 ObjectLiteralExpression::ObjectLiteralExpression(const SourceCodeRange& range,
-                                                 ExpressionList* members)
-    : NodeTemplate(members, range) {}
+                                                 const ExpressionList& members)
+    : NodeTemplate(&members, range) {}
 
 ObjectLiteralExpression::~ObjectLiteralExpression() = default;
 
@@ -176,9 +176,9 @@ ObjectLiteralExpression::~ObjectLiteralExpression() = default;
 // MemberExpression
 //
 MemberExpression::MemberExpression(const SourceCodeRange& range,
-                                   Expression* expression,
-                                   Name* name)
-    : NodeTemplate(std::make_tuple(expression, name), range) {}
+                                   const Expression& expression,
+                                   const Name& name)
+    : NodeTemplate(std::make_tuple(&expression, &name), range) {}
 
 MemberExpression::~MemberExpression() = default;
 
@@ -187,17 +187,17 @@ MemberExpression::~MemberExpression() = default;
 //
 PropertyDefinitionExpression::PropertyDefinitionExpression(
     const SourceCodeRange& range,
-    Expression* name,
-    Expression* value)
-    : NodeTemplate(std::make_tuple(name, value), range) {}
+    const Expression& name,
+    const Expression& value)
+    : NodeTemplate(std::make_tuple(&name, &value), range) {}
 
 PropertyDefinitionExpression::~PropertyDefinitionExpression() = default;
 
 //
 // ReferenceExpression
 //
-ReferenceExpression::ReferenceExpression(Name* name)
-    : NodeTemplate(name, name->range()) {}
+ReferenceExpression::ReferenceExpression(const Name& name)
+    : NodeTemplate(&name, name.range()) {}
 
 ReferenceExpression::~ReferenceExpression() = default;
 
@@ -205,9 +205,9 @@ ReferenceExpression::~ReferenceExpression() = default;
 // RegExpLiteralExpression
 //
 RegExpLiteralExpression::RegExpLiteralExpression(const SourceCodeRange& range,
-                                                 RegExp* pattern,
-                                                 Token* flags)
-    : NodeTemplate(std::make_tuple(pattern, flags), range) {}
+                                                 const RegExp& pattern,
+                                                 const Token& flags)
+    : NodeTemplate(std::make_tuple(&pattern, &flags), range) {}
 
 RegExpLiteralExpression::~RegExpLiteralExpression() = default;
 
@@ -215,9 +215,9 @@ RegExpLiteralExpression::~RegExpLiteralExpression() = default;
 // UnaryExpression
 //
 UnaryExpression::UnaryExpression(const SourceCodeRange& range,
-                                 Token* op,
-                                 Expression* expression)
-    : NodeTemplate(std::make_tuple(op, expression), range) {}
+                                 const Token& op,
+                                 const Expression& expression)
+    : NodeTemplate(std::make_tuple(&op, &expression), range) {}
 
 UnaryExpression::~UnaryExpression() = default;
 

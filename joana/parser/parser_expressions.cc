@@ -46,6 +46,12 @@ bool CanBePropertyName(const ast::Token& token) {
          token.Is<ast::Literal>();
 }
 
+bool CanHaveAnnotation(const ast::Expression& expression) {
+  if (expression.Is<ast::GroupExpression>())
+    return true;
+  return expression.Is<ast::DeclarationExpression>();
+}
+
 ast::FunctionKind FunctionKindOf(const ast::Token& token) {
   if (token == ast::NameId::Async)
     return ast::FunctionKind::Async;
@@ -188,6 +194,14 @@ const ast::Expression& Parser::NewUnaryExpression(
     const ast::Expression& expression) {
   return node_factory().NewUnaryExpression(GetSourceCodeRange(), op,
                                            expression);
+}
+
+const ast::Expression& Parser::ParseAnnotationAsExpression() {
+  auto& annotation = ConsumeToken().As<ast::Annotation>();
+  auto& expression = ParsePrimaryExpression();
+  if (!CanHaveAnnotation(expression))
+    AddError(annotation, ErrorCode::ERROR_EXPRESSION_UNEXPECT_ANNOTATION);
+  return expression;
 }
 
 // Parse argument list after consuming left parenthesis.
@@ -420,6 +434,11 @@ const ast::Expression& Parser::ParseObjectLiteralExpression() {
       comma = true;
       continue;
     }
+    if (PeekToken().Is<ast::Annotation>()) {
+      // TODO(eval1749): We should handle annotation in object literal.
+      ConsumeToken();
+      continue;
+    }
     comma = false;
     if (ConsumeTokenIf(ast::PunctuatorKind::Semicolon)) {
       // TODO(eval1749): We should keep semicolon token.
@@ -500,6 +519,8 @@ const ast::Expression& Parser::ParsePrimaryExpression() {
   if (!CanPeekToken())
     return NewInvalidExpression(ErrorCode::ERROR_EXPRESSION_INVALID);
   const auto& token = PeekToken();
+  if (token.Is<ast::Annotation>())
+    return ParseAnnotationAsExpression();
   if (token.Is<ast::Literal>())
     return NewLiteralExpression(ConsumeToken().As<ast::Literal>());
   if (token == ast::NameId::Class)

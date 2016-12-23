@@ -125,6 +125,7 @@ class Parser final {
 
   const ast::RegExp& ParseRegExp();
 
+  const ast::Expression& ParseAnnotationAsExpression();
   std::vector<const ast::Expression*> ParseArgumentList();
   const ast::Expression& ParseArrayLiteralExpression();
   const ast::Expression& ParseAssignmentExpression();
@@ -157,6 +158,7 @@ class Parser final {
 
   const ast::Statement& ParseStatement();
 
+  const ast::Statement& ParseAnnotationAsStatement();
   const ast::Statement& ParseBreakStatement();
   const ast::Statement& ParseBlockStatement();
   const ast::Statement& ParseCaseClause();

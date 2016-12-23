@@ -245,6 +245,12 @@ const ast::Node& Parser::Run() {
       Advance();
       continue;
     }
+    if (token.Is<ast::Annotation>()) {
+      ConsumeToken();
+      SourceCodeRangeScope(this);
+      ParseStatement();
+      continue;
+    }
     SourceCodeRangeScope(this);
     ast::NodeEditor().AppendChild(
         &root_, const_cast<ast::Statement*>(&ParseStatement()));

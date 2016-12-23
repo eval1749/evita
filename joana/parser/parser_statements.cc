@@ -23,6 +23,27 @@ namespace internal {
 
 namespace {
 
+bool CanHaveAnnotation(const ast::Statement& statement) {
+  if (statement.Is<ast::ConstStatement>())
+    return true;
+  if (statement.Is<ast::DeclarationStatement>())
+    return true;
+  if (statement.Is<ast::LetStatement>())
+    return true;
+  if (statement.Is<ast::VarStatement>())
+    return true;
+  if (!statement.Is<ast::ExpressionStatement>())
+    return false;
+  auto& expression = statement.As<ast::ExpressionStatement>().expression();
+  if (expression.Is<ast::AssignmentExpression>())
+    return true;
+  if (expression.Is<ast::ReferenceExpression>())
+    return true;
+  if (expression.Is<ast::MemberExpression>())
+    return true;
+  return false;
+}
+
 bool IsDeclarationKeyword(const ast::Token& token) {
   auto* const name = token.TryAs<ast::Name>();
   if (!name)
@@ -79,6 +100,14 @@ const ast::Statement& Parser::NewInvalidStatement(ErrorCode error_code) {
   AddError(GetSourceCodeRange(), error_code);
   return node_factory().NewInvalidStatement(token,
                                             static_cast<int>(error_code));
+}
+
+const ast::Statement& Parser::ParseAnnotationAsStatement() {
+  auto& annotation = ConsumeToken().As<ast::Annotation>();
+  auto& statement = ParseStatement();
+  if (!CanHaveAnnotation(statement))
+    AddError(annotation, ErrorCode::ERROR_STATEMENT_UNEXPECT_ANNOTATION);
+  return statement;
 }
 
 const ast::Statement& Parser::ParseBlockStatement() {
@@ -210,9 +239,17 @@ const ast::Statement& Parser::ParseForStatement() {
   ExpectPunctuator(ast::PunctuatorKind::LeftParenthesis,
                    ErrorCode::ERROR_STATEMENT_EXPECT_LPAREN);
 
+  auto* const annotation = CanPeekToken() && PeekToken().Is<ast::Annotation>()
+                               ? &ConsumeToken()
+                               : nullptr;
+
   auto& keyword = CanPeekToken() && IsDeclarationKeyword(PeekToken())
                       ? ConsumeToken()
                       : NewEmptyName();
+
+  if (annotation && keyword.Is<ast::Empty>())
+    AddError(*annotation, ErrorCode::ERROR_STATEMENT_UNEXPECT_ANNOTATION);
+
   auto& expression =
       CanPeekToken() && PeekToken() == ast::PunctuatorKind::Semicolon
           ? NewElisionExpression()
@@ -419,6 +456,8 @@ const ast::Statement& Parser::ParseStatement() {
     return NewEmptyStatement(source_code().end());
   SourceCodeRangeScope scope(this);
   const auto& token = PeekToken();
+  if (token.Is<ast::Annotation>())
+    return ParseAnnotationAsStatement();
   if (token.Is<ast::Name>())
     return ParseNameAsStatement();
   if (token.Is<ast::Literal>())

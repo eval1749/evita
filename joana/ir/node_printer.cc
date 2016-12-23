@@ -42,6 +42,10 @@ PrintableOperand AsPrintableOperand(const Node& node) {
 char TypeCharOf(const Type& type) {
   if (type.Is<BoolType>())
     return 'b';
+  if (type.Is<ControlType>())
+    return 'c';
+  if (type.Is<EffectType>())
+    return 'e';
   if (type.Is<Float64Type>())
     return 'f';
   if (type.Is<Int64Type>())

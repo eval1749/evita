@@ -69,7 +69,7 @@ TEST_F(IrNodeTest, If) {
   node_factory().NewIfTrueNode(if_node);
   node_factory().NewIfTrueNode(if_node);
 
-  EXPECT_EQ("4:If(%r2, true):Control", ToString(if_node));
+  EXPECT_EQ("4:If(%c2, true):Control", ToString(if_node));
 }
 
 TEST_F(IrNodeTest, LiteralBool) {
@@ -166,7 +166,7 @@ TEST_F(IrNodeTest, Ret) {
   auto& control = node_factory().NewProjectionNode(start, 0);
   auto& ret = node_factory().NewRetNode(control, literal_void);
 
-  EXPECT_EQ("4:Ret(%r3, void):Control", ToString(ret));
+  EXPECT_EQ("4:Ret(%c3, void):Control", ToString(ret));
 }
 
 TEST_F(IrNodeTest, Start) {

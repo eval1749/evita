@@ -13,7 +13,7 @@
 namespace joana {
 namespace ast {
 
-class Annotation;
+class JsDoc;
 class StatementList;
 
 //
@@ -28,16 +28,15 @@ class JOANA_AST_EXPORT Module final
 
   const StatementList& statements() const { return *member_at<0>(); }
 
-  const Annotation* AnnotationFor(const ast::Node& node) const;
+  const JsDoc* JsDocFor(const ast::Node& node) const;
 
  private:
   Module(Zone* zone,
          const SourceCodeRange& range,
          const StatementList& statements,
-         const std::unordered_map<const Node*, const ast::Annotation*>&
-             annotation_map);
+         const std::unordered_map<const Node*, const ast::JsDoc*>& js_doc_map);
 
-  const ZoneUnorderedMap<const Node*, const ast::Annotation*> annotation_map_;
+  const ZoneUnorderedMap<const Node*, const ast::JsDoc*> js_doc_map_;
 
   DISALLOW_COPY_AND_ASSIGN(Module);
 };

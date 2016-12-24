@@ -46,7 +46,7 @@ bool CanBePropertyName(const ast::Token& token) {
          token.Is<ast::Literal>();
 }
 
-bool CanHaveAnnotation(const ast::Expression& expression) {
+bool CanHaveJsDoc(const ast::Expression& expression) {
   if (expression.Is<ast::GroupExpression>())
     return true;
   return expression.Is<ast::DeclarationExpression>();
@@ -201,14 +201,14 @@ const ast::Expression& Parser::NewUnaryExpression(
                                            expression);
 }
 
-const ast::Expression& Parser::ParseAnnotationAsExpression() {
-  auto& annotation = ConsumeToken().As<ast::Annotation>();
+const ast::Expression& Parser::ParseJsDocAsExpression() {
+  auto& js_doc = ConsumeToken().As<ast::JsDoc>();
   auto& expression = ParsePrimaryExpression();
-  if (!CanHaveAnnotation(expression)) {
-    AddError(annotation, ErrorCode::ERROR_EXPRESSION_UNEXPECT_ANNOTATION);
+  if (!CanHaveJsDoc(expression)) {
+    AddError(js_doc, ErrorCode::ERROR_EXPRESSION_UNEXPECT_ANNOTATION);
     return expression;
   }
-  AssociateAnnotation(annotation, expression);
+  AssociateJsDoc(js_doc, expression);
   return expression;
 }
 
@@ -438,8 +438,8 @@ const ast::Expression& Parser::ParseObjectLiteralExpression() {
       members.push_back(&NewDelimiterExpression(ConsumeToken()));
       continue;
     }
-    if (PeekToken().Is<ast::Annotation>()) {
-      // TODO(eval1749): We should handle annotation in object literal.
+    if (PeekToken().Is<ast::JsDoc>()) {
+      // TODO(eval1749): We should handle js_doc in object literal.
       ConsumeToken();
       continue;
     }
@@ -517,8 +517,8 @@ const ast::Expression& Parser::ParsePrimaryExpression() {
   if (!CanPeekToken())
     return NewInvalidExpression(ErrorCode::ERROR_EXPRESSION_INVALID);
   const auto& token = PeekToken();
-  if (token.Is<ast::Annotation>())
-    return ParseAnnotationAsExpression();
+  if (token.Is<ast::JsDoc>())
+    return ParseJsDocAsExpression();
   if (token.Is<ast::Literal>())
     return NewLiteralExpression(ConsumeToken().As<ast::Literal>());
   if (token == ast::NameId::Class)

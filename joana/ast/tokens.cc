@@ -12,11 +12,11 @@ namespace joana {
 namespace ast {
 
 //
-// Annotation
+// JsDoc
 //
-Annotation::Annotation(const SourceCodeRange& range) : Token(range) {}
+JsDoc::JsDoc(const SourceCodeRange& range) : Token(range) {}
 
-Annotation::~Annotation() = default;
+JsDoc::~JsDoc() = default;
 
 //
 // Comment

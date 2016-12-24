@@ -141,12 +141,11 @@ void Parser::Advance() {
   SkipCommentTokens();
 }
 
-void Parser::AssociateAnnotation(const ast::Annotation& annotation,
-                                 const ast::Node& node) {
-  const auto& result = annotation_map_.emplace(&node, &annotation);
+void Parser::AssociateJsDoc(const ast::JsDoc& js_doc, const ast::Node& node) {
+  const auto& result = js_doc_map_.emplace(&node, &js_doc);
   if (result.second)
     return;
-  AddError(annotation, ErrorCode::ERROR_STATEMENT_UNEXPECT_ANNOTATION);
+  AddError(js_doc, ErrorCode::ERROR_STATEMENT_UNEXPECT_ANNOTATION);
 }
 
 bool Parser::CanPeekToken() const {
@@ -253,19 +252,19 @@ const ast::Node& Parser::Run() {
       Advance();
       continue;
     }
-    if (!token.Is<ast::Annotation>()) {
+    if (!token.Is<ast::JsDoc>()) {
       statements.push_back(&ParseStatement());
       continue;
     }
-    auto& annotation = ConsumeToken().As<ast::Annotation>();
+    auto& js_doc = ConsumeToken().As<ast::JsDoc>();
     auto& statement = ParseStatement();
-    AssociateAnnotation(annotation, statement);
+    AssociateJsDoc(js_doc, statement);
     statements.push_back(&statement);
   }
   for (const auto& bracket : bracket_stack_->tokens())
     AddError(*bracket, ErrorCode::ERROR_BRACKET_NOT_CLOSED);
   return node_factory().NewModule(source_code().range(), statements,
-                                  annotation_map_);
+                                  js_doc_map_);
 }
 
 void Parser::SkipCommentTokens() {

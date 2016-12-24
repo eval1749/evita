@@ -71,14 +71,14 @@ NodeFactory::~NodeFactory() = default;
 Module& NodeFactory::NewModule(
     const SourceCodeRange& range,
     const std::vector<const Statement*>& statements,
-    const std::unordered_map<const Node*, const Annotation*>& annotation_map) {
+    const std::unordered_map<const Node*, const JsDoc*>& js_doc_map) {
   auto* const list = new (zone_) StatementList(zone_, statements);
-  return *new (zone_) Module(zone_, range, *list, annotation_map);
+  return *new (zone_) Module(zone_, range, *list, js_doc_map);
 }
 
 // Tokens
-const Token& NodeFactory::NewAnnotation(const SourceCodeRange& range) {
-  return *new (zone_) Annotation(range);
+const Token& NodeFactory::NewJsDoc(const SourceCodeRange& range) {
+  return *new (zone_) JsDoc(range);
 }
 
 const Token& NodeFactory::NewComment(const SourceCodeRange& range) {

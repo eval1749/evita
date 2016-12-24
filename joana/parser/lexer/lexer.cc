@@ -92,14 +92,14 @@ const ast::Token& Lexer::PeekToken() const {
 }
 
 const ast::Token& Lexer::HandleBlockComment() {
-  auto is_annotation = CanPeekChar() && PeekChar() == '*';
+  auto is_js_doc = CanPeekChar() && PeekChar() == '*';
   auto is_after_asterisk = false;
   while (reader_->CanPeekChar()) {
     if (is_after_asterisk && ConsumeCharIf('/')) {
       const auto range = MakeTokenRange();
-      if (is_annotation && range.size() > 4) {
-        // "/**/" is a block comment instead of annotation.
-        return node_factory().NewAnnotation(range);
+      if (is_js_doc && range.size() > 4) {
+        // "/**/" is a block comment instead of js_doc.
+        return node_factory().NewJsDoc(range);
       }
       return node_factory().NewComment(range);
     }

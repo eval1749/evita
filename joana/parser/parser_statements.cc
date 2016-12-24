@@ -23,7 +23,7 @@ namespace internal {
 
 namespace {
 
-bool CanHaveAnnotation(const ast::Statement& statement) {
+bool CanHaveJsDoc(const ast::Statement& statement) {
   if (statement.Is<ast::ConstStatement>())
     return true;
   if (statement.Is<ast::DeclarationStatement>())
@@ -102,12 +102,12 @@ const ast::Statement& Parser::NewInvalidStatement(ErrorCode error_code) {
                                             static_cast<int>(error_code));
 }
 
-const ast::Statement& Parser::ParseAnnotationAsStatement() {
-  auto& annotation = ConsumeToken().As<ast::Annotation>();
+const ast::Statement& Parser::ParseJsDocAsStatement() {
+  auto& js_doc = ConsumeToken().As<ast::JsDoc>();
   auto& statement = ParseStatement();
-  if (!CanHaveAnnotation(statement))
-    AddError(annotation, ErrorCode::ERROR_STATEMENT_UNEXPECT_ANNOTATION);
-  AssociateAnnotation(annotation, statement);
+  if (!CanHaveJsDoc(statement))
+    AddError(js_doc, ErrorCode::ERROR_STATEMENT_UNEXPECT_ANNOTATION);
+  AssociateJsDoc(js_doc, statement);
   return statement;
 }
 
@@ -240,9 +240,9 @@ const ast::Statement& Parser::ParseForStatement() {
   ExpectPunctuator(ast::PunctuatorKind::LeftParenthesis,
                    ErrorCode::ERROR_STATEMENT_EXPECT_LPAREN);
 
-  auto* const annotation = CanPeekToken() && PeekToken().Is<ast::Annotation>()
-                               ? &ConsumeToken().As<ast::Annotation>()
-                               : nullptr;
+  auto* const js_doc = CanPeekToken() && PeekToken().Is<ast::JsDoc>()
+                           ? &ConsumeToken().As<ast::JsDoc>()
+                           : nullptr;
 
   auto& keyword = CanPeekToken() && IsDeclarationKeyword(PeekToken())
                       ? ConsumeToken()
@@ -253,11 +253,11 @@ const ast::Statement& Parser::ParseForStatement() {
           ? NewElisionExpression()
           : ParseExpression();
 
-  if (annotation) {
+  if (js_doc) {
     if (keyword.Is<ast::Empty>())
-      AddError(*annotation, ErrorCode::ERROR_STATEMENT_UNEXPECT_ANNOTATION);
+      AddError(*js_doc, ErrorCode::ERROR_STATEMENT_UNEXPECT_ANNOTATION);
     else
-      AssociateAnnotation(*annotation, expression);
+      AssociateJsDoc(*js_doc, expression);
   }
 
   if (ConsumeTokenIf(ast::PunctuatorKind::Semicolon)) {
@@ -461,8 +461,8 @@ const ast::Statement& Parser::ParseStatement() {
     return NewEmptyStatement(source_code().end());
   SourceCodeRangeScope scope(this);
   const auto& token = PeekToken();
-  if (token.Is<ast::Annotation>())
-    return ParseAnnotationAsStatement();
+  if (token.Is<ast::JsDoc>())
+    return ParseJsDocAsStatement();
   if (token.Is<ast::Name>())
     return ParseNameAsStatement();
   if (token.Is<ast::Literal>())

@@ -55,8 +55,8 @@ class LexerTest : public ::testing::Test {
 
   SourceCodeRange MakeRange(int start, int end) const;
   SourceCodeRange MakeRange() const;
-  std::string NewAnnotation(int start, int end);
-  std::string NewAnnotation();
+  std::string NewJsDoc(int start, int end);
+  std::string NewJsDoc();
   std::string NewComment(int start, int end);
   std::string NewComment();
   std::string NewError(ErrorCode error_code, int start, int end);
@@ -104,12 +104,12 @@ SourceCodeRange LexerTest::MakeRange() const {
   return source_code_->range();
 }
 
-std::string LexerTest::NewAnnotation(int start, int end) {
-  return ToString(factory().NewAnnotation(MakeRange(start, end)));
+std::string LexerTest::NewJsDoc(int start, int end) {
+  return ToString(factory().NewJsDoc(MakeRange(start, end)));
 }
 
-std::string LexerTest::NewAnnotation() {
-  return ToString(factory().NewAnnotation(MakeRange()));
+std::string LexerTest::NewJsDoc() {
+  return ToString(factory().NewJsDoc(MakeRange()));
 }
 
 std::string LexerTest::NewComment(int start, int end) {
@@ -194,12 +194,12 @@ std::string LexerTest::Parse() {
   return Parse({});
 }
 
-TEST_F(LexerTest, Annotation) {
+TEST_F(LexerTest, JsDoc) {
   PrepareSouceCode("/** @type {number} */");
-  EXPECT_EQ(NewAnnotation(), Parse());
+  EXPECT_EQ(NewJsDoc(), Parse());
 
   PrepareSouceCode("/** */");
-  EXPECT_EQ(NewAnnotation(), Parse());
+  EXPECT_EQ(NewJsDoc(), Parse());
 }
 
 TEST_F(LexerTest, BlockComment) {

@@ -7,19 +7,19 @@
 namespace joana {
 namespace ast {
 
-Module::Module(Zone* zone,
-               const SourceCodeRange& range,
-               const StatementList& statements,
-               const std::unordered_map<const Node*, const ast::Annotation*>&
-                   annotation_map)
+Module::Module(
+    Zone* zone,
+    const SourceCodeRange& range,
+    const StatementList& statements,
+    const std::unordered_map<const Node*, const ast::JsDoc*>& js_doc_map)
     : NodeTemplate(&statements, range),
-      annotation_map_(zone, annotation_map.begin(), annotation_map.end()) {}
+      js_doc_map_(zone, js_doc_map.begin(), js_doc_map.end()) {}
 
 Module::~Module() = default;
 
-const Annotation* Module::AnnotationFor(const ast::Node& node) const {
-  const auto& it = annotation_map_.find(&node);
-  return it == annotation_map_.end() ? nullptr : it->second;
+const JsDoc* Module::JsDocFor(const ast::Node& node) const {
+  const auto& it = js_doc_map_.find(&node);
+  return it == js_doc_map_.end() ? nullptr : it->second;
 }
 
 }  // namespace ast

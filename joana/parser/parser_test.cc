@@ -64,10 +64,10 @@ std::string ParserTest::Parse(base::StringPiece script_text,
   for (const auto& error : error_sink.errors())
     ostream << error << std::endl;
   for (const auto& statement : module.statements()) {
-    auto* annotation = module.AnnotationFor(statement);
-    if (!annotation)
+    auto* js_doc = module.JsDocFor(statement);
+    if (!js_doc)
       continue;
-    ostream << statement << ':' << *annotation << std::endl;
+    ostream << statement << ':' << *js_doc << std::endl;
   }
   return ostream.str();
 }
@@ -82,11 +82,11 @@ std::string ParserTest::Parse(base::StringPiece script_text) {
     EXPECT_EQ(source, Parse(script_text)); \
   }
 
-TEST_F(ParserTest, Annotation) {
+TEST_F(ParserTest, JsDoc) {
   EXPECT_EQ(
       "let foo = 1;\n"
       "LetStatement([22-34], \"let foo = 1;\"):"
-      "Annotation([0-21], \"/** @type {number} */\")\n",
+      "JsDoc([0-21], \"/** @type {number} */\")\n",
       Parse("/** @type {number} */ let foo = 1;"));
 }
 

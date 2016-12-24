@@ -68,9 +68,8 @@ class Parser final {
 
   void Advance();
 
-  // Associate |annotation| to |node|.
-  void AssociateAnnotation(const ast::Annotation& annotation,
-                           const ast::Node& node);
+  // Associate |js_doc| to |node|.
+  void AssociateJsDoc(const ast::JsDoc& js_doc, const ast::Node& node);
   bool CanPeekToken() const;
   const ast::Token& ComputeInvalidToken(ErrorCode error_code);
   const ast::Token& ConsumeToken();
@@ -131,7 +130,7 @@ class Parser final {
 
   const ast::RegExp& ParseRegExp();
 
-  const ast::Expression& ParseAnnotationAsExpression();
+  const ast::Expression& ParseJsDocAsExpression();
   std::vector<const ast::Expression*> ParseArgumentList();
   const ast::Expression& ParseArrayLiteralExpression();
   const ast::Expression& ParseAssignmentExpression();
@@ -164,7 +163,7 @@ class Parser final {
 
   const ast::Statement& ParseStatement();
 
-  const ast::Statement& ParseAnnotationAsStatement();
+  const ast::Statement& ParseJsDocAsStatement();
   const ast::Statement& ParseBreakStatement();
   const ast::Statement& ParseBlockStatement();
   const ast::Statement& ParseCaseClause();
@@ -188,8 +187,8 @@ class Parser final {
   const ast::Statement& ParseWhileStatement();
   const ast::Statement& ParseWithStatement();
 
-  // Map node to annotation
-  std::unordered_map<const ast::Node*, const ast::Annotation*> annotation_map_;
+  // Map node to js_doc
+  std::unordered_map<const ast::Node*, const ast::JsDoc*> js_doc_map_;
   const std::unique_ptr<BracketStack> bracket_stack_;
   ast::EditContext& context_;
   const std::unique_ptr<Lexer> lexer_;

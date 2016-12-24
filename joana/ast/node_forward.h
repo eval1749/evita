@@ -98,7 +98,7 @@ namespace ast {
   V(WithStatement)
 
 #define FOR_EACH_AST_TOKEN(V) \
-  V(Annotation)               \
+  V(JsDoc)                    \
   V(Comment)                  \
   V(Empty)                    \
   V(Invalid)                  \

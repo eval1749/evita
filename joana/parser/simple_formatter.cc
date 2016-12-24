@@ -110,7 +110,7 @@ void SimpleFormatter::OutputUsingSoourceCode(const ast::Node& node) {
 }
 
 // NodeVisitor implementations
-void SimpleFormatter::VisitAnnotation(ast::Annotation* node) {
+void SimpleFormatter::VisitJsDoc(ast::JsDoc* node) {
   OutputUsingSoourceCode(*node);
 }
 

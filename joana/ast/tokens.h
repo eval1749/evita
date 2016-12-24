@@ -57,18 +57,18 @@ class JOANA_AST_EXPORT Token : public Node {
 };
 
 //
-// Annotation
+// JsDoc
 //
-class JOANA_AST_EXPORT Annotation final : public Token {
-  DECLARE_CONCRETE_AST_NODE(Annotation, Token);
+class JOANA_AST_EXPORT JsDoc final : public Token {
+  DECLARE_CONCRETE_AST_NODE(JsDoc, Token);
 
  public:
-  ~Annotation() final;
+  ~JsDoc() final;
 
  private:
-  explicit Annotation(const SourceCodeRange& range);
+  explicit JsDoc(const SourceCodeRange& range);
 
-  DISALLOW_COPY_AND_ASSIGN(Annotation);
+  DISALLOW_COPY_AND_ASSIGN(JsDoc);
 };
 
 //

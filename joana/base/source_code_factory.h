@@ -20,7 +20,7 @@ class JOANA_BASE_EXPORT SourceCode::Factory {
                         base::StringPiece16 file_contents);
 
  private:
-  Zone* const zone_;
+  Zone& zone_;
 
   DISALLOW_COPY_AND_ASSIGN(Factory);
 };

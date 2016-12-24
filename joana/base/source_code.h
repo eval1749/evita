@@ -10,12 +10,13 @@
 #include "base/strings/string16.h"
 #include "base/strings/string_piece.h"
 #include "joana/base/base_export.h"
+#include "joana/base/memory/zone_allocated.h"
 
 namespace joana {
 
 class SourceCodeRange;
 
-class JOANA_BASE_EXPORT SourceCode final {
+class JOANA_BASE_EXPORT SourceCode final : public ZoneAllocated {
  public:
   class Factory;
 

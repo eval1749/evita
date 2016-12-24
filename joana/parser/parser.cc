@@ -7,7 +7,6 @@
 
 #include "joana/parser/parser.h"
 
-#include "joana/ast/edit_context.h"
 #include "joana/ast/module.h"
 #include "joana/ast/node_editor.h"
 #include "joana/ast/node_factory.h"
@@ -17,6 +16,7 @@
 #include "joana/base/source_code.h"
 #include "joana/parser/lexer/lexer.h"
 #include "joana/parser/parser_error_codes.h"
+#include "joana/parser/public/parser_context.h"
 
 namespace joana {
 namespace parser {
@@ -97,7 +97,7 @@ Parser::SourceCodeRangeScope::~SourceCodeRangeScope() {
 //
 // Parser
 //
-Parser::Parser(ast::EditContext* context,
+Parser::Parser(ParserContext* context,
                const SourceCodeRange& range,
                const ParserOptions& options)
     : bracket_stack_(new BracketStack(&context->error_sink())),

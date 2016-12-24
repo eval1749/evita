@@ -11,6 +11,10 @@ component("public") {
   sources = [
     "parse.cc",
     "parse.h",
+    "parser_context.cc",
+    "parser_context.h",
+    "parser_context_builder.cc",
+    "parser_context_builder.h",
     "parser_export.h",
   ]
 

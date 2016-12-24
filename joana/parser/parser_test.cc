@@ -10,8 +10,6 @@
 #include "base/macros.h"
 #include "base/strings/string_piece.h"
 #include "base/strings/utf_string_conversions.h"
-#include "joana/ast/edit_context.h"
-#include "joana/ast/edit_context_builder.h"
 #include "joana/ast/error_codes.h"
 #include "joana/ast/module.h"
 #include "joana/ast/node_factory.h"
@@ -23,6 +21,8 @@
 #include "joana/base/source_code_factory.h"
 #include "joana/base/source_code_range.h"
 #include "joana/parser/public/parse.h"
+#include "joana/parser/public/parser_context.h"
+#include "joana/parser/public/parser_context_builder.h"
 #include "joana/parser/simple_error_sink.h"
 #include "joana/parser/simple_formatter.h"
 #include "testing/gtest/include/gtest/gtest.h"
@@ -48,9 +48,9 @@ std::string ParserTest::Parse(base::StringPiece script_text,
   Zone zone("ParserTest");
   SimpleErrorSink error_sink;
   ast::NodeFactory node_factory(&zone);
-  const auto& context = ast::EditContext::Builder()
-                            .SetErrorSink(&error_sink)
-                            .SetNodeFactory(&node_factory)
+  const auto& context = ParserContext::Builder()
+                            .set_error_sink(&error_sink)
+                            .set_node_factory(&node_factory)
                             .Build();
   SourceCode::Factory source_code_factory(&zone);
   const auto& script_text16 = base::UTF8ToUTF16(script_text);

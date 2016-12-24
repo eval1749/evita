@@ -119,7 +119,6 @@ FOR_EACH_ABSTRACT_AST_NODE(V)
 FOR_EACH_CONCRETE_AST_NODE(V)
 #undef V
 
-class EditContext;
 class ExpressionList;
 enum class FunctionKind;
 enum class InvalidKind;

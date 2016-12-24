@@ -16,6 +16,7 @@
 namespace joana {
 
 class ErrorSink;
+class ParserContext;
 struct ParserOptions;
 struct PunctuatorKind;
 class SourceCode;
@@ -33,7 +34,7 @@ class Lexer final {
   // Expose |ErrorCode| for RegExp parser.
   enum class ErrorCode;
 
-  Lexer(ast::EditContext* context,
+  Lexer(ParserContext* context,
         const SourceCodeRange& range,
         const ParserOptions& options);
 
@@ -99,7 +100,7 @@ class Lexer final {
 
   SourceCodeRange RangeFrom(int start) const;
 
-  ast::EditContext& context_;
+  ParserContext& context_;
   const ast::Token* current_token_ = nullptr;
 
   // True if current token and previous token is separated by at least one

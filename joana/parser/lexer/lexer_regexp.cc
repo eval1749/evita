@@ -6,7 +6,6 @@
 
 #include "joana/parser/lexer/lexer.h"
 
-#include "joana/ast/edit_context.h"
 #include "joana/ast/node_factory.h"
 #include "joana/ast/regexp.h"
 #include "joana/ast/tokens.h"
@@ -73,7 +72,7 @@ struct Token {
 //
 class RegExpLexer final {
  public:
-  RegExpLexer(ast::EditContext* context,
+  RegExpLexer(ParserContext* context,
               CharacterReader* reader,
               const ParserOptions& options);
   ~RegExpLexer();
@@ -103,7 +102,7 @@ class RegExpLexer final {
   bool ConsumeCharIf(base::char16 char_code);
   base::char16 PeekChar() const { return reader_.PeekChar(); }
 
-  ast::EditContext& context_;
+  ParserContext& context_;
   const ParserOptions& options_;
   CharacterReader& reader_;
   Token token_;
@@ -111,7 +110,7 @@ class RegExpLexer final {
   DISALLOW_COPY_AND_ASSIGN(RegExpLexer);
 };
 
-RegExpLexer::RegExpLexer(ast::EditContext* context,
+RegExpLexer::RegExpLexer(ParserContext* context,
                          CharacterReader* reader,
                          const ParserOptions& options)
     : context_(*context), options_(options), reader_(*reader) {
@@ -308,7 +307,7 @@ const Token& RegExpLexer::PeekToken() const {
 //
 class RegExpParser final {
  public:
-  RegExpParser(ast::EditContext* context,
+  RegExpParser(ParserContext* context,
                CharacterReader* reader,
                const ParserOptions& options);
   ~RegExpParser();
@@ -318,7 +317,7 @@ class RegExpParser final {
  private:
   friend class ScopedNodeFactory;
 
-  ast::EditContext& context() { return context_; }
+  ParserContext& context() { return context_; }
   int location() const { return lexer_.location(); }
   ast::NodeFactory& node_factory() { return context_.node_factory(); }
   const SourceCode& source_code() const { return lexer_.source_code(); }
@@ -335,7 +334,7 @@ class RegExpParser final {
   bool ConsumeTokenIf(Syntax syntax);
   const Token& PeekToken() const { return lexer_.PeekToken(); }
 
-  ast::EditContext& context_;
+  ParserContext& context_;
 
   // |groups_| holds start offset of left parenthesis for checking matched
   // parenthesis.
@@ -487,7 +486,7 @@ void ScopedNodeFactory::SetToken(const Token& token) {
 }
 
 // RegExpParser
-RegExpParser::RegExpParser(ast::EditContext* context,
+RegExpParser::RegExpParser(ParserContext* context,
                            CharacterReader* reader,
                            const ParserOptions& options)
     : context_(*context), lexer_(context, reader, options), options_(options) {}

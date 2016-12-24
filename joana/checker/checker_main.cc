@@ -19,8 +19,6 @@
 #include "base/strings/string_split.h"
 #include "base/strings/utf_string_conversions.h"
 #include "joana/analyzer/public/analyze.h"
-#include "joana/ast/edit_context.h"
-#include "joana/ast/edit_context_builder.h"
 #include "joana/ast/error_codes.h"
 #include "joana/ast/node_factory.h"
 #include "joana/base/error_sink.h"
@@ -32,6 +30,7 @@
 #include "joana/base/source_code_line_cache.h"
 #include "joana/base/source_code_range.h"
 #include "joana/parser/public/parse.h"
+#include "joana/parser/public/parser_context_builder.h"
 
 namespace joana {
 namespace internal {
@@ -181,7 +180,7 @@ class Checker final {
   SimpleErrorSink error_sink_;
   Zone node_zone_;
   ast::NodeFactory node_factory_;
-  std::unique_ptr<ast::EditContext> context_;
+  const std::unique_ptr<ParserContext> context_;
   std::vector<const ast::Node*> modules_;
   std::unordered_map<const SourceCode*, std::unique_ptr<ScriptModule>>
       module_map_;
@@ -196,9 +195,9 @@ class Checker final {
 Checker::Checker(const ParserOptions& options)
     : node_zone_("Checker.Node"),
       node_factory_(&node_zone_),
-      context_(ast::EditContext::Builder()
-                   .SetErrorSink(&error_sink_)
-                   .SetNodeFactory(&node_factory_)
+      context_(ParserContext::Builder()
+                   .set_error_sink(&error_sink_)
+                   .set_node_factory(&node_factory_)
                    .Build()),
       source_code_zone_("Checker.SourceCode"),
       source_code_factory_(&source_code_zone_),

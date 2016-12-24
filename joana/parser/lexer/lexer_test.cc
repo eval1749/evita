@@ -11,8 +11,6 @@
 #include "base/macros.h"
 #include "base/strings/string_piece.h"
 #include "base/strings/utf_string_conversions.h"
-#include "joana/ast/edit_context.h"
-#include "joana/ast/edit_context_builder.h"
 #include "joana/ast/error_codes.h"
 #include "joana/ast/literals.h"
 #include "joana/ast/node.h"
@@ -24,6 +22,7 @@
 #include "joana/base/source_code_factory.h"
 #include "joana/base/source_code_range.h"
 #include "joana/parser/public/parse.h"
+#include "joana/parser/public/parser_context_builder.h"
 #include "joana/parser/simple_error_sink.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
@@ -78,7 +77,7 @@ class LexerTest : public ::testing::Test {
   SimpleErrorSink error_sink_;
   Zone zone_;
   ast::NodeFactory node_factory_;
-  std::unique_ptr<ast::EditContext> context_;
+  const std::unique_ptr<ParserContext> context_;
   const SourceCode* source_code_ = nullptr;
   SourceCode::Factory source_code_factory_;
 
@@ -88,9 +87,9 @@ class LexerTest : public ::testing::Test {
 LexerTest::LexerTest()
     : zone_("LexerTest"),
       node_factory_(&zone_),
-      context_(ast::EditContext::Builder()
-                   .SetErrorSink(&error_sink_)
-                   .SetNodeFactory(&node_factory_)
+      context_(ParserContext::Builder()
+                   .set_error_sink(&error_sink_)
+                   .set_node_factory(&node_factory_)
                    .Build()),
       source_code_factory_(&zone_) {}
 

@@ -10,7 +10,6 @@
 
 #include "joana/parser/lexer/lexer.h"
 
-#include "joana/ast/edit_context.h"
 #include "joana/ast/error_codes.h"
 #include "joana/ast/literals.h"
 #include "joana/ast/node_factory.h"
@@ -32,7 +31,7 @@ const auto kMaxIntegerPart = static_cast<uint64_t>(1) << 53;
 
 }  // namespace
 
-Lexer::Lexer(ast::EditContext* context,
+Lexer::Lexer(ParserContext* context,
              const SourceCodeRange& range,
              const ParserOptions& options)
     : context_(*context),

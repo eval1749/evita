@@ -6,12 +6,12 @@
 #define JOANA_PARSER_PUBLIC_PARSE_H_
 
 #include "base/macros.h"
+#include "joana/parser/public/parser_context.h"
 #include "joana/parser/public/parser_export.h"
 
 namespace joana {
 
 namespace ast {
-class EditContext;
 class Node;
 }
 
@@ -56,7 +56,7 @@ class JOANA_PARSER_EXPORT ParserOptionsBuilder final {
 //
 // The parser entry point.
 //
-JOANA_PARSER_EXPORT const ast::Node& Parse(ast::EditContext* context,
+JOANA_PARSER_EXPORT const ast::Node& Parse(ParserContext* context,
                                            const SourceCodeRange& range,
                                            const ParserOptions& options);
 

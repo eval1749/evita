@@ -32,7 +32,7 @@ class Parser final {
   // Expose |OperatorPrecedence| for implementing static helper functions.
   enum class OperatorPrecedence;
 
-  Parser(ast::EditContext* context,
+  Parser(ParserContext* context,
          const SourceCodeRange& range,
          const ParserOptions& options);
 
@@ -190,7 +190,7 @@ class Parser final {
   // Map node to js_doc
   std::unordered_map<const ast::Node*, const ast::JsDoc*> js_doc_map_;
   const std::unique_ptr<BracketStack> bracket_stack_;
-  ast::EditContext& context_;
+  ParserContext& context_;
   const std::unique_ptr<Lexer> lexer_;
 
   // True if current token and previous token is separated by at least one

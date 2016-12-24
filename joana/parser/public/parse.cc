@@ -38,7 +38,7 @@ ParserOptionsBuilder& ParserOptionsBuilder::SetStrictRegExp(bool value) {
 //
 // Parse; the entry point
 //
-const ast::Node& Parse(ast::EditContext* context,
+const ast::Node& Parse(ParserContext* context,
                        const SourceCodeRange& range,
                        const ParserOptions& options) {
   Parser parser(context, range, options);

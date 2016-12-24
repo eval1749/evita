@@ -614,7 +614,7 @@ const ast::Expression& Parser::ParseRegExpLiteral() {
   auto& regexp = lexer_->ConsumeRegExp();
   Advance();
   if (is_separated_by_newline_) {
-    if (options_.disable_automatic_semicolon) {
+    if (options_.disable_automatic_semicolon()) {
       AddError(GetSourceCodeRange(),
                ErrorCode::ERROR_EXPRESSION_UNEXPECT_NEWLINE);
     }
@@ -650,7 +650,7 @@ const ast::Expression& Parser::ParseUpdateExpression() {
   if (!CanPeekToken() || !IsUpdateOperator(PeekToken()))
     return expression;
   if (is_separated_by_newline_) {
-    if (options_.disable_automatic_semicolon)
+    if (options_.disable_automatic_semicolon())
       AddError(ErrorCode::ERROR_EXPRESSION_UNEXPECT_NEWLINE);
     return expression;
   }

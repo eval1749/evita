@@ -31,6 +31,7 @@
 #include "joana/base/source_code_range.h"
 #include "joana/parser/public/parse.h"
 #include "joana/parser/public/parser_context_builder.h"
+#include "joana/parser/public/parser_options_builder.h"
 
 namespace joana {
 namespace internal {
@@ -240,13 +241,15 @@ int Checker::Main() {
     }
   }
 
-  ParserOptions options;
-  options.disable_automatic_semicolon =
-      command_line->HasSwitch("disable_automatic_semicolon");
-  options.enable_strict_backslash =
-      command_line->HasSwitch("enable_strict_backslash");
-  options.enable_strict_regexp =
-      command_line->HasSwitch("enable_strict_regexp");
+  const auto& options =
+      ParserOptions::Builder()
+          .set_disable_automatic_semicolon(
+              command_line->HasSwitch("disable_automatic_semicolon"))
+          .set_enable_strict_backslash(
+              command_line->HasSwitch("enable_strict_backslash"))
+          .set_enable_strict_regexp(
+              command_line->HasSwitch("enable_strict_regexp"))
+          .Build();
 
   Checker checker(options);
   for (const auto& file_name : command_line->GetArgs()) {

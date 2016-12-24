@@ -172,7 +172,7 @@ int RegExpLexer::HandleDigits(int base) {
 }
 
 void RegExpLexer::HandleRepeat() {
-  if (!options_.enable_strict_regexp) {
+  if (!options_.enable_strict_regexp()) {
     if (!CanPeekChar() || !IsDigitChar(PeekChar(), 10))
       return NewLiteral('{');
   }
@@ -201,7 +201,7 @@ void RegExpLexer::NextToken() {
   const auto char_code = ConsumeChar();
   switch (char_code) {
     case '$':
-      if (options_.enable_strict_regexp)
+      if (options_.enable_strict_regexp())
         return NewSyntaxChar(Syntax::AssertEnd);
       if (!CanPeekChar() || PeekChar() == kRightParenthesis ||
           PeekChar() == '/') {
@@ -232,11 +232,11 @@ void RegExpLexer::NextToken() {
           return NewSyntaxChar(Syntax::LookAhead);
         if (ConsumeCharIf('!'))
           return NewSyntaxChar(Syntax::LookAheadNot);
-        if (options_.enable_strict_regexp)
+        if (options_.enable_strict_regexp())
           AddError(ErrorCode::REGEXP_INVALID_GROUPING);
         return NewSyntaxChar(Syntax::Group);
       }
-      if (options_.enable_strict_regexp)
+      if (options_.enable_strict_regexp())
         return NewSyntaxChar(Syntax::Group);
       if (!CanPeekChar() || PeekChar() == kRightParenthesis)
         return NewLiteral(char_code);
@@ -252,11 +252,11 @@ void RegExpLexer::NextToken() {
     case '}':
       return NewLiteral(char_code);
     case '^':
-      if (options_.enable_strict_regexp)
+      if (options_.enable_strict_regexp())
         return NewSyntaxChar(Syntax::AssertStart);
       return NewLiteral(char_code);
     case '|':
-      if (options_.enable_strict_regexp)
+      if (options_.enable_strict_regexp())
         return NewSyntaxChar(Syntax::Or);
       if (!CanPeekToken() || PeekChar() == '/' ||
           PeekChar() == kRightParenthesis) {
@@ -569,7 +569,7 @@ ast::RegExp& RegExpParser::ParsePrimary() {
   }
 
   ConsumeToken();
-  if (options_.enable_strict_regexp)
+  if (options_.enable_strict_regexp())
     return factory.NewError(ErrorCode::REGEXP_EXPECT_PRIMARY);
   return factory.NewLiteral();
 }

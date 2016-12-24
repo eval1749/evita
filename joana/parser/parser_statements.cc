@@ -77,7 +77,7 @@ class Parser::ExpectSemicolonScope final {
 const ast::Statement& Parser::HandleLabeledStatement(const ast::Name& label) {
   auto& colon = ConsumeToken();
   DCHECK_EQ(colon, ast::PunctuatorKind::Colon);
-  if (!options_.disable_automatic_semicolon) {
+  if (!options_.disable_automatic_semicolon()) {
     if (!CanPeekToken() || PeekToken() == ast::PunctuatorKind::RightBrace) {
       auto& statement =
           NewEmptyStatement(SourceCodeRange::CollapseToEnd(colon.range()));
@@ -138,7 +138,7 @@ const ast::Statement& Parser::ParseBlockStatement() {
 const ast::Statement& Parser::ParseBreakStatement() {
   ConsumeToken();
   if (is_separated_by_newline_) {
-    if (options_.disable_automatic_semicolon)
+    if (options_.disable_automatic_semicolon())
       AddError(ErrorCode::ERROR_STATEMENT_UNEXPECT_NEWLINE);
     return node_factory().NewBreakStatement(GetSourceCodeRange(),
                                             NewEmptyName());
@@ -159,7 +159,7 @@ const ast::Statement& Parser::ParseCaseClause() {
   } else {
     auto& colon = ConsumeToken();
     if (CanPeekToken() && PeekToken() == ast::PunctuatorKind::RightBrace) {
-      if (options_.disable_automatic_semicolon)
+      if (options_.disable_automatic_semicolon())
         AddError(ErrorCode::ERROR_STATEMENT_EXPECT_SEMICOLON);
       return node_factory().NewCaseClause(
           GetSourceCodeRange(), expression,
@@ -185,7 +185,7 @@ const ast::Statement& Parser::ParseConstStatement() {
 const ast::Statement& Parser::ParseContinueStatement() {
   ConsumeToken();
   if (is_separated_by_newline_) {
-    if (options_.disable_automatic_semicolon)
+    if (options_.disable_automatic_semicolon())
       AddError(ErrorCode::ERROR_STATEMENT_UNEXPECT_NEWLINE);
     return node_factory().NewContinueStatement(GetSourceCodeRange(),
                                                NewEmptyName());
@@ -211,7 +211,7 @@ const ast::Statement& Parser::ParseDoStatement() {
   auto& statement = ParseStatement();
   if (!ConsumeTokenIf(ast::NameId::While))
     return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_EXPECT_WHILE);
-  if (options_.disable_automatic_semicolon) {
+  if (options_.disable_automatic_semicolon()) {
     ExpectSemicolonScope semicolon_scope(this);
     auto& condition = ParseParenthesisExpression();
     return node_factory().NewDoStatement(GetSourceCodeRange(), statement,
@@ -409,7 +409,7 @@ const ast::Statement& Parser::ParseNameAsStatement() {
     return ParseExpressionStatement();
   }
   if (is_separated_by_newline_) {
-    if (options_.disable_automatic_semicolon)
+    if (options_.disable_automatic_semicolon())
       AddError(ErrorCode::ERROR_STATEMENT_UNEXPECT_NEWLINE);
   } else {
     if (CanPeekToken() && PeekToken() == ast::PunctuatorKind::Colon)
@@ -437,7 +437,7 @@ const ast::Statement& Parser::ParseReturnStatement() {
   ExpectSemicolonScope semicolon_scope(this);
   ConsumeToken();
   if (is_separated_by_newline_) {
-    if (options_.disable_automatic_semicolon)
+    if (options_.disable_automatic_semicolon())
       AddError(ErrorCode::ERROR_STATEMENT_UNEXPECT_NEWLINE);
     return node_factory().NewReturnStatement(GetSourceCodeRange(),
                                              NewElisionExpression());

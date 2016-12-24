@@ -20,9 +20,10 @@
 #include "joana/base/source_code.h"
 #include "joana/base/source_code_factory.h"
 #include "joana/base/source_code_range.h"
-#include "joana/parser/public/parse.h"
 #include "joana/parser/public/parser_context.h"
 #include "joana/parser/public/parser_context_builder.h"
+#include "joana/parser/public/parser_options.h"
+#include "joana/parser/public/parser_options_builder.h"
 #include "joana/parser/simple_error_sink.h"
 #include "joana/parser/simple_formatter.h"
 #include "testing/gtest/include/gtest/gtest.h"
@@ -127,8 +128,9 @@ TEST_F(ParserTest, AutomaticSemicolon) {
       "PASER_ERROR_EXPRESSION_UNEXPECT_NEWLINE@4:6\n"
       "PASER_ERROR_STATEMENT_EXPECT_SEMICOLON@0:3\n"
       "PASER_ERROR_STATEMENT_EXPECT_SEMICOLON@4:9\n",
-      Parse("foo\n++bar",
-            ParserOptionsBuilder().SetAutomaticSemicolon(false).Build()));
+      Parse("foo\n++bar", ParserOptions::Builder()
+                              .set_disable_automatic_semicolon(true)
+                              .Build()));
 }
 
 TEST_F(ParserTest, BlockStatement) {

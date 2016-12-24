@@ -15,4 +15,6 @@ source_set("lexer") {
   deps = [
     "//joana/base",
   ]
+
+  configs += [ "//joana/parser:parser_implementation" ]
 }

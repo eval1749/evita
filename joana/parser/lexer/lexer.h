@@ -17,7 +17,7 @@ namespace joana {
 
 class ErrorSink;
 class ParserContext;
-struct ParserOptions;
+class ParserOptions;
 struct PunctuatorKind;
 class SourceCode;
 class SourceCodeRange;

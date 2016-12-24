@@ -164,7 +164,7 @@ function describe(object) {
   switch (typeof(object)) {
     case 'boolean':
       console.log('A Boolean', object);
-      describeObject(new Boolean(object));
+      describeObject(Object(object));
       break;
     case 'function':
       describeFunction(/** @type {!Function} */ (object));

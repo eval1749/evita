@@ -28,7 +28,7 @@
 #include "testing/gtest/include/gtest/gtest.h"
 
 namespace joana {
-namespace internal {
+namespace parser {
 
 namespace {
 
@@ -523,5 +523,5 @@ TEST_F(LexerTest, StringLiteralError) {
       << "'\\u' without hexadecimal digit";
 }
 
-}  // namespace internal
+}  // namespace parser
 }  // namespace joana

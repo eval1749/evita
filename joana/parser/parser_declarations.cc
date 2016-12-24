@@ -10,7 +10,7 @@
 #include "joana/parser/parser_error_codes.h"
 
 namespace joana {
-namespace internal {
+namespace parser {
 
 const ast::ArrowFunctionBody& Parser::ParseArrowFunctionBody() {
   if (!CanPeekToken()) {
@@ -90,5 +90,5 @@ const ast::Expression& Parser::ParseParameterList() {
   return node_factory().NewGroupExpression(GetSourceCodeRange(), expression);
 }
 
-}  // namespace internal
+}  // namespace parser
 }  // namespace joana

@@ -8,7 +8,7 @@
 
 namespace joana {
 
-using Parser = internal::Parser;
+using Parser = parser::Parser;
 
 //
 // ParserOptionsBuilder

@@ -5,7 +5,7 @@
 #include "joana/parser/lexer/lexer_utils.h"
 
 namespace joana {
-namespace internal {
+namespace parser {
 
 int FromDigitChar(base::char16 char_code, int base) {
   DCHECK_GE(base, 2);
@@ -70,5 +70,5 @@ bool IsWhitespace(base::char16 char_code) {
          char_code == kNonBreakSpace || char_code == kZeroWidthNoBreakSpace;
 }
 
-}  // namespace internal
+}  // namespace parser
 }  // namespace joana

@@ -17,7 +17,7 @@
 #include "joana/parser/parser_error_codes.h"
 
 namespace joana {
-namespace internal {
+namespace parser {
 
 //
 // Operator Precedence - ascending ordered by operator precedence; low
@@ -675,5 +675,5 @@ const ast::Expression& Parser::ParseYieldExpression() {
   return NewUnaryExpression(keyword, ParseAssignmentExpression());
 }
 
-}  // namespace internal
+}  // namespace parser
 }  // namespace joana

@@ -8,7 +8,7 @@
 #include "joana/base/source_code_range.h"
 
 namespace joana {
-namespace internal {
+namespace parser {
 
 CharacterReader::CharacterReader(const SourceCodeRange& range)
     : current_char_offset_(range.start()), range_(range) {
@@ -67,5 +67,5 @@ void CharacterReader::MoveForward() {
   FetchChar();
 }
 
-}  // namespace internal
+}  // namespace parser
 }  // namespace joana

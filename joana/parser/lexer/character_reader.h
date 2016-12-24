@@ -13,7 +13,7 @@ namespace joana {
 class SourceCode;
 class SourceCodeRange;
 
-namespace internal {
+namespace parser {
 
 class CharacterReader final {
  public:
@@ -48,7 +48,7 @@ class CharacterReader final {
   DISALLOW_COPY_AND_ASSIGN(CharacterReader);
 };
 
-}  // namespace internal
+}  // namespace parser
 }  // namespace joana
 
 #endif  // JOANA_PARSER_LEXER_CHARACTER_READER_H_

@@ -12,7 +12,7 @@
 #include "joana/ast/node_forward.h"
 
 namespace joana {
-namespace internal {
+namespace parser {
 
 class SimpleFormatter final : public ast::NodeVisitor {
  public:
@@ -43,7 +43,7 @@ class SimpleFormatter final : public ast::NodeVisitor {
   DISALLOW_COPY_AND_ASSIGN(SimpleFormatter);
 };
 
-}  // namespace internal
+}  // namespace parser
 }  // namespace joana
 
 #endif  // JOANA_PARSER_SIMPLE_FORMATTER_H_

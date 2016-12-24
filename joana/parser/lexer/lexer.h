@@ -21,7 +21,7 @@ struct PunctuatorKind;
 class SourceCode;
 class SourceCodeRange;
 
-namespace internal {
+namespace parser {
 
 class CharacterReader;
 
@@ -113,7 +113,7 @@ class Lexer final {
   DISALLOW_COPY_AND_ASSIGN(Lexer);
 };
 
-}  // namespace internal
+}  // namespace parser
 }  // namespace joana
 
 #endif  // JOANA_PARSER_LEXER_LEXER_H_

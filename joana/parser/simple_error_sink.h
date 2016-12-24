@@ -15,7 +15,7 @@
 #include "joana/base/source_code_range.h"
 
 namespace joana {
-namespace internal {
+namespace parser {
 
 class SimpleErrorSink final : public ErrorSink {
  public:
@@ -56,7 +56,7 @@ std::ostream& operator<<(std::ostream& ostream,
 std::ostream& operator<<(std::ostream& ostream,
                          const SimpleErrorSink::Error* error);
 
-}  // namespace internal
+}  // namespace parser
 }  // namespace joana
 
 #endif  // JOANA_PARSER_SIMPLE_ERROR_SINK_H_

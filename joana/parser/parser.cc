@@ -19,7 +19,7 @@
 #include "joana/parser/parser_error_codes.h"
 
 namespace joana {
-namespace internal {
+namespace parser {
 
 //
 // BracketStack
@@ -278,5 +278,5 @@ void Parser::SkipCommentTokens() {
     lexer_->Advance();
   }
 }
-}  // namespace internal
+}  // namespace parser
 }  // namespace joana

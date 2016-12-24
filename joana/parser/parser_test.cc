@@ -28,7 +28,7 @@
 #include "testing/gtest/include/gtest/gtest.h"
 
 namespace joana {
-namespace internal {
+namespace parser {
 
 class ParserTest : public ::testing::Test {
  protected:
@@ -569,5 +569,5 @@ TEST_F(ParserTest, WithStatement) {
       "  bar;\n");
 }
 
-}  // namespace internal
+}  // namespace parser
 }  // namespace joana

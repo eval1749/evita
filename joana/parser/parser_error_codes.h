@@ -10,7 +10,7 @@
 #include "joana/parser/parser.h"
 
 namespace joana {
-namespace internal {
+namespace parser {
 
 enum class Parser::ErrorCode {
   None = ast::kParserErrorCodeBase,
@@ -19,7 +19,7 @@ enum class Parser::ErrorCode {
 #undef V
 };
 
-}  // namespace internal
+}  // namespace parser
 }  // namespace joana
 
 #endif  // JOANA_PARSER_PARSER_ERROR_CODES_H_

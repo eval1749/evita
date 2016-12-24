@@ -9,7 +9,7 @@
 #include "base/strings/string16.h"
 
 namespace joana {
-namespace internal {
+namespace parser {
 
 constexpr auto kBackslash = '\\';
 constexpr auto kLeftBrace = '{';
@@ -44,7 +44,7 @@ bool IsLineTerminator(base::char16 char_code);
 // Returns true if |char_code| is a whitespace of ECMAScript.
 bool IsWhitespace(base::char16 char_code);
 
-}  // namespace internal
+}  // namespace parser
 }  // namespace joana
 
 #endif  // JOANA_PARSER_LEXER_LEXER_UTILS_H_

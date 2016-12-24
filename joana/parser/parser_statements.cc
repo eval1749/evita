@@ -19,7 +19,7 @@
 #include "joana/parser/parser_error_codes.h"
 
 namespace joana {
-namespace internal {
+namespace parser {
 
 namespace {
 
@@ -552,5 +552,5 @@ const ast::Statement& Parser::ParseWithStatement() {
                                          statement);
 }
 
-}  // namespace internal
+}  // namespace parser
 }  // namespace joana

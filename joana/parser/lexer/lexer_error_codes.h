@@ -10,7 +10,7 @@
 #include "joana/parser/lexer/lexer.h"
 
 namespace joana {
-namespace internal {
+namespace parser {
 
 enum class Lexer::ErrorCode {
   None = ast::kLexerErrorCodeBase,
@@ -19,7 +19,7 @@ enum class Lexer::ErrorCode {
 #undef V
 };
 
-}  // namespace internal
+}  // namespace parser
 }  // namespace joana
 
 #endif  // JOANA_PARSER_LEXER_LEXER_ERROR_CODES_H_

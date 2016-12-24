@@ -20,7 +20,7 @@ namespace joana {
 class SourceCode;
 class SourceCodeRange;
 
-namespace internal {
+namespace parser {
 
 class Lexer;
 
@@ -210,7 +210,7 @@ class Parser final {
   DISALLOW_COPY_AND_ASSIGN(Parser);
 };
 
-}  // namespace internal
+}  // namespace parser
 }  // namespace joana
 
 #endif  // JOANA_PARSER_PARSER_H_

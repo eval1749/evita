@@ -18,7 +18,7 @@
 #include "joana/parser/public/parse.h"
 
 namespace joana {
-namespace internal {
+namespace parser {
 
 namespace {
 
@@ -640,5 +640,5 @@ ast::RegExp& Lexer::ConsumeRegExp() {
   return RegExpParser(&context_, reader_.get(), options_).Run();
 }
 
-}  // namespace internal
+}  // namespace parser
 }  // namespace joana

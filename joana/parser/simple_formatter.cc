@@ -20,7 +20,7 @@
 #include "joana/base/source_code.h"
 
 namespace joana {
-namespace internal {
+namespace parser {
 
 //
 // SimpleFormatter::IndentScope
@@ -764,5 +764,5 @@ void SimpleFormatter::VisitWithStatement(ast::WithStatement* node) {
   FormatChildStatement(node->statement());
 }
 
-}  // namespace internal
+}  // namespace parser
 }  // namespace joana

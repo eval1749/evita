@@ -24,7 +24,7 @@
 #include "joana/parser/public/parse.h"
 
 namespace joana {
-namespace internal {
+namespace parser {
 
 namespace {
 
@@ -691,5 +691,5 @@ SourceCodeRange Lexer::RangeFrom(int start) const {
   return source_code().Slice(start, reader_->location());
 }
 
-}  // namespace internal
+}  // namespace parser
 }  // namespace joana

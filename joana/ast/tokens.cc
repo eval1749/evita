@@ -12,13 +12,6 @@ namespace joana {
 namespace ast {
 
 //
-// JsDoc
-//
-JsDoc::JsDoc(const SourceCodeRange& range) : Token(range) {}
-
-JsDoc::~JsDoc() = default;
-
-//
 // Comment
 //
 Comment::Comment(const SourceCodeRange& range) : Token(range) {}
@@ -50,6 +43,13 @@ void Invalid::PrintMoreTo(std::ostream* ostream) const {
   }
   *ostream << string;
 }
+
+//
+// JsDoc
+//
+JsDoc::JsDoc(const SourceCodeRange& range) : Token(range) {}
+
+JsDoc::~JsDoc() = default;
 
 //
 // Name

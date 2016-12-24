@@ -57,21 +57,6 @@ class JOANA_AST_EXPORT Token : public Node {
 };
 
 //
-// JsDoc
-//
-class JOANA_AST_EXPORT JsDoc final : public Token {
-  DECLARE_CONCRETE_AST_NODE(JsDoc, Token);
-
- public:
-  ~JsDoc() final;
-
- private:
-  explicit JsDoc(const SourceCodeRange& range);
-
-  DISALLOW_COPY_AND_ASSIGN(JsDoc);
-};
-
-//
 // Comment
 //
 class JOANA_AST_EXPORT Comment final : public Token {
@@ -121,6 +106,21 @@ class JOANA_AST_EXPORT Invalid final : public Token {
   const int error_code_;
 
   DISALLOW_COPY_AND_ASSIGN(Invalid);
+};
+
+//
+// JsDoc
+//
+class JOANA_AST_EXPORT JsDoc final : public Token {
+  DECLARE_CONCRETE_AST_NODE(JsDoc, Token);
+
+ public:
+  ~JsDoc() final;
+
+ private:
+  explicit JsDoc(const SourceCodeRange& range);
+
+  DISALLOW_COPY_AND_ASSIGN(JsDoc);
 };
 
 //

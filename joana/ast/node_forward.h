@@ -98,10 +98,10 @@ namespace ast {
   V(WithStatement)
 
 #define FOR_EACH_AST_TOKEN(V) \
-  V(JsDoc)                    \
   V(Comment)                  \
   V(Empty)                    \
   V(Invalid)                  \
+  V(JsDoc)                    \
   V(Punctuator)               \
   V(Name)
 

@@ -5,16 +5,20 @@
 #include "joana/analyzer/analyzer.h"
 
 namespace joana {
-namespace internal {
+namespace analyzer {
 
 Analyzer::Analyzer(AnalyzeContext* context, const ast::Node& root)
     : context_(*context), root_(root) {}
 
 Analyzer::~Analyzer() = default;
 
-const ast::Node& Analyzer::Run() {
+const ast::Node& Analyzer::AddExterns() {
   return root_;
 }
 
-}  // namespace internal
+const ast::Node& Analyzer::Analyze() {
+  return root_;
+}
+
+}  // namespace analyzer
 }  // namespace joana

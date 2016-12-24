@@ -9,14 +9,15 @@
 #include "joana/analyzer/public/analyze.h"
 
 namespace joana {
-namespace internal {
+namespace analyzer {
 
 class Analyzer final {
  public:
   Analyzer(AnalyzeContext* context, const ast::Node& node);
   ~Analyzer();
 
-  const ast::Node& Run();
+  const ast::Node& AddExterns();
+  const ast::Node& Analyze();
 
  private:
   AnalyzeContext& context_;
@@ -25,7 +26,7 @@ class Analyzer final {
   DISALLOW_COPY_AND_ASSIGN(Analyzer);
 };
 
-}  // namespace internal
+}  // namespace analyzer
 }  // namespace joana
 
 #endif  // JOANA_ANALYZER_ANALYZER_H_

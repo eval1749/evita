@@ -5,6 +5,8 @@
 #ifndef JOANA_ANALYZER_PUBLIC_ANALYZE_H_
 #define JOANA_ANALYZER_PUBLIC_ANALYZE_H_
 
+#include <memory>
+
 #include "base/macros.h"
 #include "joana/analyzer/public/analyzer_export.h"
 
@@ -71,6 +73,9 @@ class JOANA_ANALYZER_EXPORT AnalyzeContext::Options::Builder final {
 //
 // The analyzer entry point.
 //
+JOANA_ANALYZER_EXPORT const ast::Node& AddExterns(AnalyzeContext* context,
+                                                  const ast::Node& node);
+
 JOANA_ANALYZER_EXPORT const ast::Node& Analyze(AnalyzeContext* context,
                                                const ast::Node& node);
 

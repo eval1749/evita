@@ -8,7 +8,7 @@
 
 namespace joana {
 
-using Analyzer = internal::Analyzer;
+using Analyzer = analyzer::Analyzer;
 
 //
 // AnalyzeContext
@@ -34,11 +34,19 @@ const AnalyzeContext::Options AnalyzeContext::Options::Builder::Build() {
 }
 
 //
-// Parse; the entry point
+// AddExterns; the entry point
+//
+const ast::Node& AddExterns(AnalyzeContext* context, const ast::Node& node) {
+  Analyzer analyzer(context, node);
+  return analyzer.AddExterns();
+}
+
+//
+// Analyze; the entry point
 //
 const ast::Node& Analyze(AnalyzeContext* context, const ast::Node& node) {
   Analyzer analyzer(context, node);
-  return analyzer.Run();
+  return analyzer.Analyze();
 }
 
 }  // namespace joana

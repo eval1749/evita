@@ -125,6 +125,8 @@ class Parser final {
   const ast::Expression& NewDelimiterExpression(const ast::Token& delimiter);
   const ast::Expression& NewElisionExpression();
   const ast::Expression& NewEmptyExpression();
+  const ast::Expression& NewInvalidExpression(const SourceCodeRange& range,
+                                              ErrorCode error_code);
   const ast::Expression& NewInvalidExpression(const ast::Token& token,
                                               ErrorCode error_code);
   const ast::Expression& NewInvalidExpression(ErrorCode error_code);

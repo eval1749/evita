@@ -178,15 +178,23 @@ const ast::Expression& Parser::NewEmptyExpression() {
   return node_factory().NewEmptyExpression(GetSourceCodeRange());
 }
 
-const ast::Expression& Parser::NewInvalidExpression(const ast::Token& token,
-                                                    ErrorCode error_code) {
-  AddError(token, error_code);
-  return node_factory().NewInvalidExpression(token,
+const ast::Expression& Parser::NewInvalidExpression(
+    const SourceCodeRange& range,
+    ErrorCode error_code) {
+  AddError(range, error_code);
+  return node_factory().NewInvalidExpression(range,
                                              static_cast<int>(error_code));
 }
 
+const ast::Expression& Parser::NewInvalidExpression(const ast::Token& token,
+                                                    ErrorCode error_code) {
+  return NewInvalidExpression(token.range(), error_code);
+}
+
 const ast::Expression& Parser::NewInvalidExpression(ErrorCode error_code) {
-  return NewInvalidExpression(ComputeInvalidToken(error_code), error_code);
+  if (CanPeekToken())
+    return NewInvalidExpression(PeekToken(), error_code);
+  return NewInvalidExpression(source_code().end(), error_code);
 }
 
 const ast::Expression& Parser::NewLiteralExpression(

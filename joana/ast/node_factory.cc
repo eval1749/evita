@@ -225,9 +225,10 @@ const Expression& NodeFactory::NewGroupExpression(
   return *new (zone_) GroupExpression(range, expression);
 }
 
-const Expression& NodeFactory::NewInvalidExpression(const Node& node,
-                                                    int error_code) {
-  return *new (zone_) InvalidExpression(node.range(), error_code);
+const Expression& NodeFactory::NewInvalidExpression(
+    const SourceCodeRange& range,
+    int error_code) {
+  return *new (zone_) InvalidExpression(range, error_code);
 }
 
 const Expression& NodeFactory::NewLiteralExpression(const Literal& literal) {

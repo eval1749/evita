@@ -113,7 +113,8 @@ class JOANA_AST_EXPORT NodeFactory final {
   const Expression& NewEmptyExpression(const SourceCodeRange& range);
   const Expression& NewGroupExpression(const SourceCodeRange& range,
                                        const Expression& expression);
-  const Expression& NewInvalidExpression(const Node& node, int error_code);
+  const Expression& NewInvalidExpression(const SourceCodeRange& range,
+                                         int error_code);
   const Expression& NewLiteralExpression(const Literal& literal);
 
   const Expression& NewNewExpression(

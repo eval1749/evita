@@ -107,6 +107,7 @@ namespace joana {
   V("(", LeftParenthesis, LEFT_PARENTHESIS, None)                           \
   V(")", RightParenthesis, RIGHT_PARENTHESIS, None)                         \
   V(".", Dot, DOT, None)                                                    \
+  V("..", DotDot, DOT_DOT, None)                                            \
   V("...", DotDotDot, DOT_DOT_DOT, None)                                    \
   V(";", Semicolon, SEMICOLON, None)                                        \
   V(",", Comma, COMMA, None)                                                \

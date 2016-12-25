@@ -476,7 +476,9 @@ TEST_F(LexerTest, Punctuator) {
 
 TEST_F(LexerTest, PunctuatorError) {
   PrepareSouceCode("..");
-  EXPECT_EQ(NewInvalid(0, 2, 2, ERROR_PUNCTUATOR_DOT_DOT), Parse())
+  EXPECT_EQ(NewPunctuator(ast::PunctuatorKind::DotDot) +
+                NewError(ERROR_PUNCTUATOR_DOT_DOT, 0, 2),
+            Parse())
       << "'..' is not a valid punctuator.";
 }
 

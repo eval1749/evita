@@ -167,7 +167,8 @@ const ast::Token* Lexer::HandleCharacter() {
       if (ConsumeCharIf('.')) {
         if (ConsumeCharIf('.'))
           return &NewPunctuator(ast::PunctuatorKind::DotDotDot);
-        return &NewError(ErrorCode::PUNCTUATOR_DOT_DOT);
+        AddError(ErrorCode::PUNCTUATOR_DOT_DOT);
+        return &NewPunctuator(ast::PunctuatorKind::DotDot);
       }
       if (CanPeekChar() && IsDigitChar(PeekChar(), 10)) {
         reader_->MoveBackward();

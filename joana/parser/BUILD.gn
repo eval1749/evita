@@ -29,8 +29,6 @@ source_set("test_files") {
   sources = [
     "lexer/lexer_test.cc",
     "parser_test.cc",
-    "simple_formatter.cc",
-    "simple_formatter.h",
   ]
   deps = [
     ":parser",

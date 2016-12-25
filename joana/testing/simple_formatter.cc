@@ -5,7 +5,7 @@
 #include <ostream>
 #include <string>
 
-#include "joana/parser/simple_formatter.h"
+#include "joana/testing/simple_formatter.h"
 
 #include "base/strings/utf_string_conversions.h"
 #include "joana/ast/declarations.h"

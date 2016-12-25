@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef JOANA_PARSER_SIMPLE_FORMATTER_H_
-#define JOANA_PARSER_SIMPLE_FORMATTER_H_
+#ifndef JOANA_TESTING_SIMPLE_FORMATTER_H_
+#define JOANA_TESTING_SIMPLE_FORMATTER_H_
 
 #include <iosfwd>
 
@@ -46,4 +46,4 @@ class SimpleFormatter final : public ast::NodeVisitor {
 }  // namespace parser
 }  // namespace joana
 
-#endif  // JOANA_PARSER_SIMPLE_FORMATTER_H_
+#endif  // JOANA_TESTING_SIMPLE_FORMATTER_H_

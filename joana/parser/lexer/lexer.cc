@@ -487,9 +487,7 @@ const ast::Token& Lexer::HandleStringLiteral() {
             break;
           case '0':
             ConsumeChar();
-            if (!CanPeekChar())
-              return NewError(ErrorCode::STRING_LITERAL_NOT_CLOSED);
-            if (options_.enable_strict_backslash() &&
+            if (options_.enable_strict_backslash() && CanPeekChar() &&
                 IsDigitChar(PeekChar(), 10)) {
               AddError(RangeFrom(backslash_start),
                        ErrorCode::STRING_LITERAL_BACKSLASH);

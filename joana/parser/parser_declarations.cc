@@ -69,12 +69,12 @@ const ast::Statement& Parser::ParseFunctionBody() {
   return ParseStatement();
 }
 
-const ast::Method& Parser::ParseMethod(ast::MethodKind is_static,
+const ast::Method& Parser::ParseMethod(ast::MethodKind method_kind,
                                        ast::FunctionKind kind) {
   auto& method_name = ParsePropertyName();
   auto& parameter_list = ParseParameterList();
   auto& method_body = ParseFunctionBody();
-  return node_factory().NewMethod(GetSourceCodeRange(), is_static, kind,
+  return node_factory().NewMethod(GetSourceCodeRange(), method_kind, kind,
                                   method_name, parameter_list, method_body);
 }
 

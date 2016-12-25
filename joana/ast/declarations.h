@@ -30,6 +30,7 @@ enum class FunctionKind {
 // MethodKind
 //
 enum class MethodKind {
+  Constructor,
   NonStatic,
   Static,
 };
@@ -159,15 +160,15 @@ class JOANA_AST_EXPORT Method final : public NodeTemplate<Declaration,
   ~Method() final;
 
   const Statement& body() const { return *member_at<4>(); }
-  bool is_static() const { return member_at<0>() == MethodKind::Static; }
   FunctionKind kind() const { return member_at<1>(); }
+  MethodKind method_kind() const { return member_at<0>(); }
   const Expression& name() const { return *member_at<2>(); }
   const Expression& parameter_list() const { return *member_at<3>(); }
 
  private:
   // |statement| should be either expression statement or block statement.
   Method(const SourceCodeRange& range,
-         MethodKind is_static,
+         MethodKind method_kind,
          FunctionKind kind,
          const Expression& name,
          const Expression& parameter_list,

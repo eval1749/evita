@@ -356,9 +356,10 @@ const ast::Expression& Parser::ParseLeftHandSideExpression() {
   return *expression;
 }
 
-const ast::Expression& Parser::ParseMethodExpression(ast::MethodKind is_static,
-                                                     ast::FunctionKind kind) {
-  return NewDeclarationExpression(ParseMethod(is_static, kind));
+const ast::Expression& Parser::ParseMethodExpression(
+    ast::MethodKind method_kind,
+    ast::FunctionKind kind) {
+  return NewDeclarationExpression(ParseMethod(method_kind, kind));
 }
 
 const ast::Expression& Parser::ParseNameAsExpression() {
@@ -542,7 +543,7 @@ const ast::Expression& Parser::ParsePrimaryExpression() {
 
 const ast::Expression& Parser::ParsePropertyAfterName(
     const ast::Expression& property_name,
-    ast::MethodKind is_static,
+    ast::MethodKind method_kind,
     ast::FunctionKind function_kind) {
   DCHECK(CanPeekToken());
 
@@ -552,7 +553,7 @@ const ast::Expression& Parser::ParsePropertyAfterName(
     // 'get' PropertyName '(' ParameterList ')' '{' StatementList '}'
     // 'set' PropertyName '(' ParameterList ')' '{' StatementList '}'
     DCHECK(property_name.Is<ast::ReferenceExpression>()) << property_name;
-    return ParseMethodExpression(is_static, function_kind);
+    return ParseMethodExpression(method_kind, function_kind);
   }
 
   if (PeekToken() == ast::PunctuatorKind::LeftParenthesis) {
@@ -560,12 +561,12 @@ const ast::Expression& Parser::ParsePropertyAfterName(
     auto& parameter_list = ParseParameterList();
     auto& method_body = ParseFunctionBody();
     auto& method = node_factory().NewMethod(
-        GetSourceCodeRange(), is_static, ast::FunctionKind::Normal,
+        GetSourceCodeRange(), method_kind, ast::FunctionKind::Normal,
         property_name, parameter_list, method_body);
     return NewDeclarationExpression(method);
   }
 
-  if (is_static == ast::MethodKind::Static)
+  if (method_kind == ast::MethodKind::Static)
     AddError(ErrorCode::ERROR_PROPERTY_INVALID_STATIC);
 
   if (PeekToken() == ast::PunctuatorKind::RightBrace)

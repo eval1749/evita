@@ -70,7 +70,7 @@ class JOANA_AST_EXPORT NodeFactory final {
                               const Statement& body);
 
   const Method& NewMethod(const SourceCodeRange& range,
-                          MethodKind is_static,
+                          MethodKind method_kind,
                           FunctionKind kind,
                           const Expression& name,
                           const Expression& parameter_list,

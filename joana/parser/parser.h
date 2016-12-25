@@ -95,7 +95,7 @@ class Parser final {
   const ast::Token& ParseClassName();
   const ast::Function& ParseFunction(ast::FunctionKind kind);
   const ast::Statement& ParseFunctionBody();
-  const ast::Method& ParseMethod(ast::MethodKind is_static,
+  const ast::Method& ParseMethod(ast::MethodKind method_kind,
                                  ast::FunctionKind kind);
   const ast::Expression& ParseParameterList();
   const ast::Expression& ParsePropertyName();
@@ -139,7 +139,7 @@ class Parser final {
   const ast::Expression& ParseConditionalExpression();
   const ast::Expression& ParseFunctionExpression(ast::FunctionKind kind);
   const ast::Expression& ParseLeftHandSideExpression();
-  const ast::Expression& ParseMethodExpression(ast::MethodKind is_static,
+  const ast::Expression& ParseMethodExpression(ast::MethodKind method_kind,
                                                ast::FunctionKind kind);
   const ast::Expression& ParseNameAsExpression();
   const ast::Expression& ParseNewExpression();
@@ -148,7 +148,7 @@ class Parser final {
   const ast::Expression& ParsePrimaryExpression();
   const ast::Expression& ParsePropertyAfterName(
       const ast::Expression& property_name,
-      ast::MethodKind is_static,
+      ast::MethodKind method_kind,
       ast::FunctionKind function_kind);
   const ast::Expression& ParseRegExpLiteral();
   const ast::Expression& ParseUnaryExpression();

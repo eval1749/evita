@@ -133,13 +133,13 @@ const Function& NodeFactory::NewFunction(const SourceCodeRange& range,
 }
 
 const Method& NodeFactory::NewMethod(const SourceCodeRange& range,
-                                     MethodKind is_static,
+                                     MethodKind method_kind,
                                      FunctionKind kind,
                                      const Expression& name,
                                      const Expression& parameter_list,
                                      const Statement& method_body) {
   return *new (zone_)
-      Method(range, is_static, kind, name, parameter_list, method_body);
+      Method(range, method_kind, kind, name, parameter_list, method_body);
 }
 
 // Expressions

@@ -21,8 +21,8 @@
 #include "joana/parser/public/parser_context.h"
 #include "joana/parser/public/parser_context_builder.h"
 #include "joana/parser/public/parser_options.h"
-#include "joana/parser/simple_error_sink.h"
 #include "joana/parser/utils/character_reader.h"
+#include "joana/testing/simple_error_sink.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
 namespace joana {

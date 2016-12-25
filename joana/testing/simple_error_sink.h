@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef JOANA_PARSER_SIMPLE_ERROR_SINK_H_
-#define JOANA_PARSER_SIMPLE_ERROR_SINK_H_
+#ifndef JOANA_TESTING_SIMPLE_ERROR_SINK_H_
+#define JOANA_TESTING_SIMPLE_ERROR_SINK_H_
 
 #include <iosfwd>
 #include <vector>
@@ -15,8 +15,10 @@
 #include "joana/base/source_code_range.h"
 
 namespace joana {
-namespace parser {
 
+//
+// SimpleErrorSink
+//
 class SimpleErrorSink final : public ErrorSink {
  public:
   class Error final : public ZoneAllocated {
@@ -56,7 +58,6 @@ std::ostream& operator<<(std::ostream& ostream,
 std::ostream& operator<<(std::ostream& ostream,
                          const SimpleErrorSink::Error* error);
 
-}  // namespace parser
 }  // namespace joana
 
-#endif  // JOANA_PARSER_SIMPLE_ERROR_SINK_H_
+#endif  // JOANA_TESTING_SIMPLE_ERROR_SINK_H_

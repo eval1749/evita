@@ -4,13 +4,15 @@
 
 #include <ostream>
 
-#include "joana/parser/simple_error_sink.h"
+#include "joana/testing/simple_error_sink.h"
 
 #include "joana/ast/error_codes.h"
 
 namespace joana {
-namespace parser {
 
+//
+// SimpleErrorSink
+//
 SimpleErrorSink::Error::Error(const SourceCodeRange& range, int error_code)
     : error_code_(error_code), range_(range) {}
 
@@ -42,5 +44,4 @@ std::ostream& operator<<(std::ostream& ostream,
   return ostream << *error;
 }
 
-}  // namespace parser
 }  // namespace joana

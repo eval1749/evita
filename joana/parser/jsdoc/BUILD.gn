@@ -24,6 +24,7 @@ source_set("test_files") {
   deps = [
     ":jsdoc",
     "//joana/parser/utils",
+    "//joana/testing",
     "//testing/gtest",
   ]
 }

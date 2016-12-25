@@ -227,7 +227,7 @@ const Expression& NodeFactory::NewGroupExpression(
 
 const Expression& NodeFactory::NewInvalidExpression(const Node& node,
                                                     int error_code) {
-  return *new (zone_) InvalidExpression(node, error_code);
+  return *new (zone_) InvalidExpression(node.range(), error_code);
 }
 
 const Expression& NodeFactory::NewLiteralExpression(const Literal& literal) {

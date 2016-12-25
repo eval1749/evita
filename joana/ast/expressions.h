@@ -312,7 +312,7 @@ class JOANA_AST_EXPORT InvalidExpression : public Expression {
   int error_code() const { return error_code_; }
 
  private:
-  InvalidExpression(const Node& node, int error_code);
+  InvalidExpression(const SourceCodeRange& range, int error_code);
 
   const int error_code_;
 

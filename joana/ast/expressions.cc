@@ -148,8 +148,9 @@ GroupExpression::~GroupExpression() = default;
 //
 // InvalidExpression
 //
-InvalidExpression::InvalidExpression(const Node& node, int error_code)
-    : Expression(node.range()), error_code_(error_code) {}
+InvalidExpression::InvalidExpression(const SourceCodeRange& range,
+                                     int error_code)
+    : Expression(range), error_code_(error_code) {}
 
 InvalidExpression::~InvalidExpression() = default;
 

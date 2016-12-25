@@ -25,6 +25,5 @@ source_set("test_files") {
     ":jsdoc",
     "//joana/parser/utils",
     "//joana/testing",
-    "//testing/gtest",
   ]
 }

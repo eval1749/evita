@@ -10,20 +10,12 @@
 #include "joana/parser/jsdoc/jsdoc_type_lexer.h"
 
 #include "base/macros.h"
-#include "base/strings/string_piece.h"
-#include "base/strings/utf_string_conversions.h"
 #include "joana/ast/node.h"
-#include "joana/ast/node_factory.h"
 #include "joana/ast/tokens.h"
 #include "joana/base/source_code.h"
-#include "joana/base/source_code_factory.h"
 #include "joana/parser/jsdoc/jsdoc_error_codes.h"
-#include "joana/parser/public/parser_context.h"
-#include "joana/parser/public/parser_context_builder.h"
-#include "joana/parser/public/parser_options.h"
 #include "joana/parser/utils/character_reader.h"
-#include "joana/testing/simple_error_sink.h"
-#include "testing/gtest/include/gtest/gtest.h"
+#include "joana/testing/lexer_test_base.h"
 
 namespace joana {
 namespace parser {
@@ -45,73 +37,48 @@ std::string ToString(const Parameters&... tokens) {
 
 }  // namespace
 
-class JsDocTypeLexerTest : public ::testing::Test {
+class JsDocTypeLexerTest : public LexerTestBase {
  protected:
-  JsDocTypeLexerTest();
+  JsDocTypeLexerTest() = default;
   ~JsDocTypeLexerTest() override = default;
 
   std::string NewError(int start, int end, JsDocErrorCode error_code);
   const ast::Token& NewName(int start, int end);
   const ast::Token& NewPunctuator(int start, int end, ast::PunctuatorKind kind);
 
-  void PrepareSouceCode(base::StringPiece script_text);
   std::string ScanToString(const ParserOptions& options);
   std::string ScanToString();
 
  private:
-  SimpleErrorSink error_sink_;
-  Zone zone_;
-  ast::NodeFactory node_factory_;
-  const std::unique_ptr<ParserContext> context_;
-  const SourceCode* source_code_ = nullptr;
-  SourceCode::Factory source_code_factory_;
-
   DISALLOW_COPY_AND_ASSIGN(JsDocTypeLexerTest);
 };
-
-JsDocTypeLexerTest::JsDocTypeLexerTest()
-    : zone_("JsDocTypeLexerTest"),
-      node_factory_(&zone_),
-      context_(ParserContext::Builder()
-                   .set_error_sink(&error_sink_)
-                   .set_node_factory(&node_factory_)
-                   .Build()),
-      source_code_factory_(&zone_) {}
 
 std::string JsDocTypeLexerTest::NewError(int start,
                                          int end,
                                          JsDocErrorCode error_code) {
   std::ostringstream ostream;
   ostream << ' ' << static_cast<int>(error_code) << '@'
-          << source_code_->Slice(start, end);
+          << source_code().Slice(start, end);
   return ostream.str();
 }
 
 const ast::Token& JsDocTypeLexerTest::NewName(int start, int end) {
-  return node_factory_.NewName(source_code_->Slice(start, end));
+  return node_factory().NewName(source_code().Slice(start, end));
 }
 
 const ast::Token& JsDocTypeLexerTest::NewPunctuator(int start,
                                                     int end,
                                                     ast::PunctuatorKind kind) {
-  return node_factory_.NewPunctuator(source_code_->Slice(start, end), kind);
-}
-
-void JsDocTypeLexerTest::PrepareSouceCode(base::StringPiece script_text) {
-  const auto& script_text16 = base::UTF8ToUTF16(script_text);
-  source_code_ = &source_code_factory_.New(base::FilePath(),
-                                           base::StringPiece16(script_text16));
-  error_sink_.Reset();
+  return node_factory().NewPunctuator(source_code().Slice(start, end), kind);
 }
 
 std::string JsDocTypeLexerTest::ScanToString(const ParserOptions& options) {
-  DCHECK(source_code_);
-  CharacterReader reader(source_code_->range());
-  JsDocTypeLexer lexer(context_.get(), &reader, options);
+  CharacterReader reader(source_code().range());
+  JsDocTypeLexer lexer(&context(), &reader, options);
   std::ostringstream ostream;
   while (lexer.CanPeekToken())
     ostream << lexer.ConsumeToken() << std::endl;
-  for (const auto* error : error_sink_.errors()) {
+  for (const auto* error : error_sink().errors()) {
     ostream << ' ' << error->error_code() << '@' << error->range();
   }
   return ostream.str();

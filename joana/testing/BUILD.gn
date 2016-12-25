@@ -5,6 +5,8 @@
 source_set("testing") {
   testonly = true
   sources = [
+    "lexer_test_base.cc",
+    "lexer_test_base.h",
     "simple_error_sink.cc",
     "simple_error_sink.h",
     "simple_formatter.cc",
@@ -13,5 +15,7 @@ source_set("testing") {
   public_deps = [
     "//joana/ast",
     "//joana/base",
+    "//joana/parser/public",
+    "//testing/gtest",
   ]
 }

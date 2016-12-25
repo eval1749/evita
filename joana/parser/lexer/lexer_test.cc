@@ -68,6 +68,7 @@ class LexerTest : public ::testing::Test {
   std::string NewNumericLiteral(int start, int end, double value);
   std::string NewNumericLiteral(double value);
   std::string NewPunctuator(ast::PunctuatorKind kind);
+  std::string NewStringLiteral(int start, int end, base::StringPiece data);
   std::string NewStringLiteral(base::StringPiece data);
   std::string NewStringLiteral(const std::vector<base::char16> data);
   void PrepareSouceCode(base::StringPiece script_text);
@@ -152,6 +153,14 @@ std::string LexerTest::NewNumericLiteral(double value) {
 
 std::string LexerTest::NewPunctuator(ast::PunctuatorKind kind) {
   return ToString(factory().NewPunctuator(MakeRange(), kind));
+}
+
+std::string LexerTest::NewStringLiteral(int start,
+                                        int end,
+                                        base::StringPiece data8) {
+  const auto& data16 = base::UTF8ToUTF16(data8);
+  return ToString(factory().NewStringLiteral(MakeRange(start, end),
+                                             base::StringPiece16(data16)));
 }
 
 std::string LexerTest::NewStringLiteral(base::StringPiece data8) {
@@ -514,11 +523,15 @@ TEST_F(LexerTest, StringLiteralError) {
       << "String literal can not contain newline";
 
   PrepareSouceCode("'foo");
-  EXPECT_EQ(NewInvalid(0, 4, 4, ERROR_STRING_LITERAL_NOT_CLOSED), Parse())
+  EXPECT_EQ(NewStringLiteral(0, 4, "foo") +
+                NewError(ERROR_STRING_LITERAL_NOT_CLOSED, 0, 4),
+            Parse())
       << "No closing double quote";
 
   PrepareSouceCode("'\\x");
-  EXPECT_EQ(NewInvalid(0, 3, 3, ERROR_STRING_LITERAL_NOT_CLOSED), Parse())
+  EXPECT_EQ(NewStringLiteral(0, 3, "") +
+                NewError(ERROR_STRING_LITERAL_NOT_CLOSED, 0, 3),
+            Parse())
       << "No hexadecimal digit after '\\x'";
 
   PrepareSouceCode("'\\a'");

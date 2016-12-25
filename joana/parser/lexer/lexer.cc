@@ -643,7 +643,10 @@ const ast::Token& Lexer::HandleStringLiteral() {
     }
     ConsumeChar();
   }
-  return NewError(ErrorCode::STRING_LITERAL_NOT_CLOSED);
+  AddError(ErrorCode::STRING_LITERAL_NOT_CLOSED);
+  return node_factory().NewStringLiteral(
+      MakeTokenRange(),
+      base::StringPiece16(characters.data(), characters.size()));
 }
 
 SourceCodeRange Lexer::MakeTokenRange() const {

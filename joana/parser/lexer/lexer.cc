@@ -656,16 +656,6 @@ SourceCodeRange Lexer::MakeTokenRange() const {
   return source_code().Slice(token_start_, reader_->location());
 }
 
-const ast::Token& Lexer::NewError(ErrorCode error_code) {
-  AddError(error_code);
-  return NewInvalid(error_code);
-}
-
-const ast::Token& Lexer::NewInvalid(ErrorCode error_code) {
-  return node_factory().NewInvalid(MakeTokenRange(),
-                                   static_cast<int>(error_code));
-}
-
 const ast::Token& Lexer::NewNumericLiteral(double value) {
   return node_factory().NewNumericLiteral(MakeTokenRange(), value);
 }

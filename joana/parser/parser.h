@@ -79,6 +79,17 @@ class Parser final {
   // Returns true if |Lexer| has a punctuator of |kind| and advance to next
   // token.
   bool ConsumeTokenIf(ast::PunctuatorKind kind);
+
+  template <typename Class>
+  bool ConsumeTokenIf() {
+    if (!CanPeekToken())
+      return false;
+    if (!PeekToken().Is<Class>())
+      return false;
+    ConsumeToken();
+    return true;
+  }
+
   void ExpectPunctuator(ast::PunctuatorKind kind, ErrorCode error_code);
   void ExpectSemicolon();
   SourceCodeRange GetSourceCodeRange() const;

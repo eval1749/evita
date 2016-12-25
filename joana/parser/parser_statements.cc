@@ -119,15 +119,11 @@ const ast::Statement& Parser::ParseBlockStatement() {
   while (CanPeekToken()) {
     if (ConsumeTokenIf(ast::PunctuatorKind::RightBrace))
       break;
-    auto& token = PeekToken();
-    if (token.Is<ast::Comment>()) {
-      Advance();
+    if (ConsumeTokenIf<ast::Comment>())
       continue;
-    }
-    if (token.Is<ast::Invalid>()) {
+    if (ConsumeTokenIf<ast::Invalid>()) {
       // TODO(eval1749): We should skip tokens until good point to restart
       // toplevel parsing.
-      Advance();
       continue;
     }
     statements.push_back(&ParseStatement());

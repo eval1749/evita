@@ -246,7 +246,8 @@ class JOANA_AST_EXPORT NodeFactory final {
                                   const Expression& condition,
                                   const Statement& then_clause);
 
-  const Statement& NewInvalidStatement(const Node& node, int error_code);
+  const Statement& NewInvalidStatement(const SourceCodeRange& range,
+                                       int error_code);
 
   const Statement& NewLabeledStatement(const SourceCodeRange& range,
                                        const Name& label,

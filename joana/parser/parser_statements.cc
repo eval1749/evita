@@ -96,9 +96,8 @@ const ast::Statement& Parser::NewEmptyStatement(const SourceCodeRange& range) {
 }
 
 const ast::Statement& Parser::NewInvalidStatement(ErrorCode error_code) {
-  auto& token = ComputeInvalidToken(error_code);
   AddError(GetSourceCodeRange(), error_code);
-  return node_factory().NewInvalidStatement(token,
+  return node_factory().NewInvalidStatement(GetSourceCodeRange(),
                                             static_cast<int>(error_code));
 }
 

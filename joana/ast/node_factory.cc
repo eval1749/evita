@@ -473,9 +473,9 @@ const Statement& NodeFactory::NewIfStatement(const SourceCodeRange& range,
                                   const_cast<Statement*>(&then_clause));
 }
 
-const Statement& NodeFactory::NewInvalidStatement(const Node& node,
+const Statement& NodeFactory::NewInvalidStatement(const SourceCodeRange& range,
                                                   int error_code) {
-  return *new (zone_) InvalidStatement(node.range(), error_code);
+  return *new (zone_) InvalidStatement(range, error_code);
 }
 
 const Statement& NodeFactory::NewLabeledStatement(const SourceCodeRange& range,

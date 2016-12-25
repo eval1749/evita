@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef JOANA_PARSER_LEXER_CHARACTER_READER_H_
-#define JOANA_PARSER_LEXER_CHARACTER_READER_H_
+#ifndef JOANA_PARSER_UTILS_CHARACTER_READER_H_
+#define JOANA_PARSER_UTILS_CHARACTER_READER_H_
 
 #include "base/macros.h"
 #include "base/strings/string16.h"
@@ -51,4 +51,4 @@ class CharacterReader final {
 }  // namespace parser
 }  // namespace joana
 
-#endif  // JOANA_PARSER_LEXER_CHARACTER_READER_H_
+#endif  // JOANA_PARSER_UTILS_CHARACTER_READER_H_

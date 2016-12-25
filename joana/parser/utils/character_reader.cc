@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "joana/parser/lexer/character_reader.h"
+#include "joana/parser/utils/character_reader.h"
 
 #include "joana/base/source_code.h"
 #include "joana/base/source_code_range.h"

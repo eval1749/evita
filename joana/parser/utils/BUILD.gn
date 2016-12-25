@@ -2,15 +2,15 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-source_set("lexer") {
+source_set("utils") {
   sources = [
-    "lexer.cc",
-    "lexer.h",
-    "lexer_regexp.cc",
+    "character_reader.cc",
+    "character_reader.h",
+    "lexer_utils.cc",
+    "lexer_utils.h",
   ]
   deps = [
     "//joana/base",
-    "//joana/parser/utils",
   ]
 
   configs += [ "//joana/parser:parser_implementation" ]

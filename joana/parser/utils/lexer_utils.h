@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef JOANA_PARSER_LEXER_LEXER_UTILS_H_
-#define JOANA_PARSER_LEXER_LEXER_UTILS_H_
+#ifndef JOANA_PARSER_UTILS_LEXER_UTILS_H_
+#define JOANA_PARSER_UTILS_LEXER_UTILS_H_
 
 #include "base/logging.h"
 #include "base/strings/string16.h"
@@ -47,4 +47,4 @@ bool IsWhitespace(base::char16 char_code);
 }  // namespace parser
 }  // namespace joana
 
-#endif  // JOANA_PARSER_LEXER_LEXER_UTILS_H_
+#endif  // JOANA_PARSER_UTILS_LEXER_UTILS_H_

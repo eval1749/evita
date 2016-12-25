@@ -11,6 +11,7 @@
 #include "joana/ast/regexp.h"
 #include "joana/ast/statements.h"
 #include "joana/ast/tokens.h"
+#include "joana/ast/types.h"
 
 namespace joana {
 namespace ast {

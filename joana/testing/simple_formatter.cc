@@ -17,6 +17,7 @@
 #include "joana/ast/regexp.h"
 #include "joana/ast/statements.h"
 #include "joana/ast/tokens.h"
+#include "joana/ast/types.h"
 #include "joana/base/source_code.h"
 
 namespace joana {
@@ -758,6 +759,111 @@ void SimpleFormatter::VisitWithStatement(ast::WithStatement* node) {
   Format(node->expression());
   *ostream_ << ')';
   FormatChildStatement(node->statement());
+}
+
+// Types
+void SimpleFormatter::VisitAnyType(ast::AnyType* node) {
+  *ostream_ << '*';
+}
+
+void SimpleFormatter::VisitFunctionType(ast::FunctionType* node) {
+  *ostream_ << "function(";
+  if (node->kind() == ast::FunctionTypeKind::New)
+    *ostream_ << "new:";
+  else if (node->kind() == ast::FunctionTypeKind::This)
+    *ostream_ << "this:";
+  auto* delimiter = "";
+  for (const auto& parameter_type : node->parameter_types()) {
+    *ostream_ << delimiter;
+    delimiter = ", ";
+    Format(parameter_type);
+  }
+  *ostream_ << ')';
+  if (node->return_type().Is<ast::VoidType>())
+    return;
+  *ostream_ << ':';
+  Format(node->return_type());
+}
+
+void SimpleFormatter::VisitInvalidType(ast::InvalidType* node) {
+  *ostream_ << "(invalid)";
+}
+
+void SimpleFormatter::VisitNullableType(ast::NullableType* node) {
+  *ostream_ << '?';
+  Format(node->type());
+}
+
+void SimpleFormatter::VisitNonNullableType(ast::NonNullableType* node) {
+  *ostream_ << '!';
+  Format(node->type());
+}
+
+void SimpleFormatter::VisitOptionalType(ast::OptionalType* node) {
+  Format(node->type());
+  *ostream_ << '=';
+}
+
+void SimpleFormatter::VisitRecordType(ast::RecordType* node) {
+  *ostream_ << '{';
+  auto* delimiter = "";
+  for (const auto& member : node->members()) {
+    *ostream_ << delimiter;
+    delimiter = ", ";
+    Format(*member.first);
+    *ostream_ << ": ";
+    Format(*member.second);
+  }
+  *ostream_ << '}';
+}
+
+void SimpleFormatter::VisitRestType(ast::RestType* node) {
+  *ostream_ << "...";
+  Format(node->type());
+}
+
+void SimpleFormatter::VisitTupleType(ast::TupleType* node) {
+  *ostream_ << '[';
+  auto* delimiter = "";
+  for (const auto& member : node->members()) {
+    *ostream_ << delimiter;
+    delimiter = ", ";
+    Format(member);
+  }
+  *ostream_ << ']';
+}
+
+void SimpleFormatter::VisitTypeApplication(ast::TypeApplication* node) {
+  OutputUsingSoourceCode(node->name());
+  *ostream_ << '<';
+  auto* delimiter = "";
+  for (const auto& parameter : node->parameters()) {
+    *ostream_ << delimiter;
+    delimiter = ", ";
+    Format(parameter);
+  }
+  *ostream_ << '>';
+}
+
+void SimpleFormatter::VisitTypeName(ast::TypeName* node) {
+  OutputUsingSoourceCode(*node);
+}
+
+void SimpleFormatter::VisitUnionType(ast::UnionType* node) {
+  auto* delimiter = "";
+  for (const auto& member : node->members()) {
+    *ostream_ << delimiter;
+    delimiter = "|";
+    Format(member);
+  }
+}
+
+void SimpleFormatter::VisitUnknownType(ast::UnknownType* node) {
+  *ostream_ << '?';
+}
+
+void SimpleFormatter::VisitVoidType(ast::VoidType* node) {
+  *ostream_ << "void";
 }
 
 }  // namespace parser

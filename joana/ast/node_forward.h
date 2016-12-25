@@ -16,7 +16,8 @@ namespace ast {
   V(Node)                             \
   V(RegExp)                           \
   V(Statement)                        \
-  V(Token)
+  V(Token)                            \
+  V(Type)
 
 #define FOR_EACH_AST_DECLARATION(V) \
   V(ArrowFunction)                  \
@@ -104,6 +105,22 @@ namespace ast {
   V(Punctuator)               \
   V(Name)
 
+#define FOR_EACH_AST_TYPE(V) \
+  V(AnyType)                 \
+  V(FunctionType)            \
+  V(InvalidType)             \
+  V(NullableType)            \
+  V(NonNullableType)         \
+  V(OptionalType)            \
+  V(RecordType)              \
+  V(RestType)                \
+  V(TupleType)               \
+  V(TypeApplication)         \
+  V(TypeName)                \
+  V(UnionType)               \
+  V(UnknownType)             \
+  V(VoidType)
+
 #define FOR_EACH_CONCRETE_AST_NODE(V) \
   FOR_EACH_AST_DECLARATION(V)         \
   FOR_EACH_AST_EXPRESSION(V)          \
@@ -111,6 +128,7 @@ namespace ast {
   FOR_EACH_AST_REGEXP(V)              \
   FOR_EACH_AST_STATEMENT(V)           \
   FOR_EACH_AST_TOKEN(V)               \
+  FOR_EACH_AST_TYPE(V)                \
   V(Module)
 
 #define V(name) class name;
@@ -120,6 +138,7 @@ FOR_EACH_CONCRETE_AST_NODE(V)
 
 class ExpressionList;
 enum class FunctionKind;
+enum class FunctionTypeKind;
 enum class InvalidKind;
 enum class MethodKind;
 enum class NameId;
@@ -128,6 +147,8 @@ class NodeFactory;
 enum class RegExpAssertionKind;
 struct RegExpRepeat;
 enum class PunctuatorKind;
+class RecordTypeMembers;
+class TypeList;
 
 // Expression or BlockStatement
 using ArrowFunctionBody = Node;

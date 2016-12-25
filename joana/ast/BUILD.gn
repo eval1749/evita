@@ -38,6 +38,8 @@ component("ast") {
     "statements.h",
     "tokens.cc",
     "tokens.h",
+    "types.cc",
+    "types.h",
   ]
 
   public_deps = [

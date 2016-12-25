@@ -13,6 +13,7 @@
 #include "joana/ast/regexp.h"
 #include "joana/ast/statements.h"
 #include "joana/ast/tokens.h"
+#include "joana/ast/types.h"
 
 namespace joana {
 namespace ast {
@@ -558,6 +559,84 @@ const Statement& NodeFactory::NewWithStatement(const SourceCodeRange& range,
                                                const Statement& statement) {
   return *new (zone_) WithStatement(range, const_cast<Expression*>(&expression),
                                     const_cast<Statement*>(&statement));
+}
+
+// Type factory members
+const Type& NodeFactory::NewAnyType(const SourceCodeRange& range) {
+  return *new (zone_) AnyType(range);
+}
+
+const Type& NodeFactory::NewFunctionType(
+    const SourceCodeRange& range,
+    FunctionTypeKind kind,
+    const std::vector<const Type*>& parameter_types,
+    const Type& return_type) {
+  auto& list = *new (zone_) TypeList(zone_, parameter_types);
+  return *new (zone_) FunctionType(range, kind, list, return_type);
+}
+
+const Type& NodeFactory::NewInvalidType(const SourceCodeRange& range) {
+  return *new (zone_) InvalidType(range);
+}
+
+const Type& NodeFactory::NewNullableType(const SourceCodeRange& range,
+                                         const Type& type) {
+  return *new (zone_) NullableType(range, type);
+}
+
+const Type& NodeFactory::NewNonNullableType(const SourceCodeRange& range,
+                                            const Type& type) {
+  return *new (zone_) NonNullableType(range, type);
+}
+
+const Type& NodeFactory::NewOptionalType(const SourceCodeRange& range,
+                                         const Type& type) {
+  return *new (zone_) OptionalType(range, type);
+}
+
+const Type& NodeFactory::NewRecordType(
+    const SourceCodeRange& range,
+    const std::vector<std::pair<const Name*, const Type*>>& members) {
+  auto& list = *new (zone_) RecordTypeMembers(zone_, members);
+  return *new (zone_) RecordType(range, list);
+}
+
+const Type& NodeFactory::NewRestType(const SourceCodeRange& range,
+                                     const Type& type) {
+  return *new (zone_) RestType(range, type);
+}
+
+const Type& NodeFactory::NewTupleType(const SourceCodeRange& range,
+                                      const std::vector<const Type*>& members) {
+  auto& list = *new (zone_) TypeList(zone_, members);
+  return *new (zone_) TupleType(range, list);
+}
+
+const Type& NodeFactory::NewTypeApplication(
+    const SourceCodeRange& range,
+    const Name& name,
+    const std::vector<const Type*>& members) {
+  auto& list = *new (zone_) TypeList(zone_, members);
+  return *new (zone_) TypeApplication(range, name, list);
+}
+
+const Type& NodeFactory::NewTypeName(const SourceCodeRange& range,
+                                     const Name& name) {
+  return *new (zone_) TypeName(range, name);
+}
+
+const Type& NodeFactory::NewUnionType(const SourceCodeRange& range,
+                                      const std::vector<const Type*>& members) {
+  auto& list = *new (zone_) TypeList(zone_, members);
+  return *new (zone_) UnionType(range, list);
+}
+
+const Type& NodeFactory::NewUnknownType(const SourceCodeRange& range) {
+  return *new (zone_) UnknownType(range);
+}
+
+const Type& NodeFactory::NewVoidType(const SourceCodeRange& range) {
+  return *new (zone_) VoidType(range);
 }
 
 }  // namespace ast

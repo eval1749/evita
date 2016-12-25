@@ -7,6 +7,7 @@
 
 #include <memory>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include "base/strings/string_piece.h"
@@ -293,6 +294,45 @@ class JOANA_AST_EXPORT NodeFactory final {
   const Statement& NewWithStatement(const SourceCodeRange& range,
                                     const Expression& expression,
                                     const Statement& statement);
+
+  // Type factory members
+  const Type& NewAnyType(const SourceCodeRange& range);
+
+  const Type& NewFunctionType(const SourceCodeRange& range,
+                              FunctionTypeKind kind,
+                              const std::vector<const Type*>& parameter_types,
+                              const Type& return_type);
+
+  const Type& NewInvalidType(const SourceCodeRange& range);
+
+  const Type& NewNullableType(const SourceCodeRange& range, const Type& type);
+
+  const Type& NewNonNullableType(const SourceCodeRange& range,
+                                 const Type& type);
+
+  const Type& NewOptionalType(const SourceCodeRange& range, const Type& type);
+
+  const Type& NewRecordType(
+      const SourceCodeRange& range,
+      const std::vector<std::pair<const Name*, const Type*>>& members);
+
+  const Type& NewRestType(const SourceCodeRange& range, const Type& type);
+
+  const Type& NewTupleType(const SourceCodeRange& range,
+                           const std::vector<const Type*>& members);
+
+  const Type& NewTypeApplication(const SourceCodeRange& range,
+                                 const Name& name,
+                                 const std::vector<const Type*>& members);
+
+  const Type& NewTypeName(const SourceCodeRange& range, const Name& name);
+
+  const Type& NewUnionType(const SourceCodeRange& range,
+                           const std::vector<const Type*>& members);
+
+  const Type& NewUnknownType(const SourceCodeRange& range);
+
+  const Type& NewVoidType(const SourceCodeRange& range);
 
  private:
   class NameIdMap;

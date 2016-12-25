@@ -2,17 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "joana/parser/jsdoc/jsdoc_type_lexer.h"
+#include "joana/parser/type/type_lexer.h"
 
 #include "joana/ast/node_factory.h"
 #include "joana/ast/tokens.h"
 #include "joana/base/error_sink.h"
 #include "joana/base/source_code.h"
 #include "joana/base/source_code_range.h"
-#include "joana/parser/jsdoc/jsdoc_error_codes.h"
 #include "joana/parser/public/parser_context.h"
 #include "joana/parser/utils/character_reader.h"
 #include "joana/parser/utils/lexer_utils.h"
+#include "joana/parser/type/type_error_codes.h"
 
 namespace joana {
 namespace parser {
@@ -26,9 +26,9 @@ bool IsTypeNamePart(base::char16 char_code) {
 }  // namespace
 
 //
-// JsDocTypeLexer
+// TypeLexer
 //
-JsDocTypeLexer::JsDocTypeLexer(ParserContext* context,
+TypeLexer::TypeLexer(ParserContext* context,
                                const SourceCodeRange& range,
                                const ParserOptions& options)
     : context_(*context),
@@ -37,69 +37,69 @@ JsDocTypeLexer::JsDocTypeLexer(ParserContext* context,
   current_token_ = NextToken();
 }
 
-JsDocTypeLexer::~JsDocTypeLexer() = default;
+TypeLexer::~TypeLexer() = default;
 
-int JsDocTypeLexer::location() const {
-  return reader_->location();
+SourceCodeRange TypeLexer::location() const {
+  return source_code().Slice(reader_->location(), reader_->location());
 }
 
-ast::NodeFactory& JsDocTypeLexer::node_factory() {
+ast::NodeFactory& TypeLexer::node_factory() {
   return context_.node_factory();
 }
 
-const SourceCode& JsDocTypeLexer::source_code() const {
+const SourceCode& TypeLexer::source_code() const {
   return reader_->source_code();
 }
 
-void JsDocTypeLexer::AddError(JsDocErrorCode error_code) {
+void TypeLexer::AddError(TypeErrorCode error_code) {
   context_.error_sink().AddError(ComputeTokenRange(),
                                  static_cast<int>(error_code));
 }
 
-bool JsDocTypeLexer::CanPeekChar() const {
+bool TypeLexer::CanPeekChar() const {
   return reader_->CanPeekChar();
 }
 
-SourceCodeRange JsDocTypeLexer::ComputeTokenRange() const {
-  return source_code().Slice(token_start_, location());
+SourceCodeRange TypeLexer::ComputeTokenRange() const {
+  return source_code().Slice(token_start_, reader_->location());
 }
 
-base::char16 JsDocTypeLexer::ConsumeChar() {
+base::char16 TypeLexer::ConsumeChar() {
   return reader_->ConsumeChar();
 }
 
-bool JsDocTypeLexer::ConsumeCharIf(base::char16 char_code) {
+bool TypeLexer::ConsumeCharIf(base::char16 char_code) {
   if (!CanPeekChar() || PeekChar() != char_code)
     return false;
   ConsumeChar();
   return true;
 }
 
-const ast::Token& JsDocTypeLexer::ConsumeToken() {
+const ast::Token& TypeLexer::ConsumeToken() {
   auto& token = PeekToken();
   current_token_ = NextToken();
   return token;
 }
 
-base::char16 JsDocTypeLexer::PeekChar() const {
+base::char16 TypeLexer::PeekChar() const {
   return reader_->PeekChar();
 }
 
-const ast::Token& JsDocTypeLexer::PeekToken() const {
+const ast::Token& TypeLexer::PeekToken() const {
   DCHECK(current_token_);
   return *current_token_;
 }
 
-const ast::Token& JsDocTypeLexer::NewPunctuator(ast::PunctuatorKind kind) {
+const ast::Token& TypeLexer::NewPunctuator(ast::PunctuatorKind kind) {
   return node_factory().NewPunctuator(ComputeTokenRange(), kind);
 }
 
-const ast::Token* JsDocTypeLexer::NextToken() {
+const ast::Token* TypeLexer::NextToken() {
   while (CanPeekChar() && IsWhitespace(PeekChar()))
     ConsumeChar();
   if (!CanPeekChar())
     return nullptr;
-  token_start_ = location();
+  token_start_ = reader_->location();
   switch (PeekChar()) {
     case '!':
       ConsumeChar();
@@ -151,7 +151,7 @@ const ast::Token* JsDocTypeLexer::NextToken() {
       while (ConsumeCharIf('.'))
         ++number_of_dots;
       if (number_of_dots != 3) {
-        AddError(JsDocErrorCode::ERROR_JSDOC_UNEXPECT_DOT);
+        AddError(TypeErrorCode::ERROR_TYPE_UNEXPECT_DOT);
         return &NewPunctuator(ast::PunctuatorKind::Invalid);
       }
       return &NewPunctuator(ast::PunctuatorKind::DotDotDot);

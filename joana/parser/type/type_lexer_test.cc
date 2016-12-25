@@ -7,13 +7,13 @@
 #include <string>
 #include <vector>
 
-#include "joana/parser/jsdoc/jsdoc_type_lexer.h"
+#include "joana/parser/type/type_lexer.h"
 
 #include "base/macros.h"
 #include "joana/ast/node.h"
 #include "joana/ast/tokens.h"
 #include "joana/base/source_code.h"
-#include "joana/parser/jsdoc/jsdoc_error_codes.h"
+#include "joana/parser/type/type_error_codes.h"
 #include "joana/testing/lexer_test_base.h"
 
 namespace joana {
@@ -37,14 +37,14 @@ std::string ToString(const Parameters&... tokens) {
 }  // namespace
 
 //
-// JsDocTypeLexerTest
+// TypeLexerTest
 //
-class JsDocTypeLexerTest : public LexerTestBase {
+class TypeLexerTest : public LexerTestBase {
  protected:
-  JsDocTypeLexerTest() = default;
-  ~JsDocTypeLexerTest() override = default;
+  TypeLexerTest() = default;
+  ~TypeLexerTest() override = default;
 
-  std::string NewError(int start, int end, JsDocErrorCode error_code);
+  std::string NewError(int start, int end, TypeErrorCode error_code);
   const ast::Token& NewName(int start, int end);
   const ast::Token& NewPunctuator(int start, int end, ast::PunctuatorKind kind);
 
@@ -52,30 +52,30 @@ class JsDocTypeLexerTest : public LexerTestBase {
   std::string ScanToString();
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(JsDocTypeLexerTest);
+  DISALLOW_COPY_AND_ASSIGN(TypeLexerTest);
 };
 
-std::string JsDocTypeLexerTest::NewError(int start,
+std::string TypeLexerTest::NewError(int start,
                                          int end,
-                                         JsDocErrorCode error_code) {
+                                         TypeErrorCode error_code) {
   std::ostringstream ostream;
   ostream << ' ' << static_cast<int>(error_code) << '@'
           << source_code().Slice(start, end);
   return ostream.str();
 }
 
-const ast::Token& JsDocTypeLexerTest::NewName(int start, int end) {
+const ast::Token& TypeLexerTest::NewName(int start, int end) {
   return node_factory().NewName(source_code().Slice(start, end));
 }
 
-const ast::Token& JsDocTypeLexerTest::NewPunctuator(int start,
+const ast::Token& TypeLexerTest::NewPunctuator(int start,
                                                     int end,
                                                     ast::PunctuatorKind kind) {
   return node_factory().NewPunctuator(source_code().Slice(start, end), kind);
 }
 
-std::string JsDocTypeLexerTest::ScanToString(const ParserOptions& options) {
-  JsDocTypeLexer lexer(&context(), source_code().range(), options);
+std::string TypeLexerTest::ScanToString(const ParserOptions& options) {
+  TypeLexer lexer(&context(), source_code().range(), options);
   std::ostringstream ostream;
   while (lexer.CanPeekToken())
     ostream << lexer.ConsumeToken() << std::endl;
@@ -85,11 +85,11 @@ std::string JsDocTypeLexerTest::ScanToString(const ParserOptions& options) {
   return ostream.str();
 }
 
-std::string JsDocTypeLexerTest::ScanToString() {
+std::string TypeLexerTest::ScanToString() {
   return ScanToString({});
 }
 
-TEST_F(JsDocTypeLexerTest, Name) {
+TEST_F(TypeLexerTest, Name) {
   PrepareSouceCode("foo(new:bar, baz=, ...quux) : number");
   EXPECT_EQ(
       ToString(
@@ -106,14 +106,14 @@ TEST_F(JsDocTypeLexerTest, Name) {
       ScanToString());
 }
 
-TEST_F(JsDocTypeLexerTest, Errors) {
+TEST_F(TypeLexerTest, Errors) {
   PrepareSouceCode("..");
   EXPECT_EQ(ToString(NewPunctuator(0, 2, ast::PunctuatorKind::Invalid)) +
-                NewError(0, 2, JsDocErrorCode::ERROR_JSDOC_UNEXPECT_DOT),
+                NewError(0, 2, TypeErrorCode::ERROR_TYPE_UNEXPECT_DOT),
             ScanToString());
 }
 
-TEST_F(JsDocTypeLexerTest, Punctuator) {
+TEST_F(TypeLexerTest, Punctuator) {
   PrepareSouceCode("!");
   EXPECT_EQ(ToString(NewPunctuator(0, 1, ast::PunctuatorKind::LogicalNot)),
             ScanToString());

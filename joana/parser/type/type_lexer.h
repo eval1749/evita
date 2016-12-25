@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef JOANA_PARSER_JSDOC_JSDOC_TYPE_LEXER_H_
-#define JOANA_PARSER_JSDOC_JSDOC_TYPE_LEXER_H_
+#ifndef JOANA_PARSER_TYPE_TYPE_LEXER_H_
+#define JOANA_PARSER_TYPE_TYPE_LEXER_H_
 
 #include <memory>
 
@@ -24,18 +24,19 @@ class Token;
 namespace parser {
 
 class CharacterReader;
-enum class JsDocErrorCode;
+enum class TypeErrorCode;
 
 //
-// JsDocTypeLexer
+// TypeLexer
 //
-class JsDocTypeLexer final {
+class TypeLexer final {
  public:
-  JsDocTypeLexer(ParserContext* context,
+  TypeLexer(ParserContext* context,
                  const SourceCodeRange& range,
                  const ParserOptions& options);
-  ~JsDocTypeLexer();
+  ~TypeLexer();
 
+  SourceCodeRange location() const;
   const SourceCode& source_code() const;
 
   bool CanPeekToken() const { return current_token_ != nullptr; }
@@ -43,10 +44,9 @@ class JsDocTypeLexer final {
   const ast::Token& PeekToken() const;
 
  private:
-  int location() const;
   ast::NodeFactory& node_factory();
 
-  void AddError(JsDocErrorCode error_code);
+  void AddError(TypeErrorCode error_code);
   bool CanPeekChar() const;
   base::char16 ConsumeChar();
   bool ConsumeCharIf(base::char16 char_code);
@@ -64,10 +64,10 @@ class JsDocTypeLexer final {
   const std::unique_ptr<CharacterReader> reader_;
   int token_start_ = 0;
 
-  DISALLOW_COPY_AND_ASSIGN(JsDocTypeLexer);
+  DISALLOW_COPY_AND_ASSIGN(TypeLexer);
 };
 
 }  // namespace parser
 }  // namespace joana
 
-#endif  // JOANA_PARSER_JSDOC_JSDOC_TYPE_LEXER_H_
+#endif  // JOANA_PARSER_TYPE_TYPE_LEXER_H_

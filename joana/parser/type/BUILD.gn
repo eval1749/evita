@@ -1,0 +1,29 @@
+# Copyright (c) 2016 Project Vogue. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+source_set("type") {
+  sources = [
+    "type_error_codes.h",
+    "type_lexer.cc",
+    "type_lexer.h",
+  ]
+  deps = [
+    "//joana/base",
+    "//joana/parser/utils",
+  ]
+
+  configs += [ "//joana/parser:parser_implementation" ]
+}
+
+source_set("test_files") {
+  testonly = true
+  sources = [
+    "type_lexer_test.cc",
+  ]
+  deps = [
+    ":type",
+    "//joana/parser/utils",
+    "//joana/testing",
+  ]
+}

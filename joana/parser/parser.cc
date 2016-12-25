@@ -162,13 +162,6 @@ const ast::Token& Parser::ConsumeToken() {
   return token;
 }
 
-const ast::Token& Parser::ComputeInvalidToken(ErrorCode error_code) {
-  if (CanPeekToken())
-    return PeekToken();
-  return node_factory().NewInvalid(source_code().end(),
-                                   static_cast<int>(error_code));
-}
-
 bool Parser::ConsumeTokenIf(ast::NameId name_id) {
   if (!CanPeekToken())
     return false;

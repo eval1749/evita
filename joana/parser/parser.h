@@ -71,7 +71,6 @@ class Parser final {
   // Associate |js_doc| to |node|.
   void AssociateJsDoc(const ast::JsDoc& js_doc, const ast::Node& node);
   bool CanPeekToken() const;
-  const ast::Token& ComputeInvalidToken(ErrorCode error_code);
   const ast::Token& ConsumeToken();
   // Returns true if |Lexer| has a punctuator of |name_id| and advance to next
   // token.

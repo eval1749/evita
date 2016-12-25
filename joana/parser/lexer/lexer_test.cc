@@ -217,6 +217,11 @@ TEST_F(LexerTest, BlockComment) {
 
   PrepareSouceCode("/* ***/");
   EXPECT_EQ(NewComment(), Parse());
+
+  PrepareSouceCode("/* ");
+  EXPECT_EQ(NewComment(0, 3) + NewError(ERROR_BLOCK_COMMENT_NOT_CLOSED, 0, 3),
+            Parse())
+      << "Open block comment";
 }
 
 TEST_F(LexerTest, Empty) {

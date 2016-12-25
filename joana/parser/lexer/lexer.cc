@@ -106,7 +106,8 @@ const ast::Token& Lexer::HandleBlockComment() {
       is_separated_by_newline_ = true;
     is_after_asterisk = ConsumeChar() == '*';
   }
-  return NewInvalid(ErrorCode::BLOCK_COMMENT_NOT_CLOSED);
+  AddError(ErrorCode::BLOCK_COMMENT_NOT_CLOSED);
+  return node_factory().NewComment(MakeTokenRange());
 }
 
 const ast::Token* Lexer::HandleCharacter() {

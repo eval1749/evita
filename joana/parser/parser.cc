@@ -126,7 +126,9 @@ void Parser::AddError(const SourceCodeRange& range, ErrorCode error_code) {
 }
 
 void Parser::AddError(ErrorCode error_code) {
-  AddError(ComputeInvalidToken(error_code), error_code);
+  if (CanPeekToken())
+    return AddError(PeekToken(), error_code);
+  return AddError(source_code().end(), error_code);
 }
 
 void Parser::Advance() {

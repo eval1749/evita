@@ -60,10 +60,6 @@ class LexerTest : public ::testing::Test {
   std::string NewComment(int start, int end);
   std::string NewComment();
   std::string NewError(ErrorCode error_code, int start, int end);
-  std::string NewInvalid(int start,
-                         int error_position,
-                         int end,
-                         int error_code);
   std::string NewName(int start, int end);
   std::string NewNumericLiteral(int start, int end, double value);
   std::string NewNumericLiteral(double value);
@@ -124,18 +120,6 @@ std::string LexerTest::NewComment() {
 std::string LexerTest::NewError(ErrorCode error_code, int start, int end) {
   std::ostringstream ostream;
   ostream << ' ' << error_code << '@' << source_code_->Slice(start, end);
-  return ostream.str();
-}
-
-std::string LexerTest::NewInvalid(int start,
-                                  int error_offset,
-                                  int end,
-                                  int error_code) {
-  std::ostringstream ostream;
-  factory()
-      .NewInvalid(source_code_->Slice(start, end), error_code)
-      .PrintTo(&ostream);
-  ostream << ' ' << error_code << '@' << MakeRange(start, error_offset);
   return ostream.str();
 }
 

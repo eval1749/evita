@@ -89,11 +89,6 @@ const Token& NodeFactory::NewEmpty(const SourceCodeRange& range) {
   return *new (zone_) Empty(range);
 }
 
-const Token& NodeFactory::NewInvalid(const SourceCodeRange& range,
-                                     int error_code) {
-  return *new (zone_) Invalid(range, error_code);
-}
-
 const Name& NodeFactory::NewName(const SourceCodeRange& range, NameId name_id) {
   DCHECK_EQ(name_id, NameId::YieldStar);
   return *new (zone_) Name(range, static_cast<int>(name_id));

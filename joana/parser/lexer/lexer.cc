@@ -93,7 +93,7 @@ const ast::Token& Lexer::PeekToken() const {
 const ast::Token& Lexer::HandleBlockComment() {
   auto is_js_doc = CanPeekChar() && PeekChar() == '*';
   auto is_after_asterisk = false;
-  while (reader_->CanPeekChar()) {
+  while (CanPeekChar()) {
     if (is_after_asterisk && ConsumeCharIf('/')) {
       const auto range = MakeTokenRange();
       if (is_js_doc && range.size() > 4) {
@@ -283,7 +283,7 @@ const ast::Token* Lexer::HandleCharacter() {
 const ast::Token& Lexer::HandleDecimal() {
   uint64_t integer_part = FromDigitChar(ConsumeChar(), 10);
   auto integer_scale = 0;
-  while (reader_->CanPeekChar()) {
+  while (CanPeekChar()) {
     if (!IsDigitChar(PeekChar(), 10))
       break;
     const auto digit = FromDigitChar(ConsumeChar(), 10);
@@ -302,7 +302,7 @@ const ast::Token& Lexer::HandleDecimalAfterDot(uint64_t integer_part,
   auto digits_part = integer_part;
   auto digits_scale = integer_scale;
   if (ConsumeCharIf('.')) {
-    while (reader_->CanPeekChar()) {
+    while (CanPeekChar()) {
       if (!IsDigitChar(PeekChar(), 10))
         break;
       const auto digit = FromDigitChar(ConsumeChar(), 10);
@@ -323,7 +323,7 @@ const ast::Token& Lexer::HandleDecimalAfterDot(uint64_t integer_part,
       exponent_sign = 1;
     else if (ConsumeCharIf('-'))
       exponent_sign = -1;
-    while (reader_->CanPeekChar()) {
+    while (CanPeekChar()) {
       if (!IsDigitChar(PeekChar(), 10))
         break;
       const auto digit = FromDigitChar(ConsumeChar(), 10);
@@ -386,7 +386,7 @@ const ast::Token& Lexer::HandleInteger(int base) {
   const auto kMaxInteger = static_cast<uint64_t>(1) << 53;
   auto number_of_digits = 0;
   auto is_overflow = false;
-  while (reader_->CanPeekChar() && IsDigitChar(PeekChar(), base)) {
+  while (CanPeekChar() && IsDigitChar(PeekChar(), base)) {
     const auto digit = FromDigitChar(ConsumeChar(), base);
     if (digit != 0 && accumulator > kMaxInteger / base) {
       if (!is_overflow)
@@ -412,7 +412,7 @@ const ast::Token& Lexer::HandleInteger(int base) {
 }
 
 const ast::Token& Lexer::HandleLineComment() {
-  while (reader_->CanPeekChar()) {
+  while (CanPeekChar()) {
     if (IsLineTerminator(ConsumeChar())) {
       is_separated_by_newline_ = true;
       break;
@@ -422,7 +422,7 @@ const ast::Token& Lexer::HandleLineComment() {
 }
 
 const ast::Token& Lexer::HandleName() {
-  while (reader_->CanPeekChar()) {
+  while (CanPeekChar()) {
     if (!IsIdentifierPart(PeekChar()))
       break;
     ConsumeChar();
@@ -460,7 +460,7 @@ const ast::Token& Lexer::HandleStringLiteral() {
   const auto delimiter = ConsumeChar();
   auto accumulator = 0;
   auto backslash_start = 0;
-  while (reader_->CanPeekChar()) {
+  while (CanPeekChar()) {
     switch (state) {
       case State::Normal:
         if (ConsumeCharIf(delimiter)) {
@@ -647,7 +647,7 @@ const ast::Token& Lexer::HandleStringLiteral() {
 }
 
 SourceCodeRange Lexer::MakeTokenRange() const {
-  if (reader_->CanPeekChar())
+  if (CanPeekChar())
     DCHECK_LT(token_start_, reader_->location());
   return source_code().Slice(token_start_, reader_->location());
 }
@@ -672,7 +672,7 @@ const ast::Token& Lexer::NewPunctuator(ast::PunctuatorKind kind) {
 
 const ast::Token* Lexer::NextToken() {
   is_separated_by_newline_ = false;
-  while (reader_->CanPeekChar()) {
+  while (CanPeekChar()) {
     if (IsLineTerminator(PeekChar()))
       is_separated_by_newline_ = true;
     if (auto* token = HandleCharacter())

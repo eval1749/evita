@@ -5,6 +5,8 @@
 #ifndef JOANA_PARSER_JSDOC_JSDOC_TYPE_LEXER_H_
 #define JOANA_PARSER_JSDOC_JSDOC_TYPE_LEXER_H_
 
+#include <memory>
+
 #include "base/macros.h"
 #include "base/strings/string16.h"
 #include "joana/parser/public/parser_options.h"
@@ -30,7 +32,7 @@ enum class JsDocErrorCode;
 class JsDocTypeLexer final {
  public:
   JsDocTypeLexer(ParserContext* context,
-                 CharacterReader* reader,
+                 const SourceCodeRange& range,
                  const ParserOptions& options);
   ~JsDocTypeLexer();
 
@@ -59,7 +61,7 @@ class JsDocTypeLexer final {
   ParserContext& context_;
   const ast::Token* current_token_ = nullptr;
   ParserOptions options_;
-  CharacterReader& reader_;
+  const std::unique_ptr<CharacterReader> reader_;
   int token_start_ = 0;
 
   DISALLOW_COPY_AND_ASSIGN(JsDocTypeLexer);

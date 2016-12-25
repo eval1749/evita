@@ -14,7 +14,6 @@
 #include "joana/ast/tokens.h"
 #include "joana/base/source_code.h"
 #include "joana/parser/jsdoc/jsdoc_error_codes.h"
-#include "joana/parser/utils/character_reader.h"
 #include "joana/testing/lexer_test_base.h"
 
 namespace joana {
@@ -76,8 +75,7 @@ const ast::Token& JsDocTypeLexerTest::NewPunctuator(int start,
 }
 
 std::string JsDocTypeLexerTest::ScanToString(const ParserOptions& options) {
-  CharacterReader reader(source_code().range());
-  JsDocTypeLexer lexer(&context(), &reader, options);
+  JsDocTypeLexer lexer(&context(), source_code().range(), options);
   std::ostringstream ostream;
   while (lexer.CanPeekToken())
     ostream << lexer.ConsumeToken() << std::endl;

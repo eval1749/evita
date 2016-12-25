@@ -29,16 +29,18 @@ bool IsTypeNamePart(base::char16 char_code) {
 // JsDocTypeLexer
 //
 JsDocTypeLexer::JsDocTypeLexer(ParserContext* context,
-                               CharacterReader* reader,
+                               const SourceCodeRange& range,
                                const ParserOptions& options)
-    : context_(*context), options_(options), reader_(*reader) {
+    : context_(*context),
+      options_(options),
+      reader_(new CharacterReader(range)) {
   current_token_ = NextToken();
 }
 
 JsDocTypeLexer::~JsDocTypeLexer() = default;
 
 int JsDocTypeLexer::location() const {
-  return reader_.location();
+  return reader_->location();
 }
 
 ast::NodeFactory& JsDocTypeLexer::node_factory() {
@@ -46,7 +48,7 @@ ast::NodeFactory& JsDocTypeLexer::node_factory() {
 }
 
 const SourceCode& JsDocTypeLexer::source_code() const {
-  return reader_.source_code();
+  return reader_->source_code();
 }
 
 void JsDocTypeLexer::AddError(JsDocErrorCode error_code) {
@@ -55,7 +57,7 @@ void JsDocTypeLexer::AddError(JsDocErrorCode error_code) {
 }
 
 bool JsDocTypeLexer::CanPeekChar() const {
-  return reader_.CanPeekChar();
+  return reader_->CanPeekChar();
 }
 
 SourceCodeRange JsDocTypeLexer::ComputeTokenRange() const {
@@ -63,7 +65,7 @@ SourceCodeRange JsDocTypeLexer::ComputeTokenRange() const {
 }
 
 base::char16 JsDocTypeLexer::ConsumeChar() {
-  return reader_.ConsumeChar();
+  return reader_->ConsumeChar();
 }
 
 bool JsDocTypeLexer::ConsumeCharIf(base::char16 char_code) {
@@ -80,7 +82,7 @@ const ast::Token& JsDocTypeLexer::ConsumeToken() {
 }
 
 base::char16 JsDocTypeLexer::PeekChar() const {
-  return reader_.PeekChar();
+  return reader_->PeekChar();
 }
 
 const ast::Token& JsDocTypeLexer::PeekToken() const {

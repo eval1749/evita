@@ -77,7 +77,7 @@ class Lexer final {
   // Returns character.
   base::char16 PeekChar() const;
   const ast::Token& HandleBlockComment();
-  const ast::Token& HandleCharacter();
+  const ast::Token* HandleCharacter();
   const ast::Token& HandleDecimal();
   const ast::Token& HandleDecimalAfterDot(uint64_t integer_part,
                                           int integer_scale);

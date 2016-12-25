@@ -224,6 +224,16 @@ TEST_F(LexerTest, Empty) {
   EXPECT_EQ("", Parse());
 }
 
+TEST_F(LexerTest, InvalidChar) {
+  PrepareSouceCode("#foo");
+  EXPECT_EQ(NewName(1, 4) + NewError(ERROR_CHARACTER_INVALID, 0, 1), Parse())
+      << "Skip invalid character and return token";
+
+  PrepareSouceCode("#");
+  EXPECT_EQ(NewError(ERROR_CHARACTER_INVALID, 0, 1), Parse())
+      << "Invalid character at end of source";
+}
+
 TEST_F(LexerTest, LineComment) {
   PrepareSouceCode("//");
   EXPECT_EQ(NewComment(), Parse());

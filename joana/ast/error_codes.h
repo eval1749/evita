@@ -39,6 +39,21 @@ namespace ast {
   V(STRING_LITERAL, NEWLINE)             \
   V(STRING_LITERAL, NOT_CLOSED)
 
+#define FOR_EACH_JSDOC_ERROR_CODE(V) \
+  V(JSDOC, EXPECT_COLON)             \
+  V(JSDOC, EXPECT_LBRACE)            \
+  V(JSDOC, EXPECT_RANGLE)            \
+  V(JSDOC, EXPECT_RBRACE)            \
+  V(JSDOC, EXPECT_RBRACKET)          \
+  V(JSDOC, EXPECT_RPAREN)            \
+  V(JSDOC, EXPECT_TYPE)              \
+  V(JSDOC, UNEXPECT_DOT)             \
+  V(JSDOC, UNEXPECT_RANGLE)          \
+  V(JSDOC, UNEXPECT_RBRACE)          \
+  V(JSDOC, UNEXPECT_RBRACKET)        \
+  V(JSDOC, UNEXPECT_RPAREN)          \
+  V(JSDOC, UNKNOWN_TAG)
+
 #define FOR_EACH_PARSER_ERROR_CODE(V)        \
   V(BRACKET, MISMATCHED)                     \
   V(BRACKET, NOT_CLOSED)                     \
@@ -88,6 +103,7 @@ namespace ast {
 
 const auto kLexerErrorCodeBase = 10000;
 const auto kParserErrorCodeBase = 20000;
+const auto kJsDocErrorCodeBase = 30000;
 
 JOANA_AST_EXPORT base::StringPiece ErrorStringOf(int error_code);
 

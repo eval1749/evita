@@ -94,6 +94,7 @@ class Lexer final {
 
   const ast::Token& NewError(ErrorCode error_code);
   const ast::Token& NewInvalid(ErrorCode error_code);
+  const ast::Token& NewNumericLiteral(double value);
   const ast::Token& NewPunctuator(ast::PunctuatorKind kind);
 
   const ast::Token* NextToken();

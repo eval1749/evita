@@ -346,13 +346,12 @@ const ast::Token& Lexer::HandleDecimalAfterDot(uint64_t integer_part,
   const auto value =
       static_cast<double>(digits_part) * std::pow(10.0, digits_scale);
   const auto exponent = exponent_part * exponent_sign;
-  return node_factory().NewNumericLiteral(MakeTokenRange(),
-                                          value * std::pow(10.0, exponent));
+  return NewNumericLiteral(value * std::pow(10.0, exponent));
 }
 
 const ast::Token& Lexer::HandleDigitZero() {
   if (!CanPeekChar())
-    return node_factory().NewNumericLiteral(MakeTokenRange(), 0);
+    return NewNumericLiteral(0);
   switch (PeekChar()) {
     case '0':
     case '1':
@@ -412,7 +411,7 @@ const ast::Token& Lexer::HandleInteger(int base) {
   }
   if (number_of_digits == 0)
     return NewError(ErrorCode::NUMERIC_LITERAL_INTEGER_NO_DIGITS);
-  return node_factory().NewNumericLiteral(MakeTokenRange(), accumulator);
+  return NewNumericLiteral(accumulator);
 }
 
 const ast::Token& Lexer::HandleLineComment() {
@@ -664,6 +663,10 @@ const ast::Token& Lexer::NewError(ErrorCode error_code) {
 const ast::Token& Lexer::NewInvalid(ErrorCode error_code) {
   return node_factory().NewInvalid(MakeTokenRange(),
                                    static_cast<int>(error_code));
+}
+
+const ast::Token& Lexer::NewNumericLiteral(double value) {
+  return node_factory().NewNumericLiteral(MakeTokenRange(), value);
 }
 
 const ast::Token& Lexer::NewPunctuator(ast::PunctuatorKind kind) {

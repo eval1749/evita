@@ -399,15 +399,15 @@ const ast::Token& Lexer::HandleInteger(int base) {
     ++number_of_digits;
   }
 
-  if (reader_->CanPeekChar() && IsIdentifierPart(PeekChar())) {
+  const auto invalid_start = reader_->location();
+  while (CanPeekChar() && IsIdentifierPart(PeekChar()))
     ConsumeChar();
-    AddError(ErrorCode::NUMERIC_LITERAL_INTEGER_BAD_DIGIT);
-    while (reader_->CanPeekChar() && IsIdentifierPart(PeekChar()))
-      ConsumeChar();
-    return NewInvalid(ErrorCode::NUMERIC_LITERAL_INTEGER_BAD_DIGIT);
+  if (reader_->location() > invalid_start) {
+    AddError(RangeFrom(invalid_start),
+             ErrorCode::NUMERIC_LITERAL_INTEGER_BAD_DIGIT);
+  } else if (number_of_digits == 0) {
+    AddError(ErrorCode::NUMERIC_LITERAL_INTEGER_NO_DIGITS);
   }
-  if (number_of_digits == 0)
-    return NewError(ErrorCode::NUMERIC_LITERAL_INTEGER_NO_DIGITS);
   return NewNumericLiteral(accumulator);
 }
 

@@ -328,22 +328,26 @@ TEST_F(LexerTest, NumericLiteral) {
 
 TEST_F(LexerTest, NumericLiteralError) {
   PrepareSouceCode("0b1034");
-  EXPECT_EQ(NewInvalid(0, 5, 6, ERROR_NUMERIC_LITERAL_INTEGER_BAD_DIGIT),
+  EXPECT_EQ(NewNumericLiteral(0, 6, 2) +
+                NewError(ERROR_NUMERIC_LITERAL_INTEGER_BAD_DIGIT, 4, 6),
             Parse())
       << "Binary literal contains 3 and 4";
 
   PrepareSouceCode("0o128934");
-  EXPECT_EQ(NewInvalid(0, 5, 8, ERROR_NUMERIC_LITERAL_INTEGER_BAD_DIGIT),
+  EXPECT_EQ(NewNumericLiteral(0, 8, 10) +
+                NewError(ERROR_NUMERIC_LITERAL_INTEGER_BAD_DIGIT, 4, 8),
             Parse())
       << "Octal literal contains 8 and 9";
 
   PrepareSouceCode("0x12X34");
-  EXPECT_EQ(NewInvalid(0, 5, 7, ERROR_NUMERIC_LITERAL_INTEGER_BAD_DIGIT),
+  EXPECT_EQ(NewNumericLiteral(0, 7, 18) +
+                NewError(ERROR_NUMERIC_LITERAL_INTEGER_BAD_DIGIT, 4, 7),
             Parse())
       << "Hexadecimal literal contains 'X'";
 
   PrepareSouceCode("0x");
-  EXPECT_EQ(NewInvalid(0, 2, 2, ERROR_NUMERIC_LITERAL_INTEGER_NO_DIGITS),
+  EXPECT_EQ(NewNumericLiteral(0, 2, 0) +
+                NewError(ERROR_NUMERIC_LITERAL_INTEGER_NO_DIGITS, 0, 2),
             Parse())
       << "No digits after '0x'";
 

@@ -352,7 +352,9 @@ TEST_F(LexerTest, NumericLiteralError) {
       << "No digits after '0x'";
 
   PrepareSouceCode("0123");
-  EXPECT_EQ(NewInvalid(0, 4, 4, ERROR_NUMERIC_LITERAL_INTEGER_OCTAL), Parse())
+  EXPECT_EQ(NewNumericLiteral(0, 4, 83) +
+                NewError(ERROR_NUMERIC_LITERAL_INTEGER_OCTAL, 0, 4),
+            Parse())
       << "Strict mode does not allow legacy octal literal";
 
   PrepareSouceCode("0f0");

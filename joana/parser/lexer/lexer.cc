@@ -357,10 +357,12 @@ const ast::Token& Lexer::HandleDigitZero() {
     case '4':
     case '5':
     case '6':
-    case '7':
+    case '7': {
       // Continue fetching octal digits
-      HandleInteger(8);
-      return NewError(ErrorCode::NUMERIC_LITERAL_INTEGER_OCTAL);
+      auto& token = HandleInteger(8);
+      AddError(ErrorCode::NUMERIC_LITERAL_INTEGER_OCTAL);
+      return token;
+    }
     case '8':
     case '9':
       return HandleDecimal();

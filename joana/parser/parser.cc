@@ -241,11 +241,6 @@ const ast::Node& Parser::Run() {
   SkipCommentTokens();
   while (CanPeekToken()) {
     auto& token = PeekToken();
-    if (ConsumeTokenIf<ast::Invalid>()) {
-      // TODO(eval1749): We should skip tokens until good point to restart
-      // toplevel parsing.
-      continue;
-    }
     if (!token.Is<ast::JsDoc>()) {
       statements.push_back(&ParseStatement());
       continue;

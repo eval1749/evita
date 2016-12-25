@@ -100,7 +100,6 @@ namespace ast {
 #define FOR_EACH_AST_TOKEN(V) \
   V(Comment)                  \
   V(Empty)                    \
-  V(Invalid)                  \
   V(JsDoc)                    \
   V(Punctuator)               \
   V(Name)

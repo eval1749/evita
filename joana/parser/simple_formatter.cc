@@ -122,10 +122,6 @@ void SimpleFormatter::VisitEmpty(ast::Empty* node) {
   *ostream_ << "(empty)";
 }
 
-void SimpleFormatter::VisitInvalid(ast::Invalid* node) {
-  *ostream_ << *node;
-}
-
 void SimpleFormatter::VisitPunctuator(ast::Punctuator* node) {
   OutputUsingSoourceCode(*node);
 }

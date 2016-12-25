@@ -26,25 +26,6 @@ Empty::Empty(const SourceCodeRange& range) : Token(range) {}
 Empty::~Empty() = default;
 
 //
-// Invalid
-//
-Invalid::Invalid(const SourceCodeRange& range, int error_code)
-    : Token(range), error_code_(error_code) {}
-
-Invalid::~Invalid() = default;
-
-// Implements |Node| members
-void Invalid::PrintMoreTo(std::ostream* ostream) const {
-  *ostream << ", ";
-  const auto string = ErrorStringOf(error_code_);
-  if (string.empty()) {
-    *ostream << error_code_;
-    return;
-  }
-  *ostream << string;
-}
-
-//
 // JsDoc
 //
 JsDoc::JsDoc(const SourceCodeRange& range) : Token(range) {}

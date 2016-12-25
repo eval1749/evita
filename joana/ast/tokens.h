@@ -87,28 +87,6 @@ class JOANA_AST_EXPORT Empty final : public Token {
 };
 
 //
-// Invalid
-//
-class JOANA_AST_EXPORT Invalid final : public Token {
-  DECLARE_CONCRETE_AST_NODE(Invalid, Token);
-
- public:
-  ~Invalid() final;
-
-  int error_code() const { return error_code_; }
-
- private:
-  explicit Invalid(const SourceCodeRange& range, int error_code);
-
-  // Implements |Node| members
-  void PrintMoreTo(std::ostream* ostream) const final;
-
-  const int error_code_;
-
-  DISALLOW_COPY_AND_ASSIGN(Invalid);
-};
-
-//
 // JsDoc
 //
 class JOANA_AST_EXPORT JsDoc final : public Token {

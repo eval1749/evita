@@ -120,11 +120,6 @@ const ast::Statement& Parser::ParseBlockStatement() {
       break;
     if (ConsumeTokenIf<ast::Comment>())
       continue;
-    if (ConsumeTokenIf<ast::Invalid>()) {
-      // TODO(eval1749): We should skip tokens until good point to restart
-      // toplevel parsing.
-      continue;
-    }
     statements.push_back(&ParseStatement());
   }
   return node_factory().NewBlockStatement(GetSourceCodeRange(), statements);

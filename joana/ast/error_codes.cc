@@ -22,6 +22,12 @@ base::StringPiece ErrorStringOf(int error_code) {
 #undef V
   };
 
+  static const char* kTypeErrorText[] = {
+#define V(token, reason) "TYPE_ERROR_" #token "_" #reason,
+      FOR_EACH_TYPE_ERROR_CODE(V)
+#undef V
+  };
+
   const auto lexer_it =
       std::begin(kLiteralErrorTexts) + error_code - kLexerErrorCodeBase - 1;
   if (lexer_it >= std::begin(kLiteralErrorTexts) &&
@@ -34,7 +40,13 @@ base::StringPiece ErrorStringOf(int error_code) {
       parser_it < std::end(kParserErrorText)) {
     return base::StringPiece(*parser_it);
   }
-  return base::StringPiece();
+  const auto type_it =
+      std::begin(kTypeErrorText) + error_code - kTypeErrorCodeBase - 1;
+  if (type_it >= std::begin(kTypeErrorText) &&
+      type_it < std::end(kTypeErrorText)) {
+    return base::StringPiece(*type_it);
+  }
+  return base::StringPiece("(no message)");
 }
 
 }  // namespace ast

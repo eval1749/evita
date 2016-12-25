@@ -7,6 +7,8 @@ source_set("type") {
     "type_error_codes.h",
     "type_lexer.cc",
     "type_lexer.h",
+    "type_parser.cc",
+    "type_parser.h",
   ]
   deps = [
     "//joana/base",
@@ -20,6 +22,7 @@ source_set("test_files") {
   testonly = true
   sources = [
     "type_lexer_test.cc",
+    "type_parser_test.cc",
   ]
   deps = [
     ":type",

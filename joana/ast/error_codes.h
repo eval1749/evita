@@ -40,18 +40,8 @@ namespace ast {
   V(STRING_LITERAL, NOT_CLOSED)
 
 #define FOR_EACH_JSDOC_ERROR_CODE(V) \
-  V(JSDOC, EXPECT_COLON)             \
   V(JSDOC, EXPECT_LBRACE)            \
-  V(JSDOC, EXPECT_RANGLE)            \
   V(JSDOC, EXPECT_RBRACE)            \
-  V(JSDOC, EXPECT_RBRACKET)          \
-  V(JSDOC, EXPECT_RPAREN)            \
-  V(JSDOC, EXPECT_TYPE)              \
-  V(JSDOC, UNEXPECT_DOT)             \
-  V(JSDOC, UNEXPECT_RANGLE)          \
-  V(JSDOC, UNEXPECT_RBRACE)          \
-  V(JSDOC, UNEXPECT_RBRACKET)        \
-  V(JSDOC, UNEXPECT_RPAREN)          \
   V(JSDOC, UNKNOWN_TAG)
 
 #define FOR_EACH_PARSER_ERROR_CODE(V)        \
@@ -101,9 +91,23 @@ namespace ast {
   V(STATEMENT, UNEXPECT_NEWLINE)             \
   V(STATEMENT, SWITCH_INVALID_CLAUSE)
 
+#define FOR_EACH_TYPE_ERROR_CODE(V) \
+  V(TYPE, EXPECT_COLON)             \
+  V(TYPE, EXPECT_LBRACE)            \
+  V(TYPE, EXPECT_RANGLE)            \
+  V(TYPE, EXPECT_RBRACE)            \
+  V(TYPE, EXPECT_RBRACKET)          \
+  V(TYPE, EXPECT_RPAREN)            \
+  V(TYPE, UNEXPECT_DOT)             \
+  V(TYPE, UNEXPECT_RANGLE)          \
+  V(TYPE, UNEXPECT_RBRACE)          \
+  V(TYPE, UNEXPECT_RBRACKET)        \
+  V(TYPE, UNEXPECT_RPAREN)
+
 const auto kLexerErrorCodeBase = 10000;
 const auto kParserErrorCodeBase = 20000;
 const auto kJsDocErrorCodeBase = 30000;
+const auto kTypeErrorCodeBase = 40000;
 
 JOANA_AST_EXPORT base::StringPiece ErrorStringOf(int error_code);
 

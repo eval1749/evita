@@ -14,18 +14,11 @@
 #include "joana/ast/error_codes.h"
 #include "joana/ast/literals.h"
 #include "joana/ast/node.h"
-#include "joana/ast/node_factory.h"
 #include "joana/ast/tokens.h"
-#include "joana/base/error_sink.h"
-#include "joana/base/memory/zone.h"
-#include "joana/base/source_code.h"
-#include "joana/base/source_code_factory.h"
-#include "joana/base/source_code_range.h"
 #include "joana/parser/public/parse.h"
 #include "joana/parser/public/parser_context_builder.h"
 #include "joana/parser/public/parser_options_builder.h"
-#include "joana/testing/simple_error_sink.h"
-#include "testing/gtest/include/gtest/gtest.h"
+#include "joana/testing/lexer_test_base.h"
 
 namespace joana {
 namespace parser {
@@ -47,11 +40,13 @@ std::string ToString(const ast::Node& node) {
 
 }  // namespace
 
-class LexerTest : public ::testing::Test {
+//
+// LexerTest
+//
+class LexerTest : public LexerTestBase {
  protected:
-  LexerTest();
-
-  ast::NodeFactory& factory() { return node_factory_; }
+  LexerTest() = default;
+  ~LexerTest() override = default;
 
   SourceCodeRange MakeRange(int start, int end) const;
   SourceCodeRange MakeRange() const;
@@ -67,107 +62,81 @@ class LexerTest : public ::testing::Test {
   std::string NewStringLiteral(int start, int end, base::StringPiece data);
   std::string NewStringLiteral(base::StringPiece data);
   std::string NewStringLiteral(const std::vector<base::char16> data);
-  void PrepareSouceCode(base::StringPiece script_text);
   std::string Parse(const ParserOptions& options);
   std::string Parse();
 
  private:
-  SimpleErrorSink error_sink_;
-  Zone zone_;
-  ast::NodeFactory node_factory_;
-  const std::unique_ptr<ParserContext> context_;
-  const SourceCode* source_code_ = nullptr;
-  SourceCode::Factory source_code_factory_;
-
   DISALLOW_COPY_AND_ASSIGN(LexerTest);
 };
 
-LexerTest::LexerTest()
-    : zone_("LexerTest"),
-      node_factory_(&zone_),
-      context_(ParserContext::Builder()
-                   .set_error_sink(&error_sink_)
-                   .set_node_factory(&node_factory_)
-                   .Build()),
-      source_code_factory_(&zone_) {}
-
 SourceCodeRange LexerTest::MakeRange(int start, int end) const {
-  DCHECK(source_code_);
-  return source_code_->Slice(start, end);
+  return source_code().Slice(start, end);
 }
 
 SourceCodeRange LexerTest::MakeRange() const {
-  DCHECK(source_code_);
-  return source_code_->range();
+  return source_code().range();
 }
 
 std::string LexerTest::NewJsDoc(int start, int end) {
-  return ToString(factory().NewJsDoc(MakeRange(start, end)));
+  return ToString(node_factory().NewJsDoc(MakeRange(start, end)));
 }
 
 std::string LexerTest::NewJsDoc() {
-  return ToString(factory().NewJsDoc(MakeRange()));
+  return ToString(node_factory().NewJsDoc(MakeRange()));
 }
 
 std::string LexerTest::NewComment(int start, int end) {
-  return ToString(factory().NewComment(MakeRange(start, end)));
+  return ToString(node_factory().NewComment(MakeRange(start, end)));
 }
 
 std::string LexerTest::NewComment() {
-  return ToString(factory().NewComment(MakeRange()));
+  return ToString(node_factory().NewComment(MakeRange()));
 }
 
 std::string LexerTest::NewError(ErrorCode error_code, int start, int end) {
   std::ostringstream ostream;
-  ostream << ' ' << error_code << '@' << source_code_->Slice(start, end);
+  ostream << ' ' << error_code << '@' << source_code().Slice(start, end);
   return ostream.str();
 }
 
 std::string LexerTest::NewName(int start, int end) {
-  return ToString(factory().NewName(source_code_->Slice(start, end)));
+  return ToString(node_factory().NewName(source_code().Slice(start, end)));
 }
 
 std::string LexerTest::NewNumericLiteral(int start, int end, double value) {
-  return ToString(factory().NewNumericLiteral(MakeRange(start, end), value));
+  return ToString(
+      node_factory().NewNumericLiteral(MakeRange(start, end), value));
 }
 
 std::string LexerTest::NewNumericLiteral(double value) {
-  return ToString(factory().NewNumericLiteral(MakeRange(), value));
+  return ToString(node_factory().NewNumericLiteral(MakeRange(), value));
 }
 
 std::string LexerTest::NewPunctuator(ast::PunctuatorKind kind) {
-  return ToString(factory().NewPunctuator(MakeRange(), kind));
+  return ToString(node_factory().NewPunctuator(MakeRange(), kind));
 }
 
 std::string LexerTest::NewStringLiteral(int start,
                                         int end,
                                         base::StringPiece data8) {
   const auto& data16 = base::UTF8ToUTF16(data8);
-  return ToString(factory().NewStringLiteral(MakeRange(start, end),
-                                             base::StringPiece16(data16)));
+  return ToString(node_factory().NewStringLiteral(MakeRange(start, end),
+                                                  base::StringPiece16(data16)));
 }
 
 std::string LexerTest::NewStringLiteral(base::StringPiece data8) {
   const auto& data16 = base::UTF8ToUTF16(data8);
-  return ToString(
-      factory().NewStringLiteral(MakeRange(), base::StringPiece16(data16)));
+  return ToString(node_factory().NewStringLiteral(MakeRange(),
+                                                  base::StringPiece16(data16)));
 }
 
 std::string LexerTest::NewStringLiteral(const std::vector<base::char16> data) {
-  return ToString(factory().NewStringLiteral(
+  return ToString(node_factory().NewStringLiteral(
       MakeRange(), base::StringPiece16(data.data(), data.size())));
 }
 
-void LexerTest::PrepareSouceCode(base::StringPiece script_text) {
-  const auto& script_text16 = base::UTF8ToUTF16(script_text);
-  source_code_ = &source_code_factory_.New(base::FilePath(),
-                                           base::StringPiece16(script_text16));
-  error_sink_.Reset();
-}
-
 std::string LexerTest::Parse(const ParserOptions& options) {
-  DCHECK(source_code_);
-  Lexer lexer(context_.get(), source_code_->range(), options);
+  Lexer lexer(&context(), source_code().range(), options);
   std::ostringstream ostream;
   auto delimiter = "";
   while (lexer.CanPeekToken()) {
@@ -177,7 +146,7 @@ std::string LexerTest::Parse(const ParserOptions& options) {
     node.PrintTo(&ostream);
     lexer.Advance();
   }
-  for (const auto* error : error_sink_.errors()) {
+  for (const auto* error : error_sink().errors()) {
     ostream << ' ' << error->error_code() << '@' << error->range();
   }
   return ostream.str();
@@ -260,23 +229,23 @@ TEST_F(LexerTest, Name) {
 TEST_F(LexerTest, NodeFactoryNewName) {
   PrepareSouceCode("while");
   EXPECT_EQ(static_cast<int>(ast::NameId::While),
-            factory().NewName(MakeRange(0, 5)).number())
+            node_factory().NewName(MakeRange(0, 5)).number())
       << "We can identify keyword 'while'.";
 
   PrepareSouceCode("while");
-  EXPECT_TRUE(factory().NewName(MakeRange(0, 5)).IsKeyword());
+  EXPECT_TRUE(node_factory().NewName(MakeRange(0, 5)).IsKeyword());
 
   PrepareSouceCode("from");
   EXPECT_EQ(static_cast<int>(ast::NameId::From),
-            factory().NewName(MakeRange(0, 4)).number())
+            node_factory().NewName(MakeRange(0, 4)).number())
       << "We can identify contextual keyword 'from'.";
 
   PrepareSouceCode("from");
-  EXPECT_FALSE(factory().NewName(MakeRange(0, 4)).IsKeyword());
+  EXPECT_FALSE(node_factory().NewName(MakeRange(0, 4)).IsKeyword());
 
   PrepareSouceCode("of");
   EXPECT_EQ(static_cast<int>(ast::NameId::Of),
-            factory().NewName(MakeRange(0, 2)).number())
+            node_factory().NewName(MakeRange(0, 2)).number())
       << "We can identify contextual keyword 'of'.";
 }
 

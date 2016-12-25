@@ -37,6 +37,9 @@ std::string ToString(const Parameters&... tokens) {
 
 }  // namespace
 
+//
+// JsDocTypeLexerTest
+//
 class JsDocTypeLexerTest : public LexerTestBase {
  protected:
   JsDocTypeLexerTest() = default;

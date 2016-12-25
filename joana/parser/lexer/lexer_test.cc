@@ -352,11 +352,13 @@ TEST_F(LexerTest, NumericLiteralError) {
       << "Strict mode does not allow legacy octal literal";
 
   PrepareSouceCode("0f0");
-  EXPECT_EQ(NewInvalid(0, 2, 3, ERROR_NUMERIC_LITERAL_DECIMAL_BAD_DIGIT),
+  EXPECT_EQ(NewNumericLiteral(0, 3, 0) +
+                NewError(ERROR_NUMERIC_LITERAL_DECIMAL_BAD_DIGIT, 1, 3),
             Parse());
 
   PrepareSouceCode("12x43");
-  EXPECT_EQ(NewInvalid(0, 3, 5, ERROR_NUMERIC_LITERAL_DECIMAL_BAD_DIGIT),
+  EXPECT_EQ(NewNumericLiteral(0, 5, 12) +
+                NewError(ERROR_NUMERIC_LITERAL_DECIMAL_BAD_DIGIT, 2, 5),
             Parse())
       << "Decimal contains letter.";
 }

@@ -333,16 +333,13 @@ const ast::Token& Lexer::HandleDecimalAfterDot(uint64_t integer_part,
       exponent_part += digit;
     }
   }
-  auto number_of_invalid = 0;
-  while (CanPeekChar() && IsIdentifierPart(PeekChar())) {
-    ++number_of_invalid;
+  auto invalid_start = reader_->location();
+  while (CanPeekChar() && IsIdentifierPart(PeekChar()))
     ConsumeChar();
-    if (number_of_invalid > 1)
-      continue;
-    AddError(ErrorCode::NUMERIC_LITERAL_DECIMAL_BAD_DIGIT);
+  if (reader_->location() > invalid_start) {
+    AddError(RangeFrom(invalid_start),
+             ErrorCode::NUMERIC_LITERAL_DECIMAL_BAD_DIGIT);
   }
-  if (number_of_invalid > 0)
-    return NewInvalid(ErrorCode::NUMERIC_LITERAL_DECIMAL_BAD_DIGIT);
   const auto value =
       static_cast<double>(digits_part) * std::pow(10.0, digits_scale);
   const auto exponent = exponent_part * exponent_sign;

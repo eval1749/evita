@@ -115,7 +115,7 @@ class TypeParser final {
   ParserContext& context_;
   const std::unique_ptr<TypeLexer> lexer_;
   const ParserOptions& options_;
-  int node_start_ = -1;
+  int node_start_;
 
   DISALLOW_COPY_AND_ASSIGN(TypeParser);
 };

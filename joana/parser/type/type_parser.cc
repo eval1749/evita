@@ -58,6 +58,7 @@ TypeParser::TypeParser(ParserContext* context,
                        const ParserOptions& options)
     : context_(*context),
       lexer_(new TypeLexer(context, range, options)),
+      node_start_(range.start()),
       options_(options) {}
 
 TypeParser::~TypeParser() = default;
@@ -250,6 +251,10 @@ const Type& TypeParser::NewVoidType(const SourceCodeRange& range) {
 // TupleType ::= '[' (Type ',')* ']'
 // UnionTYpe ::= Type ('|' Type*)
 const Type& TypeParser::Parse() {
+  if (!CanPeekToken()) {
+    AddError(TypeErrorCode::ERROR_TYPE_EXPECT_TYPE);
+    return NewInvalidType();
+  }
   TypeNodeScope scope(this);
   std::vector<const Type*> types;
   types.push_back(&ParseType());
@@ -270,26 +275,32 @@ const Type& TypeParser::ParseFunctionType(const Name& name) {
     return NewTypeName(name);
   std::vector<const Type*> parameters;
   auto kind = ast::FunctionTypeKind::Normal;
-  auto after_comma = false;
+  auto expect_type = false;
+  if (ConsumeTokenIf(ast::NameId::New)) {
+    kind = ast::FunctionTypeKind::New;
+    if (!ConsumeTokenIf(ast::PunctuatorKind::Colon))
+      AddError(TypeErrorCode::ERROR_TYPE_EXPECT_COLON);
+    expect_type = true;
+  } else if (ConsumeTokenIf(ast::NameId::This)) {
+    kind = ast::FunctionTypeKind::This;
+    if (!ConsumeTokenIf(ast::PunctuatorKind::Colon))
+      AddError(TypeErrorCode::ERROR_TYPE_EXPECT_COLON);
+    expect_type = true;
+  }
   while (CanPeekToken() &&
          PeekToken() != ast::PunctuatorKind::RightParenthesis) {
-    if (parameters.empty()) {
-      if (ConsumeTokenIf(ast::NameId::New)) {
-        kind = ast::FunctionTypeKind::New;
-        if (!ConsumeTokenIf(ast::PunctuatorKind::Colon))
-          AddError(TypeErrorCode::ERROR_TYPE_EXPECT_COLON);
-      } else if (ConsumeTokenIf(ast::NameId::This)) {
-        kind = ast::FunctionTypeKind::This;
-        if (!ConsumeTokenIf(ast::PunctuatorKind::Colon))
-          AddError(TypeErrorCode::ERROR_TYPE_EXPECT_COLON);
-      }
-    }
     parameters.push_back(&ParseType());
-    after_comma = ConsumeTokenIf(ast::PunctuatorKind::Comma);
-    if (!after_comma)
+    expect_type = false;
+    if (!CanPeekToken())
       break;
+    if (PeekToken() == ast::PunctuatorKind::RightParenthesis)
+      break;
+    expect_type = true;
+    if (ConsumeTokenIf(ast::PunctuatorKind::Comma))
+      continue;
+    AddError(TypeErrorCode::ERROR_TYPE_EXPECT_COMMA);
   }
-  if (after_comma)
+  if (expect_type)
     AddError(TypeErrorCode::ERROR_TYPE_EXPECT_TYPE);
   SkipTokensTo(ast::PunctuatorKind::RightParenthesis);
   if (ConsumeTokenIf(ast::PunctuatorKind::Colon))
@@ -385,6 +396,7 @@ const Type& TypeParser::ParseTypeBeforeEqual() {
     return ParseTupleType();
   if (ConsumeTokenIf(ast::PunctuatorKind::DotDotDot))
     return NewRestType(ParseType());
+  ConsumeToken();
   return NewInvalidType();
 }
 

@@ -93,6 +93,7 @@ namespace ast {
 
 #define FOR_EACH_TYPE_ERROR_CODE(V) \
   V(TYPE, EXPECT_COLON)             \
+  V(TYPE, EXPECT_COMMA)             \
   V(TYPE, EXPECT_LBRACE)            \
   V(TYPE, EXPECT_RANGLE)            \
   V(TYPE, EXPECT_RBRACE)            \

@@ -79,7 +79,10 @@ TEST_F(TypeParserTest, AnyType) {
 }
 
 TEST_F(TypeParserTest, Empty) {
-  TEST_PARSER("(invalid)");
+  EXPECT_EQ(
+      "(invalid)"
+      "TYPE_ERROR_TYPE_EXPECT_TYPE@0:0\n",
+      Parse(""));
 }
 
 TEST_F(TypeParserTest, ErrorFunctionType) {
@@ -95,19 +98,27 @@ TEST_F(TypeParserTest, ErrorFunctionType) {
       Parse("function(foo,"));
 
   EXPECT_EQ(
-      "function(foo)"
-      "TYPE_ERROR_TYPE_EXPECT_RPAREN@8:16\n",
-      Parse("function(foo bar"))
+      "function(foo, bar)"
+      "TYPE_ERROR_TYPE_EXPECT_COMMA@13:16\n",
+      Parse("function(foo bar)"))
       << "No comma between types";
 
   EXPECT_EQ(
-      "function(foo)"
+      "function(foo, bar)"
+      "TYPE_ERROR_TYPE_EXPECT_COMMA@13:16\n"
+      "TYPE_ERROR_TYPE_EXPECT_RPAREN@8:16\n",
+      Parse("function(foo bar"))
+      << "No comma between types and not close";
+
+  EXPECT_EQ(
+      "function(foo, (invalid))"
+      "TYPE_ERROR_TYPE_EXPECT_COMMA@12:13\n"
       "TYPE_ERROR_TYPE_UNEXPECT_RBRACE@8:13\n",
       Parse("function(foo}"))
       << "Mismatched bracket";
 
   EXPECT_EQ(
-      "function(new:(invalid))"
+      "function(new:)"
       "TYPE_ERROR_TYPE_EXPECT_COLON@12:12\n"
       "TYPE_ERROR_TYPE_EXPECT_TYPE@12:12\n"
       "TYPE_ERROR_TYPE_EXPECT_RPAREN@8:12\n",
@@ -115,7 +126,7 @@ TEST_F(TypeParserTest, ErrorFunctionType) {
       << "No colon after 'new'";
 
   EXPECT_EQ(
-      "function(new:(invalid))"
+      "function(new:)"
       "TYPE_ERROR_TYPE_EXPECT_TYPE@13:13\n"
       "TYPE_ERROR_TYPE_EXPECT_RPAREN@8:13\n",
       Parse("function(new:"))

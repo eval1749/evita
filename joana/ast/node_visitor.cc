@@ -6,6 +6,7 @@
 
 #include "joana/ast/declarations.h"
 #include "joana/ast/expressions.h"
+#include "joana/ast/jsdoc_nodes.h"
 #include "joana/ast/literals.h"
 #include "joana/ast/module.h"
 #include "joana/ast/regexp.h"

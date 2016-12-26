@@ -12,6 +12,7 @@ namespace ast {
   V(Declaration)                      \
   V(Expression)                       \
   V(ContainerNode)                    \
+  V(JsDocNode)                        \
   V(Literal)                          \
   V(Node)                             \
   V(RegExp)                           \
@@ -47,6 +48,13 @@ namespace ast {
   V(PropertyDefinitionExpression)  \
   V(ReferenceExpression)           \
   V(UnaryExpression)
+
+#define FOR_EACH_AST_JSDOC(V) \
+  V(JsDocDocument)            \
+  V(JsDocName)                \
+  V(JsDocTag)                 \
+  V(JsDocText)                \
+  V(JsDocType)
 
 #define FOR_EACH_AST_LITERAL(V) \
   V(BooleanLiteral)             \
@@ -125,6 +133,7 @@ namespace ast {
 #define FOR_EACH_CONCRETE_AST_NODE(V) \
   FOR_EACH_AST_DECLARATION(V)         \
   FOR_EACH_AST_EXPRESSION(V)          \
+  FOR_EACH_AST_JSDOC(V)               \
   FOR_EACH_AST_LITERAL(V)             \
   FOR_EACH_AST_REGEXP(V)              \
   FOR_EACH_AST_STATEMENT(V)           \

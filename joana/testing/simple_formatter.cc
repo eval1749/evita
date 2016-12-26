@@ -11,6 +11,7 @@
 #include "joana/ast/declarations.h"
 #include "joana/ast/error_codes.h"
 #include "joana/ast/expressions.h"
+#include "joana/ast/jsdoc_nodes.h"
 #include "joana/ast/literals.h"
 #include "joana/ast/module.h"
 #include "joana/ast/node_traversal.h"
@@ -136,6 +137,36 @@ void SimpleFormatter::VisitModule(ast::Module* node) {
 
 void SimpleFormatter::VisitName(ast::Name* node) {
   OutputUsingSoourceCode(*node);
+}
+
+// JsDoc
+void SimpleFormatter::VisitJsDocDocument(ast::JsDocDocument* node) {
+  *ostream_ << "/**";
+  for (const auto& element : node->elements())
+    Format(element);
+  *ostream_ << "*/";
+}
+
+void SimpleFormatter::VisitJsDocName(ast::JsDocName* node) {
+  OutputUsingSoourceCode(*node);
+}
+
+void SimpleFormatter::VisitJsDocTag(ast::JsDocTag* node) {
+  OutputUsingSoourceCode(node->name());
+  for (const auto& node : node->parameters()) {
+    *ostream_ << ' ';
+    Format(node);
+  }
+}
+
+void SimpleFormatter::VisitJsDocText(ast::JsDocText* node) {
+  OutputUsingSoourceCode(*node);
+}
+
+void SimpleFormatter::VisitJsDocType(ast::JsDocType* node) {
+  *ostream_ << '{';
+  Format(node->type());
+  *ostream_ << '}';
 }
 
 // Literals

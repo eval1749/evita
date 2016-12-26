@@ -7,6 +7,7 @@
 
 #include "joana/ast/node.h"
 
+#include "joana/ast/jsdoc_tags.h"
 #include "joana/ast/lexical_grammar.h"
 
 namespace joana {
@@ -38,6 +39,12 @@ enum class NameId {
   FOR_EACH_JAVASCRIPT_KNOWN_WORD(V)
 #undef V
       EndOfKnownWord,
+
+  StartOfJsDocTagName,
+#define V(name, camel, syntax) JsDoc##camel,
+  FOR_EACH_JSDOC_TAG_NAME(V)
+#undef V
+      EndOfJsDocTagName,
 };
 
 //

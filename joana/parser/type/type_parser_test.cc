@@ -192,9 +192,9 @@ TEST_F(TypeParserTest, ErrorTypeApplication) {
       "TYPE_ERROR_TYPE_EXPECT_RANGLE@3:4\n",
       Parse("foo<"));
 
-  // TODO(eval1749): Type application without type parameters should be an
-  // error.
-  EXPECT_EQ("foo<(invalid)>", Parse("foo<>")) << "No type parameters";
+  // Parser doesn't report error for no type parameters for type application.
+  // Later pass will report error.
+  EXPECT_EQ("foo<>", Parse("foo<>")) << "No type parameters";
 
   EXPECT_EQ(
       "foo<bar>"

@@ -366,7 +366,7 @@ const Type& TypeParser::ParseType() {
 // TypeApplication ::= TypeName '<' (Type',')* '>'
 const Type& TypeParser::ParseTypeApplication(const Name& name) {
   std::vector<const Type*> parameters;
-  while (CanPeekToken() && PeekToken() != ast::PunctuatorKind::LessThan) {
+  while (CanPeekToken() && PeekToken() != ast::PunctuatorKind::GreaterThan) {
     parameters.push_back(&ParseType());
     if (!ConsumeTokenIf(ast::PunctuatorKind::Comma))
       break;

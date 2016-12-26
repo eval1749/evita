@@ -10,9 +10,9 @@
 #include "joana/base/source_code.h"
 #include "joana/base/source_code_range.h"
 #include "joana/parser/public/parser_context.h"
+#include "joana/parser/type/type_error_codes.h"
 #include "joana/parser/utils/character_reader.h"
 #include "joana/parser/utils/lexer_utils.h"
-#include "joana/parser/type/type_error_codes.h"
 
 namespace joana {
 namespace parser {
@@ -29,8 +29,8 @@ bool IsTypeNamePart(base::char16 char_code) {
 // TypeLexer
 //
 TypeLexer::TypeLexer(ParserContext* context,
-                               const SourceCodeRange& range,
-                               const ParserOptions& options)
+                     const SourceCodeRange& range,
+                     const ParserOptions& options)
     : context_(*context),
       options_(options),
       reader_(new CharacterReader(range)) {
@@ -45,6 +45,10 @@ SourceCodeRange TypeLexer::location() const {
 
 ast::NodeFactory& TypeLexer::node_factory() {
   return context_.node_factory();
+}
+
+const SourceCodeRange& TypeLexer::range() const {
+  return reader_->range();
 }
 
 const SourceCode& TypeLexer::source_code() const {

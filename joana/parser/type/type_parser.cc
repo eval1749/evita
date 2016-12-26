@@ -165,7 +165,7 @@ void TypeParser::SkipTokensTo(ast::PunctuatorKind kind) {
 // Factory members
 SourceCodeRange TypeParser::ComputeNodeRange() const {
   if (!CanPeekToken())
-    return source_code().Slice(node_start_, source_code().end().end());
+    return source_code().Slice(node_start_, lexer_->range().end());
   return source_code().Slice(node_start_, PeekToken().range().end());
 }
 

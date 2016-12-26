@@ -32,11 +32,12 @@ enum class TypeErrorCode;
 class TypeLexer final {
  public:
   TypeLexer(ParserContext* context,
-                 const SourceCodeRange& range,
-                 const ParserOptions& options);
+            const SourceCodeRange& range,
+            const ParserOptions& options);
   ~TypeLexer();
 
   SourceCodeRange location() const;
+  const SourceCodeRange& range() const;
   const SourceCode& source_code() const;
 
   bool CanPeekToken() const { return current_token_ != nullptr; }

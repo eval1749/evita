@@ -21,6 +21,7 @@ class CharacterReader final {
   ~CharacterReader();
 
   int location() const;
+  const SourceCodeRange& range() const { return range_; }
   const SourceCode& source_code() const;
 
   bool CanPeekChar() const;

@@ -118,6 +118,14 @@ TypeList::TypeList(Zone* zone, const std::vector<const Type*>& types)
 TypeList::~TypeList() = default;
 
 //
+// TypeGroup
+//
+TypeGroup::TypeGroup(const SourceCodeRange& range, const Type& type)
+    : NodeTemplate(std::make_tuple(&type), range) {}
+
+TypeGroup::~TypeGroup() = default;
+
+//
 // TypeName
 //
 TypeName::TypeName(const SourceCodeRange& range, const Name& name)

@@ -268,6 +268,24 @@ class JOANA_AST_EXPORT TypeApplication final
 };
 
 //
+// TypeGroup
+//
+class JOANA_AST_EXPORT TypeGroup final
+    : public NodeTemplate<Type, const Type*> {
+  DECLARE_CONCRETE_AST_NODE(TypeGroup, Type);
+
+ public:
+  ~TypeGroup() final;
+
+  const Type& type() const { return *member_at<0>(); }
+
+ private:
+  TypeGroup(const SourceCodeRange& range, const Type& type);
+
+  DISALLOW_COPY_AND_ASSIGN(TypeGroup);
+};
+
+//
 // TypeName
 //
 class JOANA_AST_EXPORT TypeName final : public NodeTemplate<Type, const Name*> {

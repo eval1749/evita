@@ -116,6 +116,7 @@ namespace ast {
   V(RestType)                \
   V(TupleType)               \
   V(TypeApplication)         \
+  V(TypeGroup)               \
   V(TypeName)                \
   V(UnionType)               \
   V(UnknownType)             \

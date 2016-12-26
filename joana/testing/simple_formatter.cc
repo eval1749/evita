@@ -845,6 +845,12 @@ void SimpleFormatter::VisitTypeApplication(ast::TypeApplication* node) {
   *ostream_ << '>';
 }
 
+void SimpleFormatter::VisitTypeGroup(ast::TypeGroup* node) {
+  *ostream_ << '(';
+  Format(node->type());
+  *ostream_ << ')';
+}
+
 void SimpleFormatter::VisitTypeName(ast::TypeName* node) {
   OutputUsingSoourceCode(*node);
 }

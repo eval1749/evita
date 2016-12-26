@@ -74,6 +74,10 @@ std::string TypeParserTest::Parse(base::StringPiece script_text) {
     EXPECT_EQ(source, Parse(script_text)); \
   }
 
+TEST_F(TypeParserTest, AnyType) {
+  TEST_PARSER("*");
+}
+
 TEST_F(TypeParserTest, Empty) {
   TEST_PARSER("(invalid)");
 }
@@ -182,10 +186,6 @@ TEST_F(TypeParserTest, ErrorTypeApplication) {
       "TYPE_ERROR_TYPE_EXPECT_RANGLE@3:11\n",
       Parse("foo<bar baz"))
       << "No comma between parameters";
-}
-
-TEST_F(TypeParserTest, AnyType) {
-  TEST_PARSER("*");
 }
 
 TEST_F(TypeParserTest, FunctionType) {

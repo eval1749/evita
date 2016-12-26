@@ -9,57 +9,57 @@ namespace joana {
 namespace ast {
 
 // V(name, capital, syntax)
-#define FOR_EACH_JSDOC_TAG_NAME(V)                 \
-  V(const, Const, OptionalType)                    \
-  V(constructor, Constructor, None)                \
-  V(define, Define, TypeDescription)               \
-  V(deprecated, Deprecated, Description)           \
-  V(dict, Dict, None)                              \
-  V(enum, Enum, Type)                              \
-  V(export, Export, OptionalType)                  \
-  V(extends, Extends, Type)                        \
-  V(externs, Externs, None)                        \
-  V(fileoverview, FileOverview, Description)       \
-  V(final, Final, None)                            \
-  V(implements, Implements, Type)                  \
-  V(implicitCast, ImplicitCast, None)              \
-  V(inheritDoc, InheritDoc, None)                  \
-  V(interface, Interface, None)                    \
-  V(lends, Lends, /* ObjectName */ Type)           \
-  V(license, License, Description)                 \
-  V(modifies, Modifies, /* this|arguments */ Name) \
-  V(noalias, NoAlias, None)                        \
-  V(nocollapse, NoCollapse, None)                  \
-  V(nocompile, NoCompile, None)                    \
-  V(nosideeffects, NoSideeffects, None)            \
-  V(override, Override, None)                      \
-  V(package, Package, None)                        \
-  V(param, Param, TypeNameDescription)             \
-  V(preserve, Preserve, Description)               \
-  V(private, Private, None)                        \
-  V(protected, Protected, None)                    \
-  V(public, Public, None)                          \
-  V(record, Record, None)                          \
-  V(return, Return, TypeDescription)               \
-  V(struct, Struct, None)                          \
-  V(suppress, Suppress, NameList)                  \
-  V(template, Template, Names)                     \
-  V(this, This, Type)                              \
-  V(throws, Throws, Type)                          \
-  V(type, Type, Type)                              \
-  V(typedef, TypeDef, Type)                        \
+#define FOR_EACH_JSDOC_TAG_NAME(V)                   \
+  V(const, Const, OptionalType)                      \
+  V(constructor, Constructor, None)                  \
+  V(define, Define, TypeDescription)                 \
+  V(deprecated, Deprecated, Description)             \
+  V(dict, Dict, None)                                \
+  V(enum, Enum, Type)                                \
+  V(export, Export, OptionalType)                    \
+  V(extends, Extends, Type)                          \
+  V(externs, Externs, None)                          \
+  V(fileoverview, FileOverview, Description)         \
+  V(final, Final, None)                              \
+  V(implements, Implements, Type)                    \
+  V(implicitCast, ImplicitCast, None)                \
+  V(inheritDoc, InheritDoc, None)                    \
+  V(interface, Interface, None)                      \
+  V(lends, Lends, /* ObjectName */ Type)             \
+  V(license, License, Description)                   \
+  V(modifies, Modifies, /* {this|arguments} */ Type) \
+  V(noalias, NoAlias, None)                          \
+  V(nocollapse, NoCollapse, None)                    \
+  V(nocompile, NoCompile, None)                      \
+  V(nosideeffects, NoSideeffects, None)              \
+  V(override, Override, None)                        \
+  V(package, Package, None)                          \
+  V(param, Param, TypeNameDescription)               \
+  V(preserve, Preserve, Description)                 \
+  V(private, Private, None)                          \
+  V(protected, Protected, None)                      \
+  V(public, Public, None)                            \
+  V(record, Record, None)                            \
+  V(return, Return, TypeDescription)                 \
+  V(struct, Struct, None)                            \
+  V(suppress, Suppress, NameList)                    \
+  V(template, Template, Names)                       \
+  V(this, This, Type)                                \
+  V(throws, Throws, Type)                            \
+  V(type, Type, Type)                                \
+  V(typedef, TypeDef, Type)                          \
   V(unrestricted, Unrestricted, None)
 
-#define FOR_EACH_JSDOC_TAG_SYNTAX(V) \
-  V(Description)                     \
-  V(Name)                            \
-  V(NameList)                        \
-  V(Names)                           \
-  V(None)                            \
-  V(OptionalType)                    \
-  V(TypeDescription)                 \
-  V(TypeNameDescription)             \
-  V(Type)
+// V(capital, example)
+#define FOR_EACH_JSDOC_TAG_SYNTAX(V)                       \
+  V(Description, "@deprecated description")                \
+  V(NameList, "@suppress {name1, name2}")                  \
+  V(Names, "@template K, V")                               \
+  V(None, "@constructor")                                  \
+  V(OptionalType, "@const {type}")                         \
+  V(TypeDescription, "@define {type} description")         \
+  V(TypeNameDescription, "@param {type} name description") \
+  V(Type, "@enum {type}")
 
 }  // namespace ast
 }  // namespace joana

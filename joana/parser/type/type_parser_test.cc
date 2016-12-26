@@ -157,6 +157,33 @@ TEST_F(TypeParserTest, ErrorTupleType) {
       << "No comma between members";
 }
 
+TEST_F(TypeParserTest, ErrorTypeApplication) {
+  EXPECT_EQ(
+      "foo<>"
+      "TYPE_ERROR_TYPE_EXPECT_RANGLE@3:4\n",
+      Parse("foo<"));
+
+  // TODO(eval1749): Type application without type parameters should be an
+  // error.
+  EXPECT_EQ("foo<(invalid)>", Parse("foo<>")) << "No type parameters";
+
+  EXPECT_EQ(
+      "foo<bar>"
+      "TYPE_ERROR_TYPE_EXPECT_RANGLE@3:7\n",
+      Parse("foo<bar"));
+
+  EXPECT_EQ(
+      "foo<bar>"
+      "TYPE_ERROR_TYPE_EXPECT_RANGLE@3:8\n",
+      Parse("foo<bar,"));
+
+  EXPECT_EQ(
+      "foo<bar>"
+      "TYPE_ERROR_TYPE_EXPECT_RANGLE@3:11\n",
+      Parse("foo<bar baz"))
+      << "No comma between parameters";
+}
+
 TEST_F(TypeParserTest, AnyType) {
   TEST_PARSER("*");
 }

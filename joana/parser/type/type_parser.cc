@@ -25,8 +25,9 @@ using Type = ast::Type;
 namespace {
 
 bool CanStartType(const Token& token) {
-  return token.Is<Name>() || token == ast::PunctuatorKind::LeftBracket ||
-         token == ast::PunctuatorKind::RightBrace;
+  return token.Is<Name>() || token == ast::PunctuatorKind::LeftParenthesis ||
+         token == ast::PunctuatorKind::LeftBracket ||
+         token == ast::PunctuatorKind::LeftBrace;
 }
 
 }  // namespace
@@ -215,6 +216,10 @@ const Type& TypeParser::NewTypeApplication(
   return node_factory().NewTypeApplication(ComputeNodeRange(), name, types);
 }
 
+const Type& TypeParser::NewTypeGroup(const Type& type) {
+  return node_factory().NewTypeGroup(ComputeNodeRange(), type);
+}
+
 const Type& TypeParser::NewTypeName(const Name& name) {
   return node_factory().NewTypeName(name.range(), name);
 }
@@ -243,6 +248,7 @@ const Type& TypeParser::NewVoidType(const SourceCodeRange& range) {
 //      | TypeName
 //      | FunctionType
 //      | TypeApplication
+//      | TypeGroup
 //      | RecordType
 //      | TupleType
 // NullableType ::= '?' Type
@@ -251,23 +257,15 @@ const Type& TypeParser::NewVoidType(const SourceCodeRange& range) {
 // TupleType ::= '[' (Type ',')* ']'
 // UnionTYpe ::= Type ('|' Type*)
 const Type& TypeParser::Parse() {
-  if (!CanPeekToken()) {
-    AddError(TypeErrorCode::ERROR_TYPE_EXPECT_TYPE);
-    return NewInvalidType();
-  }
-  TypeNodeScope scope(this);
-  std::vector<const Type*> types;
-  types.push_back(&ParseType());
-  while (CanPeekToken() && ConsumeTokenIf(ast::PunctuatorKind::BitOr))
-    types.push_back(&ParseType());
-  if (!brackets_.empty()) {
-    auto& open_bracket = *brackets_.top().first;
-    const auto error_code = brackets_.top().second;
-    AddError(source_code().Slice(open_bracket.range().start(),
-                                 source_code().range().end()),
-             error_code);
-  }
-  return NewUnionType(types);
+  const auto& type = ParseUnionType();
+  if (brackets_.empty())
+    return type;
+  auto& open_bracket = *brackets_.top().first;
+  const auto error_code = brackets_.top().second;
+  AddError(source_code().Slice(open_bracket.range().start(),
+                               source_code().range().end()),
+           error_code);
+  return type;
 }
 
 const Type& TypeParser::ParseFunctionType(const Name& name) {
@@ -394,10 +392,31 @@ const Type& TypeParser::ParseTypeBeforeEqual() {
     return ParseRecordType();
   if (ConsumeTokenIf(ast::PunctuatorKind::LeftBracket))
     return ParseTupleType();
+  if (ConsumeTokenIf(ast::PunctuatorKind::LeftParenthesis))
+    return ParseTypeGroup();
   if (ConsumeTokenIf(ast::PunctuatorKind::DotDotDot))
     return NewRestType(ParseType());
   ConsumeToken();
   return NewInvalidType();
+}
+
+const Type& TypeParser::ParseTypeGroup() {
+  auto& type = ParseUnionType();
+  ConsumeTokenIf(ast::PunctuatorKind::RightParenthesis);
+  return NewTypeGroup(type);
+}
+
+const Type& TypeParser::ParseUnionType() {
+  if (!CanPeekToken()) {
+    AddError(TypeErrorCode::ERROR_TYPE_EXPECT_TYPE);
+    return NewInvalidType();
+  }
+  TypeNodeScope scope(this);
+  std::vector<const Type*> types;
+  types.push_back(&ParseType());
+  while (CanPeekToken() && ConsumeTokenIf(ast::PunctuatorKind::BitOr))
+    types.push_back(&ParseType());
+  return NewUnionType(types);
 }
 
 }  // namespace parser

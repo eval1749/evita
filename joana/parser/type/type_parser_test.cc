@@ -213,6 +213,14 @@ TEST_F(TypeParserTest, ErrorTypeApplication) {
       << "No comma between parameters";
 }
 
+TEST_F(TypeParserTest, ErrorTypeGroup) {
+  EXPECT_EQ(
+      "(foo)"
+      "TYPE_ERROR_TYPE_EXPECT_RPAREN@0:4\n",
+      Parse("(foo"))
+      << "No right parenthesis";
+}
+
 TEST_F(TypeParserTest, FunctionType) {
   TEST_PARSER("function");
   TEST_PARSER("function(bar, baz)");
@@ -247,6 +255,11 @@ TEST_F(TypeParserTest, TupleType) {
 
 TEST_F(TypeParserTest, TypeApplication) {
   TEST_PARSER("Map<K, V>");
+}
+
+TEST_F(TypeParserTest, TypeGroup) {
+  TEST_PARSER("(foo)");
+  TEST_PARSER("(foo|bar)=");
 }
 
 TEST_F(TypeParserTest, TypeName) {

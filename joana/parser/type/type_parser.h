@@ -97,6 +97,7 @@ class TypeParser final {
   const Type& NewTupleType(const std::vector<const Type*>& members);
   const Type& NewTypeApplication(const Name& name,
                                  const std::vector<const Type*>& types);
+  const Type& NewTypeGroup(const Type& type);
   const Type& NewTypeName(const Name& name);
   const Type& NewUnionType(const std::vector<const Type*>& members);
   const Type& NewUnknownType();
@@ -110,6 +111,8 @@ class TypeParser final {
   const Type& ParseTupleType();
   const Type& ParseType();
   const Type& ParseTypeBeforeEqual();
+  const Type& ParseTypeGroup();
+  const Type& ParseUnionType();
 
   std::stack<BracketPair> brackets_;
   ParserContext& context_;

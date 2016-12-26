@@ -7,9 +7,12 @@
 
 #include <array>
 #include <iosfwd>
+#include <iterator>
 #include <tuple>
 #include <type_traits>
+#include <vector>
 
+#include "base/logging.h"
 #include "base/macros.h"
 #include "joana/ast/ast_export.h"
 #include "joana/base/castable.h"
@@ -96,6 +99,12 @@ JOANA_AST_EXPORT std::ostream& operator<<(std::ostream& ostream,
   DECLARE_AST_NODE(name, base);               \
   void Accept(NodeVisitor* visitor) final;
 
+#define DECLARE_CONCRETE_AST_NODE_WITH_LIST(name, base)              \
+  DECLARE_CONCRETE_AST_NODE(name, base)                              \
+ public:                                                             \
+  void* operator new(size_t size, void* pointer) { return pointer; } \
+  void* operator new(size_t, Zone*) = delete;
+
 //
 // NodeTemplate represents fixed number of child nodes.
 //
@@ -118,6 +127,66 @@ class NodeTemplate : public Base {
   std::tuple<Members...> members_;
 
   DISALLOW_COPY_AND_ASSIGN(NodeTemplate);
+};
+
+//
+// NodeListTemplate
+//
+template <typename Element>
+class NodeListTemplate {
+ public:
+  class Iterator final
+      : public std::iterator<std::input_iterator_tag, Element> {
+   public:
+    Iterator(const Iterator& other)
+        : index_(other.index_), owner_(other.owner_) {}
+    ~Iterator() = default;
+
+    reference operator*() const {
+      DCHECK_LT(index_, owner_->size());
+      return *owner_->elements_[index_];
+    }
+
+    iterator& operator++() {
+      DCHECK_LT(index_, owner_->size());
+      ++index_;
+      return *this;
+    }
+
+    bool operator==(const Iterator& other) const {
+      DCHECK_EQ(owner_, other.owner_);
+      return index_ == other.index_;
+    }
+
+    bool operator!=(const Iterator& other) const { return !operator==(other); }
+
+   private:
+    friend class NodeListTemplate;
+
+    Iterator(const NodeListTemplate* owner, size_t index)
+        : index_(index), owner_(owner) {}
+
+    size_t index_;
+    const NodeListTemplate* owner_;
+  };
+
+  explicit NodeListTemplate(const std::vector<Element*>& elements)
+      : size_(elements.size()) {
+    ::memcpy(elements_, elements.data(), sizeof(Element*) * size_);
+  }
+
+  ~NodeListTemplate() = default;
+
+  Iterator begin() const { return Iterator(this, 0); }
+  bool empty() const { return size_ == 0; }
+  Iterator end() const { return Iterator(this, size_); }
+  size_t size() const { return size_; }
+
+ private:
+  const size_t size_;
+  Element* elements_[1];
+
+  DISALLOW_COPY_AND_ASSIGN(NodeListTemplate);
 };
 
 }  // namespace ast

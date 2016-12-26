@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <type_traits>
+
 #ifndef JOANA_BASE_ERROR_SINK_H_
 #define JOANA_BASE_ERROR_SINK_H_
 
@@ -15,6 +17,12 @@ class SourceCodeRange;
 class JOANA_BASE_EXPORT ErrorSink {
  public:
   virtual void AddError(const SourceCodeRange& range, int error_code) = 0;
+
+  template <typename T>
+  void AddError(const SourceCodeRange& range, T error_code) {
+    static_assert(std::is_enum<T>::value, "T is must be an enum type.");
+    AddError(range, static_cast<int>(error_code));
+  }
 
  protected:
   ErrorSink();

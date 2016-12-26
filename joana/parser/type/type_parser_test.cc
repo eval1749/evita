@@ -126,6 +126,37 @@ TEST_F(TypeParserTest, ErrorRecordType) {
       Parse("{foo: bar,"));
 }
 
+TEST_F(TypeParserTest, ErrorTupleType) {
+  EXPECT_EQ(
+      "[]"
+      "TYPE_ERROR_TYPE_EXPECT_RBRACKET@0:1\n",
+      Parse("["));
+
+  EXPECT_EQ(
+      "[foo]"
+      "TYPE_ERROR_TYPE_EXPECT_RBRACKET@0:4\n",
+      Parse("[foo"));
+
+  EXPECT_EQ(
+      "[foo]"
+      "TYPE_ERROR_TYPE_EXPECT_RBRACKET@0:4\n",
+      Parse("[foo"));
+
+  EXPECT_EQ(
+      "[foo]"
+      "TYPE_ERROR_TYPE_EXPECT_RBRACKET@0:5\n",
+      Parse("[foo,"));
+
+  // TODO(eval1749): We should make error when no type after comma
+  EXPECT_EQ("[foo]", Parse("[foo,]")) << "No type after comma";
+
+  EXPECT_EQ(
+      "[foo]"
+      "TYPE_ERROR_TYPE_EXPECT_RBRACKET@0:8\n",
+      Parse("[foo bar"))
+      << "No comma between members";
+}
+
 TEST_F(TypeParserTest, AnyType) {
   TEST_PARSER("*");
 }

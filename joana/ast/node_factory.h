@@ -325,6 +325,8 @@ class JOANA_AST_EXPORT NodeFactory final {
                                  const Name& name,
                                  const std::vector<const Type*>& members);
 
+  const Type& NewTypeGroup(const SourceCodeRange& range, const Type& type);
+
   const Type& NewTypeName(const SourceCodeRange& range, const Name& name);
 
   const Type& NewUnionType(const SourceCodeRange& range,

@@ -620,6 +620,11 @@ const Type& NodeFactory::NewTypeApplication(
   return *new (zone_) TypeApplication(range, name, list);
 }
 
+const Type& NodeFactory::NewTypeGroup(const SourceCodeRange& range,
+                                      const Type& type) {
+  return *new (zone_) TypeGroup(range, type);
+}
+
 const Type& NodeFactory::NewTypeName(const SourceCodeRange& range,
                                      const Name& name) {
   return *new (zone_) TypeName(range, name);

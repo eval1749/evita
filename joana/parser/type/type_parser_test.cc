@@ -163,11 +163,10 @@ TEST_F(TypeParserTest, ErrorTupleType) {
 
   EXPECT_EQ(
       "[foo]"
+      "TYPE_ERROR_TYPE_EXPECT_TYPE@5:5\n"
       "TYPE_ERROR_TYPE_EXPECT_RBRACKET@0:5\n",
-      Parse("[foo,"));
-
-  // TODO(eval1749): We should make error when no type after comma
-  EXPECT_EQ("[foo]", Parse("[foo,]")) << "No type after comma";
+      Parse("[foo,"))
+      << "No type after comma";
 
   EXPECT_EQ(
       "[foo]"

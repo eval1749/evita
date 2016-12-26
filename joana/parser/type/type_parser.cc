@@ -327,11 +327,15 @@ const Type& TypeParser::ParseRecordType() {
 // TupleType ::= '[' (Name ','?)* ']'
 const Type& TypeParser::ParseTupleType() {
   std::vector<const Type*> members;
+  auto after_comma = false;
   while (CanPeekToken() && PeekToken() != ast::PunctuatorKind::RightBracket) {
     members.push_back(&ParseType());
-    if (!ConsumeTokenIf(ast::PunctuatorKind::Comma))
+    after_comma = ConsumeTokenIf(ast::PunctuatorKind::Comma);
+    if (!after_comma)
       break;
   }
+  if (after_comma)
+    AddError(TypeErrorCode::ERROR_TYPE_EXPECT_TYPE);
   SkipTokensTo(ast::PunctuatorKind::RightBracket);
   return NewTupleType(members);
 }

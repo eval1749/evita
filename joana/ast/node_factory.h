@@ -144,6 +144,22 @@ class JOANA_AST_EXPORT NodeFactory final {
                                        const Token& op,
                                        const Expression& expression);
 
+  // JsDoc factory members
+  const JsDocDocument& NewJsDocDocument(
+      const SourceCodeRange& range,
+      const std::vector<const JsDocNode*>& nodes);
+
+  const JsDocNode& NewJsDocName(const SourceCodeRange& range);
+
+  const JsDocNode& NewJsDocTag(const SourceCodeRange& range,
+                               const Name& name,
+                               const std::vector<const JsDocNode*>& nodes);
+
+  const JsDocNode& NewJsDocText(const SourceCodeRange& range);
+
+  const JsDocNode& NewJsDocType(const SourceCodeRange& range,
+                                const ast::Type& type);
+
   // Literals factory members
   BooleanLiteral& NewBooleanLiteral(const Name& name, bool value);
 

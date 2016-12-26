@@ -8,6 +8,7 @@
 
 #include "joana/ast/declarations.h"
 #include "joana/ast/expressions.h"
+#include "joana/ast/jsdoc_nodes.h"
 #include "joana/ast/literals.h"
 #include "joana/ast/module.h"
 #include "joana/ast/regexp.h"
@@ -49,6 +50,11 @@ void NodeFactory::NameIdMap::Populate() {
   last_id_ = static_cast<int>(NameId::StartOfKnownWord);
 #define V(name, camel, upper) Register(base::StringPiece16(L## #name));
   FOR_EACH_JAVASCRIPT_KNOWN_WORD(V)
+#undef V
+
+  last_id_ = static_cast<int>(NameId::StartOfJsDocTagName);
+#define V(name, camel, upper) Register(base::StringPiece16(L##"@" #name));
+  FOR_EACH_JSDOC_TAG_NAME(V)
 #undef V
 }
 
@@ -275,6 +281,37 @@ const Expression& NodeFactory::NewUnaryExpression(
     const Token& op,
     const Expression& expression) {
   return *new (zone_) UnaryExpression(range, op, expression);
+}
+
+// JsDoc
+const JsDocDocument& NodeFactory::NewJsDocDocument(
+    const SourceCodeRange& range,
+    const std::vector<const JsDocNode*>& nodes) {
+  return *new (zone_->Allocate(sizeof(JsDocDocument) +
+                               sizeof(JsDocNode*) * nodes.size()))
+      JsDocDocument(range, nodes);
+}
+
+const JsDocNode& NodeFactory::NewJsDocName(const SourceCodeRange& range) {
+  return *new (zone_) JsDocName(NewName(range));
+}
+
+const JsDocNode& NodeFactory::NewJsDocTag(
+    const SourceCodeRange& range,
+    const Name& name,
+    const std::vector<const JsDocNode*>& parameters) {
+  return *new (zone_->Allocate(sizeof(JsDocTag) +
+                               sizeof(JsDocNode*) * parameters.size()))
+      JsDocTag(range, name, parameters);
+}
+
+const JsDocNode& NodeFactory::NewJsDocText(const SourceCodeRange& range) {
+  return *new (zone_) JsDocText(range);
+}
+
+const JsDocNode& NodeFactory::NewJsDocType(const SourceCodeRange& range,
+                                           const ast::Type& type) {
+  return *new (zone_) JsDocType(range, type);
 }
 
 // Literals

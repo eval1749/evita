@@ -333,6 +333,10 @@ const Type& TypeParser::ParseTupleType() {
 }
 
 const Type& TypeParser::ParseType() {
+  if (!CanPeekToken()) {
+    AddError(TypeErrorCode::ERROR_TYPE_EXPECT_TYPE);
+    return NewInvalidType();
+  }
   TypeNodeScope scope(this);
   auto& type = ParseTypeBeforeEqual();
   if (!ConsumeTokenIf(ast::PunctuatorKind::Equal))
@@ -353,8 +357,6 @@ const Type& TypeParser::ParseTypeApplication(const Name& name) {
 }
 
 const Type& TypeParser::ParseTypeBeforeEqual() {
-  if (!CanPeekToken())
-    return NewInvalidType();
   TypeNodeScope scope(this);
   if (ConsumeTokenIf(ast::PunctuatorKind::Times))
     return NewAnyType();

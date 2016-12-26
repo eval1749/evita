@@ -105,6 +105,21 @@ TEST_F(TypeParserTest, ErrorFunctionType) {
       "TYPE_ERROR_TYPE_UNEXPECT_RBRACE@8:13\n",
       Parse("function(foo}"))
       << "Mismatched bracket";
+
+  EXPECT_EQ(
+      "function(new:(invalid))"
+      "TYPE_ERROR_TYPE_EXPECT_COLON@12:12\n"
+      "TYPE_ERROR_TYPE_EXPECT_TYPE@12:12\n"
+      "TYPE_ERROR_TYPE_EXPECT_RPAREN@8:12\n",
+      Parse("function(new"))
+      << "No colon after 'new'";
+
+  EXPECT_EQ(
+      "function(new:(invalid))"
+      "TYPE_ERROR_TYPE_EXPECT_TYPE@13:13\n"
+      "TYPE_ERROR_TYPE_EXPECT_RPAREN@8:13\n",
+      Parse("function(new:"))
+      << "No type after new:'";
 }
 
 TEST_F(TypeParserTest, ErrorRecordType) {

@@ -98,6 +98,7 @@ namespace ast {
   V(TYPE, EXPECT_RBRACE)            \
   V(TYPE, EXPECT_RBRACKET)          \
   V(TYPE, EXPECT_RPAREN)            \
+  V(TYPE, EXPECT_TYPE)              \
   V(TYPE, UNEXPECT_DOT)             \
   V(TYPE, UNEXPECT_RANGLE)          \
   V(TYPE, UNEXPECT_RBRACE)          \

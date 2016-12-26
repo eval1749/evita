@@ -78,6 +78,29 @@ TEST_F(TypeParserTest, Empty) {
   TEST_PARSER("(invalid)");
 }
 
+TEST_F(TypeParserTest, ErrorFunctionType) {
+  EXPECT_EQ(
+    "function(foo)"
+    "TYPE_ERROR_TYPE_EXPECT_RPAREN@8:12\n",
+    Parse("function(foo"));
+
+  EXPECT_EQ(
+    "function(foo)"
+    // TODO(eval1749): We should have EXPECT_TYPE
+    "TYPE_ERROR_TYPE_EXPECT_RPAREN@8:13\n",
+    Parse("function(foo,"));
+
+  EXPECT_EQ(
+    "function(foo)"
+    "TYPE_ERROR_TYPE_EXPECT_RPAREN@8:16\n",
+    Parse("function(foo bar")) << "No comma between types";
+
+  EXPECT_EQ(
+    "function(foo)"
+    "TYPE_ERROR_TYPE_UNEXPECT_RBRACE@8:13\n",
+    Parse("function(foo}")) << "Mismatched bracket";
+}
+
 TEST_F(TypeParserTest, AnyType) {
   TEST_PARSER("*");
 }

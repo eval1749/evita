@@ -51,15 +51,15 @@ namespace ast {
   V(unrestricted, Unrestricted, None)
 
 // V(capital, example)
-#define FOR_EACH_JSDOC_TAG_SYNTAX(V)                       \
-  V(Description, "@deprecated description")                \
-  V(NameList, "@suppress {name1, name2}")                  \
-  V(Names, "@template K, V")                               \
-  V(None, "@constructor")                                  \
-  V(OptionalType, "@const {type}")                         \
-  V(TypeDescription, "@define {type} description")         \
-  V(TypeNameDescription, "@param {type} name description") \
-  V(Type, "@enum {type}")
+#define FOR_EACH_JSDOC_TAG_SYNTAX(V)               \
+  V(Description, "@deprecated description")        \
+  V(NameList, "@suppress {name1, name2}")          \
+  V(Names, "@template K, V")                       \
+  V(None, "@constructor")                          \
+  V(OptionalType, "@const {type}")                 \
+  V(Type, "@enum {type}")                          \
+  V(TypeDescription, "@define {type} description") \
+  V(TypeNameDescription, "@param {type} name description")
 
 }  // namespace ast
 }  // namespace joana

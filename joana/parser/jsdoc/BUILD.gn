@@ -4,12 +4,12 @@
 
 source_set("jsdoc") {
   sources = [
-    "jsdoc_error_codes.h",
-    "jsdoc_type_lexer.cc",
-    "jsdoc_type_lexer.h",
+    "jsdoc_parser.cc",
+    "jsdoc_parser.h",
   ]
   deps = [
     "//joana/base",
+    "//joana/parser/type",
     "//joana/parser/utils",
   ]
 
@@ -19,7 +19,7 @@ source_set("jsdoc") {
 source_set("test_files") {
   testonly = true
   sources = [
-    "jsdoc_type_lexer_test.cc",
+    "jsdoc_parser_test.cc",
   ]
   deps = [
     ":jsdoc",

@@ -1,0 +1,325 @@
+// Copyright (c) 2016 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#include <stack>
+#include <utility>
+#include <vector>
+
+#include "joana/parser/jsdoc/jsdoc_parser.h"
+
+#include "base/auto_reset.h"
+#include "joana/ast/jsdoc_nodes.h"
+#include "joana/ast/jsdoc_tags.h"
+#include "joana/ast/node.h"
+#include "joana/ast/node_factory.h"
+#include "joana/ast/node_forward.h"
+#include "joana/ast/tokens.h"
+#include "joana/base/error_sink.h"
+#include "joana/base/source_code.h"
+#include "joana/base/source_code_range.h"
+#include "joana/parser/jsdoc/jsdoc_error_codes.h"
+#include "joana/parser/public/parser_context.h"
+#include "joana/parser/type/type_parser.h"
+#include "joana/parser/utils/character_reader.h"
+#include "joana/parser/utils/lexer_utils.h"
+
+namespace joana {
+namespace parser {
+
+namespace {
+
+using JsDocDocument = ast::JsDocDocument;
+using JsDocNode = ast::JsDocNode;
+using Name = ast::Name;
+using Node = ast::Node;
+using Token = ast::Token;
+
+enum class Syntax {
+  Unknown,
+#define V(name, ...) name,
+  FOR_EACH_JSDOC_TAG_SYNTAX(V)
+#undef V
+};
+
+Syntax TagSyntaxOf(const Name& name) {
+#define V(underscore, capital, syntax)                                \
+  if (name.number() == static_cast<int>(ast::NameId::JsDoc##capital)) \
+    return Syntax::syntax;
+  FOR_EACH_JSDOC_TAG_NAME(V)
+#undef V
+  return Syntax::Unknown;
+}
+
+}  // namespace
+
+//
+// JsDocParser::NodeRangeScope
+//
+class JsDocParser::NodeRangeScope final {
+ public:
+  explicit NodeRangeScope(JsDocParser* parser)
+      : auto_reset_(&parser->node_start_, parser->reader_->location()) {}
+
+  ~NodeRangeScope() = default;
+
+ private:
+  base::AutoReset<int> auto_reset_;
+
+  DISALLOW_COPY_AND_ASSIGN(NodeRangeScope);
+};
+
+//
+// JsDocParser
+//
+JsDocParser::JsDocParser(ParserContext* context,
+                         const SourceCodeRange& range,
+                         const ParserOptions& options)
+    : context_(*context),
+      node_start_(range.start()),
+      options_(options),
+      reader_(new CharacterReader(range)) {}
+
+JsDocParser::~JsDocParser() = default;
+
+// ErrorSink utility functions
+void JsDocParser::AddError(const SourceCodeRange& range,
+                           JsDocErrorCode error_code) {
+  context_.error_sink().AddError(range, error_code);
+}
+
+void JsDocParser::AddError(JsDocErrorCode error_code) {
+  AddError(ComputeNodeRange(), error_code);
+}
+
+// CharacterReader utility functions
+int JsDocParser::location() const {
+  return reader_->location();
+}
+
+const SourceCode& JsDocParser::source_code() const {
+  return reader_->source_code();
+}
+
+bool JsDocParser::CanPeekChar() const {
+  return reader_->CanPeekChar();
+}
+
+base::char16 JsDocParser::ConsumeChar() {
+  return reader_->ConsumeChar();
+}
+
+bool JsDocParser::ConsumeCharIf(base::char16 char_code) {
+  return reader_->ConsumeCharIf(char_code);
+}
+
+base::char16 JsDocParser::PeekChar() const {
+  return reader_->PeekChar();
+}
+
+// Factory utility functions
+ast::NodeFactory& JsDocParser::node_factory() {
+  return context_.node_factory();
+}
+
+SourceCodeRange JsDocParser::ComputeNodeRange() const {
+  return source_code().Slice(node_start_, location());
+}
+
+const JsDocDocument& JsDocParser::NewDocument(
+    const std::vector<const JsDocNode*>& nodes) {
+  return node_factory().NewJsDocDocument(ComputeNodeRange(), nodes);
+}
+
+const JsDocNode& JsDocParser::NewName() {
+  return node_factory().NewJsDocName(ComputeNodeRange());
+}
+
+const Name& JsDocParser::NewTagName() {
+  return node_factory().NewName(ComputeNodeRange());
+}
+
+const JsDocNode& JsDocParser::NewTagWithVector(
+    const Name& name,
+    const std::vector<const JsDocNode*>& parameters) {
+  return node_factory().NewJsDocTag(ComputeNodeRange(), name, parameters);
+}
+
+const JsDocNode& JsDocParser::NewText(const SourceCodeRange& range) {
+  return node_factory().NewJsDocText(range);
+}
+
+const JsDocNode& JsDocParser::NewText(int start, int end) {
+  return NewText(source_code().Slice(start, end));
+}
+
+const JsDocNode& JsDocParser::NewText() {
+  return NewText(ComputeNodeRange());
+}
+
+const JsDocNode& JsDocParser::NewType(const ast::Type& type) {
+  return node_factory().NewJsDocType(ComputeNodeRange(), type);
+}
+
+// Parsing functions
+// The entry point of JsDoc parser.
+const JsDocDocument* JsDocParser::Parse() {
+  NodeRangeScope scope(this);
+  SkipWhitespaces();
+  std::vector<const JsDocNode*> nodes;
+  auto number_of_tags = 0;
+  auto text_start = location();
+  while (CanPeekChar()) {
+    if (PeekChar() != '@') {
+      ConsumeChar();
+      continue;
+    }
+    if (location() > text_start)
+      nodes.push_back(&NewText(text_start, location()));
+    ++number_of_tags;
+    NodeRangeScope scope(this);
+    nodes.push_back(&ParseTag(ParseTagName()));
+    SkipWhitespaces();
+    text_start = location();
+    continue;
+  }
+  if (number_of_tags == 0)
+    return nullptr;
+  return &NewDocument(nodes);
+}
+
+// Extract text without leading and trailing whitespace.
+const JsDocNode& JsDocParser::ParseDescription() {
+  SkipWhitespaces();
+  const auto text_start = reader_->location();
+  auto text_end = text_start;
+  while (CanPeekChar() && PeekChar() != '@') {
+    if (IsWhitespace(ConsumeChar()))
+      continue;
+    text_end = reader_->location();
+  }
+  return NewText(text_start, text_end);
+}
+
+// Returns list of comma separated words.
+std::vector<const JsDocNode*> JsDocParser::ParseNameList() {
+  SkipWhitespaces();
+  NodeRangeScope scope(this);
+  if (!ConsumeCharIf(kLeftBrace)) {
+    AddError(JsDocErrorCode::ERROR_JSDOC_EXPECT_LBRACE);
+    return {&NewText()};
+  }
+  const auto& names = ParseNames();
+  if (!ConsumeCharIf(kRightBrace))
+    AddError(JsDocErrorCode::ERROR_JSDOC_EXPECT_RBRACE);
+  return std::move(names);
+}
+
+const JsDocNode& JsDocParser::ParseName() {
+  SkipWhitespaces();
+  NodeRangeScope scope(this);
+  while (CanPeekChar() && IsIdentifierPart(PeekChar()))
+    ConsumeChar();
+  return NewName();
+}
+
+std::vector<const JsDocNode*> JsDocParser::ParseNames() {
+  std::vector<const JsDocNode*> names;
+  SkipWhitespaces();
+  while (CanPeekChar()) {
+    if (!IsIdentifierStart(PeekChar()))
+      break;
+    names.push_back(&ParseName());
+    SkipWhitespaces();
+    if (!ConsumeCharIf(','))
+      break;
+    SkipWhitespaces();
+  }
+  return std::move(names);
+}
+
+// Called after consuming '@'.
+const JsDocNode& JsDocParser::ParseTag(const Name& tag_name) {
+  switch (TagSyntaxOf(tag_name)) {
+    case Syntax::Description:
+      SkipWhitespaces();
+      return NewTag(tag_name, ParseDescription());
+    case Syntax::NameList:
+      return NewTagWithVector(tag_name, ParseNameList());
+    case Syntax::Names:
+      return NewTagWithVector(tag_name, ParseNames());
+    case Syntax::None:
+      return NewTag(tag_name);
+    case Syntax::OptionalType:
+      SkipWhitespaces();
+      if (CanPeekChar() && PeekChar() == kLeftBrace)
+        return NewTag(tag_name, ParseType());
+      return NewTag(tag_name);
+    case Syntax::Type:
+      return NewTag(tag_name, ParseType());
+    case Syntax::TypeDescription: {
+      auto& type = ParseType();
+      auto& description = ParseDescription();
+      return NewTag(tag_name, type, description);
+    }
+    case Syntax::TypeNameDescription: {
+      auto& type = ParseType();
+      auto& name = ParseName();
+      auto& description = ParseDescription();
+      return NewTag(tag_name, type, name, description);
+    }
+    case Syntax::Unknown:
+      AddError(tag_name.range(), JsDocErrorCode::ERROR_JSDOC_UNKNOWN_TAG);
+      return NewTag(tag_name);
+  }
+  NOTREACHED() << "We should handle " << tag_name;
+  return NewTag(tag_name);
+}
+
+const Name& JsDocParser::ParseTagName() {
+  DCHECK_EQ(PeekChar(), '@');
+  NodeRangeScope scope(this);
+  ConsumeChar();
+  while (CanPeekChar() && IsIdentifierPart(PeekChar()))
+    ConsumeChar();
+  return NewTagName();
+}
+
+const JsDocNode& JsDocParser::ParseType() {
+  SkipWhitespaces();
+  NodeRangeScope scope(this);
+  if (!ConsumeCharIf(kLeftBrace)) {
+    AddError(JsDocErrorCode::ERROR_JSDOC_EXPECT_LBRACE);
+    return NewText();
+  }
+  const auto type_start = reader_->location();
+  auto number_of_braces = 0;
+  while (CanPeekChar()) {
+    if (ConsumeCharIf(kLeftBrace)) {
+      ++number_of_braces;
+      continue;
+    }
+    if (PeekChar() == kRightBrace) {
+      if (number_of_braces == 0)
+        break;
+      --number_of_braces;
+      ConsumeChar();
+      continue;
+    }
+    ConsumeChar();
+  }
+  TypeParser parser(&context_,
+                    source_code().Slice(type_start, reader_->location()),
+                    options_);
+  auto& type = parser.Parse();
+  ConsumeCharIf(kRightBrace);
+  return NewType(type);
+}
+
+void JsDocParser::SkipWhitespaces() {
+  while (CanPeekChar() && IsWhitespace(PeekChar()))
+    ConsumeChar();
+}
+
+}  // namespace parser
+}  // namespace joana

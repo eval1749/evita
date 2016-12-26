@@ -142,9 +142,8 @@ std::string LexerTest::Parse(const ParserOptions& options) {
   while (lexer.CanPeekToken()) {
     ostream << delimiter;
     delimiter = " ";
-    auto& node = lexer.PeekToken();
+    auto& node = lexer.ConsumeToken();
     node.PrintTo(&ostream);
-    lexer.Advance();
   }
   for (const auto* error : error_sink().errors()) {
     ostream << ' ' << error->error_code() << '@' << error->range();

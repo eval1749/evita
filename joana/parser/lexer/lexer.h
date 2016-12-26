@@ -49,13 +49,13 @@ class Lexer final {
 
   const SourceCode& source_code() const;
 
-  void Advance();
-
   // Returns true if |Lexer| has a token.
   bool CanPeekToken() const { return current_token_ != nullptr; }
 
   // Returns |ast::RegExp| after "/".
   ast::RegExp& ConsumeRegExp();
+
+  const ast::Token& ConsumeToken();
 
   const ast::Token& PeekToken() const;
 

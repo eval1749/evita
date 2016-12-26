@@ -139,7 +139,7 @@ void Parser::Advance() {
   is_separated_by_newline_ = false;
   if (!lexer_->CanPeekToken())
     return;
-  lexer_->Advance();
+  lexer_->ConsumeToken();
   SkipCommentTokens();
 }
 
@@ -264,7 +264,7 @@ void Parser::SkipCommentTokens() {
     tokens_.push_back(&PeekToken());
     if (!PeekToken().Is<ast::Comment>())
       return;
-    lexer_->Advance();
+    lexer_->ConsumeToken();
   }
 }
 }  // namespace parser

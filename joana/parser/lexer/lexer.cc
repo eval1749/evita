@@ -64,11 +64,6 @@ void Lexer::AddError(ErrorCode error_code) {
   AddError(MakeTokenRange(), error_code);
 }
 
-void Lexer::Advance() {
-  DCHECK(current_token_);
-  current_token_ = NextToken();
-}
-
 bool Lexer::CanPeekChar() const {
   return reader_->CanPeekChar();
 }
@@ -79,6 +74,13 @@ base::char16 Lexer::ConsumeChar() {
 
 bool Lexer::ConsumeCharIf(base::char16 char_code) {
   return reader_->ConsumeCharIf(char_code);
+}
+
+const ast::Token& Lexer::ConsumeToken() {
+  DCHECK(current_token_);
+  auto& token = *current_token_;
+  current_token_ = NextToken();
+  return token;
 }
 
 base::char16 Lexer::PeekChar() const {

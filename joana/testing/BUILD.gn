@@ -7,6 +7,8 @@ source_set("testing") {
   sources = [
     "lexer_test_base.cc",
     "lexer_test_base.h",
+    "print_as_tree.cc",
+    "print_as_tree.h",
     "simple_error_sink.cc",
     "simple_error_sink.h",
     "simple_formatter.cc",

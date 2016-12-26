@@ -309,6 +309,8 @@ const Type& TypeParser::ParseRecordType() {
     auto& name = ConsumeToken().As<Name>();
     if (!ConsumeTokenIf(ast::PunctuatorKind::Colon))
       AddError(TypeErrorCode::ERROR_TYPE_EXPECT_COLON);
+    if (!CanPeekToken())
+      break;
     auto& type = ParseType();
     members.push_back(std::make_pair(&name, &type));
     if (!ConsumeTokenIf(ast::PunctuatorKind::Comma))

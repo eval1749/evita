@@ -80,25 +80,50 @@ TEST_F(TypeParserTest, Empty) {
 
 TEST_F(TypeParserTest, ErrorFunctionType) {
   EXPECT_EQ(
-    "function(foo)"
-    "TYPE_ERROR_TYPE_EXPECT_RPAREN@8:12\n",
-    Parse("function(foo"));
+      "function(foo)"
+      "TYPE_ERROR_TYPE_EXPECT_RPAREN@8:12\n",
+      Parse("function(foo"));
 
   EXPECT_EQ(
-    "function(foo)"
-    // TODO(eval1749): We should have EXPECT_TYPE
-    "TYPE_ERROR_TYPE_EXPECT_RPAREN@8:13\n",
-    Parse("function(foo,"));
+      "function(foo)"
+      // TODO(eval1749): We should have EXPECT_TYPE
+      "TYPE_ERROR_TYPE_EXPECT_RPAREN@8:13\n",
+      Parse("function(foo,"));
 
   EXPECT_EQ(
-    "function(foo)"
-    "TYPE_ERROR_TYPE_EXPECT_RPAREN@8:16\n",
-    Parse("function(foo bar")) << "No comma between types";
+      "function(foo)"
+      "TYPE_ERROR_TYPE_EXPECT_RPAREN@8:16\n",
+      Parse("function(foo bar"))
+      << "No comma between types";
 
   EXPECT_EQ(
-    "function(foo)"
-    "TYPE_ERROR_TYPE_UNEXPECT_RBRACE@8:13\n",
-    Parse("function(foo}")) << "Mismatched bracket";
+      "function(foo)"
+      "TYPE_ERROR_TYPE_UNEXPECT_RBRACE@8:13\n",
+      Parse("function(foo}"))
+      << "Mismatched bracket";
+}
+
+TEST_F(TypeParserTest, ErrorRecordType) {
+  EXPECT_EQ(
+      "{}"
+      "TYPE_ERROR_TYPE_EXPECT_RBRACE@0:1\n",
+      Parse("{"));
+
+  EXPECT_EQ(
+      "{}"
+      "TYPE_ERROR_TYPE_EXPECT_COLON@4:4\n"
+      "TYPE_ERROR_TYPE_EXPECT_RBRACE@0:4\n",
+      Parse("{foo"));
+
+  EXPECT_EQ(
+      "{foo: bar}"
+      "TYPE_ERROR_TYPE_EXPECT_RBRACE@0:9\n",
+      Parse("{foo: bar"));
+
+  EXPECT_EQ(
+      "{foo: bar}"
+      "TYPE_ERROR_TYPE_EXPECT_RBRACE@0:10\n",
+      Parse("{foo: bar,"));
 }
 
 TEST_F(TypeParserTest, AnyType) {

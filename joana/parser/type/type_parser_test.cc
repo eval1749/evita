@@ -90,7 +90,7 @@ TEST_F(TypeParserTest, ErrorFunctionType) {
 
   EXPECT_EQ(
       "function(foo)"
-      // TODO(eval1749): We should have EXPECT_TYPE
+      "TYPE_ERROR_TYPE_EXPECT_TYPE@13:13\n"
       "TYPE_ERROR_TYPE_EXPECT_RPAREN@8:13\n",
       Parse("function(foo,"));
 

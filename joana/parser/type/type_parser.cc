@@ -270,6 +270,7 @@ const Type& TypeParser::ParseFunctionType(const Name& name) {
     return NewTypeName(name);
   std::vector<const Type*> parameters;
   auto kind = ast::FunctionTypeKind::Normal;
+  auto after_comma = false;
   while (CanPeekToken() &&
          PeekToken() != ast::PunctuatorKind::RightParenthesis) {
     if (parameters.empty()) {
@@ -284,9 +285,12 @@ const Type& TypeParser::ParseFunctionType(const Name& name) {
       }
     }
     parameters.push_back(&ParseType());
-    if (!ConsumeTokenIf(ast::PunctuatorKind::Comma))
+    after_comma = ConsumeTokenIf(ast::PunctuatorKind::Comma);
+    if (!after_comma)
       break;
   }
+  if (after_comma)
+    AddError(TypeErrorCode::ERROR_TYPE_EXPECT_TYPE);
   SkipTokensTo(ast::PunctuatorKind::RightParenthesis);
   if (ConsumeTokenIf(ast::PunctuatorKind::Colon))
     return NewFunctionType(kind, parameters, ParseType());
@@ -320,7 +324,7 @@ const Type& TypeParser::ParseRecordType() {
   return NewRecordType(members);
 }
 
-// TupleType ::= '{' (Name ','?)* '}'
+// TupleType ::= '[' (Name ','?)* ']'
 const Type& TypeParser::ParseTupleType() {
   std::vector<const Type*> members;
   while (CanPeekToken() && PeekToken() != ast::PunctuatorKind::RightBracket) {

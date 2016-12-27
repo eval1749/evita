@@ -8,6 +8,9 @@
 namespace joana {
 namespace ast {
 
+// See [1] for tags supported by closure compiler.
+// [1] src/com/google/javascript/jscomp/parsing/Annotation.java
+
 // V(name, capital, syntax)
 #define FOR_EACH_JSDOC_TAG_NAME(V)                   \
   V(const, Const, OptionalType)                      \

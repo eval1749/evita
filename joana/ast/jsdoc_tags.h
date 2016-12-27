@@ -13,6 +13,7 @@ namespace ast {
 
 // V(name, capital, syntax)
 #define FOR_EACH_JSDOC_TAG_NAME(V)                   \
+  V(author, Author, SingleLine)                      \
   V(const, Const, OptionalType)                      \
   V(constructor, Constructor, None)                  \
   V(define, Define, TypeDescription)                 \
@@ -44,6 +45,7 @@ namespace ast {
   V(public, Public, None)                            \
   V(record, Record, None)                            \
   V(return, Return, TypeDescription)                 \
+  V(see, See, SingleLine)                            \
   V(struct, Struct, None)                            \
   V(suppress, Suppress, NameList)                    \
   V(template, Template, Names)                       \
@@ -59,6 +61,7 @@ namespace ast {
   V(NameList, "@suppress {name1, name2}")          \
   V(Names, "@template K, V")                       \
   V(None, "@constructor")                          \
+  V(SingleLine, "@author ...")                     \
   V(OptionalType, "@const {type}")                 \
   V(Type, "@enum {type}")                          \
   V(TypeDescription, "@define {type} description") \

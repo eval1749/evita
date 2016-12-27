@@ -111,6 +111,16 @@ TEST_F(JsDocParserTest, SyntaxOptionalType) {
       Parse("@const {number}"));
 }
 
+TEST_F(JsDocParserTest, SyntaxSingleLine) {
+  EXPECT_EQ(
+      "#document\n"
+      "+--@author\n"
+      "|  +--|foo|\n",
+      Parse("@author foo  \nbar"))
+      << "The parameter of @author should not have leading and trailing "
+         "whitespaces.";
+}
+
 TEST_F(JsDocParserTest, SyntaxType) {
   EXPECT_EQ(
       "#document\n"

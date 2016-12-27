@@ -238,6 +238,22 @@ std::vector<const JsDocNode*> JsDocParser::ParseNames() {
   return std::move(names);
 }
 
+// Extract text until newline
+const JsDocNode& JsDocParser::ParseSingleLine() {
+  SkipWhitespaces();
+  const auto text_start = location();
+  auto text_end = text_start;
+  while (CanPeekChar()) {
+    const auto char_code = ConsumeChar();
+    if (IsLineTerminator(char_code))
+      break;
+    if (IsWhitespace(char_code))
+      continue;
+    text_end = location();
+  }
+  return NewText(text_start, text_end);
+}
+
 // Called after consuming '@'.
 const JsDocNode& JsDocParser::ParseTag(const Name& tag_name) {
   switch (TagSyntaxOf(tag_name)) {
@@ -255,6 +271,8 @@ const JsDocNode& JsDocParser::ParseTag(const Name& tag_name) {
       if (CanPeekChar() && PeekChar() == kLeftBrace)
         return NewTag(tag_name, ParseType());
       return NewTag(tag_name);
+    case Syntax::SingleLine:
+      return NewTag(tag_name, ParseSingleLine());
     case Syntax::Type:
       return NewTag(tag_name, ParseType());
     case Syntax::TypeDescription: {

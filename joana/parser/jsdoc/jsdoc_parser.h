@@ -96,6 +96,7 @@ class JsDocParser final {
   const JsDocNode& ParseName();
   std::vector<const JsDocNode*> ParseNameList();
   std::vector<const JsDocNode*> ParseNames();
+  const JsDocNode& ParseSingleLine();
   const JsDocNode& ParseTag(const Name& tag_name);
   const Name& ParseTagName();
   const JsDocNode& ParseType();

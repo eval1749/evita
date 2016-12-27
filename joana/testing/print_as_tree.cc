@@ -4,6 +4,8 @@
 
 #include <ostream>
 
+#include "base/auto_reset.h"
+#include "base/macros.h"
 #include "base/strings/string_piece.h"
 #include "base/strings/utf_string_conversions.h"
 #include "joana/ast/jsdoc_nodes.h"
@@ -19,7 +21,12 @@ namespace internal {
 
 namespace {
 
+struct Context {
+  int level = 0;
+};
+
 struct Indent {
+  explicit Indent(const Context& context) : level(context.level) {}
   explicit Indent(int passed_level) : level(passed_level) {}
   int level;
 };
@@ -33,6 +40,22 @@ std::ostream& operator<<(std::ostream& ostream, const Indent& indent) {
   return ostream;
 }
 
+//
+// IndentScope
+//
+class IndentScope final {
+ public:
+  explicit IndentScope(Context* context)
+      : auto_reset_(&context->level, context->level + 1) {}
+
+  ~IndentScope() = default;
+
+ private:
+  base::AutoReset<int> auto_reset_;
+
+  DISALLOW_COPY_AND_ASSIGN(IndentScope);
+};
+
 struct PrintableSourceCodeRange {
   const SourceCodeRange* range;
 };
@@ -45,10 +68,6 @@ std::ostream& operator<<(std::ostream& ostream,
                          const PrintableSourceCodeRange& printable) {
   return ostream << base::UTF16ToUTF8(printable.range->GetString());
 }
-
-struct Context {
-  int level = 0;
-};
 
 struct PrintableNode {
   Context* context;
@@ -72,6 +91,7 @@ PrintableNode AsPrintable(Context* context, const ast::Node& node) {
 FOR_EACH_AST_JSDOC(V)
 #undef V
 
+// JsDoc
 std::ostream& operator<<(std::ostream& ostream,
                          const PrintableJsDocDocument& printable) {
   auto& context = *printable.context;
@@ -93,12 +113,9 @@ std::ostream& operator<<(std::ostream& ostream,
   auto& context = *printable.context;
   const auto& node = *printable.node;
   ostream << AsPrintable(&context, node.name()) << std::endl;
-  ++context.level;
-  const auto level = context.level;
-  for (const auto& parameter : node.parameters()) {
-    ostream << Indent(level) << AsPrintable(&context, parameter) << std::endl;
-  }
-  --context.level;
+  IndentScope scope(&context);
+  for (const auto& parameter : node.parameters())
+    ostream << Indent(context) << AsPrintable(&context, parameter) << std::endl;
   return ostream;
 }
 
@@ -114,6 +131,7 @@ std::ostream& operator<<(std::ostream& ostream,
   return ostream << AsPrintable(node.type().range());
 }
 
+// Dispatcher
 std::ostream& operator<<(std::ostream& ostream,
                          const PrintableNode& printable) {
   Context context;

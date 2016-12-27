@@ -20,6 +20,7 @@
 #include "joana/base/source_code_range.h"
 #include "joana/parser/jsdoc/jsdoc_error_codes.h"
 #include "joana/parser/public/parser_context.h"
+#include "joana/parser/type/type_lexer.h"
 #include "joana/parser/type/type_parser.h"
 #include "joana/parser/utils/character_reader.h"
 #include "joana/parser/utils/lexer_utils.h"
@@ -325,7 +326,7 @@ const JsDocNode& JsDocParser::ParseType() {
   }
   TypeParser parser(&context_,
                     source_code().Slice(type_start, reader_->location()),
-                    options_);
+                    options_, TypeLexerMode::JsDoc);
   auto& type = parser.Parse();
   ConsumeCharIf(kRightBrace);
   return NewType(type);

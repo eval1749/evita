@@ -86,12 +86,18 @@ class TypeParser::TypeNodeScope final {
 //
 TypeParser::TypeParser(ParserContext* context,
                        const SourceCodeRange& range,
-                       const ParserOptions& options)
+                       const ParserOptions& options,
+                       TypeLexerMode mode)
     : bracket_tracker_(NewBracketTracker(&context->error_sink(), range)),
       context_(*context),
-      lexer_(new TypeLexer(context, range, options)),
+      lexer_(new TypeLexer(context, range, options, mode)),
       node_start_(range.start()),
       options_(options) {}
+
+TypeParser::TypeParser(ParserContext* context,
+                       const SourceCodeRange& range,
+                       const ParserOptions& options)
+    : TypeParser(context, range, options, TypeLexerMode::Normal) {}
 
 TypeParser::~TypeParser() = default;
 

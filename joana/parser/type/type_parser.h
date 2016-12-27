@@ -33,6 +33,7 @@ namespace parser {
 class BracketTracker;
 enum class TypeErrorCode;
 class TypeLexer;
+enum class TypeLexerMode;
 
 //
 // TypeParser parses text representation of type in specified range of
@@ -45,6 +46,10 @@ class TypeParser final {
   using RecordMember = std::pair<const Name*, const Type*>;
 
  public:
+  TypeParser(ParserContext* context,
+             const SourceCodeRange& range,
+             const ParserOptions& options,
+             TypeLexerMode mode);
   TypeParser(ParserContext* context,
              const SourceCodeRange& range,
              const ParserOptions& options);

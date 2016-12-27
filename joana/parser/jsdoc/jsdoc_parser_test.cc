@@ -64,6 +64,19 @@ TEST_F(JsDocParserTest, InlineTag) {
       << "Open inline tag";
 }
 
+TEST_F(JsDocParserTest, MultipleLines) {
+  EXPECT_EQ(
+      "#document\n"
+      "+--|*|\n"
+      "+--@typedef\n"
+      "|  +--#type union\n"
+      "|  |  +--foo\n"
+      "|  |  +--bar\n",
+      Parse(" * @typedef {\n"
+            " *     foo|\n"
+            " *     bar}\n"));
+}
+
 TEST_F(JsDocParserTest, NoTags) {
   EXPECT_EQ("", Parse("foo"));
 }

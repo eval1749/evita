@@ -22,6 +22,7 @@ class SourceCodeRange;
 
 namespace parser {
 
+class BracketTracker;
 class Lexer;
 
 //
@@ -29,6 +30,7 @@ class Lexer;
 //
 class Parser final {
  public:
+  enum class ErrorCode;
   // Expose |OperatorPrecedence| for implementing static helper functions.
   enum class OperatorPrecedence;
 
@@ -44,8 +46,6 @@ class Parser final {
   const ast::Node& Run();
 
  private:
-  class BracketStack;
-  enum class ErrorCode;
   class ExpectSemicolonScope;
 
   class SourceCodeRangeScope final {
@@ -201,7 +201,7 @@ class Parser final {
 
   // Map node to js_doc
   std::unordered_map<const ast::Node*, const ast::JsDoc*> js_doc_map_;
-  const std::unique_ptr<BracketStack> bracket_stack_;
+  const std::unique_ptr<BracketTracker> bracket_tracker_;
   ParserContext& context_;
   const std::unique_ptr<Lexer> lexer_;
 

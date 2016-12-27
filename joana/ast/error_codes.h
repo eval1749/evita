@@ -45,8 +45,12 @@ namespace ast {
   V(JSDOC, UNKNOWN_TAG)
 
 #define FOR_EACH_PARSER_ERROR_CODE(V)        \
-  V(BRACKET, MISMATCHED)                     \
-  V(BRACKET, UNEXPECTED)                     \
+  V(BRACKET, EXPECT_RBRACE)                  \
+  V(BRACKET, EXPECT_RBRACKET)                \
+  V(BRACKET, EXPECT_RPAREN)                  \
+  V(BRACKET, UNEXPECT_RBRACE)                \
+  V(BRACKET, UNEXPECT_RBRACKET)              \
+  V(BRACKET, UNEXPECT_RPAREN)                \
   V(CLASS, EXPECT_LBRACE)                    \
   V(CLASS, INVALID)                          \
   V(EXPRESSION, ARGUMENT_LIST_EXPECT_COMMA)  \

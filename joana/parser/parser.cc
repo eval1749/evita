@@ -18,80 +18,36 @@
 #include "joana/parser/lexer/lexer.h"
 #include "joana/parser/parser_error_codes.h"
 #include "joana/parser/public/parser_context.h"
+#include "joana/parser/utils/bracket_tracker.h"
 
 namespace joana {
 namespace parser {
 
-//
-// BracketStack
-//
-class Parser::BracketStack final {
- public:
-  explicit BracketStack(ErrorSink* error_sink);
-  ~BracketStack() = default;
+namespace {
 
-  void Feed(const ast::Node& token);
-  void Finish();
+std::unique_ptr<BracketTracker> NewBracketTracker(
+    ErrorSink* error_sink,
+    const SourceCodeRange& source_code_range) {
+  const auto descriptions = std::vector<BracketTracker::Description>{
+      {ast::PunctuatorKind::LeftParenthesis,
+       static_cast<int>(Parser::ErrorCode::ERROR_BRACKET_EXPECT_RPAREN),
+       ast::PunctuatorKind::RightParenthesis,
+       static_cast<int>(Parser::ErrorCode::ERROR_BRACKET_UNEXPECT_RPAREN)},
+      {ast::PunctuatorKind::LeftBrace,
+       static_cast<int>(Parser::ErrorCode::ERROR_BRACKET_EXPECT_RBRACE),
+       ast::PunctuatorKind::RightBrace,
+       static_cast<int>(Parser::ErrorCode::ERROR_BRACKET_UNEXPECT_RBRACE)},
+      {ast::PunctuatorKind::LeftBracket,
+       static_cast<int>(Parser::ErrorCode::ERROR_BRACKET_EXPECT_RBRACKET),
+       ast::PunctuatorKind::RightBracket,
+       static_cast<int>(Parser::ErrorCode::ERROR_BRACKET_UNEXPECT_RBRACKET)},
+  };
 
- private:
-  void Check(const ast::Node& token, ast::PunctuatorKind expected);
-  void Mark(const ast::Node& token, ErrorCode error_code);
-
-  ErrorSink& error_sink_;
-  std::vector<std::pair<const ast::Node*, ErrorCode>> stack_;
-
-  DISALLOW_COPY_AND_ASSIGN(BracketStack);
-};
-
-Parser::BracketStack::BracketStack(ErrorSink* error_sink)
-    : error_sink_(*error_sink) {}
-
-void Parser::BracketStack::Check(const ast::Node& token,
-                                 ast::PunctuatorKind expected) {
-  if (stack_.empty()) {
-    error_sink_.AddError(token.range(),
-                         static_cast<int>(ErrorCode::ERROR_BRACKET_UNEXPECTED));
-    return;
-  }
-  const auto& start_token = *stack_.back().first;
-  if (start_token == expected) {
-    stack_.pop_back();
-    return;
-  }
-  error_sink_.AddError(
-      SourceCodeRange::Merge(SourceCodeRange::CollapseToStart(token.range()),
-                             start_token.range()),
-      static_cast<int>(ErrorCode::ERROR_BRACKET_MISMATCHED));
+  return std::make_unique<BracketTracker>(error_sink, source_code_range,
+                                          descriptions);
 }
 
-void Parser::BracketStack::Mark(const ast::Node& token, ErrorCode error_code) {
-  stack_.push_back(std::make_pair(&token, error_code));
-}
-
-void Parser::BracketStack::Feed(const ast::Node& token) {
-  auto* const bracket = token.TryAs<ast::Punctuator>();
-  if (!bracket)
-    return;
-  switch (static_cast<ast::PunctuatorKind>(bracket->kind())) {
-    case ast::PunctuatorKind::LeftParenthesis:
-      return Mark(token, ErrorCode::ERROR_STATEMENT_EXPECT_RPAREN);
-    case ast::PunctuatorKind::LeftBracket:
-      return Mark(token, ErrorCode::ERROR_EXPRESSION_EXPECT_RBRACKET);
-    case ast::PunctuatorKind::LeftBrace:
-      return Mark(token, ErrorCode::ERROR_STATEMENT_EXPECT_RBRACE);
-    case ast::PunctuatorKind::RightParenthesis:
-      return Check(token, ast::PunctuatorKind::LeftParenthesis);
-    case ast::PunctuatorKind::RightBracket:
-      return Check(token, ast::PunctuatorKind::LeftBracket);
-    case ast::PunctuatorKind::RightBrace:
-      return Check(token, ast::PunctuatorKind::LeftBrace);
-  }
-}
-
-void Parser::BracketStack::Finish() {
-  for (const auto& bracket : stack_)
-    error_sink_.AddError(bracket.first->range(), bracket.second);
-}
+}  // namespace
 
 //
 // SourceCodeRangeScope
@@ -111,7 +67,7 @@ Parser::SourceCodeRangeScope::~SourceCodeRangeScope() {
 Parser::Parser(ParserContext* context,
                const SourceCodeRange& range,
                const ParserOptions& options)
-    : bracket_stack_(new BracketStack(&context->error_sink())),
+    : bracket_tracker_(NewBracketTracker(&context->error_sink(), range)),
       context_(*context),
       lexer_(new Lexer(context, range, options)),
       options_(options) {}
@@ -261,7 +217,7 @@ const ast::Node& Parser::Run() {
     AssociateJsDoc(js_doc, statement);
     statements.push_back(&statement);
   }
-  bracket_stack_->Finish();
+  bracket_tracker_->Finish();
   return node_factory().NewModule(source_code().range(), statements,
                                   js_doc_map_);
 }
@@ -270,7 +226,7 @@ void Parser::SkipCommentTokens() {
   while (lexer_->CanPeekToken()) {
     if (lexer_->is_separated_by_newline())
       is_separated_by_newline_ = true;
-    bracket_stack_->Feed(PeekToken());
+    bracket_tracker_->Feed(PeekToken());
     tokens_.push_back(&PeekToken());
     if (!PeekToken().Is<ast::Comment>())
       return;

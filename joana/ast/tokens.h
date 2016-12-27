@@ -104,6 +104,8 @@ class JOANA_AST_EXPORT JsDoc final : public Token {
  public:
   ~JsDoc() final;
 
+  const JsDocDocument& document() const { return document_; }
+
  private:
   JsDoc(const SourceCodeRange& range, const JsDocDocument& document);
 

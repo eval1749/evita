@@ -124,7 +124,7 @@ class JOANA_AST_EXPORT ConstStatement
  public:
   ~ConstStatement() override;
 
-  const Expression& expression() { return *member_at<0>(); }
+  const Expression& expression() const { return *member_at<0>(); }
 
  protected:
   ConstStatement(const SourceCodeRange& range, Expression* expression);
@@ -240,11 +240,11 @@ class JOANA_AST_EXPORT ForStatement : public NodeTemplate<Statement,
  public:
   ~ForStatement() override;
 
-  const Expression& condition() { return *member_at<2>(); }
-  const Statement& body() { return *member_at<4>(); }
-  const Expression& init() { return *member_at<1>(); }
+  const Expression& condition() const { return *member_at<2>(); }
+  const Statement& body() const { return *member_at<4>(); }
+  const Expression& init() const { return *member_at<1>(); }
   const Token& keyword() const { return *member_at<0>(); }
-  const Expression& step() { return *member_at<3>(); }
+  const Expression& step() const { return *member_at<3>(); }
 
  protected:
   ForStatement(const SourceCodeRange& range,
@@ -273,8 +273,8 @@ class JOANA_AST_EXPORT ForInStatement
  public:
   ~ForInStatement() override;
 
-  const Statement& body() { return *member_at<2>(); }
-  const Expression& expression() { return *member_at<1>(); }
+  const Statement& body() const { return *member_at<2>(); }
+  const Expression& expression() const { return *member_at<1>(); }
   const Token& keyword() const { return *member_at<0>(); }
 
  protected:
@@ -300,9 +300,9 @@ class JOANA_AST_EXPORT ForOfStatement : public NodeTemplate<Statement,
  public:
   ~ForOfStatement() override;
 
-  const Expression& binding() { return *member_at<1>(); }
-  const Statement& body() { return *member_at<3>(); }
-  const Expression& expression() { return *member_at<2>(); }
+  const Expression& binding() const { return *member_at<1>(); }
+  const Statement& body() const { return *member_at<3>(); }
+  const Expression& expression() const { return *member_at<2>(); }
   const Token& keyword() const { return *member_at<0>(); }
 
  protected:
@@ -408,7 +408,7 @@ class JOANA_AST_EXPORT LetStatement
  public:
   ~LetStatement() override;
 
-  const Expression& expression() { return *member_at<0>(); }
+  const Expression& expression() const { return *member_at<0>(); }
 
  protected:
   LetStatement(const SourceCodeRange& range, Expression* expression);
@@ -561,7 +561,7 @@ class JOANA_AST_EXPORT VarStatement
  public:
   ~VarStatement() override;
 
-  const Expression& expression() { return *member_at<0>(); }
+  const Expression& expression() const { return *member_at<0>(); }
 
  protected:
   VarStatement(const SourceCodeRange& range, Expression* expression);

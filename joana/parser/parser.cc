@@ -29,9 +29,8 @@ class Parser::BracketStack final {
   explicit BracketStack(ErrorSink* error_sink);
   ~BracketStack() = default;
 
-  const std::vector<const ast::Node*>& tokens() const { return stack_; }
-
   void Feed(const ast::Node& token);
+  void Finish();
 
  private:
   void Check(const ast::Node& token, ast::PunctuatorKind expected);
@@ -80,6 +79,11 @@ void Parser::BracketStack::Feed(const ast::Node& token) {
     case ast::PunctuatorKind::RightBrace:
       return Check(token, ast::PunctuatorKind::LeftBrace);
   }
+}
+
+void Parser::BracketStack::Finish() {
+  for (const auto& bracket : stack_)
+    error_sink_.AddError(bracket->range(), ErrorCode::ERROR_BRACKET_NOT_CLOSED);
 }
 
 //
@@ -250,8 +254,7 @@ const ast::Node& Parser::Run() {
     AssociateJsDoc(js_doc, statement);
     statements.push_back(&statement);
   }
-  for (const auto& bracket : bracket_stack_->tokens())
-    AddError(*bracket, ErrorCode::ERROR_BRACKET_NOT_CLOSED);
+  bracket_stack_->Finish();
   return node_factory().NewModule(source_code().range(), statements,
                                   js_doc_map_);
 }

@@ -8,6 +8,7 @@
 
 #include "joana/parser/parser.h"
 
+#include "joana/ast/jsdoc_nodes.h"
 #include "joana/ast/module.h"
 #include "joana/ast/node_editor.h"
 #include "joana/ast/node_factory.h"
@@ -24,6 +25,16 @@ namespace joana {
 namespace parser {
 
 namespace {
+
+// Returns true if |document| contains |@fileoviewview| tag.
+bool IsFileOverview(const ast::JsDocDocument& document) {
+  for (const auto& element : document.elements()) {
+    const auto* tag = element.TryAs<ast::JsDocTag>();
+    if (tag && tag->name() == ast::NameId::JsDocFileOverview)
+      return true;
+  }
+  return false;
+}
 
 std::unique_ptr<BracketTracker> NewBracketTracker(
     ErrorSink* error_sink,
@@ -114,6 +125,9 @@ void Parser::AssociateJsDoc(const ast::JsDoc& js_doc, const ast::Node& node) {
   const auto& result = js_doc_map_.emplace(&node, &js_doc);
   if (result.second)
     return;
+  if (IsFileOverview(js_doc.document()))
+    return;
+  // We don't allow statement/expression has more than one annotation.
   AddError(js_doc, ErrorCode::ERROR_STATEMENT_UNEXPECT_ANNOTATION);
 }
 

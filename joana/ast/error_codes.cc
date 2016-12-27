@@ -10,6 +10,12 @@ namespace joana {
 namespace ast {
 
 base::StringPiece ErrorStringOf(int error_code) {
+  static const char* kJsDocErrorText[] = {
+#define V(token, reason) "JSDOC_ERROR_" #token "_" #reason,
+      FOR_EACH_JSDOC_ERROR_CODE(V)
+#undef V
+  };
+
   static const char* kLiteralErrorTexts[] = {
 #define V(token, reason) "LEXER_ERROR_" #token "_" #reason,
       FOR_EACH_LEXER_ERROR_CODE(V)
@@ -28,6 +34,12 @@ base::StringPiece ErrorStringOf(int error_code) {
 #undef V
   };
 
+  const auto jsdoc_it =
+      std::begin(kJsDocErrorText) + error_code - kJsDocErrorCodeBase - 1;
+  if (jsdoc_it >= std::begin(kJsDocErrorText) &&
+      jsdoc_it < std::end(kJsDocErrorText)) {
+    return base::StringPiece(*jsdoc_it);
+  }
   const auto lexer_it =
       std::begin(kLiteralErrorTexts) + error_code - kLexerErrorCodeBase - 1;
   if (lexer_it >= std::begin(kLiteralErrorTexts) &&

@@ -44,6 +44,9 @@ class TypeLexerTest : public LexerTestBase {
   TypeLexerTest() = default;
   ~TypeLexerTest() override = default;
 
+  TypeLexerMode mode() const { return lexer_mode_; }
+  void set_lexer_mode(TypeLexerMode mode) { lexer_mode_ = mode; }
+
   std::string NewError(int start, int end, TypeErrorCode error_code);
   const ast::Token& NewName(int start, int end);
   const ast::Token& NewPunctuator(int start, int end, ast::PunctuatorKind kind);
@@ -52,12 +55,14 @@ class TypeLexerTest : public LexerTestBase {
   std::string ScanToString();
 
  private:
+  TypeLexerMode lexer_mode_ = TypeLexerMode::Normal;
+
   DISALLOW_COPY_AND_ASSIGN(TypeLexerTest);
 };
 
 std::string TypeLexerTest::NewError(int start,
-                                         int end,
-                                         TypeErrorCode error_code) {
+                                    int end,
+                                    TypeErrorCode error_code) {
   std::ostringstream ostream;
   ostream << ' ' << static_cast<int>(error_code) << '@'
           << source_code().Slice(start, end);
@@ -69,13 +74,13 @@ const ast::Token& TypeLexerTest::NewName(int start, int end) {
 }
 
 const ast::Token& TypeLexerTest::NewPunctuator(int start,
-                                                    int end,
-                                                    ast::PunctuatorKind kind) {
+                                               int end,
+                                               ast::PunctuatorKind kind) {
   return node_factory().NewPunctuator(source_code().Slice(start, end), kind);
 }
 
 std::string TypeLexerTest::ScanToString(const ParserOptions& options) {
-  TypeLexer lexer(&context(), source_code().range(), options);
+  TypeLexer lexer(&context(), source_code().range(), options, lexer_mode_);
   std::ostringstream ostream;
   while (lexer.CanPeekToken())
     ostream << lexer.ConsumeToken() << std::endl;
@@ -111,6 +116,12 @@ TEST_F(TypeLexerTest, Errors) {
   EXPECT_EQ(ToString(NewPunctuator(0, 2, ast::PunctuatorKind::Invalid)) +
                 NewError(0, 2, TypeErrorCode::ERROR_TYPE_UNEXPECT_DOT),
             ScanToString());
+}
+
+TEST_F(TypeLexerTest, JsDocMdoe) {
+  set_lexer_mode(TypeLexerMode::JsDoc);
+  PrepareSouceCode("\n  * foo");
+  EXPECT_EQ(ToString(NewName(5, 8)), ScanToString());
 }
 
 TEST_F(TypeLexerTest, Punctuator) {

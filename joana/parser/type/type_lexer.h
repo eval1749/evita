@@ -26,6 +26,11 @@ namespace parser {
 class CharacterReader;
 enum class TypeErrorCode;
 
+enum class TypeLexerMode {
+  Normal,
+  JsDoc,
+};
+
 //
 // TypeLexer
 //
@@ -33,7 +38,8 @@ class TypeLexer final {
  public:
   TypeLexer(ParserContext* context,
             const SourceCodeRange& range,
-            const ParserOptions& options);
+            const ParserOptions& options,
+            TypeLexerMode mode);
   ~TypeLexer();
 
   SourceCodeRange location() const;
@@ -61,6 +67,7 @@ class TypeLexer final {
 
   ParserContext& context_;
   const ast::Token* current_token_ = nullptr;
+  const TypeLexerMode mode_;
   ParserOptions options_;
   const std::unique_ptr<CharacterReader> reader_;
   int token_start_ = 0;

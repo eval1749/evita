@@ -30,8 +30,10 @@ bool IsTypeNamePart(base::char16 char_code) {
 //
 TypeLexer::TypeLexer(ParserContext* context,
                      const SourceCodeRange& range,
-                     const ParserOptions& options)
+                     const ParserOptions& options,
+                     TypeLexerMode mode)
     : context_(*context),
+      mode_(mode),
       options_(options),
       reader_(new CharacterReader(range)) {
   current_token_ = NextToken();
@@ -99,10 +101,17 @@ const ast::Token& TypeLexer::NewPunctuator(ast::PunctuatorKind kind) {
 }
 
 const ast::Token* TypeLexer::NextToken() {
-  while (CanPeekChar() && IsWhitespace(PeekChar()))
+start_over:
+  auto found_newline = false;
+  while (CanPeekChar() && IsWhitespace(PeekChar())) {
+    if (IsLineTerminator(PeekChar()))
+      found_newline = true;
     ConsumeChar();
+  }
   if (!CanPeekChar())
     return nullptr;
+  if (mode_ == TypeLexerMode::JsDoc && found_newline && ConsumeCharIf('*'))
+    goto start_over;
   token_start_ = reader_->location();
   switch (PeekChar()) {
     case '!':

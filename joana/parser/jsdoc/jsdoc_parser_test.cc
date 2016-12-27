@@ -4,29 +4,15 @@
 
 #include "joana/parser/jsdoc/jsdoc_parser.h"
 
-#include <memory>
-#include <ostream>
+#include <sstream>
 #include <string>
 
-#include "base/macros.h"
-#include "base/strings/string_piece.h"
-#include "base/strings/utf_string_conversions.h"
 #include "joana/ast/jsdoc_nodes.h"
-#include "joana/ast/node.h"
-#include "joana/ast/node_factory.h"
-#include "joana/ast/node_forward.h"
 #include "joana/base/error_sink.h"
-#include "joana/base/memory/zone.h"
 #include "joana/base/source_code.h"
-#include "joana/base/source_code_factory.h"
-#include "joana/base/source_code_range.h"
-#include "joana/parser/public/parser_context.h"
-#include "joana/parser/public/parser_context_builder.h"
 #include "joana/parser/public/parser_options.h"
-#include "joana/parser/public/parser_options_builder.h"
+#include "joana/testing/lexer_test_base.h"
 #include "joana/testing/print_as_tree.h"
-#include "joana/testing/simple_error_sink.h"
-#include "testing/gtest/include/gtest/gtest.h"
 
 namespace joana {
 namespace parser {
@@ -34,7 +20,7 @@ namespace parser {
 //
 // JsDocParserTest
 //
-class JsDocParserTest : public ::testing::Test {
+class JsDocParserTest : public LexerTestBase {
  protected:
   JsDocParserTest() = default;
   ~JsDocParserTest() override = default;
@@ -49,26 +35,15 @@ class JsDocParserTest : public ::testing::Test {
 
 std::string JsDocParserTest::Parse(base::StringPiece script_text,
                                    const ParserOptions& options) {
-  Zone zone("JsDocParserTest");
-  SimpleErrorSink error_sink;
-  ast::NodeFactory node_factory(&zone);
-  const auto& context = ParserContext::Builder()
-                            .set_error_sink(&error_sink)
-                            .set_node_factory(&node_factory)
-                            .Build();
-  SourceCode::Factory source_code_factory(&zone);
-  const auto& script_text16 = base::UTF8ToUTF16(script_text);
-  auto& source_code = source_code_factory.New(
-      base::FilePath(), base::StringPiece16(script_text16));
-
-  JsDocParser parser(context.get(), source_code.range(), options);
+  PrepareSouceCode(script_text);
+  JsDocParser parser(&context(), source_code().range(), options);
   const auto* maybe_document = parser.Parse();
   if (!maybe_document)
     return "";
   const auto& document = *maybe_document;
   std::ostringstream ostream;
   ostream << AsPrintableTree(document);
-  for (const auto& error : error_sink.errors())
+  for (const auto& error : error_sink().errors())
     ostream << error << std::endl;
   return ostream.str();
 }

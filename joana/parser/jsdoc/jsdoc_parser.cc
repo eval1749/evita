@@ -88,6 +88,10 @@ void JsDocParser::AddError(const SourceCodeRange& range,
   context_.error_sink().AddError(range, error_code);
 }
 
+void JsDocParser::AddError(int start, int end, JsDocErrorCode error_code) {
+  AddError(source_code().Slice(start, end), error_code);
+}
+
 void JsDocParser::AddError(JsDocErrorCode error_code) {
   AddError(ComputeNodeRange(), error_code);
 }
@@ -170,18 +174,16 @@ const JsDocDocument* JsDocParser::Parse() {
   auto number_of_tags = 0;
   auto text_start = location();
   while (CanPeekChar()) {
-    if (PeekChar() != '@') {
-      ConsumeChar();
-      continue;
-    }
-    if (location() > text_start)
-      nodes.push_back(&NewText(text_start, location()));
+    const auto text_end = SkipToBlockTag();
+    if (text_end > text_start)
+      nodes.push_back(&NewText(text_start, text_end));
+    if (!CanPeekChar())
+      break;
     ++number_of_tags;
     NodeRangeScope scope(this);
     nodes.push_back(&ParseTag(ParseTagName()));
     SkipWhitespaces();
     text_start = location();
-    continue;
   }
   if (number_of_tags == 0)
     return nullptr;
@@ -192,12 +194,7 @@ const JsDocDocument* JsDocParser::Parse() {
 const JsDocNode& JsDocParser::ParseDescription() {
   SkipWhitespaces();
   const auto text_start = reader_->location();
-  auto text_end = text_start;
-  while (CanPeekChar() && PeekChar() != '@') {
-    if (IsWhitespace(ConsumeChar()))
-      continue;
-    text_end = reader_->location();
-  }
+  auto text_end = SkipToBlockTag();
   return NewText(text_start, text_end);
 }
 
@@ -332,6 +329,54 @@ const JsDocNode& JsDocParser::ParseType() {
   auto& type = parser.Parse();
   ConsumeCharIf(kRightBrace);
   return NewType(type);
+}
+
+int JsDocParser::SkipToBlockTag() {
+  SkipWhitespaces();
+  enum class State {
+    Brace,
+    InlineTag,
+    Normal,
+  } state = State::Normal;
+  auto text_end = reader_->location();
+  auto inline_tag_start = 0;
+  while (CanPeekChar()) {
+    switch (state) {
+      case State::Brace:
+        if (ConsumeCharIf('@')) {
+          state = State::InlineTag;
+          continue;
+        }
+        if (ConsumeCharIf(kLeftBrace))
+          continue;
+        state = State::Normal;
+        continue;
+      case State::Normal:
+        if (PeekChar() == '@')
+          return text_end;
+        if (!IsWhitespace(PeekChar()))
+          text_end = reader_->location() + 1;
+        if (ConsumeChar() == kLeftBrace) {
+          inline_tag_start = reader_->location() - 1;
+          state = State::Brace;
+          continue;
+        }
+        continue;
+      case State::InlineTag:
+        if (ConsumeChar() != kRightBrace)
+          continue;
+        state = State::Normal;
+        text_end = reader_->location();
+        continue;
+    }
+    NOTREACHED() << "We have missing case for state="
+                 << static_cast<int>(state);
+  }
+  if (state == State::InlineTag) {
+    AddError(inline_tag_start, reader_->location(),
+             JsDocErrorCode::ERROR_JSDOC_EXPECT_RBRACE);
+  }
+  return text_end;
 }
 
 void JsDocParser::SkipWhitespaces() {

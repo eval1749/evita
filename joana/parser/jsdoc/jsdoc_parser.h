@@ -56,6 +56,7 @@ class JsDocParser final {
 
   // ErrorSink utility functions
   void AddError(const SourceCodeRange& range, JsDocErrorCode error_code);
+  void AddError(int start, int end, JsDocErrorCode error_code);
   void AddError(JsDocErrorCode error_code);
 
   // Factory functions
@@ -101,6 +102,8 @@ class JsDocParser final {
   const Name& ParseTagName();
   const JsDocNode& ParseType();
 
+  // Returns start of training whitespace or before block tag.
+  int SkipToBlockTag();
   void SkipWhitespaces();
 
   ParserContext& context_;

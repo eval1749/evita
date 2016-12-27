@@ -37,12 +37,9 @@ std::string JsDocParserTest::Parse(base::StringPiece script_text,
                                    const ParserOptions& options) {
   PrepareSouceCode(script_text);
   JsDocParser parser(&context(), source_code().range(), options);
-  const auto* maybe_document = parser.Parse();
-  if (!maybe_document)
-    return "";
-  const auto& document = *maybe_document;
   std::ostringstream ostream;
-  ostream << AsPrintableTree(document) << std::endl;
+  if (auto* document = parser.Parse())
+    ostream << AsPrintableTree(*document) << std::endl;
   for (const auto& error : error_sink().errors())
     ostream << error << std::endl;
   return ostream.str();
@@ -54,6 +51,17 @@ std::string JsDocParserTest::Parse(base::StringPiece script_text) {
 
 TEST_F(JsDocParserTest, Empty) {
   EXPECT_EQ("", Parse(""));
+}
+
+TEST_F(JsDocParserTest, InlineTag) {
+  EXPECT_EQ(
+      "#document\n"
+      "+--|foo {@code bar}|\n"
+      "+--@const\n",
+      Parse("foo {@code bar} @const"));
+
+  EXPECT_EQ("JSDOC_ERROR_JSDOC_EXPECT_RBRACE@4:14\n", Parse("foo {@code bar"))
+      << "Open inline tag";
 }
 
 TEST_F(JsDocParserTest, NoTags) {
@@ -82,13 +90,15 @@ TEST_F(JsDocParserTest, SyntaxNames) {
   EXPECT_EQ(
       "#document\n"
       "+--@template\n"
-      "|  +--#name T\n",
+      "|  +--#name T\n"
+      "+--|desc|\n",
       Parse("@template T desc"));
   EXPECT_EQ(
       "#document\n"
       "+--@template\n"
       "|  +--#name KEY\n"
-      "|  +--#name VALUE\n",
+      "|  +--#name VALUE\n"
+      "+--|desc|\n",
       Parse("@template KEY, VALUE desc"));
 }
 
@@ -102,7 +112,8 @@ TEST_F(JsDocParserTest, SyntaxNone) {
 TEST_F(JsDocParserTest, SyntaxOptionalType) {
   EXPECT_EQ(
       "#document\n"
-      "+--@const\n",
+      "+--@const\n"
+      "+--|desc|\n",
       Parse("@const desc"));
   EXPECT_EQ(
       "#document\n"
@@ -115,7 +126,8 @@ TEST_F(JsDocParserTest, SyntaxSingleLine) {
   EXPECT_EQ(
       "#document\n"
       "+--@author\n"
-      "|  +--|foo|\n",
+      "|  +--|foo|\n"
+      "+--|bar|\n",
       Parse("@author foo  \nbar"))
       << "The parameter of @author should not have leading and trailing "
          "whitespaces.";

@@ -825,12 +825,12 @@ class LaunchPad {
  * @this {!Window}
  */
 function listTextDocumentCommand() {
-  /** @const @type {?Window} */
+  /** @const {?Window} */
   const present = this.parent.children.find(function(child) {
     if (!(child instanceof VisualWindow))
       return false;
-    /** @const @type(!VisualWindow) */
-    const window = /** @type(!VisualWindow) */ (child);
+    /** @const {!VisualWindow} */
+    const window = /** @type {!VisualWindow} */ (child);
     return window.styleSheet == styleSheet;
   }) ||
       null;

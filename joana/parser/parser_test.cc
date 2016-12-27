@@ -144,7 +144,7 @@ TEST_F(ParserTest, BlockStatement) {
 TEST_F(ParserTest, Bracket) {
   EXPECT_EQ(
       "{\n}\n"
-      "PASER_ERROR_BRACKET_NOT_CLOSED@0:1\n",
+      "PASER_ERROR_STATEMENT_EXPECT_RBRACE@0:1\n",
       Parse("{"));
 }
 

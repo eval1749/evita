@@ -46,7 +46,6 @@ namespace ast {
 
 #define FOR_EACH_PARSER_ERROR_CODE(V)        \
   V(BRACKET, MISMATCHED)                     \
-  V(BRACKET, NOT_CLOSED)                     \
   V(BRACKET, UNEXPECTED)                     \
   V(CLASS, EXPECT_LBRACE)                    \
   V(CLASS, INVALID)                          \

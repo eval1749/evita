@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include <iterator>
+#include <utility>
 #include <vector>
 
 #include "joana/parser/parser.h"
@@ -34,9 +35,10 @@ class Parser::BracketStack final {
 
  private:
   void Check(const ast::Node& token, ast::PunctuatorKind expected);
+  void Mark(const ast::Node& token, ErrorCode error_code);
 
   ErrorSink& error_sink_;
-  std::vector<const ast::Node*> stack_;
+  std::vector<std::pair<const ast::Node*, ErrorCode>> stack_;
 
   DISALLOW_COPY_AND_ASSIGN(BracketStack);
 };
@@ -51,7 +53,7 @@ void Parser::BracketStack::Check(const ast::Node& token,
                          static_cast<int>(ErrorCode::ERROR_BRACKET_UNEXPECTED));
     return;
   }
-  const auto& start_token = *stack_.back();
+  const auto& start_token = *stack_.back().first;
   if (start_token == expected) {
     stack_.pop_back();
     return;
@@ -62,16 +64,21 @@ void Parser::BracketStack::Check(const ast::Node& token,
       static_cast<int>(ErrorCode::ERROR_BRACKET_MISMATCHED));
 }
 
+void Parser::BracketStack::Mark(const ast::Node& token, ErrorCode error_code) {
+  stack_.push_back(std::make_pair(&token, error_code));
+}
+
 void Parser::BracketStack::Feed(const ast::Node& token) {
   auto* const bracket = token.TryAs<ast::Punctuator>();
   if (!bracket)
     return;
   switch (static_cast<ast::PunctuatorKind>(bracket->kind())) {
     case ast::PunctuatorKind::LeftParenthesis:
+      return Mark(token, ErrorCode::ERROR_STATEMENT_EXPECT_RPAREN);
     case ast::PunctuatorKind::LeftBracket:
+      return Mark(token, ErrorCode::ERROR_EXPRESSION_EXPECT_RBRACKET);
     case ast::PunctuatorKind::LeftBrace:
-      stack_.push_back(bracket);
-      return;
+      return Mark(token, ErrorCode::ERROR_STATEMENT_EXPECT_RBRACE);
     case ast::PunctuatorKind::RightParenthesis:
       return Check(token, ast::PunctuatorKind::LeftParenthesis);
     case ast::PunctuatorKind::RightBracket:
@@ -83,7 +90,7 @@ void Parser::BracketStack::Feed(const ast::Node& token) {
 
 void Parser::BracketStack::Finish() {
   for (const auto& bracket : stack_)
-    error_sink_.AddError(bracket->range(), ErrorCode::ERROR_BRACKET_NOT_CLOSED);
+    error_sink_.AddError(bracket.first->range(), bracket.second);
 }
 
 //

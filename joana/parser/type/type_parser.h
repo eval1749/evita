@@ -6,7 +6,6 @@
 #define JOANA_PARSER_TYPE_TYPE_PARSER_H_
 
 #include <memory>
-#include <stack>
 #include <utility>
 #include <vector>
 
@@ -31,6 +30,7 @@ class Type;
 
 namespace parser {
 
+class BracketTracker;
 enum class TypeErrorCode;
 class TypeLexer;
 
@@ -53,7 +53,6 @@ class TypeParser final {
   const Type& Parse();
 
  private:
-  using BracketPair = std::pair<const ast::Punctuator*, TypeErrorCode>;
   class TypeNodeScope;
 
   ast::NodeFactory& node_factory();
@@ -66,9 +65,6 @@ class TypeParser final {
 
   // Lexer utility members
   bool CanPeekToken() const;
-  void CheckCloseBracket(const ast::Token& bracket,
-                         const ast::PunctuatorKind open_bracket,
-                         TypeErrorCode error_code);
   const Token& ConsumeToken();
 
   template <typename T>
@@ -114,7 +110,7 @@ class TypeParser final {
   const Type& ParseTypeGroup();
   const Type& ParseUnionType();
 
-  std::stack<BracketPair> brackets_;
+  const std::unique_ptr<BracketTracker> bracket_tracker_;
   ParserContext& context_;
   const std::unique_ptr<TypeLexer> lexer_;
   const ParserOptions& options_;

@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <stack>
+#include <utility>
+
 #include "joana/parser/type/type_parser.h"
 
 #include "joana/ast/declarations.h"
@@ -14,6 +17,7 @@
 #include "joana/parser/public/parser_context.h"
 #include "joana/parser/type/type_error_codes.h"
 #include "joana/parser/type/type_lexer.h"
+#include "joana/parser/utils/bracket_tracker.h"
 
 namespace joana {
 namespace parser {
@@ -28,6 +32,32 @@ bool CanStartType(const Token& token) {
   return token.Is<Name>() || token == ast::PunctuatorKind::LeftParenthesis ||
          token == ast::PunctuatorKind::LeftBracket ||
          token == ast::PunctuatorKind::LeftBrace;
+}
+
+std::unique_ptr<BracketTracker> NewBracketTracker(
+    ErrorSink* error_sink,
+    const SourceCodeRange& source_code_range) {
+  const auto descriptions = std::vector<BracketTracker::Description>{
+      {ast::PunctuatorKind::LeftParenthesis,
+       static_cast<int>(TypeErrorCode::ERROR_TYPE_EXPECT_RPAREN),
+       ast::PunctuatorKind::RightParenthesis,
+       static_cast<int>(TypeErrorCode::ERROR_TYPE_UNEXPECT_RPAREN)},
+      {ast::PunctuatorKind::LeftBrace,
+       static_cast<int>(TypeErrorCode::ERROR_TYPE_EXPECT_RBRACE),
+       ast::PunctuatorKind::RightBrace,
+       static_cast<int>(TypeErrorCode::ERROR_TYPE_UNEXPECT_RBRACE)},
+      {ast::PunctuatorKind::LeftBracket,
+       static_cast<int>(TypeErrorCode::ERROR_TYPE_EXPECT_RBRACKET),
+       ast::PunctuatorKind::RightBracket,
+       static_cast<int>(TypeErrorCode::ERROR_TYPE_UNEXPECT_RBRACKET)},
+      {ast::PunctuatorKind::LessThan,
+       static_cast<int>(TypeErrorCode::ERROR_TYPE_EXPECT_RANGLE),
+       ast::PunctuatorKind::GreaterThan,
+       static_cast<int>(TypeErrorCode::ERROR_TYPE_UNEXPECT_RANGLE)},
+  };
+
+  return std::make_unique<BracketTracker>(error_sink, source_code_range,
+                                          descriptions);
 }
 
 }  // namespace
@@ -57,7 +87,8 @@ class TypeParser::TypeNodeScope final {
 TypeParser::TypeParser(ParserContext* context,
                        const SourceCodeRange& range,
                        const ParserOptions& options)
-    : context_(*context),
+    : bracket_tracker_(NewBracketTracker(&context->error_sink(), range)),
+      context_(*context),
       lexer_(new TypeLexer(context, range, options)),
       node_start_(range.start()),
       options_(options) {}
@@ -95,61 +126,9 @@ bool TypeParser::CanPeekToken() const {
   return lexer_->CanPeekToken();
 }
 
-void TypeParser::CheckCloseBracket(const ast::Token& bracket,
-                                   ast::PunctuatorKind expected,
-                                   TypeErrorCode error_code) {
-  if (brackets_.empty()) {
-    AddError(bracket, error_code);
-    return;
-  }
-  auto& actual = *brackets_.top().first;
-  if (actual == expected) {
-    brackets_.pop();
-    return;
-  }
-  AddError(actual.range().start(), bracket.range().end(), error_code);
-  brackets_.pop();
-}
-
 const Token& TypeParser::ConsumeToken() {
   auto& token = lexer_->ConsumeToken();
-  if (!token.Is<ast::Punctuator>())
-    return token;
-  auto& bracket = token.As<ast::Punctuator>();
-  switch (static_cast<ast::PunctuatorKind>(bracket.kind())) {
-    case ast::PunctuatorKind::LessThan:
-      brackets_.push(
-          std::make_pair(&bracket, TypeErrorCode::ERROR_TYPE_EXPECT_RANGLE));
-      return token;
-    case ast::PunctuatorKind::LeftBrace:
-      brackets_.push(
-          std::make_pair(&bracket, TypeErrorCode::ERROR_TYPE_EXPECT_RBRACE));
-      return token;
-    case ast::PunctuatorKind::LeftBracket:
-      brackets_.push(
-          std::make_pair(&bracket, TypeErrorCode::ERROR_TYPE_EXPECT_RBRACKET));
-      return token;
-    case ast::PunctuatorKind::LeftParenthesis:
-      brackets_.push(
-          std::make_pair(&bracket, TypeErrorCode::ERROR_TYPE_EXPECT_RPAREN));
-      return token;
-    case ast::PunctuatorKind::GreaterThan:
-      CheckCloseBracket(bracket, ast::PunctuatorKind::LessThan,
-                        TypeErrorCode::ERROR_TYPE_UNEXPECT_RANGLE);
-      return token;
-    case ast::PunctuatorKind::RightBrace:
-      CheckCloseBracket(bracket, ast::PunctuatorKind::LeftBrace,
-                        TypeErrorCode::ERROR_TYPE_UNEXPECT_RBRACE);
-      return token;
-    case ast::PunctuatorKind::RightBracket:
-      CheckCloseBracket(bracket, ast::PunctuatorKind::LeftBracket,
-                        TypeErrorCode::ERROR_TYPE_UNEXPECT_RBRACKET);
-      return token;
-    case ast::PunctuatorKind::RightParenthesis:
-      CheckCloseBracket(bracket, ast::PunctuatorKind::LeftParenthesis,
-                        TypeErrorCode::ERROR_TYPE_UNEXPECT_RPAREN);
-      return token;
-  }
+  bracket_tracker_->Feed(token);
   return token;
 }
 
@@ -258,13 +237,7 @@ const Type& TypeParser::NewVoidType(const SourceCodeRange& range) {
 // UnionTYpe ::= Type ('|' Type*)
 const Type& TypeParser::Parse() {
   const auto& type = ParseUnionType();
-  if (brackets_.empty())
-    return type;
-  auto& open_bracket = *brackets_.top().first;
-  const auto error_code = brackets_.top().second;
-  AddError(source_code().Slice(open_bracket.range().start(),
-                               source_code().range().end()),
-           error_code);
+  bracket_tracker_->Finish();
   return type;
 }
 

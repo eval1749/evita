@@ -105,7 +105,8 @@ TEST_F(TypeParserTest, ErrorFunctionType) {
       "|  +--(invalid)\n"
       "+--void\n"
       "TYPE_ERROR_TYPE_EXPECT_COMMA@12:13\n"
-      "TYPE_ERROR_TYPE_UNEXPECT_RBRACE@8:13\n",
+      "TYPE_ERROR_TYPE_UNEXPECT_RBRACE@8:13\n"
+      "TYPE_ERROR_TYPE_EXPECT_RPAREN@8:13\n",
       Parse("function(foo}"))
       << "Mismatched bracket";
 

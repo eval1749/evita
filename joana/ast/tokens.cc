@@ -28,7 +28,8 @@ Empty::~Empty() = default;
 //
 // JsDoc
 //
-JsDoc::JsDoc(const SourceCodeRange& range) : Token(range) {}
+JsDoc::JsDoc(const SourceCodeRange& range, const JsDocDocument& document)
+    : Token(range), document_(document) {}
 
 JsDoc::~JsDoc() = default;
 

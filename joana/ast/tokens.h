@@ -13,6 +13,8 @@
 namespace joana {
 namespace ast {
 
+class JsDocDocument;
+
 //
 // PunctuatorKind
 //
@@ -103,7 +105,9 @@ class JOANA_AST_EXPORT JsDoc final : public Token {
   ~JsDoc() final;
 
  private:
-  explicit JsDoc(const SourceCodeRange& range);
+  JsDoc(const SourceCodeRange& range, const JsDocDocument& document);
+
+  const JsDocDocument& document_;
 
   DISALLOW_COPY_AND_ASSIGN(JsDoc);
 };

@@ -84,8 +84,9 @@ Module& NodeFactory::NewModule(
 }
 
 // Tokens
-const Token& NodeFactory::NewJsDoc(const SourceCodeRange& range) {
-  return *new (zone_) JsDoc(range);
+const Token& NodeFactory::NewJsDoc(const SourceCodeRange& range,
+                                   const JsDocDocument& document) {
+  return *new (zone_) JsDoc(range, document);
 }
 
 const Token& NodeFactory::NewComment(const SourceCodeRange& range) {

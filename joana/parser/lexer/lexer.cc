@@ -17,6 +17,7 @@
 #include "joana/base/error_sink.h"
 #include "joana/base/source_code.h"
 #include "joana/base/source_code_range.h"
+#include "joana/parser/jsdoc/jsdoc_parser.h"
 #include "joana/parser/lexer/lexer_error_codes.h"
 #include "joana/parser/public/parse.h"
 #include "joana/parser/utils/character_reader.h"
@@ -98,10 +99,12 @@ const ast::Token& Lexer::HandleBlockComment() {
   while (CanPeekChar()) {
     if (is_after_asterisk && ConsumeCharIf('/')) {
       const auto range = MakeTokenRange();
-      if (is_js_doc && range.size() > 4) {
-        // "/**/" is a block comment instead of js_doc.
-        return node_factory().NewJsDoc(range);
-      }
+      if (!is_js_doc)
+        return node_factory().NewComment(range);
+      const auto* const document =
+          JsDocParser(&context_, range, options_).Parse();
+      if (document)
+        return node_factory().NewJsDoc(range, *document);
       return node_factory().NewComment(range);
     }
     if (IsLineTerminator(PeekChar()))

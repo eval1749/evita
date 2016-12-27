@@ -15,6 +15,7 @@
 #include "joana/ast/literals.h"
 #include "joana/ast/node.h"
 #include "joana/ast/tokens.h"
+#include "joana/parser/jsdoc/jsdoc_parser.h"
 #include "joana/parser/public/parse.h"
 #include "joana/parser/public/parser_context_builder.h"
 #include "joana/parser/public/parser_options_builder.h"
@@ -50,8 +51,8 @@ class LexerTest : public LexerTestBase {
 
   SourceCodeRange MakeRange(int start, int end) const;
   SourceCodeRange MakeRange() const;
-  std::string NewJsDoc(int start, int end);
-  std::string NewJsDoc();
+  std::string NewJsDoc(int start, int end, const ast::JsDocDocument& document);
+  std::string NewJsDoc(const ast::JsDocDocument& document);
   std::string NewComment(int start, int end);
   std::string NewComment();
   std::string NewError(ErrorCode error_code, int start, int end);
@@ -77,12 +78,14 @@ SourceCodeRange LexerTest::MakeRange() const {
   return source_code().range();
 }
 
-std::string LexerTest::NewJsDoc(int start, int end) {
-  return ToString(node_factory().NewJsDoc(MakeRange(start, end)));
+std::string LexerTest::NewJsDoc(int start,
+                                int end,
+                                const ast::JsDocDocument& document) {
+  return ToString(node_factory().NewJsDoc(MakeRange(start, end), document));
 }
 
-std::string LexerTest::NewJsDoc() {
-  return ToString(node_factory().NewJsDoc(MakeRange()));
+std::string LexerTest::NewJsDoc(const ast::JsDocDocument& document) {
+  return ToString(node_factory().NewJsDoc(MakeRange(), document));
 }
 
 std::string LexerTest::NewComment(int start, int end) {
@@ -157,10 +160,15 @@ std::string LexerTest::Parse() {
 
 TEST_F(LexerTest, JsDoc) {
   PrepareSouceCode("/** @type {number} */");
-  EXPECT_EQ(NewJsDoc(), Parse());
+  const auto& document =
+      *JsDocParser(&context(),
+                   source_code().Slice(3, source_code().size() - 2),
+                   ParserOptions())
+           .Parse();
+  EXPECT_EQ(NewJsDoc(document), Parse());
 
   PrepareSouceCode("/** */");
-  EXPECT_EQ(NewJsDoc(), Parse());
+  EXPECT_EQ(NewComment(), Parse());
 }
 
 TEST_F(LexerTest, BlockComment) {

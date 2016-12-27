@@ -10,6 +10,7 @@ source_set("lexer") {
   ]
   deps = [
     "//joana/base",
+    "//joana/parser/jsdoc",
     "//joana/parser/utils",
   ]
 

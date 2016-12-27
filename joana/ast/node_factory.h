@@ -38,7 +38,8 @@ class JOANA_AST_EXPORT NodeFactory final {
   //
   // Tokens factory members
   //
-  const Token& NewJsDoc(const SourceCodeRange& range);
+  const Token& NewJsDoc(const SourceCodeRange& range,
+                        const JsDocDocument& document);
   const Token& NewComment(const SourceCodeRange& range);
   const Token& NewEmpty(const SourceCodeRange& range);
 

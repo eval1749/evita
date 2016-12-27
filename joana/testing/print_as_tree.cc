@@ -32,6 +32,7 @@ struct Indent {
 };
 
 std::ostream& operator<<(std::ostream& ostream, const Indent& indent) {
+  ostream << std::endl;
   if (indent.level == 0)
     return ostream;
   for (auto counter = 0; counter < indent.level - 1; ++counter)
@@ -87,8 +88,11 @@ PrintableNode AsPrintable(Context* context, const ast::Node& node) {
   };                                                                     \
   Printable##name AsPrintable(Context* context, const ast::name& node) { \
     return Printable##name{context, &node};                              \
-  }
+  }                                                                      \
+  std::ostream& operator<<(std::ostream& ostream,                        \
+                           const Printable##name& printable);
 FOR_EACH_AST_JSDOC(V)
+FOR_EACH_AST_TYPE(V)
 #undef V
 
 // JsDoc
@@ -96,8 +100,10 @@ std::ostream& operator<<(std::ostream& ostream,
                          const PrintableJsDocDocument& printable) {
   auto& context = *printable.context;
   const auto& node = *printable.node;
+  ostream << "#document";
+  IndentScope scope(&context);
   for (const auto& element : node.elements())
-    ostream << AsPrintable(&context, element);
+    ostream << Indent(context) << AsPrintable(&context, element);
   return ostream;
 }
 
@@ -105,17 +111,17 @@ std::ostream& operator<<(std::ostream& ostream,
                          const PrintableJsDocName& printable) {
   auto& context = *printable.context;
   const auto& node = *printable.node;
-  return ostream << AsPrintable(&context, node.name());
+  return ostream << "#name " << AsPrintable(&context, node.name());
 }
 
 std::ostream& operator<<(std::ostream& ostream,
                          const PrintableJsDocTag& printable) {
   auto& context = *printable.context;
   const auto& node = *printable.node;
-  ostream << AsPrintable(&context, node.name()) << std::endl;
+  ostream << AsPrintable(&context, node.name());
   IndentScope scope(&context);
   for (const auto& parameter : node.parameters())
-    ostream << Indent(context) << AsPrintable(&context, parameter) << std::endl;
+    ostream << Indent(context) << AsPrintable(&context, parameter);
   return ostream;
 }
 
@@ -127,19 +133,147 @@ std::ostream& operator<<(std::ostream& ostream,
 
 std::ostream& operator<<(std::ostream& ostream,
                          const PrintableJsDocType& printable) {
+  auto& context = *printable.context;
   const auto& node = *printable.node;
-  return ostream << AsPrintable(node.type().range());
+  return ostream << "#type " << AsPrintable(&context, node.type());
+}
+
+// Types
+std::ostream& operator<<(std::ostream& ostream,
+                         const PrintableAnyType& printable) {
+  return ostream << '*';
+}
+
+std::ostream& operator<<(std::ostream& ostream,
+                         const PrintableFunctionType& printable) {
+  auto& context = *printable.context;
+  const auto& node = *printable.node;
+  ostream << "function " << static_cast<int>(node.kind());
+  IndentScope scope(&context);
+  {
+    IndentScope parameters_scope(&context);
+    for (const auto& parameter_type : node.parameter_types())
+      ostream << Indent(context) << AsPrintable(&context, parameter_type);
+  }
+  return ostream << Indent(context)
+                 << AsPrintable(&context, node.return_type());
+}
+
+std::ostream& operator<<(std::ostream& ostream,
+                         const PrintableInvalidType& printable) {
+  return ostream << "(invalid)";
+}
+
+std::ostream& operator<<(std::ostream& ostream,
+                         const PrintableNullableType& printable) {
+  auto& context = *printable.context;
+  const auto& node = *printable.node;
+  return ostream << '?' << AsPrintable(&context, node.type());
+}
+
+std::ostream& operator<<(std::ostream& ostream,
+                         const PrintableNonNullableType& printable) {
+  auto& context = *printable.context;
+  const auto& node = *printable.node;
+  return ostream << '!' << AsPrintable(&context, node.type());
+}
+
+std::ostream& operator<<(std::ostream& ostream,
+                         const PrintableOptionalType& printable) {
+  auto& context = *printable.context;
+  const auto& node = *printable.node;
+  return ostream << '=' << AsPrintable(&context, node.type());
+}
+
+std::ostream& operator<<(std::ostream& ostream,
+                         const PrintableRecordType& printable) {
+  auto& context = *printable.context;
+  const auto& node = *printable.node;
+  ostream << "record";
+  IndentScope scope(&context);
+  for (const auto& member : node.members()) {
+    ostream << Indent(context) << AsPrintable(&context, *member.first) << ": "
+            << AsPrintable(&context, *member.second);
+  }
+  return ostream;
+}
+
+std::ostream& operator<<(std::ostream& ostream,
+                         const PrintableRestType& printable) {
+  auto& context = *printable.context;
+  const auto& node = *printable.node;
+  return ostream << "..." << AsPrintable(&context, node.type());
+}
+
+std::ostream& operator<<(std::ostream& ostream,
+                         const PrintableTupleType& printable) {
+  auto& context = *printable.context;
+  const auto& node = *printable.node;
+  ostream << "tuple";
+  IndentScope scope(&context);
+  for (const auto& member : node.members())
+    ostream << Indent(context) << AsPrintable(&context, member);
+  return ostream;
+}
+
+std::ostream& operator<<(std::ostream& ostream,
+                         const PrintableTypeApplication& printable) {
+  auto& context = *printable.context;
+  const auto& node = *printable.node;
+  ostream << "application " << AsPrintable(&context, node.name());
+  IndentScope scope(&context);
+  for (const auto& parameter : node.parameters())
+    ostream << Indent(context) << AsPrintable(&context, parameter);
+  return ostream;
+}
+
+std::ostream& operator<<(std::ostream& ostream,
+                         const PrintableTypeGroup& printable) {
+  auto& context = *printable.context;
+  const auto& node = *printable.node;
+  ostream << "group";
+  IndentScope scope(&context);
+  return ostream << Indent(context) << AsPrintable(&context, node.type());
+}
+
+std::ostream& operator<<(std::ostream& ostream,
+                         const PrintableTypeName& printable) {
+  auto& context = *printable.context;
+  const auto& node = *printable.node;
+  return ostream << AsPrintable(&context, node.name());
+}
+
+std::ostream& operator<<(std::ostream& ostream,
+                         const PrintableUnionType& printable) {
+  auto& context = *printable.context;
+  const auto& node = *printable.node;
+  ostream << "union";
+  IndentScope scope(&context);
+  for (const auto& member : node.members())
+    ostream << Indent(context) << AsPrintable(&context, member);
+  return ostream;
+}
+
+std::ostream& operator<<(std::ostream& ostream,
+                         const PrintableUnknownType& printable) {
+  return ostream << '?';
+}
+
+std::ostream& operator<<(std::ostream& ostream,
+                         const PrintableVoidType& printable) {
+  return ostream << "void";
 }
 
 // Dispatcher
 std::ostream& operator<<(std::ostream& ostream,
                          const PrintableNode& printable) {
-  Context context;
+  auto& context = *printable.context;
   const auto& node = *printable.node;
 #define V(name)             \
   if (node.Is<ast::name>()) \
     return ostream << Printable##name{&context, &node.As<ast::name>()};
   FOR_EACH_AST_JSDOC(V)
+  FOR_EACH_AST_TYPE(V)
 #undef V
   return ostream << PrintableSourceCodeRange{&node.range()};
 }

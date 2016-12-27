@@ -42,7 +42,7 @@ std::string JsDocParserTest::Parse(base::StringPiece script_text,
     return "";
   const auto& document = *maybe_document;
   std::ostringstream ostream;
-  ostream << AsPrintableTree(document);
+  ostream << AsPrintableTree(document) << std::endl;
   for (const auto& error : error_sink().errors())
     ostream << error << std::endl;
   return ostream.str();
@@ -62,75 +62,92 @@ TEST_F(JsDocParserTest, NoTags) {
 
 TEST_F(JsDocParserTest, SyntaxDescription) {
   EXPECT_EQ(
-      "@deprecated\n"
-      "+--|foo bar|\n",
+      "#document\n"
+      "+--@deprecated\n"
+      "|  +--|foo bar|\n",
       Parse("@deprecated foo bar"));
 }
 
 TEST_F(JsDocParserTest, SyntaxNameList) {
   EXPECT_EQ(
-      "@suppress\n"
-      "+--foo\n"
-      "+--bar\n"
-      "+--baz\n",
+      "#document\n"
+      "+--@suppress\n"
+      "|  +--#name foo\n"
+      "|  +--#name bar\n"
+      "|  +--#name baz\n",
       Parse("@suppress {foo, bar, baz}"));
 }
 
 TEST_F(JsDocParserTest, SyntaxNames) {
   EXPECT_EQ(
-      "@template\n"
-      "+--T\n",
+      "#document\n"
+      "+--@template\n"
+      "|  +--#name T\n",
       Parse("@template T desc"));
   EXPECT_EQ(
-      "@template\n"
-      "+--KEY\n"
-      "+--VALUE\n",
+      "#document\n"
+      "+--@template\n"
+      "|  +--#name KEY\n"
+      "|  +--#name VALUE\n",
       Parse("@template KEY, VALUE desc"));
 }
 
 TEST_F(JsDocParserTest, SyntaxNone) {
-  EXPECT_EQ("@externs\n", Parse("@externs"));
+  EXPECT_EQ(
+      "#document\n"
+      "+--@externs\n",
+      Parse("@externs"));
 }
 
 TEST_F(JsDocParserTest, SyntaxOptionalType) {
-  EXPECT_EQ("@const\n", Parse("@const desc"));
   EXPECT_EQ(
-      "@const\n"
-      "+--number\n",
+      "#document\n"
+      "+--@const\n",
+      Parse("@const desc"));
+  EXPECT_EQ(
+      "#document\n"
+      "+--@const\n"
+      "|  +--#type number\n",
       Parse("@const {number}"));
 }
 
 TEST_F(JsDocParserTest, SyntaxType) {
   EXPECT_EQ(
-      "@enum\n"
-      "+--number\n",
+      "#document\n"
+      "+--@enum\n"
+      "|  +--#type number\n",
       Parse("@enum {number}"));
 }
 
-TEST_F(JsDocParserTest, SyntaxTypeName) {
+TEST_F(JsDocParserTest, SyntaxTypeDescription) {
   EXPECT_EQ(
-      "@define\n"
-      "+--{age:number, sex:string}\n"
-      "+--|human|\n",
+      "#document\n"
+      "+--@define\n"
+      "|  +--#type record\n"
+      "|  |  +--age: number\n"
+      "|  |  +--sex: string\n"
+      "|  +--|human|\n",
       Parse("@define {{age:number, sex:string}} human"));
 }
 
 TEST_F(JsDocParserTest, SyntaxTypeNameDescription) {
   EXPECT_EQ(
-      "@param\n"
-      "+--string\n"
-      "+--foo\n"
-      "+--||\n",
+      "#document\n"
+      "+--@param\n"
+      "|  +--#type string\n"
+      "|  +--#name foo\n"
+      "|  +--||\n",
       Parse("@param {string} foo"));
   EXPECT_EQ(
-      "@param\n"
-      "+--string\n"
-      "+--foo\n"
-      "+--|desc1|\n"
-      "@param\n"
-      "+--number\n"
-      "+--bar\n"
-      "+--||\n",
+      "#document\n"
+      "+--@param\n"
+      "|  +--#type string\n"
+      "|  +--#name foo\n"
+      "|  +--|desc1|\n"
+      "+--@param\n"
+      "|  +--#type number\n"
+      "|  +--#name bar\n"
+      "|  +--||\n",
       Parse("@param {string} foo desc1\n"
             "@param {number} bar\n"));
 }

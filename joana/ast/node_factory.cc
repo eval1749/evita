@@ -263,7 +263,7 @@ const Expression& NodeFactory::NewDelimiterExpression(
 
 const Expression& NodeFactory::NewElisionExpression(
     const SourceCodeRange& range) {
-  DCHECK_EQ(range.start(), range.end()) << range;
+  DCHECK(range.IsCollapsed()) << range;
   return *new (zone_) ElisionExpression(range);
 }
 

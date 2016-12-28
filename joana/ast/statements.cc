@@ -260,6 +260,16 @@ TryFinallyStatement::TryFinallyStatement(const SourceCodeRange& range,
 TryFinallyStatement::~TryFinallyStatement() = default;
 
 //
+// VariableDeclaration
+//
+VariableDeclaration::VariableDeclaration(
+    const SourceCodeRange& range,
+    const std::vector<const BindingElement*>& elements)
+    : Statement(range), elements_(elements) {}
+
+VariableDeclaration::~VariableDeclaration() = default;
+
+//
 // VarStatement
 //
 VarStatement::VarStatement(const SourceCodeRange& range, Expression* expression)

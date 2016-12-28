@@ -57,6 +57,28 @@ class JOANA_AST_EXPORT StatementList final : public ZoneAllocated {
 };
 
 //
+// VariableDeclaration is a base class of ConstStatement, LetStatement and
+// VarStatement to hold list of BindingElement
+//
+class VariableDeclaration : public Statement {
+  DECLARE_ABSTRACT_AST_NODE(VariableDeclaration, Statement);
+
+ public:
+  ~VariableDeclaration() final;
+
+  const auto& elements() const { return elements_; }
+
+ protected:
+  VariableDeclaration(const SourceCodeRange& range,
+                      const std::vector<const BindingElement*>& elements);
+
+ private:
+  NodeListTemplate<const BindingElement> elements_;
+
+  DISALLOW_COPY_AND_ASSIGN(VariableDeclaration);
+};
+
+//
 // BlockStatement
 //
 class JOANA_AST_EXPORT BlockStatement

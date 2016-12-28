@@ -45,24 +45,32 @@ BracketTracker::BracketTracker(ErrorSink* error_sink,
 
 BracketTracker::~BracketTracker() = default;
 
-void BracketTracker::Check(const ast::Node& token,
-                           ast::PunctuatorKind expected,
-                           int error_code) {
+ast::PunctuatorKind BracketTracker::close_bracket() const {
+  DCHECK(!stack_.empty());
+  return stack_.top().second->close;
+}
+
+void BracketTracker::Check(const ast::Node& token, const Description& actual) {
+  DCHECK_EQ(token, actual.close);
   if (stack_.empty()) {
-    error_sink_.AddError(token.range(), error_code);
+    error_sink_.AddError(token.range(), actual.close_error);
     return;
   }
   const auto& open_token = *stack_.top().first;
-  if (open_token == expected) {
+  if (open_token == actual.open) {
     stack_.pop();
     return;
   }
+
+  // We get mismatched close bracket.
   error_sink_.AddError(
-      SourceCodeRange::Merge(token.range(), open_token.range()), error_code);
+      SourceCodeRange::Merge(token.range(), open_token.range()),
+      actual.close_error);
 }
 
-void BracketTracker::Mark(const ast::Node& token, int error_code) {
-  stack_.push(std::make_pair(&token, error_code));
+void BracketTracker::Mark(const ast::Node& token,
+                          const Description& description) {
+  stack_.push(std::make_pair(&token, &description));
 }
 
 void BracketTracker::Feed(const ast::Node& token) {
@@ -74,9 +82,9 @@ void BracketTracker::Feed(const ast::Node& token) {
     return;
   for (const auto& description : descriptions_) {
     if (kind == description.open)
-      return Mark(token, description.open_error);
+      return Mark(token, description);
     if (kind == description.close)
-      return Check(token, description.open, description.close_error);
+      return Check(token, description);
   }
 }
 
@@ -85,11 +93,11 @@ void BracketTracker::Finish() {
     return;
   // Report the last open bracket pair.
   const auto& open_bracket = *stack_.top().first;
-  const auto error_code = stack_.top().second;
+  const auto& description = *stack_.top().second;
   error_sink_.AddError(
       source_code_range_.source_code().Slice(open_bracket.range().start(),
                                              source_code_range_.end()),
-      error_code);
+      description.open_error);
 }
 
 }  // namespace parser

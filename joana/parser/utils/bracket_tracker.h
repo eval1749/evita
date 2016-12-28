@@ -28,9 +28,16 @@ namespace parser {
 class BracketTracker final {
  public:
   struct Description {
+    // The code of open bracket.
     ast::PunctuatorKind open;
+
+    // The error code for not closed open bracket.
     int open_error;
+
+    // The code of close bracket.
     ast::PunctuatorKind close;
+
+    // The error code for mismatched close bracket.
     int close_error;
   };
 
@@ -39,20 +46,21 @@ class BracketTracker final {
                  const std::vector<Description>& descriptions);
   ~BracketTracker();
 
+  ast::PunctuatorKind close_bracket() const;
+  size_t depth() const { return stack_.size(); }
+
   void Feed(const ast::Node& token);
   void Finish();
 
  private:
-  void Check(const ast::Node& token,
-             ast::PunctuatorKind expected,
-             int error_code);
-  void Mark(const ast::Node& token, int error_code);
+  void Check(const ast::Node& token, const Description& description);
+  void Mark(const ast::Node& token, const Description& description);
 
   const std::vector<Description> descriptions_;
   ErrorSink& error_sink_;
   const SourceCodeRange& source_code_range_;
   const std::pair<ast::PunctuatorKind, ast::PunctuatorKind> min_max_;
-  std::stack<std::pair<const ast::Node*, int>> stack_;
+  std::stack<std::pair<const ast::Node*, const Description*>> stack_;
 
   DISALLOW_COPY_AND_ASSIGN(BracketTracker);
 };

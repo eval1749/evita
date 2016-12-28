@@ -26,6 +26,12 @@ namespace parser {
 
 namespace {
 
+bool IsCloseBracket(const ast::Token& token) {
+  return token == ast::PunctuatorKind::RightBrace ||
+         token == ast::PunctuatorKind::RightBracket ||
+         token == ast::PunctuatorKind::RightParenthesis;
+}
+
 // Returns true if |document| contains |@fileoviewview| tag.
 bool IsFileOverview(const ast::JsDocDocument& document) {
   for (const auto& element : document.elements()) {
@@ -197,6 +203,10 @@ void Parser::ExpectSemicolon() {
                    ErrorCode::ERROR_STATEMENT_EXPECT_SEMICOLON);
 }
 
+void Parser::Finish() {
+  bracket_tracker_->Finish();
+}
+
 SourceCodeRange Parser::GetSourceCodeRange() const {
   return source_code().Slice(
       range_stack_.top(),
@@ -231,7 +241,7 @@ const ast::Node& Parser::Run() {
     AssociateJsDoc(js_doc, statement);
     statements.push_back(&statement);
   }
-  bracket_tracker_->Finish();
+  Finish();
   return node_factory().NewModule(source_code().range(), statements,
                                   js_doc_map_);
 }
@@ -247,5 +257,23 @@ void Parser::SkipCommentTokens() {
     lexer_->ConsumeToken();
   }
 }
+
+bool Parser::SkipToListElement() {
+  const auto current_depth = bracket_tracker_->depth();
+  DCHECK_GT(current_depth, 0) << "We should call SkipListElement() in list.";
+  const auto close_bracket = bracket_tracker_->close_bracket();
+  while (CanPeekToken()) {
+    if (current_depth != bracket_tracker_->depth()) {
+      ConsumeToken();
+      continue;
+    }
+    if (IsCloseBracket(PeekToken()))
+      return false;
+    if (ConsumeToken() == ast::PunctuatorKind::Comma)
+      return true;
+  }
+  return false;
+}
+
 }  // namespace parser
 }  // namespace joana

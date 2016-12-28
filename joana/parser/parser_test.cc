@@ -7,6 +7,7 @@
 
 #include "joana/parser/parser.h"
 
+#include "joana/ast/bindings.h"
 #include "joana/ast/module.h"
 #include "joana/ast/statements.h"
 #include "joana/ast/tokens.h"
@@ -15,6 +16,7 @@
 #include "joana/parser/public/parser_options.h"
 #include "joana/parser/public/parser_options_builder.h"
 #include "joana/testing/lexer_test_base.h"
+#include "joana/testing/print_as_tree.h"
 #include "joana/testing/simple_formatter.h"
 
 namespace joana {
@@ -31,6 +33,11 @@ class ParserTest : public LexerTestBase {
   std::string Parse(base::StringPiece script_text,
                     const ParserOptions& options);
   std::string Parse(base::StringPiece script_text);
+
+  const ast::BindingElement& ParseBindingElement(base::StringPiece text);
+
+  std::string ToString(const ast::Node& node,
+                       const ast::Module* module = nullptr);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(ParserTest);
@@ -56,6 +63,33 @@ std::string ParserTest::Parse(base::StringPiece script_text,
 
 std::string ParserTest::Parse(base::StringPiece script_text) {
   return Parse(script_text, ParserOptions());
+}
+
+const ast::BindingElement& ParserTest::ParseBindingElement(
+    base::StringPiece script_text) {
+  PrepareSouceCode(script_text);
+  Parser parser(&context(), source_code().range(), {});
+  parser.SkipCommentTokens();
+  const auto& result = parser.ParseBindingElement();
+  parser.Finish();
+  return result;
+}
+
+std::string ParserTest::ToString(const ast::Node& node,
+                                 const ast::Module* module) {
+  std::ostringstream ostream;
+  ostream << AsPrintableTree(node) << std::endl;
+  for (const auto& error : error_sink().errors())
+    ostream << error << std::endl;
+  if (!module)
+    return ostream.str();
+  for (const auto& statement : module->statements()) {
+    auto* js_doc = module->JsDocFor(statement);
+    if (!js_doc)
+      continue;
+    ostream << statement << ':' << *js_doc << std::endl;
+  }
+  return ostream.str();
 }
 
 #define TEST_PARSER(script_text)           \
@@ -550,6 +584,262 @@ TEST_F(ParserTest, WithStatement) {
   TEST_PARSER(
       "with (foo)\n"
       "  bar;\n");
+}
+
+// Bindings
+TEST_F(ParserTest, ParseArrayBindingPattern) {
+  EXPECT_EQ("#array_pattern\n", ToString(ParseBindingElement("[]")))
+      << "no elements";
+
+  EXPECT_EQ(
+      "#array_pattern\n"
+      "+--#binding_name foo\n",
+      ToString(ParseBindingElement("[foo]")))
+      << "one element";
+
+  EXPECT_EQ(
+      "#array_pattern\n"
+      "+--#binding_name foo\n"
+      "+--#binding_comma\n"
+      "+--#binding_name bar\n",
+      ToString(ParseBindingElement("[foo, bar]")))
+      << "two elements";
+
+  EXPECT_EQ(
+      "#array_pattern\n"
+      "+--#binding_name foo\n"
+      "+--#binding_comma\n"
+      "+--#binding_name bar\n"
+      "+--[1]\n",
+      ToString(ParseBindingElement("[foo, bar] = [1]")))
+      << "two elements with initializer";
+
+  EXPECT_EQ(
+      "#array_pattern\n"
+      "+--#binding_name foo\n"
+      "+--#binding_comma\n",
+      ToString(ParseBindingElement("[foo,]")))
+      << "no element after comma";
+
+  EXPECT_EQ(
+      "#array_pattern\n"
+      "+--#binding_name foo\n"
+      "+--#binding_comma\n"
+      "+--#binding_comma\n",
+      ToString(ParseBindingElement("[foo,,]")))
+      << "no element after commas";
+
+  EXPECT_EQ(
+      "#array_pattern\n"
+      "+--#binding_name foo\n"
+      "+--#binding_comma\n"
+      "+--#binding_comma\n"
+      "+--#binding_name bar\n",
+      ToString(ParseBindingElement("[foo,,bar]")))
+      << "no element between commas";
+
+  EXPECT_EQ(
+      "#array_pattern\n"
+      "+--#binding_name foo\n"
+      "+--#binding_comma\n"
+      "+--#binding_name bar\n"
+      "+--#binding_comma\n"
+      "+--#binding_name baz\n",
+      ToString(ParseBindingElement("[foo, bar, baz]")))
+      << "three elements";
+
+  EXPECT_EQ(
+      "#array_pattern\n"
+      "+--#binding_name foo\n"
+      "+--#binding_comma\n"
+      "+--#binding_rest\n"
+      "|  +--#binding_name bar\n",
+      ToString(ParseBindingElement("[foo, ...bar]")))
+      << "rest element";
+
+  EXPECT_EQ(
+      "#array_pattern\n"
+      "+--#array_pattern\n"
+      "|  +--#binding_name foo\n",
+      ToString(ParseBindingElement("[[foo]]")))
+      << "array in array";
+
+  EXPECT_EQ(
+      "#array_pattern\n"
+      "+--#object_pattern\n"
+      "|  +--#binding_name foo\n",
+      ToString(ParseBindingElement("[{foo}]")))
+      << "object in array";
+}
+
+TEST_F(ParserTest, ParseArrayBindingPatternError) {
+  EXPECT_EQ(
+      "#array_pattern\n"
+      "PASER_ERROR_BRACKET_EXPECT_RBRACKET@0:1\n",
+      ToString(ParseBindingElement("[")))
+      << "no closing bracket";
+
+  EXPECT_EQ(
+      "#array_pattern\n"
+      "+--#binding_name foo\n"
+      "+--#binding_comma\n"
+      "+--#binding_rest\n"
+      "|  +--#binding_name bar\n"
+      "+--#binding_comma\n"
+      "+--#binding_name baz\n"
+      "PASER_ERROR_BINDING_UNEXPECT_REST@6:13\n",
+      ToString(ParseBindingElement("[foo, ...bar, baz]")))
+      << "rest element should be the last element";
+
+  EXPECT_EQ(
+      "#object_pattern\n"
+      "+--#binding_name foo\n"
+      "+--#array_pattern\n"
+      "|  +--#binding_name bar\n"
+      "PASER_ERROR_BINDING_EXPECT_COMMA@1:5\n"
+      "PASER_ERROR_BRACKET_UNEXPECT_RBRACE@5:11\n"
+      "PASER_ERROR_BRACKET_EXPECT_RBRACKET@5:11\n",
+      ToString(ParseBindingElement("{foo [bar }")))
+      << "Missing right bracket";
+
+  EXPECT_EQ(
+      "#array_pattern\n"
+      "+--#binding_name foo\n"
+      "+--#binding_comma\n"
+      "+--#binding_name bar\n"
+      "PASER_ERROR_BINDING_INVALID_ELEMENT@6:7\n",
+      ToString(ParseBindingElement("[foo, = 1, bar]")))
+      << "no name before equal";
+}
+
+TEST_F(ParserTest, ParseBindingNameElement) {
+  EXPECT_EQ("#binding_name foo\n", ToString(ParseBindingElement("foo")))
+      << "without initializer";
+
+  EXPECT_EQ(
+      "#binding_name foo\n"
+      "+--1\n",
+      ToString(ParseBindingElement("foo = 1")))
+      << "with initializer";
+}
+
+TEST_F(ParserTest, ParseObjectBindingPattern) {
+  EXPECT_EQ("#object_pattern\n", ToString(ParseBindingElement("{}")))
+      << "no elements";
+
+  EXPECT_EQ(
+      "#object_pattern\n"
+      "+--#binding_name foo\n",
+      ToString(ParseBindingElement("{foo}")))
+      << "one element";
+
+  EXPECT_EQ(
+      "#object_pattern\n"
+      "+--#binding_name foo\n"
+      "+--1\n",
+      ToString(ParseBindingElement("{foo} = 1")))
+      << "with initializer";
+
+  EXPECT_EQ(
+      "#object_pattern\n"
+      "+--#binding_name foo\n"
+      "|  +--1\n",
+      ToString(ParseBindingElement("{foo = 1}")))
+      << "one element with initializer";
+
+  EXPECT_EQ(
+      "#object_pattern\n"
+      "+--#binding_property foo\n"
+      "|  +--#binding_name bar\n",
+      ToString(ParseBindingElement("{foo: bar}")))
+      << "property";
+
+  EXPECT_EQ(
+      "#object_pattern\n"
+      "+--#binding_property foo\n"
+      "|  +--#object_pattern\n"
+      "|  |  +--#binding_property bar\n"
+      "|  |  |  +--#array_pattern\n"
+      "|  |  |  |  +--#binding_name baz\n",
+      ToString(ParseBindingElement("{foo: {bar: [baz]} }")))
+      << "nested property";
+
+  EXPECT_EQ(
+      "#object_pattern\n"
+      "+--#binding_name foo\n"
+      "+--#binding_comma\n"
+      "+--#binding_name bar\n",
+      ToString(ParseBindingElement("{foo, bar}")))
+      << "two elements";
+
+  EXPECT_EQ(
+      "#object_pattern\n"
+      "+--#binding_name foo\n"
+      "+--#binding_comma\n"
+      "+--#binding_name bar\n"
+      "+--#binding_comma\n",
+      ToString(ParseBindingElement("{foo, bar,}")))
+      << "two elements with trailing comma";
+
+  EXPECT_EQ(
+      "#object_pattern\n"
+      "+--#binding_name foo\n"
+      "+--#binding_comma\n"
+      "+--#binding_name bar\n"
+      "+--#binding_comma\n"
+      "+--#binding_name baz\n",
+      ToString(ParseBindingElement("{foo, bar, baz}")))
+      << "three elements";
+}
+
+TEST_F(ParserTest, ParseObjectBindingPatternError) {
+  EXPECT_EQ(
+      "#object_pattern\n"
+      "+--#binding_comma\n"
+      "PASER_ERROR_BINDING_UNEXPECT_COMMA@1:2\n",
+      ToString(ParseBindingElement("{,}")))
+      << "only comma";
+
+  EXPECT_EQ(
+      "#object_pattern\n"
+      "+--#binding_comma\n"
+      "+--#binding_name foo\n"
+      "PASER_ERROR_BINDING_UNEXPECT_COMMA@1:2\n",
+      ToString(ParseBindingElement("{, foo}")))
+      << "no name before comma";
+
+  EXPECT_EQ(
+      "#object_pattern\n"
+      "+--#binding_name foo\n"
+      "+--#binding_name bar\n"
+      "PASER_ERROR_BINDING_EXPECT_COMMA@1:5\n",
+      ToString(ParseBindingElement("{foo bar}")))
+      << "no comma between names";
+
+  EXPECT_EQ(
+      "#object_pattern\n"
+      "+--#binding_name foo\n"
+      "|  +--}\n"
+      "PASER_ERROR_EXPRESSION_INVALID@7:8\n",
+      ToString(ParseBindingElement("{foo = }")))
+      << "no expression after equal";
+
+  EXPECT_EQ(
+      "#object_pattern\n"
+      "+--#binding_property foo\n"
+      "|  +--#binding_invalid\n"
+      "PASER_ERROR_BINDING_INVALID_ELEMENT@6:7\n",
+      ToString(ParseBindingElement("{foo: }")))
+      << "no element after colon";
+
+  EXPECT_EQ(
+      "#object_pattern\n"
+      "+--#binding_name foo\n"
+      "+--#binding_comma\n"
+      "+--#binding_name bar\n"
+      "PASER_ERROR_BINDING_INVALID_ELEMENT@6:7\n",
+      ToString(ParseBindingElement("{foo, = 1, bar}")))
+      << "no name before equal";
 }
 
 }  // namespace parser

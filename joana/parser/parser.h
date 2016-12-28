@@ -46,6 +46,7 @@ class Parser final {
   const ast::Node& Run();
 
  private:
+  friend class ParserTest;
   class ExpectSemicolonScope;
 
   class SourceCodeRangeScope final {
@@ -91,10 +92,17 @@ class Parser final {
 
   void ExpectPunctuator(ast::PunctuatorKind kind, ErrorCode error_code);
   void ExpectSemicolon();
+
+  // Called when there are no more source code. Unit tests call this.
+  void Finish();
+
   SourceCodeRange GetSourceCodeRange() const;
   const ast::Token& PeekToken() const;
   void PushBackToken(const ast::Token& token);
   void SkipCommentTokens();
+
+  // Returns true if we stop before list element.
+  bool SkipToListElement();
 
   // Declarations
   const ast::Token& NewEmptyName();
@@ -198,6 +206,31 @@ class Parser final {
   const ast::Statement& ParseVarStatement();
   const ast::Statement& ParseWhileStatement();
   const ast::Statement& ParseWithStatement();
+
+  // Parsing binding
+  // Returns a list of |BindingElement|. This function should be called after
+  // reading statement keyword, |const|, |let|, |var|, or right parenthesis
+  // of function parameter list.
+  std::vector<const ast::BindingElement*> ParseBindingElements();
+  const ast::BindingElement& ParseBindingElement();
+
+  const ast::BindingElement& NewArrayBindingPattern(
+      const std::vector<const ast::BindingElement*>& elements,
+      const ast::Expression& initializer);
+
+  const ast::BindingElement& NewBindingCommaElement(const ast::Token& range);
+
+  const ast::BindingElement& NewBindingNameElement(
+      const ast::Name& name,
+      const ast::Expression& initializer);
+
+  const ast::BindingElement& NewObjectBindingPattern(
+      const std::vector<const ast::BindingElement*>& elements,
+      const ast::Expression& initializer);
+
+  const ast::BindingElement& ParseArrayBindingPattern();
+  const ast::BindingElement& ParseNameBindingElement();
+  const ast::BindingElement& ParseObjectBindingPattern();
 
   // Map node to js_doc
   std::unordered_map<const ast::Node*, const ast::JsDoc*> js_doc_map_;

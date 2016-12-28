@@ -10,6 +10,7 @@ source_set("parser") {
   sources = [
     "parser.cc",
     "parser.h",
+    "parser_bindings.cc",
     "parser_declarations.cc",
     "parser_expressions.cc",
     "parser_statements.cc",

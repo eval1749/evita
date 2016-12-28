@@ -13,6 +13,8 @@ component("ast") {
     "container_node.h",
     "declarations.cc",
     "declarations.h",
+    "empty_node_visitor.cc",
+    "empty_node_visitor.h",
     "error_codes.cc",
     "error_codes.h",
     "expressions.cc",

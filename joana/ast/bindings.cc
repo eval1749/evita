@@ -27,6 +27,14 @@ BindingCommaElement::BindingCommaElement(const SourceCodeRange& range)
 BindingCommaElement::~BindingCommaElement() = default;
 
 //
+// BindingInvalidElement
+//
+BindingInvalidElement::BindingInvalidElement(const SourceCodeRange& range)
+    : BindingElement(range) {}
+
+BindingInvalidElement::~BindingInvalidElement() = default;
+
+//
 // BindingElement
 //
 BindingElement::BindingElement(const SourceCodeRange& range) : Node(range) {}

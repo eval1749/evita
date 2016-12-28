@@ -24,6 +24,7 @@ namespace ast {
 #define FOR_EACH_AST_BINDING_ELEMENT(V) \
   V(ArrayBindingPattern)                \
   V(BindingCommaElement)                \
+  V(BindingInvalidElement)              \
   V(BindingNameElement)                 \
   V(BindingProperty)                    \
   V(BindingRestElement)                 \

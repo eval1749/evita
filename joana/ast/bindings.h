@@ -71,6 +71,21 @@ class JOANA_AST_EXPORT BindingCommaElement final : public BindingElement {
 };
 
 //
+// BindingInvalidElement
+//
+class JOANA_AST_EXPORT BindingInvalidElement final : public BindingElement {
+  DECLARE_CONCRETE_AST_NODE(BindingInvalidElement, BindingElement);
+
+ public:
+  ~BindingInvalidElement() final;
+
+ private:
+  explicit BindingInvalidElement(const SourceCodeRange& range);
+
+  DISALLOW_COPY_AND_ASSIGN(BindingInvalidElement);
+};
+
+//
 // BindingNameElement
 //
 class JOANA_AST_EXPORT BindingNameElement final

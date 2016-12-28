@@ -7,14 +7,14 @@
 
 #include <iosfwd>
 
-#include "joana/ast/node_visitor.h"
+#include "joana/ast/empty_node_visitor.h"
 
 #include "joana/ast/node_forward.h"
 
 namespace joana {
 namespace parser {
 
-class SimpleFormatter final : public ast::NodeVisitor {
+class SimpleFormatter final : public ast::EmptyNodeVisitor {
  public:
   explicit SimpleFormatter(std::ostream* ostream);
   ~SimpleFormatter();

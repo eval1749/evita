@@ -61,6 +61,8 @@ class JOANA_AST_EXPORT NodeFactory final {
 
   const BindingElement& NewBindingCommaElement(const SourceCodeRange& range);
 
+  const BindingElement& NewBindingInvalidElement(const SourceCodeRange& range);
+
   const BindingElement& NewBindingNameElement(const SourceCodeRange& range,
                                               const Name& name,
                                               const Expression& initializer);

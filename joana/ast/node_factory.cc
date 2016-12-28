@@ -127,6 +127,11 @@ const BindingElement& NodeFactory::NewBindingCommaElement(
   return *new (zone_) BindingCommaElement(range);
 }
 
+const BindingElement& NodeFactory::NewBindingInvalidElement(
+    const SourceCodeRange& range) {
+  return *new (zone_) BindingInvalidElement(range);
+}
+
 const BindingElement& NodeFactory::NewBindingNameElement(
     const SourceCodeRange& range,
     const Name& name,

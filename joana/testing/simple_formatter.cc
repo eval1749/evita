@@ -8,6 +8,7 @@
 #include "joana/testing/simple_formatter.h"
 
 #include "base/strings/utf_string_conversions.h"
+#include "joana/ast/bindings.h"
 #include "joana/ast/declarations.h"
 #include "joana/ast/error_codes.h"
 #include "joana/ast/expressions.h"
@@ -137,6 +138,64 @@ void SimpleFormatter::VisitModule(ast::Module* node) {
 
 void SimpleFormatter::VisitName(ast::Name* node) {
   OutputUsingSoourceCode(*node);
+}
+
+// Binding Element
+void SimpleFormatter::VisitArrayBindingPattern(ast::ArrayBindingPattern* node) {
+  *ostream_ << '[';
+  auto* delimiter = "";
+  for (const auto& element : node->elements()) {
+    *ostream_ << delimiter;
+    delimiter = " ";
+    Format(element);
+  }
+  *ostream_ << ']';
+  if (node->initializer().Is<ast::EmptyExpression>())
+    return;
+  *ostream_ << " = ";
+  Format(node->initializer());
+}
+
+void SimpleFormatter::VisitBindingCommaElement(ast::BindingCommaElement* node) {
+  *ostream_ << ',';
+}
+
+void SimpleFormatter::VisitBindingInvalidElement(
+    ast::BindingInvalidElement* node) {
+  *ostream_ << "(invalid)";
+}
+
+void SimpleFormatter::VisitBindingNameElement(ast::BindingNameElement* node) {
+  Format(node->name());
+  if (node->initializer().Is<ast::EmptyExpression>())
+    return;
+  *ostream_ << " = ";
+}
+
+void SimpleFormatter::VisitBindingProperty(ast::BindingProperty* node) {
+  Format(node->name());
+  *ostream_ << ": ";
+  Format(node->element());
+}
+
+void SimpleFormatter::VisitBindingRestElement(ast::BindingRestElement* node) {
+  *ostream_ << "...";
+  Format(node->element());
+}
+
+void SimpleFormatter::VisitObjectBindingPattern(
+    ast::ObjectBindingPattern* node) {
+  *ostream_ << '{';
+  auto* delimiter = "";
+  for (const auto& element : node->elements()) {
+    *ostream_ << delimiter;
+    delimiter = " ";
+    Format(element);
+  }
+  *ostream_ << '}';
+  if (node->initializer().Is<ast::EmptyExpression>())
+    return;
+  *ostream_ << " = ";
 }
 
 // JsDoc

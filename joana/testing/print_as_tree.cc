@@ -8,6 +8,8 @@
 #include "base/macros.h"
 #include "base/strings/string_piece.h"
 #include "base/strings/utf_string_conversions.h"
+#include "joana/ast/bindings.h"
+#include "joana/ast/expressions.h"
 #include "joana/ast/jsdoc_nodes.h"
 #include "joana/ast/node.h"
 #include "joana/ast/node_factory.h"
@@ -91,9 +93,84 @@ PrintableNode AsPrintable(Context* context, const ast::Node& node) {
   }                                                                      \
   std::ostream& operator<<(std::ostream& ostream,                        \
                            const Printable##name& printable);
+FOR_EACH_AST_BINDING_ELEMENT(V)
 FOR_EACH_AST_JSDOC(V)
+FOR_EACH_AST_TOKEN(V)
 FOR_EACH_AST_TYPE(V)
 #undef V
+
+// Binding
+std::ostream& operator<<(std::ostream& ostream,
+                         const PrintableArrayBindingPattern& printable) {
+  auto& context = *printable.context;
+  const auto& node = *printable.node;
+  ostream << "#array_pattern";
+  IndentScope scope(&context);
+  {
+    for (const auto& element : node.elements())
+      ostream << Indent(context) << AsPrintable(&context, element);
+  }
+  if (node.initializer().Is<ast::ElisionExpression>())
+    return ostream;
+  return ostream << Indent(context)
+                 << AsPrintable(&context, node.initializer());
+}
+
+std::ostream& operator<<(std::ostream& ostream,
+                         const PrintableBindingCommaElement& printable) {
+  return ostream << "#binding_comma";
+}
+
+std::ostream& operator<<(std::ostream& ostream,
+                         const PrintableBindingInvalidElement& printable) {
+  return ostream << "#binding_invalid";
+}
+
+std::ostream& operator<<(std::ostream& ostream,
+                         const PrintableBindingNameElement& printable) {
+  auto& context = *printable.context;
+  const auto& node = *printable.node;
+  ostream << "#binding_name " << AsPrintable(&context, node.name());
+  if (node.initializer().Is<ast::ElisionExpression>())
+    return ostream;
+  IndentScope scope(&context);
+  return ostream << Indent(context)
+                 << AsPrintable(&context, node.initializer());
+}
+
+std::ostream& operator<<(std::ostream& ostream,
+                         const PrintableBindingProperty& printable) {
+  auto& context = *printable.context;
+  const auto& node = *printable.node;
+  ostream << "#binding_property " << AsPrintable(&context, node.name());
+  IndentScope scope(&context);
+  return ostream << Indent(context) << AsPrintable(&context, node.element());
+}
+
+std::ostream& operator<<(std::ostream& ostream,
+                         const PrintableBindingRestElement& printable) {
+  auto& context = *printable.context;
+  const auto& node = *printable.node;
+  ostream << "#binding_rest";
+  IndentScope scope(&context);
+  return ostream << Indent(context) << AsPrintable(&context, node.element());
+}
+
+std::ostream& operator<<(std::ostream& ostream,
+                         const PrintableObjectBindingPattern& printable) {
+  auto& context = *printable.context;
+  const auto& node = *printable.node;
+  ostream << "#object_pattern";
+  IndentScope scope(&context);
+  {
+    for (const auto& element : node.elements())
+      ostream << Indent(context) << AsPrintable(&context, element);
+  }
+  if (node.initializer().Is<ast::ElisionExpression>())
+    return ostream;
+  return ostream << Indent(context)
+                 << AsPrintable(&context, node.initializer());
+}
 
 // JsDoc
 std::ostream& operator<<(std::ostream& ostream,
@@ -136,6 +213,39 @@ std::ostream& operator<<(std::ostream& ostream,
   auto& context = *printable.context;
   const auto& node = *printable.node;
   return ostream << "#type " << AsPrintable(&context, node.type());
+}
+
+// Tokens
+std::ostream& operator<<(std::ostream& ostream,
+                         const PrintableComment& printable) {
+  const auto& node = *printable.node;
+  return ostream << "#comment |" << AsPrintable(node.range()) << '|';
+}
+
+std::ostream& operator<<(std::ostream& ostream,
+                         const PrintableEmpty& printable) {
+  return ostream << "#empty";
+}
+
+std::ostream& operator<<(std::ostream& ostream,
+                         const PrintableJsDoc& printable) {
+  auto& context = *printable.context;
+  const auto& node = *printable.node;
+  ostream << "#jsdoc";
+  IndentScope scope(&context);
+  return ostream << AsPrintable(&context, node.document());
+}
+
+std::ostream& operator<<(std::ostream& ostream,
+                         const PrintablePunctuator& printable) {
+  const auto& node = *printable.node;
+  return ostream << AsPrintable(node.range());
+}
+
+std::ostream& operator<<(std::ostream& ostream,
+                         const PrintableName& printable) {
+  const auto& node = *printable.node;
+  return ostream << AsPrintable(node.range());
 }
 
 // Types
@@ -272,7 +382,9 @@ std::ostream& operator<<(std::ostream& ostream,
 #define V(name)             \
   if (node.Is<ast::name>()) \
     return ostream << Printable##name{&context, &node.As<ast::name>()};
+  FOR_EACH_AST_BINDING_ELEMENT(V)
   FOR_EACH_AST_JSDOC(V)
+  FOR_EACH_AST_TOKEN(V)
   FOR_EACH_AST_TYPE(V)
 #undef V
   return ostream << PrintableSourceCodeRange{&node.range()};

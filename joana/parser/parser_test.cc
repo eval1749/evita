@@ -7,31 +7,23 @@
 
 #include "joana/parser/parser.h"
 
-#include "base/macros.h"
-#include "base/strings/string_piece.h"
-#include "base/strings/utf_string_conversions.h"
-#include "joana/ast/error_codes.h"
 #include "joana/ast/module.h"
-#include "joana/ast/node_factory.h"
 #include "joana/ast/statements.h"
 #include "joana/ast/tokens.h"
 #include "joana/base/error_sink.h"
-#include "joana/base/memory/zone.h"
 #include "joana/base/source_code.h"
-#include "joana/base/source_code_factory.h"
-#include "joana/base/source_code_range.h"
-#include "joana/parser/public/parser_context.h"
-#include "joana/parser/public/parser_context_builder.h"
 #include "joana/parser/public/parser_options.h"
 #include "joana/parser/public/parser_options_builder.h"
-#include "joana/testing/simple_error_sink.h"
+#include "joana/testing/lexer_test_base.h"
 #include "joana/testing/simple_formatter.h"
-#include "testing/gtest/include/gtest/gtest.h"
 
 namespace joana {
 namespace parser {
 
-class ParserTest : public ::testing::Test {
+//
+// ParserTest
+//
+class ParserTest : public LexerTestBase {
  protected:
   ParserTest() = default;
   ~ParserTest() override = default;
@@ -46,23 +38,12 @@ class ParserTest : public ::testing::Test {
 
 std::string ParserTest::Parse(base::StringPiece script_text,
                               const ParserOptions& options) {
-  Zone zone("ParserTest");
-  SimpleErrorSink error_sink;
-  ast::NodeFactory node_factory(&zone);
-  const auto& context = ParserContext::Builder()
-                            .set_error_sink(&error_sink)
-                            .set_node_factory(&node_factory)
-                            .Build();
-  SourceCode::Factory source_code_factory(&zone);
-  const auto& script_text16 = base::UTF8ToUTF16(script_text);
-  auto& source_code = source_code_factory.New(
-      base::FilePath(), base::StringPiece16(script_text16));
-
-  std::ostringstream ostream;
-  Parser parser(context.get(), source_code.range(), options);
+  PrepareSouceCode(script_text);
+  Parser parser(&context(), source_code().range(), options);
   const auto& module = parser.Run().As<ast::Module>();
+  std::ostringstream ostream;
   SimpleFormatter(&ostream).Format(module);
-  for (const auto& error : error_sink.errors())
+  for (const auto& error : error_sink().errors())
     ostream << error << std::endl;
   for (const auto& statement : module.statements()) {
     auto* js_doc = module.JsDocFor(statement);

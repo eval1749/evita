@@ -7,7 +7,7 @@ vars = {
   'github.git': 'https://github.com',
 
   'base_revision': '99428daf1e47dfe2fc219df8594829f4bf4925a5',
-  'build_revision': '29ac3ae139551d342de8a95f4641157d0153fc33',
+  'build_revision': 'bdc04ca095549fc9f1e27210d8e36c58a7b40600',
   'buildtools_revision': '0ef801087682b271e9ace93cfa93e9d3dea98079',
   'ced_revision': 'e57cdc44bd541d10669312a6fdc59fc4bf52d2b9',
   'cygwin_revision': 'c89e446b273697fadf3a10ff1007a97c0b7de6df',
@@ -23,7 +23,7 @@ vars = {
   'modp_b64_revision': '28e3fbba4cb4ec3ffd85b53d0a3904525d08f5a6',
   'ply_revision': '4a6baf95860033d4c69d3e3087696b30c687622c',
   'testing_revision': 'e66da27ea326c183115d399432a393dbc8e492cf',
-  'v8_revision': '017e985b9c81782ac6548fdad2c66b34bc30d72b', # 5.7.292
+  'v8_revision': 'cf7481bd9da7cbdc4c3c15e6bb4014ede1d954c7', # 5.7.359
   'zlib_revision': '8086cc8849617783f1b05be03cb893bb23977186',
 
   # github

@@ -9,6 +9,7 @@ namespace joana {
 namespace ast {
 
 #define FOR_EACH_ABSTRACT_AST_NODE(V) \
+  V(BindingElement)                   \
   V(Declaration)                      \
   V(Expression)                       \
   V(ContainerNode)                    \
@@ -19,6 +20,14 @@ namespace ast {
   V(Statement)                        \
   V(Token)                            \
   V(Type)
+
+#define FOR_EACH_AST_BINDING_ELEMENT(V) \
+  V(ArrayBindingPattern)                \
+  V(BindingCommaElement)                \
+  V(BindingNameElement)                 \
+  V(BindingProperty)                    \
+  V(BindingRestElement)                 \
+  V(ObjectBindingPattern)
 
 #define FOR_EACH_AST_DECLARATION(V) \
   V(ArrowFunction)                  \
@@ -131,6 +140,7 @@ namespace ast {
   V(VoidType)
 
 #define FOR_EACH_CONCRETE_AST_NODE(V) \
+  FOR_EACH_AST_BINDING_ELEMENT(V)     \
   FOR_EACH_AST_DECLARATION(V)         \
   FOR_EACH_AST_EXPRESSION(V)          \
   FOR_EACH_AST_JSDOC(V)               \

@@ -9,6 +9,8 @@ config("ast_implementation") {
 component("ast") {
   output_name = "joana_ast"
   sources = [
+    "bindings.cc",
+    "bindings.h",
     "container_node.cc",
     "container_node.h",
     "declarations.cc",

@@ -52,6 +52,32 @@ class JOANA_AST_EXPORT NodeFactory final {
                                   PunctuatorKind kind);
 
   //
+  // Bindings factory members
+  //
+  const BindingElement& NewArrayBindingPattern(
+      const SourceCodeRange& range,
+      const std::vector<const BindingElement*>& elements,
+      const Expression& initializer);
+
+  const BindingElement& NewBindingCommaElement(const SourceCodeRange& range);
+
+  const BindingElement& NewBindingNameElement(const SourceCodeRange& range,
+                                              const Name& name,
+                                              const Expression& initializer);
+
+  const BindingElement& NewBindingProperty(const SourceCodeRange& range,
+                                           const Name& name,
+                                           const BindingElement& element);
+
+  const BindingElement& NewBindingRestElement(const SourceCodeRange& range,
+                                              const BindingElement& element);
+
+  const BindingElement& NewObjectBindingPattern(
+      const SourceCodeRange& range,
+      const std::vector<const BindingElement*>& elements,
+      const Expression& initializer);
+
+  //
   // Declarations factory members
   //
   const ArrowFunction& NewArrowFunction(const SourceCodeRange& range,

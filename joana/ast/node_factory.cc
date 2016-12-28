@@ -6,6 +6,7 @@
 
 #include "joana/ast/node_factory.h"
 
+#include "joana/ast/bindings.h"
 #include "joana/ast/declarations.h"
 #include "joana/ast/expressions.h"
 #include "joana/ast/jsdoc_nodes.h"
@@ -109,6 +110,50 @@ const Name& NodeFactory::NewName(const SourceCodeRange& range) {
 const Punctuator& NodeFactory::NewPunctuator(const SourceCodeRange& range,
                                              PunctuatorKind kind) {
   return *new (zone_) Punctuator(range, kind);
+}
+
+// Bindings
+const BindingElement& NodeFactory::NewArrayBindingPattern(
+    const SourceCodeRange& range,
+    const std::vector<const BindingElement*>& elements,
+    const Expression& initializer) {
+  return *new (zone_->Allocate(sizeof(ArrayBindingPattern) +
+                               sizeof(BindingElement*) * elements.size()))
+      ArrayBindingPattern(range, elements, initializer);
+}
+
+const BindingElement& NodeFactory::NewBindingCommaElement(
+    const SourceCodeRange& range) {
+  return *new (zone_) BindingCommaElement(range);
+}
+
+const BindingElement& NodeFactory::NewBindingNameElement(
+    const SourceCodeRange& range,
+    const Name& name,
+    const Expression& initializer) {
+  return *new (zone_) BindingNameElement(range, name, initializer);
+}
+
+const BindingElement& NodeFactory::NewBindingProperty(
+    const SourceCodeRange& range,
+    const Name& name,
+    const BindingElement& element) {
+  return *new (zone_) BindingProperty(range, name, element);
+}
+
+const BindingElement& NodeFactory::NewBindingRestElement(
+    const SourceCodeRange& range,
+    const BindingElement& element) {
+  return *new (zone_) BindingRestElement(range, element);
+}
+
+const BindingElement& NodeFactory::NewObjectBindingPattern(
+    const SourceCodeRange& range,
+    const std::vector<const BindingElement*>& elements,
+    const Expression& initializer) {
+  return *new (zone_->Allocate(sizeof(ObjectBindingPattern) +
+                               sizeof(BindingElement*) * elements.size()))
+      ObjectBindingPattern(range, elements, initializer);
 }
 
 // Declarations

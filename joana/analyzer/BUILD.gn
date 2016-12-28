@@ -6,6 +6,19 @@ source_set("analyzer") {
   sources = [
     "analyzer.cc",
     "analyzer.h",
+    "built_in_world.cc",
+    "built_in_world.h",
+    "environment.cc",
+    "environment.h",
+    "environment_builder.cc",
+    "environment_builder.h",
+    "factory.cc",
+    "factory.h",
+    "value.cc",
+    "value.h",
+    "value_forward.h",
+    "values.cc",
+    "values.h",
   ]
   public_deps = [
     "//joana/ast",

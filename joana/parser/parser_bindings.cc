@@ -28,9 +28,14 @@ bool CanStartBindingElement(const ast::Token& token) {
 std::vector<const ast::BindingElement*> Parser::ParseBindingElements() {
   std::vector<const ast::BindingElement*> elements;
   while (CanPeekToken()) {
-    elements.push_back(&ParseBindingElement());
-    if (!ConsumeTokenIf(ast::PunctuatorKind::Comma))
+    const auto& element = ParseBindingElement();
+    elements.push_back(&element);
+    if (ConsumeTokenIf(ast::PunctuatorKind::Comma))
+      continue;
+    if (!CanPeekToken() || !CanStartBindingElement(PeekToken()))
       break;
+    AddError(element.range(), ErrorCode::ERROR_BINDING_EXPECT_COMMA);
+    continue;
   }
   return std::move(elements);
 }

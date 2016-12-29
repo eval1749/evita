@@ -508,8 +508,10 @@ const Statement& NodeFactory::NewEmptyStatement(const SourceCodeRange& range) {
 }
 
 const Statement& NodeFactory::NewExpressionStatement(
+    const SourceCodeRange& range,
     const Expression& expression) {
-  return *new (zone_) ExpressionStatement(const_cast<Expression*>(&expression));
+  return *new (zone_)
+      ExpressionStatement(range, const_cast<Expression*>(&expression));
 }
 
 const Statement& NodeFactory::NewForStatement(const SourceCodeRange& range,

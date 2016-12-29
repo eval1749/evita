@@ -55,21 +55,6 @@ bool IsDeclarationKeyword(const ast::Token& token) {
 }  // namespace
 
 //
-// Parser::ExpectSemicolonScope
-//
-class Parser::ExpectSemicolonScope final {
- public:
-  explicit ExpectSemicolonScope(Parser* parser) : parser_(parser) {}
-
-  ~ExpectSemicolonScope() { parser_->ExpectSemicolon(); }
-
- private:
-  Parser* const parser_;
-
-  DISALLOW_COPY_AND_ASSIGN(ExpectSemicolonScope);
-};
-
-//
 // Functions for parsing statements
 //
 
@@ -133,9 +118,9 @@ const ast::Statement& Parser::ParseBreakStatement() {
     return node_factory().NewBreakStatement(GetSourceCodeRange(),
                                             NewEmptyName());
   }
-  ExpectSemicolonScope semicolon_scope(this);
   auto& label = CanPeekToken() && PeekToken().Is<ast::Name>() ? ConsumeToken()
                                                               : NewEmptyName();
+  ExpectSemicolon();
   return node_factory().NewBreakStatement(GetSourceCodeRange(), label);
 }
 
@@ -166,10 +151,10 @@ const ast::Statement& Parser::ParseClassStatement() {
 }
 
 const ast::Statement& Parser::ParseConstStatement() {
-  ExpectSemicolonScope semicolon_scope(this);
   DCHECK_EQ(PeekToken(), ast::NameId::Const);
   ConsumeToken();
   const auto& elements = ParseBindingElements();
+  ExpectSemicolon();
   return node_factory().NewConstStatement(GetSourceCodeRange(), elements);
 }
 
@@ -181,9 +166,9 @@ const ast::Statement& Parser::ParseContinueStatement() {
     return node_factory().NewContinueStatement(GetSourceCodeRange(),
                                                NewEmptyName());
   }
-  ExpectSemicolonScope semicolon_scope(this);
   auto& label = CanPeekToken() && PeekToken().Is<ast::Name>() ? ConsumeToken()
                                                               : NewEmptyName();
+  ExpectSemicolon();
   return node_factory().NewContinueStatement(GetSourceCodeRange(), label);
 }
 
@@ -203,8 +188,8 @@ const ast::Statement& Parser::ParseDoStatement() {
   if (!ConsumeTokenIf(ast::NameId::While))
     return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_EXPECT_WHILE);
   if (options_.disable_automatic_semicolon()) {
-    ExpectSemicolonScope semicolon_scope(this);
     auto& condition = ParseParenthesisExpression();
+    ExpectSemicolon();
     return node_factory().NewDoStatement(GetSourceCodeRange(), statement,
                                          condition);
   }
@@ -221,8 +206,9 @@ const ast::Statement& Parser::ParseExpressionStatement() {
     if (!declaration.Is<ast::ArrowFunction>())
       return node_factory().NewDeclarationStatement(declaration);
   }
-  ExpectSemicolonScope semicolon_scope(this);
-  return node_factory().NewExpressionStatement(expression);
+  ExpectSemicolon();
+  return node_factory().NewExpressionStatement(GetSourceCodeRange(),
+                                               expression);
 }
 
 const ast::Statement& Parser::ParseForStatement() {
@@ -330,10 +316,11 @@ const ast::Statement& Parser::ParseKeywordStatement() {
     case ast::NameId::Const:
       return ParseConstStatement();
     case ast::NameId::Debugger: {
-      ExpectSemicolonScope semicolon_scope(this);
       auto& expression =
           node_factory().NewReferenceExpression(ConsumeToken().As<ast::Name>());
-      return node_factory().NewExpressionStatement(expression);
+      ExpectSemicolon();
+      return node_factory().NewExpressionStatement(GetSourceCodeRange(),
+                                                   expression);
     }
     case ast::NameId::Default:
       return ParseDefaultLabel();
@@ -384,10 +371,10 @@ const ast::Statement& Parser::ParseKeywordStatement() {
 }
 
 const ast::Statement& Parser::ParseLetStatement() {
-  ExpectSemicolonScope semicolon_scope(this);
   DCHECK_EQ(PeekToken(), ast::NameId::Let);
   ConsumeToken();
   const auto& elements = ParseBindingElements();
+  ExpectSemicolon();
   return node_factory().NewLetStatement(GetSourceCodeRange(), elements);
 }
 
@@ -426,7 +413,6 @@ const ast::Expression& Parser::ParseParenthesisExpression() {
 }
 
 const ast::Statement& Parser::ParseReturnStatement() {
-  ExpectSemicolonScope semicolon_scope(this);
   ConsumeToken();
   if (is_separated_by_newline_) {
     if (options_.disable_automatic_semicolon())
@@ -439,11 +425,12 @@ const ast::Statement& Parser::ParseReturnStatement() {
                                                NewElisionExpression());
     }
   }
-  if (CanPeekToken() && PeekToken() == ast::PunctuatorKind::Semicolon) {
+  if (CanPeekToken() && ConsumeTokenIf(ast::PunctuatorKind::Semicolon)) {
     return node_factory().NewReturnStatement(GetSourceCodeRange(),
                                              NewElisionExpression());
   }
   auto& expression = ParseExpression();
+  ExpectSemicolon();
   return node_factory().NewReturnStatement(GetSourceCodeRange(), expression);
 }
 
@@ -492,8 +479,8 @@ const ast::Statement& Parser::ParseSwitchStatement() {
 const ast::Statement& Parser::ParseThrowStatement() {
   DCHECK_EQ(PeekToken(), ast::NameId::Throw);
   ConsumeToken();
-  ExpectSemicolonScope semicolon_scope(this);
   auto& expression = ParseExpression();
+  ExpectSemicolon();
   return node_factory().NewThrowStatement(GetSourceCodeRange(), expression);
 }
 
@@ -520,10 +507,10 @@ const ast::Statement& Parser::ParseTryStatement() {
 }
 
 const ast::Statement& Parser::ParseVarStatement() {
-  ExpectSemicolonScope semicolon_scope(this);
   DCHECK_EQ(PeekToken(), ast::NameId::Var);
   ConsumeToken();
   const auto& elements = ParseBindingElements();
+  ExpectSemicolon();
   return node_factory().NewVarStatement(GetSourceCodeRange(), elements);
 }
 

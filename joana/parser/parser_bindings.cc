@@ -59,7 +59,7 @@ const ast::BindingElement& Parser::ParseBindingElement() {
     return ParseArrayBindingPattern();
 
   AddError(ErrorCode::ERROR_BINDING_INVALID_ELEMENT);
-  return node_factory().NewBindingInvalidElement(GetSourceCodeRange());
+  return node_factory().NewBindingInvalidElement(PeekToken().range());
 }
 
 // Factory helper functions

@@ -47,7 +47,6 @@ class Parser final {
 
  private:
   friend class ParserTest;
-  class ExpectSemicolonScope;
 
   class SourceCodeRangeScope final {
    public:
@@ -242,6 +241,8 @@ class Parser final {
   // line terminator.
   bool is_separated_by_newline_ = false;
 
+  // The last consumed token for specify node range.
+  const ast::Token* last_token_ = nullptr;
   const ParserOptions& options_;
   std::stack<int> range_stack_;
 

@@ -146,6 +146,7 @@ bool Parser::CanPeekToken() const {
 const ast::Token& Parser::ConsumeToken() {
   auto& token = PeekToken();
   Advance();
+  last_token_ = &token;
   return token;
 }
 
@@ -154,7 +155,7 @@ bool Parser::ConsumeTokenIf(ast::NameId name_id) {
     return false;
   if (PeekToken() != name_id)
     return false;
-  Advance();
+  ConsumeToken();
   return true;
 }
 
@@ -163,7 +164,7 @@ bool Parser::ConsumeTokenIf(ast::PunctuatorKind kind) {
     return false;
   if (PeekToken() != kind)
     return false;
-  Advance();
+  ConsumeToken();
   return true;
 }
 
@@ -208,9 +209,7 @@ void Parser::Finish() {
 }
 
 SourceCodeRange Parser::GetSourceCodeRange() const {
-  return source_code().Slice(
-      range_stack_.top(),
-      CanPeekToken() ? PeekToken().range().end() : lexer_->location().end());
+  return source_code().Slice(range_stack_.top(), last_token_->range().end());
 }
 
 const ast::Token& Parser::NewEmptyName() {

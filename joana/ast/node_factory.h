@@ -264,7 +264,8 @@ class JOANA_AST_EXPORT NodeFactory final {
 
   const Statement& NewEmptyStatement(const SourceCodeRange& range);
 
-  const Statement& NewExpressionStatement(const Expression& expression);
+  const Statement& NewExpressionStatement(const SourceCodeRange& range,
+                                          const Expression& expression);
 
   const Statement& NewForStatement(const SourceCodeRange& range,
                                    const Token& keyword,

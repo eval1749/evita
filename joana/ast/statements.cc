@@ -87,8 +87,9 @@ EmptyStatement::~EmptyStatement() = default;
 //
 // ExpressionStatement
 //
-ExpressionStatement::ExpressionStatement(Expression* expression)
-    : NodeTemplate(expression, expression->range()) {}
+ExpressionStatement::ExpressionStatement(const SourceCodeRange& range,
+                                         Expression* expression)
+    : NodeTemplate(expression, range) {}
 
 ExpressionStatement::~ExpressionStatement() = default;
 

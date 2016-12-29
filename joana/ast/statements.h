@@ -241,7 +241,7 @@ class JOANA_AST_EXPORT ExpressionStatement
   const Expression& expression() const { return *member_at<0>(); }
 
  private:
-  explicit ExpressionStatement(Expression* expression);
+  ExpressionStatement(const SourceCodeRange& range, Expression* expression);
 
   DISALLOW_COPY_AND_ASSIGN(ExpressionStatement);
 };

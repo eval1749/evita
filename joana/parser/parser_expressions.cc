@@ -171,7 +171,8 @@ const ast::Expression& Parser::NewDelimiterExpression(
 }
 
 const ast::Expression& Parser::NewElisionExpression() {
-  return node_factory().NewElisionExpression(lexer_->location());
+  return node_factory().NewElisionExpression(
+      SourceCodeRange::CollapseToEnd(last_token_->range()));
 }
 
 const ast::Expression& Parser::NewEmptyExpression() {
@@ -621,7 +622,8 @@ const ast::Expression& Parser::ParsePropertyName() {
 const ast::Expression& Parser::ParseRegExpLiteral() {
   SourceCodeRangeScope scope(this);
   auto& regexp = lexer_->ConsumeRegExp();
-  Advance();
+  // Consume |RegExp| node.
+  ConsumeToken();
   if (is_separated_by_newline_) {
     if (options_.disable_automatic_semicolon()) {
       AddError(GetSourceCodeRange(),

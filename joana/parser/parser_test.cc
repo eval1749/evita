@@ -687,7 +687,7 @@ TEST_F(ParserTest, ParseArrayBindingPatternError) {
       "|  +--#binding_name bar\n"
       "+--#binding_comma\n"
       "+--#binding_name baz\n"
-      "PASER_ERROR_BINDING_UNEXPECT_REST@6:13\n",
+      "PASER_ERROR_BINDING_UNEXPECT_REST@6:12\n",
       ToString(ParseBindingElement("[foo, ...bar, baz]")))
       << "rest element should be the last element";
 

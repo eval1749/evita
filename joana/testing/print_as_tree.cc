@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include <ostream>
+#include <type_traits>
 
 #include "base/auto_reset.h"
 #include "base/macros.h"
@@ -23,10 +24,16 @@ namespace internal {
 
 namespace {
 
+//
+// Context
+//
 struct Context {
   int level = 0;
 };
 
+//
+// Indent
+//
 struct Indent {
   explicit Indent(const Context& context) : level(context.level) {}
   explicit Indent(int passed_level) : level(passed_level) {}
@@ -59,49 +66,44 @@ class IndentScope final {
   DISALLOW_COPY_AND_ASSIGN(IndentScope);
 };
 
-struct PrintableSourceCodeRange {
-  const SourceCodeRange* range;
-};
-
-PrintableSourceCodeRange AsPrintable(const SourceCodeRange& range) {
-  return PrintableSourceCodeRange{&range};
-}
-
-std::ostream& operator<<(std::ostream& ostream,
-                         const PrintableSourceCodeRange& printable) {
-  return ostream << base::UTF16ToUTF8(printable.range->GetString());
-}
-
-struct PrintableNode {
-  Context* context;
+//
+// UsingSourceCode is a wrapper of AST node to print using source code.
+//
+struct UsingSourceCode {
   const ast::Node* node;
 };
 
-std::ostream& operator<<(std::ostream& ostream, const PrintableNode& printable);
-
-PrintableNode AsPrintable(Context* context, const ast::Node& node) {
-  return PrintableNode{context, &node};
+UsingSourceCode SourceCodeOf(const ast::Node& node) {
+  return UsingSourceCode{&node};
 }
 
-#define V(name)                                                          \
-  struct Printable##name {                                               \
-    Context* context;                                                    \
-    const ast::name* node;                                               \
-  };                                                                     \
-  Printable##name AsPrintable(Context* context, const ast::name& node) { \
-    return Printable##name{context, &node};                              \
-  }                                                                      \
-  std::ostream& operator<<(std::ostream& ostream,                        \
-                           const Printable##name& printable);
-FOR_EACH_AST_BINDING_ELEMENT(V)
-FOR_EACH_AST_JSDOC(V)
-FOR_EACH_AST_TOKEN(V)
-FOR_EACH_AST_TYPE(V)
-#undef V
+std::ostream& operator<<(std::ostream& ostream,
+                         const UsingSourceCode& printable) {
+  const auto& node = *printable.node;
+  return ostream << base::UTF16ToUTF8(node.range().GetString());
+}
+
+//
+// Printable
+//
+template <typename NodeClass>
+struct Printable {
+  static_assert(std::is_base_of<ast::Node, NodeClass>::value,
+                "Should be AST node");
+  Context* context;
+  const NodeClass* node;
+};
+
+Printable<ast::Node> AsPrintable(Context* context, const ast::Node& node) {
+  return Printable<ast::Node>{context, &node};
+}
+
+std::ostream& operator<<(std::ostream& ostream,
+                         const Printable<ast::Node>& printable);
 
 // Binding
 std::ostream& operator<<(std::ostream& ostream,
-                         const PrintableArrayBindingPattern& printable) {
+                         const Printable<ast::ArrayBindingPattern>& printable) {
   auto& context = *printable.context;
   const auto& node = *printable.node;
   ostream << "#array_pattern";
@@ -117,17 +119,18 @@ std::ostream& operator<<(std::ostream& ostream,
 }
 
 std::ostream& operator<<(std::ostream& ostream,
-                         const PrintableBindingCommaElement& printable) {
+                         const Printable<ast::BindingCommaElement>& printable) {
   return ostream << "#binding_comma";
 }
 
-std::ostream& operator<<(std::ostream& ostream,
-                         const PrintableBindingInvalidElement& printable) {
+std::ostream& operator<<(
+    std::ostream& ostream,
+    const Printable<ast::BindingInvalidElement>& printable) {
   return ostream << "#binding_invalid";
 }
 
 std::ostream& operator<<(std::ostream& ostream,
-                         const PrintableBindingNameElement& printable) {
+                         const Printable<ast::BindingNameElement>& printable) {
   auto& context = *printable.context;
   const auto& node = *printable.node;
   ostream << "#binding_name " << AsPrintable(&context, node.name());
@@ -139,7 +142,7 @@ std::ostream& operator<<(std::ostream& ostream,
 }
 
 std::ostream& operator<<(std::ostream& ostream,
-                         const PrintableBindingProperty& printable) {
+                         const Printable<ast::BindingProperty>& printable) {
   auto& context = *printable.context;
   const auto& node = *printable.node;
   ostream << "#binding_property " << AsPrintable(&context, node.name());
@@ -148,7 +151,7 @@ std::ostream& operator<<(std::ostream& ostream,
 }
 
 std::ostream& operator<<(std::ostream& ostream,
-                         const PrintableBindingRestElement& printable) {
+                         const Printable<ast::BindingRestElement>& printable) {
   auto& context = *printable.context;
   const auto& node = *printable.node;
   ostream << "#binding_rest";
@@ -156,8 +159,9 @@ std::ostream& operator<<(std::ostream& ostream,
   return ostream << Indent(context) << AsPrintable(&context, node.element());
 }
 
-std::ostream& operator<<(std::ostream& ostream,
-                         const PrintableObjectBindingPattern& printable) {
+std::ostream& operator<<(
+    std::ostream& ostream,
+    const Printable<ast::ObjectBindingPattern>& printable) {
   auto& context = *printable.context;
   const auto& node = *printable.node;
   ostream << "#object_pattern";
@@ -174,7 +178,7 @@ std::ostream& operator<<(std::ostream& ostream,
 
 // JsDoc
 std::ostream& operator<<(std::ostream& ostream,
-                         const PrintableJsDocDocument& printable) {
+                         const Printable<ast::JsDocDocument>& printable) {
   auto& context = *printable.context;
   const auto& node = *printable.node;
   ostream << "#document";
@@ -185,14 +189,14 @@ std::ostream& operator<<(std::ostream& ostream,
 }
 
 std::ostream& operator<<(std::ostream& ostream,
-                         const PrintableJsDocName& printable) {
+                         const Printable<ast::JsDocName>& printable) {
   auto& context = *printable.context;
   const auto& node = *printable.node;
   return ostream << "#name " << AsPrintable(&context, node.name());
 }
 
 std::ostream& operator<<(std::ostream& ostream,
-                         const PrintableJsDocTag& printable) {
+                         const Printable<ast::JsDocTag>& printable) {
   auto& context = *printable.context;
   const auto& node = *printable.node;
   ostream << AsPrintable(&context, node.name());
@@ -203,13 +207,13 @@ std::ostream& operator<<(std::ostream& ostream,
 }
 
 std::ostream& operator<<(std::ostream& ostream,
-                         const PrintableJsDocText& printable) {
+                         const Printable<ast::JsDocText>& printable) {
   const auto& node = *printable.node;
-  return ostream << '|' << AsPrintable(node.range()) << '|';
+  return ostream << '|' << SourceCodeOf(node) << '|';
 }
 
 std::ostream& operator<<(std::ostream& ostream,
-                         const PrintableJsDocType& printable) {
+                         const Printable<ast::JsDocType>& printable) {
   auto& context = *printable.context;
   const auto& node = *printable.node;
   return ostream << "#type " << AsPrintable(&context, node.type());
@@ -217,18 +221,18 @@ std::ostream& operator<<(std::ostream& ostream,
 
 // Tokens
 std::ostream& operator<<(std::ostream& ostream,
-                         const PrintableComment& printable) {
+                         const Printable<ast::Comment>& printable) {
   const auto& node = *printable.node;
-  return ostream << "#comment |" << AsPrintable(node.range()) << '|';
+  return ostream << "#comment |" << SourceCodeOf(node) << '|';
 }
 
 std::ostream& operator<<(std::ostream& ostream,
-                         const PrintableEmpty& printable) {
+                         const Printable<ast::Empty>& printable) {
   return ostream << "#empty";
 }
 
 std::ostream& operator<<(std::ostream& ostream,
-                         const PrintableJsDoc& printable) {
+                         const Printable<ast::JsDoc>& printable) {
   auto& context = *printable.context;
   const auto& node = *printable.node;
   ostream << "#jsdoc";
@@ -237,25 +241,25 @@ std::ostream& operator<<(std::ostream& ostream,
 }
 
 std::ostream& operator<<(std::ostream& ostream,
-                         const PrintablePunctuator& printable) {
+                         const Printable<ast::Punctuator>& printable) {
   const auto& node = *printable.node;
-  return ostream << AsPrintable(node.range());
+  return ostream << SourceCodeOf(node);
 }
 
 std::ostream& operator<<(std::ostream& ostream,
-                         const PrintableName& printable) {
+                         const Printable<ast::Name>& printable) {
   const auto& node = *printable.node;
-  return ostream << AsPrintable(node.range());
+  return ostream << SourceCodeOf(node);
 }
 
 // Types
 std::ostream& operator<<(std::ostream& ostream,
-                         const PrintableAnyType& printable) {
+                         const Printable<ast::AnyType>& printable) {
   return ostream << '*';
 }
 
 std::ostream& operator<<(std::ostream& ostream,
-                         const PrintableFunctionType& printable) {
+                         const Printable<ast::FunctionType>& printable) {
   auto& context = *printable.context;
   const auto& node = *printable.node;
   ostream << "function " << static_cast<int>(node.kind());
@@ -270,33 +274,33 @@ std::ostream& operator<<(std::ostream& ostream,
 }
 
 std::ostream& operator<<(std::ostream& ostream,
-                         const PrintableInvalidType& printable) {
+                         const Printable<ast::InvalidType>& printable) {
   return ostream << "(invalid)";
 }
 
 std::ostream& operator<<(std::ostream& ostream,
-                         const PrintableNullableType& printable) {
+                         const Printable<ast::NullableType>& printable) {
   auto& context = *printable.context;
   const auto& node = *printable.node;
   return ostream << '?' << AsPrintable(&context, node.type());
 }
 
 std::ostream& operator<<(std::ostream& ostream,
-                         const PrintableNonNullableType& printable) {
+                         const Printable<ast::NonNullableType>& printable) {
   auto& context = *printable.context;
   const auto& node = *printable.node;
   return ostream << '!' << AsPrintable(&context, node.type());
 }
 
 std::ostream& operator<<(std::ostream& ostream,
-                         const PrintableOptionalType& printable) {
+                         const Printable<ast::OptionalType>& printable) {
   auto& context = *printable.context;
   const auto& node = *printable.node;
   return ostream << '=' << AsPrintable(&context, node.type());
 }
 
 std::ostream& operator<<(std::ostream& ostream,
-                         const PrintableRecordType& printable) {
+                         const Printable<ast::RecordType>& printable) {
   auto& context = *printable.context;
   const auto& node = *printable.node;
   ostream << "record";
@@ -309,14 +313,14 @@ std::ostream& operator<<(std::ostream& ostream,
 }
 
 std::ostream& operator<<(std::ostream& ostream,
-                         const PrintableRestType& printable) {
+                         const Printable<ast::RestType>& printable) {
   auto& context = *printable.context;
   const auto& node = *printable.node;
   return ostream << "..." << AsPrintable(&context, node.type());
 }
 
 std::ostream& operator<<(std::ostream& ostream,
-                         const PrintableTupleType& printable) {
+                         const Printable<ast::TupleType>& printable) {
   auto& context = *printable.context;
   const auto& node = *printable.node;
   ostream << "tuple";
@@ -327,7 +331,7 @@ std::ostream& operator<<(std::ostream& ostream,
 }
 
 std::ostream& operator<<(std::ostream& ostream,
-                         const PrintableTypeApplication& printable) {
+                         const Printable<ast::TypeApplication>& printable) {
   auto& context = *printable.context;
   const auto& node = *printable.node;
   ostream << "application " << AsPrintable(&context, node.name());
@@ -338,7 +342,7 @@ std::ostream& operator<<(std::ostream& ostream,
 }
 
 std::ostream& operator<<(std::ostream& ostream,
-                         const PrintableTypeGroup& printable) {
+                         const Printable<ast::TypeGroup>& printable) {
   auto& context = *printable.context;
   const auto& node = *printable.node;
   ostream << "group";
@@ -347,14 +351,14 @@ std::ostream& operator<<(std::ostream& ostream,
 }
 
 std::ostream& operator<<(std::ostream& ostream,
-                         const PrintableTypeName& printable) {
+                         const Printable<ast::TypeName>& printable) {
   auto& context = *printable.context;
   const auto& node = *printable.node;
   return ostream << AsPrintable(&context, node.name());
 }
 
 std::ostream& operator<<(std::ostream& ostream,
-                         const PrintableUnionType& printable) {
+                         const Printable<ast::UnionType>& printable) {
   auto& context = *printable.context;
   const auto& node = *printable.node;
   ostream << "union";
@@ -365,29 +369,29 @@ std::ostream& operator<<(std::ostream& ostream,
 }
 
 std::ostream& operator<<(std::ostream& ostream,
-                         const PrintableUnknownType& printable) {
+                         const Printable<ast::UnknownType>& printable) {
   return ostream << '?';
 }
 
 std::ostream& operator<<(std::ostream& ostream,
-                         const PrintableVoidType& printable) {
+                         const Printable<ast::VoidType>& printable) {
   return ostream << "void";
 }
 
 // Dispatcher
 std::ostream& operator<<(std::ostream& ostream,
-                         const PrintableNode& printable) {
+                         const Printable<ast::Node>& printable) {
   auto& context = *printable.context;
   const auto& node = *printable.node;
 #define V(name)             \
   if (node.Is<ast::name>()) \
-    return ostream << Printable##name{&context, &node.As<ast::name>()};
+    return ostream << Printable<ast::name>{&context, &node.As<ast::name>()};
   FOR_EACH_AST_BINDING_ELEMENT(V)
   FOR_EACH_AST_JSDOC(V)
   FOR_EACH_AST_TOKEN(V)
   FOR_EACH_AST_TYPE(V)
 #undef V
-  return ostream << PrintableSourceCodeRange{&node.range()};
+  return ostream << SourceCodeOf(node);
 }
 
 }  // namespace
@@ -395,7 +399,7 @@ std::ostream& operator<<(std::ostream& ostream,
 std::ostream& operator<<(std::ostream& ostream,
                          const PrintableAstNode& printable) {
   Context context;
-  return ostream << PrintableNode{&context, printable.node};
+  return ostream << Printable<ast::Node>{&context, printable.node};
 }
 
 }  // namespace internal

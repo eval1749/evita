@@ -5,6 +5,9 @@
 #ifndef JOANA_ANALYZER_PUBLIC_ANALYZE_H_
 #define JOANA_ANALYZER_PUBLIC_ANALYZE_H_
 
+#include <memory>
+
+#include "base/macros.h"
 #include "joana/analyzer/public/analyzer_export.h"
 
 namespace joana {
@@ -12,16 +15,28 @@ namespace ast {
 class Node;
 }
 
+namespace analyzer {
+class Analyzer;
+}  // namespace analyzer
+
 class AnalyzerSettings;
 
 //
-// The analyzer entry point.
+// Analyzer provides public API of analyzer.
 //
-JOANA_ANALYZER_EXPORT const ast::Node& AddExterns(AnalyzerSettings* context,
-                                                  const ast::Node& node);
+class JOANA_ANALYZER_EXPORT Analyzer final {
+ public:
+  explicit Analyzer(const AnalyzerSettings& settings);
+  ~Analyzer();
 
-JOANA_ANALYZER_EXPORT const ast::Node& Analyze(AnalyzerSettings* context,
-                                               const ast::Node& node);
+  void Analyze();
+  void Load(const ast::Node& node);
+
+ private:
+  std::unique_ptr<analyzer::Analyzer> analyzer_;
+
+  DISALLOW_COPY_AND_ASSIGN(Analyzer);
+};
 
 }  // namespace joana
 

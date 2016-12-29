@@ -8,22 +8,17 @@
 
 namespace joana {
 
-using Analyzer = analyzer::Analyzer;
+Analyzer::Analyzer(const AnalyzerSettings& settings)
+    : analyzer_(new analyzer::Analyzer(settings)) {}
 
-//
-// AddExterns; the entry point
-//
-const ast::Node& AddExterns(AnalyzerSettings* context, const ast::Node& node) {
-  Analyzer analyzer(context, node);
-  return analyzer.AddExterns();
+Analyzer::~Analyzer() = default;
+
+void Analyzer::Analyze() {
+  analyzer_->Analyze();
 }
 
-//
-// Analyze; the entry point
-//
-const ast::Node& Analyze(AnalyzerSettings* context, const ast::Node& node) {
-  Analyzer analyzer(context, node);
-  return analyzer.Analyze();
+void Analyzer::Load(const ast::Node& node) {
+  analyzer_->Load(node);
 }
 
 }  // namespace joana

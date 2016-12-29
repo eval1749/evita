@@ -222,8 +222,10 @@ void Checker::Analyze() {
                              .set_error_sink(&error_sink_)
                              .set_zone(&zone)
                              .Build();
+  Analyzer analyzer(*settings);
   for (const auto& module : modules_)
-    joana::Analyze(settings.get(), *module);
+    analyzer.Load(*module);
+  analyzer.Analyze();
 }
 
 int Checker::Main() {

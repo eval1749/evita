@@ -7,18 +7,13 @@
 namespace joana {
 namespace analyzer {
 
-Analyzer::Analyzer(AnalyzerSettings* context, const ast::Node& root)
-    : context_(*context), root_(root) {}
+Analyzer::Analyzer(const AnalyzerSettings& settings) : settings_(settings) {}
 
 Analyzer::~Analyzer() = default;
 
-const ast::Node& Analyzer::AddExterns() {
-  return root_;
-}
+void Analyzer::Analyze() {}
 
-const ast::Node& Analyzer::Analyze() {
-  return root_;
-}
+void Analyzer::Load(const ast::Node& node) {}
 
 }  // namespace analyzer
 }  // namespace joana

@@ -11,17 +11,19 @@
 namespace joana {
 namespace analyzer {
 
+//
+// analyzer
+//
 class Analyzer final {
  public:
-  Analyzer(AnalyzerSettings* context, const ast::Node& node);
+  explicit Analyzer(const AnalyzerSettings& settings);
   ~Analyzer();
 
-  const ast::Node& AddExterns();
-  const ast::Node& Analyze();
+  void Analyze();
+  void Load(const ast::Node& node);
 
  private:
-  AnalyzerSettings& context_;
-  const ast::Node& root_;
+  const AnalyzerSettings& settings_;
 
   DISALLOW_COPY_AND_ASSIGN(Analyzer);
 };

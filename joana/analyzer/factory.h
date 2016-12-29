@@ -29,17 +29,17 @@ class Factory final {
   explicit Factory(Zone* zone);
   ~Factory();
 
-  Environment* global_environment() const { return global_environment_; }
+  Environment& global_environment() const { return global_environment_; }
 
-  Environment* NewEnvironment(Environment* outer, const ast::Node& owner);
-  Value* NewFunction(const ast::Node& node);
-  Value* NewProperty(const ast::Node& node);
-  Value* NewVariable(const ast::Node& node);
+  Environment& NewEnvironment(Environment* outer, const ast::Node& owner);
+  Value& NewFunction(const ast::Node& node);
+  Value& NewProperty(const ast::Node& node);
+  Value& NewVariable(const ast::Node& assignment, const ast::Node& name);
 
  private:
-  static Environment* NewGlobalEnvironment(Zone* zone);
+  static Environment& NewGlobalEnvironment(Zone* zone);
 
-  Environment* const global_environment_;
+  Environment& global_environment_;
   Zone& zone_;
 
   DISALLOW_COPY_AND_ASSIGN(Factory);

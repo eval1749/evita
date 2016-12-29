@@ -20,27 +20,28 @@ Factory::Factory(Zone* zone)
 Factory::~Factory() = default;
 
 // Factory members
-Environment* Factory::NewEnvironment(Environment* outer,
+Environment& Factory::NewEnvironment(Environment* outer,
                                      const ast::Node& owner) {
-  return new (&zone_) Environment(outer, owner);
+  return *new (&zone_) Environment(&zone_, outer, owner);
 }
 
-Value* Factory::NewFunction(const ast::Node& node) {
-  return new (&zone_) Function(&zone_, node);
+Value& Factory::NewFunction(const ast::Node& node) {
+  return *new (&zone_) Function(&zone_, node);
 }
 
-Value* Factory::NewProperty(const ast::Node& node) {
-  return new (&zone_) Property(&zone_, node);
+Value& Factory::NewProperty(const ast::Node& node) {
+  return *new (&zone_) Property(&zone_, node);
 }
 
-Value* Factory::NewVariable(const ast::Node& node) {
-  return new (&zone_) Variable(&zone_, node);
+Value& Factory::NewVariable(const ast::Node& assignment,
+                            const ast::Node& name) {
+  return *new (&zone_) Variable(&zone_, assignment, name);
 }
 
 // static
-Environment* Factory::NewGlobalEnvironment(Zone* zone) {
+Environment& Factory::NewGlobalEnvironment(Zone* zone) {
   const auto& module = BuiltInWorld::GetInstance()->global_module();
-  return new (zone) Environment(module);
+  return *new (zone) Environment(zone, module);
 }
 
 }  // namespace analyzer

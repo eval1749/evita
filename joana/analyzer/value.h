@@ -5,6 +5,8 @@
 #ifndef JOANA_ANALYZER_VALUE_H_
 #define JOANA_ANALYZER_VALUE_H_
 
+#include <iosfwd>
+
 #include "base/macros.h"
 #include "joana/base/castable.h"
 #include "joana/base/memory/zone_allocated.h"
@@ -17,6 +19,7 @@ namespace analyzer {
 
 #define DECLARE_ANALYZE_VALUE(name, base) \
   DECLARE_CASTABLE_CLASS(name, base);     \
+  friend class Editor;                    \
   friend class Factory;
 
 #define DECLARE_ABSTRACT_ANALYZE_VALUE(name, base) \
@@ -32,6 +35,8 @@ class Value : public Castable<Value>, public ZoneAllocated {
   DECLARE_ABSTRACT_ANALYZE_VALUE(Value, Castable);
 
  public:
+  class Editor;
+
   virtual ~Value();
 
   // Return the AST node which associated to this value.
@@ -47,6 +52,10 @@ class Value : public Castable<Value>, public ZoneAllocated {
 
   DISALLOW_COPY_AND_ASSIGN(Value);
 };
+
+// See "value_printer.cc" for implementation of |Value| printer.
+std::ostream& operator<<(std::ostream& ostream, const Value& value);
+std::ostream& operator<<(std::ostream& ostream, const Value* value);
 
 }  // namespace analyzer
 }  // namespace joana

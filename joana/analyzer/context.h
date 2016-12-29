@@ -17,6 +17,7 @@ class SourceCodeRange;
 
 namespace analyzer {
 
+class Environment;
 class Factory;
 enum class ErrorCode;
 
@@ -30,6 +31,7 @@ class Context final {
 
   ErrorSink& error_sink() const;
   Factory& factory() const { return *factory_; }
+  Environment& global_environment() const;
 
  private:
   std::unique_ptr<Factory> factory_;

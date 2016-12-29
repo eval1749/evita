@@ -4,6 +4,10 @@
 
 #include "joana/analyzer/values.h"
 
+#include "joana/ast/bindings.h"
+#include "joana/ast/node_forward.h"
+#include "joana/ast/tokens.h"
+
 namespace joana {
 namespace analyzer {
 
@@ -12,6 +16,7 @@ namespace analyzer {
 //
 Function::Function(Zone* zone, const ast::Node& node)
     : LexicalBinding(zone, node) {}
+
 Function::~Function() = default;
 
 //
@@ -29,13 +34,19 @@ LexicalBinding::~LexicalBinding() = default;
 //
 Property::Property(Zone* zone, const ast::Node& node)
     : LexicalBinding(zone, node) {}
+
 Property::~Property() = default;
 
 //
 // Variable
 //
-Variable::Variable(Zone* zone, const ast::Node& node)
-    : LexicalBinding(zone, node) {}
+Variable::Variable(Zone* zone,
+                   const ast::Node& assignment,
+                   const ast::Node& name)
+    : LexicalBinding(zone, name), assignment_(assignment) {
+  DCHECK(name.Is<ast::Name>() || name.Is<ast::BindingNameElement>()) << name;
+}
+
 Variable::~Variable() = default;
 
 }  // namespace analyzer

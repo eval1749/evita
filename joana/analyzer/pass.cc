@@ -7,6 +7,8 @@
 #include "joana/analyzer/context.h"
 #include "joana/ast/node.h"
 #include "joana/base/error_sink.h"
+#include "joana/base/source_code.h"
+#include "joana/base/source_code_range.h"
 
 namespace joana {
 namespace analyzer {
@@ -19,6 +21,17 @@ Pass::~Pass() = default;
 
 Factory& Pass::factory() {
   return context_.factory();
+}
+
+void Pass::AddError(const ast::Node& node,
+                    ErrorCode error_code,
+                    const ast::Node& related) {
+  if (node.range().source_code() == related.range().source_code()) {
+    AddError(SourceCodeRange::Merge(node.range(), related.range()), error_code);
+    return;
+  }
+  AddError(related, error_code);
+  AddError(node, error_code);
 }
 
 void Pass::AddError(const ast::Node& node, ErrorCode error_code) {

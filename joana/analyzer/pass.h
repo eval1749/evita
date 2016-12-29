@@ -33,6 +33,9 @@ class Pass {
 
   Factory& factory();
 
+  void AddError(const ast::Node& node,
+                ErrorCode error_code,
+                const ast::Node& related);
   void AddError(const ast::Node& node, ErrorCode error_code);
   void AddError(const SourceCodeRange& range, ErrorCode error_code);
 

@@ -14,11 +14,15 @@ namespace analyzer {
 //
 // Environment
 //
-Environment::Environment(Environment* outer, const ast::Node& owner)
-    : outer_(outer), owner_(owner) {}
+Environment::Environment(Zone* zone, Environment* outer, const ast::Node& owner)
+    : names_(zone),
+      name_map_(zone),
+      outer_(outer),
+      owner_(owner),
+      value_map_(zone) {}
 
-Environment::Environment(const ast::Node& owner)
-    : Environment(nullptr, owner) {}
+Environment::Environment(Zone* zone, const ast::Node& owner)
+    : Environment(zone, nullptr, owner) {}
 
 Environment::~Environment() = default;
 
@@ -27,6 +31,7 @@ void Environment::Bind(const ast::Name& name, Value* value) {
   DCHECK(result.second) << name << " is already bound.";
   const auto& name_result = name_map_.emplace(name.number(), &name);
   DCHECK(name_result.second);
+  names_.push_back(&name);
 }
 
 Value* Environment::BindingOf(const ast::Name& name) const {

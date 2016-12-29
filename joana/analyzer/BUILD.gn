@@ -24,7 +24,10 @@ source_set("analyzer") {
     "pass.h",
     "value.cc",
     "value.h",
+    "value_editor.cc",
+    "value_editor.h",
     "value_forward.h",
+    "value_printer.cc",
     "values.cc",
     "values.h",
   ]

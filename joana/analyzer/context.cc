@@ -24,5 +24,9 @@ ErrorSink& Context::error_sink() const {
   return settings_.error_sink();
 }
 
+Environment& Context::global_environment() const {
+  return factory_->global_environment();
+}
+
 }  // namespace analyzer
 }  // namespace joana

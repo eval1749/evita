@@ -9,6 +9,8 @@
 
 #include "base/macros.h"
 #include "joana/base/memory/zone_allocated.h"
+#include "joana/base/memory/zone_unordered_map.h"
+#include "joana/base/memory/zone_vector.h"
 
 namespace joana {
 namespace ast {
@@ -28,6 +30,8 @@ class Environment final : public ZoneAllocated {
 
   virtual ~Environment();
 
+  const ZoneVector<const ast::Name*>& names() const { return names_; }
+
   // Return the AST node which associated to this Environment.
   const ast::Node& owner() const { return owner_; }
 
@@ -37,15 +41,16 @@ class Environment final : public ZoneAllocated {
   friend class EnvironmentBuilder;
   friend class Factory;
 
-  Environment(Environment* outer, const ast::Node& owner);
-  explicit Environment(const ast::Node& owner);
+  Environment(Zone* zone, Environment* outer, const ast::Node& owner);
+  Environment(Zone* zone, const ast::Node& owner);
 
   void Bind(const ast::Name& name, Value* value);
 
-  std::unordered_map<int, const ast::Name*> name_map_;
+  ZoneVector<const ast::Name*> names_;
+  ZoneUnorderedMap<int, const ast::Name*> name_map_;
   Environment* const outer_;
   const ast::Node& owner_;
-  std::unordered_map<int, Value*> value_map_;
+  ZoneUnorderedMap<int, Value*> value_map_;
 
   DISALLOW_COPY_AND_ASSIGN(Environment);
 };

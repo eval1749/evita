@@ -22,6 +22,9 @@ class JOANA_BASE_EXPORT SourceCode final : public ZoneAllocated {
 
   ~SourceCode();
 
+  bool operator==(const SourceCode& other) const;
+  bool operator!=(const SourceCode& other) const;
+
   SourceCodeRange end() const;
   const base::FilePath& file_path() const { return file_path_; }
   const base::StringPiece16 contents() const { return file_contents_; }

@@ -14,6 +14,14 @@ SourceCode::SourceCode(const base::FilePath& file_path,
 
 SourceCode::~SourceCode() = default;
 
+bool SourceCode::operator==(const SourceCode& other) const {
+  return this == &other;
+}
+
+bool SourceCode::operator!=(const SourceCode& other) const {
+  return !operator==(other);
+}
+
 SourceCodeRange SourceCode::end() const {
   return SourceCodeRange(*this, size(), size());
 }

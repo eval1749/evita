@@ -13,14 +13,14 @@ namespace analyzer {
 
 class Analyzer final {
  public:
-  Analyzer(AnalyzeContext* context, const ast::Node& node);
+  Analyzer(AnalyzerSettings* context, const ast::Node& node);
   ~Analyzer();
 
   const ast::Node& AddExterns();
   const ast::Node& Analyze();
 
  private:
-  AnalyzeContext& context_;
+  AnalyzerSettings& context_;
   const ast::Node& root_;
 
   DISALLOW_COPY_AND_ASSIGN(Analyzer);

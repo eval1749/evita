@@ -11,32 +11,32 @@ namespace joana {
 using Analyzer = analyzer::Analyzer;
 
 //
-// AnalyzeContext
+// AnalyzerSettings
 //
-AnalyzeContext::AnalyzeContext(Zone* zone,
-                               ErrorSink* error_sink,
-                               const Options& options)
+AnalyzerSettings::AnalyzerSettings(Zone* zone,
+                                   ErrorSink* error_sink,
+                                   const Options& options)
     : error_sink_(*error_sink), options_(options), zone_(*zone) {}
 
-AnalyzeContext::~AnalyzeContext() = default;
+AnalyzerSettings::~AnalyzerSettings() = default;
 
 // Options
-AnalyzeContext::Options::Options(const Options& other) = default;
-AnalyzeContext::Options::Options() = default;
-AnalyzeContext::Options::~Options() = default;
+AnalyzerSettings::Options::Options(const Options& other) = default;
+AnalyzerSettings::Options::Options() = default;
+AnalyzerSettings::Options::~Options() = default;
 
 // Options::Builder
-AnalyzeContext::Options::Builder::Builder() = default;
-AnalyzeContext::Options::Builder::~Builder() = default;
+AnalyzerSettings::Options::Builder::Builder() = default;
+AnalyzerSettings::Options::Builder::~Builder() = default;
 
-const AnalyzeContext::Options AnalyzeContext::Options::Builder::Build() {
+const AnalyzerSettings::Options AnalyzerSettings::Options::Builder::Build() {
   return options_;
 }
 
 //
 // AddExterns; the entry point
 //
-const ast::Node& AddExterns(AnalyzeContext* context, const ast::Node& node) {
+const ast::Node& AddExterns(AnalyzerSettings* context, const ast::Node& node) {
   Analyzer analyzer(context, node);
   return analyzer.AddExterns();
 }
@@ -44,7 +44,7 @@ const ast::Node& AddExterns(AnalyzeContext* context, const ast::Node& node) {
 //
 // Analyze; the entry point
 //
-const ast::Node& Analyze(AnalyzeContext* context, const ast::Node& node) {
+const ast::Node& Analyze(AnalyzerSettings* context, const ast::Node& node) {
   Analyzer analyzer(context, node);
   return analyzer.Analyze();
 }

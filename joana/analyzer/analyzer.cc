@@ -7,7 +7,7 @@
 namespace joana {
 namespace analyzer {
 
-Analyzer::Analyzer(AnalyzeContext* context, const ast::Node& root)
+Analyzer::Analyzer(AnalyzerSettings* context, const ast::Node& root)
     : context_(*context), root_(root) {}
 
 Analyzer::~Analyzer() = default;

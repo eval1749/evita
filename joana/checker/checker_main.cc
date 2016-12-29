@@ -215,9 +215,9 @@ void Checker::AddSourceCode(const base::FilePath& file_path,
 
 // Analyze modules after we parse all modules.
 void Checker::Analyze() {
-  Zone zone("AnalyzeContext");
-  const auto& options = joana::AnalyzeContext::Options::Builder().Build();
-  joana::AnalyzeContext context(&zone, &error_sink_, options);
+  Zone zone("AnalyzerSettings");
+  const auto& options = joana::AnalyzerSettings::Options::Builder().Build();
+  joana::AnalyzerSettings context(&zone, &error_sink_, options);
   for (const auto& module : modules_)
     joana::Analyze(&context, *module);
 }

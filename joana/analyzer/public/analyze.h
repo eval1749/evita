@@ -21,9 +21,9 @@ class Node;
 class SourceCodeRange;
 
 //
-// AnalyzeContext
+// AnalyzerSettings
 //
-class JOANA_ANALYZER_EXPORT AnalyzeContext final {
+class JOANA_ANALYZER_EXPORT AnalyzerSettings final {
  public:
   // Options
   class JOANA_ANALYZER_EXPORT Options final {
@@ -39,8 +39,8 @@ class JOANA_ANALYZER_EXPORT AnalyzeContext final {
     bool dummy_ = false;
   };
 
-  AnalyzeContext(Zone* zone, ErrorSink* error_sink, const Options& options);
-  ~AnalyzeContext();
+  AnalyzerSettings(Zone* zone, ErrorSink* error_sink, const Options& options);
+  ~AnalyzerSettings();
 
   ErrorSink& error_sink() const { return error_sink_; }
   const Options& options() const { return options_; }
@@ -51,13 +51,13 @@ class JOANA_ANALYZER_EXPORT AnalyzeContext final {
   const Options options_;
   Zone& zone_;
 
-  DISALLOW_COPY_AND_ASSIGN(AnalyzeContext);
+  DISALLOW_COPY_AND_ASSIGN(AnalyzerSettings);
 };
 
 //
-// AnalyzeContext::Options::Builder
+// AnalyzerSettings::Options::Builder
 //
-class JOANA_ANALYZER_EXPORT AnalyzeContext::Options::Builder final {
+class JOANA_ANALYZER_EXPORT AnalyzerSettings::Options::Builder final {
  public:
   Builder();
   ~Builder();
@@ -73,10 +73,10 @@ class JOANA_ANALYZER_EXPORT AnalyzeContext::Options::Builder final {
 //
 // The analyzer entry point.
 //
-JOANA_ANALYZER_EXPORT const ast::Node& AddExterns(AnalyzeContext* context,
+JOANA_ANALYZER_EXPORT const ast::Node& AddExterns(AnalyzerSettings* context,
                                                   const ast::Node& node);
 
-JOANA_ANALYZER_EXPORT const ast::Node& Analyze(AnalyzeContext* context,
+JOANA_ANALYZER_EXPORT const ast::Node& Analyze(AnalyzerSettings* context,
                                                const ast::Node& node);
 
 }  // namespace joana

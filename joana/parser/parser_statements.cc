@@ -521,9 +521,10 @@ const ast::Statement& Parser::ParseTryStatement() {
 
 const ast::Statement& Parser::ParseVarStatement() {
   ExpectSemicolonScope semicolon_scope(this);
+  DCHECK_EQ(PeekToken(), ast::NameId::Var);
   ConsumeToken();
-  auto& expression = ParseExpression();
-  return node_factory().NewVarStatement(GetSourceCodeRange(), expression);
+  const auto& elements = ParseBindingElements();
+  return node_factory().NewVarStatement(GetSourceCodeRange(), elements);
 }
 
 const ast::Statement& Parser::ParseWhileStatement() {

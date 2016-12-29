@@ -572,17 +572,15 @@ class JOANA_AST_EXPORT TryFinallyStatement
 //
 // VarStatement
 //
-class JOANA_AST_EXPORT VarStatement
-    : public NodeTemplate<Statement, Expression*> {
-  DECLARE_CONCRETE_AST_NODE(VarStatement, Statement);
+class JOANA_AST_EXPORT VarStatement final : public VariableDeclaration {
+  DECLARE_CONCRETE_AST_NODE_WITH_LIST(VarStatement, VariableDeclaration);
 
  public:
-  ~VarStatement() override;
-
-  const Expression& expression() const { return *member_at<0>(); }
+  ~VarStatement() final;
 
  protected:
-  VarStatement(const SourceCodeRange& range, Expression* expression);
+  VarStatement(const SourceCodeRange& range,
+               const std::vector<const BindingElement*>& elements);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(VarStatement);

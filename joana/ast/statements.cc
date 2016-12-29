@@ -274,8 +274,9 @@ VariableDeclaration::~VariableDeclaration() = default;
 //
 // VarStatement
 //
-VarStatement::VarStatement(const SourceCodeRange& range, Expression* expression)
-    : NodeTemplate(expression, range) {}
+VarStatement::VarStatement(const SourceCodeRange& range,
+                           const std::vector<const BindingElement*>& elements)
+    : VariableDeclaration(range, elements) {}
 
 VarStatement::~VarStatement() = default;
 

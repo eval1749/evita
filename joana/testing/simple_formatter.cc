@@ -845,7 +845,7 @@ void SimpleFormatter::VisitTryFinallyStatement(ast::TryFinallyStatement* node) {
 
 void SimpleFormatter::VisitVarStatement(ast::VarStatement* node) {
   *ostream_ << "var ";
-  Format(node->expression());
+  FormatBindingElements(node->elements());
   *ostream_ << ';';
 }
 

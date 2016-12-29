@@ -634,9 +634,12 @@ const Statement& NodeFactory::NewTryFinallyStatement(
                           const_cast<Statement*>(&finally_block));
 }
 
-const Statement& NodeFactory::NewVarStatement(const SourceCodeRange& range,
-                                              const Expression& expression) {
-  return *new (zone_) VarStatement(range, const_cast<Expression*>(&expression));
+const Statement& NodeFactory::NewVarStatement(
+    const SourceCodeRange& range,
+    const std::vector<const BindingElement*>& elements) {
+  return *new (zone_->Allocate(sizeof(VarStatement) +
+                               sizeof(BindingElement*) * elements.size()))
+      VarStatement(range, elements);
 }
 
 const Statement& NodeFactory::NewWhileStatement(const SourceCodeRange& range,

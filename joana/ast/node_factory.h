@@ -331,8 +331,9 @@ class JOANA_AST_EXPORT NodeFactory final {
                                           const Statement& try_block,
                                           const Statement& finally_block);
 
-  const Statement& NewVarStatement(const SourceCodeRange& range,
-                                   const Expression& expression);
+  const Statement& NewVarStatement(
+      const SourceCodeRange& range,
+      const std::vector<const BindingElement*>& elements);
 
   const Statement& NewWhileStatement(const SourceCodeRange& range,
                                      const Expression& expression,

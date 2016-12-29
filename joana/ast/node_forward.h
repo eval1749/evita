@@ -174,6 +174,11 @@ class TypeList;
 // Expression or BlockStatement
 using ArrowFunctionBody = Node;
 
+template <typename Element>
+class NodeListTemplate;
+
+using BindingElementList = NodeListTemplate<const BindingElement>;
+
 }  // namespace ast
 }  // namespace joana
 

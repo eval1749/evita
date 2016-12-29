@@ -34,6 +34,8 @@ std::vector<const ast::BindingElement*> Parser::ParseBindingElements() {
       continue;
     if (!CanPeekToken() || !CanStartBindingElement(PeekToken()))
       break;
+    if (is_separated_by_newline_ && !options_.disable_automatic_semicolon())
+      break;
     AddError(element.range(), ErrorCode::ERROR_BINDING_EXPECT_COMMA);
     continue;
   }

@@ -26,15 +26,15 @@ Environment* Factory::NewEnvironment(Environment* outer,
 }
 
 Value* Factory::NewFunction(const ast::Node& node) {
-  return new (&zone_) Function(node);
+  return new (&zone_) Function(&zone_, node);
 }
 
 Value* Factory::NewProperty(const ast::Node& node) {
-  return new (&zone_) Property(node);
+  return new (&zone_) Property(&zone_, node);
 }
 
 Value* Factory::NewVariable(const ast::Node& node) {
-  return new (&zone_) Variable(node);
+  return new (&zone_) Variable(&zone_, node);
 }
 
 // static

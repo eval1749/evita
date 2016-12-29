@@ -10,19 +10,32 @@ namespace analyzer {
 //
 // Function
 //
-Function::Function(const ast::Node& node) : Value(node) {}
+Function::Function(Zone* zone, const ast::Node& node)
+    : LexicalBinding(zone, node) {}
 Function::~Function() = default;
+
+//
+// LexicalBinding
+//
+LexicalBinding::LexicalBinding(Zone* zone, const ast::Node& node)
+    : Value(node), assignments_(zone), references_(zone) {
+  assignments_.push_back(&node);
+}
+
+LexicalBinding::~LexicalBinding() = default;
 
 //
 // Property
 //
-Property::Property(const ast::Node& node) : Value(node) {}
+Property::Property(Zone* zone, const ast::Node& node)
+    : LexicalBinding(zone, node) {}
 Property::~Property() = default;
 
 //
 // Variable
 //
-Variable::Variable(const ast::Node& node) : Value(node) {}
+Variable::Variable(Zone* zone, const ast::Node& node)
+    : LexicalBinding(zone, node) {}
 Variable::~Variable() = default;
 
 }  // namespace analyzer

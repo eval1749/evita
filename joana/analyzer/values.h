@@ -6,23 +6,47 @@
 #define JOANA_ANALYZER_VALUES_H_
 
 #include "joana/analyzer/value.h"
+#include "joana/base/memory/zone_vector.h"
 
 namespace joana {
 namespace analyzer {
 
 //
+// LexicalBinding
+//
+class LexicalBinding : public Value {
+  DECLARE_ABSTRACT_ANALYZE_VALUE(LexicalBinding, Value);
+
+ public:
+  ~LexicalBinding() override;
+
+  const ZoneVector<const ast::Node*>& assignments() const {
+    return assignments_;
+  }
+
+  const ZoneVector<const ast::Node*>& references() const { return references_; }
+
+ protected:
+  LexicalBinding(Zone* zone, const ast::Node& node);
+
+ private:
+  ZoneVector<const ast::Node*> assignments_;
+  ZoneVector<const ast::Node*> references_;
+
+  DISALLOW_COPY_AND_ASSIGN(LexicalBinding);
+};
+
+//
 // Function
 //
-class Function final : public Value {
-  DECLARE_CONCRETE_ANALYZE_VALUE(Function, Value)
+class Function final : public LexicalBinding {
+  DECLARE_CONCRETE_ANALYZE_VALUE(Function, LexicalBinding)
+
  public:
   ~Function() final;
 
  private:
-  explicit Function(const ast::Node& node);
-
-  // List of assignment
-  // List of uses
+  Function(Zone* zone, const ast::Node& node);
 
   DISALLOW_COPY_AND_ASSIGN(Function);
 };
@@ -30,16 +54,14 @@ class Function final : public Value {
 //
 // Property
 //
-class Property final : public Value {
-  DECLARE_CONCRETE_ANALYZE_VALUE(Property, Value)
+class Property final : public LexicalBinding {
+  DECLARE_CONCRETE_ANALYZE_VALUE(Property, LexicalBinding)
+
  public:
   ~Property() final;
 
  private:
-  explicit Property(const ast::Node& node);
-
-  // List of assignment
-  // List of uses
+  Property(Zone* zone, const ast::Node& node);
 
   DISALLOW_COPY_AND_ASSIGN(Property);
 };
@@ -47,16 +69,14 @@ class Property final : public Value {
 //
 // Variable
 //
-class Variable final : public Value {
-  DECLARE_CONCRETE_ANALYZE_VALUE(Variable, Value)
+class Variable final : public LexicalBinding {
+  DECLARE_CONCRETE_ANALYZE_VALUE(Variable, LexicalBinding)
+
  public:
   ~Variable() final;
 
  private:
-  explicit Variable(const ast::Node& node);
-
-  // List of assignment
-  // List of uses
+  Variable(Zone* zone, const ast::Node& node);
 
   DISALLOW_COPY_AND_ASSIGN(Variable);
 };

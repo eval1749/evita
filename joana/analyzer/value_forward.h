@@ -14,11 +14,15 @@ namespace analyzer {
   V(null)                                      \
   V(number)                                    \
   V(object)                                    \
-  V(string)  /* NOLINT */                      \
+  V(string) /* NOLINT */                       \
   V(symbol)                                    \
   V(undefined)                                 \
   V(unknown)                                   \
   V(void)
+
+#define FOR_EACH_ABSTRACT_ANALYZE_VALUE(name) \
+  V(LexicalBinding)                           \
+  V(Value)
 
 #define FOR_EACH_ANALYZE_VALUE(name) \
   V(Function)                        \
@@ -26,6 +30,7 @@ namespace analyzer {
   V(Variable)
 
 #define V(name) class name;
+FOR_EACH_ABSTRACT_ANALYZE_VALUE(V)
 FOR_EACH_ANALYZE_VALUE(V)
 #undef V
 

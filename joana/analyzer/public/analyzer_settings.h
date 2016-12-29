@@ -27,8 +27,8 @@ class JOANA_ANALYZER_EXPORT AnalyzerSettings final {
 
   ~AnalyzerSettings();
 
-  ErrorSink& error_sink() const { return error_sink_; }
-  Zone& zone() const { return zone_; }
+  ErrorSink& error_sink() const;
+  Zone& zone() const;
 
  private:
   explicit AnalyzerSettings(const Builder& builder);

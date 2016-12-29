@@ -16,4 +16,12 @@ AnalyzerSettings::AnalyzerSettings(const Builder& builder)
 
 AnalyzerSettings::~AnalyzerSettings() = default;
 
+ErrorSink& AnalyzerSettings::error_sink() const {
+  return error_sink_;
+}
+
+Zone& AnalyzerSettings::zone() const {
+  return zone_;
+}
+
 }  // namespace joana

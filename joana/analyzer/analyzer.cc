@@ -4,10 +4,13 @@
 
 #include "joana/analyzer/analyzer.h"
 
+#include "joana/analyzer/context.h"
+
 namespace joana {
 namespace analyzer {
 
-Analyzer::Analyzer(const AnalyzerSettings& settings) : settings_(settings) {}
+Analyzer::Analyzer(const AnalyzerSettings& settings)
+    : context_(new Context(settings)) {}
 
 Analyzer::~Analyzer() = default;
 

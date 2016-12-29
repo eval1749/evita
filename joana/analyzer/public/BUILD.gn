@@ -2,10 +2,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-config("analyzer_implementation") {
-  defines = [ "JOANA_ANALYZER_IMPLEMENTATION" ]
-}
-
 component("public") {
   output_name = "joana_analyzer"
   sources = [
@@ -22,5 +18,5 @@ component("public") {
     "//joana/analyzer",
   ]
 
-  configs += [ ":analyzer_implementation" ]
+  configs += [ "//joana/analyzer/:analyzer_implementation" ]
 }

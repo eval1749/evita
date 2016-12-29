@@ -5,11 +5,15 @@
 #ifndef JOANA_ANALYZER_ANALYZER_H_
 #define JOANA_ANALYZER_ANALYZER_H_
 
+#include <memory>
+
 #include "base/macros.h"
 #include "joana/analyzer/public/analyze.h"
 
 namespace joana {
 namespace analyzer {
+
+class Context;
 
 //
 // analyzer
@@ -23,7 +27,7 @@ class Analyzer final {
   void Load(const ast::Node& node);
 
  private:
-  const AnalyzerSettings& settings_;
+  const std::unique_ptr<Context> context_;
 
   DISALLOW_COPY_AND_ASSIGN(Analyzer);
 };

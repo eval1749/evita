@@ -2,12 +2,18 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+config("analyzer_implementation") {
+  defines = [ "JOANA_ANALYZER_IMPLEMENTATION" ]
+}
+
 source_set("analyzer") {
   sources = [
     "analyzer.cc",
     "analyzer.h",
     "built_in_world.cc",
     "built_in_world.h",
+    "context.cc",
+    "context.h",
     "environment.cc",
     "environment.h",
     "environment_builder.cc",
@@ -24,6 +30,8 @@ source_set("analyzer") {
     "//joana/ast",
     "//joana/base",
   ]
+
+  configs += [ ":analyzer_implementation" ]
 }
 
 source_set("test_files") {

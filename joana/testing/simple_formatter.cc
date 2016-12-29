@@ -56,6 +56,16 @@ void SimpleFormatter::Format(const ast::Node& node) {
   Visit(node);
 }
 
+void SimpleFormatter::FormatBindingElements(
+    const ast::BindingElementList& elements) {
+  auto* delimiter = "";
+  for (const auto& element : elements) {
+    *ostream_ << delimiter;
+    delimiter = ", ";
+    Format(element);
+  }
+}
+
 bool SimpleFormatter::FormatChildStatement(const ast::Statement& statement) {
   if (auto* block = statement.TryAs<ast::BlockStatement>()) {
     *ostream_ << " {" << std::endl;
@@ -636,12 +646,7 @@ void SimpleFormatter::VisitCaseClause(ast::CaseClause* node) {
 
 void SimpleFormatter::VisitConstStatement(ast::ConstStatement* node) {
   *ostream_ << "const ";
-  auto* delimiter = "";
-  for (const auto& element : node->elements()) {
-    *ostream_ << delimiter;
-    delimiter = ", ";
-    Format(element);
-  }
+  FormatBindingElements(node->elements());
   *ostream_ << ';';
 }
 

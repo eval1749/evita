@@ -476,10 +476,12 @@ const Statement& NodeFactory::NewCaseClause(const SourceCodeRange& range,
                                  const_cast<Statement*>(&statement));
 }
 
-const Statement& NodeFactory::NewConstStatement(const SourceCodeRange& range,
-                                                const Expression& expression) {
-  return *new (zone_)
-      ConstStatement(range, const_cast<Expression*>(&expression));
+const Statement& NodeFactory::NewConstStatement(
+    const SourceCodeRange& range,
+    const std::vector<const BindingElement*>& elements) {
+  return *new (zone_->Allocate(sizeof(ConstStatement) +
+                               sizeof(BindingElement*) * elements.size()))
+      ConstStatement(range, elements);
 }
 
 const Statement& NodeFactory::NewContinueStatement(const SourceCodeRange& range,

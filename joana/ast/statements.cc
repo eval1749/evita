@@ -43,9 +43,10 @@ CaseClause::~CaseClause() = default;
 //
 // ConstStatement
 //
-ConstStatement::ConstStatement(const SourceCodeRange& range,
-                               Expression* expression)
-    : NodeTemplate(expression, range) {}
+ConstStatement::ConstStatement(
+    const SourceCodeRange& range,
+    const std::vector<const BindingElement*>& elements)
+    : VariableDeclaration(range, elements) {}
 
 ConstStatement::~ConstStatement() = default;
 

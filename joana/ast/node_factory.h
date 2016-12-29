@@ -249,8 +249,9 @@ class JOANA_AST_EXPORT NodeFactory final {
                                  const Expression& expression,
                                  const Statement& statement);
 
-  const Statement& NewConstStatement(const SourceCodeRange& range,
-                                     const Expression& expression);
+  const Statement& NewConstStatement(
+      const SourceCodeRange& range,
+      const std::vector<const BindingElement*>& elements);
 
   const Statement& NewContinueStatement(const SourceCodeRange& range,
                                         const Token& label);

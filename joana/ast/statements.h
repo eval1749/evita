@@ -60,13 +60,13 @@ class JOANA_AST_EXPORT StatementList final : public ZoneAllocated {
 // VariableDeclaration is a base class of ConstStatement, LetStatement and
 // VarStatement to hold list of BindingElement
 //
-class VariableDeclaration : public Statement {
+class JOANA_AST_EXPORT VariableDeclaration : public Statement {
   DECLARE_ABSTRACT_AST_NODE(VariableDeclaration, Statement);
 
  public:
-  ~VariableDeclaration() final;
+  ~VariableDeclaration() override;
 
-  const auto& elements() const { return elements_; }
+  const BindingElementList& elements() const { return elements_; }
 
  protected:
   VariableDeclaration(const SourceCodeRange& range,
@@ -139,17 +139,15 @@ class JOANA_AST_EXPORT CaseClause
 //
 // ConstStatement
 //
-class JOANA_AST_EXPORT ConstStatement
-    : public NodeTemplate<Statement, Expression*> {
-  DECLARE_CONCRETE_AST_NODE(ConstStatement, Statement);
+class JOANA_AST_EXPORT ConstStatement final : public VariableDeclaration {
+  DECLARE_CONCRETE_AST_NODE_WITH_LIST(ConstStatement, VariableDeclaration);
 
  public:
-  ~ConstStatement() override;
-
-  const Expression& expression() const { return *member_at<0>(); }
+  ~ConstStatement() final;
 
  protected:
-  ConstStatement(const SourceCodeRange& range, Expression* expression);
+  ConstStatement(const SourceCodeRange& range,
+                 const std::vector<const BindingElement*>& elements);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(ConstStatement);

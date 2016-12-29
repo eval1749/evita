@@ -6,6 +6,7 @@
 #define JOANA_TESTING_SIMPLE_FORMATTER_H_
 
 #include <iosfwd>
+#include <vector>
 
 #include "joana/ast/empty_node_visitor.h"
 
@@ -25,6 +26,7 @@ class SimpleFormatter final : public ast::EmptyNodeVisitor {
   class IndentScope;
 
   // Returns true if |statement| is block statement.
+  void FormatBindingElements(const ast::BindingElementList& elements);
   bool FormatChildStatement(const ast::Statement& statement);
   void FormatExpressionList(const ast::ExpressionList& list);
   void FormatWithIndent(const ast::Node& node);

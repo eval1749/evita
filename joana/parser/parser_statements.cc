@@ -167,9 +167,10 @@ const ast::Statement& Parser::ParseClassStatement() {
 
 const ast::Statement& Parser::ParseConstStatement() {
   ExpectSemicolonScope semicolon_scope(this);
+  DCHECK_EQ(PeekToken(), ast::NameId::Const);
   ConsumeToken();
-  auto& expression = ParseExpression();
-  return node_factory().NewConstStatement(GetSourceCodeRange(), expression);
+  const auto& elements = ParseBindingElements();
+  return node_factory().NewConstStatement(GetSourceCodeRange(), elements);
 }
 
 const ast::Statement& Parser::ParseContinueStatement() {

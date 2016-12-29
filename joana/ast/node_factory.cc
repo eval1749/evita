@@ -572,9 +572,12 @@ const Statement& NodeFactory::NewLabeledStatement(const SourceCodeRange& range,
                                        const_cast<Statement*>(&statement));
 }
 
-const Statement& NodeFactory::NewLetStatement(const SourceCodeRange& range,
-                                              const Expression& expression) {
-  return *new (zone_) LetStatement(range, const_cast<Expression*>(&expression));
+const Statement& NodeFactory::NewLetStatement(
+    const SourceCodeRange& range,
+    const std::vector<const BindingElement*>& elements) {
+  return *new (zone_->Allocate(sizeof(LetStatement) +
+                               sizeof(BindingElement*) * elements.size()))
+      LetStatement(range, elements);
 }
 
 const Statement& NodeFactory::NewReturnStatement(const SourceCodeRange& range,

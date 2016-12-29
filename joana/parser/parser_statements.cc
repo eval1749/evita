@@ -385,9 +385,10 @@ const ast::Statement& Parser::ParseKeywordStatement() {
 
 const ast::Statement& Parser::ParseLetStatement() {
   ExpectSemicolonScope semicolon_scope(this);
+  DCHECK_EQ(PeekToken(), ast::NameId::Let);
   ConsumeToken();
-  auto& expression = ParseExpression();
-  return node_factory().NewLetStatement(GetSourceCodeRange(), expression);
+  const auto& elements = ParseBindingElements();
+  return node_factory().NewLetStatement(GetSourceCodeRange(), elements);
 }
 
 const ast::Statement& Parser::ParseNameAsStatement() {

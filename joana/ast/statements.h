@@ -421,17 +421,15 @@ class JOANA_AST_EXPORT LabeledStatement
 //
 // LetStatement
 //
-class JOANA_AST_EXPORT LetStatement
-    : public NodeTemplate<Statement, Expression*> {
-  DECLARE_CONCRETE_AST_NODE(LetStatement, Statement);
+class JOANA_AST_EXPORT LetStatement final : public VariableDeclaration {
+  DECLARE_CONCRETE_AST_NODE_WITH_LIST(LetStatement, VariableDeclaration);
 
  public:
-  ~LetStatement() override;
-
-  const Expression& expression() const { return *member_at<0>(); }
+  ~LetStatement() final;
 
  protected:
-  LetStatement(const SourceCodeRange& range, Expression* expression);
+  LetStatement(const SourceCodeRange& range,
+               const std::vector<const BindingElement*>& elements);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(LetStatement);

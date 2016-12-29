@@ -160,7 +160,7 @@ void SimpleFormatter::VisitArrayBindingPattern(ast::ArrayBindingPattern* node) {
     Format(element);
   }
   *ostream_ << ']';
-  if (node->initializer().Is<ast::EmptyExpression>())
+  if (node->initializer().Is<ast::ElisionExpression>())
     return;
   *ostream_ << " = ";
   Format(node->initializer());
@@ -177,7 +177,7 @@ void SimpleFormatter::VisitBindingInvalidElement(
 
 void SimpleFormatter::VisitBindingNameElement(ast::BindingNameElement* node) {
   Format(node->name());
-  if (node->initializer().Is<ast::EmptyExpression>())
+  if (node->initializer().Is<ast::ElisionExpression>())
     return;
   *ostream_ << " = ";
   Format(node->initializer());
@@ -204,7 +204,7 @@ void SimpleFormatter::VisitObjectBindingPattern(
     Format(element);
   }
   *ostream_ << '}';
-  if (node->initializer().Is<ast::EmptyExpression>())
+  if (node->initializer().Is<ast::ElisionExpression>())
     return;
   *ostream_ << " = ";
   Format(node->initializer());
@@ -763,7 +763,7 @@ void SimpleFormatter::VisitLabeledStatement(ast::LabeledStatement* node) {
 
 void SimpleFormatter::VisitLetStatement(ast::LetStatement* node) {
   *ostream_ << "let ";
-  Format(node->expression());
+  FormatBindingElements(node->elements());
   *ostream_ << ';';
 }
 

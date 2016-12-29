@@ -173,8 +173,9 @@ LabeledStatement::~LabeledStatement() = default;
 //
 // LetStatement
 //
-LetStatement::LetStatement(const SourceCodeRange& range, Expression* expression)
-    : NodeTemplate(expression, range) {}
+LetStatement::LetStatement(const SourceCodeRange& range,
+                           const std::vector<const BindingElement*>& elements)
+    : VariableDeclaration(range, elements) {}
 
 LetStatement::~LetStatement() = default;
 

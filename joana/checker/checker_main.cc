@@ -18,7 +18,7 @@
 #include "base/strings/string_piece.h"
 #include "base/strings/string_split.h"
 #include "base/strings/utf_string_conversions.h"
-#include "joana/analyzer/public/analyze.h"
+#include "joana/analyzer/public/analyzer.h"
 #include "joana/analyzer/public/analyzer_settings.h"
 #include "joana/analyzer/public/analyzer_settings_builder.h"
 #include "joana/ast/error_codes.h"

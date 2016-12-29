@@ -8,9 +8,15 @@
 #include <memory>
 
 #include "base/macros.h"
-#include "joana/analyzer/public/analyze.h"
 
 namespace joana {
+
+namespace ast {
+class Node;
+}
+
+class AnalyzerSettings;
+
 namespace analyzer {
 
 class Context;

@@ -5,8 +5,8 @@
 component("public") {
   output_name = "joana_analyzer"
   sources = [
-    "analyze.cc",
-    "analyze.h",
+    "analyzer.cc",
+    "analyzer.h",
     "analyzer_export.h",
     "analyzer_settings.cc",
     "analyzer_settings.h",

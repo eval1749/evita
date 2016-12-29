@@ -170,6 +170,7 @@ void SimpleFormatter::VisitBindingNameElement(ast::BindingNameElement* node) {
   if (node->initializer().Is<ast::EmptyExpression>())
     return;
   *ostream_ << " = ";
+  Format(node->initializer());
 }
 
 void SimpleFormatter::VisitBindingProperty(ast::BindingProperty* node) {
@@ -196,6 +197,7 @@ void SimpleFormatter::VisitObjectBindingPattern(
   if (node->initializer().Is<ast::EmptyExpression>())
     return;
   *ostream_ << " = ";
+  Format(node->initializer());
 }
 
 // JsDoc
@@ -634,7 +636,12 @@ void SimpleFormatter::VisitCaseClause(ast::CaseClause* node) {
 
 void SimpleFormatter::VisitConstStatement(ast::ConstStatement* node) {
   *ostream_ << "const ";
-  Format(node->expression());
+  auto* delimiter = "";
+  for (const auto& element : node->elements()) {
+    *ostream_ << delimiter;
+    delimiter = ", ";
+    Format(element);
+  }
   *ostream_ << ';';
 }
 

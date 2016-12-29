@@ -16,7 +16,7 @@ class Node;
 }
 
 namespace analyzer {
-class Analyzer;
+class Controller;
 }  // namespace analyzer
 
 class AnalyzerSettings;
@@ -33,7 +33,7 @@ class JOANA_ANALYZER_EXPORT Analyzer final {
   void Load(const ast::Node& node);
 
  private:
-  std::unique_ptr<analyzer::Analyzer> analyzer_;
+  std::unique_ptr<analyzer::Controller> controller_;
 
   DISALLOW_COPY_AND_ASSIGN(Analyzer);
 };

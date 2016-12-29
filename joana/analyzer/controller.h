@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef JOANA_ANALYZER_ANALYZER_H_
-#define JOANA_ANALYZER_ANALYZER_H_
+#ifndef JOANA_ANALYZER_CONTROLLER_H_
+#define JOANA_ANALYZER_CONTROLLER_H_
 
 #include <memory>
 
@@ -16,12 +16,12 @@ namespace analyzer {
 class Context;
 
 //
-// analyzer
+// Controller
 //
-class Analyzer final {
+class Controller final {
  public:
-  explicit Analyzer(const AnalyzerSettings& settings);
-  ~Analyzer();
+  explicit Controller(const AnalyzerSettings& settings);
+  ~Controller();
 
   void Analyze();
   void Load(const ast::Node& node);
@@ -29,10 +29,10 @@ class Analyzer final {
  private:
   const std::unique_ptr<Context> context_;
 
-  DISALLOW_COPY_AND_ASSIGN(Analyzer);
+  DISALLOW_COPY_AND_ASSIGN(Controller);
 };
 
 }  // namespace analyzer
 }  // namespace joana
 
-#endif  // JOANA_ANALYZER_ANALYZER_H_
+#endif  // JOANA_ANALYZER_CONTROLLER_H_

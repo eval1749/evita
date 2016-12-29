@@ -4,21 +4,21 @@
 
 #include "joana/analyzer/public/analyze.h"
 
-#include "joana/analyzer/analyzer.h"
+#include "joana/analyzer/controller.h"
 
 namespace joana {
 
 Analyzer::Analyzer(const AnalyzerSettings& settings)
-    : analyzer_(new analyzer::Analyzer(settings)) {}
+    : controller_(new analyzer::Controller(settings)) {}
 
 Analyzer::~Analyzer() = default;
 
 void Analyzer::Analyze() {
-  analyzer_->Analyze();
+  controller_->Analyze();
 }
 
 void Analyzer::Load(const ast::Node& node) {
-  analyzer_->Load(node);
+  controller_->Load(node);
 }
 
 }  // namespace joana

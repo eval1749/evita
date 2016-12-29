@@ -4,7 +4,9 @@
 
 #include "joana/analyzer/environment_builder.h"
 
+#include "joana/analyzer/context.h"
 #include "joana/analyzer/environment.h"
+#include "joana/analyzer/error_codes.h"
 #include "joana/analyzer/factory.h"
 #include "joana/ast/declarations.h"
 #include "joana/ast/expressions.h"
@@ -18,8 +20,8 @@ namespace analyzer {
 //
 // EnvironmentBuilder
 //
-EnvironmentBuilder::EnvironmentBuilder(Factory* factory)
-    : environment_(factory->global_environment()), factory_(*factory) {}
+EnvironmentBuilder::EnvironmentBuilder(Context* context)
+    : Pass(context), environment_(context->factory().global_environment()) {}
 
 EnvironmentBuilder::~EnvironmentBuilder() = default;
 
@@ -33,10 +35,10 @@ void EnvironmentBuilder::Load(const ast::Node& node) {
 void EnvironmentBuilder::BindToFunction(const ast::Name& name,
                                         const ast::Declaration& declaration) {
   if (auto* binding = environment_->BindingOf(name)) {
-    // AddError(name.range(), ErrorCode::ENVIRONMENT_ALREADY_BOUND);
+    AddError(name, ErrorCode::ENVIRONMENT_ALREADY_BOUND);
     return;
   }
-  environment_->Bind(name, factory_.NewFunction(declaration));
+  environment_->Bind(name, factory().NewFunction(declaration));
 }
 
 // AST node handlers

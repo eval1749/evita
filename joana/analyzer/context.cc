@@ -20,8 +20,8 @@ Context::Context(const AnalyzerSettings& settings)
 
 Context::~Context() = default;
 
-void Context::AddError(const SourceCodeRange& range, ErrorCode error_code) {
-  settings_.error_sink().AddError(range, error_code);
+ErrorSink& Context::error_sink() const {
+  return settings_.error_sink();
 }
 
 }  // namespace analyzer

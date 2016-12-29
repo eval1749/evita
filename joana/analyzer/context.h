@@ -12,6 +12,7 @@
 namespace joana {
 
 class AnalyzerSettings;
+class ErrorSink;
 class SourceCodeRange;
 
 namespace analyzer {
@@ -27,9 +28,8 @@ class Context final {
   explicit Context(const AnalyzerSettings& settings);
   ~Context();
 
+  ErrorSink& error_sink() const;
   Factory& factory() const { return *factory_; }
-
-  void AddError(const SourceCodeRange& range, ErrorCode error_code);
 
  private:
   std::unique_ptr<Factory> factory_;

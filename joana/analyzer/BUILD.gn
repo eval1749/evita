@@ -20,6 +20,8 @@ source_set("analyzer") {
     "environment_builder.h",
     "factory.cc",
     "factory.h",
+    "pass.cc",
+    "pass.h",
     "value.cc",
     "value.h",
     "value_forward.h",

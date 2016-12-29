@@ -5,7 +5,7 @@
 #ifndef JOANA_ANALYZER_ENVIRONMENT_BUILDER_H_
 #define JOANA_ANALYZER_ENVIRONMENT_BUILDER_H_
 
-#include "base/macros.h"
+#include "joana/analyzer/pass.h"
 
 namespace joana {
 namespace ast {
@@ -17,15 +17,15 @@ class Statement;
 }
 namespace analyzer {
 
+class Context;
 class Environment;
-class Factory;
 
 //
 // EnvironmentBuilder
 //
-class EnvironmentBuilder final {
+class EnvironmentBuilder final : public Pass {
  public:
-  explicit EnvironmentBuilder(Factory* factory);
+  explicit EnvironmentBuilder(Context* context);
   ~EnvironmentBuilder();
 
   void Load(const ast::Node& node);
@@ -43,8 +43,8 @@ class EnvironmentBuilder final {
   void ProcessVariable(const ast::Statement& statement,
                        const ast::Expression& expression);
 
+  // The current processing environment
   Environment* environment_;
-  Factory& factory_;
 
   DISALLOW_COPY_AND_ASSIGN(EnvironmentBuilder);
 };

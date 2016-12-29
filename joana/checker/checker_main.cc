@@ -19,6 +19,8 @@
 #include "base/strings/string_split.h"
 #include "base/strings/utf_string_conversions.h"
 #include "joana/analyzer/public/analyze.h"
+#include "joana/analyzer/public/analyzer_settings.h"
+#include "joana/analyzer/public/analyzer_settings_builder.h"
 #include "joana/ast/error_codes.h"
 #include "joana/ast/node_factory.h"
 #include "joana/base/error_sink.h"
@@ -216,10 +218,12 @@ void Checker::AddSourceCode(const base::FilePath& file_path,
 // Analyze modules after we parse all modules.
 void Checker::Analyze() {
   Zone zone("AnalyzerSettings");
-  const auto& options = joana::AnalyzerSettings::Options::Builder().Build();
-  joana::AnalyzerSettings context(&zone, &error_sink_, options);
+  const auto& settings = joana::AnalyzerSettings::Builder()
+                             .set_error_sink(&error_sink_)
+                             .set_zone(&zone)
+                             .Build();
   for (const auto& module : modules_)
-    joana::Analyze(&context, *module);
+    joana::Analyze(settings.get(), *module);
 }
 
 int Checker::Main() {

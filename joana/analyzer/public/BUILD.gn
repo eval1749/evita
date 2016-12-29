@@ -12,6 +12,10 @@ component("public") {
     "analyze.cc",
     "analyze.h",
     "analyzer_export.h",
+    "analyzer_settings.cc",
+    "analyzer_settings.h",
+    "analyzer_settings_builder.cc",
+    "analyzer_settings_builder.h",
   ]
 
   public_deps = [

@@ -5,8 +5,6 @@
 #ifndef JOANA_ANALYZER_ENVIRONMENT_H_
 #define JOANA_ANALYZER_ENVIRONMENT_H_
 
-#include <unordered_map>
-
 #include "base/macros.h"
 #include "joana/base/memory/zone_allocated.h"
 #include "joana/base/memory/zone_unordered_map.h"

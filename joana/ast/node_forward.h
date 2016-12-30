@@ -33,6 +33,7 @@ namespace ast {
 
 #define FOR_EACH_AST_COMPILATION_UNIT(V) \
   V(Externs)                             \
+  V(Script)                              \
   V(Module)
 
 #define FOR_EACH_AST_DECLARATION(V) \

@@ -218,6 +218,13 @@ void SimpleFormatter::VisitModule(ast::Module* node) {
   }
 }
 
+void SimpleFormatter::VisitScript(ast::Script* node) {
+  for (const auto& statement : node->statements()) {
+    FormatWithIndent(statement);
+    *ostream_ << std::endl;
+  }
+}
+
 // JsDoc
 void SimpleFormatter::VisitJsDocDocument(ast::JsDocDocument* node) {
   *ostream_ << "/**";

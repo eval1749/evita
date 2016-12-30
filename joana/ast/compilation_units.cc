@@ -49,5 +49,17 @@ Module::Module(
 
 Module::~Module() = default;
 
+//
+// Script
+//
+Script::Script(
+    Zone* zone,
+    const SourceCodeRange& range,
+    const StatementList& statements,
+    const std::unordered_map<const Node*, const ast::JsDoc*>& jsdoc_map)
+    : CompilationUnit(zone, range, statements, jsdoc_map) {}
+
+Script::~Script() = default;
+
 }  // namespace ast
 }  // namespace joana

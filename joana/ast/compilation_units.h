@@ -54,9 +54,9 @@ class JOANA_AST_EXPORT Externs final : public CompilationUnit {
 
  private:
   Externs(Zone* zone,
-         const SourceCodeRange& range,
-         const StatementList& statements,
-         const std::unordered_map<const Node*, const ast::JsDoc*>& jsdoc_map);
+          const SourceCodeRange& range,
+          const StatementList& statements,
+          const std::unordered_map<const Node*, const ast::JsDoc*>& jsdoc_map);
 
   DISALLOW_COPY_AND_ASSIGN(Externs);
 };
@@ -77,6 +77,24 @@ class JOANA_AST_EXPORT Module final : public CompilationUnit {
          const std::unordered_map<const Node*, const ast::JsDoc*>& jsdoc_map);
 
   DISALLOW_COPY_AND_ASSIGN(Module);
+};
+
+//
+// Script
+//
+class JOANA_AST_EXPORT Script final : public CompilationUnit {
+  DECLARE_CONCRETE_AST_NODE(Script, CompilationUnit);
+
+ public:
+  ~Script() final;
+
+ private:
+  Script(Zone* zone,
+         const SourceCodeRange& range,
+         const StatementList& statements,
+         const std::unordered_map<const Node*, const ast::JsDoc*>& jsdoc_map);
+
+  DISALLOW_COPY_AND_ASSIGN(Script);
 };
 
 }  // namespace ast

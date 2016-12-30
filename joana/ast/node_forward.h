@@ -12,6 +12,7 @@ namespace ast {
   V(BindingElement)                   \
   V(Declaration)                      \
   V(Expression)                       \
+  V(CompilationUnit)                  \
   V(ContainerNode)                    \
   V(JsDocNode)                        \
   V(Literal)                          \
@@ -29,6 +30,8 @@ namespace ast {
   V(BindingProperty)                    \
   V(BindingRestElement)                 \
   V(ObjectBindingPattern)
+
+#define FOR_EACH_AST_COMPILATION_UNIT(V) V(Module)
 
 #define FOR_EACH_AST_DECLARATION(V) \
   V(ArrowFunction)                  \
@@ -142,6 +145,7 @@ namespace ast {
 
 #define FOR_EACH_CONCRETE_AST_NODE(V) \
   FOR_EACH_AST_BINDING_ELEMENT(V)     \
+  FOR_EACH_AST_COMPILATION_UNIT(V)    \
   FOR_EACH_AST_DECLARATION(V)         \
   FOR_EACH_AST_EXPRESSION(V)          \
   FOR_EACH_AST_JSDOC(V)               \
@@ -149,8 +153,7 @@ namespace ast {
   FOR_EACH_AST_REGEXP(V)              \
   FOR_EACH_AST_STATEMENT(V)           \
   FOR_EACH_AST_TOKEN(V)               \
-  FOR_EACH_AST_TYPE(V)                \
-  V(Module)
+  FOR_EACH_AST_TYPE(V)
 
 #define V(name) class name;
 FOR_EACH_ABSTRACT_AST_NODE(V)

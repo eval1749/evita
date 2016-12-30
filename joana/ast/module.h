@@ -17,26 +17,46 @@ class JsDoc;
 class StatementList;
 
 //
-// Module
+// CompilationUnit
 //
-class JOANA_AST_EXPORT Module final
+class JOANA_AST_EXPORT CompilationUnit
     : public NodeTemplate<Node, const StatementList*> {
-  DECLARE_CONCRETE_AST_NODE(Module, Node);
+  DECLARE_ABSTRACT_AST_NODE(CompilationUnit, Node);
 
  public:
-  ~Module() final;
+  ~CompilationUnit() override;
 
   const StatementList& statements() const { return *member_at<0>(); }
 
   const JsDoc* JsDocFor(const ast::Node& node) const;
+
+ protected:
+  CompilationUnit(
+      Zone* zone,
+      const SourceCodeRange& range,
+      const StatementList& statements,
+      const std::unordered_map<const Node*, const ast::JsDoc*>& js_doc_map);
+
+ private:
+  const ZoneUnorderedMap<const Node*, const ast::JsDoc*> js_doc_map_;
+
+  DISALLOW_COPY_AND_ASSIGN(CompilationUnit);
+};
+
+//
+// Module
+//
+class JOANA_AST_EXPORT Module final : public CompilationUnit {
+  DECLARE_CONCRETE_AST_NODE(Module, CompilationUnit);
+
+ public:
+  ~Module() final;
 
  private:
   Module(Zone* zone,
          const SourceCodeRange& range,
          const StatementList& statements,
          const std::unordered_map<const Node*, const ast::JsDoc*>& js_doc_map);
-
-  const ZoneUnorderedMap<const Node*, const ast::JsDoc*> js_doc_map_;
 
   DISALLOW_COPY_AND_ASSIGN(Module);
 };

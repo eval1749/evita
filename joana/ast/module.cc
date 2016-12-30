@@ -7,7 +7,10 @@
 namespace joana {
 namespace ast {
 
-Module::Module(
+//
+// CompilationUnit
+//
+CompilationUnit::CompilationUnit(
     Zone* zone,
     const SourceCodeRange& range,
     const StatementList& statements,
@@ -15,12 +18,24 @@ Module::Module(
     : NodeTemplate(&statements, range),
       js_doc_map_(zone, js_doc_map.begin(), js_doc_map.end()) {}
 
-Module::~Module() = default;
+CompilationUnit::~CompilationUnit() = default;
 
-const JsDoc* Module::JsDocFor(const ast::Node& node) const {
+const JsDoc* CompilationUnit::JsDocFor(const ast::Node& node) const {
   const auto& it = js_doc_map_.find(&node);
   return it == js_doc_map_.end() ? nullptr : it->second;
 }
+
+//
+// Module
+//
+Module::Module(
+    Zone* zone,
+    const SourceCodeRange& range,
+    const StatementList& statements,
+    const std::unordered_map<const Node*, const ast::JsDoc*>& js_doc_map)
+    : CompilationUnit(zone, range, statements, js_doc_map) {}
+
+Module::~Module() = default;
 
 }  // namespace ast
 }  // namespace joana

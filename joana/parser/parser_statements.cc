@@ -87,11 +87,11 @@ const ast::Statement& Parser::NewInvalidStatement(ErrorCode error_code) {
 }
 
 const ast::Statement& Parser::ParseJsDocAsStatement() {
-  auto& js_doc = ConsumeToken().As<ast::JsDoc>();
+  auto& jsdoc = ConsumeToken().As<ast::JsDoc>();
   auto& statement = ParseStatement();
   if (!CanHaveJsDoc(statement))
-    AddError(js_doc, ErrorCode::ERROR_STATEMENT_UNEXPECT_ANNOTATION);
-  AssociateJsDoc(js_doc, statement);
+    AddError(jsdoc, ErrorCode::ERROR_STATEMENT_UNEXPECT_ANNOTATION);
+  AssociateJsDoc(jsdoc, statement);
   return statement;
 }
 
@@ -217,9 +217,9 @@ const ast::Statement& Parser::ParseForStatement() {
   ExpectPunctuator(ast::PunctuatorKind::LeftParenthesis,
                    ErrorCode::ERROR_STATEMENT_EXPECT_LPAREN);
 
-  auto* const js_doc = CanPeekToken() && PeekToken().Is<ast::JsDoc>()
-                           ? &ConsumeToken().As<ast::JsDoc>()
-                           : nullptr;
+  auto* const jsdoc = CanPeekToken() && PeekToken().Is<ast::JsDoc>()
+                          ? &ConsumeToken().As<ast::JsDoc>()
+                          : nullptr;
 
   auto& keyword = CanPeekToken() && IsDeclarationKeyword(PeekToken())
                       ? ConsumeToken()
@@ -230,11 +230,11 @@ const ast::Statement& Parser::ParseForStatement() {
           ? NewElisionExpression()
           : ParseExpression();
 
-  if (js_doc) {
+  if (jsdoc) {
     if (keyword.Is<ast::Empty>())
-      AddError(*js_doc, ErrorCode::ERROR_STATEMENT_UNEXPECT_ANNOTATION);
+      AddError(*jsdoc, ErrorCode::ERROR_STATEMENT_UNEXPECT_ANNOTATION);
     else
-      AssociateJsDoc(*js_doc, expression);
+      AssociateJsDoc(*jsdoc, expression);
   }
 
   if (ConsumeTokenIf(ast::PunctuatorKind::Semicolon)) {

@@ -124,20 +124,20 @@ void Parser::Advance() {
   SkipCommentTokens();
 }
 
-void Parser::AssociateJsDoc(const ast::JsDoc& js_doc, const ast::Node& node) {
-  const auto& result = js_doc_map_.emplace(&node, &js_doc);
+void Parser::AssociateJsDoc(const ast::JsDoc& jsdoc, const ast::Node& node) {
+  const auto& result = jsdoc_map_.emplace(&node, &jsdoc);
   if (result.second)
     return;
-  if (HasJsDocTag(ast::NameId::JsDocFileOverview, js_doc.document())) {
+  if (HasJsDocTag(ast::NameId::JsDocFileOverview, jsdoc.document())) {
     if (file_overview_) {
-      AddError(SourceCodeRange::Merge(file_overview_->range(), js_doc.range()),
+      AddError(SourceCodeRange::Merge(file_overview_->range(), jsdoc.range()),
                ErrorCode::ERROR_JSDOC_MULTIPLE_FILE_OVERVIEWS);
     }
-    file_overview_ = &js_doc.document();
+    file_overview_ = &jsdoc.document();
     return;
   }
   // We don't allow statement/expression has more than one annotation.
-  AddError(js_doc, ErrorCode::ERROR_STATEMENT_UNEXPECT_ANNOTATION);
+  AddError(jsdoc, ErrorCode::ERROR_STATEMENT_UNEXPECT_ANNOTATION);
 }
 
 bool Parser::CanPeekToken() const {
@@ -238,19 +238,19 @@ const ast::Node& Parser::Run() {
       statements.push_back(&ParseStatement());
       continue;
     }
-    auto& js_doc = ConsumeToken().As<ast::JsDoc>();
+    auto& jsdoc = ConsumeToken().As<ast::JsDoc>();
     auto& statement = ParseStatement();
-    AssociateJsDoc(js_doc, statement);
+    AssociateJsDoc(jsdoc, statement);
     statements.push_back(&statement);
   }
   Finish();
   if (file_overview_ &&
       HasJsDocTag(ast::NameId::JsDocExterns, *file_overview_)) {
     return node_factory().NewExterns(source_code().range(), statements,
-                                     js_doc_map_);
+                                     jsdoc_map_);
   }
   return node_factory().NewModule(source_code().range(), statements,
-                                  js_doc_map_);
+                                  jsdoc_map_);
 }
 
 void Parser::SkipCommentTokens() {

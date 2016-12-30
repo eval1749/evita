@@ -211,13 +211,13 @@ const ast::Expression& Parser::NewUnaryExpression(
 }
 
 const ast::Expression& Parser::ParseJsDocAsExpression() {
-  auto& js_doc = ConsumeToken().As<ast::JsDoc>();
+  auto& jsdoc = ConsumeToken().As<ast::JsDoc>();
   auto& expression = ParsePrimaryExpression();
   if (!CanHaveJsDoc(expression)) {
-    AddError(js_doc, ErrorCode::ERROR_EXPRESSION_UNEXPECT_ANNOTATION);
+    AddError(jsdoc, ErrorCode::ERROR_EXPRESSION_UNEXPECT_ANNOTATION);
     return expression;
   }
-  AssociateJsDoc(js_doc, expression);
+  AssociateJsDoc(jsdoc, expression);
   return expression;
 }
 
@@ -449,7 +449,7 @@ const ast::Expression& Parser::ParseObjectLiteralExpression() {
       continue;
     }
     if (PeekToken().Is<ast::JsDoc>()) {
-      // TODO(eval1749): We should handle js_doc in object literal.
+      // TODO(eval1749): We should handle jsdoc in object literal.
       ConsumeToken();
       continue;
     }

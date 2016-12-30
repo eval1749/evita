@@ -80,17 +80,17 @@ NodeFactory::~NodeFactory() = default;
 Node& NodeFactory::NewExterns(
     const SourceCodeRange& range,
     const std::vector<const Statement*>& statements,
-    const std::unordered_map<const Node*, const JsDoc*>& js_doc_map) {
+    const std::unordered_map<const Node*, const JsDoc*>& jsdoc_map) {
   auto* const list = new (zone_) StatementList(zone_, statements);
-  return *new (zone_) Externs(zone_, range, *list, js_doc_map);
+  return *new (zone_) Externs(zone_, range, *list, jsdoc_map);
 }
 
 Node& NodeFactory::NewModule(
     const SourceCodeRange& range,
     const std::vector<const Statement*>& statements,
-    const std::unordered_map<const Node*, const JsDoc*>& js_doc_map) {
+    const std::unordered_map<const Node*, const JsDoc*>& jsdoc_map) {
   auto* const list = new (zone_) StatementList(zone_, statements);
-  return *new (zone_) Module(zone_, range, *list, js_doc_map);
+  return *new (zone_) Module(zone_, range, *list, jsdoc_map);
 }
 
 // Tokens

@@ -53,10 +53,10 @@ std::string ParserTest::Parse(base::StringPiece script_text,
   for (const auto& error : error_sink().errors())
     ostream << error << std::endl;
   for (const auto& statement : module.statements()) {
-    auto* js_doc = module.JsDocFor(statement);
-    if (!js_doc)
+    auto* jsdoc = module.JsDocFor(statement);
+    if (!jsdoc)
       continue;
-    ostream << statement << ':' << *js_doc << std::endl;
+    ostream << statement << ':' << *jsdoc << std::endl;
   }
   return ostream.str();
 }
@@ -84,10 +84,10 @@ std::string ParserTest::ToString(const ast::Node& node,
   if (!module)
     return ostream.str();
   for (const auto& statement : module->statements()) {
-    auto* js_doc = module->JsDocFor(statement);
-    if (!js_doc)
+    auto* jsdoc = module->JsDocFor(statement);
+    if (!jsdoc)
       continue;
-    ostream << statement << ':' << *js_doc << std::endl;
+    ostream << statement << ':' << *jsdoc << std::endl;
   }
   return ostream.str();
 }

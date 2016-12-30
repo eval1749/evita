@@ -94,12 +94,12 @@ const ast::Token& Lexer::PeekToken() const {
 }
 
 const ast::Token& Lexer::HandleBlockComment() {
-  auto is_js_doc = CanPeekChar() && PeekChar() == '*';
+  auto is_jsdoc = CanPeekChar() && PeekChar() == '*';
   auto is_after_asterisk = false;
   while (CanPeekChar()) {
     if (is_after_asterisk && ConsumeCharIf('/')) {
       const auto range = MakeTokenRange();
-      if (!is_js_doc)
+      if (!is_jsdoc)
         return node_factory().NewComment(range);
       const auto* const document =
           JsDocParser(&context_, range, options_).Parse();

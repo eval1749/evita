@@ -70,8 +70,8 @@ class Parser final {
 
   void Advance();
 
-  // Associate |js_doc| to |node|.
-  void AssociateJsDoc(const ast::JsDoc& js_doc, const ast::Node& node);
+  // Associate |jsdoc| to |node|.
+  void AssociateJsDoc(const ast::JsDoc& jsdoc, const ast::Node& node);
   bool CanPeekToken() const;
   const ast::Token& ConsumeToken();
   // Returns true if |Lexer| has a punctuator of |name_id| and advance to next
@@ -233,8 +233,8 @@ class Parser final {
   const ast::BindingElement& ParseNameBindingElement();
   const ast::BindingElement& ParseObjectBindingPattern();
 
-  // Map node to js_doc
-  std::unordered_map<const ast::Node*, const ast::JsDoc*> js_doc_map_;
+  // Map node to jsdoc
+  std::unordered_map<const ast::Node*, const ast::JsDoc*> jsdoc_map_;
   const std::unique_ptr<BracketTracker> bracket_tracker_;
   ParserContext& context_;
 

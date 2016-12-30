@@ -33,12 +33,12 @@ class JOANA_AST_EXPORT NodeFactory final {
   Node& NewExterns(
       const SourceCodeRange& range,
       const std::vector<const Statement*>& statements,
-      const std::unordered_map<const Node*, const JsDoc*>& js_doc_map);
+      const std::unordered_map<const Node*, const JsDoc*>& jsdoc_map);
 
   Node& NewModule(
       const SourceCodeRange& range,
       const std::vector<const Statement*>& statements,
-      const std::unordered_map<const Node*, const JsDoc*>& js_doc_map);
+      const std::unordered_map<const Node*, const JsDoc*>& jsdoc_map);
 
   //
   // Tokens factory members

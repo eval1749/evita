@@ -34,7 +34,7 @@ class SimpleFormatter final : public ast::EmptyNodeVisitor {
   void OutputSpaces(int amount);
   void OutputUsingSoourceCode(const ast::Node& node);
 
-#define V(name) void Visit##name(ast::name* node) final;
+#define V(name) void Visit##name(const ast::name& node) final;
   FOR_EACH_CONCRETE_AST_NODE(V)
 #undef V
 

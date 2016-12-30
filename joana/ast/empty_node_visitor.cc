@@ -14,7 +14,7 @@ EmptyNodeVisitor::EmptyNodeVisitor() = default;
 EmptyNodeVisitor::~EmptyNodeVisitor() = default;
 
 #define V(name) \
-  void EmptyNodeVisitor::Visit##name(ast::name* node) {}
+  void EmptyNodeVisitor::Visit##name(const ast::name& node) {}
 FOR_EACH_CONCRETE_AST_NODE(V)
 #undef V
 

@@ -123,187 +123,191 @@ void SimpleFormatter::OutputUsingSoourceCode(const ast::Node& node) {
 }
 
 // NodeVisitor implementations
-void SimpleFormatter::VisitJsDoc(ast::JsDoc* node) {
-  OutputUsingSoourceCode(*node);
+void SimpleFormatter::VisitJsDoc(const ast::JsDoc& node) {
+  OutputUsingSoourceCode(node);
 }
 
-void SimpleFormatter::VisitComment(ast::Comment* node) {
-  OutputUsingSoourceCode(*node);
+void SimpleFormatter::VisitComment(const ast::Comment& node) {
+  OutputUsingSoourceCode(node);
 }
 
-void SimpleFormatter::VisitEmpty(ast::Empty* node) {
+void SimpleFormatter::VisitEmpty(const ast::Empty& node) {
   *ostream_ << "(empty)";
 }
 
-void SimpleFormatter::VisitPunctuator(ast::Punctuator* node) {
-  OutputUsingSoourceCode(*node);
+void SimpleFormatter::VisitPunctuator(const ast::Punctuator& node) {
+  OutputUsingSoourceCode(node);
 }
 
-void SimpleFormatter::VisitName(ast::Name* node) {
-  OutputUsingSoourceCode(*node);
+void SimpleFormatter::VisitName(const ast::Name& node) {
+  OutputUsingSoourceCode(node);
 }
 
 // Binding Element
-void SimpleFormatter::VisitArrayBindingPattern(ast::ArrayBindingPattern* node) {
+void SimpleFormatter::VisitArrayBindingPattern(
+    const ast::ArrayBindingPattern& node) {
   *ostream_ << '[';
   auto* delimiter = "";
-  for (const auto& element : node->elements()) {
+  for (const auto& element : node.elements()) {
     *ostream_ << delimiter;
     delimiter = " ";
     Format(element);
   }
   *ostream_ << ']';
-  if (node->initializer().Is<ast::ElisionExpression>())
+  if (node.initializer().Is<ast::ElisionExpression>())
     return;
   *ostream_ << " = ";
-  Format(node->initializer());
+  Format(node.initializer());
 }
 
-void SimpleFormatter::VisitBindingCommaElement(ast::BindingCommaElement* node) {
+void SimpleFormatter::VisitBindingCommaElement(
+    const ast::BindingCommaElement& node) {
   *ostream_ << ',';
 }
 
 void SimpleFormatter::VisitBindingInvalidElement(
-    ast::BindingInvalidElement* node) {
+    const ast::BindingInvalidElement& node) {
   *ostream_ << "(invalid)";
 }
 
-void SimpleFormatter::VisitBindingNameElement(ast::BindingNameElement* node) {
-  Format(node->name());
-  if (node->initializer().Is<ast::ElisionExpression>())
+void SimpleFormatter::VisitBindingNameElement(
+    const ast::BindingNameElement& node) {
+  Format(node.name());
+  if (node.initializer().Is<ast::ElisionExpression>())
     return;
   *ostream_ << " = ";
-  Format(node->initializer());
+  Format(node.initializer());
 }
 
-void SimpleFormatter::VisitBindingProperty(ast::BindingProperty* node) {
-  Format(node->name());
+void SimpleFormatter::VisitBindingProperty(const ast::BindingProperty& node) {
+  Format(node.name());
   *ostream_ << ": ";
-  Format(node->element());
+  Format(node.element());
 }
 
-void SimpleFormatter::VisitBindingRestElement(ast::BindingRestElement* node) {
+void SimpleFormatter::VisitBindingRestElement(
+    const ast::BindingRestElement& node) {
   *ostream_ << "...";
-  Format(node->element());
+  Format(node.element());
 }
 
 void SimpleFormatter::VisitObjectBindingPattern(
-    ast::ObjectBindingPattern* node) {
+    const ast::ObjectBindingPattern& node) {
   *ostream_ << '{';
   auto* delimiter = "";
-  for (const auto& element : node->elements()) {
+  for (const auto& element : node.elements()) {
     *ostream_ << delimiter;
     delimiter = " ";
     Format(element);
   }
   *ostream_ << '}';
-  if (node->initializer().Is<ast::ElisionExpression>())
+  if (node.initializer().Is<ast::ElisionExpression>())
     return;
   *ostream_ << " = ";
-  Format(node->initializer());
+  Format(node.initializer());
 }
 
 // Compilation Unit
-void SimpleFormatter::VisitExterns(ast::Externs* node) {
-  for (const auto& statement : node->statements()) {
+void SimpleFormatter::VisitExterns(const ast::Externs& node) {
+  for (const auto& statement : node.statements()) {
     FormatWithIndent(statement);
     *ostream_ << std::endl;
   }
 }
 
-void SimpleFormatter::VisitModule(ast::Module* node) {
-  for (const auto& statement : node->statements()) {
+void SimpleFormatter::VisitModule(const ast::Module& node) {
+  for (const auto& statement : node.statements()) {
     FormatWithIndent(statement);
     *ostream_ << std::endl;
   }
 }
 
-void SimpleFormatter::VisitScript(ast::Script* node) {
-  for (const auto& statement : node->statements()) {
+void SimpleFormatter::VisitScript(const ast::Script& node) {
+  for (const auto& statement : node.statements()) {
     FormatWithIndent(statement);
     *ostream_ << std::endl;
   }
 }
 
 // JsDoc
-void SimpleFormatter::VisitJsDocDocument(ast::JsDocDocument* node) {
+void SimpleFormatter::VisitJsDocDocument(const ast::JsDocDocument& node) {
   *ostream_ << "/**";
-  for (const auto& element : node->elements())
+  for (const auto& element : node.elements())
     Format(element);
   *ostream_ << "*/";
 }
 
-void SimpleFormatter::VisitJsDocName(ast::JsDocName* node) {
-  OutputUsingSoourceCode(*node);
+void SimpleFormatter::VisitJsDocName(const ast::JsDocName& node) {
+  OutputUsingSoourceCode(node);
 }
 
-void SimpleFormatter::VisitJsDocTag(ast::JsDocTag* node) {
-  OutputUsingSoourceCode(node->name());
-  for (const auto& node : node->parameters()) {
+void SimpleFormatter::VisitJsDocTag(const ast::JsDocTag& node) {
+  OutputUsingSoourceCode(node.name());
+  for (const auto& node : node.parameters()) {
     *ostream_ << ' ';
     Format(node);
   }
 }
 
-void SimpleFormatter::VisitJsDocText(ast::JsDocText* node) {
-  OutputUsingSoourceCode(*node);
+void SimpleFormatter::VisitJsDocText(const ast::JsDocText& node) {
+  OutputUsingSoourceCode(node);
 }
 
-void SimpleFormatter::VisitJsDocType(ast::JsDocType* node) {
+void SimpleFormatter::VisitJsDocType(const ast::JsDocType& node) {
   *ostream_ << '{';
-  Format(node->type());
+  Format(node.type());
   *ostream_ << '}';
 }
 
 // Literals
-void SimpleFormatter::VisitBooleanLiteral(ast::BooleanLiteral* node) {
-  OutputUsingSoourceCode(*node);
+void SimpleFormatter::VisitBooleanLiteral(const ast::BooleanLiteral& node) {
+  OutputUsingSoourceCode(node);
 }
 
-void SimpleFormatter::VisitNullLiteral(ast::NullLiteral* node) {
-  OutputUsingSoourceCode(*node);
+void SimpleFormatter::VisitNullLiteral(const ast::NullLiteral& node) {
+  OutputUsingSoourceCode(node);
 }
 
-void SimpleFormatter::VisitNumericLiteral(ast::NumericLiteral* node) {
-  OutputUsingSoourceCode(*node);
+void SimpleFormatter::VisitNumericLiteral(const ast::NumericLiteral& node) {
+  OutputUsingSoourceCode(node);
 }
 
-void SimpleFormatter::VisitStringLiteral(ast::StringLiteral* node) {
-  OutputUsingSoourceCode(*node);
+void SimpleFormatter::VisitStringLiteral(const ast::StringLiteral& node) {
+  OutputUsingSoourceCode(node);
 }
 
-void SimpleFormatter::VisitUndefinedLiteral(ast::UndefinedLiteral* node) {
-  OutputUsingSoourceCode(*node);
+void SimpleFormatter::VisitUndefinedLiteral(const ast::UndefinedLiteral& node) {
+  OutputUsingSoourceCode(node);
 }
 
 // Declarations
-void SimpleFormatter::VisitArrowFunction(ast::ArrowFunction* node) {
-  Format(node->parameter_list());
+void SimpleFormatter::VisitArrowFunction(const ast::ArrowFunction& node) {
+  Format(node.parameter_list());
   *ostream_ << " =>";
-  if (auto* block = node->body().TryAs<ast::BlockStatement>()) {
+  if (auto* block = node.body().TryAs<ast::BlockStatement>()) {
     FormatChildStatement(*block);
     return;
   }
   *ostream_ << ' ';
-  Format(node->body());
+  Format(node.body());
 }
 
-void SimpleFormatter::VisitClass(ast::Class* node) {
+void SimpleFormatter::VisitClass(const ast::Class& node) {
   *ostream_ << "class";
-  if (!node->name().Is<ast::Empty>()) {
+  if (!node.name().Is<ast::Empty>()) {
     *ostream_ << ' ';
-    Format(node->name());
+    Format(node.name());
   }
-  if (!node->heritage().Is<ast::ElisionExpression>()) {
+  if (!node.heritage().Is<ast::ElisionExpression>()) {
     *ostream_ << " extends ";
-    Format(node->heritage());
+    Format(node.heritage());
   }
   *ostream_ << ' ';
-  Format(node->body());
+  Format(node.body());
 }
 
-void SimpleFormatter::VisitFunction(ast::Function* node) {
-  switch (node->kind()) {
+void SimpleFormatter::VisitFunction(const ast::Function& node) {
+  switch (node.kind()) {
     case ast::FunctionKind::Async:
       *ostream_ << "async function";
       break;
@@ -319,23 +323,23 @@ void SimpleFormatter::VisitFunction(ast::Function* node) {
       *ostream_ << "function";
       break;
   }
-  if (!node->name().Is<ast::Empty>()) {
+  if (!node.name().Is<ast::Empty>()) {
     *ostream_ << ' ';
-    Format(node->name());
+    Format(node.name());
   }
-  Format(node->parameter_list());
-  if (auto* block = node->body().TryAs<ast::BlockStatement>()) {
+  Format(node.parameter_list());
+  if (auto* block = node.body().TryAs<ast::BlockStatement>()) {
     FormatChildStatement(*block);
     return;
   }
   *ostream_ << ' ';
-  Format(node->body());
+  Format(node.body());
 }
 
-void SimpleFormatter::VisitMethod(ast::Method* node) {
-  if (node->method_kind() == ast::MethodKind::Static)
+void SimpleFormatter::VisitMethod(const ast::Method& node) {
+  if (node.method_kind() == ast::MethodKind::Static)
     *ostream_ << "static ";
-  switch (node->kind()) {
+  switch (node.kind()) {
     case ast::FunctionKind::Async:
       *ostream_ << "async ";
       break;
@@ -354,9 +358,9 @@ void SimpleFormatter::VisitMethod(ast::Method* node) {
       *ostream_ << "set ";
       break;
   }
-  Format(node->name());
-  Format(node->parameter_list());
-  if (auto* block = node->body().TryAs<ast::BlockStatement>()) {
+  Format(node.name());
+  Format(node.parameter_list());
+  if (auto* block = node.body().TryAs<ast::BlockStatement>()) {
     if (block->statements().empty()) {
       *ostream_ << " {}";
       return;
@@ -370,42 +374,42 @@ void SimpleFormatter::VisitMethod(ast::Method* node) {
     FormatChildStatement(*block);
     return;
   }
-  if (!node->body().Is<ast::EmptyStatement>())
+  if (!node.body().Is<ast::EmptyStatement>())
     *ostream_ << ' ';
-  Format(node->body());
+  Format(node.body());
 }
 
 // Expressions
 
 void SimpleFormatter::VisitArrayLiteralExpression(
-    ast::ArrayLiteralExpression* node) {
+    const ast::ArrayLiteralExpression& node) {
   *ostream_ << '[';
-  FormatExpressionList(node->elements());
+  FormatExpressionList(node.elements());
   *ostream_ << ']';
 }
 
 void SimpleFormatter::VisitAssignmentExpression(
-    ast::AssignmentExpression* node) {
-  Format(node->lhs());
+    const ast::AssignmentExpression& node) {
+  Format(node.lhs());
   *ostream_ << ' ';
-  Format(node->op());
+  Format(node.op());
   *ostream_ << ' ';
-  Format(node->rhs());
+  Format(node.rhs());
 }
 
-void SimpleFormatter::VisitBinaryExpression(ast::BinaryExpression* node) {
-  Format(node->lhs());
+void SimpleFormatter::VisitBinaryExpression(const ast::BinaryExpression& node) {
+  Format(node.lhs());
   *ostream_ << ' ';
-  Format(node->op());
+  Format(node.op());
   *ostream_ << ' ';
-  Format(node->rhs());
+  Format(node.rhs());
 }
 
-void SimpleFormatter::VisitCallExpression(ast::CallExpression* node) {
-  Format(node->callee());
+void SimpleFormatter::VisitCallExpression(const ast::CallExpression& node) {
+  Format(node.callee());
   *ostream_ << '(';
   auto delimiter = "";
-  for (const auto& argument : node->arguments()) {
+  for (const auto& argument : node.arguments()) {
     *ostream_ << delimiter;
     delimiter = ", ";
     Format(argument);
@@ -413,69 +417,73 @@ void SimpleFormatter::VisitCallExpression(ast::CallExpression* node) {
   *ostream_ << ')';
 }
 
-void SimpleFormatter::VisitCommaExpression(ast::CommaExpression* node) {
-  FormatExpressionList(node->expressions());
+void SimpleFormatter::VisitCommaExpression(const ast::CommaExpression& node) {
+  FormatExpressionList(node.expressions());
 }
 
 void SimpleFormatter::VisitConditionalExpression(
-    ast::ConditionalExpression* node) {
-  Format(node->condition());
+    const ast::ConditionalExpression& node) {
+  Format(node.condition());
   *ostream_ << " ? ";
-  Format(node->true_expression());
+  Format(node.true_expression());
   *ostream_ << " : ";
-  Format(node->false_expression());
+  Format(node.false_expression());
 }
 
 void SimpleFormatter::VisitComputedMemberExpression(
-    ast::ComputedMemberExpression* node) {
-  Format(node->expression());
+    const ast::ComputedMemberExpression& node) {
+  Format(node.expression());
   *ostream_ << '[';
-  Format(node->name_expression());
+  Format(node.name_expression());
   *ostream_ << ']';
 }
 
 void SimpleFormatter::VisitDeclarationExpression(
-    ast::DeclarationExpression* node) {
-  Format(node->declaration());
+    const ast::DeclarationExpression& node) {
+  Format(node.declaration());
 }
 
-void SimpleFormatter::VisitGroupExpression(ast::GroupExpression* node) {
+void SimpleFormatter::VisitGroupExpression(const ast::GroupExpression& node) {
   *ostream_ << '(';
-  Format(node->expression());
+  Format(node.expression());
   *ostream_ << ')';
 }
 
-void SimpleFormatter::VisitDelimiterExpression(ast::DelimiterExpression* node) {
-  OutputUsingSoourceCode(*node);
+void SimpleFormatter::VisitDelimiterExpression(
+    const ast::DelimiterExpression& node) {
+  OutputUsingSoourceCode(node);
 }
 
-void SimpleFormatter::VisitElisionExpression(ast::ElisionExpression* node) {}
+void SimpleFormatter::VisitElisionExpression(
+    const ast::ElisionExpression& node) {}
 
-void SimpleFormatter::VisitInvalidExpression(ast::InvalidExpression* node) {
-  const auto string = ast::ErrorStringOf(node->error_code());
+void SimpleFormatter::VisitInvalidExpression(
+    const ast::InvalidExpression& node) {
+  const auto string = ast::ErrorStringOf(node.error_code());
   if (string.empty())
-    *ostream_ << node->error_code();
+    *ostream_ << node.error_code();
   else
     *ostream_ << string;
 }
 
-void SimpleFormatter::VisitLiteralExpression(ast::LiteralExpression* node) {
-  OutputUsingSoourceCode(node->literal());
+void SimpleFormatter::VisitLiteralExpression(
+    const ast::LiteralExpression& node) {
+  OutputUsingSoourceCode(node.literal());
 }
 
-void SimpleFormatter::VisitNewExpression(ast::NewExpression* node) {
+void SimpleFormatter::VisitNewExpression(const ast::NewExpression& node) {
   *ostream_ << "new ";
-  Format(node->expression());
+  Format(node.expression());
   *ostream_ << '(';
-  FormatExpressionList(node->arguments());
+  FormatExpressionList(node.arguments());
   *ostream_ << ')';
 }
 
 void SimpleFormatter::VisitObjectLiteralExpression(
-    ast::ObjectLiteralExpression* node) {
-  const auto& members = node->members();
+    const ast::ObjectLiteralExpression& node) {
+  const auto& members = node.members();
   auto number_of_members = 0;
-  for (const auto& member : node->members()) {
+  for (const auto& member : node.members()) {
     if (member.Is<ast::DelimiterExpression>())
       continue;
     ++number_of_members;
@@ -486,7 +494,7 @@ void SimpleFormatter::VisitObjectLiteralExpression(
   }
   if (number_of_members == 1) {
     *ostream_ << "{ ";
-    for (const auto& member : node->members())
+    for (const auto& member : node.members())
       Format(member);
     *ostream_ << " }";
     return;
@@ -508,16 +516,16 @@ void SimpleFormatter::VisitObjectLiteralExpression(
   *ostream_ << '}';
 }
 
-void SimpleFormatter::VisitMemberExpression(ast::MemberExpression* node) {
-  Format(node->expression());
+void SimpleFormatter::VisitMemberExpression(const ast::MemberExpression& node) {
+  Format(node.expression());
   *ostream_ << '.';
-  Format(node->name());
+  Format(node.name());
 }
 
-void SimpleFormatter::VisitParameterList(ast::ParameterList* node) {
+void SimpleFormatter::VisitParameterList(const ast::ParameterList& node) {
   *ostream_ << '(';
   auto delimiter = "";
-  for (const auto& parameter : *node) {
+  for (const auto& parameter : node) {
     *ostream_ << delimiter;
     delimiter = ", ";
     Format(parameter);
@@ -526,121 +534,124 @@ void SimpleFormatter::VisitParameterList(ast::ParameterList* node) {
 }
 
 void SimpleFormatter::VisitPropertyDefinitionExpression(
-    ast::PropertyDefinitionExpression* node) {
-  Format(node->name());
+    const ast::PropertyDefinitionExpression& node) {
+  Format(node.name());
   *ostream_ << ": ";
-  Format(node->value());
+  Format(node.value());
 }
 
-void SimpleFormatter::VisitReferenceExpression(ast::ReferenceExpression* node) {
-  OutputUsingSoourceCode(node->name());
+void SimpleFormatter::VisitReferenceExpression(
+    const ast::ReferenceExpression& node) {
+  OutputUsingSoourceCode(node.name());
 }
 
-void SimpleFormatter::VisitUnaryExpression(ast::UnaryExpression* node) {
-  if (node->op() == ast::PunctuatorKind::PostPlusPlus ||
-      node->op() == ast::PunctuatorKind::PostMinusMinus) {
-    Format(node->expression());
-    OutputUsingSoourceCode(node->op());
+void SimpleFormatter::VisitUnaryExpression(const ast::UnaryExpression& node) {
+  if (node.op() == ast::PunctuatorKind::PostPlusPlus ||
+      node.op() == ast::PunctuatorKind::PostMinusMinus) {
+    Format(node.expression());
+    OutputUsingSoourceCode(node.op());
     return;
   }
-  OutputUsingSoourceCode(node->op());
-  if (node->expression().Is<ast::ElisionExpression>())
+  OutputUsingSoourceCode(node.op());
+  if (node.expression().Is<ast::ElisionExpression>())
     return;
-  if (node->op().Is<ast::Name>())
+  if (node.op().Is<ast::Name>())
     *ostream_ << ' ';
-  Format(node->expression());
+  Format(node.expression());
 }
 
 void SimpleFormatter::VisitRegExpLiteralExpression(
-    ast::RegExpLiteralExpression* node) {
+    const ast::RegExpLiteralExpression& node) {
   *ostream_ << '/';
-  Format(node->pattern());
+  Format(node.pattern());
   *ostream_ << '/';
-  OutputUsingSoourceCode(node->flags());
+  OutputUsingSoourceCode(node.flags());
 }
 
 // RegExp
-void SimpleFormatter::VisitAnyCharRegExp(ast::AnyCharRegExp* node) {
+void SimpleFormatter::VisitAnyCharRegExp(const ast::AnyCharRegExp& node) {
   *ostream_ << '.';
 }
 
-void SimpleFormatter::VisitAssertionRegExp(ast::AssertionRegExp* node) {
-  OutputUsingSoourceCode(*node);
+void SimpleFormatter::VisitAssertionRegExp(const ast::AssertionRegExp& node) {
+  OutputUsingSoourceCode(node);
 }
 
-void SimpleFormatter::VisitCaptureRegExp(ast::CaptureRegExp* node) {
+void SimpleFormatter::VisitCaptureRegExp(const ast::CaptureRegExp& node) {
   *ostream_ << '(';
-  Format(node->pattern());
+  Format(node.pattern());
   *ostream_ << ')';
 }
 
-void SimpleFormatter::VisitCharSetRegExp(ast::CharSetRegExp* node) {
-  OutputUsingSoourceCode(*node);
+void SimpleFormatter::VisitCharSetRegExp(const ast::CharSetRegExp& node) {
+  OutputUsingSoourceCode(node);
 }
 
 void SimpleFormatter::VisitComplementCharSetRegExp(
-    ast::ComplementCharSetRegExp* node) {
-  OutputUsingSoourceCode(*node);
+    const ast::ComplementCharSetRegExp& node) {
+  OutputUsingSoourceCode(node);
 }
 
-void SimpleFormatter::VisitGreedyRepeatRegExp(ast::GreedyRepeatRegExp* node) {
-  Format(node->pattern());
-  *ostream_ << node->repeat();
+void SimpleFormatter::VisitGreedyRepeatRegExp(
+    const ast::GreedyRepeatRegExp& node) {
+  Format(node.pattern());
+  *ostream_ << node.repeat();
 }
 
-void SimpleFormatter::VisitInvalidRegExp(ast::InvalidRegExp* node) {
-  const auto string = ast::ErrorStringOf(node->error_code());
+void SimpleFormatter::VisitInvalidRegExp(const ast::InvalidRegExp& node) {
+  const auto string = ast::ErrorStringOf(node.error_code());
   if (string.empty())
-    *ostream_ << node->error_code();
+    *ostream_ << node.error_code();
   else
     *ostream_ << string;
 }
 
-void SimpleFormatter::VisitLiteralRegExp(ast::LiteralRegExp* node) {
-  OutputUsingSoourceCode(*node);
+void SimpleFormatter::VisitLiteralRegExp(const ast::LiteralRegExp& node) {
+  OutputUsingSoourceCode(node);
 }
 
-void SimpleFormatter::VisitLazyRepeatRegExp(ast::LazyRepeatRegExp* node) {
-  Format(node->pattern());
-  *ostream_ << node->repeat() << '?';
+void SimpleFormatter::VisitLazyRepeatRegExp(const ast::LazyRepeatRegExp& node) {
+  Format(node.pattern());
+  *ostream_ << node.repeat() << '?';
 }
 
-void SimpleFormatter::VisitLookAheadRegExp(ast::LookAheadRegExp* node) {
+void SimpleFormatter::VisitLookAheadRegExp(const ast::LookAheadRegExp& node) {
   *ostream_ << "(?=";
-  Format(node->pattern());
+  Format(node.pattern());
   *ostream_ << ')';
 }
 
-void SimpleFormatter::VisitLookAheadNotRegExp(ast::LookAheadNotRegExp* node) {
+void SimpleFormatter::VisitLookAheadNotRegExp(
+    const ast::LookAheadNotRegExp& node) {
   *ostream_ << "(?!";
-  Format(node->pattern());
+  Format(node.pattern());
   *ostream_ << ')';
 }
 
-void SimpleFormatter::VisitOrRegExp(ast::OrRegExp* node) {
+void SimpleFormatter::VisitOrRegExp(const ast::OrRegExp& node) {
   auto delimiter = "";
-  for (const auto& pattern : node->patterns()) {
+  for (const auto& pattern : node.patterns()) {
     *ostream_ << delimiter;
     delimiter = "|";
     Format(*pattern);
   }
 }
 
-void SimpleFormatter::VisitSequenceRegExp(ast::SequenceRegExp* node) {
-  if (node->patterns().empty()) {
+void SimpleFormatter::VisitSequenceRegExp(const ast::SequenceRegExp& node) {
+  if (node.patterns().empty()) {
     *ostream_ << "(?:)";
     return;
   }
-  for (const auto& pattern : node->patterns())
+  for (const auto& pattern : node.patterns())
     Format(*pattern);
 }
 
 // Statements
-void SimpleFormatter::VisitBlockStatement(ast::BlockStatement* node) {
+void SimpleFormatter::VisitBlockStatement(const ast::BlockStatement& node) {
   *ostream_ << '{' << std::endl;
   {
     IndentScope scope(this);
-    for (const auto& child : node->statements()) {
+    for (const auto& child : node.statements()) {
       FormatWithIndent(child);
       *ostream_ << std::endl;
     }
@@ -649,162 +660,164 @@ void SimpleFormatter::VisitBlockStatement(ast::BlockStatement* node) {
   *ostream_ << '}';
 }
 
-void SimpleFormatter::VisitBreakStatement(ast::BreakStatement* node) {
-  if (node->label().Is<ast::Empty>()) {
+void SimpleFormatter::VisitBreakStatement(const ast::BreakStatement& node) {
+  if (node.label().Is<ast::Empty>()) {
     *ostream_ << "break;";
     return;
   }
   *ostream_ << "break ";
-  Format(node->label());
+  Format(node.label());
   *ostream_ << ';';
 }
 
-void SimpleFormatter::VisitCaseClause(ast::CaseClause* node) {
+void SimpleFormatter::VisitCaseClause(const ast::CaseClause& node) {
   *ostream_ << "case ";
-  Format(node->expression());
+  Format(node.expression());
   *ostream_ << ": ";
-  Format(node->statement());
+  Format(node.statement());
 }
 
-void SimpleFormatter::VisitConstStatement(ast::ConstStatement* node) {
+void SimpleFormatter::VisitConstStatement(const ast::ConstStatement& node) {
   *ostream_ << "const ";
-  FormatBindingElements(node->elements());
+  FormatBindingElements(node.elements());
   *ostream_ << ';';
 }
 
-void SimpleFormatter::VisitContinueStatement(ast::ContinueStatement* node) {
-  if (node->label().Is<ast::Empty>()) {
+void SimpleFormatter::VisitContinueStatement(
+    const ast::ContinueStatement& node) {
+  if (node.label().Is<ast::Empty>()) {
     *ostream_ << "continue;";
     return;
   }
   *ostream_ << "continue ";
-  Format(node->label());
+  Format(node.label());
   *ostream_ << ';';
 }
 
 void SimpleFormatter::VisitDeclarationStatement(
-    ast::DeclarationStatement* node) {
-  Format(node->declaration());
+    const ast::DeclarationStatement& node) {
+  Format(node.declaration());
 }
 
-void SimpleFormatter::VisitDoStatement(ast::DoStatement* node) {
+void SimpleFormatter::VisitDoStatement(const ast::DoStatement& node) {
   *ostream_ << "do";
-  if (FormatChildStatement(node->statement()))
+  if (FormatChildStatement(node.statement()))
     *ostream_ << ' ';
   else
     *ostream_ << std::endl;
   *ostream_ << "while (";
-  Format(node->expression());
+  Format(node.expression());
   *ostream_ << ");";
 }
 
-void SimpleFormatter::VisitEmptyStatement(ast::EmptyStatement* node) {
+void SimpleFormatter::VisitEmptyStatement(const ast::EmptyStatement& node) {
   *ostream_ << ';';
 }
 
-void SimpleFormatter::VisitExpressionStatement(ast::ExpressionStatement* node) {
-  Format(node->expression());
+void SimpleFormatter::VisitExpressionStatement(
+    const ast::ExpressionStatement& node) {
+  Format(node.expression());
   *ostream_ << ';';
 }
 
-void SimpleFormatter::VisitForStatement(ast::ForStatement* node) {
+void SimpleFormatter::VisitForStatement(const ast::ForStatement& node) {
   *ostream_ << "for (";
-  if (node->keyword().Is<ast::Name>()) {
-    Format(node->keyword());
+  if (node.keyword().Is<ast::Name>()) {
+    Format(node.keyword());
     *ostream_ << ' ';
   }
-  Format(node->init());
+  Format(node.init());
   *ostream_ << ';';
-  if (!node->condition().Is<ast::ElisionExpression>()) {
+  if (!node.condition().Is<ast::ElisionExpression>()) {
     *ostream_ << ' ';
-    Format(node->condition());
+    Format(node.condition());
   }
   *ostream_ << ';';
-  if (!node->step().Is<ast::ElisionExpression>()) {
+  if (!node.step().Is<ast::ElisionExpression>()) {
     *ostream_ << ' ';
-    Format(node->step());
+    Format(node.step());
   }
   *ostream_ << ')';
-  FormatChildStatement(node->body());
+  FormatChildStatement(node.body());
 }
 
-void SimpleFormatter::VisitForInStatement(ast::ForInStatement* node) {
+void SimpleFormatter::VisitForInStatement(const ast::ForInStatement& node) {
   *ostream_ << "for (";
-  if (node->keyword().Is<ast::Name>()) {
-    Format(node->keyword());
+  if (node.keyword().Is<ast::Name>()) {
+    Format(node.keyword());
     *ostream_ << ' ';
   }
-  Format(node->expression());
+  Format(node.expression());
   *ostream_ << ')';
-  FormatChildStatement(node->body());
+  FormatChildStatement(node.body());
 }
 
-void SimpleFormatter::VisitForOfStatement(ast::ForOfStatement* node) {
+void SimpleFormatter::VisitForOfStatement(const ast::ForOfStatement& node) {
   *ostream_ << "for (";
-  if (node->keyword().Is<ast::Name>()) {
-    Format(node->keyword());
+  if (node.keyword().Is<ast::Name>()) {
+    Format(node.keyword());
     *ostream_ << ' ';
   }
-  Format(node->binding());
+  Format(node.binding());
   *ostream_ << " of ";
-  Format(node->expression());
+  Format(node.expression());
   *ostream_ << ')';
-  FormatChildStatement(node->body());
+  FormatChildStatement(node.body());
 }
 
-void SimpleFormatter::VisitIfElseStatement(ast::IfElseStatement* node) {
+void SimpleFormatter::VisitIfElseStatement(const ast::IfElseStatement& node) {
   *ostream_ << "if (";
-  Format(node->expression());
+  Format(node.expression());
   *ostream_ << ")";
-  if (FormatChildStatement(node->then_clause()))
+  if (FormatChildStatement(node.then_clause()))
     *ostream_ << ' ';
   else
     *ostream_ << std::endl;
   *ostream_ << "else";
-  FormatChildStatement(node->else_clause());
+  FormatChildStatement(node.else_clause());
 }
 
-void SimpleFormatter::VisitIfStatement(ast::IfStatement* node) {
+void SimpleFormatter::VisitIfStatement(const ast::IfStatement& node) {
   *ostream_ << "if (";
-  Format(node->expression());
+  Format(node.expression());
   *ostream_ << ")";
-  FormatChildStatement(node->then_clause());
+  FormatChildStatement(node.then_clause());
 }
 
-void SimpleFormatter::VisitInvalidStatement(ast::InvalidStatement* node) {
-  const auto string = ast::ErrorStringOf(node->error_code());
+void SimpleFormatter::VisitInvalidStatement(const ast::InvalidStatement& node) {
+  const auto string = ast::ErrorStringOf(node.error_code());
   if (string.empty())
-    *ostream_ << node->error_code();
+    *ostream_ << node.error_code();
   else
     *ostream_ << string;
 }
 
-void SimpleFormatter::VisitLabeledStatement(ast::LabeledStatement* node) {
-  Format(node->statement());
+void SimpleFormatter::VisitLabeledStatement(const ast::LabeledStatement& node) {
+  Format(node.statement());
 }
 
-void SimpleFormatter::VisitLetStatement(ast::LetStatement* node) {
+void SimpleFormatter::VisitLetStatement(const ast::LetStatement& node) {
   *ostream_ << "let ";
-  FormatBindingElements(node->elements());
+  FormatBindingElements(node.elements());
   *ostream_ << ';';
 }
 
-void SimpleFormatter::VisitReturnStatement(ast::ReturnStatement* node) {
-  if (node->expression().Is<ast::ElisionExpression>()) {
+void SimpleFormatter::VisitReturnStatement(const ast::ReturnStatement& node) {
+  if (node.expression().Is<ast::ElisionExpression>()) {
     *ostream_ << "return;";
     return;
   }
   *ostream_ << "return ";
-  Format(node->expression());
+  Format(node.expression());
   *ostream_ << ';';
 }
 
-void SimpleFormatter::VisitSwitchStatement(ast::SwitchStatement* node) {
+void SimpleFormatter::VisitSwitchStatement(const ast::SwitchStatement& node) {
   *ostream_ << "switch (";
-  Format(node->expression());
+  Format(node.expression());
   *ostream_ << ") {" << std::endl;
   IndentScope switch_scope(this);
-  for (const auto& clause : node->clauses()) {
+  for (const auto& clause : node.clauses()) {
     auto* runner = &clause;
     for (;;) {
       if (auto* labeled = runner->TryAs<ast::LabeledStatement>()) {
@@ -833,105 +846,107 @@ void SimpleFormatter::VisitSwitchStatement(ast::SwitchStatement* node) {
   *ostream_ << '}';
 }
 
-void SimpleFormatter::VisitThrowStatement(ast::ThrowStatement* node) {
+void SimpleFormatter::VisitThrowStatement(const ast::ThrowStatement& node) {
   *ostream_ << "throw ";
-  Format(node->expression());
+  Format(node.expression());
   *ostream_ << ';';
 }
 
 void SimpleFormatter::VisitTryCatchFinallyStatement(
-    ast::TryCatchFinallyStatement* node) {
+    const ast::TryCatchFinallyStatement& node) {
   *ostream_ << "try";
-  FormatChildStatement(node->try_block());
+  FormatChildStatement(node.try_block());
   *ostream_ << " catch ";
-  Format(node->catch_parameter());
-  FormatChildStatement(node->catch_block());
+  Format(node.catch_parameter());
+  FormatChildStatement(node.catch_block());
   *ostream_ << " finally";
-  FormatChildStatement(node->finally_block());
+  FormatChildStatement(node.finally_block());
 }
 
-void SimpleFormatter::VisitTryCatchStatement(ast::TryCatchStatement* node) {
+void SimpleFormatter::VisitTryCatchStatement(
+    const ast::TryCatchStatement& node) {
   *ostream_ << "try";
-  FormatChildStatement(node->try_block());
+  FormatChildStatement(node.try_block());
   *ostream_ << " catch ";
-  Format(node->catch_parameter());
-  FormatChildStatement(node->catch_block());
+  Format(node.catch_parameter());
+  FormatChildStatement(node.catch_block());
 }
 
-void SimpleFormatter::VisitTryFinallyStatement(ast::TryFinallyStatement* node) {
+void SimpleFormatter::VisitTryFinallyStatement(
+    const ast::TryFinallyStatement& node) {
   *ostream_ << "try";
-  FormatChildStatement(node->try_block());
+  FormatChildStatement(node.try_block());
   *ostream_ << " finally";
-  FormatChildStatement(node->finally_block());
+  FormatChildStatement(node.finally_block());
 }
 
-void SimpleFormatter::VisitVarStatement(ast::VarStatement* node) {
+void SimpleFormatter::VisitVarStatement(const ast::VarStatement& node) {
   *ostream_ << "var ";
-  FormatBindingElements(node->elements());
+  FormatBindingElements(node.elements());
   *ostream_ << ';';
 }
 
-void SimpleFormatter::VisitWhileStatement(ast::WhileStatement* node) {
+void SimpleFormatter::VisitWhileStatement(const ast::WhileStatement& node) {
   *ostream_ << "while (";
-  Format(node->expression());
+  Format(node.expression());
   *ostream_ << ')';
-  FormatChildStatement(node->statement());
+  FormatChildStatement(node.statement());
 }
 
-void SimpleFormatter::VisitWithStatement(ast::WithStatement* node) {
+void SimpleFormatter::VisitWithStatement(const ast::WithStatement& node) {
   *ostream_ << "with (";
-  Format(node->expression());
+  Format(node.expression());
   *ostream_ << ')';
-  FormatChildStatement(node->statement());
+  FormatChildStatement(node.statement());
 }
 
 // Types
-void SimpleFormatter::VisitAnyType(ast::AnyType* node) {
+void SimpleFormatter::VisitAnyType(const ast::AnyType& node) {
   *ostream_ << '*';
 }
 
-void SimpleFormatter::VisitFunctionType(ast::FunctionType* node) {
+void SimpleFormatter::VisitFunctionType(const ast::FunctionType& node) {
   *ostream_ << "function(";
-  if (node->kind() == ast::FunctionTypeKind::New)
+  if (node.kind() == ast::FunctionTypeKind::New)
     *ostream_ << "new:";
-  else if (node->kind() == ast::FunctionTypeKind::This)
+  else if (node.kind() == ast::FunctionTypeKind::This)
     *ostream_ << "this:";
   auto* delimiter = "";
-  for (const auto& parameter_type : node->parameter_types()) {
+  for (const auto& parameter_type : node.parameter_types()) {
     *ostream_ << delimiter;
     delimiter = ", ";
     Format(parameter_type);
   }
   *ostream_ << ')';
-  if (node->return_type().Is<ast::VoidType>())
+  if (node.return_type().Is<ast::VoidType>())
     return;
   *ostream_ << ':';
-  Format(node->return_type());
+  Format(node.return_type());
 }
 
-void SimpleFormatter::VisitInvalidType(ast::InvalidType* node) {
+void SimpleFormatter::VisitInvalidType(const ast::InvalidType& node) {
   *ostream_ << "(invalid)";
 }
 
-void SimpleFormatter::VisitNullableType(ast::NullableType* node) {
+void SimpleFormatter::VisitNullableType(const ast::NullableType& node) {
   *ostream_ << '?';
-  Format(node->type());
+  Format(node.type());
 }
 
-void SimpleFormatter::VisitNonNullableType(ast::NonNullableType* node) {
+void SimpleFormatter::VisitNonNullableType(const ast::NonNullableType& node) {
   *ostream_ << '!';
-  Format(node->type());
+  Format(node.type());
 }
 
-void SimpleFormatter::VisitOptionalType(ast::OptionalType* node) {
-  Format(node->type());
+void SimpleFormatter::VisitOptionalType(const ast::OptionalType& node) {
+  Format(node.type());
   *ostream_ << '=';
 }
 
-void SimpleFormatter::VisitRecordType(ast::RecordType* node) {
+void SimpleFormatter::VisitRecordType(const ast::RecordType& node) {
   *ostream_ << '{';
   auto* delimiter = "";
-  for (const auto& member : node->members()) {
+  for (const auto& member : node.members()) {
     *ostream_ << delimiter;
     delimiter = ", ";
     Format(*member.first);
@@ -941,15 +956,15 @@ void SimpleFormatter::VisitRecordType(ast::RecordType* node) {
   *ostream_ << '}';
 }
 
-void SimpleFormatter::VisitRestType(ast::RestType* node) {
+void SimpleFormatter::VisitRestType(const ast::RestType& node) {
   *ostream_ << "...";
-  Format(node->type());
+  Format(node.type());
 }
 
-void SimpleFormatter::VisitTupleType(ast::TupleType* node) {
+void SimpleFormatter::VisitTupleType(const ast::TupleType& node) {
   *ostream_ << '[';
   auto* delimiter = "";
-  for (const auto& member : node->members()) {
+  for (const auto& member : node.members()) {
     *ostream_ << delimiter;
     delimiter = ", ";
     Format(member);
@@ -957,11 +972,11 @@ void SimpleFormatter::VisitTupleType(ast::TupleType* node) {
   *ostream_ << ']';
 }
 
-void SimpleFormatter::VisitTypeApplication(ast::TypeApplication* node) {
-  OutputUsingSoourceCode(node->name());
+void SimpleFormatter::VisitTypeApplication(const ast::TypeApplication& node) {
+  OutputUsingSoourceCode(node.name());
   *ostream_ << '<';
   auto* delimiter = "";
-  for (const auto& parameter : node->parameters()) {
+  for (const auto& parameter : node.parameters()) {
     *ostream_ << delimiter;
     delimiter = ", ";
     Format(parameter);
@@ -969,30 +984,30 @@ void SimpleFormatter::VisitTypeApplication(ast::TypeApplication* node) {
   *ostream_ << '>';
 }
 
-void SimpleFormatter::VisitTypeGroup(ast::TypeGroup* node) {
+void SimpleFormatter::VisitTypeGroup(const ast::TypeGroup& node) {
   *ostream_ << '(';
-  Format(node->type());
+  Format(node.type());
   *ostream_ << ')';
 }
 
-void SimpleFormatter::VisitTypeName(ast::TypeName* node) {
-  OutputUsingSoourceCode(*node);
+void SimpleFormatter::VisitTypeName(const ast::TypeName& node) {
+  OutputUsingSoourceCode(node);
 }
 
-void SimpleFormatter::VisitUnionType(ast::UnionType* node) {
+void SimpleFormatter::VisitUnionType(const ast::UnionType& node) {
   auto* delimiter = "";
-  for (const auto& member : node->members()) {
+  for (const auto& member : node.members()) {
     *ostream_ << delimiter;
     delimiter = "|";
     Format(member);
   }
 }
 
-void SimpleFormatter::VisitUnknownType(ast::UnknownType* node) {
+void SimpleFormatter::VisitUnknownType(const ast::UnknownType& node) {
   *ostream_ << '?';
 }
 
-void SimpleFormatter::VisitVoidType(ast::VoidType* node) {
+void SimpleFormatter::VisitVoidType(const ast::VoidType& node) {
   *ostream_ << "void";
 }
 

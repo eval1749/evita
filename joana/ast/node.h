@@ -30,7 +30,7 @@ class NodeVisitor;
 enum class PunctuatorKind;
 
 class JOANA_AST_EXPORT Node : public Castable<Node>,
-                              public Visitable<NodeVisitor>,
+                              public ConstVisitable<NodeVisitor>,
                               public ZoneAllocated {
   DECLARE_CASTABLE_CLASS(Node, Castable);
 
@@ -97,7 +97,7 @@ JOANA_AST_EXPORT std::ostream& operator<<(std::ostream& ostream,
 
 #define DECLARE_CONCRETE_AST_NODE(name, base) \
   DECLARE_AST_NODE(name, base);               \
-  void Accept(NodeVisitor* visitor) final;
+  void Accept(NodeVisitor* visitor) const final;
 
 #define DECLARE_CONCRETE_AST_NODE_WITH_LIST(name, base)              \
   DECLARE_CONCRETE_AST_NODE(name, base)                              \

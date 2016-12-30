@@ -23,7 +23,7 @@ class JOANA_AST_EXPORT EmptyNodeVisitor : public NodeVisitor {
   EmptyNodeVisitor();
 
  private:
-#define V(name) void Visit##name(ast::name* node) override;
+#define V(name) void Visit##name(const ast::name& node) override;
   FOR_EACH_CONCRETE_AST_NODE(V)
 #undef V
 

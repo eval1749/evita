@@ -7,14 +7,24 @@
 
 namespace joana {
 
-//////////////////////////////////////////////////////////////////////
 //
-// Derived class of |Visitable| implements visitor patter.
+// Visitor pattern helper classes
 //
+
+template <class Visitor>
+class ConstVisitable {
+ public:
+  virtual void Accept(Visitor* visitor) const = 0;
+
+ protected:
+  ConstVisitable() = default;
+  ~ConstVisitable() = default;
+};
+
 template <class Visitor>
 class Visitable {
  public:
-  virtual void Accept(Visitor* visitor) = 0;
+  virtual void Accept(Visitor* visitor) const = 0;
 
  protected:
   Visitable() = default;

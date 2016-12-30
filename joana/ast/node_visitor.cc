@@ -22,15 +22,11 @@ NodeVisitor::NodeVisitor() = default;
 NodeVisitor::~NodeVisitor() = default;
 
 void NodeVisitor::Visit(const Node& node) {
-  Visit(const_cast<Node*>(&node));
-}
-
-void NodeVisitor::Visit(Node* node) {
-  node->Accept(this);
+  node.Accept(this);
 }
 
 #define V(name) \
-  void name::Accept(NodeVisitor* visitor) { visitor->Visit##name(this); }
+  void name::Accept(NodeVisitor* visitor) const { visitor->Visit##name(*this); }
 FOR_EACH_CONCRETE_AST_NODE(V)
 #undef V
 

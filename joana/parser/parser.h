@@ -49,15 +49,16 @@ class Parser final {
  private:
   friend class ParserTest;
 
-  class SourceCodeRangeScope final {
+  // Help class for tracking node start offset.
+  class NodeRangeScope final {
    public:
-    explicit SourceCodeRangeScope(Parser* parser);
-    ~SourceCodeRangeScope();
+    explicit NodeRangeScope(Parser* parser);
+    ~NodeRangeScope();
 
    private:
     base::AutoReset<int> offset_holder_;
 
-    DISALLOW_COPY_AND_ASSIGN(SourceCodeRangeScope);
+    DISALLOW_COPY_AND_ASSIGN(NodeRangeScope);
   };
 
   ast::NodeFactory& node_factory() const;
@@ -246,7 +247,7 @@ class Parser final {
   const ast::Token* last_token_ = nullptr;
   const ParserOptions& options_;
 
-  // Source code offset where start of node. |SourceCodeRangeScope| manages
+  // Source code offset where start of node. |NodeRangeScope| manages
   // this offset.
   int node_start_ = -1;
 

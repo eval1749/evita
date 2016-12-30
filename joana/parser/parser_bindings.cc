@@ -43,7 +43,7 @@ std::vector<const ast::BindingElement*> Parser::ParseBindingElements() {
 }
 
 const ast::BindingElement& Parser::ParseBindingElement() {
-  SourceCodeRangeScope scope(this);
+  NodeRangeScope scope(this);
   if (PeekToken().Is<ast::Name>())
     return ParseNameBindingElement();
 
@@ -152,7 +152,7 @@ const ast::BindingElement& Parser::ParseObjectBindingPattern() {
     }
 
     if (PeekToken().Is<ast::Name>()) {
-      SourceCodeRangeScope scope(this);
+      NodeRangeScope scope(this);
       const auto& name = ConsumeToken().As<ast::Name>();
       if (!CanPeekToken()) {
         elements.push_back(

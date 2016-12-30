@@ -67,13 +67,13 @@ std::unique_ptr<BracketTracker> NewBracketTracker(
 }  // namespace
 
 //
-// SourceCodeRangeScope
+// NodeRangeScope
 //
-Parser::SourceCodeRangeScope::SourceCodeRangeScope(Parser* parser)
+Parser::NodeRangeScope::NodeRangeScope(Parser* parser)
     : offset_holder_(&parser->node_start_,
                      parser->PeekToken().range().start()) {}
 
-Parser::SourceCodeRangeScope::~SourceCodeRangeScope() = default;
+Parser::NodeRangeScope::~NodeRangeScope() = default;
 
 //
 // Parser

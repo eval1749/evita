@@ -23,7 +23,7 @@ const ast::ArrowFunctionBody& Parser::ParseArrowFunctionBody() {
 }
 
 const ast::Class& Parser::ParseClass() {
-  SourceCodeRangeScope scope(this);
+  NodeRangeScope scope(this);
   DCHECK_EQ(PeekToken(), ast::NameId::Class);
   ConsumeToken();
   auto& class_name = ParseClassName();
@@ -34,7 +34,7 @@ const ast::Class& Parser::ParseClass() {
 }
 
 const ast::Expression& Parser::ParseClassBody() {
-  SourceCodeRangeScope scope(this);
+  NodeRangeScope scope(this);
   if (!CanPeekToken() || PeekToken() != ast::PunctuatorKind::LeftBrace)
     return NewInvalidExpression(ErrorCode::ERROR_CLASS_EXPECT_LBRACE);
   return ParsePrimaryExpression();
@@ -63,7 +63,7 @@ const ast::Function& Parser::ParseFunction(ast::FunctionKind kind) {
 }
 
 const ast::Statement& Parser::ParseFunctionBody() {
-  SourceCodeRangeScope scope(this);
+  NodeRangeScope scope(this);
   if (!CanPeekToken() || PeekToken() != ast::PunctuatorKind::LeftBrace)
     return NewInvalidStatement(ErrorCode::ERROR_FUNCTION_EXPECT_LBRACE);
   return ParseStatement();
@@ -79,7 +79,7 @@ const ast::Method& Parser::ParseMethod(ast::MethodKind method_kind,
 }
 
 const ast::Expression& Parser::ParseParameterList() {
-  SourceCodeRangeScope scope(this);
+  NodeRangeScope scope(this);
   if (!ConsumeTokenIf(ast::PunctuatorKind::LeftParenthesis))
     return NewInvalidExpression(ErrorCode::ERROR_FUNCTION_EXPECT_LPAREN);
   if (ConsumeTokenIf(ast::PunctuatorKind::RightParenthesis))

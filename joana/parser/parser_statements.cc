@@ -96,7 +96,7 @@ const ast::Statement& Parser::ParseJsDocAsStatement() {
 }
 
 const ast::Statement& Parser::ParseBlockStatement() {
-  SourceCodeRangeScope scope(this);
+  NodeRangeScope scope(this);
   DCHECK_EQ(PeekToken(), ast::PunctuatorKind::LeftBrace);
   ConsumeToken();
   std::vector<const ast::Statement*> statements;
@@ -125,7 +125,7 @@ const ast::Statement& Parser::ParseBreakStatement() {
 }
 
 const ast::Statement& Parser::ParseCaseClause() {
-  SourceCodeRangeScope scope(this);
+  NodeRangeScope scope(this);
   DCHECK_EQ(PeekToken(), ast::NameId::Case);
   ConsumeToken();
   auto& expression = ParseExpression();
@@ -173,7 +173,7 @@ const ast::Statement& Parser::ParseContinueStatement() {
 }
 
 const ast::Statement& Parser::ParseDefaultLabel() {
-  SourceCodeRangeScope scope(this);
+  NodeRangeScope scope(this);
   DCHECK_EQ(PeekToken(), ast::NameId::Default);
   auto& label = ConsumeToken().As<ast::Name>();
   if (!CanPeekToken() || PeekToken() != ast::PunctuatorKind::Colon)
@@ -295,7 +295,7 @@ const ast::Statement& Parser::ParseIfStatement() {
 }
 
 const ast::Statement& Parser::ParseKeywordStatement() {
-  SourceCodeRangeScope scope(this);
+  NodeRangeScope scope(this);
   const auto& keyword = PeekToken().As<ast::Name>();
   DCHECK(keyword.IsKeyword()) << keyword;
   switch (static_cast<ast::NameId>(keyword.number())) {
@@ -438,7 +438,7 @@ const ast::Statement& Parser::ParseReturnStatement() {
 const ast::Statement& Parser::ParseStatement() {
   if (!CanPeekToken())
     return NewEmptyStatement(source_code().end());
-  SourceCodeRangeScope scope(this);
+  NodeRangeScope scope(this);
   const auto& token = PeekToken();
   if (token.Is<ast::JsDoc>())
     return ParseJsDocAsStatement();

@@ -29,8 +29,13 @@ class JOANA_AST_EXPORT NodeFactory final {
   explicit NodeFactory(Zone* zone);
   ~NodeFactory();
 
-  // Factory member functions
-  Module& NewModule(
+  // Compilation unit factory members
+  Node& NewExterns(
+      const SourceCodeRange& range,
+      const std::vector<const Statement*>& statements,
+      const std::unordered_map<const Node*, const JsDoc*>& js_doc_map);
+
+  Node& NewModule(
       const SourceCodeRange& range,
       const std::vector<const Statement*>& statements,
       const std::unordered_map<const Node*, const JsDoc*>& js_doc_map);

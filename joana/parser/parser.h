@@ -237,6 +237,10 @@ class Parser final {
   std::unordered_map<const ast::Node*, const ast::JsDoc*> js_doc_map_;
   const std::unique_ptr<BracketTracker> bracket_tracker_;
   ParserContext& context_;
+
+  // Holds @fileoverview annotation.
+  const ast::JsDocDocument* file_overview_ = nullptr;
+
   const std::unique_ptr<Lexer> lexer_;
 
   // True if current token and previous token is separated by at least one

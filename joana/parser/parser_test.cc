@@ -98,6 +98,16 @@ std::string ParserTest::ToString(const ast::Node& node,
     EXPECT_EQ(source, Parse(script_text)); \
   }
 
+TEST_F(ParserTest, Externs) {
+  PrepareSouceCode(
+      "/** @fileoverview @externs */\n"
+      "/** @const {!Object} */\n"
+      "var foo;\n");
+  Parser parser(&context(), source_code().range(), {});
+  const auto& externs = parser.Run();
+  EXPECT_TRUE(externs.Is<ast::Externs>());
+}
+
 TEST_F(ParserTest, JsDoc) {
   EXPECT_EQ(
       "let foo = 1;\n"

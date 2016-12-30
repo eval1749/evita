@@ -33,10 +33,10 @@ bool IsCloseBracket(const ast::Token& token) {
 }
 
 // Returns true if |document| contains |@fileoviewview| tag.
-bool IsFileOverview(const ast::JsDocDocument& document) {
+bool HasJsDocTag(ast::NameId tag_id, const ast::JsDocDocument& document) {
   for (const auto& element : document.elements()) {
     const auto* tag = element.TryAs<ast::JsDocTag>();
-    if (tag && tag->name() == ast::NameId::JsDocFileOverview)
+    if (tag && tag->name() == tag_id)
       return true;
   }
   return false;
@@ -128,8 +128,14 @@ void Parser::AssociateJsDoc(const ast::JsDoc& js_doc, const ast::Node& node) {
   const auto& result = js_doc_map_.emplace(&node, &js_doc);
   if (result.second)
     return;
-  if (IsFileOverview(js_doc.document()))
+  if (HasJsDocTag(ast::NameId::JsDocFileOverview, js_doc.document())) {
+    if (file_overview_) {
+      AddError(SourceCodeRange::Merge(file_overview_->range(), js_doc.range()),
+               ErrorCode::ERROR_JSDOC_MULTIPLE_FILE_OVERVIEWS);
+    }
+    file_overview_ = &js_doc.document();
     return;
+  }
   // We don't allow statement/expression has more than one annotation.
   AddError(js_doc, ErrorCode::ERROR_STATEMENT_UNEXPECT_ANNOTATION);
 }
@@ -238,6 +244,11 @@ const ast::Node& Parser::Run() {
     statements.push_back(&statement);
   }
   Finish();
+  if (file_overview_ &&
+      HasJsDocTag(ast::NameId::JsDocExterns, *file_overview_)) {
+    return node_factory().NewExterns(source_code().range(), statements,
+                                     js_doc_map_);
+  }
   return node_factory().NewModule(source_code().range(), statements,
                                   js_doc_map_);
 }

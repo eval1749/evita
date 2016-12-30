@@ -54,6 +54,30 @@ class JOANA_AST_EXPORT ExpressionList final : public ZoneAllocated {
 };
 
 //
+// ParameterList represents parameter list to hold a range of "()" and
+// to distinguish "a => ..." and "(a) => ..".
+//
+class JOANA_AST_EXPORT ParameterList final : public Expression {
+  DECLARE_CONCRETE_AST_NODE_WITH_LIST(ParameterList, Expression);
+
+ public:
+  ~ParameterList();
+
+  auto begin() const { return parameters_.begin(); }
+  bool empty() const { return parameters_.empty(); }
+  auto end() const { return parameters_.end(); }
+  size_t size() const { return parameters_.size(); }
+
+ private:
+  ParameterList(const SourceCodeRange& range,
+                const std::vector<const BindingElement*>& parameters);
+
+  NodeListTemplate<const BindingElement> parameters_;
+
+  DISALLOW_COPY_AND_ASSIGN(ParameterList);
+};
+
+//
 // ArrayLiteralExpression
 //
 class JOANA_AST_EXPORT ArrayLiteralExpression final

@@ -511,6 +511,17 @@ void SimpleFormatter::VisitMemberExpression(ast::MemberExpression* node) {
   Format(node->name());
 }
 
+void SimpleFormatter::VisitParameterList(ast::ParameterList* node) {
+  *ostream_ << '(';
+  auto delimiter = "";
+  for (const auto& parameter : *node) {
+    *ostream_ << delimiter;
+    delimiter = ", ";
+    Format(parameter);
+  }
+  *ostream_ << ')';
+}
+
 void SimpleFormatter::VisitPropertyDefinitionExpression(
     ast::PropertyDefinitionExpression* node) {
   Format(node->name());

@@ -117,6 +117,58 @@ Parser::OperatorPrecedence Parser::CategoryOf(const ast::Token& token) const {
   return *it;
 }
 
+const ast::BindingElement& Parser::ConvertExpressionToBindingElement(
+    const ast::Expression& expression,
+    const ast::Expression* initializer) {
+  // TODO(eval1749): We should associate |BindingElement| to |JsDocDocument|.
+  if (auto* reference = expression.TryAs<ast::ReferenceExpression>()) {
+    return node_factory().NewBindingNameElement(
+        expression.range(), reference->name(),
+        initializer ? *initializer : NewElisionExpression(expression));
+  }
+  if (auto* array = expression.TryAs<ast::ArrayLiteralExpression>()) {
+    std::vector<const ast::BindingElement*> elements;
+    for (const auto& element : array->elements())
+      elements.push_back(&ConvertExpressionToBindingElement(element, nullptr));
+    return node_factory().NewArrayBindingPattern(
+        expression.range(), elements,
+        initializer ? *initializer : NewElisionExpression(expression));
+  }
+  if (auto* object = expression.TryAs<ast::ObjectLiteralExpression>()) {
+    std::vector<const ast::BindingElement*> members;
+    for (const auto& member : object->members())
+      members.push_back(&ConvertExpressionToBindingElement(member, nullptr));
+    return node_factory().NewObjectBindingPattern(
+        expression.range(), members,
+        initializer ? *initializer : NewElisionExpression(expression));
+  }
+  if (auto* property = expression.TryAs<ast::PropertyDefinitionExpression>()) {
+    if (property->name().Is<ast::ReferenceExpression>()) {
+      return node_factory().NewBindingProperty(
+          expression.range(), property->As<ast::ReferenceExpression>().name(),
+          ConvertExpressionToBindingElement(property->value(), nullptr));
+    }
+  } else if (auto* const assignment =
+                 expression.TryAs<ast::AssignmentExpression>()) {
+    if (assignment && assignment->op() == ast::PunctuatorKind::Equal) {
+      return ConvertExpressionToBindingElement(assignment->lhs(),
+                                               &assignment->rhs());
+    }
+  }
+  return node_factory().NewBindingInvalidElement(expression.range());
+}
+
+std::vector<const ast::BindingElement*>
+Parser::ConvertExpressionToBindingElements(const ast::Expression& expression) {
+  auto* const comma_expr = expression.TryAs<ast::CommaExpression>();
+  if (!comma_expr)
+    return {&ConvertExpressionToBindingElement(expression, nullptr)};
+  std::vector<const ast::BindingElement*> parameters;
+  for (const auto& member : comma_expr->expressions())
+    parameters.push_back(&ConvertExpressionToBindingElement(member, nullptr));
+  return parameters;
+}
+
 const ast::Expression& Parser::HandleComputedMember(
     const ast::Expression& expression) {
   auto& name_expression = ParseExpression();
@@ -170,9 +222,14 @@ const ast::Expression& Parser::NewDelimiterExpression(
   return node_factory().NewDelimiterExpression(delimiter.range());
 }
 
-const ast::Expression& Parser::NewElisionExpression() {
+const ast::Expression& Parser::NewElisionExpression(const ast::Node& node) {
   return node_factory().NewElisionExpression(
-      SourceCodeRange::CollapseToEnd(last_token_->range()));
+      SourceCodeRange::CollapseToEnd(node.range()));
+}
+
+const ast::Expression& Parser::NewElisionExpression() {
+  DCHECK(last_token_);
+  return NewElisionExpression(*last_token_);
 }
 
 const ast::Expression& Parser::NewEmptyExpression() {
@@ -503,12 +560,14 @@ const ast::Expression& Parser::ParseParenthesis() {
   DCHECK_EQ(PeekToken(), ast::PunctuatorKind::LeftParenthesis);
   ConsumeToken();
   if (ConsumeTokenIf(ast::PunctuatorKind::RightParenthesis)) {
-    auto& parameter = NewEmptyExpression();
+    auto& parameter_list =
+        node_factory().NewParameterList(GetSourceCodeRange(), {});
     ExpectPunctuator(ast::PunctuatorKind::Arrow,
                      ErrorCode::ERROR_EXPRESSION_PRIMARY_EXPECT_ARROW);
     auto& statement = ParseArrowFunctionBody();
     return NewDeclarationExpression(node_factory().NewArrowFunction(
-        GetSourceCodeRange(), ast::FunctionKind::Normal, parameter, statement));
+        GetSourceCodeRange(), ast::FunctionKind::Normal, parameter_list,
+        statement));
   }
   auto& sub_expression = ParseExpression();
   ExpectPunctuator(ast::PunctuatorKind::RightParenthesis,
@@ -519,7 +578,11 @@ const ast::Expression& Parser::ParseParenthesis() {
     return expression;
   auto& statement = ParseArrowFunctionBody();
   return NewDeclarationExpression(node_factory().NewArrowFunction(
-      GetSourceCodeRange(), ast::FunctionKind::Normal, expression, statement));
+      GetSourceCodeRange(), ast::FunctionKind::Normal,
+      node_factory().NewParameterList(
+          expression.range(),
+          ConvertExpressionToBindingElements(sub_expression)),
+      statement));
 }
 
 // The entry point for parsing property name.

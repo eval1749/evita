@@ -318,6 +318,14 @@ const Expression& NodeFactory::NewMemberExpression(const SourceCodeRange& range,
   return *new (zone_) MemberExpression(range, expression, name);
 }
 
+const Expression& NodeFactory::NewParameterList(
+    const SourceCodeRange& range,
+    const std::vector<const BindingElement*>& parameters) {
+  return *new (zone_->Allocate(sizeof(ParameterList) +
+                               sizeof(BindingElement*) * parameters.size()))
+      ParameterList(range, parameters);
+}
+
 const Expression& NodeFactory::NewPropertyDefinitionExpression(
     const SourceCodeRange& range,
     const Expression& name,

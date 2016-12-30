@@ -122,6 +122,13 @@ class Parser final {
   // Expressions
   OperatorPrecedence CategoryOf(const ast::Token& token) const;
 
+  const ast::BindingElement& ConvertExpressionToBindingElement(
+      const ast::Expression& expression,
+      const ast::Expression* initializer);
+
+  std::vector<const ast::BindingElement*> ConvertExpressionToBindingElements(
+      const ast::Expression& Expression);
+
   const ast::Expression& HandleComputedMember(
       const ast::Expression& expression);
   const ast::Expression& HandleMember(const ast::Expression& expression);
@@ -131,7 +138,11 @@ class Parser final {
   const ast::Expression& NewDeclarationExpression(
       const ast::Declaration& declaration);
   const ast::Expression& NewDelimiterExpression(const ast::Token& delimiter);
+
+  // Returns a new |ast::ElisionExpression| after |node|.
+  const ast::Expression& NewElisionExpression(const ast::Node& node);
   const ast::Expression& NewElisionExpression();
+
   const ast::Expression& NewEmptyExpression();
   const ast::Expression& NewInvalidExpression(const SourceCodeRange& range,
                                               ErrorCode error_code);

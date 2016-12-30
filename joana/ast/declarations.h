@@ -55,9 +55,9 @@ class JOANA_AST_EXPORT Declaration : public Node {
 // ArrowFunction
 //
 // The parameter list is represented by |ast::Expression| with:
-//  - () = EmptyExpression
 //  - x = ReferenceExpression
-//  - (a, b, ...) = GroupExpression with CommaExpression
+//  - () = ParameterList
+//  - (a, b, ...) = ParameterList
 //
 class JOANA_AST_EXPORT ArrowFunction final
     : public NodeTemplate<Declaration,
@@ -111,10 +111,6 @@ class JOANA_AST_EXPORT Class final : public NodeTemplate<Declaration,
 //
 // Function
 //
-// The parameter list is represented by |ast::Expression| with:
-//  - () = EmptyExpression
-//  - (a, b, ...) = GroupExpression with CommaExpression
-//
 class JOANA_AST_EXPORT Function final : public NodeTemplate<Declaration,
                                                             FunctionKind,
                                                             const Token*,
@@ -143,10 +139,6 @@ class JOANA_AST_EXPORT Function final : public NodeTemplate<Declaration,
 
 //
 // Method
-//
-// The parameter list is represented by |ast::Expression| with:
-//  - () = EmptyExpression
-//  - (a, b, ...) = GroupExpression with CommaExpression
 //
 class JOANA_AST_EXPORT Method final : public NodeTemplate<Declaration,
                                                           MethodKind,

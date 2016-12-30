@@ -192,6 +192,16 @@ MemberExpression::MemberExpression(const SourceCodeRange& range,
 MemberExpression::~MemberExpression() = default;
 
 //
+// ParameterList
+//
+ParameterList::ParameterList(
+    const SourceCodeRange& range,
+    const std::vector<const BindingElement*>& parameters)
+    : Expression(range), parameters_(parameters) {}
+
+ParameterList::~ParameterList() = default;
+
+//
 // PropertyDefinitionExpression
 //
 PropertyDefinitionExpression::PropertyDefinitionExpression(

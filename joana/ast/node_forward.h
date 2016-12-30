@@ -60,6 +60,7 @@ namespace ast {
   V(ObjectLiteralExpression)       \
   V(RegExpLiteralExpression)       \
   V(MemberExpression)              \
+  V(ParameterList)                 \
   V(PropertyDefinitionExpression)  \
   V(ReferenceExpression)           \
   V(UnaryExpression)

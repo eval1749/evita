@@ -163,6 +163,11 @@ class JOANA_AST_EXPORT NodeFactory final {
   const Expression& NewMemberExpression(const SourceCodeRange& range,
                                         const Expression& expression,
                                         const Name& name);
+
+  const Expression& NewParameterList(
+      const SourceCodeRange& range,
+      const std::vector<const BindingElement*>& elements);
+
   const Expression& NewPropertyDefinitionExpression(
       const SourceCodeRange& range,
       const Expression& name,

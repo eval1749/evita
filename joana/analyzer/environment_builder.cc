@@ -39,14 +39,19 @@ const ast::Name& NameOf(const ast::Node& node) {
 //
 // EnvironmentBuilder
 //
-EnvironmentBuilder::EnvironmentBuilder(Context* context)
-    : Pass(context), environment_(&factory().global_environment()) {}
+EnvironmentBuilder::EnvironmentBuilder(Context* context) : Pass(context) {}
 
 EnvironmentBuilder::~EnvironmentBuilder() = default;
 
+// The entry point. |node| is one of |ast::Externs|, |ast::Module| or
+// |ast::Script|.
 void EnvironmentBuilder::Load(const ast::Node& node) {
-  const auto& module = node.As<ast::Module>();
-  for (const auto& statement : module.statements())
+  auto& global_environment = factory().global_environment();
+  environment_ = node.Is<ast::Module>()
+                     ? &factory().NewEnvironment(&global_environment, node)
+                     : &global_environment;
+  const auto& compilation_unit = node.As<ast::CompilationUnit>();
+  for (const auto& statement : compilation_unit.statements())
     ProcessStatement(statement);
 }
 
@@ -59,7 +64,7 @@ void EnvironmentBuilder::BindToFunction(const ast::Name& name,
   }
   // TODO(eval1749): We should bind to |Constructor| if |declaration| has
   // "@constructor" annotation.
-  environment_->Bind(name, &factory().NewFunction(declaration));
+  environment_->Bind(name, &factory().NewFunction(environment_, declaration));
 }
 
 void EnvironmentBuilder::BindToVariable(const ast::Node& assignment,

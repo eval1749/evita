@@ -6,6 +6,7 @@
 #define JOANA_ANALYZER_CONTROLLER_H_
 
 #include <memory>
+#include <vector>
 
 #include "base/macros.h"
 
@@ -20,6 +21,8 @@ class AnalyzerSettings;
 namespace analyzer {
 
 class Context;
+class Environment;
+class Factory;
 
 //
 // Controller
@@ -33,7 +36,10 @@ class Controller final {
   void Load(const ast::Node& node);
 
  private:
+  Factory& factory() const;
+
   const std::unique_ptr<Context> context_;
+  std::vector<const ast::Node*> nodes_;
 
   DISALLOW_COPY_AND_ASSIGN(Controller);
 };

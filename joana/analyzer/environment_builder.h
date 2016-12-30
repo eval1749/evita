@@ -53,7 +53,7 @@ class EnvironmentBuilder final : public Pass {
   void ProcessVariables(const ast::VariableDeclaration& declaration);
 
   // The current processing environment
-  Environment* environment_;
+  Environment* environment_ = nullptr;
 
   DISALLOW_COPY_AND_ASSIGN(EnvironmentBuilder);
 };

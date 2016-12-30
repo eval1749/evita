@@ -32,6 +32,10 @@ class Environment final : public ZoneAllocated {
 
   const ZoneVector<const ast::Name*>& names() const { return names_; }
 
+  // Returns outer environment of this environment, or returns null If this
+  // environment is *global* environment.
+  Environment* outer() const { return outer_; }
+
   // Return the AST node which associated to this Environment.
   const ast::Node& owner() const { return owner_; }
 

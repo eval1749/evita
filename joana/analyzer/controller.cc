@@ -9,7 +9,8 @@
 #include "joana/analyzer/context.h"
 #include "joana/analyzer/environment.h"
 #include "joana/analyzer/environment_builder.h"
-#include "joana/analyzer/value.h"
+#include "joana/analyzer/factory.h"
+#include "joana/analyzer/values.h"
 #include "joana/ast/node.h"
 
 namespace joana {
@@ -46,7 +47,8 @@ std::ostream& operator<<(std::ostream& ostream, const Dump& dump) {
   ostream << Indent{depth} << "Environment " << environment.owner()
           << std::endl;
   for (const auto& name : environment.names()) {
-    ostream << Indent{depth + 1} << *environment.BindingOf(*name) << std::endl;
+    const auto& value = *environment.BindingOf(*name);
+    ostream << Indent{depth + 1} << value << std::endl;
   }
   return ostream;
 }
@@ -61,11 +63,22 @@ Controller::Controller(const AnalyzerSettings& settings)
 
 Controller::~Controller() = default;
 
+Factory& Controller::factory() const {
+  return context_->factory();
+}
+
 void Controller::Analyze() {
   std::cout << Dump{0, &context_->global_environment()};
+  for (const auto& node : nodes_) {
+    const auto& environment = factory().EnvironmentOf(*node);
+    if (!environment.outer())
+      return;
+    std::cout << Dump{0, &environment};
+  }
 }
 
 void Controller::Load(const ast::Node& node) {
+  nodes_.push_back(&node);
   EnvironmentBuilder builder(context_.get());
   builder.Load(node);
 }

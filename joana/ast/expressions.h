@@ -292,21 +292,6 @@ class JOANA_AST_EXPORT ElisionExpression final : public Expression {
 };
 
 //
-// EmptyExpression represents '(' ')' for function parameter list.
-//
-class JOANA_AST_EXPORT EmptyExpression final : public Expression {
-  DECLARE_CONCRETE_AST_NODE(EmptyExpression, Expression);
-
- public:
-  ~EmptyExpression() final;
-
- private:
-  explicit EmptyExpression(const SourceCodeRange& range);
-
-  DISALLOW_COPY_AND_ASSIGN(EmptyExpression);
-};
-
-//
 // GroupExpression represents '(' expression ')' syntax.
 //
 class JOANA_AST_EXPORT GroupExpression final

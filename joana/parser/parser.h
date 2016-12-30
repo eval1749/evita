@@ -142,8 +142,6 @@ class Parser final {
   // Returns a new |ast::ElisionExpression| after |node|.
   const ast::Expression& NewElisionExpression(const ast::Node& node);
   const ast::Expression& NewElisionExpression();
-
-  const ast::Expression& NewEmptyExpression();
   const ast::Expression& NewInvalidExpression(const SourceCodeRange& range,
                                               ErrorCode error_code);
   const ast::Expression& NewInvalidExpression(const ast::Token& token,

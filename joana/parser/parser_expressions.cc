@@ -232,10 +232,6 @@ const ast::Expression& Parser::NewElisionExpression() {
   return NewElisionExpression(*last_token_);
 }
 
-const ast::Expression& Parser::NewEmptyExpression() {
-  return node_factory().NewEmptyExpression(GetSourceCodeRange());
-}
-
 const ast::Expression& Parser::NewInvalidExpression(
     const SourceCodeRange& range,
     ErrorCode error_code) {

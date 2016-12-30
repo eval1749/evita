@@ -276,11 +276,6 @@ const Expression& NodeFactory::NewElisionExpression(
   return *new (zone_) ElisionExpression(range);
 }
 
-const Expression& NodeFactory::NewEmptyExpression(
-    const SourceCodeRange& range) {
-  return *new (zone_) EmptyExpression(range);
-}
-
 const Expression& NodeFactory::NewGroupExpression(
     const SourceCodeRange& range,
     const Expression& expression) {

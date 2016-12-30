@@ -53,7 +53,6 @@ namespace ast {
   V(DelimiterExpression)           \
   V(GroupExpression)               \
   V(ElisionExpression)             \
-  V(EmptyExpression)               \
   V(InvalidExpression)             \
   V(LiteralExpression)             \
   V(NewExpression)                 \

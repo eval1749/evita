@@ -444,10 +444,6 @@ void SimpleFormatter::VisitDelimiterExpression(ast::DelimiterExpression* node) {
 
 void SimpleFormatter::VisitElisionExpression(ast::ElisionExpression* node) {}
 
-void SimpleFormatter::VisitEmptyExpression(ast::EmptyExpression* node) {
-  *ostream_ << "()";
-}
-
 void SimpleFormatter::VisitInvalidExpression(ast::InvalidExpression* node) {
   const auto string = ast::ErrorStringOf(node->error_code());
   if (string.empty())

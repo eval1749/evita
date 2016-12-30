@@ -31,7 +31,9 @@ namespace ast {
   V(BindingRestElement)                 \
   V(ObjectBindingPattern)
 
-#define FOR_EACH_AST_COMPILATION_UNIT(V) V(Module)
+#define FOR_EACH_AST_COMPILATION_UNIT(V) \
+  V(Externs)                             \
+  V(Module)
 
 #define FOR_EACH_AST_DECLARATION(V) \
   V(ArrowFunction)                  \

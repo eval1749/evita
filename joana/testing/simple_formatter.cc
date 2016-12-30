@@ -139,13 +139,6 @@ void SimpleFormatter::VisitPunctuator(ast::Punctuator* node) {
   OutputUsingSoourceCode(*node);
 }
 
-void SimpleFormatter::VisitModule(ast::Module* node) {
-  for (const auto& statement : node->statements()) {
-    FormatWithIndent(statement);
-    *ostream_ << std::endl;
-  }
-}
-
 void SimpleFormatter::VisitName(ast::Name* node) {
   OutputUsingSoourceCode(*node);
 }
@@ -208,6 +201,21 @@ void SimpleFormatter::VisitObjectBindingPattern(
     return;
   *ostream_ << " = ";
   Format(node->initializer());
+}
+
+// Compilation Unit
+void SimpleFormatter::VisitExterns(ast::Externs* node) {
+  for (const auto& statement : node->statements()) {
+    FormatWithIndent(statement);
+    *ostream_ << std::endl;
+  }
+}
+
+void SimpleFormatter::VisitModule(ast::Module* node) {
+  for (const auto& statement : node->statements()) {
+    FormatWithIndent(statement);
+    *ostream_ << std::endl;
+  }
 }
 
 // JsDoc

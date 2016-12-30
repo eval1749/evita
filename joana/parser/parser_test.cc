@@ -8,7 +8,7 @@
 #include "joana/parser/parser.h"
 
 #include "joana/ast/bindings.h"
-#include "joana/ast/module.h"
+#include "joana/ast/compilation_units.h"
 #include "joana/ast/statements.h"
 #include "joana/ast/tokens.h"
 #include "joana/base/error_sink.h"

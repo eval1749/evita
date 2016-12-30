@@ -8,8 +8,8 @@
 
 #include "joana/parser/parser.h"
 
+#include "joana/ast/compilation_units.h"
 #include "joana/ast/jsdoc_nodes.h"
-#include "joana/ast/module.h"
 #include "joana/ast/node_editor.h"
 #include "joana/ast/node_factory.h"
 #include "joana/ast/statements.h"

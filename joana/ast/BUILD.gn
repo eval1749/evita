@@ -11,6 +11,8 @@ component("ast") {
   sources = [
     "bindings.cc",
     "bindings.h",
+    "compilation_units.cc",
+    "compilation_units.h",
     "container_node.cc",
     "container_node.h",
     "declarations.cc",
@@ -26,8 +28,6 @@ component("ast") {
     "jsdoc_tags.h",
     "literals.cc",
     "literals.h",
-    "module.cc",
-    "module.h",
     "node.cc",
     "node.h",
     "node_editor.cc",

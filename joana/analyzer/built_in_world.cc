@@ -7,7 +7,7 @@
 #include "base/memory/singleton.h"
 #include "base/strings/string_piece.h"
 #include "base/strings/utf_string_conversions.h"
-#include "joana/ast/module.h"
+#include "joana/ast/compilation_units.h"
 #include "joana/ast/node_factory.h"
 #include "joana/base/memory/zone.h"
 #include "joana/base/source_code.h"

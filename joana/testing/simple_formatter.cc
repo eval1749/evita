@@ -9,12 +9,12 @@
 
 #include "base/strings/utf_string_conversions.h"
 #include "joana/ast/bindings.h"
+#include "joana/ast/compilation_units.h"
 #include "joana/ast/declarations.h"
 #include "joana/ast/error_codes.h"
 #include "joana/ast/expressions.h"
 #include "joana/ast/jsdoc_nodes.h"
 #include "joana/ast/literals.h"
-#include "joana/ast/module.h"
 #include "joana/ast/node_traversal.h"
 #include "joana/ast/regexp.h"
 #include "joana/ast/statements.h"

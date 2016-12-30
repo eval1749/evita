@@ -5,11 +5,11 @@
 #include "joana/ast/node_visitor.h"
 
 #include "joana/ast/bindings.h"
+#include "joana/ast/compilation_units.h"
 #include "joana/ast/declarations.h"
 #include "joana/ast/expressions.h"
 #include "joana/ast/jsdoc_nodes.h"
 #include "joana/ast/literals.h"
-#include "joana/ast/module.h"
 #include "joana/ast/regexp.h"
 #include "joana/ast/statements.h"
 #include "joana/ast/tokens.h"

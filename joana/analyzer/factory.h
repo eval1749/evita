@@ -36,16 +36,17 @@ class Factory final {
   Environment& EnvironmentOf(const ast::Node& node) const;
   Value& ValueOf(const ast::Node& node) const;
 
+  // Registration
+  Value& RegisterValue(const ast::Node& node, Value* value);
+
   // Factory members
   Environment& NewEnvironment(Environment* outer, const ast::Node& owner);
-  Value& NewFunction(Environment* outer, const ast::Node& node);
+  Value& NewFunction(const ast::Node& node);
   Value& NewProperty(const ast::Node& node);
   Value& NewVariable(const ast::Node& assignment, const ast::Node& name);
 
  private:
   static Environment& NewGlobalEnvironment(Zone* zone);
-
-  Value& RegisterValue(const ast::Node& node, Value* value);
 
   std::unordered_map<const ast::Node*, Environment*> environment_map_;
   Environment& global_environment_;

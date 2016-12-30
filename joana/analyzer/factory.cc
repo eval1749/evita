@@ -44,7 +44,7 @@ Environment& Factory::NewEnvironment(Environment* outer,
   return environment;
 }
 
-Value& Factory::NewFunction(Environment* outer, const ast::Node& node) {
+Value& Factory::NewFunction(const ast::Node& node) {
   return RegisterValue(node, new (&zone_) Function(&zone_, node));
 }
 

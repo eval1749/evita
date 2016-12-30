@@ -10,6 +10,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "base/auto_reset.h"
 #include "base/macros.h"
 #include "joana/ast/node_forward.h"
 #include "joana/base/source_code_range.h"
@@ -54,7 +55,7 @@ class Parser final {
     ~SourceCodeRangeScope();
 
    private:
-    Parser* const parser_;
+    base::AutoReset<int> offset_holder_;
 
     DISALLOW_COPY_AND_ASSIGN(SourceCodeRangeScope);
   };
@@ -244,7 +245,10 @@ class Parser final {
   // The last consumed token for specify node range.
   const ast::Token* last_token_ = nullptr;
   const ParserOptions& options_;
-  std::stack<int> range_stack_;
+
+  // Source code offset where start of node. |SourceCodeRangeScope| manages
+  // this offset.
+  int node_start_ = -1;
 
   // List of tokens to locate comment.
   std::vector<const ast::Token*> tokens_;

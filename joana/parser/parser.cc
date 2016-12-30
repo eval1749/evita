@@ -70,13 +70,10 @@ std::unique_ptr<BracketTracker> NewBracketTracker(
 // SourceCodeRangeScope
 //
 Parser::SourceCodeRangeScope::SourceCodeRangeScope(Parser* parser)
-    : parser_(parser) {
-  parser_->range_stack_.push(parser_->PeekToken().range().start());
-}
+    : offset_holder_(&parser->node_start_,
+                     parser->PeekToken().range().start()) {}
 
-Parser::SourceCodeRangeScope::~SourceCodeRangeScope() {
-  parser_->range_stack_.pop();
-}
+Parser::SourceCodeRangeScope::~SourceCodeRangeScope() = default;
 
 //
 // Parser
@@ -174,7 +171,7 @@ void Parser::ExpectPunctuator(ast::PunctuatorKind kind, ErrorCode error_code) {
   if (!CanPeekToken()) {
     // Unfinished statement or expression, e.g. just "foo" in source code.
     return AddError(
-        source_code().Slice(range_stack_.top(), tokens_.back()->range().end()),
+        source_code().Slice(node_start_, tokens_.back()->range().end()),
         error_code);
   }
   // We use previous token instead of current token, since current token may
@@ -184,7 +181,7 @@ void Parser::ExpectPunctuator(ast::PunctuatorKind kind, ErrorCode error_code) {
   //    ~~~~~
   // }
   return AddError(
-      source_code().Slice(range_stack_.top(),
+      source_code().Slice(node_start_,
                           (*std::next(tokens_.rbegin()))->range().end()),
       error_code);
 }
@@ -209,7 +206,7 @@ void Parser::Finish() {
 }
 
 SourceCodeRange Parser::GetSourceCodeRange() const {
-  return source_code().Slice(range_stack_.top(), last_token_->range().end());
+  return source_code().Slice(node_start_, last_token_->range().end());
 }
 
 const ast::Token& Parser::NewEmptyName() {

@@ -78,7 +78,7 @@ const ast::Method& Parser::ParseMethod(ast::MethodKind method_kind,
                                   method_name, parameter_list, method_body);
 }
 
-const ast::Expression& Parser::ParseParameterList() {
+const ast::ParameterList& Parser::ParseParameterList() {
   NodeRangeScope scope(this);
   ExpectPunctuator(ast::PunctuatorKind::LeftParenthesis,
                    ErrorCode::ERROR_FUNCTION_EXPECT_LPAREN);

@@ -116,7 +116,7 @@ class Parser final {
   const ast::Statement& ParseFunctionBody();
   const ast::Method& ParseMethod(ast::MethodKind method_kind,
                                  ast::FunctionKind kind);
-  const ast::Expression& ParseParameterList();
+  const ast::ParameterList& ParseParameterList();
   const ast::Expression& ParsePropertyName();
 
   // Expressions

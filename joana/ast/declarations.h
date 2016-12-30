@@ -12,6 +12,7 @@ namespace joana {
 namespace ast {
 
 class ExpressionList;
+class ParameterList;
 class Statement;
 
 //
@@ -111,11 +112,12 @@ class JOANA_AST_EXPORT Class final : public NodeTemplate<Declaration,
 //
 // Function
 //
-class JOANA_AST_EXPORT Function final : public NodeTemplate<Declaration,
-                                                            FunctionKind,
-                                                            const Token*,
-                                                            const Expression*,
-                                                            const Statement*> {
+class JOANA_AST_EXPORT Function final
+    : public NodeTemplate<Declaration,
+                          FunctionKind,
+                          const Token*,
+                          const ParameterList*,
+                          const Statement*> {
   DECLARE_CONCRETE_AST_NODE(Function, Declaration);
 
  public:
@@ -124,14 +126,14 @@ class JOANA_AST_EXPORT Function final : public NodeTemplate<Declaration,
   const Statement& body() const { return *member_at<3>(); }
   FunctionKind kind() const { return member_at<0>(); }
   const Token& name() const { return *member_at<1>(); }
-  const Expression& parameter_list() const { return *member_at<2>(); }
+  const ParameterList& parameter_list() const { return *member_at<2>(); }
 
  private:
   // |statement| should be either expression statement or block statement.
   Function(const SourceCodeRange& range,
            FunctionKind kind,
            const Token& name,
-           const Expression& parameter_list,
+           const ParameterList& parameter_list,
            const Statement& body);
 
   DISALLOW_COPY_AND_ASSIGN(Function);
@@ -144,7 +146,7 @@ class JOANA_AST_EXPORT Method final : public NodeTemplate<Declaration,
                                                           MethodKind,
                                                           FunctionKind,
                                                           const Expression*,
-                                                          const Expression*,
+                                                          const ParameterList*,
                                                           const Statement*> {
   DECLARE_CONCRETE_AST_NODE(Method, Declaration);
 
@@ -155,7 +157,7 @@ class JOANA_AST_EXPORT Method final : public NodeTemplate<Declaration,
   FunctionKind kind() const { return member_at<1>(); }
   MethodKind method_kind() const { return member_at<0>(); }
   const Expression& name() const { return *member_at<2>(); }
-  const Expression& parameter_list() const { return *member_at<3>(); }
+  const ParameterList& parameter_list() const { return *member_at<3>(); }
 
  private:
   // |statement| should be either expression statement or block statement.
@@ -163,7 +165,7 @@ class JOANA_AST_EXPORT Method final : public NodeTemplate<Declaration,
          MethodKind method_kind,
          FunctionKind kind,
          const Expression& name,
-         const Expression& parameter_list,
+         const ParameterList& parameter_list,
          const Statement& body);
 
   DISALLOW_COPY_AND_ASSIGN(Method);

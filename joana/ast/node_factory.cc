@@ -189,7 +189,7 @@ const Class& NodeFactory::NewClass(const SourceCodeRange& range,
 const Function& NodeFactory::NewFunction(const SourceCodeRange& range,
                                          FunctionKind kind,
                                          const Token& name,
-                                         const Expression& parameter_list,
+                                         const ParameterList& parameter_list,
                                          const Statement& body) {
   return *new (zone_) Function(range, kind, name, parameter_list, body);
 }
@@ -198,7 +198,7 @@ const Method& NodeFactory::NewMethod(const SourceCodeRange& range,
                                      MethodKind method_kind,
                                      FunctionKind kind,
                                      const Expression& name,
-                                     const Expression& parameter_list,
+                                     const ParameterList& parameter_list,
                                      const Statement& method_body) {
   return *new (zone_)
       Method(range, method_kind, kind, name, parameter_list, method_body);
@@ -313,7 +313,7 @@ const Expression& NodeFactory::NewMemberExpression(const SourceCodeRange& range,
   return *new (zone_) MemberExpression(range, expression, name);
 }
 
-const Expression& NodeFactory::NewParameterList(
+const ParameterList& NodeFactory::NewParameterList(
     const SourceCodeRange& range,
     const std::vector<const BindingElement*>& parameters) {
   return *new (zone_->Allocate(sizeof(ParameterList) +

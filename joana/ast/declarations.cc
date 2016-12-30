@@ -44,7 +44,7 @@ Declaration::~Declaration() = default;
 Function::Function(const SourceCodeRange& range,
                    FunctionKind kind,
                    const Token& name,
-                   const Expression& parameter_list,
+                   const ParameterList& parameter_list,
                    const Statement& body)
     : NodeTemplate(std::make_tuple(kind, &name, &parameter_list, &body),
                    range) {}
@@ -58,7 +58,7 @@ Method::Method(const SourceCodeRange& range,
                MethodKind method_kind,
                FunctionKind kind,
                const Expression& name,
-               const Expression& parameter_list,
+               const ParameterList& parameter_list,
                const Statement& body)
     : NodeTemplate(
           std::make_tuple(method_kind, kind, &name, &parameter_list, &body),

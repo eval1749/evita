@@ -100,14 +100,14 @@ class JOANA_AST_EXPORT NodeFactory final {
   const Function& NewFunction(const SourceCodeRange& range,
                               FunctionKind kind,
                               const Token& name,
-                              const Expression& parameter_list,
+                              const ParameterList& parameter_list,
                               const Statement& body);
 
   const Method& NewMethod(const SourceCodeRange& range,
                           MethodKind method_kind,
                           FunctionKind kind,
                           const Expression& name,
-                          const Expression& parameter_list,
+                          const ParameterList& parameter_list,
                           const Statement& body);
 
   // Expressions factory members
@@ -163,7 +163,7 @@ class JOANA_AST_EXPORT NodeFactory final {
                                         const Expression& expression,
                                         const Name& name);
 
-  const Expression& NewParameterList(
+  const ParameterList& NewParameterList(
       const SourceCodeRange& range,
       const std::vector<const BindingElement*>& elements);
 

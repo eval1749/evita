@@ -607,86 +607,133 @@ TEST_F(ParserTest, WithStatement) {
 
 // Bindings
 TEST_F(ParserTest, ParseArrayBindingPattern) {
-  EXPECT_EQ("#array_pattern\n", ToString(ParseBindingElement("[]")))
+  EXPECT_EQ(
+      "ArrayBindingPattern\n"
+      "+--ElisionExpression ||\n",
+      ToString(ParseBindingElement("[]")))
       << "no elements";
 
   EXPECT_EQ(
-      "#array_pattern\n"
-      "+--#binding_name foo\n",
+      "ArrayBindingPattern\n"
+      "+--ElisionExpression ||\n"
+      "+--BindingNameElement\n"
+      "|  +--Name |foo|\n"
+      "|  +--ElisionExpression ||\n",
       ToString(ParseBindingElement("[foo]")))
       << "one element";
 
   EXPECT_EQ(
-      "#array_pattern\n"
-      "+--#binding_name foo\n"
-      "+--#binding_comma\n"
-      "+--#binding_name bar\n",
+      "ArrayBindingPattern\n"
+      "+--ElisionExpression ||\n"
+      "+--BindingNameElement\n"
+      "|  +--Name |foo|\n"
+      "|  +--ElisionExpression ||\n"
+      "+--BindingCommaElement |,|\n"
+      "+--BindingNameElement\n"
+      "|  +--Name |bar|\n"
+      "|  +--ElisionExpression ||\n",
       ToString(ParseBindingElement("[foo, bar]")))
       << "two elements";
 
   EXPECT_EQ(
-      "#array_pattern\n"
-      "+--#binding_name foo\n"
-      "+--#binding_comma\n"
-      "+--#binding_name bar\n"
-      "+--[1]\n",
+      "ArrayBindingPattern\n"
+      "+--ArrayInitializer\n"
+      "|  +--NumericLiteral |1|\n"
+      "+--BindingNameElement\n"
+      "|  +--Name |foo|\n"
+      "|  +--ElisionExpression ||\n"
+      "+--BindingCommaElement |,|\n"
+      "+--BindingNameElement\n"
+      "|  +--Name |bar|\n"
+      "|  +--ElisionExpression ||\n",
       ToString(ParseBindingElement("[foo, bar] = [1]")))
       << "two elements with initializer";
 
   EXPECT_EQ(
-      "#array_pattern\n"
-      "+--#binding_name foo\n"
-      "+--#binding_comma\n",
+      "ArrayBindingPattern\n"
+      "+--ElisionExpression ||\n"
+      "+--BindingNameElement\n"
+      "|  +--Name |foo|\n"
+      "|  +--ElisionExpression ||\n"
+      "+--BindingCommaElement |,|\n",
       ToString(ParseBindingElement("[foo,]")))
       << "no element after comma";
 
   EXPECT_EQ(
-      "#array_pattern\n"
-      "+--#binding_name foo\n"
-      "+--#binding_comma\n"
-      "+--#binding_comma\n",
+      "ArrayBindingPattern\n"
+      "+--ElisionExpression ||\n"
+      "+--BindingNameElement\n"
+      "|  +--Name |foo|\n"
+      "|  +--ElisionExpression ||\n"
+      "+--BindingCommaElement |,|\n"
+      "+--BindingCommaElement |,|\n",
       ToString(ParseBindingElement("[foo,,]")))
       << "no element after commas";
 
   EXPECT_EQ(
-      "#array_pattern\n"
-      "+--#binding_name foo\n"
-      "+--#binding_comma\n"
-      "+--#binding_comma\n"
-      "+--#binding_name bar\n",
+      "ArrayBindingPattern\n"
+      "+--ElisionExpression ||\n"
+      "+--BindingNameElement\n"
+      "|  +--Name |foo|\n"
+      "|  +--ElisionExpression ||\n"
+      "+--BindingCommaElement |,|\n"
+      "+--BindingCommaElement |,|\n"
+      "+--BindingNameElement\n"
+      "|  +--Name |bar|\n"
+      "|  +--ElisionExpression ||\n",
       ToString(ParseBindingElement("[foo,,bar]")))
       << "no element between commas";
 
   EXPECT_EQ(
-      "#array_pattern\n"
-      "+--#binding_name foo\n"
-      "+--#binding_comma\n"
-      "+--#binding_name bar\n"
-      "+--#binding_comma\n"
-      "+--#binding_name baz\n",
+      "ArrayBindingPattern\n"
+      "+--ElisionExpression ||\n"
+      "+--BindingNameElement\n"
+      "|  +--Name |foo|\n"
+      "|  +--ElisionExpression ||\n"
+      "+--BindingCommaElement |,|\n"
+      "+--BindingNameElement\n"
+      "|  +--Name |bar|\n"
+      "|  +--ElisionExpression ||\n"
+      "+--BindingCommaElement |,|\n"
+      "+--BindingNameElement\n"
+      "|  +--Name |baz|\n"
+      "|  +--ElisionExpression ||\n",
       ToString(ParseBindingElement("[foo, bar, baz]")))
       << "three elements";
 
   EXPECT_EQ(
-      "#array_pattern\n"
-      "+--#binding_name foo\n"
-      "+--#binding_comma\n"
-      "+--#binding_rest\n"
-      "|  +--#binding_name bar\n",
+      "ArrayBindingPattern\n"
+      "+--ElisionExpression ||\n"
+      "+--BindingNameElement\n"
+      "|  +--Name |foo|\n"
+      "|  +--ElisionExpression ||\n"
+      "+--BindingCommaElement |,|\n"
+      "+--BindingRestElement\n"
+      "|  +--BindingNameElement\n"
+      "|  |  +--Name |bar|\n"
+      "|  |  +--ElisionExpression ||\n",
       ToString(ParseBindingElement("[foo, ...bar]")))
       << "rest element";
 
   EXPECT_EQ(
-      "#array_pattern\n"
-      "+--#array_pattern\n"
-      "|  +--#binding_name foo\n",
+      "ArrayBindingPattern\n"
+      "+--ElisionExpression ||\n"
+      "+--ArrayBindingPattern\n"
+      "|  +--ElisionExpression ||\n"
+      "|  +--BindingNameElement\n"
+      "|  |  +--Name |foo|\n"
+      "|  |  +--ElisionExpression ||\n",
       ToString(ParseBindingElement("[[foo]]")))
       << "array in array";
 
   EXPECT_EQ(
-      "#array_pattern\n"
-      "+--#object_pattern\n"
-      "|  +--#binding_name foo\n",
+      "ArrayBindingPattern\n"
+      "+--ElisionExpression ||\n"
+      "+--ObjectBindingPattern\n"
+      "|  +--ElisionExpression ||\n"
+      "|  +--BindingNameElement\n"
+      "|  |  +--Name |foo|\n"
+      "|  |  +--ElisionExpression ||\n",
       ToString(ParseBindingElement("[{foo}]")))
       << "object in array";
 }
@@ -732,12 +779,17 @@ TEST_F(ParserTest, ParseArrayBindingPatternError) {
 }
 
 TEST_F(ParserTest, ParseBindingNameElement) {
-  EXPECT_EQ("#binding_name foo\n", ToString(ParseBindingElement("foo")))
+  EXPECT_EQ(
+      "BindingNameElement\n"
+      "+--Name |foo|\n"
+      "+--ElisionExpression ||\n",
+      ToString(ParseBindingElement("foo")))
       << "without initializer";
 
   EXPECT_EQ(
-      "#binding_name foo\n"
-      "+--1\n",
+      "BindingNameElement\n"
+      "+--Name |foo|\n"
+      "+--NumericLiteral |1|\n",
       ToString(ParseBindingElement("foo = 1")))
       << "with initializer";
 }

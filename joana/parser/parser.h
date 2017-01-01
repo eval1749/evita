@@ -71,25 +71,21 @@ class Parser final {
   void Advance();
 
   // Associate |jsdoc| to |node|.
-  void AssociateJsDoc(const ast::JsDocToken& jsdoc, const ast::Node& node);
+  void AssociateJsDoc(const ast::Node& jsdoc, const ast::Node& node);
   bool CanPeekToken() const;
-  const ast::Token& ConsumeToken();
+  const ast::Node& ConsumeToken();
+
   // Returns true if |Lexer| has a punctuator of |name_id| and advance to next
   // token.
   bool ConsumeTokenIf(ast::NameId keyword_id);
+
   // Returns true if |Lexer| has a punctuator of |kind| and advance to next
   // token.
   bool ConsumeTokenIf(ast::PunctuatorKind kind);
 
-  template <typename Class>
-  bool ConsumeTokenIf() {
-    if (!CanPeekToken())
-      return false;
-    if (!PeekToken().Is<Class>())
-      return false;
-    ConsumeToken();
-    return true;
-  }
+  // Returns true if |Lexer| has a syntax of |syntax| and advance to next
+  // token.
+  bool ConsumeTokenIf(ast::SyntaxCode syntax);
 
   void ExpectPunctuator(ast::PunctuatorKind kind, ErrorCode error_code);
   void ExpectSemicolon();
@@ -98,157 +94,150 @@ class Parser final {
   void Finish();
 
   SourceCodeRange GetSourceCodeRange() const;
-  const ast::Token& PeekToken() const;
-  void PushBackToken(const ast::Token& token);
+  const ast::Node& PeekToken() const;
+  void PushBackToken(const ast::Node& token);
   void SkipCommentTokens();
 
   // Returns true if we stop before list element.
   bool SkipToListElement();
 
   // Declarations
-  const ast::Token& NewEmptyName();
-  const ast::ArrowFunctionBody& ParseArrowFunctionBody();
-  const ast::Class& ParseClass();
-  const ast::Expression& ParseClassBody();
-  const ast::Expression& ParseClassHeritage();
-  const ast::Token& ParseClassName();
-  const ast::Function& ParseFunction(ast::FunctionKind kind);
-  const ast::Statement& ParseFunctionBody();
-  const ast::Method& ParseMethod(ast::MethodKind method_kind,
-                                 ast::FunctionKind kind);
-  const ast::ParameterList& ParseParameterList();
-  const ast::Expression& ParsePropertyName();
+  const ast::Node& NewEmptyName();
+  const ast::Node& ParseArrowFunctionBody();
+  const ast::Node& ParseClass();
+  const ast::Node& ParseClassBody();
+  const ast::Node& ParseClassHeritage();
+  const ast::Node& ParseClassName();
+  const ast::Node& ParseFunction(ast::FunctionKind kind);
+  const ast::Node& ParseFunctionBody();
+  const ast::Node& ParseMethod(ast::MethodKind method_kind,
+                               ast::FunctionKind kind);
+  const ast::Node& ParseParameterList();
+  const ast::Node& ParsePropertyName();
 
   // Expressions
-  OperatorPrecedence CategoryOf(const ast::Token& token) const;
+  OperatorPrecedence CategoryOf(const ast::Node& token) const;
 
-  const ast::BindingElement& ConvertExpressionToBindingElement(
-      const ast::Expression& expression,
-      const ast::Expression* initializer);
+  const ast::Node& ConvertExpressionToBindingElement(
+      const ast::Node& expression,
+      const ast::Node* initializer);
 
-  std::vector<const ast::BindingElement*> ConvertExpressionToBindingElements(
-      const ast::Expression& Expression);
+  std::vector<const ast::Node*> ConvertExpressionToBindingElements(
+      const ast::Node& Expression);
 
-  const ast::Expression& HandleComputedMember(
-      const ast::Expression& expression);
-  const ast::Expression& HandleMember(const ast::Expression& expression);
-  const ast::Expression& HandleNewExpression(const ast::Expression& expression);
+  const ast::Node& HandleComputedMember(const ast::Node& expression);
+  const ast::Node& HandleMember(const ast::Node& expression);
+  const ast::Node& HandleNewExpression(const ast::Node& expression);
 
   OperatorPrecedence HigherPrecedenceOf(OperatorPrecedence category) const;
-  const ast::Expression& NewDeclarationExpression(
-      const ast::Declaration& declaration);
-  const ast::Expression& NewDelimiterExpression(const ast::Token& delimiter);
+  const ast::Node& NewDelimiterExpression(const ast::Node& delimiter);
 
   // Returns a new |ast::ElisionExpression| after |node|.
-  const ast::Expression& NewElisionExpression(const ast::Node& node);
-  const ast::Expression& NewElisionExpression();
-  const ast::Expression& NewInvalidExpression(const SourceCodeRange& range,
-                                              ErrorCode error_code);
-  const ast::Expression& NewInvalidExpression(const ast::Token& token,
-                                              ErrorCode error_code);
-  const ast::Expression& NewInvalidExpression(ErrorCode error_code);
-  const ast::Expression& NewLiteralExpression(const ast::Literal& literal);
-  const ast::Expression& NewUnaryExpression(const ast::Token& op,
-                                            const ast::Expression& expression);
+  const ast::Node& NewElisionExpression(const ast::Node& node);
+  const ast::Node& NewElisionExpression();
+  const ast::Node& NewInvalidExpression(const SourceCodeRange& range,
+                                        ErrorCode error_code);
+  const ast::Node& NewInvalidExpression(const ast::Node& token,
+                                        ErrorCode error_code);
+  const ast::Node& NewInvalidExpression(ErrorCode error_code);
+
+  const ast::Node& NewUnaryKeywordExpression(const ast::Node& op,
+                                             const ast::Node& expression);
+
+  const ast::Node& NewUnaryExpression(const ast::Node& op,
+                                      const ast::Node& expression);
 
   // The entry of parsing an expression.
-  const ast::Expression& ParseExpression();
+  const ast::Node& ParseExpression();
 
   // Helper function for parsing an expression enclosed by parenthesis for
   // do-while, if, switch, and while statements.
-  const ast::Expression& ParseParenthesisExpression();
+  const ast::Node& ParseParenthesisExpression();
 
-  const ast::RegExp& ParseRegExp();
+  const ast::Node& ParseRegExp();
 
-  const ast::Expression& ParseJsDocAsExpression();
-  std::vector<const ast::Expression*> ParseArgumentList();
-  const ast::Expression& ParseArrayInitializer();
-  const ast::Expression& ParseAssignmentExpression();
-  const ast::Expression& ParseBinaryExpression(OperatorPrecedence category);
-  const ast::Expression& ParseCommaExpression();
-  const ast::Expression& ParseConditionalExpression();
-  const ast::Expression& ParseFunctionExpression(ast::FunctionKind kind);
-  const ast::Expression& ParseLeftHandSideExpression();
-  const ast::Expression& ParseMethodExpression(ast::MethodKind method_kind,
-                                               ast::FunctionKind kind);
-  const ast::Expression& ParseNameAsExpression();
-  const ast::Expression& ParseNewExpression();
-  const ast::Expression& ParseObjectInitializer();
-  const ast::Expression& ParseParenthesis();
-  const ast::Expression& ParsePrimaryExpression();
-  const ast::Expression& ParsePropertyAfterName(
-      const ast::Expression& property_name,
-      ast::MethodKind method_kind,
-      ast::FunctionKind function_kind);
-  const ast::Expression& ParseRegExpLiteral();
-  const ast::Expression& ParseUnaryExpression();
-  const ast::Expression& ParseUpdateExpression();
-  const ast::Expression& ParseYieldExpression();
+  const ast::Node& ParseJsDocAsExpression();
+  std::vector<const ast::Node*> ParseArgumentList();
+  const ast::Node& ParseArrayInitializer();
+  const ast::Node& ParseAssignmentExpression();
+  const ast::Node& ParseBinaryExpression(OperatorPrecedence category);
+  const ast::Node& ParseCommaExpression();
+  const ast::Node& ParseConditionalExpression();
+  const ast::Node& ParseLeftHandSideExpression();
+  const ast::Node& ParseNameAsExpression();
+  const ast::Node& ParseNewExpression();
+  const ast::Node& ParseObjectInitializer();
+  const ast::Node& ParseParenthesis();
+  const ast::Node& ParsePrimaryExpression();
+  const ast::Node& ParsePropertyAfterName(const ast::Node& property_name,
+                                          ast::MethodKind method_kind,
+                                          ast::FunctionKind function_kind);
+  const ast::Node& ParseRegExpLiteral();
+  const ast::Node& ParseUnaryExpression();
+  const ast::Node& ParseUpdateExpression();
+  const ast::Node& ParseYieldExpression();
 
   // Statements
-  const ast::Statement& HandleLabeledStatement(const ast::Node& name);
+  const ast::Node& HandleLabeledStatement(const ast::Node& name);
 
-  const ast::Statement& NewInvalidStatement(ErrorCode error_code);
-  const ast::Statement& NewEmptyStatement(const SourceCodeRange& range);
+  const ast::Node& NewInvalidStatement(ErrorCode error_code);
+  const ast::Node& NewEmptyStatement(const SourceCodeRange& range);
 
-  const ast::Statement& ParseStatement();
+  const ast::Node& ParseStatement();
 
-  const ast::Statement& ParseJsDocAsStatement();
-  const ast::Statement& ParseBreakStatement();
-  const ast::Statement& ParseBlockStatement();
-  const ast::Statement& ParseCaseClause();
-  const ast::Statement& ParseClassStatement();
-  const ast::Statement& ParseConstStatement();
-  const ast::Statement& ParseContinueStatement();
-  const ast::Statement& ParseDefaultLabel();
-  const ast::Statement& ParseDoStatement();
-  const ast::Statement& ParseExpressionStatement();
-  const ast::Statement& ParseForStatement();
-  const ast::Statement& ParseFunctionStatement(ast::FunctionKind kind);
-  const ast::Statement& ParseIfStatement();
-  const ast::Statement& ParseKeywordStatement();
-  const ast::Statement& ParseLetStatement();
-  const ast::Statement& ParseNameAsStatement();
-  const ast::Statement& ParseReturnStatement();
-  const ast::Statement& ParseSwitchStatement();
-  const ast::Statement& ParseThrowStatement();
-  const ast::Statement& ParseTryStatement();
-  const ast::Statement& ParseVarStatement();
-  const ast::Statement& ParseWhileStatement();
-  const ast::Statement& ParseWithStatement();
+  const ast::Node& ParseJsDocAsStatement();
+  const ast::Node& ParseBreakStatement();
+  const ast::Node& ParseBlockStatement();
+  const ast::Node& ParseCaseClause();
+  const ast::Node& ParseConstStatement();
+  const ast::Node& ParseContinueStatement();
+  const ast::Node& ParseDefaultLabel();
+  const ast::Node& ParseDoStatement();
+  const ast::Node& ParseExpressionStatement();
+  const ast::Node& ParseForStatement();
+  const ast::Node& ParseIfStatement();
+  const ast::Node& ParseKeywordStatement();
+  const ast::Node& ParseLetStatement();
+  const ast::Node& ParseNameAsStatement();
+  const ast::Node& ParseReturnStatement();
+  const ast::Node& ParseSwitchStatement();
+  const ast::Node& ParseThrowStatement();
+  const ast::Node& ParseTryStatement();
+  const ast::Node& ParseVarStatement();
+  const ast::Node& ParseWhileStatement();
+  const ast::Node& ParseWithStatement();
 
   // Parsing binding
   // Returns a list of |BindingElement|. This function should be called after
   // reading statement keyword, |const|, |let|, |var|, or right parenthesis
   // of function parameter list.
-  std::vector<const ast::BindingElement*> ParseBindingElements();
-  const ast::BindingElement& ParseBindingElement();
+  std::vector<const ast::Node*> ParseBindingElements();
+  const ast::Node& ParseBindingElement();
 
-  const ast::BindingElement& NewArrayBindingPattern(
-      const std::vector<const ast::BindingElement*>& elements,
-      const ast::Expression& initializer);
+  const ast::Node& NewArrayBindingPattern(
+      const std::vector<const ast::Node*>& elements,
+      const ast::Node& initializer);
 
-  const ast::BindingElement& NewBindingCommaElement(const ast::Token& range);
+  const ast::Node& NewBindingCommaElement(const ast::Node& range);
 
-  const ast::BindingElement& NewBindingNameElement(
-      const ast::Node& name,
-      const ast::Expression& initializer);
+  const ast::Node& NewBindingNameElement(const ast::Node& name,
+                                         const ast::Node& initializer);
 
-  const ast::BindingElement& NewObjectBindingPattern(
-      const std::vector<const ast::BindingElement*>& elements,
-      const ast::Expression& initializer);
+  const ast::Node& NewObjectBindingPattern(
+      const std::vector<const ast::Node*>& elements,
+      const ast::Node& initializer);
 
-  const ast::BindingElement& ParseArrayBindingPattern();
-  const ast::BindingElement& ParseNameBindingElement();
-  const ast::BindingElement& ParseObjectBindingPattern();
+  const ast::Node& ParseArrayBindingPattern();
+  const ast::Node& ParseNameBindingElement();
+  const ast::Node& ParseObjectBindingPattern();
 
   // Map node to jsdoc
-  std::unordered_map<const ast::Node*, const ast::JsDocDocument*> jsdoc_map_;
+  std::unordered_map<const ast::Node*, const ast::Node*> jsdoc_map_;
   const std::unique_ptr<BracketTracker> bracket_tracker_;
   ParserContext& context_;
 
   // Holds @fileoverview annotation.
-  const ast::JsDocDocument* file_overview_ = nullptr;
+  const ast::Node* file_overview_ = nullptr;
 
   const std::unique_ptr<Lexer> lexer_;
 
@@ -257,7 +246,7 @@ class Parser final {
   bool is_separated_by_newline_ = false;
 
   // The last consumed token for specify node range.
-  const ast::Token* last_token_ = nullptr;
+  const ast::Node* last_token_ = nullptr;
   const ParserOptions& options_;
 
   // Source code offset where start of node. |NodeRangeScope| manages
@@ -265,11 +254,11 @@ class Parser final {
   int node_start_ = -1;
 
   // List of tokens to locate comment.
-  std::vector<const ast::Token*> tokens_;
+  std::vector<const ast::Node*> tokens_;
 
   // |token_stack_| is used for look ahead, e.g. detecting whether name is
   // part of an expression or label.
-  std::stack<const ast::Token*> token_stack_;
+  std::stack<const ast::Node*> token_stack_;
 
   DISALLOW_COPY_AND_ASSIGN(Parser);
 };

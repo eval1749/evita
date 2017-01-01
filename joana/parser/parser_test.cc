@@ -18,7 +18,6 @@
 #include "joana/parser/public/parser_options_builder.h"
 #include "joana/testing/lexer_test_base.h"
 #include "joana/testing/print_as_tree.h"
-#include "joana/testing/simple_formatter.h"
 
 namespace joana {
 namespace parser {
@@ -35,10 +34,10 @@ class ParserTest : public LexerTestBase {
                     const ParserOptions& options);
   std::string Parse(base::StringPiece script_text);
 
-  const ast::BindingElement& ParseBindingElement(base::StringPiece text);
+  const ast::Node& ParseBindingElement(base::StringPiece text);
 
   std::string ToString(const ast::Node& node,
-                       const ast::Module* module = nullptr);
+                       const ast::Node* module = nullptr);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(ParserTest);
@@ -48,16 +47,16 @@ std::string ParserTest::Parse(base::StringPiece script_text,
                               const ParserOptions& options) {
   PrepareSouceCode(script_text);
   Parser parser(&context(), source_code().range(), options);
-  const auto& module = parser.Run().As<ast::Module>();
+  const auto& module = parser.Run();
   std::ostringstream ostream;
-  SimpleFormatter(&ostream).Format(module);
+  ostream << AsPrintableTree(module) << std::endl;
   for (const auto& error : error_sink().errors())
     ostream << error << std::endl;
   for (const auto& statement : ast::NodeTraversal::ChildNodesOf(module)) {
     auto* jsdoc = node_factory().JsDocFor(statement);
     if (!jsdoc)
       continue;
-    ostream << statement << ':' << *jsdoc << std::endl;
+    ostream << AsPrintableTree(*jsdoc) << std::endl;
   }
   return ostream.str();
 }
@@ -66,7 +65,7 @@ std::string ParserTest::Parse(base::StringPiece script_text) {
   return Parse(script_text, ParserOptions());
 }
 
-const ast::BindingElement& ParserTest::ParseBindingElement(
+const ast::Node& ParserTest::ParseBindingElement(
     base::StringPiece script_text) {
   PrepareSouceCode(script_text);
   Parser parser(&context(), source_code().range(), {});
@@ -77,7 +76,7 @@ const ast::BindingElement& ParserTest::ParseBindingElement(
 }
 
 std::string ParserTest::ToString(const ast::Node& node,
-                                 const ast::Module* module) {
+                                 const ast::Node* module) {
   std::ostringstream ostream;
   ostream << AsPrintableTree(node) << std::endl;
   for (const auto& error : error_sink().errors())
@@ -106,14 +105,23 @@ TEST_F(ParserTest, Externs) {
       "var foo;\n");
   Parser parser(&context(), source_code().range(), {});
   const auto& externs = parser.Run();
-  EXPECT_TRUE(externs.Is<ast::Externs>());
+  EXPECT_EQ(externs, ast::SyntaxCode::Externs);
 }
 
 TEST_F(ParserTest, JsDoc) {
   EXPECT_EQ(
-      "let foo = 1;\n"
-      "LetStatement([22-34], \"let foo = 1;\"):"
-      "JsDoc([0-21], \"/** @type {number} */\")\n",
+      "Module\n"
+      "+--LetStatement\n"
+      "|  +--BindingNameElement\n"
+      "|  |  +--Name |foo|\n"
+      "|  |  +--NumericLiteral |1|\n"
+      "JsDocument\n"
+      "+--JsDocText |/**|\n"
+      "+--JsDocTag\n"
+      "|  +--Name |@type|\n"
+      "|  +--TypeName\n"
+      "|  +--Name |number|\n"
+      "+--JsDocText |*/|\n",
       Parse("/** @type {number} */ let foo = 1;"));
 }
 

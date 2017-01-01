@@ -90,6 +90,11 @@ NodeFactory::NodeFactory(Zone* zone)
 
 NodeFactory::~NodeFactory() = default;
 
+const Node* NodeFactory::JsDocFor(const Node& node) const {
+  const auto& it = jsdoc_map_.find(&node);
+  return it == jsdoc_map_.end() ? nullptr : it->second;
+}
+
 const Node& NodeFactory::NewNode(const SourceCodeRange& range,
                                  const Syntax& tag,
                                  const std::vector<const Node*>& nodes) {
@@ -278,7 +283,9 @@ const Node& NodeFactory::NewArrowFunction(const SourceCodeRange& range,
                                           FunctionKind kind,
                                           const Node& parameter_list,
                                           const Node& body) {
-  DCHECK_EQ(parameter_list, SyntaxCode::ParameterList);
+  DCHECK(parameter_list == SyntaxCode::ParameterList ||
+         parameter_list == ast::SyntaxCode::ReferenceExpression)
+      << parameter_list;
   return NewNode2(range, syntax_factory_->NewArrowFunction(kind),
                   parameter_list, body);
 }
@@ -312,12 +319,6 @@ const Node& NodeFactory::NewMethod(const SourceCodeRange& range,
 }
 
 // Expressions
-const Node& NodeFactory::NewArgumentList(
-    const SourceCodeRange& range,
-    const std::vector<const Node*>& expressions) {
-  return NewNode(range, syntax_factory_->NewArgumentList(), expressions);
-}
-
 const Node& NodeFactory::NewArrayInitializer(
     const SourceCodeRange& range,
     const std::vector<const Node*>& elements) {
@@ -342,12 +343,22 @@ const Node& NodeFactory::NewBinaryExpression(const SourceCodeRange& range,
       lhs, op, rhs);
 }
 
-const Node& NodeFactory::NewCallExpression(const SourceCodeRange& range,
-                                           const Node& callee,
-                                           const Node& argument_list) {
-  DCHECK_EQ(argument_list, SyntaxCode::ArgumentList);
-  return NewNode2(range, syntax_factory_->NewCallExpression(), callee,
-                  argument_list);
+const Node& NodeFactory::NewBinaryKeywordExpression(
+    const SourceCodeRange& range,
+    const Node& op,
+    const Node& lhs,
+    const Node& rhs) {
+  return NewNode3(range, syntax_factory_->NewBinaryKeywordExpression(
+                             static_cast<NameId>(NameSyntax::IdOf(op))),
+                  lhs, op, rhs);
+}
+
+const Node& NodeFactory::NewCallExpression(
+    const SourceCodeRange& range,
+    const Node& callee,
+    const std::vector<const Node*>& argument_list) {
+  return NewNode(range, syntax_factory_->NewCallExpression(), callee,
+                 argument_list);
 }
 
 const Node& NodeFactory::NewCommaExpression(
@@ -395,12 +406,12 @@ const Node& NodeFactory::NewMemberExpression(const SourceCodeRange& range,
                   name);
 }
 
-const Node& NodeFactory::NewNewExpression(const SourceCodeRange& range,
-                                          const Node& callee,
-                                          const Node& argument_list) {
-  DCHECK_EQ(argument_list, SyntaxCode::ArgumentList);
-  return NewNode2(range, syntax_factory_->NewCallExpression(), callee,
-                  argument_list);
+const Node& NodeFactory::NewNewExpression(
+    const SourceCodeRange& range,
+    const Node& callee,
+    const std::vector<const Node*>& argument_list) {
+  return NewNode(range, syntax_factory_->NewNewExpression(), callee,
+                 argument_list);
 }
 
 const Node& NodeFactory::NewObjectInitializer(
@@ -421,6 +432,11 @@ const Node& NodeFactory::NewProperty(const SourceCodeRange& range,
   return NewNode2(range, syntax_factory_->NewProperty(), name, value);
 }
 
+const Node& NodeFactory::NewReferenceExpression(const Node& name) {
+  return NewNode1(name.range(), syntax_factory_->NewReferenceExpression(),
+                  name);
+}
+
 const Node& NodeFactory::NewRegExpLiteralExpression(
     const SourceCodeRange& range,
     const Node& regexp,
@@ -435,6 +451,15 @@ const Node& NodeFactory::NewUnaryExpression(const SourceCodeRange& range,
   return NewNode2(
       range, syntax_factory_->NewUnaryExpression(PunctuatorSyntax::KindOf(op)),
       op, expression);
+}
+
+const Node& NodeFactory::NewUnaryKeywordExpression(const SourceCodeRange& range,
+                                                   const Node& op,
+                                                   const Node& expression) {
+  DCHECK(NameSyntax::IsKeyword(op)) << op;
+  return NewNode2(range, syntax_factory_->NewUnaryKeywordExpression(
+                             static_cast<NameId>(NameSyntax::IdOf(op))),
+                  op, expression);
 }
 
 // JsDoc
@@ -572,11 +597,6 @@ const Node& NodeFactory::NewConstStatement(
 const Node& NodeFactory::NewContinueStatement(const SourceCodeRange& range,
                                               const Node& label) {
   return NewNode1(range, syntax_factory_->NewContinueStatement(), label);
-}
-
-const Node& NodeFactory::NewDeclarationStatement(const Node& declaration) {
-  return NewNode1(declaration.range(),
-                  syntax_factory_->NewDeclarationStatement(), declaration);
 }
 
 const Node& NodeFactory::NewDoStatement(const SourceCodeRange& range,

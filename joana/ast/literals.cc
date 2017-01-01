@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <tuple>
+
 #include "joana/ast/literals.h"
 
 #include "joana/base/escaped_string_piece.h"
@@ -9,70 +11,55 @@
 namespace joana {
 namespace ast {
 
-IMPLEMENT_AST_SYNTAX_1(Literal, BooleanLiteral, 0, bool, value)
-IMPLEMENT_AST_SYNTAX_0(Literal, NullLiteral, 0)
-IMPLEMENT_AST_SYNTAX_1(Literal, NumericLiteral, 0, float64_t, value)
-IMPLEMENT_AST_SYNTAX_0(Literal, StringLiteral, 0)
-IMPLEMENT_AST_SYNTAX_0(Literal, UndefinedLiteral, 0)
-
-#if 0
 //
-// BooleanLiteral
+// BooleanLiteralSyntax
 //
-BooleanLiteral::BooleanLiteral(const Node& name, bool value)
-    : Literal(name.range()), value_(value) {}
+BooleanLiteralSyntax::BooleanLiteralSyntax(bool value)
+    : SyntaxTemplate(value,
+                     SyntaxCode::BooleanLiteral,
+                     Format::Builder().set_is_literal(true).Build()) {}
 
-BooleanLiteral::~BooleanLiteral() = default;
+BooleanLiteralSyntax::~BooleanLiteralSyntax() = default;
 
 //
-// Literal
+// NumericLiteralSyntax
 //
-Literal::Literal(const SourceCodeRange& range) : Token(range) {}
+NumericLiteralSyntax::NumericLiteralSyntax(float64_t value)
+    : SyntaxTemplate(value,
+                     SyntaxCode::NumericLiteral,
+                     Format::Builder().set_is_literal(true).Build()) {}
 
-Literal::~Literal() = default;
-
-//
-// NullLiteral
-//
-NullLiteral::NullLiteral(const Node& name) : Literal(name.range()) {}
-
-NullLiteral::~NullLiteral() = default;
+NumericLiteralSyntax::~NumericLiteralSyntax() = default;
 
 //
-// NumericLiteral
+// NullLiteralSyntax
 //
-NumericLiteral::NumericLiteral(const SourceCodeRange& range, double value)
-    : Literal(range), value_(value) {}
+NullLiteralSyntax::NullLiteralSyntax()
+    : SyntaxTemplate(std::tuple<>(),
+                     SyntaxCode::NullLiteral,
+                     Format::Builder().set_is_literal(true).Build()) {}
 
-NumericLiteral::~NumericLiteral() = default;
-
-// Implements |Node| members
-void NumericLiteral::PrintMoreTo(std::ostream* ostream) const {
-  *ostream << ", " << value_;
-}
+NullLiteralSyntax::~NullLiteralSyntax() = default;
 
 //
-// StringLiteral
+// StringLiteralSyntax
 //
-StringLiteral::StringLiteral(const SourceCodeRange& range,
-                             base::StringPiece16 data)
-    : Literal(range), data_(base::string16(data.data(), data.size())) {}
+StringLiteralSyntax::StringLiteralSyntax()
+    : SyntaxTemplate(std::tuple<>(),
+                     SyntaxCode::StringLiteral,
+                     Format::Builder().set_is_literal(true).Build()) {}
 
-StringLiteral::~StringLiteral() = default;
-
-// Implements |Node| members
-void StringLiteral::PrintMoreTo(std::ostream* ostream) const {
-  *ostream << ", '" << EscapedStringPiece16(data_, '\'') << '\'';
-}
+StringLiteralSyntax::~StringLiteralSyntax() = default;
 
 //
-// UndefinedLiteral
+// UndefinedLiteralSyntax
 //
-UndefinedLiteral::UndefinedLiteral(const Node& name) : Literal(name.range()) {}
+UndefinedLiteralSyntax::UndefinedLiteralSyntax()
+    : SyntaxTemplate(std::tuple<>(),
+                     SyntaxCode::UndefinedLiteral,
+                     Format::Builder().set_is_literal(true).Build()) {}
 
-UndefinedLiteral::~UndefinedLiteral() = default;
-
-#endif
+UndefinedLiteralSyntax::~UndefinedLiteralSyntax() = default;
 
 }  // namespace ast
 }  // namespace joana

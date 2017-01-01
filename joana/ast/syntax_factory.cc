@@ -22,12 +22,14 @@
 namespace joana {
 namespace ast {
 
+// TODO(eval1749): We should convert enum class type to int.
 #define FOR_EACH_PARAMETER(V)              \
   V(float64, float64_t)                    \
   V(function_kind, FunctionKind)           \
   V(function_type_kind, FunctionTypeKind)  \
   V(method_kind, MethodKind, FunctionKind) \
   V(name, int)                             \
+  V(name_id, NameId)                       \
   V(punctuator, PunctuatorKind)            \
   V(regexp_assetion, RegExpAssertionKind)  \
   V(regexp_repeat, RegExpRepeat)           \
@@ -144,17 +146,17 @@ IMPLEMENT_FACTORY_MEMBER_1(Function, FunctionKind, kind)
 IMPLEMENT_FACTORY_MEMBER_2(Method, MethodKind, method_kind, FunctionKind, kind)
 
 // Expressions
-IMPLEMENT_FACTORY_MEMBER_0(ArgumentList)
 IMPLEMENT_FACTORY_MEMBER_0(ArrayInitializer)
 IMPLEMENT_FACTORY_MEMBER_1(AssignmentExpression, PunctuatorKind, kind)
 IMPLEMENT_FACTORY_MEMBER_1(BinaryExpression, PunctuatorKind, kind)
+IMPLEMENT_FACTORY_MEMBER_1(BinaryKeywordExpression, NameId, name_id)
 IMPLEMENT_FACTORY_MEMBER_0(CallExpression)
 IMPLEMENT_FACTORY_MEMBER_0(ComputedMemberExpression)
 IMPLEMENT_FACTORY_MEMBER_0(CommaExpression)
 IMPLEMENT_FACTORY_MEMBER_0(ConditionalExpression)
 IMPLEMENT_FACTORY_MEMBER_0(DelimiterExpression)
-IMPLEMENT_FACTORY_MEMBER_0(GroupExpression)
 IMPLEMENT_FACTORY_MEMBER_0(ElisionExpression)
+IMPLEMENT_FACTORY_MEMBER_0(GroupExpression)
 IMPLEMENT_FACTORY_MEMBER_0(MemberExpression)
 IMPLEMENT_FACTORY_MEMBER_0(NewExpression)
 IMPLEMENT_FACTORY_MEMBER_0(ObjectInitializer)
@@ -164,6 +166,7 @@ IMPLEMENT_FACTORY_MEMBER_0(ReferenceExpression)
 IMPLEMENT_FACTORY_MEMBER_0(RegExpLiteralExpression)
 IMPLEMENT_FACTORY_MEMBER_0(Tuple)
 IMPLEMENT_FACTORY_MEMBER_1(UnaryExpression, PunctuatorKind, kind)
+IMPLEMENT_FACTORY_MEMBER_1(UnaryKeywordExpression, NameId, name_id)
 
 FOR_EACH_AST_JSDOC(IMPLEMENT_FACTORY_MEMBER_0)
 

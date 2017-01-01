@@ -16,16 +16,17 @@
 namespace joana {
 namespace ast {
 
-DECLARE_AST_SYNTAX_0(ArgumentList)
+class ChildNodes;
+class Node;
+
 DECLARE_AST_SYNTAX_0(ArrayInitializer)
-DECLARE_AST_SYNTAX_0(CallExpression)
+DECLARE_AST_SYNTAX_0(AwaitExpression)
 DECLARE_AST_SYNTAX_0(CommaExpression)
 DECLARE_AST_SYNTAX_0(ComputedMemberExpression)
 DECLARE_AST_SYNTAX_0(ConditionalExpression)
 DECLARE_AST_SYNTAX_0(DelimiterExpression)
 DECLARE_AST_SYNTAX_0(GroupExpression)
 DECLARE_AST_SYNTAX_0(ElisionExpression)
-DECLARE_AST_SYNTAX_0(NewExpression)
 DECLARE_AST_SYNTAX_0(MemberExpression)
 DECLARE_AST_SYNTAX_0(ObjectInitializer)
 DECLARE_AST_SYNTAX_0(ParameterList)
@@ -69,6 +70,64 @@ class JOANA_AST_EXPORT BinaryExpressionSyntax final
   explicit BinaryExpressionSyntax(PunctuatorKind kind);
 
   DISALLOW_COPY_AND_ASSIGN(BinaryExpressionSyntax);
+};
+
+//
+// BinaryKeywordExpressionSyntax
+//
+class JOANA_AST_EXPORT BinaryKeywordExpressionSyntax final
+    : public SyntaxTemplate<Syntax, NameId> {
+  DECLARE_CONCRETE_AST_SYNTAX(BinaryKeywordExpressionSyntax, Syntax);
+
+ public:
+  ~BinaryKeywordExpressionSyntax() final;
+
+  static const Node& LeftHandSideOf(const Node& node);
+  static const Node& OperatorOf(const Node& node);
+  static const Node& RightHandSideOf(const Node& node);
+
+ private:
+  explicit BinaryKeywordExpressionSyntax(NameId kind);
+
+  DISALLOW_COPY_AND_ASSIGN(BinaryKeywordExpressionSyntax);
+};
+
+//
+// CallExpressionSyntax
+//
+class JOANA_AST_EXPORT CallExpressionSyntax final
+    : public SyntaxTemplate<Syntax> {
+  DECLARE_CONCRETE_AST_SYNTAX(CallExpressionSyntax, Syntax);
+
+ public:
+  ~CallExpressionSyntax() final;
+
+  static ChildNodes ArgumentsOf(const Node& node);
+  static const Node& ExpressionOf(const Node& node);
+
+ private:
+  CallExpressionSyntax();
+
+  DISALLOW_COPY_AND_ASSIGN(CallExpressionSyntax);
+};
+
+//
+// NewExpressionSyntax
+//
+class JOANA_AST_EXPORT NewExpressionSyntax final
+    : public SyntaxTemplate<Syntax> {
+  DECLARE_CONCRETE_AST_SYNTAX(NewExpressionSyntax, Syntax);
+
+ public:
+  ~NewExpressionSyntax() final;
+
+  static ChildNodes ArgumentsOf(const Node& node);
+  static const Node& ExpressionOf(const Node& node);
+
+ private:
+  NewExpressionSyntax();
+
+  DISALLOW_COPY_AND_ASSIGN(NewExpressionSyntax);
 };
 
 //
@@ -143,6 +202,25 @@ class JOANA_AST_EXPORT UnaryExpressionSyntax final
   explicit UnaryExpressionSyntax(PunctuatorKind kind);
 
   DISALLOW_COPY_AND_ASSIGN(UnaryExpressionSyntax);
+};
+
+//
+// UnaryKeywordExpressionSyntax
+//
+class JOANA_AST_EXPORT UnaryKeywordExpressionSyntax final
+    : public SyntaxTemplate<Syntax, NameId> {
+  DECLARE_CONCRETE_AST_SYNTAX(UnaryKeywordExpressionSyntax, Syntax);
+
+ public:
+  ~UnaryKeywordExpressionSyntax() final;
+
+  static const Node& ExpressionOf(const Node& node);
+  static const Node& OperatorOf(const Node& node);
+
+ private:
+  explicit UnaryKeywordExpressionSyntax(NameId name_id);
+
+  DISALLOW_COPY_AND_ASSIGN(UnaryKeywordExpressionSyntax);
 };
 
 }  // namespace ast

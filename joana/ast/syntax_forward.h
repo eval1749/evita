@@ -29,17 +29,17 @@ namespace ast {
   V(Method)
 
 #define FOR_EACH_AST_EXPRESSION(V) \
-  V(ArgumentList)                  \
   V(ArrayInitializer)              \
   V(AssignmentExpression)          \
   V(BinaryExpression)              \
+  V(BinaryKeywordExpression)       \
   V(CallExpression)                \
   V(ComputedMemberExpression)      \
   V(CommaExpression)               \
   V(ConditionalExpression)         \
   V(DelimiterExpression)           \
-  V(GroupExpression)               \
   V(ElisionExpression)             \
+  V(GroupExpression)               \
   V(MemberExpression)              \
   V(NewExpression)                 \
   V(ObjectInitializer)             \
@@ -48,7 +48,8 @@ namespace ast {
   V(ReferenceExpression)           \
   V(RegExpLiteralExpression)       \
   V(Tuple)                         \
-  V(UnaryExpression)
+  V(UnaryExpression)               \
+  V(UnaryKeywordExpression)
 
 #define FOR_EACH_AST_JSDOC(V) \
   V(JsDocDocument)            \
@@ -83,7 +84,6 @@ namespace ast {
   V(CaseClause)                   \
   V(ConstStatement)               \
   V(ContinueStatement)            \
-  V(DeclarationStatement)         \
   V(DoStatement)                  \
   V(EmptyStatement)               \
   V(ExpressionStatement)          \

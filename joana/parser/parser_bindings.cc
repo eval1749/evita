@@ -16,8 +16,9 @@ namespace parser {
 
 namespace {
 
-bool CanStartBindingElement(const ast::Token& token) {
-  return token.Is<ast::Name>() || token == ast::PunctuatorKind::DotDotDot ||
+bool CanStartBindingElement(const ast::Node& token) {
+  return token == ast::SyntaxCode::Name ||
+         token == ast::PunctuatorKind::DotDotDot ||
          token == ast::PunctuatorKind::LeftBrace ||
          token == ast::PunctuatorKind::LeftBracket;
 }
@@ -25,8 +26,8 @@ bool CanStartBindingElement(const ast::Token& token) {
 }  // namespace
 
 // This function is called after consuming keyword or right parenthesis.
-std::vector<const ast::BindingElement*> Parser::ParseBindingElements() {
-  std::vector<const ast::BindingElement*> elements;
+std::vector<const ast::Node*> Parser::ParseBindingElements() {
+  std::vector<const ast::Node*> elements;
   while (CanPeekToken()) {
     const auto& element = ParseBindingElement();
     elements.push_back(&element);
@@ -42,9 +43,9 @@ std::vector<const ast::BindingElement*> Parser::ParseBindingElements() {
   return std::move(elements);
 }
 
-const ast::BindingElement& Parser::ParseBindingElement() {
+const ast::Node& Parser::ParseBindingElement() {
   NodeRangeScope scope(this);
-  if (PeekToken().Is<ast::Name>())
+  if (PeekToken() == ast::SyntaxCode::Name)
     return ParseNameBindingElement();
 
   if (ConsumeTokenIf(ast::PunctuatorKind::DotDotDot)) {
@@ -63,36 +64,34 @@ const ast::BindingElement& Parser::ParseBindingElement() {
 }
 
 // Factory helper functions
-const ast::BindingElement& Parser::NewArrayBindingPattern(
-    const std::vector<const ast::BindingElement*>& elements,
-    const ast::Expression& initializer) {
+const ast::Node& Parser::NewArrayBindingPattern(
+    const std::vector<const ast::Node*>& elements,
+    const ast::Node& initializer) {
   return node_factory().NewArrayBindingPattern(GetSourceCodeRange(), elements,
                                                initializer);
 }
 
-const ast::BindingElement& Parser::NewBindingCommaElement(
-    const ast::Token& token) {
+const ast::Node& Parser::NewBindingCommaElement(const ast::Node& token) {
   DCHECK_EQ(token, ast::PunctuatorKind::Comma);
   return node_factory().NewBindingCommaElement(token.range());
 }
 
-const ast::BindingElement& Parser::NewBindingNameElement(
-    const ast::Node& name,
-    const ast::Expression& initializer) {
+const ast::Node& Parser::NewBindingNameElement(const ast::Node& name,
+                                               const ast::Node& initializer) {
   return node_factory().NewBindingNameElement(GetSourceCodeRange(), name,
                                               initializer);
 }
 
-const ast::BindingElement& Parser::NewObjectBindingPattern(
-    const std::vector<const ast::BindingElement*>& elements,
-    const ast::Expression& initializer) {
+const ast::Node& Parser::NewObjectBindingPattern(
+    const std::vector<const ast::Node*>& elements,
+    const ast::Node& initializer) {
   return node_factory().NewObjectBindingPattern(GetSourceCodeRange(), elements,
                                                 initializer);
 }
 
 // Paring helper functions
-const ast::BindingElement& Parser::ParseArrayBindingPattern() {
-  std::vector<const ast::BindingElement*> elements;
+const ast::Node& Parser::ParseArrayBindingPattern() {
+  std::vector<const ast::Node*> elements;
   while (CanPeekToken() && PeekToken() != ast::PunctuatorKind::RightBracket) {
     if (!elements.empty() &&
         *elements.back() == ast::SyntaxCode::BindingRestElement) {
@@ -123,8 +122,8 @@ const ast::BindingElement& Parser::ParseArrayBindingPattern() {
   return NewArrayBindingPattern(elements, initializer);
 }
 
-const ast::BindingElement& Parser::ParseNameBindingElement() {
-  const auto& name = ConsumeToken().As<ast::Name>();
+const ast::Node& Parser::ParseNameBindingElement() {
+  const auto& name = ConsumeToken();
   if (!ConsumeTokenIf(ast::PunctuatorKind::Equal))
     return NewBindingNameElement(name, NewElisionExpression());
   const auto& initializer = ParseAssignmentExpression();
@@ -134,8 +133,8 @@ const ast::BindingElement& Parser::ParseNameBindingElement() {
 // Note: We don't report an error for rest binding element in object pattern to
 // support [1].
 // [1] https://github.com/sebmarkbage/ecmascript-rest-spread
-const ast::BindingElement& Parser::ParseObjectBindingPattern() {
-  std::vector<const ast::BindingElement*> elements;
+const ast::Node& Parser::ParseObjectBindingPattern() {
+  std::vector<const ast::Node*> elements;
 
   while (CanPeekToken() && PeekToken() != ast::PunctuatorKind::RightBrace) {
     if (PeekToken() == ast::PunctuatorKind::Comma) {
@@ -152,9 +151,9 @@ const ast::BindingElement& Parser::ParseObjectBindingPattern() {
       continue;
     }
 
-    if (PeekToken().Is<ast::Name>()) {
+    if (PeekToken() == ast::SyntaxCode::Name) {
       NodeRangeScope scope(this);
-      const auto& name = ConsumeToken().As<ast::Name>();
+      const auto& name = ConsumeToken();
       if (!CanPeekToken()) {
         elements.push_back(
             &NewBindingNameElement(name, NewElisionExpression()));

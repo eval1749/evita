@@ -28,10 +28,10 @@ source_set("parser") {
 source_set("test_files") {
   testonly = true
   sources = [
-    #"parser_test.cc",
+    "parser_test.cc",
   ]
   deps = [
-    #":parser",
+    ":parser",
     "//joana/parser/jsdoc:test_files",
     "//joana/parser/lexer:test_files",
     "//joana/parser/public",

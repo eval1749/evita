@@ -12,10 +12,9 @@
 namespace joana {
 namespace ast {
 
-IMPLEMENT_AST_SYNTAX_0(Statement, BreakStatement, 0)
+IMPLEMENT_AST_SYNTAX_0(Statement, BreakStatement, 1)
 IMPLEMENT_AST_SYNTAX_0(Statement, CaseClause, 2)
-IMPLEMENT_AST_SYNTAX_0(Statement, ContinueStatement, 0)
-IMPLEMENT_AST_SYNTAX_0(Statement, DeclarationStatement, 0)
+IMPLEMENT_AST_SYNTAX_0(Statement, ContinueStatement, 1)
 IMPLEMENT_AST_SYNTAX_0(Statement, DoStatement, 2)
 IMPLEMENT_AST_SYNTAX_0(Statement, EmptyStatement, 0)
 IMPLEMENT_AST_SYNTAX_0(Statement, ExpressionStatement, 1)

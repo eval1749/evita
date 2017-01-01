@@ -75,7 +75,8 @@ namespace joana {
   V(void, Void, VOID)                    \
   V(while, While, WHILE)                 \
   V(with, With, WITH)                    \
-  V(yield, Yield, YIELD)
+  V(yield, Yield, YIELD)                 \
+  V(yield_star, YieldStar, YIELD_STAR)
 
 #define FOR_EACH_JAVASCRIPT_KNOWN_WORD(V)  \
   V(async, Async, ASYNC)                   \
@@ -88,8 +89,7 @@ namespace joana {
   V(set, Set, SET)                         \
   /** new.target */                        \
   V(target, Target, Target)                \
-  V(undefined, Undefined, UNDEFINED)       \
-  V(yield_star, YieldStar, YIELD_STAR)
+  V(undefined, Undefined, UNDEFINED)
 
 // Visitor parameter takes:
 //  - String representation of punctuator.

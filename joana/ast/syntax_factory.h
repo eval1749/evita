@@ -44,17 +44,17 @@ class JOANA_AST_EXPORT SyntaxFactory final {
   DECLARE_FACTORY_MEMBER_2(Method, MethodKind, method_kind, FunctionKind, kind)
 
   // Expressions
-  DECLARE_FACTORY_MEMBER_0(ArgumentList)
   DECLARE_FACTORY_MEMBER_0(ArrayInitializer)
   DECLARE_FACTORY_MEMBER_1(AssignmentExpression, PunctuatorKind, kind)
   DECLARE_FACTORY_MEMBER_1(BinaryExpression, PunctuatorKind, kind)
+  DECLARE_FACTORY_MEMBER_1(BinaryKeywordExpression, NameId, name_id)
   DECLARE_FACTORY_MEMBER_0(CallExpression)
   DECLARE_FACTORY_MEMBER_0(ComputedMemberExpression)
   DECLARE_FACTORY_MEMBER_0(CommaExpression)
   DECLARE_FACTORY_MEMBER_0(ConditionalExpression)
   DECLARE_FACTORY_MEMBER_0(DelimiterExpression)
-  DECLARE_FACTORY_MEMBER_0(GroupExpression)
   DECLARE_FACTORY_MEMBER_0(ElisionExpression)
+  DECLARE_FACTORY_MEMBER_0(GroupExpression)
   DECLARE_FACTORY_MEMBER_0(MemberExpression)
   DECLARE_FACTORY_MEMBER_0(NewExpression)
   DECLARE_FACTORY_MEMBER_0(ObjectInitializer)
@@ -64,6 +64,7 @@ class JOANA_AST_EXPORT SyntaxFactory final {
   DECLARE_FACTORY_MEMBER_0(RegExpLiteralExpression)
   DECLARE_FACTORY_MEMBER_0(Tuple)
   DECLARE_FACTORY_MEMBER_1(UnaryExpression, PunctuatorKind, kind)
+  DECLARE_FACTORY_MEMBER_1(UnaryKeywordExpression, NameId, name_id)
 
   // Literals
   DECLARE_FACTORY_MEMBER_1(BooleanLiteral, bool, value)

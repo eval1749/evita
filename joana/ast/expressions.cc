@@ -6,25 +6,25 @@
 
 #include "joana/ast/expressions.h"
 
+#include "joana/ast/node.h"
+#include "joana/ast/node_traversal.h"
+
 namespace joana {
 namespace ast {
 
-//
-// ArgumentListSyntax
-//
-ArgumentListSyntax::ArgumentListSyntax()
-    : SyntaxTemplate(std::tuple<>(),
-                     SyntaxCode::ArgumentList,
-                     Format::Builder().set_is_variadic(true).Build()) {}
-
-ArgumentListSyntax::~ArgumentListSyntax() = default;
+IMPLEMENT_AST_SYNTAX_0(Expression, ComputedMemberExpression, 2)
+IMPLEMENT_AST_SYNTAX_0(Expression, ConditionalExpression, 3)
+IMPLEMENT_AST_SYNTAX_0(Expression, DelimiterExpression, 0)
+IMPLEMENT_AST_SYNTAX_0(Expression, ElisionExpression, 0)
+IMPLEMENT_AST_SYNTAX_0(Expression, GroupExpression, 1)
+IMPLEMENT_AST_SYNTAX_0(Expression, MemberExpression, 2)
 
 //
 // ArrayInitializerSyntax
 //
 ArrayInitializerSyntax::ArrayInitializerSyntax()
     : SyntaxTemplate(std::tuple<>(),
-                     SyntaxCode::ArgumentList,
+                     SyntaxCode::ArrayInitializer,
                      Format::Builder().set_is_variadic(true).Build()) {}
 
 ArrayInitializerSyntax::~ArrayInitializerSyntax() = default;
@@ -79,7 +79,51 @@ const Node& BinaryExpressionSyntax::RightHandSideOf(const Node& node) {
   return node.child_at(2);
 }
 
-IMPLEMENT_AST_SYNTAX_0(Expression, CallExpression, 2)
+//
+// BinaryKeywordExpressionSyntax
+//
+BinaryKeywordExpressionSyntax::BinaryKeywordExpressionSyntax(NameId name_id)
+    : SyntaxTemplate(name_id,
+                     SyntaxCode::BinaryKeywordExpression,
+                     Format::Builder().set_arity(3).Build()) {}
+
+BinaryKeywordExpressionSyntax::~BinaryKeywordExpressionSyntax() = default;
+
+const Node& BinaryKeywordExpressionSyntax::LeftHandSideOf(const Node& node) {
+  DCHECK_EQ(node, SyntaxCode::BinaryKeywordExpression);
+  return node.child_at(0);
+}
+
+const Node& BinaryKeywordExpressionSyntax::OperatorOf(const Node& node) {
+  DCHECK_EQ(node, SyntaxCode::BinaryKeywordExpression);
+  return node.child_at(1);
+}
+
+const Node& BinaryKeywordExpressionSyntax::RightHandSideOf(const Node& node) {
+  DCHECK_EQ(node, SyntaxCode::BinaryKeywordExpression);
+  return node.child_at(2);
+}
+
+//
+// CallExpressionSyntax
+//
+CallExpressionSyntax::CallExpressionSyntax()
+    : SyntaxTemplate(
+          std::tuple<>(),
+          SyntaxCode::CallExpression,
+          Format::Builder().set_arity(1).set_is_variadic(true).Build()) {}
+
+CallExpressionSyntax::~CallExpressionSyntax() = default;
+
+ChildNodes CallExpressionSyntax::ArgumentsOf(const Node& node) {
+  DCHECK_EQ(node, SyntaxCode::CallExpression);
+  return ast::NodeTraversal::ChildNodesFrom(node, 1);
+}
+
+const Node& CallExpressionSyntax::ExpressionOf(const Node& node) {
+  DCHECK_EQ(node, SyntaxCode::CallExpression);
+  return node.child_at(0);
+}
 
 //
 // CommaExpressionSyntax
@@ -91,20 +135,33 @@ CommaExpressionSyntax::CommaExpressionSyntax()
 
 CommaExpressionSyntax::~CommaExpressionSyntax() = default;
 
-IMPLEMENT_AST_SYNTAX_0(Expression, ComputedMemberExpression, 2)
-IMPLEMENT_AST_SYNTAX_0(Expression, ConditionalExpression, 1)
-IMPLEMENT_AST_SYNTAX_0(Expression, DelimiterExpression, 0)
-IMPLEMENT_AST_SYNTAX_0(Expression, GroupExpression, 1)
-IMPLEMENT_AST_SYNTAX_0(Expression, ElisionExpression, 0)
-IMPLEMENT_AST_SYNTAX_0(Expression, NewExpression, 2)
-IMPLEMENT_AST_SYNTAX_0(Expression, MemberExpression, 2)
+//
+// NewExpressionSyntax
+//
+NewExpressionSyntax::NewExpressionSyntax()
+    : SyntaxTemplate(
+          std::tuple<>(),
+          SyntaxCode::NewExpression,
+          Format::Builder().set_arity(1).set_is_variadic(true).Build()) {}
+
+NewExpressionSyntax::~NewExpressionSyntax() = default;
+
+ChildNodes NewExpressionSyntax::ArgumentsOf(const Node& node) {
+  DCHECK_EQ(node, SyntaxCode::NewExpression);
+  return ast::NodeTraversal::ChildNodesFrom(node, 1);
+}
+
+const Node& NewExpressionSyntax::ExpressionOf(const Node& node) {
+  DCHECK_EQ(node, SyntaxCode::NewExpression);
+  return node.child_at(0);
+}
 
 //
 // ObjectInitializerSyntax
 //
 ObjectInitializerSyntax::ObjectInitializerSyntax()
     : SyntaxTemplate(std::tuple<>(),
-                     SyntaxCode::ArgumentList,
+                     SyntaxCode::ObjectInitializer,
                      Format::Builder().set_is_variadic(true).Build()) {}
 
 ObjectInitializerSyntax::~ObjectInitializerSyntax() = default;
@@ -201,6 +258,26 @@ const Node& UnaryExpressionSyntax::ExpressionOf(const Node& node) {
 
 const Node& UnaryExpressionSyntax::OperatorOf(const Node& node) {
   DCHECK_EQ(node, SyntaxCode::UnaryExpression);
+  return node.child_at(0);
+}
+
+//
+// UnaryKeywordExpressionSyntax
+//
+UnaryKeywordExpressionSyntax::UnaryKeywordExpressionSyntax(NameId name_id)
+    : SyntaxTemplate(name_id,
+                     SyntaxCode::UnaryKeywordExpression,
+                     Format::Builder().set_arity(2).Build()) {}
+
+UnaryKeywordExpressionSyntax::~UnaryKeywordExpressionSyntax() = default;
+
+const Node& UnaryKeywordExpressionSyntax::ExpressionOf(const Node& node) {
+  DCHECK_EQ(node, SyntaxCode::UnaryKeywordExpression);
+  return node.child_at(1);
+}
+
+const Node& UnaryKeywordExpressionSyntax::OperatorOf(const Node& node) {
+  DCHECK_EQ(node, SyntaxCode::UnaryKeywordExpression);
   return node.child_at(0);
 }
 

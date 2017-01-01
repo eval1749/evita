@@ -75,6 +75,10 @@ const Node& Node::child_at(size_t index) const {
   return *nodes_[index];
 }
 
+bool Node::is_literal() const {
+  return syntax_.is_literal();
+}
+
 int Node::name_id() const {
   return syntax_.As<NameSyntax>().number();
 }

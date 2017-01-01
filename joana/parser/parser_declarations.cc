@@ -4,15 +4,15 @@
 
 #include "joana/parser/parser.h"
 
-#include "joana/ast/expressions.h"
+#include "joana/ast/node.h"
 #include "joana/ast/node_factory.h"
-#include "joana/ast/statements.h"
+#include "joana/ast/tokens.h"
 #include "joana/parser/parser_error_codes.h"
 
 namespace joana {
 namespace parser {
 
-const ast::ArrowFunctionBody& Parser::ParseArrowFunctionBody() {
+const ast::Node& Parser::ParseArrowFunctionBody() {
   if (!CanPeekToken()) {
     return NewInvalidStatement(
         ErrorCode::ERROR_FUNCTION_INVALID_ARROW_FUNCTION_BODY);
@@ -22,7 +22,7 @@ const ast::ArrowFunctionBody& Parser::ParseArrowFunctionBody() {
   return ParseAssignmentExpression();
 }
 
-const ast::Class& Parser::ParseClass() {
+const ast::Node& Parser::ParseClass() {
   NodeRangeScope scope(this);
   DCHECK_EQ(PeekToken(), ast::NameId::Class);
   ConsumeToken();
@@ -33,44 +33,45 @@ const ast::Class& Parser::ParseClass() {
                                  class_body);
 }
 
-const ast::Expression& Parser::ParseClassBody() {
+const ast::Node& Parser::ParseClassBody() {
   NodeRangeScope scope(this);
   if (!CanPeekToken() || PeekToken() != ast::PunctuatorKind::LeftBrace)
     return NewInvalidExpression(ErrorCode::ERROR_CLASS_EXPECT_LBRACE);
   return ParsePrimaryExpression();
 }
 
-const ast::Expression& Parser::ParseClassHeritage() {
+const ast::Node& Parser::ParseClassHeritage() {
   if (!ConsumeTokenIf(ast::NameId::Extends))
     return NewElisionExpression();
   return ParseLeftHandSideExpression();
 }
 
-const ast::Token& Parser::ParseClassName() {
-  if (!CanPeekToken() || !PeekToken().Is<ast::Name>())
+const ast::Node& Parser::ParseClassName() {
+  if (!CanPeekToken() || PeekToken() != ast::SyntaxCode::Name)
     return NewEmptyName();
   if (PeekToken() == ast::NameId::Extends)
     return NewEmptyName();
-  return ConsumeToken().As<ast::Name>();
+  return ConsumeToken();
 }
 
-const ast::Function& Parser::ParseFunction(ast::FunctionKind kind) {
-  auto& name = PeekToken().Is<ast::Name>() ? ConsumeToken() : NewEmptyName();
+const ast::Node& Parser::ParseFunction(ast::FunctionKind kind) {
+  auto& name =
+      PeekToken() == ast::SyntaxCode::Name ? ConsumeToken() : NewEmptyName();
   const auto& parameter_list = ParseParameterList();
   auto& body = ParseFunctionBody();
   return node_factory().NewFunction(GetSourceCodeRange(), kind, name,
                                     parameter_list, body);
 }
 
-const ast::Statement& Parser::ParseFunctionBody() {
+const ast::Node& Parser::ParseFunctionBody() {
   NodeRangeScope scope(this);
   if (!CanPeekToken() || PeekToken() != ast::PunctuatorKind::LeftBrace)
     return NewInvalidStatement(ErrorCode::ERROR_FUNCTION_EXPECT_LBRACE);
   return ParseStatement();
 }
 
-const ast::Method& Parser::ParseMethod(ast::MethodKind method_kind,
-                                       ast::FunctionKind kind) {
+const ast::Node& Parser::ParseMethod(ast::MethodKind method_kind,
+                                     ast::FunctionKind kind) {
   auto& method_name = ParsePropertyName();
   const auto& parameter_list = ParseParameterList();
   auto& method_body = ParseFunctionBody();
@@ -78,7 +79,7 @@ const ast::Method& Parser::ParseMethod(ast::MethodKind method_kind,
                                   method_name, parameter_list, method_body);
 }
 
-const ast::ParameterList& Parser::ParseParameterList() {
+const ast::Node& Parser::ParseParameterList() {
   NodeRangeScope scope(this);
   ExpectPunctuator(ast::PunctuatorKind::LeftParenthesis,
                    ErrorCode::ERROR_FUNCTION_EXPECT_LPAREN);

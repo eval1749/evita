@@ -81,7 +81,7 @@ bool TypeLexer::ConsumeCharIf(base::char16 char_code) {
   return true;
 }
 
-const ast::Token& TypeLexer::ConsumeToken() {
+const ast::Node& TypeLexer::ConsumeToken() {
   auto& token = PeekToken();
   current_token_ = NextToken();
   return token;
@@ -91,16 +91,16 @@ base::char16 TypeLexer::PeekChar() const {
   return reader_->PeekChar();
 }
 
-const ast::Token& TypeLexer::PeekToken() const {
+const ast::Node& TypeLexer::PeekToken() const {
   DCHECK(current_token_);
   return *current_token_;
 }
 
-const ast::Token& TypeLexer::NewPunctuator(ast::PunctuatorKind kind) {
+const ast::Node& TypeLexer::NewPunctuator(ast::PunctuatorKind kind) {
   return node_factory().NewPunctuator(ComputeTokenRange(), kind);
 }
 
-const ast::Token* TypeLexer::NextToken() {
+const ast::Node* TypeLexer::NextToken() {
 start_over:
   auto found_newline = false;
   while (CanPeekChar() && IsWhitespace(PeekChar())) {

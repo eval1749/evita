@@ -10,7 +10,6 @@
 
 #include "joana/ast/compilation_units.h"
 #include "joana/ast/jsdoc_syntaxes.h"
-#include "joana/ast/node_editor.h"
 #include "joana/ast/node_factory.h"
 #include "joana/ast/node_traversal.h"
 #include "joana/ast/statements.h"
@@ -28,14 +27,14 @@ namespace parser {
 
 namespace {
 
-bool IsCloseBracket(const ast::Token& token) {
+bool IsCloseBracket(const ast::Node& token) {
   return token == ast::PunctuatorKind::RightBrace ||
          token == ast::PunctuatorKind::RightBracket ||
          token == ast::PunctuatorKind::RightParenthesis;
 }
 
 // Returns true if |document| contains |@fileoviewview| tag.
-bool HasJsDocTag(ast::NameId tag_id, const ast::JsDocDocument& document) {
+bool HasJsDocTag(ast::NameId tag_id, const ast::Node& document) {
   for (const auto& element : ast::NodeTraversal::ChildNodesOf(document)) {
     if (element == ast::SyntaxCode::JsDocTag && element.child_at(0) == tag_id)
       return true;
@@ -125,8 +124,7 @@ void Parser::Advance() {
   SkipCommentTokens();
 }
 
-void Parser::AssociateJsDoc(const ast::JsDocToken& document,
-                            const ast::Node& node) {
+void Parser::AssociateJsDoc(const ast::Node& document, const ast::Node& node) {
   const auto& result = jsdoc_map_.emplace(&node, &document);
   if (result.second)
     return;
@@ -149,7 +147,7 @@ bool Parser::CanPeekToken() const {
   return lexer_->CanPeekToken();
 }
 
-const ast::Token& Parser::ConsumeToken() {
+const ast::Node& Parser::ConsumeToken() {
   auto& token = PeekToken();
   Advance();
   last_token_ = &token;
@@ -169,6 +167,15 @@ bool Parser::ConsumeTokenIf(ast::PunctuatorKind kind) {
   if (!CanPeekToken())
     return false;
   if (PeekToken() != kind)
+    return false;
+  ConsumeToken();
+  return true;
+}
+
+bool Parser::ConsumeTokenIf(ast::SyntaxCode syntax) {
+  if (!CanPeekToken())
+    return false;
+  if (PeekToken() != syntax)
     return false;
   ConsumeToken();
   return true;
@@ -218,30 +225,30 @@ SourceCodeRange Parser::GetSourceCodeRange() const {
   return source_code().Slice(node_start_, last_token_->range().end());
 }
 
-const ast::Token& Parser::NewEmptyName() {
+const ast::Node& Parser::NewEmptyName() {
   return node_factory().NewEmpty(lexer_->location());
 }
 
-const ast::Token& Parser::PeekToken() const {
+const ast::Node& Parser::PeekToken() const {
   if (token_stack_.empty())
     return lexer_->PeekToken();
   return *token_stack_.top();
 }
 
-void Parser::PushBackToken(const ast::Token& token) {
-  token_stack_.push(const_cast<ast::Token*>(&token));
+void Parser::PushBackToken(const ast::Node& token) {
+  token_stack_.push(&token);
 }
 
 const ast::Node& Parser::Run() {
-  std::vector<const ast::Statement*> statements;
+  std::vector<const ast::Node*> statements;
   SkipCommentTokens();
   while (CanPeekToken()) {
     auto& token = PeekToken();
-    if (!token.Is<ast::JsDocToken>()) {
+    if (token != ast::SyntaxCode::JsDocDocument) {
       statements.push_back(&ParseStatement());
       continue;
     }
-    auto& jsdoc = ConsumeToken().As<ast::JsDocToken>();
+    auto& jsdoc = ConsumeToken();
     auto& statement = ParseStatement();
     AssociateJsDoc(jsdoc, statement);
     statements.push_back(&statement);
@@ -262,7 +269,7 @@ void Parser::SkipCommentTokens() {
       is_separated_by_newline_ = true;
     bracket_tracker_->Feed(PeekToken());
     tokens_.push_back(&PeekToken());
-    if (!PeekToken().Is<ast::Comment>())
+    if (PeekToken() != ast::SyntaxCode::Comment)
       return;
     lexer_->ConsumeToken();
   }

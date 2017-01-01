@@ -104,7 +104,7 @@ void EnvironmentBuilder::Load(const ast::Node& node) {
 
 // Binding helpers
 void EnvironmentBuilder::BindToFunction(const ast::Node& name,
-                                        const ast::Declaration& declaration) {
+                                        const ast::Node& declaration) {
   if (environment_) {
     if (auto* present = environment_->Find(name)) {
       AddError(name, ErrorCode::ENVIRONMENT_MULTIPLE_BINDINGS, present->node());
@@ -178,12 +178,12 @@ void EnvironmentBuilder::VisitBindingNameElement(
 }
 
 // Declarations
-void EnvironmentBuilder::VisitClass(const ast::Class& node) {
+void EnvironmentBuilder::VisitClass(const ast::Node& node) {
   // TODO(eval1749): Report warning for anonymous class
   BindToFunction(ast::ClassTag::NameOf(node), node);
 }
 
-void EnvironmentBuilder::VisitFunction(const ast::Function& node) {
+void EnvironmentBuilder::VisitFunction(const ast::Node& node) {
   // TODO(eval1749): Report warning for anonymous class
   BindToFunction(ast::FunctionTag::NameOf(node), node);
   LocalEnvironment environment(this, node);

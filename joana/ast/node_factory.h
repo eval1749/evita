@@ -120,9 +120,6 @@ class JOANA_AST_EXPORT NodeFactory final {
                         const Node& body);
 
   // Expression factory members
-  const Node& NewArgumentList(const SourceCodeRange& range,
-                              const std::vector<const Node*>& expressions);
-
   const Node& NewArrayInitializer(const SourceCodeRange& range,
                                   const std::vector<const Node*>& elements);
 
@@ -135,9 +132,14 @@ class JOANA_AST_EXPORT NodeFactory final {
                                   const Node& left_hand_side,
                                   const Node& right_hand_side);
 
+  const Node& NewBinaryKeywordExpression(const SourceCodeRange& range,
+                                         const Node& op,
+                                         const Node& left_hand_side,
+                                         const Node& right_hand_side);
+
   const Node& NewCallExpression(const SourceCodeRange& range,
                                 const Node& callee,
-                                const Node& argument_list);
+                                const std::vector<const Node*>& argument_list);
 
   const Node& NewCommaExpression(const SourceCodeRange& range,
                                  const std::vector<const Node*>& expressions);
@@ -151,15 +153,18 @@ class JOANA_AST_EXPORT NodeFactory final {
                                        const Node& condition,
                                        const Node& true_expression,
                                        const Node& false_expression);
-  const Node& NewDeclarationExpression(const Node& declaration);
   const Node& NewDelimiterExpression(const SourceCodeRange& range);
   const Node& NewElisionExpression(const SourceCodeRange& range);
   const Node& NewGroupExpression(const SourceCodeRange& range,
                                  const Node& expression);
 
+  const Node& NewUnaryKeywordExpression(const SourceCodeRange& range,
+                                        const Node& op,
+                                        const Node& expression);
+
   const Node& NewNewExpression(const SourceCodeRange& range,
                                const Node& expression,
-                               const Node& argument_list);
+                               const std::vector<const Node*>& argument_list);
 
   const Node& NewObjectInitializer(const SourceCodeRange& range,
                                    const std::vector<const Node*>& elements);
@@ -262,8 +267,6 @@ class JOANA_AST_EXPORT NodeFactory final {
 
   const Node& NewContinueStatement(const SourceCodeRange& range,
                                    const Node& label);
-
-  const Node& NewDeclarationStatement(const Node& declaration);
 
   const Node& NewDoStatement(const SourceCodeRange& range,
                              const Node& statement,

@@ -48,8 +48,8 @@ class TypeLexer final {
   const SourceCode& source_code() const;
 
   bool CanPeekToken() const { return current_token_ != nullptr; }
-  const ast::Token& ConsumeToken();
-  const ast::Token& PeekToken() const;
+  const ast::Node& ConsumeToken();
+  const ast::Node& PeekToken() const;
 
  private:
   ast::NodeFactory& node_factory();
@@ -60,14 +60,14 @@ class TypeLexer final {
   bool ConsumeCharIf(base::char16 char_code);
   base::char16 PeekChar() const;
 
-  const ast::Token* NextToken();
+  const ast::Node* NextToken();
 
   // Factory members
   SourceCodeRange ComputeTokenRange() const;
-  const ast::Token& NewPunctuator(ast::PunctuatorKind kind);
+  const ast::Node& NewPunctuator(ast::PunctuatorKind kind);
 
   ParserContext& context_;
-  const ast::Token* current_token_ = nullptr;
+  const ast::Node* current_token_ = nullptr;
   const TypeLexerMode mode_;
   ParserOptions options_;
   const std::unique_ptr<CharacterReader> reader_;

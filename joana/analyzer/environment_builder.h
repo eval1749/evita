@@ -43,8 +43,7 @@ class EnvironmentBuilder final : public Pass {
   void Visit(const ast::Node& node);
 
   // Binding helpers
-  void BindToFunction(const ast::Node& name,
-                      const ast::Declaration& declaration);
+  void BindToFunction(const ast::Node& name, const ast::Node& declaration);
 
   void BindToVariable(const ast::Node& origin, const ast::Node& name);
 

@@ -21,7 +21,7 @@ namespace parser {
 
 namespace {
 
-std::string ToStringFromVector(const std::vector<const ast::Token*>& tokens) {
+std::string ToStringFromVector(const std::vector<const ast::Node*>& tokens) {
   std::ostringstream ostream;
   for (const auto& token : tokens) {
     ostream << token << std::endl;
@@ -48,8 +48,8 @@ class TypeLexerTest : public LexerTestBase {
   void set_lexer_mode(TypeLexerMode mode) { lexer_mode_ = mode; }
 
   std::string NewError(int start, int end, TypeErrorCode error_code);
-  const ast::Token& NewName(int start, int end);
-  const ast::Token& NewPunctuator(int start, int end, ast::PunctuatorKind kind);
+  const ast::Node& NewName(int start, int end);
+  const ast::Node& NewPunctuator(int start, int end, ast::PunctuatorKind kind);
 
   std::string ScanToString(const ParserOptions& options);
   std::string ScanToString();
@@ -69,13 +69,13 @@ std::string TypeLexerTest::NewError(int start,
   return ostream.str();
 }
 
-const ast::Token& TypeLexerTest::NewName(int start, int end) {
+const ast::Node& TypeLexerTest::NewName(int start, int end) {
   return node_factory().NewName(source_code().Slice(start, end));
 }
 
-const ast::Token& TypeLexerTest::NewPunctuator(int start,
-                                               int end,
-                                               ast::PunctuatorKind kind) {
+const ast::Node& TypeLexerTest::NewPunctuator(int start,
+                                              int end,
+                                              ast::PunctuatorKind kind) {
   return node_factory().NewPunctuator(source_code().Slice(start, end), kind);
 }
 

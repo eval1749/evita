@@ -103,7 +103,7 @@ def skip(file_name):
 
 def main():
     git_pipe = pipes.Template()
-    git_pipe.prepend('git diff master --name-status', '.-')
+    git_pipe.prepend('git diff HEAD --name-status', '.-')
     diff_output = git_pipe.open('files', 'r')
     lines = diff_output.readlines()
     diff_output.close()

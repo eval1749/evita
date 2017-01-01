@@ -2,140 +2,34 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <tuple>
+
 #include "joana/ast/regexp.h"
 
 namespace joana {
 namespace ast {
 
-//
-// AnyCharRegExp
-//
-AnyCharRegExp::AnyCharRegExp(const SourceCodeRange& range)
-    : NodeTemplate(std::make_tuple(), range) {}
-
-AnyCharRegExp::~AnyCharRegExp() = default;
-
-//
-// AssertionRegExp
-//
-AssertionRegExp::AssertionRegExp(const SourceCodeRange& range,
-                                 RegExpAssertionKind kind)
-    : NodeTemplate(kind, range) {}
-
-AssertionRegExp::~AssertionRegExp() = default;
-
-//
-// CaptureRegExp
-//
-CaptureRegExp::CaptureRegExp(const SourceCodeRange& range, RegExp* pattern)
-    : NodeTemplate(pattern, range) {}
-
-CaptureRegExp::~CaptureRegExp() = default;
-
-//
-// CharSetRegExp
-//
-CharSetRegExp::CharSetRegExp(const SourceCodeRange& range)
-    : NodeTemplate(std::make_tuple(), range) {}
-
-CharSetRegExp::~CharSetRegExp() = default;
-
-//
-// ComplementCharSetRegExp
-//
-ComplementCharSetRegExp::ComplementCharSetRegExp(const SourceCodeRange& range)
-    : NodeTemplate(std::make_tuple(), range) {}
-
-ComplementCharSetRegExp::~ComplementCharSetRegExp() = default;
-
-//
-// GreedyRepeatRegExp
-//
-GreedyRepeatRegExp::GreedyRepeatRegExp(const SourceCodeRange& range,
-                                       RegExp* pattern,
-                                       const RegExpRepeat& repeat)
-    : NodeTemplate(std::make_tuple(pattern, repeat), range) {}
-
-GreedyRepeatRegExp::~GreedyRepeatRegExp() = default;
-
-//
-// InvalidRegExp
-//
-InvalidRegExp::InvalidRegExp(const SourceCodeRange& range, int error_code)
-    : RegExp(range), error_code_(error_code) {}
-
-InvalidRegExp::~InvalidRegExp() = default;
-
-//
-// LazyRepeatRegExp
-//
-LazyRepeatRegExp::LazyRepeatRegExp(const SourceCodeRange& range,
-                                   RegExp* pattern,
-                                   const RegExpRepeat& repeat)
-    : NodeTemplate(std::make_tuple(pattern, repeat), range) {}
-
-LazyRepeatRegExp::~LazyRepeatRegExp() = default;
-
-//
-// LiteralRegExp
-//
-LiteralRegExp::LiteralRegExp(const SourceCodeRange& range)
-    : NodeTemplate(std::make_tuple(), range) {}
-
-LiteralRegExp::~LiteralRegExp() = default;
-
-//
-// LookAheadRegExp
-//
-LookAheadRegExp::LookAheadRegExp(const SourceCodeRange& range, RegExp* pattern)
-    : NodeTemplate(pattern, range) {}
-
-LookAheadRegExp::~LookAheadRegExp() = default;
-
-//
-// LookAheadNotRegExp
-//
-LookAheadNotRegExp::LookAheadNotRegExp(const SourceCodeRange& range,
-                                       RegExp* pattern)
-    : NodeTemplate(pattern, range) {}
-
-LookAheadNotRegExp::~LookAheadNotRegExp() = default;
-
-//
-// RegExp
-//
-RegExp::RegExp(const SourceCodeRange& range) : Node(range) {}
-
-RegExp::~RegExp() = default;
-
-//
-// RegExpList
-//
-RegExpList::RegExpList(Zone* zone, const std::vector<RegExp*>& patterns)
-    : patterns_(zone, patterns) {}
-
-RegExpList::~RegExpList() = default;
-
-//
-// OrRegExp
-//
-OrRegExp::OrRegExp(const SourceCodeRange& range, RegExpList* patterns)
-    : NodeTemplate(patterns, range) {}
-
-OrRegExp::~OrRegExp() = default;
-
-//
-// SequenceRegExp
-//
-SequenceRegExp::SequenceRegExp(const SourceCodeRange& range,
-                               RegExpList* patterns)
-    : NodeTemplate(patterns, range) {}
-
-SequenceRegExp::~SequenceRegExp() = default;
+IMPLEMENT_AST_SYNTAX_0(RegExp, AnyCharRegExp, 0)
+IMPLEMENT_AST_SYNTAX_1(RegExp, AssertionRegExp, 0, RegExpAssertionKind, kind)
+IMPLEMENT_AST_SYNTAX_0(RegExp, CaptureRegExp, 1)
+IMPLEMENT_AST_SYNTAX_0(RegExp, CharSetRegExp, 0)
+IMPLEMENT_AST_SYNTAX_0(RegExp, ComplementCharSetRegExp, 0)
+IMPLEMENT_AST_SYNTAX_1(RegExp, GreedyRepeatRegExp, 1, RegExpRepeat, repeat)
+IMPLEMENT_AST_SYNTAX_0(RegExp, InvalidRegExp, 0)
+IMPLEMENT_AST_SYNTAX_1(RegExp, LazyRepeatRegExp, 1, RegExpRepeat, repeat)
+IMPLEMENT_AST_SYNTAX_0(RegExp, LiteralRegExp, 0)
+IMPLEMENT_AST_SYNTAX_0(RegExp, LookAheadRegExp, 1)
+IMPLEMENT_AST_SYNTAX_0(RegExp, LookAheadNotRegExp, 1)
 
 //
 // RegExpRepeat
 //
+bool operator<(const RegExpRepeat& repeat1, const RegExpRepeat& repeat2) {
+  if (repeat1.min != repeat2.min)
+    return repeat1.min < repeat2.min;
+  return repeat1.max < repeat2.max;
+}
+
 std::ostream& operator<<(std::ostream& ostream, const RegExpRepeat& repeat) {
   if (repeat.min == 0 && repeat.max == 1)
     return ostream << '?';
@@ -149,6 +43,26 @@ std::ostream& operator<<(std::ostream& ostream, const RegExpRepeat& repeat) {
     return ostream << '{' << repeat.min << ",}";
   return ostream << '{' << repeat.min << ',' << repeat.max << '}';
 }
+
+//
+// OrRegExpSyntax
+//
+OrRegExpSyntax::OrRegExpSyntax()
+    : SyntaxTemplate(std::tuple<>(),
+                     SyntaxCode::OrRegExp,
+                     Format::Builder().set_is_variadic(true).Build()) {}
+
+OrRegExpSyntax::~OrRegExpSyntax() = default;
+
+//
+// SequenceRegExpSyntax
+//
+SequenceRegExpSyntax::SequenceRegExpSyntax()
+    : SyntaxTemplate(std::tuple<>(),
+                     SyntaxCode::SequenceRegExp,
+                     Format::Builder().set_is_variadic(true).Build()) {}
+
+SequenceRegExpSyntax::~SequenceRegExpSyntax() = default;
 
 }  // namespace ast
 }  // namespace joana

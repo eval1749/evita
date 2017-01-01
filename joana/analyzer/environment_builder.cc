@@ -18,8 +18,9 @@
 #include "joana/ast/compilation_units.h"
 #include "joana/ast/declarations.h"
 #include "joana/ast/expressions.h"
-#include "joana/ast/node_forward.h"
+#include "joana/ast/node_traversal.h"
 #include "joana/ast/statements.h"
+#include "joana/ast/syntax_forward.h"
 #include "joana/ast/tokens.h"
 
 namespace joana {
@@ -27,13 +28,13 @@ namespace analyzer {
 
 namespace {
 
-const ast::Name& NameOf(const ast::Node& node) {
-  if (auto* name = node.TryAs<ast::Name>())
-    return *name;
-  if (auto* element = node.TryAs<ast::BindingNameElement>())
-    return element->name();
+const ast::Node& NameOf(const ast::Node& node) {
+  if (node == ast::SyntaxCode::Name)
+    return node;
+  if (node == ast::SyntaxCode::BindingNameElement)
+    return node.child_at(0);
   NOTREACHED() << node << " is not name node.";
-  return node.As<ast::Name>();
+  return node;
 }
 
 }  // namespace
@@ -49,8 +50,8 @@ class EnvironmentBuilder::LocalEnvironment final {
   const LocalEnvironment* outer() const { return outer_; }
   LocalEnvironment* outer() { return outer_; }
 
-  void Bind(const ast::Name& name, Value* value);
-  Value* Find(const ast::Name& name) const;
+  void Bind(const ast::Node& name, Value* value);
+  Value* Find(const ast::Node& name) const;
 
  private:
   EnvironmentBuilder& builder_;
@@ -72,14 +73,14 @@ EnvironmentBuilder::LocalEnvironment::~LocalEnvironment() {
   builder_.environment_ = outer_;
 }
 
-void EnvironmentBuilder::LocalEnvironment::Bind(const ast::Name& name,
+void EnvironmentBuilder::LocalEnvironment::Bind(const ast::Node& name,
                                                 Value* value) {
-  const auto& result = value_map_.emplace(name.number(), value);
+  const auto& result = value_map_.emplace(name.name_id(), value);
   DCHECK(result.second);
 }
 
-Value* EnvironmentBuilder::LocalEnvironment::Find(const ast::Name& name) const {
-  const auto& it = value_map_.find(name.number());
+Value* EnvironmentBuilder::LocalEnvironment::Find(const ast::Node& name) const {
+  const auto& it = value_map_.find(name.name_id());
   return it == value_map_.end() ? nullptr : it->second;
 }
 
@@ -102,7 +103,7 @@ void EnvironmentBuilder::Load(const ast::Node& node) {
 }
 
 // Binding helpers
-void EnvironmentBuilder::BindToFunction(const ast::Name& name,
+void EnvironmentBuilder::BindToFunction(const ast::Node& name,
                                         const ast::Declaration& declaration) {
   if (environment_) {
     if (auto* present = environment_->Find(name)) {
@@ -155,17 +156,15 @@ void EnvironmentBuilder::BindToVariable(const ast::Node& origin,
 }
 
 // AST node handlers
-void EnvironmentBuilder::ProcessCompilationUnit(
-    const ast::CompilationUnit& node) {
-  for (const auto& statement : node.statements())
-    Visit(statement);
-}
-
 void EnvironmentBuilder::ProcessVariables(
     const ast::VariableDeclaration& statement) {
   variable_origin_ = &statement;
-  for (const auto& element : statement.elements())
+  for (const auto& element : ast::NodeTraversal::ChildNodesOf(statement))
     Visit(element);
+}
+
+void EnvironmentBuilder::Visit(const ast::Node& node) {
+  NOTREACHED() << "Dummy";
 }
 
 //
@@ -173,87 +172,36 @@ void EnvironmentBuilder::ProcessVariables(
 //
 
 // Binding elements
-void EnvironmentBuilder::VisitArrayBindingPattern(
-    const ast::ArrayBindingPattern& node) {
-  for (const auto& element : node.elements())
-    Visit(element);
-}
-
-void EnvironmentBuilder::VisitBindingCommaElement(
-    const ast::BindingCommaElement& node) {}
-
-void EnvironmentBuilder::VisitBindingInvalidElement(
-    const ast::BindingInvalidElement& node) {}
-
 void EnvironmentBuilder::VisitBindingNameElement(
     const ast::BindingNameElement& node) {
   BindToVariable(*variable_origin_, node);
 }
 
-void EnvironmentBuilder::VisitBindingProperty(
-    const ast::BindingProperty& node) {
-  Visit(node.element());
-}
-
-void EnvironmentBuilder::VisitBindingRestElement(
-    const ast::BindingRestElement& node) {
-  Visit(node.element());
-}
-
-void EnvironmentBuilder::VisitObjectBindingPattern(
-    const ast::ObjectBindingPattern& node) {
-  for (const auto& element : node.elements())
-    Visit(element);
-}
-
-// Compilation units
-void EnvironmentBuilder::VisitExterns(const ast::Externs& node) {
-  ProcessCompilationUnit(node);
-}
-
-void EnvironmentBuilder::VisitModule(const ast::Module& node) {
-  ProcessCompilationUnit(node);
-}
-
-void EnvironmentBuilder::VisitScript(const ast::Script& node) {
-  ProcessCompilationUnit(node);
-}
-
 // Declarations
 void EnvironmentBuilder::VisitClass(const ast::Class& node) {
   // TODO(eval1749): Report warning for anonymous class
-  BindToFunction(node.name().As<ast::Name>(), node);
+  BindToFunction(ast::ClassTag::NameOf(node), node);
 }
 
 void EnvironmentBuilder::VisitFunction(const ast::Function& node) {
   // TODO(eval1749): Report warning for anonymous class
-  BindToFunction(node.name().As<ast::Name>(), node);
+  BindToFunction(ast::FunctionTag::NameOf(node), node);
   LocalEnvironment environment(this, node);
   variable_origin_ = &node;
-  Visit(node.parameter_list());
+  Visit(ast::FunctionTag::ParametersOf(node));
 }
 
 // Expressions
-void EnvironmentBuilder::VisitBinaryExpression(
-    const ast::BinaryExpression& node) {
-  Visit(node.lhs());
-  Visit(node.rhs());
-}
-
-void EnvironmentBuilder::VisitParameterList(const ast::ParameterList& node) {
-  for (const auto& parameter : node)
-    Visit(parameter);
-}
-
 void EnvironmentBuilder::VisitReferenceExpression(
     const ast::ReferenceExpression& node) {
+  const auto& name = ast::ReferenceExpressionTag::NameOf(node);
   for (auto* runner = environment_; runner; runner = runner->outer()) {
-    if (auto* present = environment_->Find(node.name())) {
+    if (auto* present = environment_->Find(name)) {
       factory().RegisterValue(node, present);
       return;
     }
   }
-  auto* present = toplevel_environment_->BindingOf(node.name());
+  auto* present = toplevel_environment_->BindingOf(name);
   if (!present)
     return;
   factory().RegisterValue(node, present);
@@ -262,18 +210,8 @@ void EnvironmentBuilder::VisitReferenceExpression(
 // Statements
 void EnvironmentBuilder::VisitBlockStatement(const ast::BlockStatement& node) {
   LocalEnvironment environment(this, node);
-  for (const auto& statement : node.statements())
+  for (const auto& statement : ast::NodeTraversal::ChildNodesOf(node))
     Visit(statement);
-}
-
-void EnvironmentBuilder::VisitDeclarationStatement(
-    const ast::DeclarationStatement& node) {
-  Visit(node.declaration());
-}
-
-void EnvironmentBuilder::VisitExpressionStatement(
-    const ast::ExpressionStatement& node) {
-  Visit(node.expression());
 }
 
 void EnvironmentBuilder::VisitConstStatement(const ast::ConstStatement& node) {
@@ -282,15 +220,6 @@ void EnvironmentBuilder::VisitConstStatement(const ast::ConstStatement& node) {
 
 void EnvironmentBuilder::VisitLetStatement(const ast::LetStatement& node) {
   ProcessVariables(node);
-}
-
-void EnvironmentBuilder::VisitReturnStatement(
-    const ast::ReturnStatement& node) {
-  Visit(node.expression());
-}
-
-void EnvironmentBuilder::VisitThrowStatement(const ast::ThrowStatement& node) {
-  Visit(node.expression());
 }
 
 void EnvironmentBuilder::VisitVarStatement(const ast::VarStatement& node) {

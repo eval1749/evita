@@ -6,44 +6,20 @@
 #define JOANA_TESTING_SIMPLE_FORMATTER_H_
 
 #include <iosfwd>
-#include <vector>
-
-#include "joana/ast/empty_node_visitor.h"
-
-#include "joana/ast/node_forward.h"
 
 namespace joana {
+namespace ast {
+class Node;
+}
 namespace parser {
 
-class SimpleFormatter final : public ast::EmptyNodeVisitor {
- public:
-  explicit SimpleFormatter(std::ostream* ostream);
-  ~SimpleFormatter();
-
-  void Format(const ast::Node& node);
-
- private:
-  class IndentScope;
-
-  // Returns true if |statement| is block statement.
-  void FormatBindingElements(const ast::BindingElementList& elements);
-  bool FormatChildStatement(const ast::Statement& statement);
-  void FormatExpressionList(const ast::ExpressionList& list);
-  void FormatWithIndent(const ast::Node& node);
-  void OutputIndent();
-  void OutputSpaces(int amount);
-  void OutputUsingSoourceCode(const ast::Node& node);
-
-#define V(name) void Visit##name(const ast::name& node) final;
-  FOR_EACH_CONCRETE_AST_NODE(V)
-#undef V
-
-  int indent_ = 0;
-  const int indent_size_ = 2;
-  std::ostream* const ostream_;
-
-  DISALLOW_COPY_AND_ASSIGN(SimpleFormatter);
+struct Formatted {
+  const ast::Node* node;
 };
+
+Formatted AsFormatted(const ast::Node& node);
+
+std::ostream& operator<<(std::ostream& ostream, const Formatted& formatted);
 
 }  // namespace parser
 }  // namespace joana

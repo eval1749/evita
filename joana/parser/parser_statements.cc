@@ -24,22 +24,22 @@ namespace parser {
 namespace {
 
 bool CanHaveJsDoc(const ast::Statement& statement) {
-  if (statement.Is<ast::ConstStatement>())
+  if (statement == ast::SyntaxCode::ConstStatement)
     return true;
-  if (statement.Is<ast::DeclarationStatement>())
+  if (statement == ast::SyntaxCode::DeclarationStatement)
     return true;
-  if (statement.Is<ast::LetStatement>())
+  if (statement == ast::SyntaxCode::LetStatement)
     return true;
-  if (statement.Is<ast::VarStatement>())
+  if (statement == ast::SyntaxCode::VarStatement)
     return true;
-  if (!statement.Is<ast::ExpressionStatement>())
+  if (statement != ast::SyntaxCode::ExpressionStatement)
     return false;
-  auto& expression = statement.As<ast::ExpressionStatement>().expression();
-  if (expression.Is<ast::AssignmentExpression>())
+  auto& expression = statement.child_at(0);
+  if (expression == ast::SyntaxCode::AssignmentExpression)
     return true;
-  if (expression.Is<ast::ReferenceExpression>())
+  if (expression == ast::SyntaxCode::ReferenceExpression)
     return true;
-  if (expression.Is<ast::MemberExpression>())
+  if (expression == ast::SyntaxCode::MemberExpression)
     return true;
   return false;
 }
@@ -59,7 +59,7 @@ bool IsDeclarationKeyword(const ast::Token& token) {
 //
 
 // Called after before consuming ':'
-const ast::Statement& Parser::HandleLabeledStatement(const ast::Name& label) {
+const ast::Statement& Parser::HandleLabeledStatement(const ast::Node& label) {
   auto& colon = ConsumeToken();
   DCHECK_EQ(colon, ast::PunctuatorKind::Colon);
   if (!options_.disable_automatic_semicolon()) {
@@ -87,7 +87,7 @@ const ast::Statement& Parser::NewInvalidStatement(ErrorCode error_code) {
 }
 
 const ast::Statement& Parser::ParseJsDocAsStatement() {
-  auto& jsdoc = ConsumeToken().As<ast::JsDoc>();
+  auto& jsdoc = ConsumeToken().As<ast::JsDocToken>();
   auto& statement = ParseStatement();
   if (!CanHaveJsDoc(statement))
     AddError(jsdoc, ErrorCode::ERROR_STATEMENT_UNEXPECT_ANNOTATION);
@@ -118,8 +118,9 @@ const ast::Statement& Parser::ParseBreakStatement() {
     return node_factory().NewBreakStatement(GetSourceCodeRange(),
                                             NewEmptyName());
   }
-  auto& label = CanPeekToken() && PeekToken().Is<ast::Name>() ? ConsumeToken()
-                                                              : NewEmptyName();
+  auto& label = CanPeekToken() && PeekToken() == ast::SyntaxCode::Name
+                    ? ConsumeToken()
+                    : NewEmptyName();
   ExpectSemicolon();
   return node_factory().NewBreakStatement(GetSourceCodeRange(), label);
 }
@@ -166,8 +167,9 @@ const ast::Statement& Parser::ParseContinueStatement() {
     return node_factory().NewContinueStatement(GetSourceCodeRange(),
                                                NewEmptyName());
   }
-  auto& label = CanPeekToken() && PeekToken().Is<ast::Name>() ? ConsumeToken()
-                                                              : NewEmptyName();
+  auto& label = CanPeekToken() && PeekToken() == ast::SyntaxCode::Name
+                    ? ConsumeToken()
+                    : NewEmptyName();
   ExpectSemicolon();
   return node_factory().NewContinueStatement(GetSourceCodeRange(), label);
 }
@@ -201,10 +203,9 @@ const ast::Statement& Parser::ParseDoStatement() {
 
 const ast::Statement& Parser::ParseExpressionStatement() {
   auto& expression = ParseExpression();
-  if (auto* decl_expr = expression.TryAs<ast::DeclarationExpression>()) {
-    auto& declaration = decl_expr->declaration();
-    if (!declaration.Is<ast::ArrowFunction>())
-      return node_factory().NewDeclarationStatement(declaration);
+  if (expression == ast::SyntaxCode::Class ||
+      expression == ast::SyntaxCode::Function) {
+    return node_factory().NewDeclarationStatement(expression);
   }
   ExpectSemicolon();
   return node_factory().NewExpressionStatement(GetSourceCodeRange(),
@@ -217,9 +218,10 @@ const ast::Statement& Parser::ParseForStatement() {
   ExpectPunctuator(ast::PunctuatorKind::LeftParenthesis,
                    ErrorCode::ERROR_STATEMENT_EXPECT_LPAREN);
 
-  auto* const jsdoc = CanPeekToken() && PeekToken().Is<ast::JsDoc>()
-                          ? &ConsumeToken().As<ast::JsDoc>()
-                          : nullptr;
+  auto* const jsdoc =
+      CanPeekToken() && PeekToken() == ast::SyntaxCode::JsDocToken
+          ? &ConsumeToken().As<ast::JsDocToken>()
+          : nullptr;
 
   auto& keyword = CanPeekToken() && IsDeclarationKeyword(PeekToken())
                       ? ConsumeToken()
@@ -231,7 +233,7 @@ const ast::Statement& Parser::ParseForStatement() {
           : ParseExpression();
 
   if (jsdoc) {
-    if (keyword.Is<ast::Empty>())
+    if (keyword == ast::SyntaxCode::Empty)
       AddError(*jsdoc, ErrorCode::ERROR_STATEMENT_UNEXPECT_ANNOTATION);
     else
       AssociateJsDoc(*jsdoc, expression);
@@ -296,9 +298,9 @@ const ast::Statement& Parser::ParseIfStatement() {
 
 const ast::Statement& Parser::ParseKeywordStatement() {
   NodeRangeScope scope(this);
-  const auto& keyword = PeekToken().As<ast::Name>();
-  DCHECK(keyword.IsKeyword()) << keyword;
-  switch (static_cast<ast::NameId>(keyword.number())) {
+  const auto& keyword = PeekToken();
+  DCHECK(ast::IsKeyword(keyword)) << keyword;
+  switch (static_cast<ast::NameId>(keyword.name_id())) {
     case ast::NameId::Async:
       ConsumeToken();
       if (CanPeekToken() && PeekToken() == ast::NameId::Function)
@@ -380,7 +382,7 @@ const ast::Statement& Parser::ParseLetStatement() {
 
 const ast::Statement& Parser::ParseNameAsStatement() {
   auto& name = PeekToken().As<ast::Name>();
-  if (name.IsKeyword())
+  if (ast::IsKeyword(name))
     return ParseKeywordStatement();
   ConsumeToken();
   if (!CanPeekToken()) {
@@ -440,11 +442,11 @@ const ast::Statement& Parser::ParseStatement() {
     return NewEmptyStatement(source_code().end());
   NodeRangeScope scope(this);
   const auto& token = PeekToken();
-  if (token.Is<ast::JsDoc>())
+  if (token == ast::SyntaxCode::JsDocToken)
     return ParseJsDocAsStatement();
-  if (token.Is<ast::Name>())
+  if (token == ast::SyntaxCode::Name)
     return ParseNameAsStatement();
-  if (token.Is<ast::Literal>())
+  if (token.is_literal())
     return ParseExpressionStatement();
   if (token == ast::PunctuatorKind::LeftBrace)
     return ParseBlockStatement();

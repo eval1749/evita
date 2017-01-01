@@ -77,7 +77,7 @@ const ast::BindingElement& Parser::NewBindingCommaElement(
 }
 
 const ast::BindingElement& Parser::NewBindingNameElement(
-    const ast::Name& name,
+    const ast::Node& name,
     const ast::Expression& initializer) {
   return node_factory().NewBindingNameElement(GetSourceCodeRange(), name,
                                               initializer);
@@ -94,7 +94,8 @@ const ast::BindingElement& Parser::NewObjectBindingPattern(
 const ast::BindingElement& Parser::ParseArrayBindingPattern() {
   std::vector<const ast::BindingElement*> elements;
   while (CanPeekToken() && PeekToken() != ast::PunctuatorKind::RightBracket) {
-    if (!elements.empty() && elements.back()->Is<ast::BindingRestElement>()) {
+    if (!elements.empty() &&
+        *elements.back() == ast::SyntaxCode::BindingRestElement) {
       AddError(elements.back()->range(),
                ErrorCode::ERROR_BINDING_UNEXPECT_REST);
     }

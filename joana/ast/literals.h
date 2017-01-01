@@ -5,12 +5,22 @@
 #ifndef JOANA_AST_LITERALS_H_
 #define JOANA_AST_LITERALS_H_
 
+#include "joana/ast/syntax.h"
 #include "joana/ast/tokens.h"
+#include "joana/base/float_type.h"
 
 namespace joana {
 namespace ast {
 
-class Name;
+DECLARE_AST_SYNTAX_1(BooleanLiteral, bool, value)
+DECLARE_AST_SYNTAX_0(NullLiteral)
+DECLARE_AST_SYNTAX_1(NumericLiteral, float64_t, value)
+DECLARE_AST_SYNTAX_0(StringLiteral)
+DECLARE_AST_SYNTAX_0(UndefinedLiteral)
+
+#if 0
+
+using Name = Token;
 
 class JOANA_AST_EXPORT Literal : public Token {
   DECLARE_ABSTRACT_AST_NODE(Literal, Token);
@@ -34,7 +44,7 @@ class JOANA_AST_EXPORT BooleanLiteral final : public Literal {
   bool value() const { return value_; }
 
  private:
-  BooleanLiteral(const Name& name, bool value);
+  BooleanLiteral(const Node& name, bool value);
 
   const bool value_;
 
@@ -48,7 +58,7 @@ class JOANA_AST_EXPORT NullLiteral final : public Literal {
   ~NullLiteral() final;
 
  private:
-  explicit NullLiteral(const Name& name);
+  explicit NullLiteral(const Node& name);
 
   DISALLOW_COPY_AND_ASSIGN(NullLiteral);
 };
@@ -98,10 +108,12 @@ class JOANA_AST_EXPORT UndefinedLiteral final : public Literal {
   ~UndefinedLiteral() final;
 
  private:
-  explicit UndefinedLiteral(const Name& name);
+  explicit UndefinedLiteral(const Node& name);
 
   DISALLOW_COPY_AND_ASSIGN(UndefinedLiteral);
 };
+
+#endif
 
 }  // namespace ast
 }  // namespace joana

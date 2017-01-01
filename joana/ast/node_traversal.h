@@ -8,20 +8,21 @@
 #include <iterator>
 
 #include "joana/ast/ast_export.h"
+#include "joana/ast/syntax_forward.h"
 
 namespace joana {
 namespace ast {
 
-class ContainerNode;
 class Node;
 class NodeTraversal;
 
-// |NodeAncestors| is a return value of |NodeTraversal::AncestorsOf()| and
-// |NodeTraversal::InclusiveAncestorsOf()|.
-class JOANA_AST_EXPORT NodeAncestors final {
+//
+// ChildNodes
+//
+class JOANA_AST_EXPORT ChildNodes final {
  public:
   class JOANA_AST_EXPORT Iterator final
-      : public std::iterator<std::input_iterator_tag, Node> {
+      : public std::iterator<std::input_iterator_tag, const Node> {
    public:
     Iterator(const Iterator& other);
     ~Iterator();
@@ -33,65 +34,29 @@ class JOANA_AST_EXPORT NodeAncestors final {
     bool operator!=(const Iterator& other) const;
 
    private:
-    friend class NodeAncestors;
+    friend class ChildNodes;
 
-    Iterator(const NodeAncestors* owner, Node* node);
+    Iterator(const ChildNodes& owner, size_t index);
 
-    Node* node_;
-    const NodeAncestors* owner_;
+    size_t index_;
+    const ChildNodes* owner_;
   };
 
-  NodeAncestors(const NodeAncestors& other);
-  ~NodeAncestors();
-
-  Iterator begin() const { return Iterator(this, node_); }
-  Iterator end() const { return Iterator(this, nullptr); }
-
- private:
-  friend class NodeTraversal;
-
-  explicit NodeAncestors(const Node* node);
-
-  Node* node_;
-};
-
-// |NodeChildren| is a return value of |NodeTraversal::ChildrenOf()| and
-// |NodeTraversal::InclusiveChildrenOf()|.
-class JOANA_AST_EXPORT NodeChildren final {
- public:
-  class JOANA_AST_EXPORT Iterator final
-      : public std::iterator<std::input_iterator_tag, Node> {
-   public:
-    Iterator(const Iterator& other);
-    ~Iterator();
-
-    reference operator*() const;
-    Iterator& operator++();
-
-    bool operator==(const Iterator& other) const;
-    bool operator!=(const Iterator& other) const;
-
-   private:
-    friend class NodeChildren;
-
-    Iterator(const NodeChildren* owner, Node* node);
-
-    Node* node_;
-    const NodeChildren* owner_;
-  };
-
-  NodeChildren(const NodeChildren& other);
-  ~NodeChildren();
+  ChildNodes(const ChildNodes& other);
+  ~ChildNodes();
 
   Iterator begin() const;
-  Iterator end() const { return Iterator(this, nullptr); }
+  bool empty() const;
+  Iterator end() const;
+  size_t size() const;
 
  private:
   friend class NodeTraversal;
 
-  explicit NodeChildren(const ContainerNode& container);
+  ChildNodes(const Node& container, size_t start);
 
-  ContainerNode* container_;
+  const Node* container_;
+  size_t start_;
 };
 
 //
@@ -102,16 +67,11 @@ class JOANA_AST_EXPORT NodeTraversal final {
   NodeTraversal() = delete;
   ~NodeTraversal() = delete;
 
-  static NodeAncestors AncestorsOf(const Node& container);
-  static Node& ChildAt(const ContainerNode& container, int index);
-  static NodeChildren ChildrenOf(const ContainerNode& container);
-  static int CountChildren(const ContainerNode& container);
-  static Node* FirstChildOf(const ContainerNode& node);
-  static NodeAncestors InclusiveAncestorsOf(const Node& node);
-  static Node* LastChildOf(const ContainerNode& container);
-  static Node* NextSiblingOf(const Node& node);
-  static ContainerNode* ParentOf(const Node& node);
-  static Node* PreviousSiblingOf(const Node& node);
+  // Returns child node list generator starting from |index|th child.
+  static ChildNodes ChildNodesFrom(const Node& container, size_t index);
+
+  // Returns child node list generator starting from first child.
+  static ChildNodes ChildNodesOf(const Node& container);
 };
 
 }  // namespace ast

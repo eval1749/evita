@@ -11,7 +11,7 @@
 
 #include "base/macros.h"
 #include "base/strings/string16.h"
-#include "joana/ast/node_forward.h"
+#include "joana/ast/syntax_forward.h"
 
 namespace joana {
 
@@ -21,6 +21,11 @@ class ParserOptions;
 struct PunctuatorKind;
 class SourceCode;
 class SourceCodeRange;
+
+namespace ast {
+class Node;
+class NodeFactory;
+}
 
 namespace parser {
 
@@ -53,11 +58,11 @@ class Lexer final {
   bool CanPeekToken() const { return current_token_ != nullptr; }
 
   // Returns |ast::RegExp| after "/".
-  ast::RegExp& ConsumeRegExp();
+  const ast::Node& ConsumeRegExp();
 
-  const ast::Token& ConsumeToken();
+  const ast::Node& ConsumeToken();
 
-  const ast::Token& PeekToken() const;
+  const ast::Node& PeekToken() const;
 
  private:
   ast::NodeFactory& node_factory() const;
@@ -76,31 +81,31 @@ class Lexer final {
 
   // Returns character.
   base::char16 PeekChar() const;
-  const ast::Token& HandleBlockComment();
-  const ast::Token* HandleCharacter();
-  const ast::Token& HandleDecimal();
-  const ast::Token& HandleDecimalAfterDot(uint64_t integer_part,
-                                          int integer_scale);
-  const ast::Token& HandleDigitZero();
-  const ast::Token& HandleInteger(int base);
-  const ast::Token& HandleLineComment();
-  const ast::Token& HandleName();
-  const ast::Token& HandleOperator(ast::PunctuatorKind one,
-                                   ast::PunctuatorKind two,
-                                   ast::PunctuatorKind equal);
-  const ast::Token& HandleStringLiteral();
+  const ast::Node& HandleBlockComment();
+  const ast::Node* HandleCharacter();
+  const ast::Node& HandleDecimal();
+  const ast::Node& HandleDecimalAfterDot(uint64_t integer_part,
+                                         int integer_scale);
+  const ast::Node& HandleDigitZero();
+  const ast::Node& HandleInteger(int base);
+  const ast::Node& HandleLineComment();
+  const ast::Node& HandleName();
+  const ast::Node& HandleOperator(ast::PunctuatorKind one,
+                                  ast::PunctuatorKind two,
+                                  ast::PunctuatorKind equal);
+  const ast::Node& HandleStringLiteral();
 
   SourceCodeRange MakeTokenRange() const;
 
-  const ast::Token& NewNumericLiteral(double value);
-  const ast::Token& NewPunctuator(ast::PunctuatorKind kind);
+  const ast::Node& NewNumericLiteral(double value);
+  const ast::Node& NewPunctuator(ast::PunctuatorKind kind);
 
-  const ast::Token* NextToken();
+  const ast::Node* NextToken();
 
   SourceCodeRange RangeFrom(int start) const;
 
   ParserContext& context_;
-  const ast::Token* current_token_ = nullptr;
+  const ast::Node* current_token_ = nullptr;
 
   // True if current token and previous token is separated by at least one
   // line terminator.

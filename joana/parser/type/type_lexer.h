@@ -17,9 +17,10 @@ class SourceCode;
 class SourceCodeRange;
 
 namespace ast {
+class Node;
 class NodeFactory;
 enum class PunctuatorKind;
-class Token;
+using Token = Node;
 }
 namespace parser {
 

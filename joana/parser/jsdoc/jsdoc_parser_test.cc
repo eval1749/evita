@@ -7,7 +7,7 @@
 #include <sstream>
 #include <string>
 
-#include "joana/ast/jsdoc_nodes.h"
+#include "joana/ast/jsdoc_syntaxes.h"
 #include "joana/base/error_sink.h"
 #include "joana/base/source_code.h"
 #include "joana/parser/public/parser_options.h"
@@ -55,9 +55,10 @@ TEST_F(JsDocParserTest, Empty) {
 
 TEST_F(JsDocParserTest, InlineTag) {
   EXPECT_EQ(
-      "#document\n"
-      "+--|foo {@code bar}|\n"
-      "+--@const\n",
+      "JsDocDocument\n"
+      "+--JsDocText |foo {@code bar}|\n"
+      "+--JsDocTag\n"
+      "|  +--Name |@const|\n",
       Parse("foo {@code bar} @const"));
 
   EXPECT_EQ("JSDOC_ERROR_JSDOC_EXPECT_RBRACE@4:14\n", Parse("foo {@code bar"))
@@ -66,12 +67,15 @@ TEST_F(JsDocParserTest, InlineTag) {
 
 TEST_F(JsDocParserTest, MultipleLines) {
   EXPECT_EQ(
-      "#document\n"
-      "+--|*|\n"
-      "+--@typedef\n"
-      "|  +--#type union\n"
-      "|  |  +--foo\n"
-      "|  |  +--bar\n",
+      "JsDocDocument\n"
+      "+--JsDocText |*|\n"
+      "+--JsDocTag\n"
+      "|  +--Name |@typedef|\n"
+      "|  +--UnionType\n"
+      "|  |  +--TypeName\n"
+      "|  |  |  +--Name |foo|\n"
+      "|  |  +--TypeName\n"
+      "|  |  |  +--Name |bar|\n",
       Parse(" * @typedef {\n"
             " *     foo|\n"
             " *     bar}\n"));
@@ -83,64 +87,75 @@ TEST_F(JsDocParserTest, NoTags) {
 
 TEST_F(JsDocParserTest, SyntaxDescription) {
   EXPECT_EQ(
-      "#document\n"
-      "+--@deprecated\n"
-      "|  +--|foo bar|\n",
+      "JsDocDocument\n"
+      "+--JsDocTag\n"
+      "|  +--Name |@deprecated|\n"
+      "|  +--JsDocText |foo bar|\n",
       Parse("@deprecated foo bar"));
 }
 
 TEST_F(JsDocParserTest, SyntaxNameList) {
   EXPECT_EQ(
-      "#document\n"
-      "+--@suppress\n"
-      "|  +--#name foo\n"
-      "|  +--#name bar\n"
-      "|  +--#name baz\n",
+      "JsDocDocument\n"
+      "+--JsDocTag\n"
+      "|  +--Name |@suppress|\n"
+      "|  +--Name |foo|\n"
+      "|  +--Name |bar|\n"
+      "|  +--Name |baz|\n",
       Parse("@suppress {foo, bar, baz}"));
 }
 
 TEST_F(JsDocParserTest, SyntaxNames) {
   EXPECT_EQ(
-      "#document\n"
-      "+--@template\n"
-      "|  +--#name T\n"
-      "+--|desc|\n",
+      "JsDocDocument\n"
+      "+--JsDocTag\n"
+      "|  +--Name |@template|\n"
+      "|  +--Name |T|\n"
+      "+--JsDocText |desc|\n",
       Parse("@template T desc"));
+
   EXPECT_EQ(
-      "#document\n"
-      "+--@template\n"
-      "|  +--#name KEY\n"
-      "|  +--#name VALUE\n"
-      "+--|desc|\n",
+      "JsDocDocument\n"
+      "+--JsDocTag\n"
+      "|  +--Name |@template|\n"
+      "|  +--Name |KEY|\n"
+      "|  +--Name |VALUE|\n"
+      "+--JsDocText |desc|\n",
       Parse("@template KEY, VALUE desc"));
 }
 
 TEST_F(JsDocParserTest, SyntaxNone) {
   EXPECT_EQ(
-      "#document\n"
-      "+--@externs\n",
+      "JsDocDocument\n"
+      "+--JsDocTag\n"
+      "|  +--Name |@externs|\n",
       Parse("@externs"));
 }
 
 TEST_F(JsDocParserTest, SyntaxOptionalType) {
   EXPECT_EQ(
-      "#document\n"
-      "+--@const\n"
-      "+--|desc|\n",
+      "JsDocDocument\n"
+      "+--JsDocTag\n"
+      "|  +--Name |@const|\n"
+      "+--JsDocText |desc|\n",
       Parse("@const desc"));
+
   EXPECT_EQ(
-      "#document\n"
-      "+--@const\n"
-      "|  +--#type number\n",
+      "JsDocDocument\n"
+      "+--JsDocTag\n"
+      "|  +--Name |@const|\n"
+      "|  +--TypeName\n"
+      "|  |  +--Name |number|\n",
       Parse("@const {number}"));
 }
 
 TEST_F(JsDocParserTest, SyntaxSingleLine) {
   EXPECT_EQ(
-      "#document\n"
-      "+--@author\n"
-      "|  +--|foo|\n"
-      "+--|bar|\n",
+      "JsDocDocument\n"
+      "+--JsDocTag\n"
+      "|  +--Name |@author|\n"
+      "|  +--JsDocText |foo|\n"
+      "+--JsDocText |bar|\n",
       Parse("@author foo  \nbar"))
       << "The parameter of @author should not have leading and trailing "
          "whitespaces.";
@@ -148,41 +163,56 @@ TEST_F(JsDocParserTest, SyntaxSingleLine) {
 
 TEST_F(JsDocParserTest, SyntaxType) {
   EXPECT_EQ(
-      "#document\n"
-      "+--@enum\n"
-      "|  +--#type number\n",
+      "JsDocDocument\n"
+      "+--JsDocTag\n"
+      "|  +--Name |@enum|\n"
+      "|  +--TypeName\n"
+      "|  |  +--Name |number|\n",
       Parse("@enum {number}"));
 }
 
 TEST_F(JsDocParserTest, SyntaxTypeDescription) {
   EXPECT_EQ(
-      "#document\n"
-      "+--@define\n"
-      "|  +--#type record\n"
-      "|  |  +--age: number\n"
-      "|  |  +--sex: string\n"
-      "|  +--|human|\n",
+      "JsDocDocument\n"
+      "+--JsDocTag\n"
+      "|  +--Name |@define|\n"
+      "|  +--RecordType\n"
+      "|  |  +--Property\n"
+      "|  |  |  +--Name |age|\n"
+      "|  |  |  +--TypeName\n"
+      "|  |  |  |  +--Name |number|\n"
+      "|  |  +--Property\n"
+      "|  |  |  +--Name |sex|\n"
+      "|  |  |  +--TypeName\n"
+      "|  |  |  |  +--Name |string|\n"
+      "|  +--JsDocText |human|\n",
       Parse("@define {{age:number, sex:string}} human"));
 }
 
 TEST_F(JsDocParserTest, SyntaxTypeNameDescription) {
   EXPECT_EQ(
-      "#document\n"
-      "+--@param\n"
-      "|  +--#type string\n"
-      "|  +--#name foo\n"
-      "|  +--||\n",
+      "JsDocDocument\n"
+      "+--JsDocTag\n"
+      "|  +--Name |@param|\n"
+      "|  +--TypeName\n"
+      "|  |  +--Name |string|\n"
+      "|  +--Name |foo|\n"
+      "|  +--JsDocText ||\n",
       Parse("@param {string} foo"));
   EXPECT_EQ(
-      "#document\n"
-      "+--@param\n"
-      "|  +--#type string\n"
-      "|  +--#name foo\n"
-      "|  +--|desc1|\n"
-      "+--@param\n"
-      "|  +--#type number\n"
-      "|  +--#name bar\n"
-      "|  +--||\n",
+      "JsDocDocument\n"
+      "+--JsDocTag\n"
+      "|  +--Name |@param|\n"
+      "|  +--TypeName\n"
+      "|  |  +--Name |string|\n"
+      "|  +--Name |foo|\n"
+      "|  +--JsDocText |desc1|\n"
+      "+--JsDocTag\n"
+      "|  +--Name |@param|\n"
+      "|  +--TypeName\n"
+      "|  |  +--Name |number|\n"
+      "|  +--Name |bar|\n"
+      "|  +--JsDocText ||\n",
       Parse("@param {string} foo desc1\n"
             "@param {number} bar\n"));
 }

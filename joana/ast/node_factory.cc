@@ -10,16 +10,28 @@
 #include "joana/ast/compilation_units.h"
 #include "joana/ast/declarations.h"
 #include "joana/ast/expressions.h"
-#include "joana/ast/jsdoc_nodes.h"
+#include "joana/ast/jsdoc_syntaxes.h"
 #include "joana/ast/literals.h"
 #include "joana/ast/regexp.h"
 #include "joana/ast/statements.h"
+#include "joana/ast/syntax_factory.h"
 #include "joana/ast/tokens.h"
 #include "joana/ast/types.h"
 
 namespace joana {
 namespace ast {
 
+namespace {
+
+void* AllocateNode(Zone* zone, size_t arity) {
+  return zone->Allocate(sizeof(Node) + sizeof(Node*) * arity);
+}
+
+}  // namespace
+
+//
+// NodeFactory::NameIdMap
+//
 class NodeFactory::NameIdMap {
  public:
   NameIdMap();
@@ -72,686 +84,718 @@ int NodeFactory::NameIdMap::Register(base::StringPiece16 name) {
 // NodeFactory implementations
 //
 NodeFactory::NodeFactory(Zone* zone)
-    : name_id_map_(new NameIdMap()), zone_(zone) {}
+    : name_id_map_(new NameIdMap()),
+      syntax_factory_(new SyntaxFactory(zone)),
+      zone_(*zone) {}
 
 NodeFactory::~NodeFactory() = default;
 
-// Compilation units
-Node& NodeFactory::NewExterns(
-    const SourceCodeRange& range,
-    const std::vector<const Statement*>& statements,
-    const std::unordered_map<const Node*, const JsDoc*>& jsdoc_map) {
-  auto* const list = new (zone_) StatementList(zone_, statements);
-  return *new (zone_) Externs(zone_, range, *list, jsdoc_map);
+const Node& NodeFactory::NewNode(const SourceCodeRange& range,
+                                 const Syntax& tag,
+                                 const std::vector<const Node*>& nodes) {
+  const auto size = nodes.size();
+  auto* const node = new (AllocateNode(&zone_, size)) Node(range, tag, size);
+  auto* runner = &node->nodes_[0];
+  for (const auto& child : nodes) {
+    *runner = child;
+    ++runner;
+  }
+  return *node;
 }
 
-Node& NodeFactory::NewModule(
+const Node& NodeFactory::NewNode(const SourceCodeRange& range,
+                                 const Syntax& tag,
+                                 const Node& node0,
+                                 const std::vector<const Node*>& nodes) {
+  const auto size = nodes.size() + 1;
+  auto* const node = new (AllocateNode(&zone_, size)) Node(range, tag, size);
+  auto* runner = &node->nodes_[0];
+  *runner = &node0;
+  ++runner;
+  for (const auto& child : nodes) {
+    *runner = child;
+    ++runner;
+  }
+  return *node;
+}
+
+const Node& NodeFactory::NewNode0(const SourceCodeRange& range,
+                                  const Syntax& tag) {
+  auto* node = new (AllocateNode(&zone_, 0)) Node(range, tag, 0);
+  node->nodes_[0] = nullptr;
+  return *node;
+}
+
+const Node& NodeFactory::NewNode1(const SourceCodeRange& range,
+                                  const Syntax& tag,
+                                  const Node& node0) {
+  auto* const node = new (AllocateNode(&zone_, 1)) Node(range, tag, 1);
+  node->nodes_[0] = &node0;
+  return *node;
+}
+
+const Node& NodeFactory::NewNode2(const SourceCodeRange& range,
+                                  const Syntax& tag,
+                                  const Node& node0,
+                                  const Node& node1) {
+  auto* const node = new ((AllocateNode(&zone_, 2))) Node(range, tag, 2);
+  node->nodes_[0] = &node0;
+  node->nodes_[1] = &node1;
+  return *node;
+}
+
+const Node& NodeFactory::NewNode3(const SourceCodeRange& range,
+                                  const Syntax& tag,
+                                  const Node& node0,
+                                  const Node& node1,
+                                  const Node& node2) {
+  auto* const node = new (AllocateNode(&zone_, 3)) Node(range, tag, 3);
+  node->nodes_[0] = &node0;
+  node->nodes_[1] = &node1;
+  node->nodes_[2] = &node2;
+  return *node;
+}
+
+const Node& NodeFactory::NewNode4(const SourceCodeRange& range,
+                                  const Syntax& tag,
+                                  const Node& node0,
+                                  const Node& node1,
+                                  const Node& node2,
+                                  const Node& node3) {
+  auto* const node = new (AllocateNode(&zone_, 4)) Node(range, tag, 4);
+  node->nodes_[0] = &node0;
+  node->nodes_[1] = &node1;
+  node->nodes_[2] = &node2;
+  node->nodes_[3] = &node3;
+  return *node;
+}
+
+const Node& NodeFactory::NewTuple(const SourceCodeRange& range,
+                                  const std::vector<const Node*>& nodes) {
+  return NewNode(range, syntax_factory_->NewTuple(), nodes);
+}
+
+// Compilation units
+const Node& NodeFactory::NewExterns(
     const SourceCodeRange& range,
-    const std::vector<const Statement*>& statements,
-    const std::unordered_map<const Node*, const JsDoc*>& jsdoc_map) {
-  auto* const list = new (zone_) StatementList(zone_, statements);
-  return *new (zone_) Module(zone_, range, *list, jsdoc_map);
+    const std::vector<const Node*>& statements,
+    const std::unordered_map<const Node*, const Node*>& jsdoc_map) {
+  jsdoc_map_.insert(jsdoc_map.begin(), jsdoc_map.end());
+  return NewNode(range, syntax_factory_->NewExterns(), statements);
+}
+
+const Node& NodeFactory::NewModule(
+    const SourceCodeRange& range,
+    const std::vector<const Node*>& statements,
+    const std::unordered_map<const Node*, const Node*>& jsdoc_map) {
+  jsdoc_map_.insert(jsdoc_map.begin(), jsdoc_map.end());
+  return NewNode(range, syntax_factory_->NewModule(), statements);
+}
+
+const Node& NodeFactory::NewScript(
+    const SourceCodeRange& range,
+    const std::vector<const Node*>& statements,
+    const std::unordered_map<const Node*, const Node*>& jsdoc_map) {
+  jsdoc_map_.insert(jsdoc_map.begin(), jsdoc_map.end());
+  return NewNode(range, syntax_factory_->NewScript(), statements);
 }
 
 // Tokens
-const Token& NodeFactory::NewJsDoc(const SourceCodeRange& range,
-                                   const JsDocDocument& document) {
-  return *new (zone_) JsDoc(range, document);
+const Node& NodeFactory::NewComment(const SourceCodeRange& range) {
+  return NewNode0(range, syntax_factory_->NewComment());
 }
 
-const Token& NodeFactory::NewComment(const SourceCodeRange& range) {
-  return *new (zone_) Comment(range);
+const Node& NodeFactory::NewEmpty(const SourceCodeRange& range) {
+  return NewNode0(range, syntax_factory_->NewEmpty());
 }
 
-const Token& NodeFactory::NewEmpty(const SourceCodeRange& range) {
-  return *new (zone_) Empty(range);
+const Node& NodeFactory::NewInvalid(const SourceCodeRange& range,
+                                    int error_code) {
+  return NewNode0(range, syntax_factory_->NewInvalid(error_code));
 }
 
-const Name& NodeFactory::NewName(const SourceCodeRange& range, NameId name_id) {
+const Node& NodeFactory::NewName(const SourceCodeRange& range, NameId name_id) {
   DCHECK_EQ(name_id, NameId::YieldStar);
-  return *new (zone_) Name(range, static_cast<int>(name_id));
+  return NewNode0(range, syntax_factory_->NewName(static_cast<int>(name_id)));
 }
 
-const Name& NodeFactory::NewName(const SourceCodeRange& range) {
-  return *new (zone_) Name(range, name_id_map_->Register(range.GetString()));
+const Node& NodeFactory::NewName(const SourceCodeRange& range) {
+  const auto name_id = name_id_map_->Register(range.GetString());
+  return NewNode0(range, syntax_factory_->NewName(name_id));
 }
 
-const Punctuator& NodeFactory::NewPunctuator(const SourceCodeRange& range,
-                                             PunctuatorKind kind) {
-  return *new (zone_) Punctuator(range, kind);
+const Node& NodeFactory::NewPunctuator(const SourceCodeRange& range,
+                                       PunctuatorKind kind) {
+  return NewNode0(range, syntax_factory_->NewPunctuator(kind));
 }
 
 // Bindings
-const BindingElement& NodeFactory::NewArrayBindingPattern(
+const Node& NodeFactory::NewArrayBindingPattern(
     const SourceCodeRange& range,
-    const std::vector<const BindingElement*>& elements,
-    const Expression& initializer) {
-  return *new (zone_->Allocate(sizeof(ArrayBindingPattern) +
-                               sizeof(BindingElement*) * elements.size()))
-      ArrayBindingPattern(range, elements, initializer);
+    const std::vector<const Node*>& elements,
+    const Node& initializer) {
+  return NewNode(range, syntax_factory_->NewArrayBindingPattern(), initializer,
+                 elements);
 }
 
-const BindingElement& NodeFactory::NewBindingCommaElement(
+const Node& NodeFactory::NewBindingCommaElement(const SourceCodeRange& range) {
+  return NewNode0(range, syntax_factory_->NewBindingCommaElement());
+}
+
+const Node& NodeFactory::NewBindingInvalidElement(
     const SourceCodeRange& range) {
-  return *new (zone_) BindingCommaElement(range);
+  return NewNode0(range, syntax_factory_->NewBindingInvalidElement());
 }
 
-const BindingElement& NodeFactory::NewBindingInvalidElement(
-    const SourceCodeRange& range) {
-  return *new (zone_) BindingInvalidElement(range);
+const Node& NodeFactory::NewBindingNameElement(const SourceCodeRange& range,
+                                               const Node& name,
+                                               const Node& initializer) {
+  return NewNode2(range, syntax_factory_->NewBindingNameElement(), name,
+                  initializer);
 }
 
-const BindingElement& NodeFactory::NewBindingNameElement(
+const Node& NodeFactory::NewBindingProperty(const SourceCodeRange& range,
+                                            const Node& name,
+                                            const Node& element) {
+  return NewNode2(range, syntax_factory_->NewBindingProperty(), name, element);
+}
+
+const Node& NodeFactory::NewBindingRestElement(const SourceCodeRange& range,
+                                               const Node& element) {
+  return NewNode1(range, syntax_factory_->NewBindingRestElement(), element);
+}
+
+const Node& NodeFactory::NewObjectBindingPattern(
     const SourceCodeRange& range,
-    const Name& name,
-    const Expression& initializer) {
-  return *new (zone_) BindingNameElement(range, name, initializer);
-}
-
-const BindingElement& NodeFactory::NewBindingProperty(
-    const SourceCodeRange& range,
-    const Name& name,
-    const BindingElement& element) {
-  return *new (zone_) BindingProperty(range, name, element);
-}
-
-const BindingElement& NodeFactory::NewBindingRestElement(
-    const SourceCodeRange& range,
-    const BindingElement& element) {
-  return *new (zone_) BindingRestElement(range, element);
-}
-
-const BindingElement& NodeFactory::NewObjectBindingPattern(
-    const SourceCodeRange& range,
-    const std::vector<const BindingElement*>& elements,
-    const Expression& initializer) {
-  return *new (zone_->Allocate(sizeof(ObjectBindingPattern) +
-                               sizeof(BindingElement*) * elements.size()))
-      ObjectBindingPattern(range, elements, initializer);
+    const std::vector<const Node*>& elements,
+    const Node& initializer) {
+  return NewNode(range, syntax_factory_->NewObjectBindingPattern(), initializer,
+                 elements);
 }
 
 // Declarations
-const ArrowFunction& NodeFactory::NewArrowFunction(
-    const SourceCodeRange& range,
-    FunctionKind kind,
-    const Expression& parameter_list,
-    const ArrowFunctionBody& body) {
-  return *new (zone_) ArrowFunction(range, kind, parameter_list, body);
+const Node& NodeFactory::NewArrowFunction(const SourceCodeRange& range,
+                                          FunctionKind kind,
+                                          const Node& parameter_list,
+                                          const Node& body) {
+  DCHECK_EQ(parameter_list, SyntaxCode::ParameterList);
+  return NewNode2(range, syntax_factory_->NewArrowFunction(kind),
+                  parameter_list, body);
 }
 
-const Class& NodeFactory::NewClass(const SourceCodeRange& range,
-                                   const Token& name,
-                                   const Expression& heritage,
-                                   const Expression& body) {
-  return *new (zone_) Class(range, name, heritage, body);
+const Node& NodeFactory::NewClass(const SourceCodeRange& range,
+                                  const Node& name,
+                                  const Node& heritage,
+                                  const Node& body) {
+  return NewNode3(range, syntax_factory_->NewClass(), name, heritage, body);
 }
 
-const Function& NodeFactory::NewFunction(const SourceCodeRange& range,
-                                         FunctionKind kind,
-                                         const Token& name,
-                                         const ParameterList& parameter_list,
-                                         const Statement& body) {
-  return *new (zone_) Function(range, kind, name, parameter_list, body);
-}
-
-const Method& NodeFactory::NewMethod(const SourceCodeRange& range,
-                                     MethodKind method_kind,
+const Node& NodeFactory::NewFunction(const SourceCodeRange& range,
                                      FunctionKind kind,
-                                     const Expression& name,
-                                     const ParameterList& parameter_list,
-                                     const Statement& method_body) {
-  return *new (zone_)
-      Method(range, method_kind, kind, name, parameter_list, method_body);
+                                     const Node& name,
+                                     const Node& parameter_list,
+                                     const Node& body) {
+  DCHECK_EQ(parameter_list, SyntaxCode::ParameterList);
+  return NewNode3(range, syntax_factory_->NewFunction(kind), name,
+                  parameter_list, body);
+}
+
+const Node& NodeFactory::NewMethod(const SourceCodeRange& range,
+                                   MethodKind method_kind,
+                                   FunctionKind kind,
+                                   const Node& name,
+                                   const Node& parameter_list,
+                                   const Node& method_body) {
+  DCHECK_EQ(parameter_list, SyntaxCode::ParameterList);
+  return NewNode3(range, syntax_factory_->NewMethod(method_kind, kind), name,
+                  parameter_list, method_body);
 }
 
 // Expressions
-const Expression& NodeFactory::NewArrayLiteralExpression(
+const Node& NodeFactory::NewArgumentList(
     const SourceCodeRange& range,
-    const std::vector<const Expression*>& elements) {
-  auto* const list = new (zone_) ExpressionList(zone_, elements);
-  return *new (zone_) ArrayLiteralExpression(range, *list);
+    const std::vector<const Node*>& expressions) {
+  return NewNode(range, syntax_factory_->NewArgumentList(), expressions);
 }
 
-const Expression& NodeFactory::NewAssignmentExpression(
+const Node& NodeFactory::NewArrayInitializer(
     const SourceCodeRange& range,
-    const Punctuator& op,
-    const Expression& lhs,
-    const Expression& rhs) {
-  return *new (zone_) AssignmentExpression(range, op, lhs, rhs);
+    const std::vector<const Node*>& elements) {
+  return NewNode(range, syntax_factory_->NewArrayInitializer(), elements);
 }
 
-const Expression& NodeFactory::NewBinaryExpression(const SourceCodeRange& range,
-                                                   const Token& op,
-                                                   const Expression& lhs,
-                                                   const Expression& rhs) {
-  return *new (zone_) BinaryExpression(range, op, lhs, rhs);
+const Node& NodeFactory::NewAssignmentExpression(const SourceCodeRange& range,
+                                                 const Node& op,
+                                                 const Node& lhs,
+                                                 const Node& rhs) {
+  return NewNode3(range, syntax_factory_->NewAssignmentExpression(
+                             PunctuatorSyntax::KindOf(op)),
+                  lhs, op, rhs);
 }
 
-const Expression& NodeFactory::NewCallExpression(
+const Node& NodeFactory::NewBinaryExpression(const SourceCodeRange& range,
+                                             const Node& op,
+                                             const Node& lhs,
+                                             const Node& rhs) {
+  return NewNode3(
+      range, syntax_factory_->NewBinaryExpression(PunctuatorSyntax::KindOf(op)),
+      lhs, op, rhs);
+}
+
+const Node& NodeFactory::NewCallExpression(const SourceCodeRange& range,
+                                           const Node& callee,
+                                           const Node& argument_list) {
+  DCHECK_EQ(argument_list, SyntaxCode::ArgumentList);
+  return NewNode2(range, syntax_factory_->NewCallExpression(), callee,
+                  argument_list);
+}
+
+const Node& NodeFactory::NewCommaExpression(
     const SourceCodeRange& range,
-    const Expression& callee,
-    const std::vector<const Expression*>& arguments) {
-  auto* const list = new (zone_) ExpressionList(zone_, arguments);
-  return *new (zone_) CallExpression(range, callee, *list);
+    const std::vector<const Node*>& expressions) {
+  return NewNode(range, syntax_factory_->NewCommaExpression(), expressions);
 }
 
-const Expression& NodeFactory::NewCommaExpression(
+const Node& NodeFactory::NewComputedMemberExpression(
     const SourceCodeRange& range,
-    const std::vector<const Expression*>& expressions) {
-  auto* const list = new (zone_) ExpressionList(zone_, expressions);
-  return *new (zone_) CommaExpression(range, *list);
+    const Node& expression,
+    const Node& name_expression) {
+  return NewNode2(range, syntax_factory_->NewComputedMemberExpression(),
+                  expression, name_expression);
 }
 
-const Expression& NodeFactory::NewComputedMemberExpression(
+const Node& NodeFactory::NewConditionalExpression(
     const SourceCodeRange& range,
-    const Expression& expression,
-    const Expression& name_expression) {
-  return *new (zone_)
-      ComputedMemberExpression(range, expression, name_expression);
+    const Node& condition,
+    const Node& true_expression,
+    const Node& false_expression) {
+  return NewNode3(range, syntax_factory_->NewConditionalExpression(), condition,
+                  true_expression, false_expression);
 }
 
-const Expression& NodeFactory::NewConditionalExpression(
-    const SourceCodeRange& range,
-    const Expression& condition,
-    const Expression& true_expression,
-    const Expression& false_expression) {
-  return *new (zone_) ConditionalExpression(range, condition, true_expression,
-                                            false_expression);
-}
-
-const Expression& NodeFactory::NewDeclarationExpression(
-    const Declaration& declaration) {
-  return *new (zone_) DeclarationExpression(declaration);
-}
-
-const Expression& NodeFactory::NewDelimiterExpression(
-    const SourceCodeRange& range) {
+const Node& NodeFactory::NewDelimiterExpression(const SourceCodeRange& range) {
   DCHECK(!range.IsCollapsed()) << range;
-  return *new (zone_) DelimiterExpression(range);
+  return NewNode0(range, syntax_factory_->NewDelimiterExpression());
 }
 
-const Expression& NodeFactory::NewElisionExpression(
-    const SourceCodeRange& range) {
+const Node& NodeFactory::NewElisionExpression(const SourceCodeRange& range) {
   DCHECK(range.IsCollapsed()) << range;
-  return *new (zone_) ElisionExpression(range);
+  return NewNode0(range, syntax_factory_->NewElisionExpression());
 }
 
-const Expression& NodeFactory::NewGroupExpression(
+const Node& NodeFactory::NewGroupExpression(const SourceCodeRange& range,
+                                            const Node& expression) {
+  return NewNode1(range, syntax_factory_->NewGroupExpression(), expression);
+}
+
+const Node& NodeFactory::NewMemberExpression(const SourceCodeRange& range,
+                                             const Node& expression,
+                                             const Node& name) {
+  return NewNode2(range, syntax_factory_->NewMemberExpression(), expression,
+                  name);
+}
+
+const Node& NodeFactory::NewNewExpression(const SourceCodeRange& range,
+                                          const Node& callee,
+                                          const Node& argument_list) {
+  DCHECK_EQ(argument_list, SyntaxCode::ArgumentList);
+  return NewNode2(range, syntax_factory_->NewCallExpression(), callee,
+                  argument_list);
+}
+
+const Node& NodeFactory::NewObjectInitializer(
     const SourceCodeRange& range,
-    const Expression& expression) {
-  return *new (zone_) GroupExpression(range, expression);
+    const std::vector<const Node*>& properties) {
+  return NewNode(range, syntax_factory_->NewObjectInitializer(), properties);
 }
 
-const Expression& NodeFactory::NewInvalidExpression(
+const Node& NodeFactory::NewParameterList(
     const SourceCodeRange& range,
-    int error_code) {
-  return *new (zone_) InvalidExpression(range, error_code);
+    const std::vector<const Node*>& parameters) {
+  return NewNode(range, syntax_factory_->NewParameterList(), parameters);
 }
 
-const Expression& NodeFactory::NewLiteralExpression(const Literal& literal) {
-  return *new (zone_) LiteralExpression(literal);
+const Node& NodeFactory::NewProperty(const SourceCodeRange& range,
+                                     const Node& name,
+                                     const Node& value) {
+  return NewNode2(range, syntax_factory_->NewProperty(), name, value);
 }
 
-const Expression& NodeFactory::NewNewExpression(
+const Node& NodeFactory::NewRegExpLiteralExpression(
     const SourceCodeRange& range,
-    const Expression& expression,
-    const std::vector<const Expression*>& arguments) {
-  auto* const list = new (zone_) ExpressionList(zone_, arguments);
-  return *new (zone_) NewExpression(range, expression, *list);
+    const Node& regexp,
+    const Node& flags) {
+  return NewNode2(range, syntax_factory_->NewRegExpLiteralExpression(), regexp,
+                  flags);
 }
 
-const Expression& NodeFactory::NewObjectLiteralExpression(
-    const SourceCodeRange& range,
-    const std::vector<const Expression*>& elements) {
-  auto* const list = new (zone_) ExpressionList(zone_, elements);
-  return *new (zone_) ObjectLiteralExpression(range, *list);
-}
-
-const Expression& NodeFactory::NewMemberExpression(const SourceCodeRange& range,
-                                                   const Expression& expression,
-                                                   const Name& name) {
-  return *new (zone_) MemberExpression(range, expression, name);
-}
-
-const ParameterList& NodeFactory::NewParameterList(
-    const SourceCodeRange& range,
-    const std::vector<const BindingElement*>& parameters) {
-  return *new (zone_->Allocate(sizeof(ParameterList) +
-                               sizeof(BindingElement*) * parameters.size()))
-      ParameterList(range, parameters);
-}
-
-const Expression& NodeFactory::NewPropertyDefinitionExpression(
-    const SourceCodeRange& range,
-    const Expression& name,
-    const Expression& value) {
-  return *new (zone_) PropertyDefinitionExpression(range, name, value);
-}
-
-const Expression& NodeFactory::NewReferenceExpression(const Name& name) {
-  return *new (zone_) ReferenceExpression(name);
-}
-
-const Expression& NodeFactory::NewRegExpLiteralExpression(
-    const SourceCodeRange& range,
-    const RegExp& regexp,
-    const Token& flags) {
-  return *new (zone_) RegExpLiteralExpression(range, regexp, flags);
-}
-
-const Expression& NodeFactory::NewUnaryExpression(
-    const SourceCodeRange& range,
-    const Token& op,
-    const Expression& expression) {
-  return *new (zone_) UnaryExpression(range, op, expression);
+const Node& NodeFactory::NewUnaryExpression(const SourceCodeRange& range,
+                                            const Node& op,
+                                            const Node& expression) {
+  return NewNode2(
+      range, syntax_factory_->NewUnaryExpression(PunctuatorSyntax::KindOf(op)),
+      op, expression);
 }
 
 // JsDoc
 const JsDocDocument& NodeFactory::NewJsDocDocument(
     const SourceCodeRange& range,
-    const std::vector<const JsDocNode*>& nodes) {
-  return *new (zone_->Allocate(sizeof(JsDocDocument) +
-                               sizeof(JsDocNode*) * nodes.size()))
-      JsDocDocument(range, nodes);
+    const std::vector<const Node*>& nodes) {
+  return NewNode(range, syntax_factory_->NewJsDocDocument(), nodes);
 }
 
-const JsDocNode& NodeFactory::NewJsDocName(const SourceCodeRange& range) {
-  return *new (zone_) JsDocName(NewName(range));
+const Node& NodeFactory::NewJsDocTag(const SourceCodeRange& range,
+                                     const Node& name,
+                                     const std::vector<const Node*>& operands) {
+  DCHECK_EQ(name, SyntaxCode::Name);
+  return NewNode(range, syntax_factory_->NewJsDocTag(), name, operands);
 }
 
-const JsDocNode& NodeFactory::NewJsDocTag(
-    const SourceCodeRange& range,
-    const Name& name,
-    const std::vector<const JsDocNode*>& parameters) {
-  return *new (zone_->Allocate(sizeof(JsDocTag) +
-                               sizeof(JsDocNode*) * parameters.size()))
-      JsDocTag(range, name, parameters);
-}
-
-const JsDocNode& NodeFactory::NewJsDocText(const SourceCodeRange& range) {
-  return *new (zone_) JsDocText(range);
-}
-
-const JsDocNode& NodeFactory::NewJsDocType(const SourceCodeRange& range,
-                                           const ast::Type& type) {
-  return *new (zone_) JsDocType(range, type);
+const Node& NodeFactory::NewJsDocText(const SourceCodeRange& range) {
+  return NewNode0(range, syntax_factory_->NewJsDocText());
 }
 
 // Literals
-BooleanLiteral& NodeFactory::NewBooleanLiteral(const Name& name, bool value) {
-  return *new (zone_) BooleanLiteral(name, value);
+const Node& NodeFactory::NewBooleanLiteral(const Node& name, bool value) {
+  return NewNode0(name.range(), syntax_factory_->NewBooleanLiteral(value));
 }
 
-NullLiteral& NodeFactory::NewNullLiteral(const Name& name) {
-  return *new (zone_) NullLiteral(name);
+const Node& NodeFactory::NewNullLiteral(const Node& name) {
+  return NewNode0(name.range(), syntax_factory_->NewNullLiteral());
 }
 
-NumericLiteral& NodeFactory::NewNumericLiteral(const SourceCodeRange& range,
-                                               double value) {
-  return *new (zone_) NumericLiteral(range, value);
+const Node& NodeFactory::NewNumericLiteral(const SourceCodeRange& range,
+                                           double value) {
+  return NewNode0(range, syntax_factory_->NewNumericLiteral(value));
 }
 
-StringLiteral& NodeFactory::NewStringLiteral(const SourceCodeRange& range,
-                                             base::StringPiece16 data) {
-  return *new (zone_) StringLiteral(range, data);
+const Node& NodeFactory::NewStringLiteral(const SourceCodeRange& range) {
+  return NewNode0(range, syntax_factory_->NewStringLiteral());
 }
 
-UndefinedLiteral& NodeFactory::NewUndefinedLiteral(const Name& name) {
-  return *new (zone_) UndefinedLiteral(name);
+const Node& NodeFactory::NewUndefinedLiteral(const Node& name) {
+  return NewNode0(name.range(), syntax_factory_->NewUndefinedLiteral());
 }
 
 // RegExp
-RegExp& NodeFactory::NewAnyCharRegExp(const SourceCodeRange& range) {
-  return *new (zone_) AnyCharRegExp(range);
+const Node& NodeFactory::NewAnyCharRegExp(const SourceCodeRange& range) {
+  return NewNode0(range, syntax_factory_->NewAnyCharRegExp());
 }
 
-RegExp& NodeFactory::NewAssertionRegExp(const SourceCodeRange& range,
-                                        RegExpAssertionKind kind) {
-  return *new (zone_) AssertionRegExp(range, kind);
+const Node& NodeFactory::NewAssertionRegExp(const SourceCodeRange& range,
+                                            RegExpAssertionKind kind) {
+  return NewNode0(range, syntax_factory_->NewAssertionRegExp(kind));
 }
 
-RegExp& NodeFactory::NewCaptureRegExp(const SourceCodeRange& range,
-                                      const RegExp& pattern) {
-  return *new (zone_) CaptureRegExp(range, const_cast<RegExp*>(&pattern));
+const Node& NodeFactory::NewCaptureRegExp(const SourceCodeRange& range,
+                                          const Node& pattern) {
+  return NewNode1(range, syntax_factory_->NewCaptureRegExp(), pattern);
 }
 
-RegExp& NodeFactory::NewCharSetRegExp(const SourceCodeRange& range) {
-  return *new (zone_) CharSetRegExp(range);
+const Node& NodeFactory::NewCharSetRegExp(const SourceCodeRange& range) {
+  return NewNode0(range, syntax_factory_->NewCharSetRegExp());
 }
 
-RegExp& NodeFactory::NewComplementCharSetRegExp(const SourceCodeRange& range) {
-  return *new (zone_) ComplementCharSetRegExp(range);
+const Node& NodeFactory::NewComplementCharSetRegExp(
+    const SourceCodeRange& range) {
+  return NewNode0(range, syntax_factory_->NewComplementCharSetRegExp());
 }
 
-RegExp& NodeFactory::NewGreedyRepeatRegExp(const SourceCodeRange& range,
-                                           const ast::RegExp& pattern,
-                                           const RegExpRepeat& repeat) {
-  return *new (zone_)
-      GreedyRepeatRegExp(range, const_cast<RegExp*>(&pattern), repeat);
+const Node& NodeFactory::NewGreedyRepeatRegExp(const SourceCodeRange& range,
+                                               const Node& pattern,
+                                               const RegExpRepeat& repeat) {
+  return NewNode1(range, syntax_factory_->NewGreedyRepeatRegExp(repeat),
+                  pattern);
 }
 
-RegExp& NodeFactory::NewInvalidRegExp(const SourceCodeRange& range,
-                                      int error_code) {
-  return *new (zone_) InvalidRegExp(range, error_code);
+const Node& NodeFactory::NewInvalidRegExp(const SourceCodeRange& range,
+                                          int error_code) {
+  return NewNode0(range, syntax_factory_->NewInvalidRegExp());
 }
 
-RegExp& NodeFactory::NewLazyRepeatRegExp(const SourceCodeRange& range,
-                                         const ast::RegExp& pattern,
-                                         const RegExpRepeat& repeat) {
-  return *new (zone_)
-      LazyRepeatRegExp(range, const_cast<RegExp*>(&pattern), repeat);
+const Node& NodeFactory::NewLazyRepeatRegExp(const SourceCodeRange& range,
+                                             const Node& pattern,
+                                             const RegExpRepeat& repeat) {
+  return NewNode1(range, syntax_factory_->NewLazyRepeatRegExp(repeat), pattern);
 }
 
-RegExp& NodeFactory::NewLiteralRegExp(const SourceCodeRange& range) {
-  return *new (zone_) LiteralRegExp(range);
+const Node& NodeFactory::NewLiteralRegExp(const SourceCodeRange& range) {
+  return NewNode0(range, syntax_factory_->NewLiteralRegExp());
 }
 
-RegExp& NodeFactory::NewLookAheadRegExp(const SourceCodeRange& range,
-                                        const ast::RegExp& pattern) {
-  return *new (zone_) LookAheadRegExp(range, const_cast<RegExp*>(&pattern));
+const Node& NodeFactory::NewLookAheadRegExp(const SourceCodeRange& range,
+                                            const Node& pattern) {
+  return NewNode1(range, syntax_factory_->NewLookAheadRegExp(), pattern);
 }
 
-RegExp& NodeFactory::NewLookAheadNotRegExp(const SourceCodeRange& range,
-                                           const ast::RegExp& pattern) {
-  return *new (zone_) LookAheadNotRegExp(range, const_cast<RegExp*>(&pattern));
+const Node& NodeFactory::NewLookAheadNotRegExp(const SourceCodeRange& range,
+                                               const Node& pattern) {
+  return NewNode1(range, syntax_factory_->NewLookAheadNotRegExp(), pattern);
 }
 
-RegExp& NodeFactory::NewOrRegExp(const SourceCodeRange& range,
-                                 const std::vector<RegExp*> patterns) {
-  auto* const list = new (zone_) RegExpList(zone_, patterns);
-  return *new (zone_) OrRegExp(range, list);
+const Node& NodeFactory::NewOrRegExp(const SourceCodeRange& range,
+                                     const std::vector<const Node*> patterns) {
+  return NewNode(range, syntax_factory_->NewOrRegExp(), patterns);
 }
 
-RegExp& NodeFactory::NewSequenceRegExp(const SourceCodeRange& range,
-                                       const std::vector<RegExp*> patterns) {
-  auto* const list = new (zone_) RegExpList(zone_, patterns);
-  return *new (zone_) SequenceRegExp(range, list);
+const Node& NodeFactory::NewSequenceRegExp(
+    const SourceCodeRange& range,
+    const std::vector<const Node*> patterns) {
+  return NewNode(range, syntax_factory_->NewSequenceRegExp(), patterns);
 }
 
 // Statements factory members
-const Statement& NodeFactory::NewBlockStatement(
+const Node& NodeFactory::NewBlockStatement(
     const SourceCodeRange& range,
-    const std::vector<const Statement*>& statements) {
-  auto* const list = new (zone_) StatementList(zone_, statements);
-  return *new (zone_) BlockStatement(range, list);
+    const std::vector<const Node*>& statements) {
+  return NewNode(range, syntax_factory_->NewBlockStatement(), statements);
 }
 
-const Statement& NodeFactory::NewBreakStatement(const SourceCodeRange& range,
-                                                const Token& label) {
-  return *new (zone_) BreakStatement(range, const_cast<Token*>(&label));
+const Node& NodeFactory::NewBreakStatement(const SourceCodeRange& range,
+                                           const Node& label) {
+  return NewNode1(range, syntax_factory_->NewBreakStatement(), label);
 }
 
-const Statement& NodeFactory::NewCaseClause(const SourceCodeRange& range,
-                                            const Expression& expression,
-                                            const Statement& statement) {
-  return *new (zone_) CaseClause(range, const_cast<Expression*>(&expression),
-                                 const_cast<Statement*>(&statement));
+const Node& NodeFactory::NewCaseClause(const SourceCodeRange& range,
+                                       const Node& expression,
+                                       const Node& statement) {
+  return NewNode2(range, syntax_factory_->NewCaseClause(), expression,
+                  statement);
 }
 
-const Statement& NodeFactory::NewConstStatement(
+const Node& NodeFactory::NewConstStatement(
     const SourceCodeRange& range,
-    const std::vector<const BindingElement*>& elements) {
-  return *new (zone_->Allocate(sizeof(ConstStatement) +
-                               sizeof(BindingElement*) * elements.size()))
-      ConstStatement(range, elements);
+    const std::vector<const Node*>& elements) {
+  return NewNode(range, syntax_factory_->NewConstStatement(), elements);
 }
 
-const Statement& NodeFactory::NewContinueStatement(const SourceCodeRange& range,
-                                                   const Token& label) {
-  return *new (zone_) ContinueStatement(range, const_cast<Token*>(&label));
+const Node& NodeFactory::NewContinueStatement(const SourceCodeRange& range,
+                                              const Node& label) {
+  return NewNode1(range, syntax_factory_->NewContinueStatement(), label);
 }
 
-const Statement& NodeFactory::NewDeclarationStatement(
-    const Declaration& declaration) {
-  return *new (zone_)
-      DeclarationStatement(const_cast<Declaration*>(&declaration));
+const Node& NodeFactory::NewDeclarationStatement(const Node& declaration) {
+  return NewNode1(declaration.range(),
+                  syntax_factory_->NewDeclarationStatement(), declaration);
 }
 
-const Statement& NodeFactory::NewDoStatement(const SourceCodeRange& range,
-                                             const Statement& statement,
-                                             const Expression& expression) {
-  return *new (zone_)
-      DoStatement(range, const_cast<ast::Statement*>(&statement),
-                  const_cast<Expression*>(&expression));
+const Node& NodeFactory::NewDoStatement(const SourceCodeRange& range,
+                                        const Node& statement,
+                                        const Node& expression) {
+  return NewNode2(range, syntax_factory_->NewDoStatement(), statement,
+                  expression);
 }
 
-const Statement& NodeFactory::NewEmptyStatement(const SourceCodeRange& range) {
-  return *new (zone_) EmptyStatement(range);
+const Node& NodeFactory::NewEmptyStatement(const SourceCodeRange& range) {
+  return NewNode0(range, syntax_factory_->NewEmptyStatement());
 }
 
-const Statement& NodeFactory::NewExpressionStatement(
+const Node& NodeFactory::NewExpressionStatement(const SourceCodeRange& range,
+                                                const Node& expression) {
+  return NewNode1(range, syntax_factory_->NewExpressionStatement(), expression);
+}
+
+const Node& NodeFactory::NewForStatement(const SourceCodeRange& range,
+                                         const Node& keyword,
+                                         const Node& init,
+                                         const Node& condition,
+                                         const Node& step,
+                                         const Node& body) {
+  return NewNode4(range, syntax_factory_->NewForStatement(), init, condition,
+                  step, body);
+}
+
+const Node& NodeFactory::NewForInStatement(const SourceCodeRange& range,
+                                           const Node& keyword,
+                                           const Node& expression,
+                                           const Node& body) {
+  return NewNode2(range, syntax_factory_->NewForInStatement(), expression,
+                  body);
+}
+
+const Node& NodeFactory::NewForOfStatement(const SourceCodeRange& range,
+                                           const Node& keyword,
+                                           const Node& binding,
+                                           const Node& expression,
+                                           const Node& body) {
+  return NewNode3(range, syntax_factory_->NewForOfStatement(), binding,
+                  expression, body);
+}
+
+const Node& NodeFactory::NewIfElseStatement(const SourceCodeRange& range,
+                                            const Node& expression,
+                                            const Node& then_clause,
+                                            const Node& else_clause) {
+  return NewNode3(range, syntax_factory_->NewIfElseStatement(), expression,
+                  then_clause, else_clause);
+}
+
+const Node& NodeFactory::NewIfStatement(const SourceCodeRange& range,
+                                        const Node& expression,
+                                        const Node& then_clause) {
+  return NewNode2(range, syntax_factory_->NewIfStatement(), expression,
+                  then_clause);
+}
+
+const Node& NodeFactory::NewInvalidStatement(const SourceCodeRange& range,
+                                             int error_code) {
+  return NewNode0(range, syntax_factory_->NewInvalidStatement());
+}
+
+const Node& NodeFactory::NewLabeledStatement(const SourceCodeRange& range,
+                                             const Node& label,
+                                             const Node& statement) {
+  return NewNode1(range, syntax_factory_->NewLabeledStatement(), statement);
+}
+
+const Node& NodeFactory::NewLetStatement(
     const SourceCodeRange& range,
-    const Expression& expression) {
-  return *new (zone_)
-      ExpressionStatement(range, const_cast<Expression*>(&expression));
+    const std::vector<const Node*>& elements) {
+  return NewNode(range, syntax_factory_->NewLetStatement(), elements);
 }
 
-const Statement& NodeFactory::NewForStatement(const SourceCodeRange& range,
-                                              const Token& keyword,
-                                              const Expression& init,
-                                              const Expression& condition,
-                                              const Expression& step,
-                                              const Statement& body) {
-  return *new (zone_) ForStatement(
-      range, const_cast<Token*>(&keyword), const_cast<Expression*>(&init),
-      const_cast<Expression*>(&condition), const_cast<Expression*>(&step),
-      const_cast<Statement*>(&body));
+const Node& NodeFactory::NewReturnStatement(const SourceCodeRange& range,
+                                            const Node& expression) {
+  return NewNode1(range, syntax_factory_->NewReturnStatement(), expression);
 }
 
-const Statement& NodeFactory::NewForInStatement(const SourceCodeRange& range,
-                                                const Token& keyword,
-                                                const Expression& expression,
-                                                const Statement& body) {
-  return *new (zone_) ForInStatement(range, const_cast<Token*>(&keyword),
-                                     const_cast<Expression*>(&expression),
-                                     const_cast<Statement*>(&body));
-}
-
-const Statement& NodeFactory::NewForOfStatement(const SourceCodeRange& range,
-                                                const Token& keyword,
-                                                const Expression& binding,
-                                                const Expression& expression,
-                                                const Statement& body) {
-  return *new (zone_) ForOfStatement(
-      range, const_cast<Token*>(&keyword), const_cast<Expression*>(&binding),
-      const_cast<Expression*>(&expression), const_cast<Statement*>(&body));
-}
-
-const Statement& NodeFactory::NewIfElseStatement(const SourceCodeRange& range,
-                                                 const Expression& expression,
-                                                 const Statement& then_clause,
-                                                 const Statement& else_clause) {
-  return *new (zone_)
-      IfElseStatement(range, const_cast<Expression*>(&expression),
-                      const_cast<Statement*>(&then_clause),
-                      const_cast<Statement*>(&else_clause));
-}
-
-const Statement& NodeFactory::NewIfStatement(const SourceCodeRange& range,
-                                             const Expression& expression,
-                                             const Statement& then_clause) {
-  return *new (zone_) IfStatement(range, const_cast<Expression*>(&expression),
-                                  const_cast<Statement*>(&then_clause));
-}
-
-const Statement& NodeFactory::NewInvalidStatement(const SourceCodeRange& range,
-                                                  int error_code) {
-  return *new (zone_) InvalidStatement(range, error_code);
-}
-
-const Statement& NodeFactory::NewLabeledStatement(const SourceCodeRange& range,
-                                                  const Name& label,
-                                                  const Statement& statement) {
-  return *new (zone_) LabeledStatement(range, const_cast<Name*>(&label),
-                                       const_cast<Statement*>(&statement));
-}
-
-const Statement& NodeFactory::NewLetStatement(
+const Node& NodeFactory::NewSwitchStatement(
     const SourceCodeRange& range,
-    const std::vector<const BindingElement*>& elements) {
-  return *new (zone_->Allocate(sizeof(LetStatement) +
-                               sizeof(BindingElement*) * elements.size()))
-      LetStatement(range, elements);
+    const Node& expression,
+    const std::vector<const Node*>& clauses) {
+  return NewNode(range, syntax_factory_->NewSwitchStatement(), expression,
+                 clauses);
 }
 
-const Statement& NodeFactory::NewReturnStatement(const SourceCodeRange& range,
-                                                 const Expression& expression) {
-  return *new (zone_)
-      ReturnStatement(range, const_cast<Expression*>(&expression));
+const Node& NodeFactory::NewThrowStatement(const SourceCodeRange& range,
+                                           const Node& expression) {
+  return NewNode1(range, syntax_factory_->NewThrowStatement(), expression);
 }
 
-const Statement& NodeFactory::NewSwitchStatement(
+const Node& NodeFactory::NewTryCatchFinallyStatement(
     const SourceCodeRange& range,
-    const Expression& expression,
-    const std::vector<const Statement*>& clauses) {
-  auto* const list = new (zone_) StatementList(zone_, clauses);
-  return *new (zone_)
-      SwitchStatement(range, const_cast<Expression*>(&expression), list);
+    const Node& try_block,
+    const Node& catch_parameter,
+    const Node& catch_block,
+    const Node& finally_block) {
+  return NewNode4(range, syntax_factory_->NewTryCatchFinallyStatement(),
+                  try_block, catch_parameter, catch_block, finally_block);
 }
 
-const Statement& NodeFactory::NewThrowStatement(const SourceCodeRange& range,
-                                                const Expression& expression) {
-  return *new (zone_)
-      ThrowStatement(range, const_cast<Expression*>(&expression));
+const Node& NodeFactory::NewTryCatchStatement(const SourceCodeRange& range,
+                                              const Node& try_block,
+                                              const Node& catch_parameter,
+                                              const Node& catch_block) {
+  return NewNode3(range, syntax_factory_->NewTryCatchStatement(), try_block,
+                  catch_parameter, catch_block);
 }
 
-const Statement& NodeFactory::NewTryCatchFinallyStatement(
+const Node& NodeFactory::NewTryFinallyStatement(const SourceCodeRange& range,
+                                                const Node& try_block,
+                                                const Node& finally_block) {
+  return NewNode2(range, syntax_factory_->NewTryFinallyStatement(), try_block,
+                  finally_block);
+}
+
+const Node& NodeFactory::NewVarStatement(
     const SourceCodeRange& range,
-    const Statement& try_block,
-    const Expression& catch_parameter,
-    const Statement& catch_block,
-    const Statement& finally_block) {
-  return *new (zone_)
-      TryCatchFinallyStatement(range, const_cast<Statement*>(&try_block),
-                               const_cast<Expression*>(&catch_parameter),
-                               const_cast<Statement*>(&catch_block),
-                               const_cast<Statement*>(&finally_block));
+    const std::vector<const Node*>& elements) {
+  return NewNode(range, syntax_factory_->NewVarStatement(), elements);
 }
 
-const Statement& NodeFactory::NewTryCatchStatement(
-    const SourceCodeRange& range,
-    const Statement& try_block,
-    const Expression& catch_parameter,
-    const Statement& catch_block) {
-  return *new (zone_)
-      TryCatchStatement(range, const_cast<Statement*>(&try_block),
-                        const_cast<Expression*>(&catch_parameter),
-                        const_cast<Statement*>(&catch_block));
+const Node& NodeFactory::NewWhileStatement(const SourceCodeRange& range,
+                                           const Node& expression,
+                                           const Node& statement) {
+  return NewNode2(range, syntax_factory_->NewWhileStatement(), expression,
+                  statement);
 }
 
-const Statement& NodeFactory::NewTryFinallyStatement(
-    const SourceCodeRange& range,
-    const Statement& try_block,
-    const Statement& finally_block) {
-  return *new (zone_)
-      TryFinallyStatement(range, const_cast<Statement*>(&try_block),
-                          const_cast<Statement*>(&finally_block));
-}
-
-const Statement& NodeFactory::NewVarStatement(
-    const SourceCodeRange& range,
-    const std::vector<const BindingElement*>& elements) {
-  return *new (zone_->Allocate(sizeof(VarStatement) +
-                               sizeof(BindingElement*) * elements.size()))
-      VarStatement(range, elements);
-}
-
-const Statement& NodeFactory::NewWhileStatement(const SourceCodeRange& range,
-                                                const Expression& expression,
-                                                const Statement& statement) {
-  return *new (zone_)
-      WhileStatement(range, const_cast<Expression*>(&expression),
-                     const_cast<Statement*>(&statement));
-}
-
-const Statement& NodeFactory::NewWithStatement(const SourceCodeRange& range,
-                                               const Expression& expression,
-                                               const Statement& statement) {
-  return *new (zone_) WithStatement(range, const_cast<Expression*>(&expression),
-                                    const_cast<Statement*>(&statement));
+const Node& NodeFactory::NewWithStatement(const SourceCodeRange& range,
+                                          const Node& expression,
+                                          const Node& statement) {
+  return NewNode2(range, syntax_factory_->NewWithStatement(), expression,
+                  statement);
 }
 
 // Type factory members
-const Type& NodeFactory::NewAnyType(const SourceCodeRange& range) {
-  return *new (zone_) AnyType(range);
+const Node& NodeFactory::NewAnyType(const SourceCodeRange& range) {
+  return NewNode0(range, syntax_factory_->NewAnyType());
 }
 
-const Type& NodeFactory::NewFunctionType(
+const Node& NodeFactory::NewFunctionType(const SourceCodeRange& range,
+                                         FunctionTypeKind kind,
+                                         const Node& parameter_list,
+                                         const Node& return_type) {
+  return NewNode2(range, syntax_factory_->NewFunctionType(kind), parameter_list,
+                  return_type);
+}
+
+const Node& NodeFactory::NewInvalidType(const SourceCodeRange& range) {
+  return NewNode0(range, syntax_factory_->NewInvalidType());
+}
+
+const Node& NodeFactory::NewNullableType(const SourceCodeRange& range,
+                                         const Node& type) {
+  return NewNode1(range, syntax_factory_->NewNullableType(), type);
+}
+
+const Node& NodeFactory::NewNonNullableType(const SourceCodeRange& range,
+                                            const Node& type) {
+  return NewNode1(range, syntax_factory_->NewNonNullableType(), type);
+}
+
+const Node& NodeFactory::NewOptionalType(const SourceCodeRange& range,
+                                         const Node& type) {
+  return NewNode1(range, syntax_factory_->NewOptionalType(), type);
+}
+
+const Node& NodeFactory::NewRecordType(
     const SourceCodeRange& range,
-    FunctionTypeKind kind,
-    const std::vector<const Type*>& parameter_types,
-    const Type& return_type) {
-  auto& list = *new (zone_) TypeList(zone_, parameter_types);
-  return *new (zone_) FunctionType(range, kind, list, return_type);
+    const std::vector<const Node*>& members) {
+  return NewNode(range, syntax_factory_->NewRecordType(), members);
 }
 
-const Type& NodeFactory::NewInvalidType(const SourceCodeRange& range) {
-  return *new (zone_) InvalidType(range);
+const Node& NodeFactory::NewRestType(const SourceCodeRange& range,
+                                     const Node& type) {
+  return NewNode1(range, syntax_factory_->NewRestType(), type);
 }
 
-const Type& NodeFactory::NewNullableType(const SourceCodeRange& range,
-                                         const Type& type) {
-  return *new (zone_) NullableType(range, type);
+const Node& NodeFactory::NewTupleType(const SourceCodeRange& range,
+                                      const std::vector<const Node*>& members) {
+  return NewNode(range, syntax_factory_->NewTupleType(), members);
 }
 
-const Type& NodeFactory::NewNonNullableType(const SourceCodeRange& range,
-                                            const Type& type) {
-  return *new (zone_) NonNullableType(range, type);
+const Node& NodeFactory::NewTypeApplication(const SourceCodeRange& range,
+                                            const Node& name,
+                                            const Node& argument_list) {
+  DCHECK_EQ(name, SyntaxCode::TypeName);
+  DCHECK_EQ(argument_list, SyntaxCode::Tuple);
+  return NewNode2(range, syntax_factory_->NewTypeApplication(), name,
+                  argument_list);
 }
 
-const Type& NodeFactory::NewOptionalType(const SourceCodeRange& range,
-                                         const Type& type) {
-  return *new (zone_) OptionalType(range, type);
+const Node& NodeFactory::NewTypeGroup(const SourceCodeRange& range,
+                                      const Node& type) {
+  return NewNode1(range, syntax_factory_->NewTypeGroup(), type);
 }
 
-const Type& NodeFactory::NewRecordType(
-    const SourceCodeRange& range,
-    const std::vector<std::pair<const Name*, const Type*>>& members) {
-  auto& list = *new (zone_) RecordTypeMembers(zone_, members);
-  return *new (zone_) RecordType(range, list);
+const Node& NodeFactory::NewTypeName(const SourceCodeRange& range,
+                                     const Node& name) {
+  DCHECK_EQ(name, SyntaxCode::Name);
+  return NewNode1(range, syntax_factory_->NewTypeName(), name);
 }
 
-const Type& NodeFactory::NewRestType(const SourceCodeRange& range,
-                                     const Type& type) {
-  return *new (zone_) RestType(range, type);
+const Node& NodeFactory::NewUnionType(const SourceCodeRange& range,
+                                      const std::vector<const Node*>& members) {
+  return NewNode(range, syntax_factory_->NewUnionType(), members);
 }
 
-const Type& NodeFactory::NewTupleType(const SourceCodeRange& range,
-                                      const std::vector<const Type*>& members) {
-  auto& list = *new (zone_) TypeList(zone_, members);
-  return *new (zone_) TupleType(range, list);
+const Node& NodeFactory::NewUnknownType(const SourceCodeRange& range) {
+  return NewNode0(range, syntax_factory_->NewUnknownType());
 }
 
-const Type& NodeFactory::NewTypeApplication(
-    const SourceCodeRange& range,
-    const Name& name,
-    const std::vector<const Type*>& members) {
-  auto& list = *new (zone_) TypeList(zone_, members);
-  return *new (zone_) TypeApplication(range, name, list);
-}
-
-const Type& NodeFactory::NewTypeGroup(const SourceCodeRange& range,
-                                      const Type& type) {
-  return *new (zone_) TypeGroup(range, type);
-}
-
-const Type& NodeFactory::NewTypeName(const SourceCodeRange& range,
-                                     const Name& name) {
-  return *new (zone_) TypeName(range, name);
-}
-
-const Type& NodeFactory::NewUnionType(const SourceCodeRange& range,
-                                      const std::vector<const Type*>& members) {
-  auto& list = *new (zone_) TypeList(zone_, members);
-  return *new (zone_) UnionType(range, list);
-}
-
-const Type& NodeFactory::NewUnknownType(const SourceCodeRange& range) {
-  return *new (zone_) UnknownType(range);
-}
-
-const Type& NodeFactory::NewVoidType(const SourceCodeRange& range) {
-  return *new (zone_) VoidType(range);
+const Node& NodeFactory::NewVoidType(const SourceCodeRange& range) {
+  return NewNode0(range, syntax_factory_->NewVoidType());
 }
 
 }  // namespace ast

@@ -5,173 +5,56 @@
 #ifndef JOANA_AST_BINDINGS_H_
 #define JOANA_AST_BINDINGS_H_
 
-#include <vector>
-
-#include "joana/ast/node.h"
+#include "joana/ast/syntax.h"
 
 namespace joana {
 namespace ast {
 
-class Expression;
-class Name;
+class ChildNodes;
+class Node;
+
+DECLARE_AST_SYNTAX_0(BindingCommaElement)
+DECLARE_AST_SYNTAX_0(BindingInvalidElement)
+DECLARE_AST_SYNTAX_0(BindingNameElement)
+DECLARE_AST_SYNTAX_0(BindingProperty)
+DECLARE_AST_SYNTAX_0(BindingRestElement)
 
 //
-// BindingElement is a base class of binding pattern.
+// ArrayBindingPatternSyntax
 //
-class JOANA_AST_EXPORT BindingElement : public Node {
-  DECLARE_ABSTRACT_AST_NODE(BindingElement, Node);
+class JOANA_AST_EXPORT ArrayBindingPatternSyntax final
+    : public SyntaxTemplate<Syntax> {
+  DECLARE_CONCRETE_AST_SYNTAX(ArrayBindingPatternSyntax, Syntax);
 
  public:
-  ~BindingElement() override;
+  ~ArrayBindingPatternSyntax() final;
 
- protected:
-  explicit BindingElement(const SourceCodeRange& range);
+  static ChildNodes ElementsOf(const Node& node);
+  static const Node& InitializerOf(const Node& node);
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(BindingElement);
+  ArrayBindingPatternSyntax();
+
+  DISALLOW_COPY_AND_ASSIGN(ArrayBindingPatternSyntax);
 };
 
 //
-// ArrayBindingPattern
+// ObjectBindingPatternSyntax
 //
-class JOANA_AST_EXPORT ArrayBindingPattern final
-    : public NodeTemplate<BindingElement, const Expression*> {
-  DECLARE_CONCRETE_AST_NODE_WITH_LIST(ArrayBindingPattern, BindingElement);
+class JOANA_AST_EXPORT ObjectBindingPatternSyntax final
+    : public SyntaxTemplate<Syntax> {
+  DECLARE_CONCRETE_AST_SYNTAX(ObjectBindingPatternSyntax, Syntax);
 
  public:
-  ~ArrayBindingPattern() final;
+  ~ObjectBindingPatternSyntax() final;
 
-  const auto& elements() const { return elements_; }
-  const Expression& initializer() const { return *member_at<0>(); }
-
- private:
-  ArrayBindingPattern(const SourceCodeRange& range,
-                      const std::vector<const BindingElement*>& elements,
-                      const Expression& initializer);
-
-  // |elements_| must be the last member variable.
-  const NodeListTemplate<const BindingElement> elements_;
-
-  DISALLOW_COPY_AND_ASSIGN(ArrayBindingPattern);
-};
-
-//
-// BindingCommaElement
-//
-class JOANA_AST_EXPORT BindingCommaElement final : public BindingElement {
-  DECLARE_CONCRETE_AST_NODE(BindingCommaElement, BindingElement);
-
- public:
-  ~BindingCommaElement() final;
+  static ChildNodes ElementsOf(const Node& node);
+  static const Node& InitializerOf(const Node& node);
 
  private:
-  explicit BindingCommaElement(const SourceCodeRange& range);
+  ObjectBindingPatternSyntax();
 
-  DISALLOW_COPY_AND_ASSIGN(BindingCommaElement);
-};
-
-//
-// BindingInvalidElement
-//
-class JOANA_AST_EXPORT BindingInvalidElement final : public BindingElement {
-  DECLARE_CONCRETE_AST_NODE(BindingInvalidElement, BindingElement);
-
- public:
-  ~BindingInvalidElement() final;
-
- private:
-  explicit BindingInvalidElement(const SourceCodeRange& range);
-
-  DISALLOW_COPY_AND_ASSIGN(BindingInvalidElement);
-};
-
-//
-// BindingNameElement
-//
-class JOANA_AST_EXPORT BindingNameElement final
-    : public NodeTemplate<BindingElement, const Name*, const Expression*> {
-  DECLARE_CONCRETE_AST_NODE(BindingNameElement, BindingElement);
-
- public:
-  ~BindingNameElement() final;
-
-  const Expression& initializer() const { return *member_at<1>(); }
-  const Name& name() const { return *member_at<0>(); }
-
- private:
-  BindingNameElement(const SourceCodeRange& range,
-                     const Name& name,
-                     const Expression& initializer);
-
-  DISALLOW_COPY_AND_ASSIGN(BindingNameElement);
-};
-
-//
-// BindingProperty is a base class of binding property.
-//
-class JOANA_AST_EXPORT BindingProperty
-    : public NodeTemplate<BindingElement, const Name*, const BindingElement*> {
-  DECLARE_CONCRETE_AST_NODE(BindingProperty, BindingElement);
-
- public:
-  ~BindingProperty() override;
-
-  const BindingElement& element() const { return *member_at<1>(); }
-  const Name& name() const { return *member_at<0>(); }
-
- private:
-  BindingProperty(const SourceCodeRange& range,
-                  const Name& name,
-                  const BindingElement& element);
-
-  DISALLOW_COPY_AND_ASSIGN(BindingProperty);
-};
-
-//
-// BindingRestElement
-//
-class JOANA_AST_EXPORT BindingRestElement final
-    : public NodeTemplate<BindingElement, const BindingElement*> {
-  DECLARE_CONCRETE_AST_NODE(BindingRestElement, BindingElement);
-
- public:
-  ~BindingRestElement() final;
-
-  const BindingElement& element() const { return *member_at<0>(); }
-
- private:
-  BindingRestElement(const SourceCodeRange& range,
-                     const BindingElement& element);
-
-  DISALLOW_COPY_AND_ASSIGN(BindingRestElement);
-};
-
-//
-// ObjectBindingPattern
-//
-// Proposal[1] allows object binding patter to have |BindingRestElement|.
-//
-// [1] https://github.com/sebmarkbage/ecmascript-rest-spread
-//
-class JOANA_AST_EXPORT ObjectBindingPattern final
-    : public NodeTemplate<BindingElement, const Expression*> {
-  DECLARE_CONCRETE_AST_NODE_WITH_LIST(ObjectBindingPattern, BindingElement);
-
- public:
-  ~ObjectBindingPattern() final;
-
-  const Expression& initializer() const { return *member_at<0>(); }
-  const auto& elements() const { return elements_; }
-
- private:
-  ObjectBindingPattern(const SourceCodeRange& range,
-                       const std::vector<const BindingElement*>& elements,
-                       const Expression& initializer);
-
-  // |elements_| must the last member variable.
-  const NodeListTemplate<const BindingElement> elements_;
-
-  DISALLOW_COPY_AND_ASSIGN(ObjectBindingPattern);
+  DISALLOW_COPY_AND_ASSIGN(ObjectBindingPatternSyntax);
 };
 
 }  // namespace ast

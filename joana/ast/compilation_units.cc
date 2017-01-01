@@ -2,64 +2,42 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <tuple>
+
 #include "joana/ast/compilation_units.h"
 
 namespace joana {
 namespace ast {
 
 //
-// CompilationUnit
+// ExternsSyntax
 //
-CompilationUnit::CompilationUnit(
-    Zone* zone,
-    const SourceCodeRange& range,
-    const StatementList& statements,
-    const std::unordered_map<const Node*, const ast::JsDoc*>& jsdoc_map)
-    : NodeTemplate(&statements, range),
-      jsdoc_map_(zone, jsdoc_map.begin(), jsdoc_map.end()) {}
+ExternsSyntax::ExternsSyntax()
+    : SyntaxTemplate(std::tuple<>(),
+                     SyntaxCode::Externs,
+                     Format::Builder().set_is_variadic(true).Build()) {}
 
-CompilationUnit::~CompilationUnit() = default;
-
-const JsDoc* CompilationUnit::JsDocFor(const ast::Node& node) const {
-  const auto& it = jsdoc_map_.find(&node);
-  return it == jsdoc_map_.end() ? nullptr : it->second;
-}
+ExternsSyntax::~ExternsSyntax() = default;
 
 //
-// Externs
+// ModuleSyntax
 //
-Externs::Externs(
-    Zone* zone,
-    const SourceCodeRange& range,
-    const StatementList& statements,
-    const std::unordered_map<const Node*, const ast::JsDoc*>& jsdoc_map)
-    : CompilationUnit(zone, range, statements, jsdoc_map) {}
+ModuleSyntax::ModuleSyntax()
+    : SyntaxTemplate(std::tuple<>(),
+                     SyntaxCode::Module,
+                     Format::Builder().set_is_variadic(true).Build()) {}
 
-Externs::~Externs() = default;
+ModuleSyntax::~ModuleSyntax() = default;
 
 //
-// Module
+// ScriptSyntax
 //
-Module::Module(
-    Zone* zone,
-    const SourceCodeRange& range,
-    const StatementList& statements,
-    const std::unordered_map<const Node*, const ast::JsDoc*>& jsdoc_map)
-    : CompilationUnit(zone, range, statements, jsdoc_map) {}
+ScriptSyntax::ScriptSyntax()
+    : SyntaxTemplate(std::tuple<>(),
+                     SyntaxCode::Script,
+                     Format::Builder().set_is_variadic(true).Build()) {}
 
-Module::~Module() = default;
-
-//
-// Script
-//
-Script::Script(
-    Zone* zone,
-    const SourceCodeRange& range,
-    const StatementList& statements,
-    const std::unordered_map<const Node*, const ast::JsDoc*>& jsdoc_map)
-    : CompilationUnit(zone, range, statements, jsdoc_map) {}
-
-Script::~Script() = default;
+ScriptSyntax::~ScriptSyntax() = default;
 
 }  // namespace ast
 }  // namespace joana

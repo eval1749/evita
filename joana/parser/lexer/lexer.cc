@@ -77,7 +77,7 @@ bool Lexer::ConsumeCharIf(base::char16 char_code) {
   return reader_->ConsumeCharIf(char_code);
 }
 
-const ast::Token& Lexer::ConsumeToken() {
+const ast::Node& Lexer::ConsumeToken() {
   DCHECK(current_token_);
   auto& token = *current_token_;
   current_token_ = NextToken();
@@ -88,12 +88,12 @@ base::char16 Lexer::PeekChar() const {
   return reader_->PeekChar();
 }
 
-const ast::Token& Lexer::PeekToken() const {
+const ast::Node& Lexer::PeekToken() const {
   DCHECK(current_token_);
   return *current_token_;
 }
 
-const ast::Token& Lexer::HandleBlockComment() {
+const ast::Node& Lexer::HandleBlockComment() {
   auto is_jsdoc = CanPeekChar() && PeekChar() == '*';
   auto is_after_asterisk = false;
   while (CanPeekChar()) {
@@ -104,7 +104,7 @@ const ast::Token& Lexer::HandleBlockComment() {
       const auto* const document =
           JsDocParser(&context_, range, options_).Parse();
       if (document)
-        return node_factory().NewJsDoc(range, *document);
+        return *document;
       return node_factory().NewComment(range);
     }
     if (IsLineTerminator(PeekChar()))
@@ -115,7 +115,7 @@ const ast::Token& Lexer::HandleBlockComment() {
   return node_factory().NewComment(MakeTokenRange());
 }
 
-const ast::Token* Lexer::HandleCharacter() {
+const ast::Node* Lexer::HandleCharacter() {
   token_start_ = reader_->location();
   switch (PeekChar()) {
     case '!':
@@ -286,7 +286,7 @@ const ast::Token* Lexer::HandleCharacter() {
   return nullptr;
 }
 
-const ast::Token& Lexer::HandleDecimal() {
+const ast::Node& Lexer::HandleDecimal() {
   uint64_t integer_part = FromDigitChar(ConsumeChar(), 10);
   auto integer_scale = 0;
   while (CanPeekChar()) {
@@ -303,8 +303,8 @@ const ast::Token& Lexer::HandleDecimal() {
   return HandleDecimalAfterDot(integer_part, integer_scale);
 }
 
-const ast::Token& Lexer::HandleDecimalAfterDot(uint64_t integer_part,
-                                               int integer_scale) {
+const ast::Node& Lexer::HandleDecimalAfterDot(uint64_t integer_part,
+                                              int integer_scale) {
   auto digits_part = integer_part;
   auto digits_scale = integer_scale;
   if (ConsumeCharIf('.')) {
@@ -352,7 +352,7 @@ const ast::Token& Lexer::HandleDecimalAfterDot(uint64_t integer_part,
   return NewNumericLiteral(value * std::pow(10.0, exponent));
 }
 
-const ast::Token& Lexer::HandleDigitZero() {
+const ast::Node& Lexer::HandleDigitZero() {
   if (!CanPeekChar())
     return NewNumericLiteral(0);
   switch (PeekChar()) {
@@ -388,7 +388,7 @@ const ast::Token& Lexer::HandleDigitZero() {
   return HandleDecimalAfterDot(0, 0);
 }
 
-const ast::Token& Lexer::HandleInteger(int base) {
+const ast::Node& Lexer::HandleInteger(int base) {
   DCHECK(base == 2 || base == 8 || base == 16) << base;
   uint64_t accumulator = 0;
   const auto kMaxInteger = static_cast<uint64_t>(1) << 53;
@@ -419,7 +419,7 @@ const ast::Token& Lexer::HandleInteger(int base) {
   return NewNumericLiteral(accumulator);
 }
 
-const ast::Token& Lexer::HandleLineComment() {
+const ast::Node& Lexer::HandleLineComment() {
   while (CanPeekChar()) {
     if (IsLineTerminator(ConsumeChar())) {
       is_separated_by_newline_ = true;
@@ -429,7 +429,7 @@ const ast::Token& Lexer::HandleLineComment() {
   return node_factory().NewComment(MakeTokenRange());
 }
 
-const ast::Token& Lexer::HandleName() {
+const ast::Node& Lexer::HandleName() {
   while (CanPeekChar()) {
     if (!IsIdentifierPart(PeekChar()))
       break;
@@ -439,9 +439,9 @@ const ast::Token& Lexer::HandleName() {
 }
 
 // Handle op, op op, op '=' pattern.
-const ast::Token& Lexer::HandleOperator(ast::PunctuatorKind one,
-                                        ast::PunctuatorKind two,
-                                        ast::PunctuatorKind equal) {
+const ast::Node& Lexer::HandleOperator(ast::PunctuatorKind one,
+                                       ast::PunctuatorKind two,
+                                       ast::PunctuatorKind equal) {
   const auto char_code = ConsumeChar();
   if (ConsumeCharIf('='))
     return NewPunctuator(equal);
@@ -450,7 +450,7 @@ const ast::Token& Lexer::HandleOperator(ast::PunctuatorKind one,
   return NewPunctuator(one);
 }
 
-const ast::Token& Lexer::HandleStringLiteral() {
+const ast::Node& Lexer::HandleStringLiteral() {
   std::vector<base::char16> characters;
   enum class State {
     Backslash,
@@ -472,9 +472,7 @@ const ast::Token& Lexer::HandleStringLiteral() {
     switch (state) {
       case State::Normal:
         if (ConsumeCharIf(delimiter)) {
-          return node_factory().NewStringLiteral(
-              MakeTokenRange(),
-              base::StringPiece16(characters.data(), characters.size()));
+          return node_factory().NewStringLiteral(MakeTokenRange());
         }
         if (PeekChar() == '\\') {
           backslash_start = reader_->location();
@@ -650,9 +648,7 @@ const ast::Token& Lexer::HandleStringLiteral() {
     ConsumeChar();
   }
   AddError(ErrorCode::STRING_LITERAL_NOT_CLOSED);
-  return node_factory().NewStringLiteral(
-      MakeTokenRange(),
-      base::StringPiece16(characters.data(), characters.size()));
+  return node_factory().NewStringLiteral(MakeTokenRange());
 }
 
 SourceCodeRange Lexer::MakeTokenRange() const {
@@ -661,15 +657,15 @@ SourceCodeRange Lexer::MakeTokenRange() const {
   return source_code().Slice(token_start_, reader_->location());
 }
 
-const ast::Token& Lexer::NewNumericLiteral(double value) {
+const ast::Node& Lexer::NewNumericLiteral(double value) {
   return node_factory().NewNumericLiteral(MakeTokenRange(), value);
 }
 
-const ast::Token& Lexer::NewPunctuator(ast::PunctuatorKind kind) {
+const ast::Node& Lexer::NewPunctuator(ast::PunctuatorKind kind) {
   return node_factory().NewPunctuator(MakeTokenRange(), kind);
 }
 
-const ast::Token* Lexer::NextToken() {
+const ast::Node* Lexer::NextToken() {
   is_separated_by_newline_ = false;
   while (CanPeekChar()) {
     if (IsLineTerminator(PeekChar()))

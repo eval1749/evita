@@ -312,7 +312,7 @@ class RegExpParser final {
                const ParserOptions& options);
   ~RegExpParser();
 
-  ast::RegExp& Run();
+  const ast::Node& Run();
 
  private:
   friend class ScopedNodeFactory;
@@ -322,11 +322,11 @@ class RegExpParser final {
   ast::NodeFactory& node_factory() { return context_.node_factory(); }
   const SourceCode& source_code() const { return lexer_.source_code(); }
 
-  ast::RegExp& ParseOr();
-  ast::RegExp& ParsePrimary();
-  ast::RegExp& ParseParenthesis();
-  ast::RegExp& ParseRepeat();
-  ast::RegExp& ParseSequence();
+  const ast::Node& ParseOr();
+  const ast::Node& ParsePrimary();
+  const ast::Node& ParseParenthesis();
+  const ast::Node& ParseRepeat();
+  const ast::Node& ParseSequence();
 
   // Helper functions for Lexer
   bool CanPeekToken() const { return lexer_.CanPeekToken(); }
@@ -360,22 +360,22 @@ class ScopedNodeFactory final {
 
   void AddError(const SourceCodeRange& range, ErrorCode error_code);
   void AddError(ErrorCode error_code);
-  ast::RegExp& NewAnyChar();
-  ast::RegExp& NewAssertion(ast::RegExpAssertionKind kind);
-  ast::RegExp& NewCapture(const ast::RegExp& pattern);
-  ast::RegExp& NewCharSet();
-  ast::RegExp& NewComplementCharSet();
-  ast::RegExp& NewError(ErrorCode error_code);
-  ast::RegExp& NewInvalid(ErrorCode error_code);
-  ast::RegExp& NewGreedyRepeat(const ast::RegExp& pattern,
-                               const ast::RegExpRepeat& repeat);
-  ast::RegExp& NewLazyRepeat(const ast::RegExp& pattern,
-                             const ast::RegExpRepeat& repeat);
-  ast::RegExp& NewLookAhead(const ast::RegExp& pattern);
-  ast::RegExp& NewLookAheadNot(const ast::RegExp& pattern);
-  ast::RegExp& NewLiteral();
-  ast::RegExp& NewOr(const std::vector<ast::RegExp*> members);
-  ast::RegExp& NewSequence(const std::vector<ast::RegExp*> members);
+  const ast::Node& NewAnyChar();
+  const ast::Node& NewAssertion(ast::RegExpAssertionKind kind);
+  const ast::Node& NewCapture(const ast::Node& pattern);
+  const ast::Node& NewCharSet();
+  const ast::Node& NewComplementCharSet();
+  const ast::Node& NewError(ErrorCode error_code);
+  const ast::Node& NewInvalid(ErrorCode error_code);
+  const ast::Node& NewGreedyRepeat(const ast::Node& pattern,
+                                   const ast::RegExpRepeat& repeat);
+  const ast::Node& NewLazyRepeat(const ast::Node& pattern,
+                                 const ast::RegExpRepeat& repeat);
+  const ast::Node& NewLookAhead(const ast::Node& pattern);
+  const ast::Node& NewLookAheadNot(const ast::Node& pattern);
+  const ast::Node& NewLiteral();
+  const ast::Node& NewOr(const std::vector<const ast::Node*> members);
+  const ast::Node& NewSequence(const std::vector<const ast::Node*> members);
 
   void SetToken(const Token& token);
 
@@ -412,60 +412,63 @@ SourceCodeRange ScopedNodeFactory::ComputeRange() const {
   return parser_.source_code().Slice(start_, end_);
 }
 
-ast::RegExp& ScopedNodeFactory::NewAnyChar() {
+const ast::Node& ScopedNodeFactory::NewAnyChar() {
   return factory().NewAnyCharRegExp(ComputeRange());
 }
 
-ast::RegExp& ScopedNodeFactory::NewAssertion(ast::RegExpAssertionKind kind) {
+const ast::Node& ScopedNodeFactory::NewAssertion(
+    ast::RegExpAssertionKind kind) {
   return factory().NewAssertionRegExp(ComputeRange(), kind);
 }
 
-ast::RegExp& ScopedNodeFactory::NewCapture(const ast::RegExp& pattern) {
+const ast::Node& ScopedNodeFactory::NewCapture(const ast::Node& pattern) {
   return factory().NewCaptureRegExp(ComputeRange(), pattern);
 }
 
-ast::RegExp& ScopedNodeFactory::NewCharSet() {
+const ast::Node& ScopedNodeFactory::NewCharSet() {
   return factory().NewCharSetRegExp(ComputeRange());
 }
 
-ast::RegExp& ScopedNodeFactory::NewComplementCharSet() {
+const ast::Node& ScopedNodeFactory::NewComplementCharSet() {
   return factory().NewComplementCharSetRegExp(ComputeRange());
 }
 
-ast::RegExp& ScopedNodeFactory::NewError(ErrorCode error_code) {
+const ast::Node& ScopedNodeFactory::NewError(ErrorCode error_code) {
   AddError(error_code);
   return NewInvalid(error_code);
 }
 
-ast::RegExp& ScopedNodeFactory::NewGreedyRepeat(
-    const ast::RegExp& pattern,
+const ast::Node& ScopedNodeFactory::NewGreedyRepeat(
+    const ast::Node& pattern,
     const ast::RegExpRepeat& repeat) {
   return factory().NewGreedyRepeatRegExp(ComputeRange(), pattern, repeat);
 }
 
-ast::RegExp& ScopedNodeFactory::NewInvalid(ErrorCode error_code) {
+const ast::Node& ScopedNodeFactory::NewInvalid(ErrorCode error_code) {
   return factory().NewInvalidRegExp(ComputeRange(),
                                     static_cast<int>(error_code));
 }
 
-ast::RegExp& ScopedNodeFactory::NewLazyRepeat(const ast::RegExp& pattern,
-                                              const ast::RegExpRepeat& repeat) {
+const ast::Node& ScopedNodeFactory::NewLazyRepeat(
+    const ast::Node& pattern,
+    const ast::RegExpRepeat& repeat) {
   return factory().NewLazyRepeatRegExp(ComputeRange(), pattern, repeat);
 }
 
-ast::RegExp& ScopedNodeFactory::NewLookAhead(const ast::RegExp& pattern) {
+const ast::Node& ScopedNodeFactory::NewLookAhead(const ast::Node& pattern) {
   return factory().NewLookAheadRegExp(ComputeRange(), pattern);
 }
 
-ast::RegExp& ScopedNodeFactory::NewLookAheadNot(const ast::RegExp& pattern) {
+const ast::Node& ScopedNodeFactory::NewLookAheadNot(const ast::Node& pattern) {
   return factory().NewLookAheadNotRegExp(ComputeRange(), pattern);
 }
 
-ast::RegExp& ScopedNodeFactory::NewLiteral() {
+const ast::Node& ScopedNodeFactory::NewLiteral() {
   return factory().NewLiteralRegExp(ComputeRange());
 }
 
-ast::RegExp& ScopedNodeFactory::NewOr(const std::vector<ast::RegExp*> members) {
+const ast::Node& ScopedNodeFactory::NewOr(
+    const std::vector<const ast::Node*> members) {
   if (members.size() == 1)
     return *members.front();
   if (members.size() >= 2)
@@ -474,8 +477,8 @@ ast::RegExp& ScopedNodeFactory::NewOr(const std::vector<ast::RegExp*> members) {
 }
 
 // Note: /(?:)/ calls |NewSequence()| with |members.size() == 0|.
-ast::RegExp& ScopedNodeFactory::NewSequence(
-    const std::vector<ast::RegExp*> members) {
+const ast::Node& ScopedNodeFactory::NewSequence(
+    const std::vector<const ast::Node*> members) {
   if (members.size() == 1)
     return *members.front();
   return factory().NewSequenceRegExp(ComputeRange(), members);
@@ -493,7 +496,7 @@ RegExpParser::RegExpParser(ParserContext* context,
 
 RegExpParser::~RegExpParser() = default;
 
-ast::RegExp& RegExpParser::Run() {
+const ast::Node& RegExpParser::Run() {
   return ParseOr();
 }
 
@@ -509,9 +512,9 @@ bool RegExpParser::ConsumeTokenIf(Syntax syntax) {
   return true;
 }
 
-ast::RegExp& RegExpParser::ParseOr() {
+const ast::Node& RegExpParser::ParseOr() {
   ScopedNodeFactory factory(this);
-  std::vector<ast::RegExp*> members;
+  std::vector<const ast::Node*> members;
   members.push_back(&ParseSequence());
   while (CanPeekToken() && ConsumeTokenIf(Syntax::Or)) {
     if (!CanPeekToken())
@@ -521,7 +524,7 @@ ast::RegExp& RegExpParser::ParseOr() {
   return factory.NewOr(members);
 }
 
-ast::RegExp& RegExpParser::ParsePrimary() {
+const ast::Node& RegExpParser::ParsePrimary() {
   ScopedNodeFactory factory(this);
   if (ConsumeTokenIf(Syntax::AssertBoundary))
     return factory.NewAssertion(ast::RegExpAssertionKind::Boundary);
@@ -574,7 +577,7 @@ ast::RegExp& RegExpParser::ParsePrimary() {
   return factory.NewLiteral();
 }
 
-ast::RegExp& RegExpParser::ParseParenthesis() {
+const ast::Node& RegExpParser::ParseParenthesis() {
   ScopedNodeFactory factory(this);
   if (ConsumeTokenIf(Syntax::Close)) {
     // In case of /(?:)/
@@ -591,7 +594,7 @@ ast::RegExp& RegExpParser::ParseParenthesis() {
   return pattern;
 }
 
-ast::RegExp& RegExpParser::ParseRepeat() {
+const ast::Node& RegExpParser::ParseRepeat() {
   ScopedNodeFactory factory(this);
   auto& pattern = ParsePrimary();
   if (!CanPeekToken())
@@ -605,13 +608,14 @@ ast::RegExp& RegExpParser::ParseRepeat() {
   return pattern;
 }
 
-bool CanMergeNodes(const ast::RegExp& pattern1, const ast::RegExp& pattern2) {
-  return pattern1.Is<ast::LiteralRegExp>() && pattern2.Is<ast::LiteralRegExp>();
+bool CanMergeNodes(const ast::Node& pattern1, const ast::Node& pattern2) {
+  return pattern1 == ast::SyntaxCode::LiteralRegExp &&
+         pattern2 == ast::SyntaxCode::LiteralRegExp;
 }
 
-ast::RegExp& RegExpParser::ParseSequence() {
+const ast::Node& RegExpParser::ParseSequence() {
   ScopedNodeFactory factory(this);
-  std::vector<ast::RegExp*> patterns;
+  std::vector<const ast::Node*> patterns;
   patterns.push_back(&ParseRepeat());
   while (CanPeekToken() && PeekToken().syntax != Syntax::Or) {
     if (PeekToken().syntax == Syntax::End)
@@ -633,7 +637,7 @@ ast::RegExp& RegExpParser::ParseSequence() {
 
 }  // namespace
 
-ast::RegExp& Lexer::ConsumeRegExp() {
+const ast::Node& Lexer::ConsumeRegExp() {
   if (PeekToken() == ast::PunctuatorKind::DivideEqual)
     reader_->MoveBackward();
   return RegExpParser(&context_, reader_.get(), options_).Run();

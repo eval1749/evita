@@ -9,10 +9,12 @@
 #include "joana/parser/parser.h"
 
 #include "joana/ast/compilation_units.h"
-#include "joana/ast/jsdoc_nodes.h"
+#include "joana/ast/jsdoc_syntaxes.h"
 #include "joana/ast/node_editor.h"
 #include "joana/ast/node_factory.h"
+#include "joana/ast/node_traversal.h"
 #include "joana/ast/statements.h"
+#include "joana/ast/syntax.h"
 #include "joana/ast/tokens.h"
 #include "joana/base/error_sink.h"
 #include "joana/base/source_code.h"
@@ -34,9 +36,8 @@ bool IsCloseBracket(const ast::Token& token) {
 
 // Returns true if |document| contains |@fileoviewview| tag.
 bool HasJsDocTag(ast::NameId tag_id, const ast::JsDocDocument& document) {
-  for (const auto& element : document.elements()) {
-    const auto* tag = element.TryAs<ast::JsDocTag>();
-    if (tag && tag->name() == tag_id)
+  for (const auto& element : ast::NodeTraversal::ChildNodesOf(document)) {
+    if (element == ast::SyntaxCode::JsDocTag && element.child_at(0) == tag_id)
       return true;
   }
   return false;
@@ -124,20 +125,22 @@ void Parser::Advance() {
   SkipCommentTokens();
 }
 
-void Parser::AssociateJsDoc(const ast::JsDoc& jsdoc, const ast::Node& node) {
-  const auto& result = jsdoc_map_.emplace(&node, &jsdoc);
+void Parser::AssociateJsDoc(const ast::JsDocToken& document,
+                            const ast::Node& node) {
+  const auto& result = jsdoc_map_.emplace(&node, &document);
   if (result.second)
     return;
-  if (HasJsDocTag(ast::NameId::JsDocFileOverview, jsdoc.document())) {
+  if (HasJsDocTag(ast::NameId::JsDocFileOverview, document)) {
     if (file_overview_) {
-      AddError(SourceCodeRange::Merge(file_overview_->range(), jsdoc.range()),
-               ErrorCode::ERROR_JSDOC_MULTIPLE_FILE_OVERVIEWS);
+      AddError(
+          SourceCodeRange::Merge(file_overview_->range(), document.range()),
+          ErrorCode::ERROR_JSDOC_MULTIPLE_FILE_OVERVIEWS);
     }
-    file_overview_ = &jsdoc.document();
+    file_overview_ = &document;
     return;
   }
   // We don't allow statement/expression has more than one annotation.
-  AddError(jsdoc, ErrorCode::ERROR_STATEMENT_UNEXPECT_ANNOTATION);
+  AddError(document, ErrorCode::ERROR_STATEMENT_UNEXPECT_ANNOTATION);
 }
 
 bool Parser::CanPeekToken() const {
@@ -234,11 +237,11 @@ const ast::Node& Parser::Run() {
   SkipCommentTokens();
   while (CanPeekToken()) {
     auto& token = PeekToken();
-    if (!token.Is<ast::JsDoc>()) {
+    if (!token.Is<ast::JsDocToken>()) {
       statements.push_back(&ParseStatement());
       continue;
     }
-    auto& jsdoc = ConsumeToken().As<ast::JsDoc>();
+    auto& jsdoc = ConsumeToken().As<ast::JsDocToken>();
     auto& statement = ParseStatement();
     AssociateJsDoc(jsdoc, statement);
     statements.push_back(&statement);

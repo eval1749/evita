@@ -7,19 +7,17 @@
 
 #include "joana/analyzer/pass.h"
 
-#include "joana/ast/empty_node_visitor.h"
-
 namespace joana {
 
 namespace ast {
-class BindingElement;
-class CompilationUnit;
-class Declaration;
-class Expression;
-class Name;
 class Node;
-class Statement;
-class VariableDeclaration;
+using BindingElement = Node;
+using CompilationUnit = Node;
+using Declaration = Node;
+using Expression = Node;
+using Name = Node;
+using Statement = Node;
+using VariableDeclaration = Node;
 }
 
 namespace analyzer {
@@ -31,7 +29,7 @@ enum class VariableKind;
 //
 // EnvironmentBuilder
 //
-class EnvironmentBuilder final : public Pass, public ast::EmptyNodeVisitor {
+class EnvironmentBuilder final : public Pass {
  public:
   explicit EnvironmentBuilder(Context* context);
   ~EnvironmentBuilder();
@@ -41,46 +39,35 @@ class EnvironmentBuilder final : public Pass, public ast::EmptyNodeVisitor {
  private:
   class LocalEnvironment;
 
+  // Dummy
+  void Visit(const ast::Node& node);
+
   // Binding helpers
-  void BindToFunction(const ast::Name& name,
+  void BindToFunction(const ast::Node& name,
                       const ast::Declaration& declaration);
 
   void BindToVariable(const ast::Node& origin, const ast::Node& name);
 
   // Process AST nodes
-  void ProcessCompilationUnit(const ast::CompilationUnit& node);
-  void ProcessVariables(const ast::VariableDeclaration& declaration);
+  void ProcessVariables(const ast::Node& declaration);
 
-// ast::NodeVisitor implementations
+  // ast::NodeVisitor implementations
 
-// Binding elements
-#define V(name) void Visit##name(const ast::name& node) final;
-  FOR_EACH_AST_BINDING_ELEMENT(V)
-#undef V
-
-  // Compilation units
-  void VisitExterns(const ast::Externs& node) final;
-  void VisitModule(const ast::Module& node) final;
-  void VisitScript(const ast::Script& node) final;
+  // Binding elements
+  void VisitBindingNameElement(const ast::Node& node);
 
   // Declarations
-  void VisitClass(const ast::Class& node) final;
-  void VisitFunction(const ast::Function& node) final;
+  void VisitClass(const ast::Node& node);
+  void VisitFunction(const ast::Node& node);
 
   // Expressions
-  void VisitBinaryExpression(const ast::BinaryExpression& node) final;
-  void VisitParameterList(const ast::ParameterList& node) final;
-  void VisitReferenceExpression(const ast::ReferenceExpression& node) final;
+  void VisitReferenceExpression(const ast::Node& node);
 
   // Statement
-  void VisitBlockStatement(const ast::BlockStatement& node) final;
-  void VisitDeclarationStatement(const ast::DeclarationStatement& node) final;
-  void VisitConstStatement(const ast::ConstStatement& node) final;
-  void VisitExpressionStatement(const ast::ExpressionStatement& node) final;
-  void VisitLetStatement(const ast::LetStatement& node) final;
-  void VisitReturnStatement(const ast::ReturnStatement& node) final;
-  void VisitThrowStatement(const ast::ThrowStatement& node) final;
-  void VisitVarStatement(const ast::VarStatement& node) final;
+  void VisitBlockStatement(const ast::Node& node);
+  void VisitConstStatement(const ast::Node& node);
+  void VisitLetStatement(const ast::Node& node);
+  void VisitVarStatement(const ast::Node& node);
 
   LocalEnvironment* environment_ = nullptr;
 

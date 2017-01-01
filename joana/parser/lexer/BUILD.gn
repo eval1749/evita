@@ -16,3 +16,15 @@ source_set("lexer") {
 
   configs += [ "//joana/parser:parser_implementation" ]
 }
+
+source_set("test_files") {
+  testonly = true
+  sources = [
+    "lexer_test.cc",
+  ]
+  deps = [
+    ":lexer",
+    "//joana/testing",
+    "//testing/gtest",
+  ]
+}

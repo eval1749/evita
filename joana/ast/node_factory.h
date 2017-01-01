@@ -10,9 +10,8 @@
 #include <utility>
 #include <vector>
 
-#include "base/strings/string_piece.h"
 #include "joana/ast/ast_export.h"
-#include "joana/ast/node_forward.h"
+#include "joana/ast/syntax_forward.h"
 #include "joana/base/memory/zone.h"
 
 namespace joana {
@@ -20,6 +19,10 @@ namespace joana {
 class SourceCodeRange;
 
 namespace ast {
+
+class Node;
+class Syntax;
+class SyntaxFactory;
 
 //
 // NodeFactory
@@ -29,376 +32,400 @@ class JOANA_AST_EXPORT NodeFactory final {
   explicit NodeFactory(Zone* zone);
   ~NodeFactory();
 
+  const Node* JsDocFor(const Node& node) const;
+
+  const Node& NewTuple(const SourceCodeRange& range,
+                       const std::vector<const Node*>& nodes);
+
   // Compilation unit factory members
-  Node& NewExterns(
+  const Node& NewExterns(
       const SourceCodeRange& range,
-      const std::vector<const Statement*>& statements,
-      const std::unordered_map<const Node*, const JsDoc*>& jsdoc_map);
+      const std::vector<const Node*>& statements,
+      const std::unordered_map<const Node*, const Node*>& jsdoc_map);
 
-  Node& NewModule(
+  const Node& NewModule(
       const SourceCodeRange& range,
-      const std::vector<const Statement*>& statements,
-      const std::unordered_map<const Node*, const JsDoc*>& jsdoc_map);
+      const std::vector<const Node*>& statements,
+      const std::unordered_map<const Node*, const Node*>& jsdoc_map);
+
+  const Node& NewScript(
+      const SourceCodeRange& range,
+      const std::vector<const Node*>& statements,
+      const std::unordered_map<const Node*, const Node*>& jsdoc_map);
 
   //
-  // Tokens factory members
+  // Nodes factory members
   //
-  const Token& NewJsDoc(const SourceCodeRange& range,
-                        const JsDocDocument& document);
-  const Token& NewComment(const SourceCodeRange& range);
-  const Token& NewEmpty(const SourceCodeRange& range);
+  const Node& NewComment(const SourceCodeRange& range);
+  const Node& NewEmpty(const SourceCodeRange& range);
+  const Node& NewInvalid(const SourceCodeRange& range, int error_code);
 
   // Returns new |Name| token with specified |name_id|. This function is used
   // for constructing pseudo name "yield*".
-  const Name& NewName(const SourceCodeRange& range, NameId name_id);
-  const Name& NewName(const SourceCodeRange& range);
+  const Node& NewName(const SourceCodeRange& range, NameId name_id);
+  const Node& NewName(const SourceCodeRange& range);
 
-  const Punctuator& NewPunctuator(const SourceCodeRange& range,
-                                  PunctuatorKind kind);
+  const Node& NewPunctuator(const SourceCodeRange& range, PunctuatorKind kind);
 
   //
   // Bindings factory members
   //
-  const BindingElement& NewArrayBindingPattern(
-      const SourceCodeRange& range,
-      const std::vector<const BindingElement*>& elements,
-      const Expression& initializer);
+  const Node& NewArrayBindingPattern(const SourceCodeRange& range,
+                                     const std::vector<const Node*>& elements,
+                                     const Node& initializer);
 
-  const BindingElement& NewBindingCommaElement(const SourceCodeRange& range);
+  const Node& NewBindingCommaElement(const SourceCodeRange& range);
 
-  const BindingElement& NewBindingInvalidElement(const SourceCodeRange& range);
+  const Node& NewBindingInvalidElement(const SourceCodeRange& range);
 
-  const BindingElement& NewBindingNameElement(const SourceCodeRange& range,
-                                              const Name& name,
-                                              const Expression& initializer);
+  const Node& NewBindingNameElement(const SourceCodeRange& range,
+                                    const Node& name,
+                                    const Node& initializer);
 
-  const BindingElement& NewBindingProperty(const SourceCodeRange& range,
-                                           const Name& name,
-                                           const BindingElement& element);
+  const Node& NewBindingProperty(const SourceCodeRange& range,
+                                 const Node& name,
+                                 const Node& element);
 
-  const BindingElement& NewBindingRestElement(const SourceCodeRange& range,
-                                              const BindingElement& element);
+  const Node& NewBindingRestElement(const SourceCodeRange& range,
+                                    const Node& element);
 
-  const BindingElement& NewObjectBindingPattern(
-      const SourceCodeRange& range,
-      const std::vector<const BindingElement*>& elements,
-      const Expression& initializer);
+  const Node& NewObjectBindingPattern(const SourceCodeRange& range,
+                                      const std::vector<const Node*>& elements,
+                                      const Node& initializer);
 
   //
   // Declarations factory members
   //
-  const ArrowFunction& NewArrowFunction(const SourceCodeRange& range,
-                                        FunctionKind kind,
-                                        const Expression& parameter_list,
-                                        const Node& body);
+  const Node& NewArrowFunction(const SourceCodeRange& range,
+                               FunctionKind kind,
+                               const Node& parameter_list,
+                               const Node& body);
 
-  const Class& NewClass(const SourceCodeRange& range,
-                        const Token& name,
-                        const Expression& heritage,
-                        const Expression& body);
+  const Node& NewClass(const SourceCodeRange& range,
+                       const Node& name,
+                       const Node& heritage,
+                       const Node& body);
 
-  const Function& NewFunction(const SourceCodeRange& range,
-                              FunctionKind kind,
-                              const Token& name,
-                              const ParameterList& parameter_list,
-                              const Statement& body);
-
-  const Method& NewMethod(const SourceCodeRange& range,
-                          MethodKind method_kind,
+  const Node& NewFunction(const SourceCodeRange& range,
                           FunctionKind kind,
-                          const Expression& name,
-                          const ParameterList& parameter_list,
-                          const Statement& body);
+                          const Node& name,
+                          const Node& parameter_list,
+                          const Node& body);
 
-  // Expressions factory members
-  const Expression& NewArrayLiteralExpression(
-      const SourceCodeRange& range,
-      const std::vector<const Expression*>& elements);
-  const Expression& NewAssignmentExpression(const SourceCodeRange& range,
-                                            const Punctuator& op,
-                                            const Expression& left_hand_side,
-                                            const Expression& right_hand_side);
-  const Expression& NewBinaryExpression(const SourceCodeRange& range,
-                                        const Token& op,
-                                        const Expression& left_hand_side,
-                                        const Expression& right_hand_side);
-  const Expression& NewCallExpression(
-      const SourceCodeRange& range,
-      const Expression& callee,
-      const std::vector<const Expression*>& arguments);
-  const Expression& NewCommaExpression(
-      const SourceCodeRange& range,
-      const std::vector<const Expression*>& expressions);
+  const Node& NewMethod(const SourceCodeRange& range,
+                        MethodKind method_kind,
+                        FunctionKind kind,
+                        const Node& name,
+                        const Node& parameter_list,
+                        const Node& body);
+
+  // Expression factory members
+  const Node& NewArgumentList(const SourceCodeRange& range,
+                              const std::vector<const Node*>& expressions);
+
+  const Node& NewArrayInitializer(const SourceCodeRange& range,
+                                  const std::vector<const Node*>& elements);
+
+  const Node& NewAssignmentExpression(const SourceCodeRange& range,
+                                      const Node& op,
+                                      const Node& left_hand_side,
+                                      const Node& right_hand_side);
+  const Node& NewBinaryExpression(const SourceCodeRange& range,
+                                  const Node& op,
+                                  const Node& left_hand_side,
+                                  const Node& right_hand_side);
+
+  const Node& NewCallExpression(const SourceCodeRange& range,
+                                const Node& callee,
+                                const Node& argument_list);
+
+  const Node& NewCommaExpression(const SourceCodeRange& range,
+                                 const std::vector<const Node*>& expressions);
 
   // expression '[' expression ']'
-  const Expression& NewComputedMemberExpression(
-      const SourceCodeRange& range,
-      const Expression& expression,
-      const Expression& name_expression);
+  const Node& NewComputedMemberExpression(const SourceCodeRange& range,
+                                          const Node& expression,
+                                          const Node& name_expression);
 
-  const Expression& NewConditionalExpression(
-      const SourceCodeRange& range,
-      const Expression& condition,
-      const Expression& true_expression,
-      const Expression& false_expression);
-  const Expression& NewDeclarationExpression(const Declaration& declaration);
-  const Expression& NewDelimiterExpression(const SourceCodeRange& range);
-  const Expression& NewElisionExpression(const SourceCodeRange& range);
-  const Expression& NewGroupExpression(const SourceCodeRange& range,
-                                       const Expression& expression);
-  const Expression& NewInvalidExpression(const SourceCodeRange& range,
-                                         int error_code);
-  const Expression& NewLiteralExpression(const Literal& literal);
+  const Node& NewConditionalExpression(const SourceCodeRange& range,
+                                       const Node& condition,
+                                       const Node& true_expression,
+                                       const Node& false_expression);
+  const Node& NewDeclarationExpression(const Node& declaration);
+  const Node& NewDelimiterExpression(const SourceCodeRange& range);
+  const Node& NewElisionExpression(const SourceCodeRange& range);
+  const Node& NewGroupExpression(const SourceCodeRange& range,
+                                 const Node& expression);
 
-  const Expression& NewNewExpression(
-      const SourceCodeRange& range,
-      const Expression& expression,
-      const std::vector<const Expression*>& arguments);
+  const Node& NewNewExpression(const SourceCodeRange& range,
+                               const Node& expression,
+                               const Node& argument_list);
 
-  const Expression& NewObjectLiteralExpression(
-      const SourceCodeRange& range,
-      const std::vector<const Expression*>& elements);
+  const Node& NewObjectInitializer(const SourceCodeRange& range,
+                                   const std::vector<const Node*>& elements);
 
-  const Expression& NewMemberExpression(const SourceCodeRange& range,
-                                        const Expression& expression,
-                                        const Name& name);
+  const Node& NewMemberExpression(const SourceCodeRange& range,
+                                  const Node& expression,
+                                  const Node& name);
 
-  const ParameterList& NewParameterList(
-      const SourceCodeRange& range,
-      const std::vector<const BindingElement*>& elements);
+  const Node& NewNewExpression(const SourceCodeRange& range,
+                               const std::vector<const Node*>& elements);
 
-  const Expression& NewPropertyDefinitionExpression(
-      const SourceCodeRange& range,
-      const Expression& name,
-      const Expression& value);
+  const Node& NewParameterList(const SourceCodeRange& range,
+                               const std::vector<const Node*>& expressions);
 
-  const Expression& NewReferenceExpression(const Name& name);
+  const Node& NewProperty(const SourceCodeRange& range,
+                          const Node& name,
+                          const Node& value);
 
-  const Expression& NewRegExpLiteralExpression(const SourceCodeRange& range,
-                                               const RegExp& regexp,
-                                               const Token& flags);
+  const Node& NewReferenceExpression(const Node& name);
 
-  const Expression& NewUnaryExpression(const SourceCodeRange& range,
-                                       const Token& op,
-                                       const Expression& expression);
+  const Node& NewRegExpLiteralExpression(const SourceCodeRange& range,
+                                         const Node& regexp,
+                                         const Node& flags);
+
+  const Node& NewUnaryExpression(const SourceCodeRange& range,
+                                 const Node& op,
+                                 const Node& expression);
 
   // JsDoc factory members
-  const JsDocDocument& NewJsDocDocument(
-      const SourceCodeRange& range,
-      const std::vector<const JsDocNode*>& nodes);
+  const Node& NewJsDocDocument(const SourceCodeRange& range,
+                               const std::vector<const Node*>& nodes);
 
-  const JsDocNode& NewJsDocName(const SourceCodeRange& range);
+  const Node& NewJsDocTag(const SourceCodeRange& range,
+                          const Node& name,
+                          const std::vector<const Node*>& operands);
 
-  const JsDocNode& NewJsDocTag(const SourceCodeRange& range,
-                               const Name& name,
-                               const std::vector<const JsDocNode*>& nodes);
-
-  const JsDocNode& NewJsDocText(const SourceCodeRange& range);
-
-  const JsDocNode& NewJsDocType(const SourceCodeRange& range,
-                                const ast::Type& type);
+  const Node& NewJsDocText(const SourceCodeRange& range);
 
   // Literals factory members
-  BooleanLiteral& NewBooleanLiteral(const Name& name, bool value);
+  const Node& NewBooleanLiteral(const Node& name, bool value);
 
-  NullLiteral& NewNullLiteral(const Name& name);
+  const Node& NewNullLiteral(const Node& name);
 
-  NumericLiteral& NewNumericLiteral(const SourceCodeRange& range, double value);
+  const Node& NewNumericLiteral(const SourceCodeRange& range, double value);
 
-  StringLiteral& NewStringLiteral(const SourceCodeRange& range,
-                                  base::StringPiece16 data);
+  const Node& NewStringLiteral(const SourceCodeRange& range);
 
-  UndefinedLiteral& NewUndefinedLiteral(const Name& name);
+  const Node& NewUndefinedLiteral(const Node& name);
 
-  // RegExp
-  RegExp& NewAnyCharRegExp(const SourceCodeRange& range);
+  // Node
+  const Node& NewAnyCharRegExp(const SourceCodeRange& range);
 
-  RegExp& NewAssertionRegExp(const SourceCodeRange& range,
-                             RegExpAssertionKind kind);
+  const Node& NewAssertionRegExp(const SourceCodeRange& range,
+                                 RegExpAssertionKind kind);
 
-  RegExp& NewCaptureRegExp(const SourceCodeRange& range, const RegExp& pattern);
+  const Node& NewCaptureRegExp(const SourceCodeRange& range,
+                               const Node& pattern);
 
-  RegExp& NewCharSetRegExp(const SourceCodeRange& range);
+  const Node& NewCharSetRegExp(const SourceCodeRange& range);
 
-  RegExp& NewComplementCharSetRegExp(const SourceCodeRange& range);
+  const Node& NewComplementCharSetRegExp(const SourceCodeRange& range);
 
-  RegExp& NewGreedyRepeatRegExp(const SourceCodeRange& range,
-                                const RegExp& pattern,
-                                const RegExpRepeat& repeat);
+  const Node& NewGreedyRepeatRegExp(const SourceCodeRange& range,
+                                    const Node& pattern,
+                                    const RegExpRepeat& repeat);
 
-  RegExp& NewInvalidRegExp(const SourceCodeRange& range, int error_code);
+  const Node& NewInvalidRegExp(const SourceCodeRange& range, int error_code);
 
-  RegExp& NewLazyRepeatRegExp(const SourceCodeRange& range,
-                              const RegExp& pattern,
-                              const RegExpRepeat& repeat);
+  const Node& NewLazyRepeatRegExp(const SourceCodeRange& range,
+                                  const Node& pattern,
+                                  const RegExpRepeat& repeat);
 
-  RegExp& NewLiteralRegExp(const SourceCodeRange& range);
+  const Node& NewLiteralRegExp(const SourceCodeRange& range);
 
-  RegExp& NewLookAheadRegExp(const SourceCodeRange& range,
-                             const RegExp& pattern);
+  const Node& NewLookAheadRegExp(const SourceCodeRange& range,
+                                 const Node& pattern);
 
-  RegExp& NewLookAheadNotRegExp(const SourceCodeRange& range,
-                                const RegExp& pattern);
+  const Node& NewLookAheadNotRegExp(const SourceCodeRange& range,
+                                    const Node& pattern);
 
-  RegExp& NewOrRegExp(const SourceCodeRange& range,
-                      const std::vector<RegExp*> patterns);
+  const Node& NewOrRegExp(const SourceCodeRange& range,
+                          const std::vector<const Node*> patterns);
 
-  RegExp& NewSequenceRegExp(const SourceCodeRange& range,
-                            const std::vector<RegExp*> patterns);
+  const Node& NewSequenceRegExp(const SourceCodeRange& range,
+                                const std::vector<const Node*> patterns);
 
-  // Statements factory members
-  const Statement& NewBlockStatement(
-      const SourceCodeRange& range,
-      const std::vector<const Statement*>& statements);
+  // Statement factory members
+  const Node& NewBlockStatement(const SourceCodeRange& range,
+                                const std::vector<const Node*>& statements);
 
-  const Statement& NewBreakStatement(const SourceCodeRange& range,
-                                     const Token& label);
+  const Node& NewBreakStatement(const SourceCodeRange& range,
+                                const Node& label);
 
-  const Statement& NewCaseClause(const SourceCodeRange& range,
-                                 const Expression& expression,
-                                 const Statement& statement);
+  const Node& NewCaseClause(const SourceCodeRange& range,
+                            const Node& expression,
+                            const Node& statement);
 
-  const Statement& NewConstStatement(
-      const SourceCodeRange& range,
-      const std::vector<const BindingElement*>& elements);
+  const Node& NewConstStatement(const SourceCodeRange& range,
+                                const std::vector<const Node*>& elements);
 
-  const Statement& NewContinueStatement(const SourceCodeRange& range,
-                                        const Token& label);
+  const Node& NewContinueStatement(const SourceCodeRange& range,
+                                   const Node& label);
 
-  const Statement& NewDeclarationStatement(const Declaration& declaration);
+  const Node& NewDeclarationStatement(const Node& declaration);
 
-  const Statement& NewDoStatement(const SourceCodeRange& range,
-                                  const Statement& statement,
-                                  const Expression& expression);
+  const Node& NewDoStatement(const SourceCodeRange& range,
+                             const Node& statement,
+                             const Node& expression);
 
-  const Statement& NewEmptyStatement(const SourceCodeRange& range);
+  const Node& NewEmptyStatement(const SourceCodeRange& range);
 
-  const Statement& NewExpressionStatement(const SourceCodeRange& range,
-                                          const Expression& expression);
+  const Node& NewExpressionStatement(const SourceCodeRange& range,
+                                     const Node& expression);
 
-  const Statement& NewForStatement(const SourceCodeRange& range,
-                                   const Token& keyword,
-                                   const Expression& init,
-                                   const Expression& condition,
-                                   const Expression& step,
-                                   const Statement& body);
+  const Node& NewForStatement(const SourceCodeRange& range,
+                              const Node& keyword,
+                              const Node& init,
+                              const Node& condition,
+                              const Node& step,
+                              const Node& body);
 
-  const Statement& NewForInStatement(const SourceCodeRange& range,
-                                     const Token& keyword,
-                                     const Expression& expression,
-                                     const Statement& body);
+  const Node& NewForInStatement(const SourceCodeRange& range,
+                                const Node& keyword,
+                                const Node& expression,
+                                const Node& body);
 
-  const Statement& NewForOfStatement(const SourceCodeRange& range,
-                                     const Token& keyword,
-                                     const Expression& binding,
-                                     const Expression& expression,
-                                     const Statement& body);
+  const Node& NewForOfStatement(const SourceCodeRange& range,
+                                const Node& keyword,
+                                const Node& binding,
+                                const Node& expression,
+                                const Node& body);
 
-  const Statement& NewIfElseStatement(const SourceCodeRange& range,
-                                      const Expression& condition,
-                                      const Statement& then_clause,
-                                      const Statement& else_clause);
+  const Node& NewIfElseStatement(const SourceCodeRange& range,
+                                 const Node& condition,
+                                 const Node& then_clause,
+                                 const Node& else_clause);
 
-  const Statement& NewIfStatement(const SourceCodeRange& range,
-                                  const Expression& condition,
-                                  const Statement& then_clause);
+  const Node& NewIfStatement(const SourceCodeRange& range,
+                             const Node& condition,
+                             const Node& then_clause);
 
-  const Statement& NewInvalidStatement(const SourceCodeRange& range,
-                                       int error_code);
+  const Node& NewInvalidStatement(const SourceCodeRange& range, int error_code);
 
-  const Statement& NewLabeledStatement(const SourceCodeRange& range,
-                                       const Name& label,
-                                       const Statement& statement);
+  const Node& NewLabeledStatement(const SourceCodeRange& range,
+                                  const Node& label,
+                                  const Node& statement);
 
-  const Statement& NewLetStatement(
-      const SourceCodeRange& range,
-      const std::vector<const BindingElement*>& elements);
+  const Node& NewLetStatement(const SourceCodeRange& range,
+                              const std::vector<const Node*>& elements);
 
-  const Statement& NewReturnStatement(const SourceCodeRange& range,
-                                      const Expression& condition);
+  const Node& NewReturnStatement(const SourceCodeRange& range,
+                                 const Node& condition);
 
-  const Statement& NewSwitchStatement(
-      const SourceCodeRange& range,
-      const Expression& expression,
-      const std::vector<const Statement*>& clauses);
+  const Node& NewSwitchStatement(const SourceCodeRange& range,
+                                 const Node& expression,
+                                 const std::vector<const Node*>& clauses);
 
-  const Statement& NewThrowStatement(const SourceCodeRange& range,
-                                     const Expression& expression);
+  const Node& NewThrowStatement(const SourceCodeRange& range,
+                                const Node& expression);
 
-  const Statement& NewTryCatchFinallyStatement(
-      const SourceCodeRange& range,
-      const Statement& try_block,
-      const Expression& catch_parameter,
-      const Statement& catch_block,
-      const Statement& finally_block);
+  const Node& NewTryCatchFinallyStatement(const SourceCodeRange& range,
+                                          const Node& try_block,
+                                          const Node& catch_parameter,
+                                          const Node& catch_block,
+                                          const Node& finally_block);
 
-  const Statement& NewTryCatchStatement(const SourceCodeRange& range,
-                                        const Statement& try_block,
-                                        const Expression& catch_parameter,
-                                        const Statement& catch_block);
+  const Node& NewTryCatchStatement(const SourceCodeRange& range,
+                                   const Node& try_block,
+                                   const Node& catch_parameter,
+                                   const Node& catch_block);
 
-  const Statement& NewTryFinallyStatement(const SourceCodeRange& range,
-                                          const Statement& try_block,
-                                          const Statement& finally_block);
+  const Node& NewTryFinallyStatement(const SourceCodeRange& range,
+                                     const Node& try_block,
+                                     const Node& finally_block);
 
-  const Statement& NewVarStatement(
-      const SourceCodeRange& range,
-      const std::vector<const BindingElement*>& elements);
+  const Node& NewVarStatement(const SourceCodeRange& range,
+                              const std::vector<const Node*>& elements);
 
-  const Statement& NewWhileStatement(const SourceCodeRange& range,
-                                     const Expression& expression,
-                                     const Statement& statement);
+  const Node& NewWhileStatement(const SourceCodeRange& range,
+                                const Node& expression,
+                                const Node& statement);
 
-  const Statement& NewWithStatement(const SourceCodeRange& range,
-                                    const Expression& expression,
-                                    const Statement& statement);
+  const Node& NewWithStatement(const SourceCodeRange& range,
+                               const Node& expression,
+                               const Node& statement);
 
   // Type factory members
-  const Type& NewAnyType(const SourceCodeRange& range);
+  const Node& NewAnyType(const SourceCodeRange& range);
 
-  const Type& NewFunctionType(const SourceCodeRange& range,
+  const Node& NewFunctionType(const SourceCodeRange& range,
                               FunctionTypeKind kind,
-                              const std::vector<const Type*>& parameter_types,
-                              const Type& return_type);
+                              const Node& parameter_list,
+                              const Node& return_type);
 
-  const Type& NewInvalidType(const SourceCodeRange& range);
+  const Node& NewInvalidType(const SourceCodeRange& range);
 
-  const Type& NewNullableType(const SourceCodeRange& range, const Type& type);
+  const Node& NewNullableType(const SourceCodeRange& range, const Node& type);
 
-  const Type& NewNonNullableType(const SourceCodeRange& range,
-                                 const Type& type);
+  const Node& NewNonNullableType(const SourceCodeRange& range,
+                                 const Node& type);
 
-  const Type& NewOptionalType(const SourceCodeRange& range, const Type& type);
+  const Node& NewOptionalType(const SourceCodeRange& range, const Node& type);
 
-  const Type& NewRecordType(
-      const SourceCodeRange& range,
-      const std::vector<std::pair<const Name*, const Type*>>& members);
+  const Node& NewRecordType(const SourceCodeRange& range,
+                            const std::vector<const Node*>& members);
 
-  const Type& NewRestType(const SourceCodeRange& range, const Type& type);
+  const Node& NewRestType(const SourceCodeRange& range, const Node& type);
 
-  const Type& NewTupleType(const SourceCodeRange& range,
-                           const std::vector<const Type*>& members);
+  const Node& NewTupleType(const SourceCodeRange& range,
+                           const std::vector<const Node*>& members);
 
-  const Type& NewTypeApplication(const SourceCodeRange& range,
-                                 const Name& name,
-                                 const std::vector<const Type*>& members);
+  const Node& NewTypeApplication(const SourceCodeRange& range,
+                                 const Node& name,
+                                 const Node& argument_list);
 
-  const Type& NewTypeGroup(const SourceCodeRange& range, const Type& type);
+  const Node& NewTypeGroup(const SourceCodeRange& range, const Node& type);
 
-  const Type& NewTypeName(const SourceCodeRange& range, const Name& name);
+  const Node& NewTypeName(const SourceCodeRange& range, const Node& name);
 
-  const Type& NewUnionType(const SourceCodeRange& range,
-                           const std::vector<const Type*>& members);
+  const Node& NewUnionType(const SourceCodeRange& range,
+                           const std::vector<const Node*>& members);
 
-  const Type& NewUnknownType(const SourceCodeRange& range);
+  const Node& NewUnknownType(const SourceCodeRange& range);
 
-  const Type& NewVoidType(const SourceCodeRange& range);
+  const Node& NewVoidType(const SourceCodeRange& range);
 
  private:
   class NameIdMap;
 
+  const Node& NewNode(const SourceCodeRange& range,
+                      const Syntax& tag,
+                      const std::vector<const Node*>& nodes);
+
+  const Node& NewNode(const SourceCodeRange& range,
+                      const Syntax& tag,
+                      const Node& node0,
+                      const std::vector<const Node*>& nodes);
+
+  const Node& NewNode0(const SourceCodeRange& range, const Syntax& tag);
+
+  const Node& NewNode1(const SourceCodeRange& range,
+                       const Syntax& tag,
+                       const Node& node0);
+
+  const Node& NewNode2(const SourceCodeRange& range,
+                       const Syntax& tag,
+                       const Node& node0,
+                       const Node& node1);
+
+  const Node& NewNode3(const SourceCodeRange& range,
+                       const Syntax& tag,
+                       const Node& node0,
+                       const Node& node1,
+                       const Node& node2);
+
+  const Node& NewNode4(const SourceCodeRange& range,
+                       const Syntax& tag,
+                       const Node& node0,
+                       const Node& node1,
+                       const Node& node2,
+                       const Node& node3);
+
   std::unique_ptr<NameIdMap> name_id_map_;
-  Zone* const zone_;
+  std::unique_ptr<SyntaxFactory> syntax_factory_;
+  std::unordered_map<const Node*, const Node*> jsdoc_map_;
+  Zone& zone_;
 
   DISALLOW_COPY_AND_ASSIGN(NodeFactory);
 };

@@ -2,83 +2,63 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <tuple>
+
 #include "joana/ast/bindings.h"
+
+#include "joana/ast/node.h"
+#include "joana/ast/node_traversal.h"
 
 namespace joana {
 namespace ast {
 
-//
-// ArrayBindingPattern
-//
-ArrayBindingPattern::ArrayBindingPattern(
-    const SourceCodeRange& range,
-    const std::vector<const BindingElement*>& elements,
-    const Expression& initializer)
-    : NodeTemplate(&initializer, range), elements_(elements) {}
-
-ArrayBindingPattern::~ArrayBindingPattern() = default;
+IMPLEMENT_AST_SYNTAX_0(BidingElement, BindingCommaElement, 0)
+IMPLEMENT_AST_SYNTAX_0(BidingElement, BindingInvalidElement, 0)
+IMPLEMENT_AST_SYNTAX_0(BidingElement, BindingNameElement, 2)
+IMPLEMENT_AST_SYNTAX_0(BidingElement, BindingProperty, 2)
+IMPLEMENT_AST_SYNTAX_0(BidingElement, BindingRestElement, 1)
 
 //
-// BindingCommaElement
+// ArrayBindingPatternSyntax
 //
-BindingCommaElement::BindingCommaElement(const SourceCodeRange& range)
-    : BindingElement(range) {}
+ArrayBindingPatternSyntax::ArrayBindingPatternSyntax()
+    : SyntaxTemplate(
+          std::tuple<>(),
+          SyntaxCode::ArrayBindingPattern,
+          Format::Builder().set_arity(1).set_is_variadic(true).Build()) {}
 
-BindingCommaElement::~BindingCommaElement() = default;
+ArrayBindingPatternSyntax::~ArrayBindingPatternSyntax() = default;
 
-//
-// BindingInvalidElement
-//
-BindingInvalidElement::BindingInvalidElement(const SourceCodeRange& range)
-    : BindingElement(range) {}
+ChildNodes ArrayBindingPatternSyntax::ElementsOf(const Node& node) {
+  DCHECK_EQ(node, SyntaxCode::ArrayBindingPattern);
+  return ast::NodeTraversal::ChildNodesFrom(node, 1);
+}
 
-BindingInvalidElement::~BindingInvalidElement() = default;
-
-//
-// BindingElement
-//
-BindingElement::BindingElement(const SourceCodeRange& range) : Node(range) {}
-BindingElement::~BindingElement() = default;
-
-//
-// BindingNameElement
-//
-BindingNameElement::BindingNameElement(const SourceCodeRange& range,
-                                       const Name& name,
-                                       const Expression& initializer)
-    : NodeTemplate(std::make_tuple(&name, &initializer), range) {}
-
-BindingNameElement::~BindingNameElement() = default;
+const Node& ArrayBindingPatternSyntax::InitializerOf(const Node& node) {
+  DCHECK_EQ(node, SyntaxCode::ArrayBindingPattern);
+  return node.child_at(0);
+}
 
 //
-// BindingProperty
+// ObjectBindingPatternSyntax
 //
-BindingProperty::BindingProperty(const SourceCodeRange& range,
-                                 const Name& name,
-                                 const BindingElement& element)
-    : NodeTemplate(std::make_tuple(&name, &element), range) {}
+ObjectBindingPatternSyntax::ObjectBindingPatternSyntax()
+    : SyntaxTemplate(
+          std::tuple<>(),
+          SyntaxCode::ObjectBindingPattern,
+          Format::Builder().set_arity(1).set_is_variadic(true).Build()) {}
 
-BindingProperty::~BindingProperty() = default;
+ObjectBindingPatternSyntax::~ObjectBindingPatternSyntax() = default;
 
-//
-// BindingRestElement
-//
-BindingRestElement::BindingRestElement(const SourceCodeRange& range,
-                                       const BindingElement& element)
-    : NodeTemplate(&element, range) {}
+ChildNodes ObjectBindingPatternSyntax::ElementsOf(const Node& node) {
+  DCHECK_EQ(node, SyntaxCode::ObjectBindingPattern);
+  return ast::NodeTraversal::ChildNodesFrom(node, 1);
+}
 
-BindingRestElement::~BindingRestElement() = default;
-
-//
-// ObjectBindingPattern
-//
-ObjectBindingPattern::ObjectBindingPattern(
-    const SourceCodeRange& range,
-    const std::vector<const BindingElement*>& elements,
-    const Expression& initializer)
-    : NodeTemplate(&initializer, range), elements_(elements) {}
-
-ObjectBindingPattern::~ObjectBindingPattern() = default;
+const Node& ObjectBindingPatternSyntax::InitializerOf(const Node& node) {
+  DCHECK_EQ(node, SyntaxCode::ObjectBindingPattern);
+  return node.child_at(0);
+}
 
 }  // namespace ast
 }  // namespace joana

@@ -9,10 +9,17 @@
 namespace joana {
 namespace ast {
 
+IMPLEMENT_AST_SYNTAX_1(Literal, BooleanLiteral, 0, bool, value)
+IMPLEMENT_AST_SYNTAX_0(Literal, NullLiteral, 0)
+IMPLEMENT_AST_SYNTAX_1(Literal, NumericLiteral, 0, float64_t, value)
+IMPLEMENT_AST_SYNTAX_0(Literal, StringLiteral, 0)
+IMPLEMENT_AST_SYNTAX_0(Literal, UndefinedLiteral, 0)
+
+#if 0
 //
 // BooleanLiteral
 //
-BooleanLiteral::BooleanLiteral(const Name& name, bool value)
+BooleanLiteral::BooleanLiteral(const Node& name, bool value)
     : Literal(name.range()), value_(value) {}
 
 BooleanLiteral::~BooleanLiteral() = default;
@@ -27,7 +34,7 @@ Literal::~Literal() = default;
 //
 // NullLiteral
 //
-NullLiteral::NullLiteral(const Name& name) : Literal(name.range()) {}
+NullLiteral::NullLiteral(const Node& name) : Literal(name.range()) {}
 
 NullLiteral::~NullLiteral() = default;
 
@@ -61,9 +68,11 @@ void StringLiteral::PrintMoreTo(std::ostream* ostream) const {
 //
 // UndefinedLiteral
 //
-UndefinedLiteral::UndefinedLiteral(const Name& name) : Literal(name.range()) {}
+UndefinedLiteral::UndefinedLiteral(const Node& name) : Literal(name.range()) {}
 
 UndefinedLiteral::~UndefinedLiteral() = default;
+
+#endif
 
 }  // namespace ast
 }  // namespace joana

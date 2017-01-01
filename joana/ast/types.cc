@@ -2,160 +2,75 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <tuple>
+
 #include "joana/ast/types.h"
 
 namespace joana {
 namespace ast {
 
-//
-// AnyType
-//
-AnyType::AnyType(const SourceCodeRange& range)
-    : NodeTemplate(std::make_tuple(), range) {}
-
-AnyType::~AnyType() = default;
-
-//
-// FunctionType
-//
-FunctionType::FunctionType(const SourceCodeRange& range,
-                           FunctionTypeKind kind,
-                           const TypeList& parameter_types,
-                           const Type& return_type)
-    : NodeTemplate(std::make_tuple(kind, &parameter_types, &return_type),
-                   range) {}
-
-FunctionType::~FunctionType() = default;
+IMPLEMENT_AST_SYNTAX_0(Type, AnyType, 0)
+IMPLEMENT_AST_SYNTAX_1(Type, FunctionType, 2, FunctionTypeKind, kind)
+IMPLEMENT_AST_SYNTAX_0(Type, InvalidType, 0)
+IMPLEMENT_AST_SYNTAX_0(Type, NullableType, 1)
+IMPLEMENT_AST_SYNTAX_0(Type, NonNullableType, 1)
+IMPLEMENT_AST_SYNTAX_0(Type, OptionalType, 1)
+IMPLEMENT_AST_SYNTAX_0(Type, RestType, 1)
+IMPLEMENT_AST_SYNTAX_0(Type, TypeGroup, 1)
+IMPLEMENT_AST_SYNTAX_0(Type, TypeName, 1)
+IMPLEMENT_AST_SYNTAX_0(Type, TypeProperty, 2)
+IMPLEMENT_AST_SYNTAX_0(Type, UnknownType, 0)
+IMPLEMENT_AST_SYNTAX_0(Type, VoidType, 0)
 
 //
-// InvalidType
+// RecordTypeSyntax
 //
-InvalidType::InvalidType(const SourceCodeRange& range)
-    : NodeTemplate(std::make_tuple(), range) {}
+RecordTypeSyntax::RecordTypeSyntax()
+    : SyntaxTemplate(std::tuple<>(),
+                     SyntaxCode::RecordType,
+                     Format::Builder().set_is_variadic(true).Build()) {}
 
-InvalidType::~InvalidType() = default;
-
-//
-// NullableType
-//
-NullableType::NullableType(const SourceCodeRange& range, const Type& type)
-    : NodeTemplate(std::make_tuple(&type), range) {}
-
-NullableType::~NullableType() = default;
+RecordTypeSyntax::~RecordTypeSyntax() = default;
 
 //
-// NonNullableType
+// TupleTypeSyntax
 //
-NonNullableType::NonNullableType(const SourceCodeRange& range, const Type& type)
-    : NodeTemplate(std::make_tuple(&type), range) {}
+TupleTypeSyntax::TupleTypeSyntax()
+    : SyntaxTemplate(std::tuple<>(),
+                     SyntaxCode::TupleType,
+                     Format::Builder().set_is_variadic(true).Build()) {}
 
-NonNullableType::~NonNullableType() = default;
-
-//
-// OptionalType
-//
-OptionalType::OptionalType(const SourceCodeRange& range, const Type& type)
-    : NodeTemplate(std::make_tuple(&type), range) {}
-
-OptionalType::~OptionalType() = default;
+TupleTypeSyntax::~TupleTypeSyntax() = default;
 
 //
-// RecordType
+// TypeApplicationSyntax
 //
-RecordType::RecordType(const SourceCodeRange& range,
-                       const RecordTypeMembers& members)
-    : NodeTemplate(std::make_tuple(&members), range) {}
+TypeApplicationSyntax::TypeApplicationSyntax()
+    : SyntaxTemplate(std::tuple<>(),
+                     SyntaxCode::TypeApplication,
+                     Format::Builder().set_arity(2).Build()) {}
 
-RecordType::~RecordType() = default;
+TypeApplicationSyntax::~TypeApplicationSyntax() = default;
 
-//
-// RecordTypeMembers
-//
-RecordTypeMembers::RecordTypeMembers(Zone* zone,
-                                     const std::vector<Member>& members)
-    : members_(zone, members) {}
+const Node& TypeApplicationSyntax::ArgumentsOf(const Node& node) {
+  DCHECK_EQ(node, SyntaxCode::TypeApplication);
+  return node.child_at(1);
+}
 
-RecordTypeMembers::~RecordTypeMembers() = default;
-
-//
-// RestType
-//
-RestType::RestType(const SourceCodeRange& range, const Type& type)
-    : NodeTemplate(std::make_tuple(&type), range) {}
-
-RestType::~RestType() = default;
+const Node& TypeApplicationSyntax::NameOf(const Node& node) {
+  DCHECK_EQ(node, SyntaxCode::TypeApplication);
+  return node.child_at(0);
+}
 
 //
-// TupleType
+// UnionTypeSyntax
 //
-TupleType::TupleType(const SourceCodeRange& range, const TypeList& members)
-    : NodeTemplate(std::make_tuple(&members), range) {}
+UnionTypeSyntax::UnionTypeSyntax()
+    : SyntaxTemplate(std::tuple<>(),
+                     SyntaxCode::UnionType,
+                     Format::Builder().set_is_variadic(true).Build()) {}
 
-TupleType::~TupleType() = default;
-
-//
-// Type
-//
-Type::Type(const SourceCodeRange& range) : Node(range) {}
-Type::~Type() = default;
-
-//
-// TypeApplication
-//
-TypeApplication::TypeApplication(const SourceCodeRange& range,
-                                 const Name& name,
-                                 const TypeList& members)
-    : NodeTemplate(std::make_tuple(&name, &members), range) {}
-
-TypeApplication::~TypeApplication() = default;
-
-//
-// TypeList
-//
-TypeList::TypeList(Zone* zone, const std::vector<const Type*>& types)
-    : types_(zone, types) {}
-
-TypeList::~TypeList() = default;
-
-//
-// TypeGroup
-//
-TypeGroup::TypeGroup(const SourceCodeRange& range, const Type& type)
-    : NodeTemplate(std::make_tuple(&type), range) {}
-
-TypeGroup::~TypeGroup() = default;
-
-//
-// TypeName
-//
-TypeName::TypeName(const SourceCodeRange& range, const Name& name)
-    : NodeTemplate(std::make_tuple(&name), range) {}
-
-TypeName::~TypeName() = default;
-
-//
-// UnionType
-//
-UnionType::UnionType(const SourceCodeRange& range, const TypeList& members)
-    : NodeTemplate(std::make_tuple(&members), range) {}
-
-UnionType::~UnionType() = default;
-
-//
-// UnknownType
-//
-UnknownType::UnknownType(const SourceCodeRange& range)
-    : NodeTemplate(std::make_tuple(), range) {}
-
-UnknownType::~UnknownType() = default;
-
-//
-// VoidType
-//
-VoidType::VoidType(const SourceCodeRange& range)
-    : NodeTemplate(std::make_tuple(), range) {}
-
-VoidType::~VoidType() = default;
+UnionTypeSyntax::~UnionTypeSyntax() = default;
 
 }  // namespace ast
 }  // namespace joana

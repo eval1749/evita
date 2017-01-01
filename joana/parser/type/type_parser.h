@@ -18,14 +18,11 @@ class SourceCode;
 class SourceCodeRange;
 
 namespace ast {
-class Name;
 enum class NameId;
 enum class FunctionTypeKind;
+class Node;
 class NodeFactory;
-class Punctuator;
 enum class PunctuatorKind;
-class Token;
-class Type;
 }
 
 namespace parser {
@@ -40,11 +37,6 @@ enum class TypeLexerMode;
 // source code.
 //
 class TypeParser final {
-  using Name = ast::Name;
-  using Token = ast::Token;
-  using Type = ast::Type;
-  using RecordMember = std::pair<const Name*, const Type*>;
-
  public:
   TypeParser(ParserContext* context,
              const SourceCodeRange& range,
@@ -55,7 +47,7 @@ class TypeParser final {
              const ParserOptions& options);
   ~TypeParser();
 
-  const Type& Parse();
+  const ast::Node& Parse();
 
  private:
   class TypeNodeScope;
@@ -65,12 +57,12 @@ class TypeParser final {
 
   void AddError(int start, int end, TypeErrorCode error_code);
   void AddError(const SourceCodeRange& range, TypeErrorCode error_code);
-  void AddError(const Token& token, TypeErrorCode error_code);
+  void AddError(const ast::Node& token, TypeErrorCode error_code);
   void AddError(TypeErrorCode error_code);
 
   // Lexer utility members
   bool CanPeekToken() const;
-  const Token& ConsumeToken();
+  const ast::Node& ConsumeToken();
 
   template <typename T>
   bool ConsumeTokenIf(T expected) {
@@ -80,40 +72,42 @@ class TypeParser final {
     return true;
   }
 
-  const Token& PeekToken() const;
+  const ast::Node& PeekToken() const;
   void SkipTokensTo(ast::PunctuatorKind kind);
 
   // Factory members
   SourceCodeRange ComputeNodeRange() const;
-  const Type& NewAnyType();
-  const Type& NewFunctionType(ast::FunctionTypeKind method_kind,
-                              const std::vector<const Type*>& parameters,
-                              const Type& return_type);
-  const Type& NewInvalidType();
-  const Type& NewNullableType(const Type& type);
-  const Type& NewNonNullableType(const Type& type);
-  const Type& NewOptionalType(const Type& type);
-  const Type& NewRecordType(const std::vector<RecordMember>& members);
-  const Type& NewRestType(const Type& type);
-  const Type& NewTupleType(const std::vector<const Type*>& members);
-  const Type& NewTypeApplication(const Name& name,
-                                 const std::vector<const Type*>& types);
-  const Type& NewTypeGroup(const Type& type);
-  const Type& NewTypeName(const Name& name);
-  const Type& NewUnionType(const std::vector<const Type*>& members);
-  const Type& NewUnknownType();
-  const Type& NewVoidType(const SourceCodeRange& range);
+  const ast::Node& NewAnyType();
+  const ast::Node& NewFunctionType(ast::FunctionTypeKind method_kind,
+                                   const ast::Node& parameter_list,
+                                   const ast::Node& return_type);
+  const ast::Node& NewInvalidType();
+  const ast::Node& NewNullableType(const ast::Node& type);
+  const ast::Node& NewNonNullableType(const ast::Node& type);
+  const ast::Node& NewOptionalType(const ast::Node& type);
+  const ast::Node& NewRecordType(const std::vector<const ast::Node*>& members);
+  const ast::Node& NewRestType(const ast::Node& type);
+  const ast::Node& NewTupleType(const std::vector<const ast::Node*>& members);
+  const ast::Node& NewTypeApplication(const ast::Node& name,
+                                      const ast::Node& argument_list);
+  const ast::Node& NewTypeGroup(const ast::Node& type);
+  const ast::Node& NewTypeName(const ast::Node& name);
+  const ast::Node& NewTypeProperty(const ast::Node& name,
+                                   const ast::Node& type);
+  const ast::Node& NewUnionType(const std::vector<const ast::Node*>& members);
+  const ast::Node& NewVoidType(const SourceCodeRange& range);
 
   // Parser for each syntax
-  const Type& ParseTypeApplication(const Name& name);
-  const Type& ParseFunctionType(const Name& name);
-  const Type& ParseNameAsType(const Name& name);
-  const Type& ParseRecordType();
-  const Type& ParseTupleType();
-  const Type& ParseType();
-  const Type& ParseTypeBeforeEqual();
-  const Type& ParseTypeGroup();
-  const Type& ParseUnionType();
+  const ast::Node& ParseFunctionType(const ast::Node& name);
+  const ast::Node& ParseNameAsType(const ast::Node& name);
+  std::pair<const ast::Node*, ast::FunctionTypeKind> ParseParameters();
+  const ast::Node& ParseRecordType();
+  const ast::Node& ParseTupleType();
+  const ast::Node& ParseType();
+  const ast::Node& ParseTypeArguments();
+  const ast::Node& ParseTypeBeforeEqual();
+  const ast::Node& ParseTypeGroup();
+  const ast::Node& ParseUnionType();
 
   const std::unique_ptr<BracketTracker> bracket_tracker_;
   ParserContext& context_;

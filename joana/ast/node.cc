@@ -5,8 +5,8 @@
 #include "joana/ast/node.h"
 
 #include "base/files/file_path.h"
-#include "joana/ast/container_node.h"
 #include "joana/ast/node_traversal.h"
+#include "joana/ast/syntax.h"
 #include "joana/ast/tokens.h"
 #include "joana/base/escaped_string_piece.h"
 #include "joana/base/source_code.h"
@@ -14,7 +14,18 @@
 namespace joana {
 namespace ast {
 
-Node::Node(const SourceCodeRange& range) : range_(range) {}
+//
+// Node
+//
+Node::Node(const SourceCodeRange& range, const Syntax& syntax, size_t arity)
+    : arity_(arity), range_(range), syntax_(syntax) {
+  if (syntax_.is_variadic()) {
+    DCHECK_GE(arity_, syntax.arity());
+    return;
+  }
+  DCHECK_EQ(arity_, syntax.arity());
+}
+
 Node::~Node() = default;
 
 bool Node::operator==(const Node& other) const {
@@ -34,7 +45,7 @@ bool Node::operator!=(const Node* other) const {
 }
 
 bool Node::operator==(NameId name_id) const {
-  auto* name = TryAs<Name>();
+  const auto* name = syntax_.TryAs<NameSyntax>();
   return name && name->number() == static_cast<int>(name_id);
 }
 
@@ -43,7 +54,7 @@ bool Node::operator!=(NameId name_id) const {
 }
 
 bool Node::operator==(PunctuatorKind kind) const {
-  auto* punctuator = TryAs<Punctuator>();
+  const auto* punctuator = syntax_.TryAs<PunctuatorSyntax>();
   return punctuator && punctuator->kind() == kind;
 }
 
@@ -51,49 +62,27 @@ bool Node::operator!=(PunctuatorKind kind) const {
   return !operator==(kind);
 }
 
-Node* Node::first_child() const {
-  return nullptr;
-}
-Node* Node::last_child() const {
-  return nullptr;
+bool Node::operator==(SyntaxCode syntax_code) const {
+  return syntax_ == syntax_code;
 }
 
-const Node& Node::ChildAt(size_t index) const {
-  NOTREACHED() << this;
-  return *this;
+bool Node::operator!=(SyntaxCode syntax_code) const {
+  return !operator==(syntax_code);
 }
 
-bool Node::Contains(const Node& other) const {
-  return this == &other || other.IsDescendantOf(*this);
+const Node& Node::child_at(size_t index) const {
+  DCHECK_LT(index, arity()) << *this;
+  return *nodes_[index];
 }
 
-size_t Node::CountChildNodes() const {
-  NOTREACHED() << this;
-  return 0;
+int Node::name_id() const {
+  return syntax_.As<NameSyntax>().number();
 }
-
-bool Node::IsDescendantOf(const Node& other) const {
-  if (!parent_)
-    return false;
-  for (const auto& runner : NodeTraversal::AncestorsOf(*parent_)) {
-    if (runner == other)
-      return true;
-  }
-  return false;
-}
-
-void Node::PrintTo(std::ostream* ostream) const {
-  *ostream << class_name() << '(' << range_ << ", "
-           << EscapedStringPiece16(range_.GetString(), '"');
-  PrintMoreTo(ostream);
-  *ostream << ')';
-}
-
-void Node::PrintMoreTo(std::ostream* ostream) const {}
 
 std::ostream& operator<<(std::ostream& ostream, const Node& node) {
-  node.PrintTo(&ostream);
-  return ostream;
+  const auto& range = node.range();
+  return ostream << node.syntax() << '(' << range << ", "
+                 << EscapedStringPiece16(range.GetString(), '|') << ')';
 }
 
 std::ostream& operator<<(std::ostream& ostream, const Node* node) {

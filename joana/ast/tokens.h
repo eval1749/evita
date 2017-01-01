@@ -9,11 +9,12 @@
 
 #include "joana/ast/jsdoc_tags.h"
 #include "joana/ast/lexical_grammar.h"
+#include "joana/ast/syntax.h"
 
 namespace joana {
 namespace ast {
 
-class JsDocDocument;
+using JsDocDocument = Node;
 
 //
 // PunctuatorKind
@@ -49,111 +50,48 @@ enum class NameId {
       EndOfJsDocTagName,
 };
 
+DECLARE_AST_SYNTAX_0(Comment)
+DECLARE_AST_SYNTAX_0(Empty)
+DECLARE_AST_SYNTAX_1(Invalid, int, error_code)
+
 //
-// Token
+// PunctuatorSyntax
 //
-class JOANA_AST_EXPORT Token : public Node {
-  DECLARE_ABSTRACT_AST_NODE(Token, Node);
+class JOANA_AST_EXPORT PunctuatorSyntax final
+    : public SyntaxTemplate<Syntax, PunctuatorKind> {
+  DECLARE_CONCRETE_AST_SYNTAX(PunctuatorSyntax, Syntax);
 
  public:
-  ~Token() override;
+  ~PunctuatorSyntax() final;
 
- protected:
-  explicit Token(const SourceCodeRange& range);
+  PunctuatorKind kind() const { return parameter_at<0>(); }
+
+  static PunctuatorKind KindOf(const Node& node);
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(Token);
+  explicit PunctuatorSyntax(PunctuatorKind kind);
+
+  DISALLOW_COPY_AND_ASSIGN(PunctuatorSyntax);
 };
 
 //
-// Comment
+// NameSyntax
 //
-class JOANA_AST_EXPORT Comment final : public Token {
-  DECLARE_CONCRETE_AST_NODE(Comment, Token);
+class JOANA_AST_EXPORT NameSyntax final : public SyntaxTemplate<Syntax, int> {
+  DECLARE_CONCRETE_AST_SYNTAX(NameSyntax, Syntax);
 
  public:
-  ~Comment() final;
+  ~NameSyntax() final;
+
+  int number() const { return parameter_at<0>(); }
+
+  static int IdOf(const Node& node);
+  static bool IsKeyword(const Node& node);
 
  private:
-  explicit Comment(const SourceCodeRange& range);
+  explicit NameSyntax(int number);
 
-  DISALLOW_COPY_AND_ASSIGN(Comment);
-};
-
-//
-// Empty is used for representing anonymous class and function.
-//
-class JOANA_AST_EXPORT Empty final : public Token {
-  DECLARE_CONCRETE_AST_NODE(Empty, Token);
-
- public:
-  ~Empty() final;
-
- private:
-  explicit Empty(const SourceCodeRange& range);
-
-  DISALLOW_COPY_AND_ASSIGN(Empty);
-};
-
-//
-// JsDoc
-//
-class JOANA_AST_EXPORT JsDoc final : public Token {
-  DECLARE_CONCRETE_AST_NODE(JsDoc, Token);
-
- public:
-  ~JsDoc() final;
-
-  const JsDocDocument& document() const { return document_; }
-
- private:
-  JsDoc(const SourceCodeRange& range, const JsDocDocument& document);
-
-  const JsDocDocument& document_;
-
-  DISALLOW_COPY_AND_ASSIGN(JsDoc);
-};
-
-//
-// Name
-//
-class JOANA_AST_EXPORT Name final : public Token {
-  DECLARE_CONCRETE_AST_NODE(Name, Token);
-
- public:
-  ~Name() final;
-
-  int number() const { return number_; }
-
-  bool IsKeyword() const;
-
- private:
-  Name(const SourceCodeRange& range, int number);
-
-  // Implements |Node| members
-  void PrintMoreTo(std::ostream* ostream) const final;
-
-  const int number_;
-
-  DISALLOW_COPY_AND_ASSIGN(Name);
-};
-
-//
-// Punctuator
-//
-class JOANA_AST_EXPORT Punctuator final : public Token {
-  DECLARE_CONCRETE_AST_NODE(Punctuator, Node);
-
- public:
-  explicit Punctuator(const SourceCodeRange& range, PunctuatorKind kind);
-  ~Punctuator() final;
-
-  PunctuatorKind kind() const { return kind_; }
-
- private:
-  const PunctuatorKind kind_;
-
-  DISALLOW_COPY_AND_ASSIGN(Punctuator);
+  DISALLOW_COPY_AND_ASSIGN(NameSyntax);
 };
 
 }  // namespace ast

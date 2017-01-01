@@ -12,8 +12,8 @@
 
 namespace joana {
 namespace ast {
-class Name;
 class Node;
+using Name = Node;
 }
 namespace analyzer {
 
@@ -37,7 +37,7 @@ class Environment final : public ZoneAllocated {
   // Return the AST node which associated to this Environment.
   const ast::Node& owner() const { return owner_; }
 
-  Value* BindingOf(const ast::Name& name) const;
+  Value* BindingOf(const ast::Node& name) const;
 
  private:
   friend class EnvironmentBuilder;
@@ -46,7 +46,7 @@ class Environment final : public ZoneAllocated {
   Environment(Zone* zone, Environment* outer, const ast::Node& owner);
   Environment(Zone* zone, const ast::Node& owner);
 
-  void Bind(const ast::Name& name, Value* value);
+  void Bind(const ast::Node& name, Value* value);
 
   ZoneVector<const ast::Name*> names_;
   ZoneUnorderedMap<int, const ast::Name*> name_map_;

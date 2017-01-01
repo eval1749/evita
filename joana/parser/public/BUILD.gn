@@ -19,7 +19,8 @@ component("public") {
   ]
 
   public_deps = [
-    "//joana/parser",
+    # "//joana/parser",
+    "//joana/ast",
   ]
 
   configs += [ "//joana/parser:parser_implementation" ]

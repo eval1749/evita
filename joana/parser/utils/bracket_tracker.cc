@@ -74,10 +74,9 @@ void BracketTracker::Mark(const ast::Node& token,
 }
 
 void BracketTracker::Feed(const ast::Node& token) {
-  auto* const bracket = token.TryAs<ast::Punctuator>();
-  if (!bracket)
+  if (token != ast::SyntaxCode::Punctuator)
     return;
-  const auto kind = bracket->kind();
+  const auto kind = token.syntax().As<ast::PunctuatorSyntax>().kind();
   if (kind < min_max_.first || kind > min_max_.second)
     return;
   for (const auto& description : descriptions_) {

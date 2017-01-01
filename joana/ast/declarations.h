@@ -6,14 +6,11 @@
 #define JOANA_AST_DECLARATIONS_H_
 
 #include "joana/ast/node.h"
-#include "joana/ast/node_forward.h"
+#include "joana/ast/syntax.h"
+#include "joana/ast/syntax_forward.h"
 
 namespace joana {
 namespace ast {
-
-class ExpressionList;
-class ParameterList;
-class Statement;
 
 //
 // FunctionKind
@@ -37,138 +34,85 @@ enum class MethodKind {
 };
 
 //
-// Declaration is a base class of declaration nodes.
+// ArrowFunctionSyntax
 //
-class JOANA_AST_EXPORT Declaration : public Node {
-  DECLARE_ABSTRACT_AST_NODE(Declaration, Node);
+class JOANA_AST_EXPORT ArrowFunctionSyntax final
+    : public SyntaxTemplate<Syntax, FunctionKind> {
+  DECLARE_CONCRETE_AST_SYNTAX(ArrowFunctionSyntax, Syntax);
 
  public:
-  ~Declaration() override;
+  ~ArrowFunctionSyntax() final;
 
- protected:
-  explicit Declaration(const SourceCodeRange& range);
+  static const Node& BodyOf(const Node& node);
+
+  //  - x = ReferenceExpression
+  //  - () = ParameterList
+  //  - (a, b, ...) = ParameterList
+  static const Node& ParametersOf(const Node& node);
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(Declaration);
+  explicit ArrowFunctionSyntax(FunctionKind kind);
+
+  DISALLOW_COPY_AND_ASSIGN(ArrowFunctionSyntax);
 };
 
 //
-// ArrowFunction
+// ClassSyntax
 //
-// The parameter list is represented by |ast::Expression| with:
-//  - x = ReferenceExpression
-//  - () = ParameterList
-//  - (a, b, ...) = ParameterList
-//
-class JOANA_AST_EXPORT ArrowFunction final
-    : public NodeTemplate<Declaration,
-                          FunctionKind,
-                          const Expression*,
-                          const ArrowFunctionBody*> {
-  DECLARE_CONCRETE_AST_NODE(ArrowFunction, Declaration);
+class JOANA_AST_EXPORT ClassSyntax final : public SyntaxTemplate<Syntax> {
+  DECLARE_CONCRETE_AST_SYNTAX(ClassSyntax, Syntax);
 
  public:
-  ~ArrowFunction() final;
+  ~ClassSyntax() final;
 
-  const ArrowFunctionBody& body() const { return *member_at<2>(); }
-  FunctionKind kind() const { return member_at<0>(); }
-  const Expression& parameter_list() const { return *member_at<1>(); }
+  static const Node& BodyOf(const Node& node);
+  static const Node& HerisyntaxeOf(const Node& node);
+  static const Node& NameOf(const Node& node);
 
  private:
-  // |statement| should be either expression statement or block statement.
-  ArrowFunction(const SourceCodeRange& range,
-                FunctionKind kind,
-                const Expression& parameter_list,
-                const ArrowFunctionBody& body);
+  ClassSyntax();
 
-  DISALLOW_COPY_AND_ASSIGN(ArrowFunction);
+  DISALLOW_COPY_AND_ASSIGN(ClassSyntax);
 };
 
 //
-// Class
+// FunctionSyntax
 //
-class JOANA_AST_EXPORT Class final : public NodeTemplate<Declaration,
-                                                         const Token*,
-                                                         const Expression*,
-                                                         const Expression*> {
-  DECLARE_CONCRETE_AST_NODE(Class, Declaration);
+class JOANA_AST_EXPORT FunctionSyntax final
+    : public SyntaxTemplate<Syntax, FunctionKind> {
+  DECLARE_CONCRETE_AST_SYNTAX(FunctionSyntax, Syntax);
 
  public:
-  ~Class() final;
+  ~FunctionSyntax() final;
 
-  const Expression& body() const { return *member_at<2>(); }
-  const Token& name() const { return *member_at<0>(); }
-  const Expression& heritage() const { return *member_at<1>(); }
+  static const Node& BodyOf(const Node& node);
+  static const Node& NameOf(const Node& node);
+  static const Node& ParametersOf(const Node& node);
 
  private:
-  Class(const SourceCodeRange& range,
-        const Token& name,
-        const Expression& heritage,
-        const Expression& body);
+  explicit FunctionSyntax(FunctionKind kind);
 
-  DISALLOW_COPY_AND_ASSIGN(Class);
+  DISALLOW_COPY_AND_ASSIGN(FunctionSyntax);
 };
 
 //
-// Function
+// MethodSyntax
 //
-class JOANA_AST_EXPORT Function final
-    : public NodeTemplate<Declaration,
-                          FunctionKind,
-                          const Token*,
-                          const ParameterList*,
-                          const Statement*> {
-  DECLARE_CONCRETE_AST_NODE(Function, Declaration);
+class JOANA_AST_EXPORT MethodSyntax final
+    : public SyntaxTemplate<Syntax, MethodKind, FunctionKind> {
+  DECLARE_CONCRETE_AST_SYNTAX(MethodSyntax, Syntax);
 
  public:
-  ~Function() final;
+  ~MethodSyntax() final;
 
-  const Statement& body() const { return *member_at<3>(); }
-  FunctionKind kind() const { return member_at<0>(); }
-  const Token& name() const { return *member_at<1>(); }
-  const ParameterList& parameter_list() const { return *member_at<2>(); }
-
- private:
-  // |statement| should be either expression statement or block statement.
-  Function(const SourceCodeRange& range,
-           FunctionKind kind,
-           const Token& name,
-           const ParameterList& parameter_list,
-           const Statement& body);
-
-  DISALLOW_COPY_AND_ASSIGN(Function);
-};
-
-//
-// Method
-//
-class JOANA_AST_EXPORT Method final : public NodeTemplate<Declaration,
-                                                          MethodKind,
-                                                          FunctionKind,
-                                                          const Expression*,
-                                                          const ParameterList*,
-                                                          const Statement*> {
-  DECLARE_CONCRETE_AST_NODE(Method, Declaration);
-
- public:
-  ~Method() final;
-
-  const Statement& body() const { return *member_at<4>(); }
-  FunctionKind kind() const { return member_at<1>(); }
-  MethodKind method_kind() const { return member_at<0>(); }
-  const Expression& name() const { return *member_at<2>(); }
-  const ParameterList& parameter_list() const { return *member_at<3>(); }
+  static const Node& BodyOf(const Node& node);
+  static const Node& NameOf(const Node& node);
+  static const Node& ParametersOf(const Node& node);
 
  private:
-  // |statement| should be either expression statement or block statement.
-  Method(const SourceCodeRange& range,
-         MethodKind method_kind,
-         FunctionKind kind,
-         const Expression& name,
-         const ParameterList& parameter_list,
-         const Statement& body);
+  MethodSyntax(MethodKind method_kind, FunctionKind kind);
 
-  DISALLOW_COPY_AND_ASSIGN(Method);
+  DISALLOW_COPY_AND_ASSIGN(MethodSyntax);
 };
 
 }  // namespace ast

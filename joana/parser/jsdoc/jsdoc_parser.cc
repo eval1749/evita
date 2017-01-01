@@ -9,11 +9,11 @@
 #include "joana/parser/jsdoc/jsdoc_parser.h"
 
 #include "base/auto_reset.h"
-#include "joana/ast/jsdoc_nodes.h"
+#include "joana/ast/jsdoc_syntaxes.h"
 #include "joana/ast/jsdoc_tags.h"
 #include "joana/ast/node.h"
 #include "joana/ast/node_factory.h"
-#include "joana/ast/node_forward.h"
+#include "joana/ast/syntax_forward.h"
 #include "joana/ast/tokens.h"
 #include "joana/base/error_sink.h"
 #include "joana/base/source_code.h"
@@ -30,12 +30,6 @@ namespace parser {
 
 namespace {
 
-using JsDocDocument = ast::JsDocDocument;
-using JsDocNode = ast::JsDocNode;
-using Name = ast::Name;
-using Node = ast::Node;
-using Token = ast::Token;
-
 enum class Syntax {
   Unknown,
 #define V(name, ...) name,
@@ -43,9 +37,9 @@ enum class Syntax {
 #undef V
 };
 
-Syntax TagSyntaxOf(const Name& name) {
-#define V(underscore, capital, syntax)                                \
-  if (name.number() == static_cast<int>(ast::NameId::JsDoc##capital)) \
+Syntax TagSyntaxOf(const ast::Node& name) {
+#define V(underscore, capital, syntax)                                 \
+  if (name.name_id() == static_cast<int>(ast::NameId::JsDoc##capital)) \
     return Syntax::syntax;
   FOR_EACH_JSDOC_TAG_NAME(V)
 #undef V
@@ -131,47 +125,43 @@ SourceCodeRange JsDocParser::ComputeNodeRange() const {
   return source_code().Slice(node_start_, location());
 }
 
-const JsDocDocument& JsDocParser::NewDocument(
-    const std::vector<const JsDocNode*>& nodes) {
+const ast::Node& JsDocParser::NewDocument(
+    const std::vector<const ast::Node*>& nodes) {
   return node_factory().NewJsDocDocument(ComputeNodeRange(), nodes);
 }
 
-const JsDocNode& JsDocParser::NewName() {
-  return node_factory().NewJsDocName(ComputeNodeRange());
-}
-
-const Name& JsDocParser::NewTagName() {
+const ast::Node& JsDocParser::NewName() {
   return node_factory().NewName(ComputeNodeRange());
 }
 
-const JsDocNode& JsDocParser::NewTagWithVector(
-    const Name& name,
-    const std::vector<const JsDocNode*>& parameters) {
+const ast::Node& JsDocParser::NewTagName() {
+  return node_factory().NewName(ComputeNodeRange());
+}
+
+const ast::Node& JsDocParser::NewTagWithVector(
+    const ast::Node& name,
+    const std::vector<const ast::Node*>& parameters) {
   return node_factory().NewJsDocTag(ComputeNodeRange(), name, parameters);
 }
 
-const JsDocNode& JsDocParser::NewText(const SourceCodeRange& range) {
+const ast::Node& JsDocParser::NewText(const SourceCodeRange& range) {
   return node_factory().NewJsDocText(range);
 }
 
-const JsDocNode& JsDocParser::NewText(int start, int end) {
+const ast::Node& JsDocParser::NewText(int start, int end) {
   return NewText(source_code().Slice(start, end));
 }
 
-const JsDocNode& JsDocParser::NewText() {
+const ast::Node& JsDocParser::NewText() {
   return NewText(ComputeNodeRange());
-}
-
-const JsDocNode& JsDocParser::NewType(const ast::Type& type) {
-  return node_factory().NewJsDocType(ComputeNodeRange(), type);
 }
 
 // Parsing functions
 // The entry point of JsDoc parser.
-const JsDocDocument* JsDocParser::Parse() {
+const ast::Node* JsDocParser::Parse() {
   NodeRangeScope scope(this);
   SkipWhitespaces();
-  std::vector<const JsDocNode*> nodes;
+  std::vector<const ast::Node*> nodes;
   auto number_of_tags = 0;
   auto text_start = location();
   while (CanPeekChar()) {
@@ -192,7 +182,7 @@ const JsDocDocument* JsDocParser::Parse() {
 }
 
 // Extract text without leading and trailing whitespace.
-const JsDocNode& JsDocParser::ParseDescription() {
+const ast::Node& JsDocParser::ParseDescription() {
   SkipWhitespaces();
   const auto text_start = reader_->location();
   auto text_end = SkipToBlockTag();
@@ -200,7 +190,7 @@ const JsDocNode& JsDocParser::ParseDescription() {
 }
 
 // Returns list of comma separated words.
-std::vector<const JsDocNode*> JsDocParser::ParseNameList() {
+std::vector<const ast::Node*> JsDocParser::ParseNameList() {
   SkipWhitespaces();
   NodeRangeScope scope(this);
   if (!ConsumeCharIf(kLeftBrace)) {
@@ -213,7 +203,7 @@ std::vector<const JsDocNode*> JsDocParser::ParseNameList() {
   return std::move(names);
 }
 
-const JsDocNode& JsDocParser::ParseName() {
+const ast::Node& JsDocParser::ParseName() {
   SkipWhitespaces();
   NodeRangeScope scope(this);
   while (CanPeekChar() && IsIdentifierPart(PeekChar()))
@@ -221,8 +211,8 @@ const JsDocNode& JsDocParser::ParseName() {
   return NewName();
 }
 
-std::vector<const JsDocNode*> JsDocParser::ParseNames() {
-  std::vector<const JsDocNode*> names;
+std::vector<const ast::Node*> JsDocParser::ParseNames() {
+  std::vector<const ast::Node*> names;
   SkipWhitespaces();
   while (CanPeekChar()) {
     if (!IsIdentifierStart(PeekChar()))
@@ -237,7 +227,7 @@ std::vector<const JsDocNode*> JsDocParser::ParseNames() {
 }
 
 // Extract text until newline
-const JsDocNode& JsDocParser::ParseSingleLine() {
+const ast::Node& JsDocParser::ParseSingleLine() {
   SkipWhitespaces();
   const auto text_start = location();
   auto text_end = text_start;
@@ -253,7 +243,7 @@ const JsDocNode& JsDocParser::ParseSingleLine() {
 }
 
 // Called after consuming '@'.
-const JsDocNode& JsDocParser::ParseTag(const Name& tag_name) {
+const ast::Node& JsDocParser::ParseTag(const ast::Node& tag_name) {
   switch (TagSyntaxOf(tag_name)) {
     case Syntax::Description:
       SkipWhitespaces();
@@ -292,7 +282,7 @@ const JsDocNode& JsDocParser::ParseTag(const Name& tag_name) {
   return NewTag(tag_name);
 }
 
-const Name& JsDocParser::ParseTagName() {
+const ast::Node& JsDocParser::ParseTagName() {
   DCHECK_EQ(PeekChar(), '@');
   NodeRangeScope scope(this);
   ConsumeChar();
@@ -301,7 +291,7 @@ const Name& JsDocParser::ParseTagName() {
   return NewTagName();
 }
 
-const JsDocNode& JsDocParser::ParseType() {
+const ast::Node& JsDocParser::ParseType() {
   SkipWhitespaces();
   NodeRangeScope scope(this);
   if (!ConsumeCharIf(kLeftBrace)) {
@@ -329,7 +319,7 @@ const JsDocNode& JsDocParser::ParseType() {
                     options_, TypeLexerMode::JsDoc);
   auto& type = parser.Parse();
   ConsumeCharIf(kRightBrace);
-  return NewType(type);
+  return type;
 }
 
 int JsDocParser::SkipToBlockTag() {

@@ -8,6 +8,7 @@
 #include <limits>
 
 #include "joana/ast/node.h"
+#include "joana/ast/syntax.h"
 
 namespace joana {
 namespace ast {
@@ -53,278 +54,25 @@ struct JOANA_AST_EXPORT RegExpRepeat {
   int max = 0;
 };
 
+JOANA_AST_EXPORT bool operator<(const RegExpRepeat& repeat1,
+                                const RegExpRepeat& repeat2);
+
 JOANA_AST_EXPORT std::ostream& operator<<(std::ostream& ostream,
-                                             const RegExpRepeat& repeat);
-
-//
-// RegExp
-//
-class JOANA_AST_EXPORT RegExp : public Node {
-  DECLARE_ABSTRACT_AST_NODE(RegExp, Node);
-
- public:
-  ~RegExp() override;
-
- protected:
-  RegExp(const SourceCodeRange& range);
-
- private:
-  DISALLOW_COPY_AND_ASSIGN(RegExp);
-};
-
-//
-// RegExpList
-//
-class JOANA_AST_EXPORT RegExpList final : public ZoneAllocated {
- public:
-  ~RegExpList();
-
-  auto begin() const { return patterns_.begin(); }
-  bool empty() const { return patterns_.empty(); }
-  auto end() const { return patterns_.end(); }
-  size_t size() const { return patterns_.size(); }
-
- private:
-  friend class NodeFactory;
-
-  RegExpList(Zone* zone, const std::vector<RegExp*>& patterns);
-
-  ZoneVector<RegExp*> patterns_;
-
-  DISALLOW_COPY_AND_ASSIGN(RegExpList);
-};
-
-//
-// AnyCharRegExp
-//
-class JOANA_AST_EXPORT AnyCharRegExp final : public NodeTemplate<RegExp> {
-  DECLARE_CONCRETE_AST_NODE(AnyCharRegExp, RegExp);
-
- public:
-  ~AnyCharRegExp() final;
-
- private:
-  AnyCharRegExp(const SourceCodeRange& range);
-
-  DISALLOW_COPY_AND_ASSIGN(AnyCharRegExp);
-};
-
-//
-// AssertionRegExp
-//
-class JOANA_AST_EXPORT AssertionRegExp final
-    : public NodeTemplate<RegExp, RegExpAssertionKind> {
-  DECLARE_CONCRETE_AST_NODE(AssertionRegExp, RegExp);
-
- public:
-  ~AssertionRegExp() final;
-
-  RegExpAssertionKind kind() const { return member_at<0>(); }
-
- private:
-  AssertionRegExp(const SourceCodeRange& range, RegExpAssertionKind kind);
-
-  DISALLOW_COPY_AND_ASSIGN(AssertionRegExp);
-};
-
-//
-// CaptureRegExp
-//
-class JOANA_AST_EXPORT CaptureRegExp final
-    : public NodeTemplate<RegExp, RegExp*> {
-  DECLARE_CONCRETE_AST_NODE(CaptureRegExp, RegExp);
-
- public:
-  ~CaptureRegExp() final;
-
-  RegExp& pattern() const { return *member_at<0>(); }
-
- private:
-  CaptureRegExp(const SourceCodeRange& range, RegExp* pattern);
-
-  DISALLOW_COPY_AND_ASSIGN(CaptureRegExp);
-};
-
-//
-// CharSetRegExp
-// TODO(eval1749): We should make |CharSetRegExp| to hold list of character
-// ranges.
-class JOANA_AST_EXPORT CharSetRegExp final : public NodeTemplate<RegExp> {
-  DECLARE_CONCRETE_AST_NODE(CharSetRegExp, RegExp);
-
- public:
-  ~CharSetRegExp() final;
-
- private:
-  CharSetRegExp(const SourceCodeRange& range);
-
-  DISALLOW_COPY_AND_ASSIGN(CharSetRegExp);
-};
-
-//
-// ComplementCharSetRegExp
-// TODO(eval1749): We should make |CharSetRegExp| to hold list of character
-// ranges.
-class JOANA_AST_EXPORT ComplementCharSetRegExp final
-    : public NodeTemplate<RegExp> {
-  DECLARE_CONCRETE_AST_NODE(ComplementCharSetRegExp, RegExp);
-
- public:
-  ~ComplementCharSetRegExp() final;
-
- private:
-  ComplementCharSetRegExp(const SourceCodeRange& range);
-
-  DISALLOW_COPY_AND_ASSIGN(ComplementCharSetRegExp);
-};
-
-//
-// GreedyRepeatRegExp
-//
-class JOANA_AST_EXPORT GreedyRepeatRegExp final
-    : public NodeTemplate<RegExp, RegExp*, RegExpRepeat> {
-  DECLARE_CONCRETE_AST_NODE(GreedyRepeatRegExp, RegExp);
-
- public:
-  ~GreedyRepeatRegExp() final;
-
-  RegExp& pattern() const { return *member_at<0>(); }
-  const RegExpRepeat repeat() const { return member_at<1>(); }
-
- private:
-  GreedyRepeatRegExp(const SourceCodeRange& range,
-                     RegExp* pattern,
-                     const RegExpRepeat& repeat);
-
-  DISALLOW_COPY_AND_ASSIGN(GreedyRepeatRegExp);
-};
-
-//
-// InvalidRegExp
-//
-class JOANA_AST_EXPORT InvalidRegExp : public RegExp {
-  DECLARE_CONCRETE_AST_NODE(InvalidRegExp, RegExp);
-
- public:
-  ~InvalidRegExp() final;
-
-  int error_code() const { return error_code_; }
-
- private:
-  InvalidRegExp(const SourceCodeRange& range, int error_code);
-
-  const int error_code_;
-
-  DISALLOW_COPY_AND_ASSIGN(InvalidRegExp);
-};
-
-//
-// LazyRepeatRegExp
-//
-class JOANA_AST_EXPORT LazyRepeatRegExp final
-    : public NodeTemplate<RegExp, RegExp*, RegExpRepeat> {
-  DECLARE_CONCRETE_AST_NODE(LazyRepeatRegExp, RegExp);
-
- public:
-  ~LazyRepeatRegExp() final;
-
-  RegExp& pattern() const { return *member_at<0>(); }
-  const RegExpRepeat repeat() const { return member_at<1>(); }
-
- private:
-  LazyRepeatRegExp(const SourceCodeRange& range,
-                   RegExp* pattern,
-                   const RegExpRepeat& repeat);
-
-  DISALLOW_COPY_AND_ASSIGN(LazyRepeatRegExp);
-};
-
-//
-// LookAheadRegExp
-//
-class JOANA_AST_EXPORT LookAheadRegExp final
-    : public NodeTemplate<RegExp, RegExp*> {
-  DECLARE_CONCRETE_AST_NODE(LookAheadRegExp, RegExp);
-
- public:
-  ~LookAheadRegExp() final;
-
-  RegExp& pattern() const { return *member_at<0>(); }
-
- private:
-  LookAheadRegExp(const SourceCodeRange& range, RegExp* pattern);
-
-  DISALLOW_COPY_AND_ASSIGN(LookAheadRegExp);
-};
-
-//
-// LookAheadNotRegExp
-//
-class JOANA_AST_EXPORT LookAheadNotRegExp final
-    : public NodeTemplate<RegExp, RegExp*> {
-  DECLARE_CONCRETE_AST_NODE(LookAheadNotRegExp, RegExp);
-
- public:
-  ~LookAheadNotRegExp() final;
-
-  RegExp& pattern() const { return *member_at<0>(); }
-
- private:
-  LookAheadNotRegExp(const SourceCodeRange& range, RegExp* pattern);
-
-  DISALLOW_COPY_AND_ASSIGN(LookAheadNotRegExp);
-};
-
-//
-// LiteralRegExp
-//
-class JOANA_AST_EXPORT LiteralRegExp final : public NodeTemplate<RegExp> {
-  DECLARE_CONCRETE_AST_NODE(LiteralRegExp, RegExp);
-
- public:
-  ~LiteralRegExp() final;
-
- private:
-  LiteralRegExp(const SourceCodeRange& range);
-
-  DISALLOW_COPY_AND_ASSIGN(LiteralRegExp);
-};
-
-//
-// OrRegExp
-//
-class JOANA_AST_EXPORT OrRegExp final
-    : public NodeTemplate<RegExp, RegExpList*> {
-  DECLARE_CONCRETE_AST_NODE(OrRegExp, RegExp);
-
- public:
-  ~OrRegExp() final;
-
-  const RegExpList& patterns() const { return *member_at<0>(); }
-
- private:
-  OrRegExp(const SourceCodeRange& range, RegExpList* elements);
-
-  DISALLOW_COPY_AND_ASSIGN(OrRegExp);
-};
-
-//
-// SequenceRegExp
-//
-class JOANA_AST_EXPORT SequenceRegExp final
-    : public NodeTemplate<RegExp, RegExpList*> {
-  DECLARE_CONCRETE_AST_NODE(SequenceRegExp, RegExp);
-
- public:
-  ~SequenceRegExp() final;
-
-  const RegExpList& patterns() const { return *member_at<0>(); }
-
- private:
-  SequenceRegExp(const SourceCodeRange& range, RegExpList* elements);
-
-  DISALLOW_COPY_AND_ASSIGN(SequenceRegExp);
-};
+                                          const RegExpRepeat& repeat);
+
+DECLARE_AST_SYNTAX_0(AnyCharRegExp)
+DECLARE_AST_SYNTAX_1(AssertionRegExp, RegExpAssertionKind, kind)
+DECLARE_AST_SYNTAX_0(CaptureRegExp)
+DECLARE_AST_SYNTAX_0(CharSetRegExp)
+DECLARE_AST_SYNTAX_0(ComplementCharSetRegExp)
+DECLARE_AST_SYNTAX_1(GreedyRepeatRegExp, RegExpRepeat, repeat)
+DECLARE_AST_SYNTAX_0(InvalidRegExp)
+DECLARE_AST_SYNTAX_1(LazyRepeatRegExp, RegExpRepeat, repeat)
+DECLARE_AST_SYNTAX_0(LiteralRegExp)
+DECLARE_AST_SYNTAX_0(LookAheadRegExp)
+DECLARE_AST_SYNTAX_0(LookAheadNotRegExp)
+DECLARE_AST_SYNTAX_0(OrRegExp)
+DECLARE_AST_SYNTAX_0(SequenceRegExp)
 
 }  // namespace ast
 }  // namespace joana

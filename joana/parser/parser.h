@@ -12,7 +12,7 @@
 
 #include "base/auto_reset.h"
 #include "base/macros.h"
-#include "joana/ast/node_forward.h"
+#include "joana/ast/syntax_forward.h"
 #include "joana/base/source_code_range.h"
 #include "joana/parser/public/parse.h"
 
@@ -71,7 +71,7 @@ class Parser final {
   void Advance();
 
   // Associate |jsdoc| to |node|.
-  void AssociateJsDoc(const ast::JsDoc& jsdoc, const ast::Node& node);
+  void AssociateJsDoc(const ast::JsDocToken& jsdoc, const ast::Node& node);
   bool CanPeekToken() const;
   const ast::Token& ConsumeToken();
   // Returns true if |Lexer| has a punctuator of |name_id| and advance to next
@@ -162,7 +162,7 @@ class Parser final {
 
   const ast::Expression& ParseJsDocAsExpression();
   std::vector<const ast::Expression*> ParseArgumentList();
-  const ast::Expression& ParseArrayLiteralExpression();
+  const ast::Expression& ParseArrayInitializer();
   const ast::Expression& ParseAssignmentExpression();
   const ast::Expression& ParseBinaryExpression(OperatorPrecedence category);
   const ast::Expression& ParseCommaExpression();
@@ -173,7 +173,7 @@ class Parser final {
                                                ast::FunctionKind kind);
   const ast::Expression& ParseNameAsExpression();
   const ast::Expression& ParseNewExpression();
-  const ast::Expression& ParseObjectLiteralExpression();
+  const ast::Expression& ParseObjectInitializer();
   const ast::Expression& ParseParenthesis();
   const ast::Expression& ParsePrimaryExpression();
   const ast::Expression& ParsePropertyAfterName(
@@ -186,7 +186,7 @@ class Parser final {
   const ast::Expression& ParseYieldExpression();
 
   // Statements
-  const ast::Statement& HandleLabeledStatement(const ast::Name& name);
+  const ast::Statement& HandleLabeledStatement(const ast::Node& name);
 
   const ast::Statement& NewInvalidStatement(ErrorCode error_code);
   const ast::Statement& NewEmptyStatement(const SourceCodeRange& range);
@@ -231,7 +231,7 @@ class Parser final {
   const ast::BindingElement& NewBindingCommaElement(const ast::Token& range);
 
   const ast::BindingElement& NewBindingNameElement(
-      const ast::Name& name,
+      const ast::Node& name,
       const ast::Expression& initializer);
 
   const ast::BindingElement& NewObjectBindingPattern(
@@ -243,7 +243,7 @@ class Parser final {
   const ast::BindingElement& ParseObjectBindingPattern();
 
   // Map node to jsdoc
-  std::unordered_map<const ast::Node*, const ast::JsDoc*> jsdoc_map_;
+  std::unordered_map<const ast::Node*, const ast::JsDocDocument*> jsdoc_map_;
   const std::unique_ptr<BracketTracker> bracket_tracker_;
   ParserContext& context_;
 

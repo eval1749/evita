@@ -9,6 +9,7 @@
 
 #include "joana/ast/bindings.h"
 #include "joana/ast/compilation_units.h"
+#include "joana/ast/node_traversal.h"
 #include "joana/ast/statements.h"
 #include "joana/ast/tokens.h"
 #include "joana/base/error_sink.h"
@@ -52,8 +53,8 @@ std::string ParserTest::Parse(base::StringPiece script_text,
   SimpleFormatter(&ostream).Format(module);
   for (const auto& error : error_sink().errors())
     ostream << error << std::endl;
-  for (const auto& statement : module.statements()) {
-    auto* jsdoc = module.JsDocFor(statement);
+  for (const auto& statement : ast::NodeTraversal::ChildNodesOf(module)) {
+    auto* jsdoc = node_factory().JsDocFor(statement);
     if (!jsdoc)
       continue;
     ostream << statement << ':' << *jsdoc << std::endl;
@@ -83,8 +84,8 @@ std::string ParserTest::ToString(const ast::Node& node,
     ostream << error << std::endl;
   if (!module)
     return ostream.str();
-  for (const auto& statement : module->statements()) {
-    auto* jsdoc = module->JsDocFor(statement);
+  for (const auto& statement : ast::NodeTraversal::ChildNodesOf(*module)) {
+    auto* jsdoc = node_factory().JsDocFor(statement);
     if (!jsdoc)
       continue;
     ostream << statement << ':' << *jsdoc << std::endl;

@@ -5,153 +5,72 @@
 #include "joana/ast/node_traversal.h"
 
 #include "base/logging.h"
-#include "joana/ast/container_node.h"
+#include "joana/ast/node.h"
 
 namespace joana {
 namespace ast {
 
 //
-// NodeAncestors
+// ChildNodes::Iterator
 //
+ChildNodes::Iterator::Iterator(const ChildNodes& owner, size_t index)
+    : index_(index), owner_(&owner) {}
 
-// |NodeTraversal::AncestorsOf()| may calls |NodeAncestors| constructor with
-// |nullptr|.
-NodeAncestors::NodeAncestors(const Node* node)
-    : node_(const_cast<Node*>(node)) {}
+ChildNodes::Iterator::Iterator(const Iterator& other)
+    : Iterator(*other.owner_, other.index_) {}
 
-NodeAncestors::NodeAncestors(const NodeAncestors& other) : node_(other.node_) {}
+ChildNodes::Iterator::~Iterator() = default;
 
-NodeAncestors::~NodeAncestors() = default;
-
-NodeAncestors::Iterator::Iterator(const NodeAncestors* owner, Node* node)
-    : node_(node), owner_(owner) {
-  DCHECK(owner);
+const Node& ChildNodes::Iterator::operator*() const {
+  return owner_->container_->child_at(index_);
 }
 
-NodeAncestors::Iterator::Iterator(const Iterator& other)
-    : node_(other.node_), owner_(other.owner_) {}
-
-NodeAncestors::Iterator::~Iterator() = default;
-
-Node& NodeAncestors::Iterator::operator*() const {
-  DCHECK(node_);
-  return *node_;
-}
-
-NodeAncestors::Iterator& NodeAncestors::Iterator::operator++() {
-  DCHECK(node_);
-  node_ = NodeTraversal::ParentOf(*node_);
+ChildNodes::Iterator& ChildNodes::Iterator::operator++() {
+  DCHECK_LT(index_, owner_->container_->arity());
+  ++index_;
   return *this;
 }
 
-bool NodeAncestors::Iterator::operator==(const Iterator& other) const {
+bool ChildNodes::Iterator::operator==(const Iterator& other) const {
   DCHECK_EQ(owner_, other.owner_);
-  return node_ == other.node_;
+  return index_ == other.index_;
 }
 
-bool NodeAncestors::Iterator::operator!=(const Iterator& other) const {
+bool ChildNodes::Iterator::operator!=(const Iterator& other) const {
   return !operator==(other);
 }
 
 //
-// NodeChildren
+// ChildNodes
 //
-NodeChildren::NodeChildren(const ContainerNode& container)
-    : container_(const_cast<ContainerNode*>(&container)) {}
-
-NodeChildren::NodeChildren(const NodeChildren& other)
-    : container_(other.container_) {}
-
-NodeChildren::~NodeChildren() = default;
-
-NodeChildren::Iterator NodeChildren::begin() const {
-  return Iterator(this, NodeTraversal::FirstChildOf(*container_));
+ChildNodes::ChildNodes(const Node& container, size_t start)
+    : container_(&container), start_(start) {
+  DCHECK_LT(start_, container_->arity());
 }
 
-NodeChildren::Iterator::Iterator(const NodeChildren* owner, Node* node)
-    : node_(node), owner_(owner) {
-  DCHECK(owner);
+ChildNodes::~ChildNodes() = default;
+
+ChildNodes::Iterator ChildNodes::begin() const {
+  return Iterator(*this, start_);
 }
 
-NodeChildren::Iterator::Iterator(const Iterator& other)
-    : node_(other.node_), owner_(other.owner_) {}
-
-NodeChildren::Iterator::~Iterator() = default;
-
-Node& NodeChildren::Iterator::operator*() const {
-  DCHECK(node_);
-  return *node_;
+bool ChildNodes::empty() const {
+  return size() == 0;
 }
 
-NodeChildren::Iterator& NodeChildren::Iterator::operator++() {
-  DCHECK(node_);
-  node_ = NodeTraversal::NextSiblingOf(*node_);
-  return *this;
+ChildNodes::Iterator ChildNodes::end() const {
+  return Iterator(*this, container_->arity());
 }
 
-bool NodeChildren::Iterator::operator==(const Iterator& other) const {
-  DCHECK_EQ(owner_, other.owner_);
-  return node_ == other.node_;
+size_t ChildNodes::size() const {
+  return container_->arity() - start_;
 }
 
-bool NodeChildren::Iterator::operator!=(const Iterator& other) const {
-  return !operator==(other);
+ChildNodes NodeTraversal::ChildNodesFrom(const Node& node, size_t index) {
+  return ChildNodes(node, index);
 }
-
-//
-// NodeTraversal
-//
-NodeAncestors NodeTraversal::AncestorsOf(const Node& node) {
-  return NodeAncestors(ParentOf(node));
-}
-
-Node& NodeTraversal::ChildAt(const ContainerNode& container, int index) {
-  DCHECK_GE(index, 0);
-  auto position = 0;
-  for (const auto& child : ChildrenOf(container)) {
-    if (position == index)
-      return const_cast<Node&>(child);
-    ++position;
-  }
-  NOTREACHED() << "Index " << index << " is too large for " << container;
-  return const_cast<ContainerNode&>(container);
-}
-
-NodeChildren NodeTraversal::ChildrenOf(const ContainerNode& container) {
-  return NodeChildren(container);
-}
-
-int NodeTraversal::CountChildren(const ContainerNode& container) {
-  auto position = 0;
-  for (const auto& child : ChildrenOf(container)) {
-    static_cast<void>(child);
-    ++position;
-  }
-  return position;
-}
-
-Node* NodeTraversal::FirstChildOf(const ContainerNode& container) {
-  return container.first_child();
-}
-
-NodeAncestors NodeTraversal::InclusiveAncestorsOf(const Node& node) {
-  return NodeAncestors(&node);
-}
-
-Node* NodeTraversal::LastChildOf(const ContainerNode& container) {
-  return container.last_child();
-}
-
-Node* NodeTraversal::NextSiblingOf(const Node& node) {
-  return node.next_sibling();
-}
-
-ContainerNode* NodeTraversal::ParentOf(const Node& node) {
-  return node.parent();
-}
-
-Node* NodeTraversal::PreviousSiblingOf(const Node& node) {
-  return node.previous_sibling();
+ChildNodes NodeTraversal::ChildNodesOf(const Node& node) {
+  return ChildNodes(node, 0);
 }
 
 }  // namespace ast

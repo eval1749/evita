@@ -11,59 +11,28 @@
 namespace joana {
 namespace ast {
 
-//
-// Comment
-//
-Comment::Comment(const SourceCodeRange& range) : Token(range) {}
+IMPLEMENT_AST_SYNTAX_0(Token, Comment, 0)
+IMPLEMENT_AST_SYNTAX_0(Token, Empty, 0)
+IMPLEMENT_AST_SYNTAX_1(Token, Invalid, 0, int, error_code)
+IMPLEMENT_AST_SYNTAX_1(Token, Punctuator, 0, PunctuatorKind, kind)
+IMPLEMENT_AST_SYNTAX_1(Token, Name, 0, int, number)
 
-Comment::~Comment() = default;
-
-//
-// Empty
-//
-Empty::Empty(const SourceCodeRange& range) : Token(range) {}
-
-Empty::~Empty() = default;
-
-//
-// JsDoc
-//
-JsDoc::JsDoc(const SourceCodeRange& range, const JsDocDocument& document)
-    : Token(range), document_(document) {}
-
-JsDoc::~JsDoc() = default;
-
-//
-// Name
-//
-Name::Name(const SourceCodeRange& range, int number)
-    : Token(range), number_(number) {}
-
-Name::~Name() = default;
-
-bool Name::IsKeyword() const {
-  return number_ > static_cast<int>(NameId::StartOfKeyword) &&
-         number_ < static_cast<int>(NameId::EndOfKeyword);
-}
-
-// Implements |Node| members
-void Name::PrintMoreTo(std::ostream* ostream) const {
-  *ostream << ", " << number_;
+PunctuatorKind PunctuatorSyntax::KindOf(const Node& node) {
+  return node.syntax().As<PunctuatorSyntax>().kind();
 }
 
 //
-// Punctuator
+// NameSyntax
 //
-Punctuator::Punctuator(const SourceCodeRange& range, PunctuatorKind kind)
-    : Token(range), kind_(kind) {}
+int NameSyntax::IdOf(const Node& node) {
+  return node.syntax().As<NameSyntax>().number();
+}
 
-Punctuator::~Punctuator() = default;
-
-//
-// Token
-//
-Token::Token(const SourceCodeRange& range) : Node(range) {}
-Token::~Token() = default;
+bool NameSyntax::IsKeyword(const Node& node) {
+  const auto number = IdOf(node);
+  return number > static_cast<int>(NameId::StartOfKeyword) &&
+         number < static_cast<int>(NameId::EndOfKeyword);
+}
 
 }  // namespace ast
 }  // namespace joana

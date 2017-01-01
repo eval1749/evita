@@ -18,15 +18,9 @@ class SourceCode;
 class SourceCodeRange;
 
 namespace ast {
-class JsDocDocument;
-class JsDocNode;
-class Name;
 class Node;
 class NodeFactory;
-class StringLiteral;
-class Token;
-class Type;
-}
+}  // namespace ast
 
 namespace parser {
 
@@ -37,19 +31,14 @@ enum class JsDocErrorCode;
 // JsDocParser
 //
 class JsDocParser final {
-  using JsDocDocument = ast::JsDocDocument;
-  using JsDocNode = ast::JsDocNode;
-  using Name = ast::Name;
-  using Node = ast::Node;
-  using Token = ast::Token;
-
  public:
+  // |range| contains "/**" and "*/".
   JsDocParser(ParserContext* context,
               const SourceCodeRange& range,
               const ParserOptions& options);
   ~JsDocParser();
 
-  const JsDocDocument* Parse();
+  const ast::Node* Parse();
 
  private:
   class NodeRangeScope;
@@ -64,21 +53,20 @@ class JsDocParser final {
 
   SourceCodeRange ComputeNodeRange() const;
 
-  const JsDocDocument& NewDocument(const std::vector<const JsDocNode*>& nodes);
-  const JsDocNode& NewName();
-  const Name& NewTagName();
-  const JsDocNode& NewTagWithVector(
-      const Name& tag_name,
-      const std::vector<const JsDocNode*>& parameters);
-  const JsDocNode& NewText(const SourceCodeRange& range);
-  const JsDocNode& NewText(int start, int end);
-  const JsDocNode& NewText();
-  const JsDocNode& NewType(const ast::Type& type);
+  const ast::Node& NewDocument(const std::vector<const ast::Node*>& nodes);
+  const ast::Node& NewName();
+  const ast::Node& NewTagName();
+  const ast::Node& NewTagWithVector(
+      const ast::Node& tag_name,
+      const std::vector<const ast::Node*>& parameters);
+  const ast::Node& NewText(const SourceCodeRange& range);
+  const ast::Node& NewText(int start, int end);
+  const ast::Node& NewText();
 
   // |NewTag()| is a help function wrapping |NewTagWithVector()| to avoid
   // using |&| before members.
   template <typename... Parameters>
-  const JsDocNode& NewTag(const Name& tag_name,
+  const ast::Node& NewTag(const ast::Node& tag_name,
                           const Parameters&... parameters) {
     return NewTagWithVector(tag_name, {&parameters...});
   }
@@ -93,14 +81,14 @@ class JsDocParser final {
   base::char16 PeekChar() const;
 
   // Parsing functions
-  const JsDocNode& ParseDescription();
-  const JsDocNode& ParseName();
-  std::vector<const JsDocNode*> ParseNameList();
-  std::vector<const JsDocNode*> ParseNames();
-  const JsDocNode& ParseSingleLine();
-  const JsDocNode& ParseTag(const Name& tag_name);
-  const Name& ParseTagName();
-  const JsDocNode& ParseType();
+  const ast::Node& ParseDescription();
+  const ast::Node& ParseName();
+  std::vector<const ast::Node*> ParseNameList();
+  std::vector<const ast::Node*> ParseNames();
+  const ast::Node& ParseSingleLine();
+  const ast::Node& ParseTag(const ast::Node& tag_name);
+  const ast::Node& ParseTagName();
+  const ast::Node& ParseType();
 
   // Returns start of training whitespace or before block tag.
   int SkipToBlockTag();

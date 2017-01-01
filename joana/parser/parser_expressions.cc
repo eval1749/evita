@@ -10,6 +10,7 @@
 #include "joana/ast/expressions.h"
 #include "joana/ast/literals.h"
 #include "joana/ast/node_factory.h"
+#include "joana/ast/node_traversal.h"
 #include "joana/ast/regexp.h"
 #include "joana/ast/tokens.h"
 #include "joana/base/source_code.h"
@@ -42,14 +43,15 @@ enum class Parser::OperatorPrecedence {
 namespace {
 
 bool CanBePropertyName(const ast::Token& token) {
-  return token.Is<ast::Name>() || token == ast::PunctuatorKind::LeftBracket ||
-         token.Is<ast::Literal>();
+  return token == ast::SyntaxCode::Name ||
+         token == ast::PunctuatorKind::LeftBracket || token.is_literal();
 }
 
 bool CanHaveJsDoc(const ast::Expression& expression) {
-  if (expression.Is<ast::GroupExpression>())
-    return true;
-  return expression.Is<ast::DeclarationExpression>();
+  return expression == ast::SyntaxCode::GroupExpression ||
+         expression == ast::SyntaxCode::ArrowFunction ||
+         expression == ast::SyntaxCode::Function ||
+         expression == ast::SyntaxCode::Method;
 }
 
 ast::FunctionKind FunctionKindOf(const ast::Token& token) {
@@ -110,7 +112,7 @@ Parser::OperatorPrecedence Parser::CategoryOf(const ast::Token& token) const {
   auto* const punctuator = token.TryAs<ast::Punctuator>();
   if (!punctuator)
     return Parser::OperatorPrecedence::None;
-  const auto kind = punctuator->kind();
+  const auto kind = punctuator->tag().As<ast::PunctuatorTag>().kind();
   const auto& it = std::begin(CategoryMap) + static_cast<size_t>(kind);
   DCHECK(it >= std::begin(CategoryMap)) << punctuator;
   DCHECK(it < std::end(CategoryMap)) << punctuator;
@@ -121,38 +123,41 @@ const ast::BindingElement& Parser::ConvertExpressionToBindingElement(
     const ast::Expression& expression,
     const ast::Expression* initializer) {
   // TODO(eval1749): We should associate |BindingElement| to |JsDocDocument|.
-  if (auto* reference = expression.TryAs<ast::ReferenceExpression>()) {
+  if (expression == ast::SyntaxCode::ReferenceExpression) {
     return node_factory().NewBindingNameElement(
-        expression.range(), reference->name(),
+        expression.range(), ast::ReferenceExpressionTag::NameOf(expression),
         initializer ? *initializer : NewElisionExpression(expression));
   }
-  if (auto* array = expression.TryAs<ast::ArrayLiteralExpression>()) {
+  if (expression == ast::SyntaxCode::ArrayInitializer) {
     std::vector<const ast::BindingElement*> elements;
-    for (const auto& element : array->elements())
+    for (const auto& element : ast::NodeTraversal::ChildNodesOf(expression))
       elements.push_back(&ConvertExpressionToBindingElement(element, nullptr));
     return node_factory().NewArrayBindingPattern(
         expression.range(), elements,
         initializer ? *initializer : NewElisionExpression(expression));
   }
-  if (auto* object = expression.TryAs<ast::ObjectLiteralExpression>()) {
+  if (expression == ast::SyntaxCode::ObjectInitializer) {
     std::vector<const ast::BindingElement*> members;
-    for (const auto& member : object->members())
+    for (const auto& member : ast::NodeTraversal::ChildNodesOf(expression))
       members.push_back(&ConvertExpressionToBindingElement(member, nullptr));
     return node_factory().NewObjectBindingPattern(
         expression.range(), members,
         initializer ? *initializer : NewElisionExpression(expression));
   }
-  if (auto* property = expression.TryAs<ast::PropertyDefinitionExpression>()) {
-    if (property->name().Is<ast::ReferenceExpression>()) {
+  if (expression == ast::SyntaxCode::Property) {
+    const auto& property_name = ast::PropertyTag::NameOf(expression);
+    if (property_name == ast::SyntaxCode::ReferenceExpression) {
       return node_factory().NewBindingProperty(
-          expression.range(), property->As<ast::ReferenceExpression>().name(),
-          ConvertExpressionToBindingElement(property->value(), nullptr));
+          expression.range(),
+          ast::ReferenceExpressionTag::NameOf(property_name),
+          ConvertExpressionToBindingElement(
+              ast::PropertyTag::ValueOf(expression), nullptr));
     }
-  } else if (auto* const assignment =
-                 expression.TryAs<ast::AssignmentExpression>()) {
-    if (assignment && assignment->op() == ast::PunctuatorKind::Equal) {
-      return ConvertExpressionToBindingElement(assignment->lhs(),
-                                               &assignment->rhs());
+  } else if (expression == ast::SyntaxCode::AssignmentExpression) {
+    if (expression.tag() == ast::PunctuatorKind::Equal) {
+      return ConvertExpressionToBindingElement(
+          ast::AssignmentExpressionTag::LeftHandSideOf(expression),
+          &ast::AssignmentExpressionTag::RightHandSideOf(expression));
     }
   }
   return node_factory().NewBindingInvalidElement(expression.range());
@@ -160,11 +165,10 @@ const ast::BindingElement& Parser::ConvertExpressionToBindingElement(
 
 std::vector<const ast::BindingElement*>
 Parser::ConvertExpressionToBindingElements(const ast::Expression& expression) {
-  auto* const comma_expr = expression.TryAs<ast::CommaExpression>();
-  if (!comma_expr)
+  if (expression != ast::SyntaxCode::CommaExpression)
     return {&ConvertExpressionToBindingElement(expression, nullptr)};
   std::vector<const ast::BindingElement*> parameters;
-  for (const auto& member : comma_expr->expressions())
+  for (const auto& member : ast::NodeTraversal::ChildNodesOf(expression))
     parameters.push_back(&ConvertExpressionToBindingElement(member, nullptr));
   return parameters;
 }
@@ -236,8 +240,7 @@ const ast::Expression& Parser::NewInvalidExpression(
     const SourceCodeRange& range,
     ErrorCode error_code) {
   AddError(range, error_code);
-  return node_factory().NewInvalidExpression(range,
-                                             static_cast<int>(error_code));
+  return node_factory().NewInvalid(range, static_cast<int>(error_code));
 }
 
 const ast::Expression& Parser::NewInvalidExpression(const ast::Token& token,
@@ -264,7 +267,7 @@ const ast::Expression& Parser::NewUnaryExpression(
 }
 
 const ast::Expression& Parser::ParseJsDocAsExpression() {
-  auto& jsdoc = ConsumeToken().As<ast::JsDoc>();
+  auto& jsdoc = ConsumeToken().As<ast::JsDocToken>();
   auto& expression = ParsePrimaryExpression();
   if (!CanHaveJsDoc(expression)) {
     AddError(jsdoc, ErrorCode::ERROR_EXPRESSION_UNEXPECT_ANNOTATION);
@@ -295,7 +298,7 @@ std::vector<const ast::Expression*> Parser::ParseArgumentList() {
   return arguments;
 }
 
-const ast::Expression& Parser::ParseArrayLiteralExpression() {
+const ast::Expression& Parser::ParseArrayInitializer() {
   NodeRangeScope scope(this);
   DCHECK_EQ(PeekToken(), ast::PunctuatorKind::LeftBracket);
   ConsumeToken();
@@ -303,8 +306,7 @@ const ast::Expression& Parser::ParseArrayLiteralExpression() {
   auto has_expression = false;
   while (CanPeekToken()) {
     if (ConsumeTokenIf(ast::PunctuatorKind::RightBracket)) {
-      return node_factory().NewArrayLiteralExpression(GetSourceCodeRange(),
-                                                      elements);
+      return node_factory().NewArrayInitializer(GetSourceCodeRange(), elements);
     }
     if (ConsumeTokenIf(ast::PunctuatorKind::Comma)) {
       if (!has_expression)
@@ -315,8 +317,7 @@ const ast::Expression& Parser::ParseArrayLiteralExpression() {
     has_expression = true;
     elements.push_back(&ParseAssignmentExpression());
   }
-  return node_factory().NewArrayLiteralExpression(GetSourceCodeRange(),
-                                                  elements);
+  return node_factory().NewArrayInitializer(GetSourceCodeRange(), elements);
 }
 
 // Yet another entry pointer used for parsing computed property name.
@@ -426,8 +427,8 @@ const ast::Expression& Parser::ParseMethodExpression(
 
 const ast::Expression& Parser::ParseNameAsExpression() {
   NodeRangeScope scope(this);
-  auto& name = ConsumeToken().As<ast::Name>();
-  switch (static_cast<ast::NameId>(name.number())) {
+  auto& name = ConsumeToken();
+  switch (static_cast<ast::NameId>(name.name_id())) {
     case ast::NameId::Async:
       if (CanPeekToken() && PeekToken() == ast::NameId::Function) {
         ConsumeToken();
@@ -449,7 +450,7 @@ const ast::Expression& Parser::ParseNameAsExpression() {
     case ast::NameId::True:
       return NewLiteralExpression(node_factory().NewBooleanLiteral(name, true));
   }
-  if (name.IsKeyword())
+  if (ast::IsKeyword(name))
     return NewInvalidExpression(name, ErrorCode::ERROR_EXPRESSION_INVALID);
   if (ConsumeTokenIf(ast::PunctuatorKind::Arrow)) {
     auto& statement = ParseArrowFunctionBody();
@@ -484,7 +485,7 @@ const ast::Expression& Parser::ParseNewExpression() {
   return HandleNewExpression(ParsePrimaryExpression());
 }
 
-const ast::Expression& Parser::ParseObjectLiteralExpression() {
+const ast::Expression& Parser::ParseObjectInitializer() {
   NodeRangeScope scope(this);
   DCHECK_EQ(PeekToken(), ast::PunctuatorKind::LeftBrace);
   ConsumeToken();
@@ -501,7 +502,7 @@ const ast::Expression& Parser::ParseObjectLiteralExpression() {
       members.push_back(&NewDelimiterExpression(ConsumeToken()));
       continue;
     }
-    if (PeekToken().Is<ast::JsDoc>()) {
+    if (PeekToken().Is<ast::JsDocToken>()) {
       // TODO(eval1749): We should handle jsdoc in object literal.
       ConsumeToken();
       continue;
@@ -547,8 +548,7 @@ const ast::Expression& Parser::ParseObjectLiteralExpression() {
     members.push_back(&ParsePropertyAfterName(
         property_name, ast::MethodKind::NonStatic, function_kind));
   }
-  return node_factory().NewObjectLiteralExpression(GetSourceCodeRange(),
-                                                   members);
+  return node_factory().NewObjectInitializer(GetSourceCodeRange(), members);
 }
 
 const ast::Expression& Parser::ParseParenthesis() {
@@ -586,20 +586,20 @@ const ast::Expression& Parser::ParsePrimaryExpression() {
   if (!CanPeekToken())
     return NewInvalidExpression(ErrorCode::ERROR_EXPRESSION_INVALID);
   const auto& token = PeekToken();
-  if (token.Is<ast::JsDoc>())
+  if (token.Is<ast::JsDocToken>())
     return ParseJsDocAsExpression();
   if (token.Is<ast::Literal>())
     return NewLiteralExpression(ConsumeToken().As<ast::Literal>());
-  if (token == ast::NameId::Class)
-    return NewDeclarationExpression(ParseClass());
+  if (token == ast::NameId::Function)
+    return NewDeclarationExpression(ParseFunction(ast::FunctionKind::Normal));
   if (token.Is<ast::Name>())
     return ParseNameAsExpression();
   if (token == ast::PunctuatorKind::LeftParenthesis)
     return ParseParenthesis();
   if (token == ast::PunctuatorKind::LeftBracket)
-    return ParseArrayLiteralExpression();
+    return ParseArrayInitializer();
   if (token == ast::PunctuatorKind::LeftBrace)
-    return ParseObjectLiteralExpression();
+    return ParseObjectInitializer();
   if (token == ast::PunctuatorKind::Divide ||
       token == ast::PunctuatorKind::DivideEqual) {
     return ParseRegExpLiteral();
@@ -645,8 +645,8 @@ const ast::Expression& Parser::ParsePropertyAfterName(
 
   if (ConsumeTokenIf(ast::PunctuatorKind::Colon)) {
     auto& expression = ParseAssignmentExpression();
-    return node_factory().NewPropertyDefinitionExpression(
-        GetSourceCodeRange(), property_name, expression);
+    return node_factory().NewProperty(GetSourceCodeRange(), property_name,
+                                      expression);
   }
 
   if (PeekToken() == ast::PunctuatorKind::Equal) {

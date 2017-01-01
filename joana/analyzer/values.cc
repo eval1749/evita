@@ -5,7 +5,7 @@
 #include "joana/analyzer/values.h"
 
 #include "joana/ast/bindings.h"
-#include "joana/ast/node_forward.h"
+#include "joana/ast/syntax_forward.h"
 #include "joana/ast/tokens.h"
 
 namespace joana {
@@ -44,7 +44,9 @@ Variable::Variable(Zone* zone,
                    const ast::Node& assignment,
                    const ast::Node& name)
     : LexicalBinding(zone, name), assignment_(assignment) {
-  DCHECK(name.Is<ast::Name>() || name.Is<ast::BindingNameElement>()) << name;
+  DCHECK(name == ast::SyntaxCode::Name ||
+         name == ast::SyntaxCode::BindingNameElement)
+      << name;
 }
 
 Variable::~Variable() = default;

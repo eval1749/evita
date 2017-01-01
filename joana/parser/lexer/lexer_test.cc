@@ -20,6 +20,7 @@
 #include "joana/parser/public/parser_context_builder.h"
 #include "joana/parser/public/parser_options_builder.h"
 #include "joana/testing/lexer_test_base.h"
+#include "joana/testing/simple_formatter.h"
 
 namespace joana {
 namespace parser {
@@ -35,7 +36,7 @@ enum ErrorCode {
 
 std::string ToString(const ast::Node& node) {
   std::ostringstream ostream;
-  node.PrintTo(&ostream);
+  ostream << node;
   return ostream.str();
 }
 
@@ -51,8 +52,6 @@ class LexerTest : public LexerTestBase {
 
   SourceCodeRange MakeRange(int start, int end) const;
   SourceCodeRange MakeRange() const;
-  std::string NewJsDoc(int start, int end, const ast::JsDocDocument& document);
-  std::string NewJsDoc(const ast::JsDocDocument& document);
   std::string NewComment(int start, int end);
   std::string NewComment();
   std::string NewError(ErrorCode error_code, int start, int end);
@@ -76,16 +75,6 @@ SourceCodeRange LexerTest::MakeRange(int start, int end) const {
 
 SourceCodeRange LexerTest::MakeRange() const {
   return source_code().range();
-}
-
-std::string LexerTest::NewJsDoc(int start,
-                                int end,
-                                const ast::JsDocDocument& document) {
-  return ToString(node_factory().NewJsDoc(MakeRange(start, end), document));
-}
-
-std::string LexerTest::NewJsDoc(const ast::JsDocDocument& document) {
-  return ToString(node_factory().NewJsDoc(MakeRange(), document));
 }
 
 std::string LexerTest::NewComment(int start, int end) {
@@ -122,20 +111,15 @@ std::string LexerTest::NewPunctuator(ast::PunctuatorKind kind) {
 std::string LexerTest::NewStringLiteral(int start,
                                         int end,
                                         base::StringPiece data8) {
-  const auto& data16 = base::UTF8ToUTF16(data8);
-  return ToString(node_factory().NewStringLiteral(MakeRange(start, end),
-                                                  base::StringPiece16(data16)));
+  return ToString(node_factory().NewStringLiteral(MakeRange(start, end)));
 }
 
 std::string LexerTest::NewStringLiteral(base::StringPiece data8) {
-  const auto& data16 = base::UTF8ToUTF16(data8);
-  return ToString(node_factory().NewStringLiteral(MakeRange(),
-                                                  base::StringPiece16(data16)));
+  return ToString(node_factory().NewStringLiteral(MakeRange()));
 }
 
 std::string LexerTest::NewStringLiteral(const std::vector<base::char16> data) {
-  return ToString(node_factory().NewStringLiteral(
-      MakeRange(), base::StringPiece16(data.data(), data.size())));
+  return ToString(node_factory().NewStringLiteral(MakeRange()));
 }
 
 std::string LexerTest::Parse(const ParserOptions& options) {
@@ -146,7 +130,7 @@ std::string LexerTest::Parse(const ParserOptions& options) {
     ostream << delimiter;
     delimiter = " ";
     auto& node = lexer.ConsumeToken();
-    node.PrintTo(&ostream);
+    ostream << AsFormatted(node);
   }
   for (const auto* error : error_sink().errors()) {
     ostream << ' ' << error->error_code() << '@' << error->range();
@@ -161,14 +145,14 @@ std::string LexerTest::Parse() {
 TEST_F(LexerTest, JsDoc) {
   PrepareSouceCode("/** @type {number} */");
   const auto& document =
-      *JsDocParser(&context(),
-                   source_code().Slice(3, source_code().size() - 2),
-                   ParserOptions())
-           .Parse();
-  EXPECT_EQ(NewJsDoc(document), Parse());
+      *JsDocParser(&context(), source_code().range(), ParserOptions()).Parse();
+  EXPECT_EQ(ToString(document), Parse());
 
   PrepareSouceCode("/** */");
   EXPECT_EQ(NewComment(), Parse());
+
+  PrepareSouceCode("/*** */");
+  EXPECT_EQ(NewComment(), Parse()) << "Starts with thee '*' is not JsDoc.";
 }
 
 TEST_F(LexerTest, BlockComment) {
@@ -236,23 +220,25 @@ TEST_F(LexerTest, Name) {
 TEST_F(LexerTest, NodeFactoryNewName) {
   PrepareSouceCode("while");
   EXPECT_EQ(static_cast<int>(ast::NameId::While),
-            node_factory().NewName(MakeRange(0, 5)).number())
+            node_factory().NewName(MakeRange(0, 5)).name_id())
       << "We can identify keyword 'while'.";
 
   PrepareSouceCode("while");
-  EXPECT_TRUE(node_factory().NewName(MakeRange(0, 5)).IsKeyword());
+  EXPECT_TRUE(
+      ast::NameSyntax::IsKeyword(node_factory().NewName(MakeRange(0, 5))));
 
   PrepareSouceCode("from");
   EXPECT_EQ(static_cast<int>(ast::NameId::From),
-            node_factory().NewName(MakeRange(0, 4)).number())
+            node_factory().NewName(MakeRange(0, 4)).name_id())
       << "We can identify contextual keyword 'from'.";
 
   PrepareSouceCode("from");
-  EXPECT_FALSE(node_factory().NewName(MakeRange(0, 4)).IsKeyword());
+  EXPECT_FALSE(
+      ast::NameSyntax::IsKeyword(node_factory().NewName(MakeRange(0, 4))));
 
   PrepareSouceCode("of");
   EXPECT_EQ(static_cast<int>(ast::NameId::Of),
-            node_factory().NewName(MakeRange(0, 2)).number())
+            node_factory().NewName(MakeRange(0, 2)).name_id())
       << "We can identify contextual keyword 'of'.";
 }
 

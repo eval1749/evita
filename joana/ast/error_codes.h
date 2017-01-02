@@ -120,9 +120,10 @@ namespace ast {
 
 const auto kLexerErrorCodeBase = 10000;
 const auto kJsDocErrorCodeBase = 11000;
-const auto kParserErrorCodeBase = 12000;
+const auto kRegExpErrorCodeBase = 12000;
 const auto kTypeErrorCodeBase = 13000;
-const auto kRegExpErrorCodeBase = 20000;
+
+const auto kParserErrorCodeBase = 20000;
 
 JOANA_AST_EXPORT base::StringPiece ErrorStringOf(int error_code);
 

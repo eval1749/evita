@@ -16,6 +16,7 @@
 #include "joana/base/source_code.h"
 #include "joana/parser/lexer/lexer.h"
 #include "joana/parser/parser_error_codes.h"
+#include "joana/parser/regexp/regexp_parser.h"
 
 namespace joana {
 namespace parser {
@@ -668,9 +669,17 @@ const ast::Node& Parser::ParsePropertyName() {
 
 const ast::Node& Parser::ParseRegExpLiteral() {
   NodeRangeScope scope(this);
-  auto& regexp = lexer_->ConsumeRegExp();
-  // Consume |RegExp| node.
+  auto& source = lexer_->ExtendTokenAsRegExp();
+  // Consume |RegExpSource| node.
   ConsumeToken();
+  const auto source_end = source_code().CharAt(source.range().end() - 1) == '/'
+                              ? source.range().end() - 1
+                              : source.range().end();
+  const auto& regexp =
+      RegExpParser(&context_,
+                   source_code().Slice(source.range().start(), source_end),
+                   options_)
+          .Parse();
   if (is_separated_by_newline_) {
     if (options_.disable_automatic_semicolon()) {
       AddError(GetSourceCodeRange(),

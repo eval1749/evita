@@ -19,6 +19,7 @@ source_set("parser") {
     "//joana/ast",
     "//joana/base",
     "//joana/parser/lexer",
+    "//joana/parser/regexp",
     "//joana/parser/utils",
   ]
 
@@ -35,6 +36,7 @@ source_set("test_files") {
     "//joana/parser/jsdoc:test_files",
     "//joana/parser/lexer:test_files",
     "//joana/parser/public",
+    "//joana/parser/regexp:test_files",
     "//joana/parser/type:test_files",
     "//joana/testing",
     "//testing/gtest",

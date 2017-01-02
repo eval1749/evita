@@ -28,6 +28,12 @@ base::StringPiece ErrorStringOf(int error_code) {
 #undef V
   };
 
+  static const char* kRegExpErrorText[] = {
+#define V(token, reason) "REGEXP_ERROR_" #token "_" #reason,
+      FOR_EACH_REGEXP_ERROR_CODE(V)
+#undef V
+  };
+
   static const char* kTypeErrorText[] = {
 #define V(token, reason) "TYPE_ERROR_" #token "_" #reason,
       FOR_EACH_TYPE_ERROR_CODE(V)
@@ -51,6 +57,12 @@ base::StringPiece ErrorStringOf(int error_code) {
   if (parser_it >= std::begin(kParserErrorText) &&
       parser_it < std::end(kParserErrorText)) {
     return base::StringPiece(*parser_it);
+  }
+  const auto regexp_it =
+      std::begin(kRegExpErrorText) + error_code - kRegExpErrorCodeBase - 1;
+  if (regexp_it >= std::begin(kRegExpErrorText) &&
+      regexp_it < std::end(kRegExpErrorText)) {
+    return base::StringPiece(*regexp_it);
   }
   const auto type_it =
       std::begin(kTypeErrorText) + error_code - kTypeErrorCodeBase - 1;

@@ -1,15 +1,17 @@
-# Copyright (c) 2016 Project Vogue. All rights reserved.
+# Copyright (c) 2017 Project Vogue. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-source_set("lexer") {
+source_set("regexp") {
   sources = [
-    "lexer.cc",
-    "lexer.h",
+    "regexp_error_codes.h",
+    "regexp_lexer.cc",
+    "regexp_lexer.h",
+    "regexp_parser.cc",
+    "regexp_parser.h",
   ]
   deps = [
     "//joana/base",
-    "//joana/parser/jsdoc",
     "//joana/parser/utils",
   ]
 
@@ -19,10 +21,11 @@ source_set("lexer") {
 source_set("test_files") {
   testonly = true
   sources = [
-    "lexer_test.cc",
+    "regexp_lexer_test.cc",
+    "regexp_parser_test.cc",
   ]
   deps = [
-    ":lexer",
+    ":regexp",
     "//joana/testing",
     "//testing/gtest",
   ]

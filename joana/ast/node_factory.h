@@ -212,6 +212,8 @@ class JOANA_AST_EXPORT NodeFactory final {
 
   const Node& NewComplementCharSetRegExp(const SourceCodeRange& range);
 
+  const Node& NewEmptyRegExp(const SourceCodeRange& range);
+
   const Node& NewInvalidRegExp(const SourceCodeRange& range, int error_code);
 
   const Node& NewLiteralRegExp(const SourceCodeRange& range);

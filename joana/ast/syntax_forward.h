@@ -68,6 +68,7 @@ namespace ast {
   V(CaptureRegExp)             \
   V(CharSetRegExp)             \
   V(ComplementCharSetRegExp)   \
+  V(EmptyRegExp)               \
   V(InvalidRegExp)             \
   V(LiteralRegExp)             \
   V(LookAheadRegExp)           \

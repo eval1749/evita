@@ -506,6 +506,10 @@ const Node& NodeFactory::NewComplementCharSetRegExp(
   return NewNode0(range, syntax_factory_->NewComplementCharSetRegExp());
 }
 
+const Node& NodeFactory::NewEmptyRegExp(const SourceCodeRange& range) {
+  return NewNode0(range, syntax_factory_->NewEmptyRegExp());
+}
+
 const Node& NodeFactory::NewInvalidRegExp(const SourceCodeRange& range,
                                           int error_code) {
   return NewNode0(range, syntax_factory_->NewInvalidRegExp());

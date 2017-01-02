@@ -32,7 +32,7 @@ ArrayInitializerSyntax::~ArrayInitializerSyntax() = default;
 //
 // AssignmentExpressionSyntax
 //
-AssignmentExpressionSyntax::AssignmentExpressionSyntax(PunctuatorKind kind)
+AssignmentExpressionSyntax::AssignmentExpressionSyntax(TokenKind kind)
     : SyntaxTemplate(
           kind,
           SyntaxCode::AssignmentExpression,
@@ -58,7 +58,7 @@ const Node& AssignmentExpressionSyntax::RightHandSideOf(const Node& node) {
 //
 // BinaryExpressionSyntax
 //
-BinaryExpressionSyntax::BinaryExpressionSyntax(PunctuatorKind kind)
+BinaryExpressionSyntax::BinaryExpressionSyntax(TokenKind kind)
     : SyntaxTemplate(
           kind,
           SyntaxCode::BinaryExpression,
@@ -78,32 +78,6 @@ const Node& BinaryExpressionSyntax::OperatorOf(const Node& node) {
 
 const Node& BinaryExpressionSyntax::RightHandSideOf(const Node& node) {
   DCHECK_EQ(node, SyntaxCode::BinaryExpression);
-  return node.child_at(2);
-}
-
-//
-// BinaryKeywordExpressionSyntax
-//
-BinaryKeywordExpressionSyntax::BinaryKeywordExpressionSyntax(NameId name_id)
-    : SyntaxTemplate(
-          name_id,
-          SyntaxCode::BinaryKeywordExpression,
-          Format::Builder().set_arity(3).set_number_of_parameters(1).Build()) {}
-
-BinaryKeywordExpressionSyntax::~BinaryKeywordExpressionSyntax() = default;
-
-const Node& BinaryKeywordExpressionSyntax::LeftHandSideOf(const Node& node) {
-  DCHECK_EQ(node, SyntaxCode::BinaryKeywordExpression);
-  return node.child_at(0);
-}
-
-const Node& BinaryKeywordExpressionSyntax::OperatorOf(const Node& node) {
-  DCHECK_EQ(node, SyntaxCode::BinaryKeywordExpression);
-  return node.child_at(1);
-}
-
-const Node& BinaryKeywordExpressionSyntax::RightHandSideOf(const Node& node) {
-  DCHECK_EQ(node, SyntaxCode::BinaryKeywordExpression);
   return node.child_at(2);
 }
 
@@ -247,7 +221,7 @@ TupleSyntax::~TupleSyntax() = default;
 //
 // UnaryExpressionSyntax
 //
-UnaryExpressionSyntax::UnaryExpressionSyntax(PunctuatorKind kind)
+UnaryExpressionSyntax::UnaryExpressionSyntax(TokenKind kind)
     : SyntaxTemplate(
           kind,
           SyntaxCode::UnaryExpression,
@@ -262,27 +236,6 @@ const Node& UnaryExpressionSyntax::ExpressionOf(const Node& node) {
 
 const Node& UnaryExpressionSyntax::OperatorOf(const Node& node) {
   DCHECK_EQ(node, SyntaxCode::UnaryExpression);
-  return node.child_at(0);
-}
-
-//
-// UnaryKeywordExpressionSyntax
-//
-UnaryKeywordExpressionSyntax::UnaryKeywordExpressionSyntax(NameId name_id)
-    : SyntaxTemplate(
-          name_id,
-          SyntaxCode::UnaryKeywordExpression,
-          Format::Builder().set_arity(2).set_number_of_parameters(1).Build()) {}
-
-UnaryKeywordExpressionSyntax::~UnaryKeywordExpressionSyntax() = default;
-
-const Node& UnaryKeywordExpressionSyntax::ExpressionOf(const Node& node) {
-  DCHECK_EQ(node, SyntaxCode::UnaryKeywordExpression);
-  return node.child_at(1);
-}
-
-const Node& UnaryKeywordExpressionSyntax::OperatorOf(const Node& node) {
-  DCHECK_EQ(node, SyntaxCode::UnaryKeywordExpression);
   return node.child_at(0);
 }
 

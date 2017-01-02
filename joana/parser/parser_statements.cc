@@ -46,8 +46,8 @@ bool CanHaveJsDoc(const ast::Node& statement) {
 bool IsDeclarationKeyword(const ast::Node& name) {
   if (name != ast::SyntaxCode::Name)
     return false;
-  return name == ast::NameId::Const || name == ast::NameId::Let ||
-         name == ast::NameId::Var;
+  return name == ast::TokenKind::Const || name == ast::TokenKind::Let ||
+         name == ast::TokenKind::Var;
 }
 
 }  // namespace
@@ -59,9 +59,9 @@ bool IsDeclarationKeyword(const ast::Node& name) {
 // Called after before consuming ':'
 const ast::Node& Parser::HandleLabeledStatement(const ast::Node& label) {
   auto& colon = ConsumeToken();
-  DCHECK_EQ(colon, ast::PunctuatorKind::Colon);
+  DCHECK_EQ(colon, ast::TokenKind::Colon);
   if (!options_.disable_automatic_semicolon()) {
-    if (!CanPeekToken() || PeekToken() == ast::PunctuatorKind::RightBrace) {
+    if (!CanPeekToken() || PeekToken() == ast::TokenKind::RightBrace) {
       auto& statement =
           NewEmptyStatement(SourceCodeRange::CollapseToEnd(colon.range()));
       return node_factory().NewLabeledStatement(GetSourceCodeRange(), label,
@@ -99,11 +99,11 @@ const ast::Node& Parser::ParseJsDocAsStatement() {
 
 const ast::Node& Parser::ParseBlockStatement() {
   NodeRangeScope scope(this);
-  DCHECK_EQ(PeekToken(), ast::PunctuatorKind::LeftBrace);
+  DCHECK_EQ(PeekToken(), ast::TokenKind::LeftBrace);
   ConsumeToken();
   std::vector<const ast::Node*> statements;
   while (CanPeekToken()) {
-    if (ConsumeTokenIf(ast::PunctuatorKind::RightBrace))
+    if (ConsumeTokenIf(ast::TokenKind::RightBrace))
       break;
     if (ConsumeTokenIf(ast::SyntaxCode::Comment))
       continue;
@@ -129,14 +129,14 @@ const ast::Node& Parser::ParseBreakStatement() {
 
 const ast::Node& Parser::ParseCaseClause() {
   NodeRangeScope scope(this);
-  DCHECK_EQ(PeekToken(), ast::NameId::Case);
+  DCHECK_EQ(PeekToken(), ast::TokenKind::Case);
   ConsumeToken();
   auto& expression = ParseExpression();
-  if (!CanPeekToken() || PeekToken() != ast::PunctuatorKind::Colon) {
+  if (!CanPeekToken() || PeekToken() != ast::TokenKind::Colon) {
     AddError(ErrorCode::ERROR_STATEMENT_EXPECT_COLON);
   } else {
     auto& colon = ConsumeToken();
-    if (CanPeekToken() && PeekToken() == ast::PunctuatorKind::RightBrace) {
+    if (CanPeekToken() && PeekToken() == ast::TokenKind::RightBrace) {
       if (options_.disable_automatic_semicolon())
         AddError(ErrorCode::ERROR_STATEMENT_EXPECT_SEMICOLON);
       return node_factory().NewCaseClause(
@@ -150,7 +150,7 @@ const ast::Node& Parser::ParseCaseClause() {
 }
 
 const ast::Node& Parser::ParseConstStatement() {
-  DCHECK_EQ(PeekToken(), ast::NameId::Const);
+  DCHECK_EQ(PeekToken(), ast::TokenKind::Const);
   ConsumeToken();
   const auto& elements = ParseBindingElements();
   ExpectSemicolon();
@@ -174,18 +174,18 @@ const ast::Node& Parser::ParseContinueStatement() {
 
 const ast::Node& Parser::ParseDefaultLabel() {
   NodeRangeScope scope(this);
-  DCHECK_EQ(PeekToken(), ast::NameId::Default);
+  DCHECK_EQ(PeekToken(), ast::TokenKind::Default);
   auto& label = ConsumeToken();
-  if (!CanPeekToken() || PeekToken() != ast::PunctuatorKind::Colon)
+  if (!CanPeekToken() || PeekToken() != ast::TokenKind::Colon)
     return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_EXPECT_COLON);
   return HandleLabeledStatement(label);
 }
 
 const ast::Node& Parser::ParseDoStatement() {
-  DCHECK_EQ(PeekToken(), ast::NameId::Do);
+  DCHECK_EQ(PeekToken(), ast::TokenKind::Do);
   ConsumeToken();
   auto& statement = ParseStatement();
-  if (!ConsumeTokenIf(ast::NameId::While))
+  if (!ConsumeTokenIf(ast::TokenKind::While))
     return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_EXPECT_WHILE);
   if (options_.disable_automatic_semicolon()) {
     auto& condition = ParseParenthesisExpression();
@@ -194,7 +194,7 @@ const ast::Node& Parser::ParseDoStatement() {
                                          condition);
   }
   auto& condition = ParseParenthesisExpression();
-  ConsumeTokenIf(ast::PunctuatorKind::Semicolon);
+  ConsumeTokenIf(ast::TokenKind::Semicolon);
   return node_factory().NewDoStatement(GetSourceCodeRange(), statement,
                                        condition);
 }
@@ -211,9 +211,9 @@ const ast::Node& Parser::ParseExpressionStatement() {
 }
 
 const ast::Node& Parser::ParseForStatement() {
-  DCHECK_EQ(PeekToken(), ast::NameId::For);
+  DCHECK_EQ(PeekToken(), ast::TokenKind::For);
   ConsumeToken();
-  ExpectPunctuator(ast::PunctuatorKind::LeftParenthesis,
+  ExpectPunctuator(ast::TokenKind::LeftParenthesis,
                    ErrorCode::ERROR_STATEMENT_EXPECT_LPAREN);
 
   auto* const jsdoc =
@@ -225,46 +225,44 @@ const ast::Node& Parser::ParseForStatement() {
                       ? ConsumeToken()
                       : NewEmptyName();
 
-  auto& expression =
-      CanPeekToken() && PeekToken() == ast::PunctuatorKind::Semicolon
-          ? NewElisionExpression()
-          : ParseExpression();
+  auto& expression = CanPeekToken() && PeekToken() == ast::TokenKind::Semicolon
+                         ? NewElisionExpression()
+                         : ParseExpression();
 
   if (jsdoc) {
     if (keyword == ast::SyntaxCode::Empty)
       AddError(*jsdoc, ErrorCode::ERROR_STATEMENT_UNEXPECT_ANNOTATION);
   }
 
-  if (ConsumeTokenIf(ast::PunctuatorKind::Semicolon)) {
+  if (ConsumeTokenIf(ast::TokenKind::Semicolon)) {
     // 'for' '(' binding ';' condition ';' step ')' statement
-    auto& condition =
-        CanPeekToken() && PeekToken() == ast::PunctuatorKind::Semicolon
-            ? NewElisionExpression()
-            : ParseExpression();
-    ExpectPunctuator(ast::PunctuatorKind::Semicolon,
+    auto& condition = CanPeekToken() && PeekToken() == ast::TokenKind::Semicolon
+                          ? NewElisionExpression()
+                          : ParseExpression();
+    ExpectPunctuator(ast::TokenKind::Semicolon,
                      ErrorCode::ERROR_STATEMENT_EXPECT_SEMICOLON);
     auto& step =
-        CanPeekToken() && PeekToken() == ast::PunctuatorKind::RightParenthesis
+        CanPeekToken() && PeekToken() == ast::TokenKind::RightParenthesis
             ? NewElisionExpression()
             : ParseExpression();
-    ExpectPunctuator(ast::PunctuatorKind::RightParenthesis,
+    ExpectPunctuator(ast::TokenKind::RightParenthesis,
                      ErrorCode::ERROR_STATEMENT_EXPECT_RPAREN);
     auto& body = ParseStatement();
     return node_factory().NewForStatement(GetSourceCodeRange(), keyword,
                                           expression, condition, step, body);
   }
 
-  if (ConsumeTokenIf(ast::NameId::Of)) {
+  if (ConsumeTokenIf(ast::TokenKind::Of)) {
     // 'for' '(' binding 'of' expression ')' statement
     auto& expression2 = ParseAssignmentExpression();
-    ExpectPunctuator(ast::PunctuatorKind::RightParenthesis,
+    ExpectPunctuator(ast::TokenKind::RightParenthesis,
                      ErrorCode::ERROR_STATEMENT_EXPECT_RPAREN);
     auto& body = ParseStatement();
     return node_factory().NewForOfStatement(GetSourceCodeRange(), keyword,
                                             expression, expression2, body);
   }
 
-  if (ConsumeTokenIf(ast::PunctuatorKind::RightParenthesis)) {
+  if (ConsumeTokenIf(ast::TokenKind::RightParenthesis)) {
     // 'for' '(' binding 'in' expression ')' statement
     auto& body = ParseStatement();
     return node_factory().NewForInStatement(GetSourceCodeRange(), keyword,
@@ -276,10 +274,10 @@ const ast::Node& Parser::ParseForStatement() {
 
 const ast::Node& Parser::ParseIfStatement() {
   auto& keyword = ConsumeToken();
-  DCHECK_EQ(keyword, ast::NameId::If);
+  DCHECK_EQ(keyword, ast::TokenKind::If);
   auto& condition = ParseParenthesisExpression();
   auto& then_clause = ParseStatement();
-  if (!ConsumeTokenIf(ast::NameId::Else)) {
+  if (!ConsumeTokenIf(ast::TokenKind::Else)) {
     return node_factory().NewIfStatement(GetSourceCodeRange(), condition,
                                          then_clause);
   }
@@ -292,71 +290,71 @@ const ast::Node& Parser::ParseKeywordStatement() {
   NodeRangeScope scope(this);
   const auto& keyword = PeekToken();
   DCHECK(ast::NameSyntax::IsKeyword(keyword)) << keyword;
-  switch (static_cast<ast::NameId>(keyword.name_id())) {
-    case ast::NameId::Async:
+  switch (static_cast<ast::TokenKind>(keyword.name_id())) {
+    case ast::TokenKind::Async:
       ConsumeToken();
-      if (CanPeekToken() && PeekToken() == ast::NameId::Function)
+      if (CanPeekToken() && PeekToken() == ast::TokenKind::Function)
         return ParseFunction(ast::FunctionKind::Async);
       PushBackToken(keyword);
       break;
-    case ast::NameId::Break:
+    case ast::TokenKind::Break:
       return ParseBreakStatement();
-    case ast::NameId::Case:
+    case ast::TokenKind::Case:
       return ParseCaseClause();
-    case ast::NameId::Class:
+    case ast::TokenKind::Class:
       return ParseClass();
-    case ast::NameId::Continue:
+    case ast::TokenKind::Continue:
       return ParseContinueStatement();
-    case ast::NameId::Const:
+    case ast::TokenKind::Const:
       return ParseConstStatement();
-    case ast::NameId::Debugger: {
+    case ast::TokenKind::Debugger: {
       auto& expression = node_factory().NewReferenceExpression(ConsumeToken());
       ExpectSemicolon();
       return node_factory().NewExpressionStatement(GetSourceCodeRange(),
                                                    expression);
     }
-    case ast::NameId::Default:
+    case ast::TokenKind::Default:
       return ParseDefaultLabel();
-    case ast::NameId::Do:
+    case ast::TokenKind::Do:
       return ParseDoStatement();
-    case ast::NameId::For:
+    case ast::TokenKind::For:
       return ParseForStatement();
-    case ast::NameId::Function:
+    case ast::TokenKind::Function:
       ConsumeToken();
-      if (ConsumeTokenIf(ast::PunctuatorKind::Times))
+      if (ConsumeTokenIf(ast::TokenKind::Times))
         return ParseFunction(ast::FunctionKind::Generator);
       return ParseFunction(ast::FunctionKind::Normal);
-    case ast::NameId::If:
+    case ast::TokenKind::If:
       return ParseIfStatement();
-    case ast::NameId::Let:
+    case ast::TokenKind::Let:
       return ParseLetStatement();
-    case ast::NameId::Return:
+    case ast::TokenKind::Return:
       return ParseReturnStatement();
-    case ast::NameId::Switch:
+    case ast::TokenKind::Switch:
       return ParseSwitchStatement();
-    case ast::NameId::Throw:
+    case ast::TokenKind::Throw:
       return ParseThrowStatement();
-    case ast::NameId::Try:
+    case ast::TokenKind::Try:
       return ParseTryStatement();
-    case ast::NameId::Var:
+    case ast::TokenKind::Var:
       return ParseVarStatement();
-    case ast::NameId::While:
+    case ast::TokenKind::While:
       return ParseWhileStatement();
 
-    case ast::NameId::With:
+    case ast::TokenKind::With:
       return ParseWithStatement();
 
     // Reserved keywords
-    case ast::NameId::Catch:
-    case ast::NameId::Else:
-    case ast::NameId::Enum:
-    case ast::NameId::Finally:
-    case ast::NameId::Interface:
-    case ast::NameId::Package:
-    case ast::NameId::Private:
-    case ast::NameId::Protected:
-    case ast::NameId::Public:
-    case ast::NameId::Static:
+    case ast::TokenKind::Catch:
+    case ast::TokenKind::Else:
+    case ast::TokenKind::Enum:
+    case ast::TokenKind::Finally:
+    case ast::TokenKind::Interface:
+    case ast::TokenKind::Package:
+    case ast::TokenKind::Private:
+    case ast::TokenKind::Protected:
+    case ast::TokenKind::Public:
+    case ast::TokenKind::Static:
       ConsumeToken();
       return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_RESERVED_WORD);
   }
@@ -364,7 +362,7 @@ const ast::Node& Parser::ParseKeywordStatement() {
 }
 
 const ast::Node& Parser::ParseLetStatement() {
-  DCHECK_EQ(PeekToken(), ast::NameId::Let);
+  DCHECK_EQ(PeekToken(), ast::TokenKind::Let);
   ConsumeToken();
   const auto& elements = ParseBindingElements();
   ExpectSemicolon();
@@ -384,7 +382,7 @@ const ast::Node& Parser::ParseNameAsStatement() {
     if (options_.disable_automatic_semicolon())
       AddError(ErrorCode::ERROR_STATEMENT_UNEXPECT_NEWLINE);
   } else {
-    if (CanPeekToken() && PeekToken() == ast::PunctuatorKind::Colon)
+    if (CanPeekToken() && PeekToken() == ast::TokenKind::Colon)
       return HandleLabeledStatement(name);
   }
   PushBackToken(name);
@@ -393,14 +391,14 @@ const ast::Node& Parser::ParseNameAsStatement() {
 
 // Yet another entry point called by statement parser.
 const ast::Node& Parser::ParseParenthesisExpression() {
-  if (!ConsumeTokenIf(ast::PunctuatorKind::LeftParenthesis)) {
+  if (!ConsumeTokenIf(ast::TokenKind::LeftParenthesis)) {
     // Some people think it is redundant that C++ statement requires
     // parenthesis for an expression after keyword.
     AddError(ErrorCode::ERROR_STATEMENT_EXPECT_LPAREN);
     return ParseExpression();
   }
   auto& expression = ParseExpression();
-  ExpectPunctuator(ast::PunctuatorKind::RightParenthesis,
+  ExpectPunctuator(ast::TokenKind::RightParenthesis,
                    ErrorCode::ERROR_STATEMENT_EXPECT_RPAREN);
   return expression;
 }
@@ -413,12 +411,12 @@ const ast::Node& Parser::ParseReturnStatement() {
     return node_factory().NewReturnStatement(GetSourceCodeRange(),
                                              NewElisionExpression());
   } else {
-    if (CanPeekToken() && PeekToken() == ast::PunctuatorKind::RightBrace) {
+    if (CanPeekToken() && PeekToken() == ast::TokenKind::RightBrace) {
       return node_factory().NewReturnStatement(GetSourceCodeRange(),
                                                NewElisionExpression());
     }
   }
-  if (CanPeekToken() && ConsumeTokenIf(ast::PunctuatorKind::Semicolon)) {
+  if (CanPeekToken() && ConsumeTokenIf(ast::TokenKind::Semicolon)) {
     return node_factory().NewReturnStatement(GetSourceCodeRange(),
                                              NewElisionExpression());
   }
@@ -439,9 +437,9 @@ const ast::Node& Parser::ParseStatement() {
     return ParseNameAsStatement();
   if (token.is_literal())
     return ParseExpressionStatement();
-  if (token == ast::PunctuatorKind::LeftBrace)
+  if (token == ast::TokenKind::LeftBrace)
     return ParseBlockStatement();
-  if (token == ast::PunctuatorKind::Semicolon) {
+  if (token == ast::TokenKind::Semicolon) {
     auto& statement = NewEmptyStatement(
         SourceCodeRange::CollapseToStart(PeekToken().range()));
     ConsumeToken();
@@ -451,17 +449,17 @@ const ast::Node& Parser::ParseStatement() {
 }
 
 const ast::Node& Parser::ParseSwitchStatement() {
-  DCHECK_EQ(PeekToken(), ast::NameId::Switch);
+  DCHECK_EQ(PeekToken(), ast::TokenKind::Switch);
   ConsumeToken();
   auto& expression = ParseParenthesisExpression();
   std::vector<const ast::Node*> clauses;
-  if (!ConsumeTokenIf(ast::PunctuatorKind::LeftBrace)) {
+  if (!ConsumeTokenIf(ast::TokenKind::LeftBrace)) {
     AddError(ErrorCode::ERROR_STATEMENT_EXPECT_LBRACE);
     return node_factory().NewSwitchStatement(GetSourceCodeRange(), expression,
                                              clauses);
   }
   while (CanPeekToken()) {
-    if (ConsumeTokenIf(ast::PunctuatorKind::RightBrace))
+    if (ConsumeTokenIf(ast::TokenKind::RightBrace))
       break;
     clauses.push_back(&ParseStatement());
   }
@@ -470,7 +468,7 @@ const ast::Node& Parser::ParseSwitchStatement() {
 }
 
 const ast::Node& Parser::ParseThrowStatement() {
-  DCHECK_EQ(PeekToken(), ast::NameId::Throw);
+  DCHECK_EQ(PeekToken(), ast::TokenKind::Throw);
   ConsumeToken();
   auto& expression = ParseExpression();
   ExpectSemicolon();
@@ -480,16 +478,16 @@ const ast::Node& Parser::ParseThrowStatement() {
 const ast::Node& Parser::ParseTryStatement() {
   ConsumeToken();
   auto& try_block = ParseStatement();
-  if (ConsumeTokenIf(ast::NameId::Finally)) {
+  if (ConsumeTokenIf(ast::TokenKind::Finally)) {
     auto& finally_block = ParseBlockStatement();
     return node_factory().NewTryFinallyStatement(GetSourceCodeRange(),
                                                  try_block, finally_block);
   }
-  if (!ConsumeTokenIf(ast::NameId::Catch))
+  if (!ConsumeTokenIf(ast::TokenKind::Catch))
     return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_EXPECT_CATCH);
   auto& catch_parameter = ParseExpression();
   auto& catch_block = ParseStatement();
-  if (!ConsumeTokenIf(ast::NameId::Finally)) {
+  if (!ConsumeTokenIf(ast::TokenKind::Finally)) {
     return node_factory().NewTryCatchStatement(GetSourceCodeRange(), try_block,
                                                catch_parameter, catch_block);
   }
@@ -500,7 +498,7 @@ const ast::Node& Parser::ParseTryStatement() {
 }
 
 const ast::Node& Parser::ParseVarStatement() {
-  DCHECK_EQ(PeekToken(), ast::NameId::Var);
+  DCHECK_EQ(PeekToken(), ast::TokenKind::Var);
   ConsumeToken();
   const auto& elements = ParseBindingElements();
   ExpectSemicolon();
@@ -508,7 +506,7 @@ const ast::Node& Parser::ParseVarStatement() {
 }
 
 const ast::Node& Parser::ParseWhileStatement() {
-  DCHECK_EQ(PeekToken(), ast::NameId::While);
+  DCHECK_EQ(PeekToken(), ast::TokenKind::While);
   ConsumeToken();
   auto& condition = ParseParenthesisExpression();
   auto& statement = ParseStatement();
@@ -517,7 +515,7 @@ const ast::Node& Parser::ParseWhileStatement() {
 }
 
 const ast::Node& Parser::ParseWithStatement() {
-  DCHECK_EQ(PeekToken(), ast::NameId::With);
+  DCHECK_EQ(PeekToken(), ast::TokenKind::With);
   ConsumeToken();
   auto& expression = ParseParenthesisExpression();
   auto& statement = ParseStatement();

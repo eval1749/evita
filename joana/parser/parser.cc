@@ -28,13 +28,13 @@ namespace parser {
 namespace {
 
 bool IsCloseBracket(const ast::Node& token) {
-  return token == ast::PunctuatorKind::RightBrace ||
-         token == ast::PunctuatorKind::RightBracket ||
-         token == ast::PunctuatorKind::RightParenthesis;
+  return token == ast::TokenKind::RightBrace ||
+         token == ast::TokenKind::RightBracket ||
+         token == ast::TokenKind::RightParenthesis;
 }
 
 // Returns true if |document| contains |@fileoviewview| tag.
-bool HasJsDocTag(ast::NameId tag_id, const ast::Node& document) {
+bool HasJsDocTag(ast::TokenKind tag_id, const ast::Node& document) {
   for (const auto& element : ast::NodeTraversal::ChildNodesOf(document)) {
     if (element == ast::SyntaxCode::JsDocTag && element.child_at(0) == tag_id)
       return true;
@@ -46,17 +46,17 @@ std::unique_ptr<BracketTracker> NewBracketTracker(
     ErrorSink* error_sink,
     const SourceCodeRange& source_code_range) {
   const auto descriptions = std::vector<BracketTracker::Description>{
-      {ast::PunctuatorKind::LeftParenthesis,
+      {ast::TokenKind::LeftParenthesis,
        static_cast<int>(Parser::ErrorCode::ERROR_BRACKET_EXPECT_RPAREN),
-       ast::PunctuatorKind::RightParenthesis,
+       ast::TokenKind::RightParenthesis,
        static_cast<int>(Parser::ErrorCode::ERROR_BRACKET_UNEXPECT_RPAREN)},
-      {ast::PunctuatorKind::LeftBrace,
+      {ast::TokenKind::LeftBrace,
        static_cast<int>(Parser::ErrorCode::ERROR_BRACKET_EXPECT_RBRACE),
-       ast::PunctuatorKind::RightBrace,
+       ast::TokenKind::RightBrace,
        static_cast<int>(Parser::ErrorCode::ERROR_BRACKET_UNEXPECT_RBRACE)},
-      {ast::PunctuatorKind::LeftBracket,
+      {ast::TokenKind::LeftBracket,
        static_cast<int>(Parser::ErrorCode::ERROR_BRACKET_EXPECT_RBRACKET),
-       ast::PunctuatorKind::RightBracket,
+       ast::TokenKind::RightBracket,
        static_cast<int>(Parser::ErrorCode::ERROR_BRACKET_UNEXPECT_RBRACKET)},
   };
 
@@ -137,16 +137,7 @@ const ast::Node& Parser::ConsumeToken() {
   return token;
 }
 
-bool Parser::ConsumeTokenIf(ast::NameId name_id) {
-  if (!CanPeekToken())
-    return false;
-  if (PeekToken() != name_id)
-    return false;
-  ConsumeToken();
-  return true;
-}
-
-bool Parser::ConsumeTokenIf(ast::PunctuatorKind kind) {
+bool Parser::ConsumeTokenIf(ast::TokenKind kind) {
   if (!CanPeekToken())
     return false;
   if (PeekToken() != kind)
@@ -164,7 +155,7 @@ bool Parser::ConsumeTokenIf(ast::SyntaxCode syntax) {
   return true;
 }
 
-void Parser::ExpectPunctuator(ast::PunctuatorKind kind, ErrorCode error_code) {
+void Parser::ExpectPunctuator(ast::TokenKind kind, ErrorCode error_code) {
   if (ConsumeTokenIf(kind))
     return;
   if (!CanPeekToken()) {
@@ -189,14 +180,14 @@ void Parser::ExpectSemicolon() {
   if (!options_.disable_automatic_semicolon()) {
     if (!CanPeekToken())
       return;
-    if (ConsumeTokenIf(ast::PunctuatorKind::Semicolon))
+    if (ConsumeTokenIf(ast::TokenKind::Semicolon))
       return;
-    if (PeekToken() == ast::PunctuatorKind::RightBrace)
+    if (PeekToken() == ast::TokenKind::RightBrace)
       return;
     if (is_separated_by_newline_)
       return;
   }
-  ExpectPunctuator(ast::PunctuatorKind::Semicolon,
+  ExpectPunctuator(ast::TokenKind::Semicolon,
                    ErrorCode::ERROR_STATEMENT_EXPECT_SEMICOLON);
 }
 
@@ -232,7 +223,7 @@ const ast::Node& Parser::Run() {
       continue;
     }
 
-    if (HasJsDocTag(ast::NameId::JsDocFileOverview, token)) {
+    if (HasJsDocTag(ast::TokenKind::JsDocFileOverview, token)) {
       const auto& document = ConsumeToken();
       if (file_overview_) {
         AddError(
@@ -249,7 +240,7 @@ const ast::Node& Parser::Run() {
   }
   Finish();
   if (file_overview_ &&
-      HasJsDocTag(ast::NameId::JsDocExterns, *file_overview_)) {
+      HasJsDocTag(ast::TokenKind::JsDocExterns, *file_overview_)) {
     return node_factory().NewExterns(source_code().range(), statements);
   }
   return node_factory().NewModule(source_code().range(), statements);
@@ -278,7 +269,7 @@ bool Parser::SkipToListElement() {
     }
     if (IsCloseBracket(PeekToken()))
       return false;
-    if (ConsumeToken() == ast::PunctuatorKind::Comma)
+    if (ConsumeToken() == ast::TokenKind::Comma)
       return true;
   }
   return false;

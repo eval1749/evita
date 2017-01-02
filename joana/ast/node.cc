@@ -44,21 +44,12 @@ bool Node::operator!=(const Node* other) const {
   return this != other;
 }
 
-bool Node::operator==(NameId name_id) const {
-  const auto* name = syntax_.TryAs<NameSyntax>();
-  return name && name->number() == static_cast<int>(name_id);
+bool Node::operator==(TokenKind kind) const {
+  const auto* name = syntax_.TryAs<Token>();
+  return name && name->number() == static_cast<int>(kind);
 }
 
-bool Node::operator!=(NameId name_id) const {
-  return !operator==(name_id);
-}
-
-bool Node::operator==(PunctuatorKind kind) const {
-  const auto* punctuator = syntax_.TryAs<PunctuatorSyntax>();
-  return punctuator && punctuator->kind() == kind;
-}
-
-bool Node::operator!=(PunctuatorKind kind) const {
+bool Node::operator!=(TokenKind kind) const {
   return !operator==(kind);
 }
 

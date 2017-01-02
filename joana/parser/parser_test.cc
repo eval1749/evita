@@ -1297,7 +1297,7 @@ TEST_F(ParserTest, ExpressionUnaryAwait) {
   EXPECT_EQ(
       "Module\n"
       "+--ExpressionStatement\n"
-      "|  +--UnaryKeywordExpression\n"
+      "|  +--UnaryExpression<await>\n"
       "|  |  +--Name |await|\n"
       "|  |  +--ReferenceExpression\n"
       "|  |  |  +--Name |foo|\n",
@@ -1308,7 +1308,7 @@ TEST_F(ParserTest, ExpressionUnaryDelete) {
   EXPECT_EQ(
       "Module\n"
       "+--ExpressionStatement\n"
-      "|  +--UnaryKeywordExpression\n"
+      "|  +--UnaryExpression<delete>\n"
       "|  |  +--Name |delete|\n"
       "|  |  +--ReferenceExpression\n"
       "|  |  |  +--Name |foo|\n",
@@ -1319,7 +1319,7 @@ TEST_F(ParserTest, ExpressionUnaryTypeOf) {
   EXPECT_EQ(
       "Module\n"
       "+--ExpressionStatement\n"
-      "|  +--UnaryKeywordExpression\n"
+      "|  +--UnaryExpression<typeof>\n"
       "|  |  +--Name |typeof|\n"
       "|  |  +--ReferenceExpression\n"
       "|  |  |  +--Name |foo|\n",
@@ -1330,7 +1330,7 @@ TEST_F(ParserTest, ExpressionUnaryVoid) {
   EXPECT_EQ(
       "Module\n"
       "+--ExpressionStatement\n"
-      "|  +--UnaryKeywordExpression\n"
+      "|  +--UnaryExpression<void>\n"
       "|  |  +--Name |void|\n"
       "|  |  +--ReferenceExpression\n"
       "|  |  |  +--Name |foo|\n",
@@ -1497,7 +1497,7 @@ TEST_F(ParserTest, ExpressionYield) {
   EXPECT_EQ(
       "Module\n"
       "+--ExpressionStatement\n"
-      "|  +--UnaryKeywordExpression\n"
+      "|  +--UnaryExpression<yield>\n"
       "|  |  +--Name |yield|\n"
       "|  |  +--ElisionExpression ||\n",
       Parse("yield;"));
@@ -1505,7 +1505,7 @@ TEST_F(ParserTest, ExpressionYield) {
   EXPECT_EQ(
       "Module\n"
       "+--ExpressionStatement\n"
-      "|  +--UnaryKeywordExpression\n"
+      "|  +--UnaryExpression<yield>\n"
       "|  |  +--Name |yield|\n"
       "|  |  +--NumericLiteral |1|\n",
       Parse("yield 1;"));
@@ -1513,7 +1513,7 @@ TEST_F(ParserTest, ExpressionYield) {
   EXPECT_EQ(
       "Module\n"
       "+--ExpressionStatement\n"
-      "|  +--UnaryKeywordExpression\n"
+      "|  +--UnaryExpression<yield_star>\n"
       "|  |  +--Name |yield*|\n"
       "|  |  +--CallExpression\n"
       "|  |  |  +--ReferenceExpression\n"
@@ -1570,7 +1570,7 @@ TEST_F(ParserTest, ForInStatement) {
   EXPECT_EQ(
       "Module\n"
       "+--ForInStatement\n"
-      "|  +--BinaryKeywordExpression\n"
+      "|  +--BinaryExpression<in>\n"
       "|  |  +--MemberExpression\n"
       "|  |  |  +--ReferenceExpression\n"
       "|  |  |  |  +--Name |foo|\n"

@@ -63,7 +63,7 @@ class LexerTest : public LexerTestBase {
   std::string NewName(int start, int end);
   std::string NewNumericLiteral(int start, int end, double value);
   std::string NewNumericLiteral(double value);
-  std::string NewPunctuator(ast::PunctuatorKind kind);
+  std::string NewPunctuator(ast::TokenKind kind);
   std::string NewRegExpSource(int start, int end);
   std::string NewRegExpSource();
   std::string NewStringLiteral(int start, int end, base::StringPiece data);
@@ -112,7 +112,7 @@ std::string LexerTest::NewNumericLiteral(double value) {
   return ToString(node_factory().NewNumericLiteral(MakeRange(), value));
 }
 
-std::string LexerTest::NewPunctuator(ast::PunctuatorKind kind) {
+std::string LexerTest::NewPunctuator(ast::TokenKind kind) {
   return ToString(node_factory().NewPunctuator(MakeRange(), kind));
 }
 
@@ -146,8 +146,7 @@ std::string LexerTest::Parse(const ParserOptions& options, LexerMode mode) {
     ostream << delimiter;
     delimiter = " ";
     const auto& node = lexer.PeekToken();
-    if (node == ast::PunctuatorKind::Divide ||
-        node == ast::PunctuatorKind::DivideEqual) {
+    if (node == ast::TokenKind::Divide || node == ast::TokenKind::DivideEqual) {
       if (mode == LexerMode::RegExp)
         lexer.ExtendTokenAsRegExp();
     }
@@ -240,7 +239,7 @@ TEST_F(LexerTest, Name) {
 
 TEST_F(LexerTest, NodeFactoryNewName) {
   PrepareSouceCode("while");
-  EXPECT_EQ(static_cast<int>(ast::NameId::While),
+  EXPECT_EQ(static_cast<int>(ast::TokenKind::While),
             node_factory().NewName(MakeRange(0, 5)).name_id())
       << "We can identify keyword 'while'.";
 
@@ -249,7 +248,7 @@ TEST_F(LexerTest, NodeFactoryNewName) {
       ast::NameSyntax::IsKeyword(node_factory().NewName(MakeRange(0, 5))));
 
   PrepareSouceCode("from");
-  EXPECT_EQ(static_cast<int>(ast::NameId::From),
+  EXPECT_EQ(static_cast<int>(ast::TokenKind::From),
             node_factory().NewName(MakeRange(0, 4)).name_id())
       << "We can identify contextual keyword 'from'.";
 
@@ -258,7 +257,7 @@ TEST_F(LexerTest, NodeFactoryNewName) {
       ast::NameSyntax::IsKeyword(node_factory().NewName(MakeRange(0, 4))));
 
   PrepareSouceCode("of");
-  EXPECT_EQ(static_cast<int>(ast::NameId::Of),
+  EXPECT_EQ(static_cast<int>(ast::TokenKind::Of),
             node_factory().NewName(MakeRange(0, 2)).name_id())
       << "We can identify contextual keyword 'of'.";
 }
@@ -348,102 +347,102 @@ TEST_F(LexerTest, NumericLiteralError) {
 TEST_F(LexerTest, Punctuator) {
   // ";"
   PrepareSouceCode(";");
-  EXPECT_EQ(NewPunctuator(ast::PunctuatorKind::Semicolon), Parse());
+  EXPECT_EQ(NewPunctuator(ast::TokenKind::Semicolon), Parse());
 
   // ":"
   PrepareSouceCode(":");
-  EXPECT_EQ(NewPunctuator(ast::PunctuatorKind::Colon), Parse());
+  EXPECT_EQ(NewPunctuator(ast::TokenKind::Colon), Parse());
 
   // "=>"
   PrepareSouceCode("=>");
-  EXPECT_EQ(NewPunctuator(ast::PunctuatorKind::Arrow), Parse());
+  EXPECT_EQ(NewPunctuator(ast::TokenKind::Arrow), Parse());
 
   // "("
   PrepareSouceCode("(");
-  EXPECT_EQ(NewPunctuator(ast::PunctuatorKind::Semicolon), Parse());
+  EXPECT_EQ(NewPunctuator(ast::TokenKind::Semicolon), Parse());
 
   // ")"
   PrepareSouceCode(")");
-  EXPECT_EQ(NewPunctuator(ast::PunctuatorKind::Semicolon), Parse());
+  EXPECT_EQ(NewPunctuator(ast::TokenKind::Semicolon), Parse());
 
   // "?"
   PrepareSouceCode("?");
-  EXPECT_EQ(NewPunctuator(ast::PunctuatorKind::Question), Parse());
+  EXPECT_EQ(NewPunctuator(ast::TokenKind::Question), Parse());
 
   // "~"
   PrepareSouceCode("~");
-  EXPECT_EQ(NewPunctuator(ast::PunctuatorKind::BitNot), Parse());
+  EXPECT_EQ(NewPunctuator(ast::TokenKind::BitNot), Parse());
 
   // "["
   PrepareSouceCode("[");
-  EXPECT_EQ(NewPunctuator(ast::PunctuatorKind::Semicolon), Parse());
+  EXPECT_EQ(NewPunctuator(ast::TokenKind::Semicolon), Parse());
 
   // "]"
   PrepareSouceCode("]");
-  EXPECT_EQ(NewPunctuator(ast::PunctuatorKind::Semicolon), Parse());
+  EXPECT_EQ(NewPunctuator(ast::TokenKind::Semicolon), Parse());
 
   // "{"
   PrepareSouceCode("{");
-  EXPECT_EQ(NewPunctuator(ast::PunctuatorKind::Semicolon), Parse());
+  EXPECT_EQ(NewPunctuator(ast::TokenKind::Semicolon), Parse());
 
   // "}"
   PrepareSouceCode("}");
-  EXPECT_EQ(NewPunctuator(ast::PunctuatorKind::Semicolon), Parse());
+  EXPECT_EQ(NewPunctuator(ast::TokenKind::Semicolon), Parse());
 
   // "."
   PrepareSouceCode(".");
-  EXPECT_EQ(NewPunctuator(ast::PunctuatorKind::Dot), Parse());
+  EXPECT_EQ(NewPunctuator(ast::TokenKind::Dot), Parse());
 
   PrepareSouceCode("...");
-  EXPECT_EQ(NewPunctuator(ast::PunctuatorKind::DotDotDot), Parse());
+  EXPECT_EQ(NewPunctuator(ast::TokenKind::DotDotDot), Parse());
 
   // "!"
   PrepareSouceCode("!");
-  EXPECT_EQ(NewPunctuator(ast::PunctuatorKind::LogicalNot), Parse());
+  EXPECT_EQ(NewPunctuator(ast::TokenKind::LogicalNot), Parse());
 
   PrepareSouceCode("!=");
-  EXPECT_EQ(NewPunctuator(ast::PunctuatorKind::NotEqual), Parse());
+  EXPECT_EQ(NewPunctuator(ast::TokenKind::NotEqual), Parse());
 
   PrepareSouceCode("!==");
-  EXPECT_EQ(NewPunctuator(ast::PunctuatorKind::NotEqualEqual), Parse());
+  EXPECT_EQ(NewPunctuator(ast::TokenKind::NotEqualEqual), Parse());
 
   // "+"
   PrepareSouceCode("+");
-  EXPECT_EQ(NewPunctuator(ast::PunctuatorKind::Plus), Parse());
+  EXPECT_EQ(NewPunctuator(ast::TokenKind::Plus), Parse());
 
   PrepareSouceCode("++");
-  EXPECT_EQ(NewPunctuator(ast::PunctuatorKind::PlusPlus), Parse());
+  EXPECT_EQ(NewPunctuator(ast::TokenKind::PlusPlus), Parse());
 
   PrepareSouceCode("+=");
-  EXPECT_EQ(NewPunctuator(ast::PunctuatorKind::PlusPlus), Parse());
+  EXPECT_EQ(NewPunctuator(ast::TokenKind::PlusPlus), Parse());
 
   // "<"
   PrepareSouceCode("<");
-  EXPECT_EQ(NewPunctuator(ast::PunctuatorKind::LessThan), Parse());
+  EXPECT_EQ(NewPunctuator(ast::TokenKind::LessThan), Parse());
 
   PrepareSouceCode("<<");
-  EXPECT_EQ(NewPunctuator(ast::PunctuatorKind::LeftShift), Parse());
+  EXPECT_EQ(NewPunctuator(ast::TokenKind::LeftShift), Parse());
 
   PrepareSouceCode("<=");
-  EXPECT_EQ(NewPunctuator(ast::PunctuatorKind::LessThanOrEqual), Parse());
+  EXPECT_EQ(NewPunctuator(ast::TokenKind::LessThanOrEqual), Parse());
 
   // ">"
   PrepareSouceCode(">");
-  EXPECT_EQ(NewPunctuator(ast::PunctuatorKind::GreaterThan), Parse());
+  EXPECT_EQ(NewPunctuator(ast::TokenKind::GreaterThan), Parse());
 
   PrepareSouceCode(">>");
-  EXPECT_EQ(NewPunctuator(ast::PunctuatorKind::RightShift), Parse());
+  EXPECT_EQ(NewPunctuator(ast::TokenKind::RightShift), Parse());
 
   PrepareSouceCode(">>>");
-  EXPECT_EQ(NewPunctuator(ast::PunctuatorKind::UnsignedRightShift), Parse());
+  EXPECT_EQ(NewPunctuator(ast::TokenKind::UnsignedRightShift), Parse());
 
   PrepareSouceCode(">=");
-  EXPECT_EQ(NewPunctuator(ast::PunctuatorKind::GreaterThanOrEqual), Parse());
+  EXPECT_EQ(NewPunctuator(ast::TokenKind::GreaterThanOrEqual), Parse());
 }
 
 TEST_F(LexerTest, PunctuatorError) {
   PrepareSouceCode("..");
-  EXPECT_EQ(NewPunctuator(ast::PunctuatorKind::DotDot) +
+  EXPECT_EQ(NewPunctuator(ast::TokenKind::DotDot) +
                 NewError(ERROR_PUNCTUATOR_DOT_DOT, 0, 2),
             Parse())
       << "'..' is not a valid punctuator.";

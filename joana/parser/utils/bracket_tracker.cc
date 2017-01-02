@@ -17,7 +17,7 @@ namespace parser {
 
 namespace {
 
-std::pair<ast::PunctuatorKind, ast::PunctuatorKind> ComputeMinMax(
+std::pair<ast::TokenKind, ast::TokenKind> ComputeMinMax(
     const std::vector<BracketTracker::Description>& descriptions) {
   auto max = descriptions.front().open;
   auto min = max;
@@ -45,7 +45,7 @@ BracketTracker::BracketTracker(ErrorSink* error_sink,
 
 BracketTracker::~BracketTracker() = default;
 
-ast::PunctuatorKind BracketTracker::close_bracket() const {
+ast::TokenKind BracketTracker::close_bracket() const {
   DCHECK(!stack_.empty());
   return stack_.top().second->close;
 }

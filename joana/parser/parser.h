@@ -73,19 +73,15 @@ class Parser final {
   bool CanPeekToken() const;
   const ast::Node& ConsumeToken();
 
-  // Returns true if |Lexer| has a punctuator of |name_id| and advance to next
-  // token.
-  bool ConsumeTokenIf(ast::NameId keyword_id);
-
   // Returns true if |Lexer| has a punctuator of |kind| and advance to next
   // token.
-  bool ConsumeTokenIf(ast::PunctuatorKind kind);
+  bool ConsumeTokenIf(ast::TokenKind kind);
 
   // Returns true if |Lexer| has a syntax of |syntax| and advance to next
   // token.
   bool ConsumeTokenIf(ast::SyntaxCode syntax);
 
-  void ExpectPunctuator(ast::PunctuatorKind kind, ErrorCode error_code);
+  void ExpectPunctuator(ast::TokenKind kind, ErrorCode error_code);
   void ExpectSemicolon();
 
   // Called when there are no more source code. Unit tests call this.
@@ -138,9 +134,6 @@ class Parser final {
   const ast::Node& NewInvalidExpression(const ast::Node& token,
                                         ErrorCode error_code);
   const ast::Node& NewInvalidExpression(ErrorCode error_code);
-
-  const ast::Node& NewUnaryKeywordExpression(const ast::Node& op,
-                                             const ast::Node& expression);
 
   const ast::Node& NewUnaryExpression(const ast::Node& op,
                                       const ast::Node& expression);

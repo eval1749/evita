@@ -83,8 +83,8 @@ class JOANA_AST_EXPORT Syntax : public Castable<Syntax>, public ZoneAllocated {
 
   bool operator==(const Syntax& other) const;
   bool operator!=(const Syntax& other) const;
-  bool operator==(PunctuatorKind syntax_code) const;
-  bool operator!=(PunctuatorKind syntax_code) const;
+  bool operator==(TokenKind syntax_code) const;
+  bool operator!=(TokenKind syntax_code) const;
   bool operator==(SyntaxCode syntax_code) const;
   bool operator!=(SyntaxCode syntax_code) const;
 

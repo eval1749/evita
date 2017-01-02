@@ -46,9 +46,8 @@ class JOANA_AST_EXPORT SyntaxFactory final {
 
   // Expressions
   DECLARE_FACTORY_MEMBER_0(ArrayInitializer)
-  DECLARE_FACTORY_MEMBER_1(AssignmentExpression, PunctuatorKind, kind)
-  DECLARE_FACTORY_MEMBER_1(BinaryExpression, PunctuatorKind, kind)
-  DECLARE_FACTORY_MEMBER_1(BinaryKeywordExpression, NameId, name_id)
+  DECLARE_FACTORY_MEMBER_1(AssignmentExpression, TokenKind, kind)
+  DECLARE_FACTORY_MEMBER_1(BinaryExpression, TokenKind, kind)
   DECLARE_FACTORY_MEMBER_0(CallExpression)
   DECLARE_FACTORY_MEMBER_0(ComputedMemberExpression)
   DECLARE_FACTORY_MEMBER_0(CommaExpression)
@@ -64,8 +63,7 @@ class JOANA_AST_EXPORT SyntaxFactory final {
   DECLARE_FACTORY_MEMBER_0(ReferenceExpression)
   DECLARE_FACTORY_MEMBER_0(RegExpLiteralExpression)
   DECLARE_FACTORY_MEMBER_0(Tuple)
-  DECLARE_FACTORY_MEMBER_1(UnaryExpression, PunctuatorKind, kind)
-  DECLARE_FACTORY_MEMBER_1(UnaryKeywordExpression, NameId, name_id)
+  DECLARE_FACTORY_MEMBER_1(UnaryExpression, TokenKind, kind)
 
   // Literals
   DECLARE_FACTORY_MEMBER_1(BooleanLiteral, bool, value)
@@ -93,7 +91,7 @@ class JOANA_AST_EXPORT SyntaxFactory final {
   DECLARE_FACTORY_MEMBER_0(Comment)
   DECLARE_FACTORY_MEMBER_0(Empty)
   DECLARE_FACTORY_MEMBER_1(Invalid, int, error_code)
-  DECLARE_FACTORY_MEMBER_1(Punctuator, PunctuatorKind, kind)
+  DECLARE_FACTORY_MEMBER_1(Punctuator, TokenKind, kind)
   DECLARE_FACTORY_MEMBER_1(Name, int, number)
   DECLARE_FACTORY_MEMBER_0(RegExpSource)
 

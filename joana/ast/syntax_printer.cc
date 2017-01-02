@@ -120,16 +120,33 @@ std::ostream& operator<<(std::ostream& ostream, MethodKind kind) {
   return ostream << *it;
 }
 
-// PunctuatorKind
-std::ostream& operator<<(std::ostream& ostream, PunctuatorKind kind) {
+// TokenKind
+std::ostream& operator<<(std::ostream& ostream, TokenKind kind) {
   static const char* const kTexts[] = {
 #define V(text, ...) text,
       FOR_EACH_JAVASCRIPT_PUNCTUATOR(V)
 #undef V
+          "StartOfKeyword",
+#define V(name, camel, upper) #name,
+      FOR_EACH_JAVASCRIPT_KEYWORD(V)
+#undef V
+          "EndOfKeyword",
+
+      "StartOfKnownWord",
+#define V(name, camel, upper) #name,
+      FOR_EACH_JAVASCRIPT_KNOWN_WORD(V)
+#undef V
+          "EndOfKnownWord",
+
+      "StartOfJsDocTagName,"
+#define V(name, camel, syntax) "@" #name,
+      FOR_EACH_JSDOC_TAG_NAME(V)
+#undef V
+          "EndOfJsDocTagName",
   };
   const auto& it = std::begin(kTexts) + static_cast<size_t>(kind);
   if (it < std::begin(kTexts) || it >= std::end(kTexts))
-    return ostream << "PunctuatorKind" << static_cast<size_t>(kind);
+    return ostream << "TokenKind" << static_cast<size_t>(kind);
   return ostream << *it;
 }
 

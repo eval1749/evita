@@ -86,8 +86,8 @@ const ast::Node& Lexer::ConsumeToken() {
 
 // Replaces current "/" or "/=" token with |RegExpSource|.
 const ast::Node& Lexer::ExtendTokenAsRegExp() {
-  DCHECK(PeekToken() == ast::PunctuatorKind::Divide ||
-         PeekToken() == ast::PunctuatorKind::DivideEqual);
+  DCHECK(PeekToken() == ast::TokenKind::Divide ||
+         PeekToken() == ast::TokenKind::DivideEqual);
   token_start_ = PeekToken().range().start();
   enum class State {
     Backslash,
@@ -174,73 +174,69 @@ const ast::Node* Lexer::HandleCharacter() {
       ConsumeChar();
       if (ConsumeCharIf('=')) {
         if (ConsumeCharIf('='))
-          return &NewPunctuator(ast::PunctuatorKind::NotEqualEqual);
-        return &NewPunctuator(ast::PunctuatorKind::NotEqual);
+          return &NewPunctuator(ast::TokenKind::NotEqualEqual);
+        return &NewPunctuator(ast::TokenKind::NotEqual);
       }
-      return &NewPunctuator(ast::PunctuatorKind::LogicalNot);
+      return &NewPunctuator(ast::TokenKind::LogicalNot);
     case '"':
       return &HandleStringLiteral();
     case '$':
       return &HandleName();
     case '%':
-      return &HandleOperator(ast::PunctuatorKind::Modulo,
-                             ast::PunctuatorKind::Invalid,
-                             ast::PunctuatorKind::ModuloEqual);
+      return &HandleOperator(ast::TokenKind::Modulo, ast::TokenKind::Invalid,
+                             ast::TokenKind::ModuloEqual);
     case '&':
-      return &HandleOperator(ast::PunctuatorKind::BitAnd,
-                             ast::PunctuatorKind::LogicalAnd,
-                             ast::PunctuatorKind::BitAndEqual);
+      return &HandleOperator(ast::TokenKind::BitAnd, ast::TokenKind::LogicalAnd,
+                             ast::TokenKind::BitAndEqual);
     case '\'':
       return &HandleStringLiteral();
     case '(':
       ConsumeChar();
-      return &NewPunctuator(ast::PunctuatorKind::LeftParenthesis);
+      return &NewPunctuator(ast::TokenKind::LeftParenthesis);
     case ')':
       ConsumeChar();
-      return &NewPunctuator(ast::PunctuatorKind::RightParenthesis);
+      return &NewPunctuator(ast::TokenKind::RightParenthesis);
     case '*':
       ConsumeChar();
       if (ConsumeCharIf('='))
-        return &NewPunctuator(ast::PunctuatorKind::TimesEqual);
+        return &NewPunctuator(ast::TokenKind::TimesEqual);
       if (ConsumeCharIf('*')) {
         if (ConsumeCharIf('='))
-          return &NewPunctuator(ast::PunctuatorKind::TimesTimesEqual);
-        return &NewPunctuator(ast::PunctuatorKind::TimesTimes);
+          return &NewPunctuator(ast::TokenKind::TimesTimesEqual);
+        return &NewPunctuator(ast::TokenKind::TimesTimes);
       }
-      return &NewPunctuator(ast::PunctuatorKind::Times);
+      return &NewPunctuator(ast::TokenKind::Times);
     case '+':
-      return &HandleOperator(ast::PunctuatorKind::Plus,
-                             ast::PunctuatorKind::PlusPlus,
-                             ast::PunctuatorKind::PlusEqual);
+      return &HandleOperator(ast::TokenKind::Plus, ast::TokenKind::PlusPlus,
+                             ast::TokenKind::PlusEqual);
     case ',':
       ConsumeChar();
-      return &NewPunctuator(ast::PunctuatorKind::Comma);
+      return &NewPunctuator(ast::TokenKind::Comma);
     case '-':
-      return &HandleOperator(ast::PunctuatorKind::Minus,
-                             ast::PunctuatorKind::MinusMinus,
-                             ast::PunctuatorKind::MinusEqual);
+      return &HandleOperator(ast::TokenKind::Minus, ast::TokenKind::MinusMinus,
+                             ast::TokenKind::MinusEqual);
     case '.':
       ConsumeChar();
       if (ConsumeCharIf('.')) {
         if (ConsumeCharIf('.'))
-          return &NewPunctuator(ast::PunctuatorKind::DotDotDot);
+          return &NewPunctuator(ast::TokenKind::DotDotDot);
         AddError(ErrorCode::PUNCTUATOR_DOT_DOT);
-        return &NewPunctuator(ast::PunctuatorKind::DotDot);
+        return &NewPunctuator(ast::TokenKind::DotDot);
       }
       if (CanPeekChar() && IsDigitChar(PeekChar(), 10)) {
         reader_->MoveBackward();
         return &HandleDecimalAfterDot(0, 0);
       }
-      return &NewPunctuator(ast::PunctuatorKind::Dot);
+      return &NewPunctuator(ast::TokenKind::Dot);
     case '/':
       ConsumeChar();
       if (ConsumeCharIf('='))
-        return &NewPunctuator(ast::PunctuatorKind::DivideEqual);
+        return &NewPunctuator(ast::TokenKind::DivideEqual);
       if (ConsumeCharIf('*'))
         return &HandleBlockComment();
       if (ConsumeCharIf('/'))
         return &HandleLineComment();
-      return &NewPunctuator(ast::PunctuatorKind::Divide);
+      return &NewPunctuator(ast::TokenKind::Divide);
     case '0':
       ConsumeChar();
       return &HandleDigitZero();
@@ -256,76 +252,74 @@ const ast::Node* Lexer::HandleCharacter() {
       return &HandleDecimal();
     case ':':
       ConsumeChar();
-      return &NewPunctuator(ast::PunctuatorKind::Colon);
+      return &NewPunctuator(ast::TokenKind::Colon);
     case ';':
       ConsumeChar();
-      return &NewPunctuator(ast::PunctuatorKind::Semicolon);
+      return &NewPunctuator(ast::TokenKind::Semicolon);
     case '<':
       ConsumeChar();
       if (ConsumeCharIf('='))
-        return &NewPunctuator(ast::PunctuatorKind::LessThanOrEqual);
+        return &NewPunctuator(ast::TokenKind::LessThanOrEqual);
       if (ConsumeCharIf('<')) {
         if (ConsumeCharIf('='))
-          return &NewPunctuator(ast::PunctuatorKind::LeftShiftEqual);
-        return &NewPunctuator(ast::PunctuatorKind::LeftShift);
+          return &NewPunctuator(ast::TokenKind::LeftShiftEqual);
+        return &NewPunctuator(ast::TokenKind::LeftShift);
       }
-      return &NewPunctuator(ast::PunctuatorKind::LessThan);
+      return &NewPunctuator(ast::TokenKind::LessThan);
     case '=':
       ConsumeChar();
       if (ConsumeCharIf('=')) {
         if (ConsumeCharIf('='))
-          return &NewPunctuator(ast::PunctuatorKind::EqualEqualEqual);
-        return &NewPunctuator(ast::PunctuatorKind::EqualEqual);
+          return &NewPunctuator(ast::TokenKind::EqualEqualEqual);
+        return &NewPunctuator(ast::TokenKind::EqualEqual);
       }
       if (ConsumeCharIf('>'))
-        return &NewPunctuator(ast::PunctuatorKind::Arrow);
-      return &NewPunctuator(ast::PunctuatorKind::Equal);
+        return &NewPunctuator(ast::TokenKind::Arrow);
+      return &NewPunctuator(ast::TokenKind::Equal);
     case '>':
       ConsumeChar();
       if (ConsumeCharIf('='))
-        return &NewPunctuator(ast::PunctuatorKind::GreaterThanOrEqual);
+        return &NewPunctuator(ast::TokenKind::GreaterThanOrEqual);
       if (ConsumeCharIf('>')) {
         if (ConsumeCharIf('='))
-          return &NewPunctuator(ast::PunctuatorKind::RightShiftEqual);
+          return &NewPunctuator(ast::TokenKind::RightShiftEqual);
         if (ConsumeCharIf('>')) {
           if (ConsumeCharIf('='))
-            return &NewPunctuator(ast::PunctuatorKind::UnsignedRightShiftEqual);
-          return &NewPunctuator(ast::PunctuatorKind::UnsignedRightShift);
+            return &NewPunctuator(ast::TokenKind::UnsignedRightShiftEqual);
+          return &NewPunctuator(ast::TokenKind::UnsignedRightShift);
         }
-        return &NewPunctuator(ast::PunctuatorKind::RightShift);
+        return &NewPunctuator(ast::TokenKind::RightShift);
       }
-      return &NewPunctuator(ast::PunctuatorKind::GreaterThan);
+      return &NewPunctuator(ast::TokenKind::GreaterThan);
     case '?':
       ConsumeChar();
-      return &NewPunctuator(ast::PunctuatorKind::Question);
+      return &NewPunctuator(ast::TokenKind::Question);
     case '`':
       // TODO(eval1749): NYI: template token
       return &HandleStringLiteral();
     case '[':
       ConsumeChar();
-      return &NewPunctuator(ast::PunctuatorKind::LeftBracket);
+      return &NewPunctuator(ast::TokenKind::LeftBracket);
     case ']':
       ConsumeChar();
-      return &NewPunctuator(ast::PunctuatorKind::RightBracket);
+      return &NewPunctuator(ast::TokenKind::RightBracket);
     case '_':
       return &HandleName();
     case '^':
-      return &HandleOperator(ast::PunctuatorKind::BitXor,
-                             ast::PunctuatorKind::Invalid,
-                             ast::PunctuatorKind::BitXorEqual);
+      return &HandleOperator(ast::TokenKind::BitXor, ast::TokenKind::Invalid,
+                             ast::TokenKind::BitXorEqual);
     case '~':
       ConsumeChar();
-      return &NewPunctuator(ast::PunctuatorKind::BitNot);
+      return &NewPunctuator(ast::TokenKind::BitNot);
     case '{':
       ConsumeChar();
-      return &NewPunctuator(ast::PunctuatorKind::LeftBrace);
+      return &NewPunctuator(ast::TokenKind::LeftBrace);
     case '}':
       ConsumeChar();
-      return &NewPunctuator(ast::PunctuatorKind::RightBrace);
+      return &NewPunctuator(ast::TokenKind::RightBrace);
     case '|':
-      return &HandleOperator(ast::PunctuatorKind::BitOr,
-                             ast::PunctuatorKind::LogicalOr,
-                             ast::PunctuatorKind::BitOrEqual);
+      return &HandleOperator(ast::TokenKind::BitOr, ast::TokenKind::LogicalOr,
+                             ast::TokenKind::BitOrEqual);
   }
   if (IsIdentifierStart(PeekChar()))
     return &HandleName();
@@ -491,13 +485,13 @@ const ast::Node& Lexer::HandleName() {
 }
 
 // Handle op, op op, op '=' pattern.
-const ast::Node& Lexer::HandleOperator(ast::PunctuatorKind one,
-                                       ast::PunctuatorKind two,
-                                       ast::PunctuatorKind equal) {
+const ast::Node& Lexer::HandleOperator(ast::TokenKind one,
+                                       ast::TokenKind two,
+                                       ast::TokenKind equal) {
   const auto char_code = ConsumeChar();
   if (ConsumeCharIf('='))
     return NewPunctuator(equal);
-  if (two != ast::PunctuatorKind::Invalid && ConsumeCharIf(char_code))
+  if (two != ast::TokenKind::Invalid && ConsumeCharIf(char_code))
     return NewPunctuator(two);
   return NewPunctuator(one);
 }
@@ -713,7 +707,7 @@ const ast::Node& Lexer::NewNumericLiteral(double value) {
   return node_factory().NewNumericLiteral(MakeTokenRange(), value);
 }
 
-const ast::Node& Lexer::NewPunctuator(ast::PunctuatorKind kind) {
+const ast::Node& Lexer::NewPunctuator(ast::TokenKind kind) {
   return node_factory().NewPunctuator(MakeTokenRange(), kind);
 }
 

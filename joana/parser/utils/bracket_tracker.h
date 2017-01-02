@@ -17,7 +17,7 @@ class SourceCodeRange;
 
 namespace ast {
 class Node;
-enum class PunctuatorKind;
+enum class TokenKind;
 }
 
 namespace parser {
@@ -29,13 +29,13 @@ class BracketTracker final {
  public:
   struct Description {
     // The code of open bracket.
-    ast::PunctuatorKind open;
+    ast::TokenKind open;
 
     // The error code for not closed open bracket.
     int open_error;
 
     // The code of close bracket.
-    ast::PunctuatorKind close;
+    ast::TokenKind close;
 
     // The error code for mismatched close bracket.
     int close_error;
@@ -46,7 +46,7 @@ class BracketTracker final {
                  const std::vector<Description>& descriptions);
   ~BracketTracker();
 
-  ast::PunctuatorKind close_bracket() const;
+  ast::TokenKind close_bracket() const;
   size_t depth() const { return stack_.size(); }
 
   void Feed(const ast::Node& token);
@@ -59,7 +59,7 @@ class BracketTracker final {
   const std::vector<Description> descriptions_;
   ErrorSink& error_sink_;
   const SourceCodeRange& source_code_range_;
-  const std::pair<ast::PunctuatorKind, ast::PunctuatorKind> min_max_;
+  const std::pair<ast::TokenKind, ast::TokenKind> min_max_;
   std::stack<std::pair<const ast::Node*, const Description*>> stack_;
 
   DISALLOW_COPY_AND_ASSIGN(BracketTracker);

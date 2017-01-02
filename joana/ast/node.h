@@ -23,8 +23,8 @@
 namespace joana {
 namespace ast {
 
-enum class NameId;
-enum class PunctuatorKind;
+enum class TokenKind;
+enum class TokenKind;
 class Syntax;
 enum class SyntaxCode;
 
@@ -38,10 +38,8 @@ class JOANA_AST_EXPORT Node final {
   bool operator==(const Node* other) const;
   bool operator!=(const Node& other) const;
   bool operator!=(const Node* other) const;
-  bool operator==(NameId name_id) const;
-  bool operator!=(NameId name_id) const;
-  bool operator==(PunctuatorKind kind) const;
-  bool operator!=(PunctuatorKind kind) const;
+  bool operator==(TokenKind kind) const;
+  bool operator!=(TokenKind kind) const;
   bool operator==(SyntaxCode syntax_code) const;
   bool operator!=(SyntaxCode syntax_code) const;
 

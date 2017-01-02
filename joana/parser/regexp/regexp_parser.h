@@ -15,7 +15,7 @@ namespace joana {
 namespace ast {
 class Node;
 class NodeFactory;
-enum class PunctuatorKind;
+enum class TokenKind;
 }
 
 class ParserContext;
@@ -55,7 +55,7 @@ class RegExpParser final {
   // Helper functions for Lexer
   bool CanPeekToken() const;
   void ConsumeToken();
-  bool ConsumeTokenIf(ast::PunctuatorKind kind);
+  bool ConsumeTokenIf(ast::TokenKind kind);
   const ast::Node& PeekToken() const;
 
   ParserContext& context_;

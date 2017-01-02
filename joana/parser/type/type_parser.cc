@@ -26,32 +26,32 @@ namespace {
 
 bool CanStartType(const ast::Node& token) {
   return token == ast::SyntaxCode::Name ||
-         token == ast::PunctuatorKind::LeftParenthesis ||
-         token == ast::PunctuatorKind::LeftBracket ||
-         token == ast::PunctuatorKind::LeftBrace ||
-         token == ast::PunctuatorKind::Question;
-  token == ast::PunctuatorKind::Times;
+         token == ast::TokenKind::LeftParenthesis ||
+         token == ast::TokenKind::LeftBracket ||
+         token == ast::TokenKind::LeftBrace ||
+         token == ast::TokenKind::Question;
+  token == ast::TokenKind::Times;
 }
 
 std::unique_ptr<BracketTracker> NewBracketTracker(
     ErrorSink* error_sink,
     const SourceCodeRange& source_code_range) {
   const auto descriptions = std::vector<BracketTracker::Description>{
-      {ast::PunctuatorKind::LeftParenthesis,
+      {ast::TokenKind::LeftParenthesis,
        static_cast<int>(TypeErrorCode::ERROR_TYPE_EXPECT_RPAREN),
-       ast::PunctuatorKind::RightParenthesis,
+       ast::TokenKind::RightParenthesis,
        static_cast<int>(TypeErrorCode::ERROR_TYPE_UNEXPECT_RPAREN)},
-      {ast::PunctuatorKind::LeftBrace,
+      {ast::TokenKind::LeftBrace,
        static_cast<int>(TypeErrorCode::ERROR_TYPE_EXPECT_RBRACE),
-       ast::PunctuatorKind::RightBrace,
+       ast::TokenKind::RightBrace,
        static_cast<int>(TypeErrorCode::ERROR_TYPE_UNEXPECT_RBRACE)},
-      {ast::PunctuatorKind::LeftBracket,
+      {ast::TokenKind::LeftBracket,
        static_cast<int>(TypeErrorCode::ERROR_TYPE_EXPECT_RBRACKET),
-       ast::PunctuatorKind::RightBracket,
+       ast::TokenKind::RightBracket,
        static_cast<int>(TypeErrorCode::ERROR_TYPE_UNEXPECT_RBRACKET)},
-      {ast::PunctuatorKind::LessThan,
+      {ast::TokenKind::LessThan,
        static_cast<int>(TypeErrorCode::ERROR_TYPE_EXPECT_RANGLE),
-       ast::PunctuatorKind::GreaterThan,
+       ast::TokenKind::GreaterThan,
        static_cast<int>(TypeErrorCode::ERROR_TYPE_UNEXPECT_RANGLE)},
   };
 
@@ -141,7 +141,7 @@ const ast::Node& TypeParser::PeekToken() const {
   return lexer_->PeekToken();
 }
 
-void TypeParser::SkipTokensTo(ast::PunctuatorKind kind) {
+void TypeParser::SkipTokensTo(ast::TokenKind kind) {
   while (CanPeekToken() && !ConsumeTokenIf(kind))
     ConsumeToken();
 }
@@ -252,19 +252,19 @@ const ast::Node& TypeParser::Parse() {
 }
 
 const ast::Node& TypeParser::ParseFunctionType(const ast::Node& name) {
-  if (!CanPeekToken() || PeekToken() != ast::PunctuatorKind::LeftParenthesis)
+  if (!CanPeekToken() || PeekToken() != ast::TokenKind::LeftParenthesis)
     return NewTypeName(name);
   const auto& result = ParseParameters();
   const auto& parameter_list = *result.first;
   const auto kind = result.second;
-  if (ConsumeTokenIf(ast::PunctuatorKind::Colon))
+  if (ConsumeTokenIf(ast::TokenKind::Colon))
     return NewFunctionType(kind, parameter_list, ParseType());
   const auto& return_type = NewVoidType(lexer_->location());
   return NewFunctionType(kind, parameter_list, return_type);
 }
 
 const ast::Node& TypeParser::ParseNameAsType(const ast::Node& name) {
-  if (!CanPeekToken() || PeekToken() != ast::PunctuatorKind::LessThan)
+  if (!CanPeekToken() || PeekToken() != ast::TokenKind::LessThan)
     return NewTypeName(name);
   // TypeApplication ::= TypeName '<' (Type',')* '>'
   const auto& arguments = ParseTypeArguments();
@@ -274,60 +274,59 @@ const ast::Node& TypeParser::ParseNameAsType(const ast::Node& name) {
 // RecordType ::= '{' (Name ':' Type ','?)* '}'
 const ast::Node& TypeParser::ParseRecordType() {
   std::vector<const ast::Node*> members;
-  while (CanPeekToken() && PeekToken() != ast::PunctuatorKind::RightBrace) {
+  while (CanPeekToken() && PeekToken() != ast::TokenKind::RightBrace) {
     if (PeekToken() != ast::SyntaxCode::Name)
       break;
     const auto& name = ConsumeToken();
-    if (!ConsumeTokenIf(ast::PunctuatorKind::Colon))
+    if (!ConsumeTokenIf(ast::TokenKind::Colon))
       AddError(TypeErrorCode::ERROR_TYPE_EXPECT_COLON);
     if (!CanPeekToken())
       break;
     const auto& type = ParseType();
     members.push_back(&NewTypeProperty(name, type));
-    if (!ConsumeTokenIf(ast::PunctuatorKind::Comma))
+    if (!ConsumeTokenIf(ast::TokenKind::Comma))
       break;
   }
-  SkipTokensTo(ast::PunctuatorKind::RightBrace);
+  SkipTokensTo(ast::TokenKind::RightBrace);
   return NewRecordType(members);
 }
 
 std::pair<const ast::Node*, ast::FunctionTypeKind>
 TypeParser::ParseParameters() {
   TypeNodeScope scope(this);
-  DCHECK_EQ(PeekToken(), ast::PunctuatorKind::LeftParenthesis);
+  DCHECK_EQ(PeekToken(), ast::TokenKind::LeftParenthesis);
   ConsumeToken();
   std::vector<const ast::Node*> parameters;
   auto kind = ast::FunctionTypeKind::Normal;
   auto expect_type = false;
-  if (ConsumeTokenIf(ast::NameId::New)) {
+  if (ConsumeTokenIf(ast::TokenKind::New)) {
     kind = ast::FunctionTypeKind::New;
-    if (!ConsumeTokenIf(ast::PunctuatorKind::Colon))
+    if (!ConsumeTokenIf(ast::TokenKind::Colon))
       AddError(TypeErrorCode::ERROR_TYPE_EXPECT_COLON);
     expect_type = true;
-  } else if (ConsumeTokenIf(ast::NameId::This)) {
+  } else if (ConsumeTokenIf(ast::TokenKind::This)) {
     kind = ast::FunctionTypeKind::This;
-    if (!ConsumeTokenIf(ast::PunctuatorKind::Colon))
+    if (!ConsumeTokenIf(ast::TokenKind::Colon))
       AddError(TypeErrorCode::ERROR_TYPE_EXPECT_COLON);
     expect_type = true;
   }
-  while (CanPeekToken() &&
-         PeekToken() != ast::PunctuatorKind::RightParenthesis) {
+  while (CanPeekToken() && PeekToken() != ast::TokenKind::RightParenthesis) {
     expect_type = false;
     if (!CanStartType(PeekToken()))
       break;
     parameters.push_back(&ParseType());
     if (!CanPeekToken())
       break;
-    if (PeekToken() == ast::PunctuatorKind::RightParenthesis)
+    if (PeekToken() == ast::TokenKind::RightParenthesis)
       break;
     expect_type = true;
-    if (ConsumeTokenIf(ast::PunctuatorKind::Comma))
+    if (ConsumeTokenIf(ast::TokenKind::Comma))
       continue;
     AddError(TypeErrorCode::ERROR_TYPE_EXPECT_COMMA);
   }
   if (expect_type)
     AddError(TypeErrorCode::ERROR_TYPE_EXPECT_TYPE);
-  SkipTokensTo(ast::PunctuatorKind::RightParenthesis);
+  SkipTokensTo(ast::TokenKind::RightParenthesis);
   return std::make_pair(
       &node_factory().NewTuple(ComputeNodeRange(), parameters), kind);
 }
@@ -335,11 +334,11 @@ TypeParser::ParseParameters() {
 // TupleType ::= '[' (Name ','?)* ']'
 const ast::Node& TypeParser::ParseTupleType() {
   std::vector<const ast::Node*> members;
-  while (CanPeekToken() && PeekToken() != ast::PunctuatorKind::RightBracket) {
+  while (CanPeekToken() && PeekToken() != ast::TokenKind::RightBracket) {
     members.push_back(&ParseType());
     if (!CanPeekToken())
       break;
-    if (ConsumeTokenIf(ast::PunctuatorKind::Comma))
+    if (ConsumeTokenIf(ast::TokenKind::Comma))
       continue;
     if (CanStartType(PeekToken())) {
       AddError(TypeErrorCode::ERROR_TYPE_EXPECT_COMMA);
@@ -349,7 +348,7 @@ const ast::Node& TypeParser::ParseTupleType() {
   }
   if (members.empty())
     AddError(TypeErrorCode::ERROR_TYPE_EXPECT_TYPE);
-  SkipTokensTo(ast::PunctuatorKind::RightBracket);
+  SkipTokensTo(ast::TokenKind::RightBracket);
   return NewTupleType(members);
 }
 
@@ -360,48 +359,48 @@ const ast::Node& TypeParser::ParseType() {
   }
   TypeNodeScope scope(this);
   const auto& type = ParseTypeBeforeEqual();
-  if (!ConsumeTokenIf(ast::PunctuatorKind::Equal))
+  if (!ConsumeTokenIf(ast::TokenKind::Equal))
     return type;
   return NewOptionalType(type);
 }
 
 const ast::Node& TypeParser::ParseTypeArguments() {
-  DCHECK_EQ(PeekToken(), ast::PunctuatorKind::LessThan);
+  DCHECK_EQ(PeekToken(), ast::TokenKind::LessThan);
   TypeNodeScope scope(this);
   ConsumeToken();
   std::vector<const ast::Node*> arguments;
-  while (CanPeekToken() && PeekToken() != ast::PunctuatorKind::GreaterThan) {
+  while (CanPeekToken() && PeekToken() != ast::TokenKind::GreaterThan) {
     arguments.push_back(&ParseType());
-    if (!ConsumeTokenIf(ast::PunctuatorKind::Comma))
+    if (!ConsumeTokenIf(ast::TokenKind::Comma))
       break;
   }
-  SkipTokensTo(ast::PunctuatorKind::GreaterThan);
+  SkipTokensTo(ast::TokenKind::GreaterThan);
   return node_factory().NewTuple(ComputeNodeRange(), arguments);
 }
 
 const ast::Node& TypeParser::ParseTypeBeforeEqual() {
   TypeNodeScope scope(this);
-  if (ConsumeTokenIf(ast::PunctuatorKind::Times))
+  if (ConsumeTokenIf(ast::TokenKind::Times))
     return NewAnyType();
-  if (PeekToken() == ast::PunctuatorKind::Question) {
+  if (PeekToken() == ast::TokenKind::Question) {
     const auto& question = ConsumeToken();
     if (CanPeekToken() && CanStartType(PeekToken()))
       return NewNullableType(ParseType());
     return node_factory().NewUnknownType(question.range());
   }
-  if (ConsumeTokenIf(ast::PunctuatorKind::LogicalNot))
+  if (ConsumeTokenIf(ast::TokenKind::LogicalNot))
     return NewNonNullableType(ParseType());
-  if (PeekToken() == ast::NameId::Function)
+  if (PeekToken() == ast::TokenKind::Function)
     return ParseFunctionType(ConsumeToken());
   if (PeekToken() == ast::SyntaxCode::Name)
     return ParseNameAsType(ConsumeToken());
-  if (ConsumeTokenIf(ast::PunctuatorKind::LeftBrace))
+  if (ConsumeTokenIf(ast::TokenKind::LeftBrace))
     return ParseRecordType();
-  if (ConsumeTokenIf(ast::PunctuatorKind::LeftBracket))
+  if (ConsumeTokenIf(ast::TokenKind::LeftBracket))
     return ParseTupleType();
-  if (ConsumeTokenIf(ast::PunctuatorKind::LeftParenthesis))
+  if (ConsumeTokenIf(ast::TokenKind::LeftParenthesis))
     return ParseTypeGroup();
-  if (ConsumeTokenIf(ast::PunctuatorKind::DotDotDot))
+  if (ConsumeTokenIf(ast::TokenKind::DotDotDot))
     return NewRestType(ParseType());
   ConsumeToken();
   return NewInvalidType();
@@ -409,7 +408,7 @@ const ast::Node& TypeParser::ParseTypeBeforeEqual() {
 
 const ast::Node& TypeParser::ParseTypeGroup() {
   const auto& type = ParseUnionType();
-  ConsumeTokenIf(ast::PunctuatorKind::RightParenthesis);
+  ConsumeTokenIf(ast::TokenKind::RightParenthesis);
   return NewTypeGroup(type);
 }
 
@@ -421,7 +420,7 @@ const ast::Node& TypeParser::ParseUnionType() {
   TypeNodeScope scope(this);
   std::vector<const ast::Node*> types;
   types.push_back(&ParseType());
-  while (CanPeekToken() && ConsumeTokenIf(ast::PunctuatorKind::BitOr))
+  while (CanPeekToken() && ConsumeTokenIf(ast::TokenKind::BitOr))
     types.push_back(&ParseType());
   return NewUnionType(types);
 }

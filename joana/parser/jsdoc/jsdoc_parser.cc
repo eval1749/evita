@@ -38,8 +38,8 @@ enum class Syntax {
 };
 
 Syntax TagSyntaxOf(const ast::Node& name) {
-#define V(underscore, capital, syntax)                                 \
-  if (name.name_id() == static_cast<int>(ast::NameId::JsDoc##capital)) \
+#define V(underscore, capital, syntax)                                    \
+  if (name.name_id() == static_cast<int>(ast::TokenKind::JsDoc##capital)) \
     return Syntax::syntax;
   FOR_EACH_JSDOC_TAG_NAME(V)
 #undef V

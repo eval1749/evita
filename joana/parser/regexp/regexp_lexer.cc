@@ -185,22 +185,22 @@ const ast::Node* RegExpLexer::NextToken() {
     case '(':
       if (ConsumeCharIf('?')) {
         if (ConsumeCharIf(':'))
-          return &NewSyntaxChar(ast::PunctuatorKind::Colon);
+          return &NewSyntaxChar(ast::TokenKind::Colon);
         if (ConsumeCharIf('='))
-          return &NewSyntaxChar(ast::PunctuatorKind::Equal);
+          return &NewSyntaxChar(ast::TokenKind::Equal);
         if (ConsumeCharIf('!'))
-          return &NewSyntaxChar(ast::PunctuatorKind::LogicalNot);
+          return &NewSyntaxChar(ast::TokenKind::LogicalNot);
         if (options_.enable_strict_regexp())
           AddError(RegExpErrorCode::REGEXP_INVALID_GROUPING);
-        return &NewSyntaxChar(ast::PunctuatorKind::Colon);
+        return &NewSyntaxChar(ast::TokenKind::Colon);
       }
       if (options_.enable_strict_regexp())
-        return &NewSyntaxChar(ast::PunctuatorKind::Colon);
+        return &NewSyntaxChar(ast::TokenKind::Colon);
       if (!CanPeekChar() || PeekChar() == kRightParenthesis)
         return &NewLiteral();
-      return &NewSyntaxChar(ast::PunctuatorKind::LeftParenthesis);
+      return &NewSyntaxChar(ast::TokenKind::LeftParenthesis);
     case ')':
-      return &NewSyntaxChar(ast::PunctuatorKind::RightParenthesis);
+      return &NewSyntaxChar(ast::TokenKind::RightParenthesis);
     case '[':
       return &HandleCharSet();
     case '{':
@@ -215,12 +215,12 @@ const ast::Node* RegExpLexer::NextToken() {
       break;
     case '|':
       if (options_.enable_strict_regexp())
-        return &NewSyntaxChar(ast::PunctuatorKind::BitOr);
+        return &NewSyntaxChar(ast::TokenKind::BitOr);
       if (token_start_ == range_.start())
         break;
       if (!CanPeekToken() || PeekChar() == kRightParenthesis)
         break;
-      return &NewSyntaxChar(ast::PunctuatorKind::BitOr);
+      return &NewSyntaxChar(ast::TokenKind::BitOr);
     case '\\':
       // TODO(eval1749): NYI parse backslash
       if (!CanPeekChar())
@@ -257,7 +257,7 @@ const ast::Node& RegExpLexer::NewRepeat(ast::RegExpRepeatMethod method,
   return node_factory().NewRegExpRepeat(MakeTokenRange(), method, min, max);
 }
 
-const ast::Node& RegExpLexer::NewSyntaxChar(ast::PunctuatorKind op) {
+const ast::Node& RegExpLexer::NewSyntaxChar(ast::TokenKind op) {
   return node_factory().NewPunctuator(MakeTokenRange(), op);
 }
 

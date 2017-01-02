@@ -17,24 +17,14 @@ namespace joana {
 namespace ast {
 
 //
-// PunctuatorKind
+// TokenKind
 //
-enum class PunctuatorKind {
+enum class TokenKind {
 #define V(text, capital, upper, category) capital,
   FOR_EACH_JAVASCRIPT_PUNCTUATOR(V)
 #undef V
-};
 
-JOANA_AST_EXPORT std::ostream& operator<<(std::ostream& ostream,
-                                          PunctuatorKind kind);
-
-//
-// NameId
-//
-enum class NameId {
-  Invalid,
-
-  StartOfKeyword,
+      StartOfKeyword,
 #define V(name, camel, upper) camel,
   FOR_EACH_JAVASCRIPT_KEYWORD(V)
 #undef V
@@ -53,6 +43,30 @@ enum class NameId {
       EndOfJsDocTagName,
 };
 
+JOANA_AST_EXPORT std::ostream& operator<<(std::ostream& ostream,
+                                          TokenKind kind);
+
+//
+// Token
+//
+class JOANA_AST_EXPORT Token : public SyntaxTemplate<Syntax, int> {
+  DECLARE_ABSTRACT_AST_SYNTAX(Token, Syntax);
+
+ public:
+  ~Token() override;
+
+  int number() const { return parameter_at<0>(); }
+
+  static int IdOf(const Node& node);
+  static TokenKind KindOf(const Node& node);
+
+ protected:
+  Token(SyntaxCode syntax_code, int number);
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(Token);
+};
+
 DECLARE_AST_SYNTAX_0(Comment)
 DECLARE_AST_SYNTAX_0(Empty)
 DECLARE_AST_SYNTAX_1(Invalid, int, error_code)
@@ -60,15 +74,12 @@ DECLARE_AST_SYNTAX_1(Invalid, int, error_code)
 //
 // NameSyntax
 //
-class JOANA_AST_EXPORT NameSyntax final : public SyntaxTemplate<Syntax, int> {
-  DECLARE_CONCRETE_AST_SYNTAX(Name, Syntax);
+class JOANA_AST_EXPORT NameSyntax final : public Token {
+  DECLARE_CONCRETE_AST_SYNTAX(Name, Token);
 
  public:
   ~NameSyntax() final;
 
-  int number() const { return parameter_at<0>(); }
-
-  static int IdOf(const Node& node);
   static bool IsKeyword(const Node& node);
 
  private:
@@ -80,19 +91,16 @@ class JOANA_AST_EXPORT NameSyntax final : public SyntaxTemplate<Syntax, int> {
 //
 // PunctuatorSyntax
 //
-class JOANA_AST_EXPORT PunctuatorSyntax final
-    : public SyntaxTemplate<Syntax, PunctuatorKind> {
-  DECLARE_CONCRETE_AST_SYNTAX(Punctuator, Syntax);
+class JOANA_AST_EXPORT PunctuatorSyntax final : public Token {
+  DECLARE_CONCRETE_AST_SYNTAX(Punctuator, Token);
 
  public:
   ~PunctuatorSyntax() final;
 
-  PunctuatorKind kind() const { return parameter_at<0>(); }
-
-  static PunctuatorKind KindOf(const Node& node);
+  TokenKind kind() const { return static_cast<TokenKind>(number()); }
 
  private:
-  explicit PunctuatorSyntax(PunctuatorKind kind);
+  explicit PunctuatorSyntax(TokenKind kind);
 
   DISALLOW_COPY_AND_ASSIGN(PunctuatorSyntax);
 };

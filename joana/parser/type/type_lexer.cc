@@ -96,7 +96,7 @@ const ast::Node& TypeLexer::PeekToken() const {
   return *current_token_;
 }
 
-const ast::Node& TypeLexer::NewPunctuator(ast::PunctuatorKind kind) {
+const ast::Node& TypeLexer::NewPunctuator(ast::TokenKind kind) {
   return node_factory().NewPunctuator(ComputeTokenRange(), kind);
 }
 
@@ -116,58 +116,58 @@ start_over:
   switch (PeekChar()) {
     case '!':
       ConsumeChar();
-      return &NewPunctuator(ast::PunctuatorKind::LogicalNot);
+      return &NewPunctuator(ast::TokenKind::LogicalNot);
     case '(':
       ConsumeChar();
-      return &NewPunctuator(ast::PunctuatorKind::LeftParenthesis);
+      return &NewPunctuator(ast::TokenKind::LeftParenthesis);
     case ')':
       ConsumeChar();
-      return &NewPunctuator(ast::PunctuatorKind::RightParenthesis);
+      return &NewPunctuator(ast::TokenKind::RightParenthesis);
     case ',':
       ConsumeChar();
-      return &NewPunctuator(ast::PunctuatorKind::Comma);
+      return &NewPunctuator(ast::TokenKind::Comma);
     case '*':
       ConsumeChar();
-      return &NewPunctuator(ast::PunctuatorKind::Times);
+      return &NewPunctuator(ast::TokenKind::Times);
     case ':':
       ConsumeChar();
-      return &NewPunctuator(ast::PunctuatorKind::Colon);
+      return &NewPunctuator(ast::TokenKind::Colon);
     case '<':
       ConsumeChar();
-      return &NewPunctuator(ast::PunctuatorKind::LessThan);
+      return &NewPunctuator(ast::TokenKind::LessThan);
     case '=':
       ConsumeChar();
-      return &NewPunctuator(ast::PunctuatorKind::Equal);
+      return &NewPunctuator(ast::TokenKind::Equal);
     case '>':
       ConsumeChar();
-      return &NewPunctuator(ast::PunctuatorKind::GreaterThan);
+      return &NewPunctuator(ast::TokenKind::GreaterThan);
     case '?':
       ConsumeChar();
-      return &NewPunctuator(ast::PunctuatorKind::Question);
+      return &NewPunctuator(ast::TokenKind::Question);
     case '[':
       ConsumeChar();
-      return &NewPunctuator(ast::PunctuatorKind::LeftBracket);
+      return &NewPunctuator(ast::TokenKind::LeftBracket);
     case ']':
       ConsumeChar();
-      return &NewPunctuator(ast::PunctuatorKind::RightBracket);
+      return &NewPunctuator(ast::TokenKind::RightBracket);
     case '{':
       ConsumeChar();
-      return &NewPunctuator(ast::PunctuatorKind::LeftBrace);
+      return &NewPunctuator(ast::TokenKind::LeftBrace);
     case '|':
       ConsumeChar();
-      return &NewPunctuator(ast::PunctuatorKind::BitOr);
+      return &NewPunctuator(ast::TokenKind::BitOr);
     case '}':
       ConsumeChar();
-      return &NewPunctuator(ast::PunctuatorKind::RightBrace);
+      return &NewPunctuator(ast::TokenKind::RightBrace);
     case '.': {
       auto number_of_dots = 0;
       while (ConsumeCharIf('.'))
         ++number_of_dots;
       if (number_of_dots != 3) {
         AddError(TypeErrorCode::ERROR_TYPE_UNEXPECT_DOT);
-        return &NewPunctuator(ast::PunctuatorKind::Invalid);
+        return &NewPunctuator(ast::TokenKind::Invalid);
       }
-      return &NewPunctuator(ast::PunctuatorKind::DotDotDot);
+      return &NewPunctuator(ast::TokenKind::DotDotDot);
     }
   }
   if (IsIdentifierStart(PeekChar())) {
@@ -177,7 +177,7 @@ start_over:
     return &node_factory().NewName(ComputeTokenRange());
   }
   ConsumeChar();
-  return &NewPunctuator(ast::PunctuatorKind::Invalid);
+  return &NewPunctuator(ast::TokenKind::Invalid);
 }
 
 }  // namespace parser

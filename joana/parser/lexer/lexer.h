@@ -18,7 +18,7 @@ namespace joana {
 class ErrorSink;
 class ParserContext;
 class ParserOptions;
-struct PunctuatorKind;
+struct TokenKind;
 class SourceCode;
 class SourceCodeRange;
 
@@ -93,15 +93,15 @@ class Lexer final {
   const ast::Node& HandleInteger(int base);
   const ast::Node& HandleLineComment();
   const ast::Node& HandleName();
-  const ast::Node& HandleOperator(ast::PunctuatorKind one,
-                                  ast::PunctuatorKind two,
-                                  ast::PunctuatorKind equal);
+  const ast::Node& HandleOperator(ast::TokenKind one,
+                                  ast::TokenKind two,
+                                  ast::TokenKind equal);
   const ast::Node& HandleStringLiteral();
 
   SourceCodeRange MakeTokenRange() const;
 
   const ast::Node& NewNumericLiteral(double value);
-  const ast::Node& NewPunctuator(ast::PunctuatorKind kind);
+  const ast::Node& NewPunctuator(ast::TokenKind kind);
 
   const ast::Node* NextToken();
 

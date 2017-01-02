@@ -19,8 +19,7 @@ class SourceCodeRange;
 namespace ast {
 class Node;
 class NodeFactory;
-enum class PunctuatorKind;
-using Token = Node;
+enum class TokenKind;
 }
 namespace parser {
 
@@ -64,7 +63,7 @@ class TypeLexer final {
 
   // Factory members
   SourceCodeRange ComputeTokenRange() const;
-  const ast::Node& NewPunctuator(ast::PunctuatorKind kind);
+  const ast::Node& NewPunctuator(ast::TokenKind kind);
 
   ParserContext& context_;
   const ast::Node* current_token_ = nullptr;

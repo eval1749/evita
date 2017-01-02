@@ -17,14 +17,14 @@ const ast::Node& Parser::ParseArrowFunctionBody() {
     return NewInvalidStatement(
         ErrorCode::ERROR_FUNCTION_INVALID_ARROW_FUNCTION_BODY);
   }
-  if (PeekToken() == ast::PunctuatorKind::LeftBrace)
+  if (PeekToken() == ast::TokenKind::LeftBrace)
     return ParseStatement();
   return ParseAssignmentExpression();
 }
 
 const ast::Node& Parser::ParseClass() {
   NodeRangeScope scope(this);
-  DCHECK_EQ(PeekToken(), ast::NameId::Class);
+  DCHECK_EQ(PeekToken(), ast::TokenKind::Class);
   ConsumeToken();
   auto& class_name = ParseClassName();
   auto& heritage = ParseClassHeritage();
@@ -35,13 +35,13 @@ const ast::Node& Parser::ParseClass() {
 
 const ast::Node& Parser::ParseClassBody() {
   NodeRangeScope scope(this);
-  if (!CanPeekToken() || PeekToken() != ast::PunctuatorKind::LeftBrace)
+  if (!CanPeekToken() || PeekToken() != ast::TokenKind::LeftBrace)
     return NewInvalidExpression(ErrorCode::ERROR_CLASS_EXPECT_LBRACE);
   return ParsePrimaryExpression();
 }
 
 const ast::Node& Parser::ParseClassHeritage() {
-  if (!ConsumeTokenIf(ast::NameId::Extends))
+  if (!ConsumeTokenIf(ast::TokenKind::Extends))
     return NewElisionExpression();
   return ParseLeftHandSideExpression();
 }
@@ -49,7 +49,7 @@ const ast::Node& Parser::ParseClassHeritage() {
 const ast::Node& Parser::ParseClassName() {
   if (!CanPeekToken() || PeekToken() != ast::SyntaxCode::Name)
     return NewEmptyName();
-  if (PeekToken() == ast::NameId::Extends)
+  if (PeekToken() == ast::TokenKind::Extends)
     return NewEmptyName();
   return ConsumeToken();
 }
@@ -65,7 +65,7 @@ const ast::Node& Parser::ParseFunction(ast::FunctionKind kind) {
 
 const ast::Node& Parser::ParseFunctionBody() {
   NodeRangeScope scope(this);
-  if (!CanPeekToken() || PeekToken() != ast::PunctuatorKind::LeftBrace)
+  if (!CanPeekToken() || PeekToken() != ast::TokenKind::LeftBrace)
     return NewInvalidStatement(ErrorCode::ERROR_FUNCTION_EXPECT_LBRACE);
   return ParseStatement();
 }
@@ -81,12 +81,12 @@ const ast::Node& Parser::ParseMethod(ast::MethodKind method_kind,
 
 const ast::Node& Parser::ParseParameterList() {
   NodeRangeScope scope(this);
-  ExpectPunctuator(ast::PunctuatorKind::LeftParenthesis,
+  ExpectPunctuator(ast::TokenKind::LeftParenthesis,
                    ErrorCode::ERROR_FUNCTION_EXPECT_LPAREN);
-  if (ConsumeTokenIf(ast::PunctuatorKind::RightParenthesis))
+  if (ConsumeTokenIf(ast::TokenKind::RightParenthesis))
     return node_factory().NewParameterList(GetSourceCodeRange(), {});
   const auto& parameters = ParseBindingElements();
-  ExpectPunctuator(ast::PunctuatorKind::RightParenthesis,
+  ExpectPunctuator(ast::TokenKind::RightParenthesis,
                    ErrorCode::ERROR_FUNCTION_EXPECT_RPAREN);
   return node_factory().NewParameterList(GetSourceCodeRange(), parameters);
 }

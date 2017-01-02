@@ -33,7 +33,6 @@ namespace ast {
   V(ArrayInitializer)              \
   V(AssignmentExpression)          \
   V(BinaryExpression)              \
-  V(BinaryKeywordExpression)       \
   V(CallExpression)                \
   V(ComputedMemberExpression)      \
   V(CommaExpression)               \
@@ -49,8 +48,7 @@ namespace ast {
   V(ReferenceExpression)           \
   V(RegExpLiteralExpression)       \
   V(Tuple)                         \
-  V(UnaryExpression)               \
-  V(UnaryKeywordExpression)
+  V(UnaryExpression)
 
 #define FOR_EACH_AST_JSDOC(V) \
   V(JsDocDocument)            \
@@ -147,10 +145,10 @@ namespace ast {
 enum class FunctionKind;
 enum class FunctionTypeKind;
 enum class MethodKind;
-enum class NameId;
+enum class TokenKind;
 enum class RegExpAssertionKind;
 struct RegExpRepeat;
-enum class PunctuatorKind;
+enum class TokenKind;
 enum class RegExpRepeatMethod;
 enum class SyntaxCode;
 class Syntax;

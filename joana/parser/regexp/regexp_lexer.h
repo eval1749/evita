@@ -19,7 +19,7 @@ namespace joana {
 namespace ast {
 class Node;
 class NodeFactory;
-enum class PunctuatorKind;
+enum class TokenKind;
 enum class RegExpAssertionKind;
 enum class RegExpRepeatMethod;
 }
@@ -63,7 +63,7 @@ class RegExpLexer final {
   const ast::Node& NewAssertion(ast::RegExpAssertionKind kind);
   const ast::Node& NewLiteral();
   const ast::Node& NewRepeat(ast::RegExpRepeatMethod method, int min, int max);
-  const ast::Node& NewSyntaxChar(ast::PunctuatorKind op);
+  const ast::Node& NewSyntaxChar(ast::TokenKind op);
 
   // CharacterReader helper function
   bool CanPeekChar() const;

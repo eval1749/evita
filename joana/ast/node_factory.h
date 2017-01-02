@@ -53,10 +53,10 @@ class JOANA_AST_EXPORT NodeFactory final {
 
   // Returns new |Name| token with specified |name_id|. This function is used
   // for constructing pseudo name "yield*".
-  const Node& NewName(const SourceCodeRange& range, NameId name_id);
+  const Node& NewName(const SourceCodeRange& range, TokenKind name_id);
   const Node& NewName(const SourceCodeRange& range);
 
-  const Node& NewPunctuator(const SourceCodeRange& range, PunctuatorKind kind);
+  const Node& NewPunctuator(const SourceCodeRange& range, TokenKind kind);
   const Node& NewRegExpSource(const SourceCodeRange& range);
 
   //
@@ -123,15 +123,11 @@ class JOANA_AST_EXPORT NodeFactory final {
                                       const Node& op,
                                       const Node& left_hand_side,
                                       const Node& right_hand_side);
+
   const Node& NewBinaryExpression(const SourceCodeRange& range,
                                   const Node& op,
                                   const Node& left_hand_side,
                                   const Node& right_hand_side);
-
-  const Node& NewBinaryKeywordExpression(const SourceCodeRange& range,
-                                         const Node& op,
-                                         const Node& left_hand_side,
-                                         const Node& right_hand_side);
 
   const Node& NewCallExpression(const SourceCodeRange& range,
                                 const Node& callee,
@@ -154,10 +150,6 @@ class JOANA_AST_EXPORT NodeFactory final {
   const Node& NewGroupExpression(const SourceCodeRange& range,
                                  const Node& expression);
 
-  const Node& NewUnaryKeywordExpression(const SourceCodeRange& range,
-                                        const Node& op,
-                                        const Node& expression);
-
   const Node& NewNewExpression(const SourceCodeRange& range,
                                const Node& expression,
                                const std::vector<const Node*>& argument_list);
@@ -168,9 +160,6 @@ class JOANA_AST_EXPORT NodeFactory final {
   const Node& NewMemberExpression(const SourceCodeRange& range,
                                   const Node& expression,
                                   const Node& name);
-
-  const Node& NewNewExpression(const SourceCodeRange& range,
-                               const std::vector<const Node*>& elements);
 
   const Node& NewParameterList(const SourceCodeRange& range,
                                const std::vector<const Node*>& expressions);

@@ -18,11 +18,11 @@ class SourceCode;
 class SourceCodeRange;
 
 namespace ast {
-enum class NameId;
+enum class TokenKind;
 enum class FunctionTypeKind;
 class Node;
 class NodeFactory;
-enum class PunctuatorKind;
+enum class TokenKind;
 }
 
 namespace parser {
@@ -73,7 +73,7 @@ class TypeParser final {
   }
 
   const ast::Node& PeekToken() const;
-  void SkipTokensTo(ast::PunctuatorKind kind);
+  void SkipTokensTo(ast::TokenKind kind);
 
   // Factory members
   SourceCodeRange ComputeNodeRange() const;

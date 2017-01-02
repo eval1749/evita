@@ -45,7 +45,7 @@ namespace {
 
 bool CanBePropertyName(const ast::Node& token) {
   return token == ast::SyntaxCode::Name ||
-         token == ast::PunctuatorKind::LeftBracket || token.is_literal();
+         token == ast::TokenKind::LeftBracket || token.is_literal();
 }
 
 bool CanHaveJsDoc(const ast::Node& expression) {
@@ -56,11 +56,11 @@ bool CanHaveJsDoc(const ast::Node& expression) {
 }
 
 ast::FunctionKind FunctionKindOf(const ast::Node& token) {
-  if (token == ast::NameId::Async)
+  if (token == ast::TokenKind::Async)
     return ast::FunctionKind::Async;
-  if (token == ast::NameId::Get)
+  if (token == ast::TokenKind::Get)
     return ast::FunctionKind::Getter;
-  if (token == ast::NameId::Set)
+  if (token == ast::TokenKind::Set)
     return ast::FunctionKind::Setter;
   return ast::FunctionKind::Normal;
 }
@@ -69,38 +69,35 @@ ast::FunctionKind FunctionKindOf(const ast::Node& token) {
 // operator.
 const ast::Node& ConvertToPostOperator(ast::NodeFactory* factory,
                                        const ast::Node& op) {
-  if (op == ast::PunctuatorKind::PlusPlus) {
-    return factory->NewPunctuator(op.range(),
-                                  ast::PunctuatorKind::PostPlusPlus);
+  if (op == ast::TokenKind::PlusPlus) {
+    return factory->NewPunctuator(op.range(), ast::TokenKind::PostPlusPlus);
   }
-  if (op == ast::PunctuatorKind::MinusMinus) {
-    return factory->NewPunctuator(op.range(),
-                                  ast::PunctuatorKind::PostMinusMinus);
+  if (op == ast::TokenKind::MinusMinus) {
+    return factory->NewPunctuator(op.range(), ast::TokenKind::PostMinusMinus);
   }
   NOTREACHED() << op;
-  return factory->NewPunctuator(op.range(), ast::PunctuatorKind::Invalid);
+  return factory->NewPunctuator(op.range(), ast::TokenKind::Invalid);
 }
 
 bool IsKeywordOperator(const ast::Node& token) {
   if (token != ast::SyntaxCode::Name)
     return false;
-  return token == ast::NameId::Await || token == ast::NameId::Delete ||
-         token == ast::NameId::TypeOf || token == ast::NameId::Void;
+  return token == ast::TokenKind::Await || token == ast::TokenKind::Delete ||
+         token == ast::TokenKind::TypeOf || token == ast::TokenKind::Void;
 }
 
 bool IsUnaryOperator(const ast::Node& token) {
   if (token != ast::SyntaxCode::Punctuator)
     return false;
-  return token == ast::PunctuatorKind::BitNot ||
-         token == ast::PunctuatorKind::DotDotDot ||
-         token == ast::PunctuatorKind::LogicalNot ||
-         token == ast::PunctuatorKind::Minus ||
-         token == ast::PunctuatorKind::Plus;
+  return token == ast::TokenKind::BitNot ||
+         token == ast::TokenKind::DotDotDot ||
+         token == ast::TokenKind::LogicalNot ||
+         token == ast::TokenKind::Minus || token == ast::TokenKind::Plus;
 }
 
 bool IsUpdateOperator(const ast::Node& token) {
-  return token == ast::PunctuatorKind::PlusPlus ||
-         token == ast::PunctuatorKind::MinusMinus;
+  return token == ast::TokenKind::PlusPlus ||
+         token == ast::TokenKind::MinusMinus;
 }
 
 }  // namespace
@@ -113,7 +110,7 @@ Parser::OperatorPrecedence Parser::CategoryOf(const ast::Node& token) const {
 #undef V
   };
 
-  if (token == ast::NameId::InstanceOf || token == ast::NameId::In)
+  if (token == ast::TokenKind::InstanceOf || token == ast::TokenKind::In)
     return Parser::OperatorPrecedence::Relational;
   if (token != ast::SyntaxCode::Punctuator)
     return Parser::OperatorPrecedence::None;
@@ -159,7 +156,7 @@ const ast::Node& Parser::ConvertExpressionToBindingElement(
     }
   } else if (expression == ast::SyntaxCode::AssignmentExpression) {
     if (ast::AssignmentExpressionSyntax::OperatorOf(expression) ==
-        ast::PunctuatorKind::Equal) {
+        ast::TokenKind::Equal) {
       return ConvertExpressionToBindingElement(
           ast::AssignmentExpressionSyntax::LeftHandSideOf(expression),
           &ast::AssignmentExpressionSyntax::RightHandSideOf(expression));
@@ -180,7 +177,7 @@ std::vector<const ast::Node*> Parser::ConvertExpressionToBindingElements(
 
 const ast::Node& Parser::HandleComputedMember(const ast::Node& expression) {
   auto& name_expression = ParseExpression();
-  ExpectPunctuator(ast::PunctuatorKind::RightBracket,
+  ExpectPunctuator(ast::TokenKind::RightBracket,
                    ErrorCode::ERROR_EXPRESSION_EXPECT_RBRACKET);
   return node_factory().NewComputedMemberExpression(
       GetSourceCodeRange(), expression, name_expression);
@@ -200,11 +197,11 @@ const ast::Node& Parser::HandleNewExpression(
     const ast::Node& passed_expression) {
   auto* expression = &passed_expression;
   while (CanPeekToken()) {
-    if (ConsumeTokenIf(ast::PunctuatorKind::LeftBracket)) {
+    if (ConsumeTokenIf(ast::TokenKind::LeftBracket)) {
       expression = &HandleComputedMember(*expression);
       continue;
     }
-    if (ConsumeTokenIf(ast::PunctuatorKind::Dot)) {
+    if (ConsumeTokenIf(ast::TokenKind::Dot)) {
       expression = &HandleMember(*expression);
       continue;
     }
@@ -251,13 +248,6 @@ const ast::Node& Parser::NewInvalidExpression(ErrorCode error_code) {
   return NewInvalidExpression(source_code().end(), error_code);
 }
 
-const ast::Node& Parser::NewUnaryKeywordExpression(
-    const ast::Node& op,
-    const ast::Node& expression) {
-  return node_factory().NewUnaryKeywordExpression(GetSourceCodeRange(), op,
-                                                  expression);
-}
-
 const ast::Node& Parser::NewUnaryExpression(const ast::Node& op,
                                             const ast::Node& expression) {
   return node_factory().NewUnaryExpression(GetSourceCodeRange(), op,
@@ -275,20 +265,20 @@ const ast::Node& Parser::ParseJsDocAsExpression() {
 
 // Parse argument list after consuming left parenthesis.
 std::vector<const ast::Node*> Parser::ParseArgumentList() {
-  if (ConsumeTokenIf(ast::PunctuatorKind::RightParenthesis))
+  if (ConsumeTokenIf(ast::TokenKind::RightParenthesis))
     return {};
   std::vector<const ast::Node*> arguments;
   while (CanPeekToken()) {
     arguments.push_back(&ParseExpression());
     if (!CanPeekToken())
       break;
-    if (ConsumeTokenIf(ast::PunctuatorKind::RightParenthesis))
+    if (ConsumeTokenIf(ast::TokenKind::RightParenthesis))
       return arguments;
-    if (PeekToken() == ast::PunctuatorKind::Semicolon) {
+    if (PeekToken() == ast::TokenKind::Semicolon) {
       AddError(ErrorCode::ERROR_EXPRESSION_ARGUMENT_LIST_EXPECT_RPAREN);
       return arguments;
     }
-    if (!ConsumeTokenIf(ast::PunctuatorKind::Comma))
+    if (!ConsumeTokenIf(ast::TokenKind::Comma))
       AddError(ErrorCode::ERROR_EXPRESSION_ARGUMENT_LIST_EXPECT_COMMA);
   }
   return arguments;
@@ -296,15 +286,15 @@ std::vector<const ast::Node*> Parser::ParseArgumentList() {
 
 const ast::Node& Parser::ParseArrayInitializer() {
   NodeRangeScope scope(this);
-  DCHECK_EQ(PeekToken(), ast::PunctuatorKind::LeftBracket);
+  DCHECK_EQ(PeekToken(), ast::TokenKind::LeftBracket);
   ConsumeToken();
   std::vector<const ast::Node*> elements;
   auto has_expression = false;
   while (CanPeekToken()) {
-    if (ConsumeTokenIf(ast::PunctuatorKind::RightBracket)) {
+    if (ConsumeTokenIf(ast::TokenKind::RightBracket)) {
       return node_factory().NewArrayInitializer(GetSourceCodeRange(), elements);
     }
-    if (ConsumeTokenIf(ast::PunctuatorKind::Comma)) {
+    if (ConsumeTokenIf(ast::TokenKind::Comma)) {
       if (!has_expression)
         elements.push_back(&NewElisionExpression());
       has_expression = false;
@@ -349,8 +339,8 @@ const ast::Node& Parser::ParseBinaryExpression(OperatorPrecedence category) {
       left = &node_factory().NewBinaryExpression(GetSourceCodeRange(), op,
                                                  *left, right);
     } else {
-      left = &node_factory().NewBinaryKeywordExpression(GetSourceCodeRange(),
-                                                        op, *left, right);
+      left = &node_factory().NewBinaryExpression(GetSourceCodeRange(), op,
+                                                 *left, right);
     }
   }
   return *left;
@@ -360,7 +350,7 @@ const ast::Node& Parser::ParseCommaExpression() {
   NodeRangeScope scope(this);
   std::vector<const ast::Node*> expressions;
   expressions.push_back(&ParseAssignmentExpression());
-  while (ConsumeTokenIf(ast::PunctuatorKind::Comma))
+  while (ConsumeTokenIf(ast::TokenKind::Comma))
     expressions.push_back(&ParseAssignmentExpression());
   if (expressions.size() == 1)
     return *expressions.front();
@@ -370,10 +360,10 @@ const ast::Node& Parser::ParseCommaExpression() {
 const ast::Node& Parser::ParseConditionalExpression() {
   NodeRangeScope scope(this);
   auto& expression = ParseBinaryExpression(OperatorPrecedence::LogicalOr);
-  if (!ConsumeTokenIf(ast::PunctuatorKind::Question))
+  if (!ConsumeTokenIf(ast::TokenKind::Question))
     return expression;
   auto& true_expression = ParseAssignmentExpression();
-  ExpectPunctuator(ast::PunctuatorKind::Colon,
+  ExpectPunctuator(ast::TokenKind::Colon,
                    ErrorCode::ERROR_EXPRESSION_CONDITIONAL_EXPECT_COLON);
   auto& false_expression = ParseAssignmentExpression();
   return node_factory().NewConditionalExpression(
@@ -396,15 +386,15 @@ const ast::Node& Parser::ParseLeftHandSideExpression() {
     return NewInvalidExpression(ErrorCode::ERROR_EXPRESSION_INVALID);
   auto* expression = &ParseNewExpression();
   while (CanPeekToken()) {
-    if (ConsumeTokenIf(ast::PunctuatorKind::LeftBracket)) {
+    if (ConsumeTokenIf(ast::TokenKind::LeftBracket)) {
       expression = &HandleComputedMember(*expression);
       continue;
     }
-    if (ConsumeTokenIf(ast::PunctuatorKind::Dot)) {
+    if (ConsumeTokenIf(ast::TokenKind::Dot)) {
       expression = &HandleMember(*expression);
       continue;
     }
-    if (ConsumeTokenIf(ast::PunctuatorKind::LeftParenthesis)) {
+    if (ConsumeTokenIf(ast::TokenKind::LeftParenthesis)) {
       const auto& arguments = ParseArgumentList();
       expression = &node_factory().NewCallExpression(GetSourceCodeRange(),
                                                      *expression, arguments);
@@ -418,30 +408,30 @@ const ast::Node& Parser::ParseLeftHandSideExpression() {
 const ast::Node& Parser::ParseNameAsExpression() {
   NodeRangeScope scope(this);
   auto& name = ConsumeToken();
-  switch (static_cast<ast::NameId>(name.name_id())) {
-    case ast::NameId::Async:
-      if (CanPeekToken() && PeekToken() == ast::NameId::Function) {
+  switch (static_cast<ast::TokenKind>(name.name_id())) {
+    case ast::TokenKind::Async:
+      if (CanPeekToken() && PeekToken() == ast::TokenKind::Function) {
         ConsumeToken();
         return ParseFunction(ast::FunctionKind::Async);
       }
       break;
-    case ast::NameId::False:
+    case ast::TokenKind::False:
       return node_factory().NewBooleanLiteral(name, false);
-    case ast::NameId::Function:
-      if (ConsumeTokenIf(ast::PunctuatorKind::Times))
+    case ast::TokenKind::Function:
+      if (ConsumeTokenIf(ast::TokenKind::Times))
         return ParseFunction(ast::FunctionKind::Generator);
       return ParseFunction(ast::FunctionKind::Normal);
-    case ast::NameId::Null:
+    case ast::TokenKind::Null:
       return node_factory().NewNullLiteral(name);
-    case ast::NameId::Super:
-    case ast::NameId::This:
+    case ast::TokenKind::Super:
+    case ast::TokenKind::This:
       return node_factory().NewReferenceExpression(name);
-    case ast::NameId::True:
+    case ast::TokenKind::True:
       return node_factory().NewBooleanLiteral(name, true);
   }
   if (ast::NameSyntax::IsKeyword(name))
     return NewInvalidExpression(name, ErrorCode::ERROR_EXPRESSION_INVALID);
-  if (ConsumeTokenIf(ast::PunctuatorKind::Arrow)) {
+  if (ConsumeTokenIf(ast::TokenKind::Arrow)) {
     auto& statement = ParseArrowFunctionBody();
     auto& parameter = node_factory().NewReferenceExpression(name);
     return node_factory().NewArrowFunction(
@@ -453,17 +443,17 @@ const ast::Node& Parser::ParseNameAsExpression() {
 // NewExpression ::= MemberExpression | 'new' NewExpression
 const ast::Node& Parser::ParseNewExpression() {
   NodeRangeScope scope(this);
-  if (PeekToken() == ast::NameId::New) {
+  if (PeekToken() == ast::TokenKind::New) {
     auto& name_new = ConsumeToken();
     if (!CanPeekToken()) {
       return NewInvalidExpression(
           ErrorCode::ERROR_EXPRESSION_EXPECT_EXPRESSION);
     }
-    if (PeekToken() == ast::PunctuatorKind::Dot)
+    if (PeekToken() == ast::TokenKind::Dot)
       return HandleNewExpression(
           node_factory().NewReferenceExpression(name_new));
     auto& member_expression = ParseNewExpression();
-    if (ConsumeTokenIf(ast::PunctuatorKind::LeftParenthesis)) {
+    if (ConsumeTokenIf(ast::TokenKind::LeftParenthesis)) {
       const auto& arguments = ParseArgumentList();
       return node_factory().NewNewExpression(GetSourceCodeRange(),
                                              member_expression, arguments);
@@ -476,18 +466,18 @@ const ast::Node& Parser::ParseNewExpression() {
 
 const ast::Node& Parser::ParseObjectInitializer() {
   NodeRangeScope scope(this);
-  DCHECK_EQ(PeekToken(), ast::PunctuatorKind::LeftBrace);
+  DCHECK_EQ(PeekToken(), ast::TokenKind::LeftBrace);
   ConsumeToken();
   std::vector<const ast::Node*> members;
   while (CanPeekToken()) {
     NodeRangeScope scope(this);
-    if (ConsumeTokenIf(ast::PunctuatorKind::RightBrace))
+    if (ConsumeTokenIf(ast::TokenKind::RightBrace))
       break;
-    if (PeekToken() == ast::PunctuatorKind::Comma) {
+    if (PeekToken() == ast::TokenKind::Comma) {
       members.push_back(&NewDelimiterExpression(ConsumeToken()));
       continue;
     }
-    if (PeekToken() == ast::PunctuatorKind::Semicolon) {
+    if (PeekToken() == ast::TokenKind::Semicolon) {
       members.push_back(&NewDelimiterExpression(ConsumeToken()));
       continue;
     }
@@ -496,13 +486,13 @@ const ast::Node& Parser::ParseObjectInitializer() {
       ConsumeToken();
       continue;
     }
-    if (ConsumeTokenIf(ast::PunctuatorKind::Times)) {
+    if (ConsumeTokenIf(ast::TokenKind::Times)) {
       members.push_back(&ParseMethod(ast::MethodKind::NonStatic,
                                      ast::FunctionKind::Generator));
       continue;
     }
 
-    if (PeekToken() == ast::NameId::Static) {
+    if (PeekToken() == ast::TokenKind::Static) {
       // 'static' can be a property name and method name.
       auto& property_name_static = ParsePropertyName();
       if (!CanPeekToken())
@@ -517,7 +507,7 @@ const ast::Node& Parser::ParseObjectInitializer() {
             property_name, ast::MethodKind::Static, function_kind));
         continue;
       }
-      if (ConsumeTokenIf(ast::PunctuatorKind::Times)) {
+      if (ConsumeTokenIf(ast::TokenKind::Times)) {
         // 'static' '*' PropertyName
         members.push_back(&ParseMethod(ast::MethodKind::Static,
                                        ast::FunctionKind::Generator));
@@ -542,12 +532,12 @@ const ast::Node& Parser::ParseObjectInitializer() {
 
 const ast::Node& Parser::ParseParenthesis() {
   NodeRangeScope scope(this);
-  DCHECK_EQ(PeekToken(), ast::PunctuatorKind::LeftParenthesis);
+  DCHECK_EQ(PeekToken(), ast::TokenKind::LeftParenthesis);
   ConsumeToken();
-  if (ConsumeTokenIf(ast::PunctuatorKind::RightParenthesis)) {
+  if (ConsumeTokenIf(ast::TokenKind::RightParenthesis)) {
     auto& parameter_list =
         node_factory().NewParameterList(GetSourceCodeRange(), {});
-    ExpectPunctuator(ast::PunctuatorKind::Arrow,
+    ExpectPunctuator(ast::TokenKind::Arrow,
                      ErrorCode::ERROR_EXPRESSION_PRIMARY_EXPECT_ARROW);
     auto& statement = ParseArrowFunctionBody();
     return node_factory().NewArrowFunction(GetSourceCodeRange(),
@@ -555,11 +545,11 @@ const ast::Node& Parser::ParseParenthesis() {
                                            parameter_list, statement);
   }
   auto& sub_expression = ParseExpression();
-  ExpectPunctuator(ast::PunctuatorKind::RightParenthesis,
+  ExpectPunctuator(ast::TokenKind::RightParenthesis,
                    ErrorCode::ERROR_EXPRESSION_PRIMARY_EXPECT_RPAREN);
   auto& expression =
       node_factory().NewGroupExpression(GetSourceCodeRange(), sub_expression);
-  if (!ConsumeTokenIf(ast::PunctuatorKind::Arrow))
+  if (!ConsumeTokenIf(ast::TokenKind::Arrow))
     return expression;
   auto& statement = ParseArrowFunctionBody();
   return node_factory().NewArrowFunction(
@@ -579,18 +569,17 @@ const ast::Node& Parser::ParsePrimaryExpression() {
     return ParseJsDocAsExpression();
   if (token.is_literal())
     return ConsumeToken();
-  if (token == ast::NameId::Class)
+  if (token == ast::TokenKind::Class)
     return ParseClass();
   if (token == ast::SyntaxCode::Name)
     return ParseNameAsExpression();
-  if (token == ast::PunctuatorKind::LeftParenthesis)
+  if (token == ast::TokenKind::LeftParenthesis)
     return ParseParenthesis();
-  if (token == ast::PunctuatorKind::LeftBracket)
+  if (token == ast::TokenKind::LeftBracket)
     return ParseArrayInitializer();
-  if (token == ast::PunctuatorKind::LeftBrace)
+  if (token == ast::TokenKind::LeftBrace)
     return ParseObjectInitializer();
-  if (token == ast::PunctuatorKind::Divide ||
-      token == ast::PunctuatorKind::DivideEqual) {
+  if (token == ast::TokenKind::Divide || token == ast::TokenKind::DivideEqual) {
     return ParseRegExpLiteral();
   }
   // TODO(eval1749): NYI template literal
@@ -614,7 +603,7 @@ const ast::Node& Parser::ParsePropertyAfterName(
     return ParseMethod(method_kind, function_kind);
   }
 
-  if (PeekToken() == ast::PunctuatorKind::LeftParenthesis) {
+  if (PeekToken() == ast::TokenKind::LeftParenthesis) {
     // PropertyName '(' ParameterList ')' '{' StatementList '}'
     auto& parameter_list = ParseParameterList();
     auto& method_body = ParseFunctionBody();
@@ -627,19 +616,19 @@ const ast::Node& Parser::ParsePropertyAfterName(
   if (method_kind == ast::MethodKind::Static)
     AddError(ErrorCode::ERROR_PROPERTY_INVALID_STATIC);
 
-  if (PeekToken() == ast::PunctuatorKind::RightBrace)
+  if (PeekToken() == ast::TokenKind::RightBrace)
     return property_name;
 
-  if (ConsumeTokenIf(ast::PunctuatorKind::Comma))
+  if (ConsumeTokenIf(ast::TokenKind::Comma))
     return property_name;
 
-  if (ConsumeTokenIf(ast::PunctuatorKind::Colon)) {
+  if (ConsumeTokenIf(ast::TokenKind::Colon)) {
     auto& expression = ParseAssignmentExpression();
     return node_factory().NewProperty(GetSourceCodeRange(), property_name,
                                       expression);
   }
 
-  if (PeekToken() == ast::PunctuatorKind::Equal) {
+  if (PeekToken() == ast::TokenKind::Equal) {
     auto& op = ConsumeToken();
     auto& expression = ParseAssignmentExpression();
     return node_factory().NewAssignmentExpression(GetSourceCodeRange(), op,
@@ -705,9 +694,9 @@ const ast::Node& Parser::ParseUnaryExpression() {
   if (IsKeywordOperator(PeekToken())) {
     auto& token = ConsumeToken();
     auto& expression = ParseUnaryExpression();
-    return NewUnaryKeywordExpression(token, expression);
+    return NewUnaryExpression(token, expression);
   }
-  if (PeekToken() == ast::NameId::Yield)
+  if (PeekToken() == ast::TokenKind::Yield)
     return ParseYieldExpression();
   return ParseUpdateExpression();
 }
@@ -735,17 +724,17 @@ const ast::Node& Parser::ParseYieldExpression() {
   NodeRangeScope scope(this);
   auto& keyword = ConsumeToken();
   if (!CanPeekToken())
-    return NewUnaryKeywordExpression(keyword, NewElisionExpression());
-  if (PeekToken() == ast::PunctuatorKind::Times) {
+    return NewUnaryExpression(keyword, NewElisionExpression());
+  if (PeekToken() == ast::TokenKind::Times) {
     auto& yield_star = node_factory().NewName(
         SourceCodeRange::Merge(keyword.range(), lexer_->location()),
-        ast::NameId::YieldStar);
+        ast::TokenKind::YieldStar);
     ConsumeToken();
-    return NewUnaryKeywordExpression(yield_star, ParseAssignmentExpression());
+    return NewUnaryExpression(yield_star, ParseAssignmentExpression());
   }
-  if (PeekToken() == ast::PunctuatorKind::Semicolon)
-    return NewUnaryKeywordExpression(keyword, NewElisionExpression());
-  return NewUnaryKeywordExpression(keyword, ParseAssignmentExpression());
+  if (PeekToken() == ast::TokenKind::Semicolon)
+    return NewUnaryExpression(keyword, NewElisionExpression());
+  return NewUnaryExpression(keyword, ParseAssignmentExpression());
 }
 
 }  // namespace parser

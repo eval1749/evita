@@ -55,17 +55,17 @@ NodeFactory::NameIdMap::NameIdMap() {
 NodeFactory::NameIdMap::~NameIdMap() = default;
 
 void NodeFactory::NameIdMap::Populate() {
-  last_id_ = static_cast<int>(NameId::StartOfKeyword);
+  last_id_ = static_cast<int>(TokenKind::StartOfKeyword);
 #define V(name, camel, upper) Register(base::StringPiece16(L## #name));
   FOR_EACH_JAVASCRIPT_KEYWORD(V)
 #undef V
 
-  last_id_ = static_cast<int>(NameId::StartOfKnownWord);
+  last_id_ = static_cast<int>(TokenKind::StartOfKnownWord);
 #define V(name, camel, upper) Register(base::StringPiece16(L## #name));
   FOR_EACH_JAVASCRIPT_KNOWN_WORD(V)
 #undef V
 
-  last_id_ = static_cast<int>(NameId::StartOfJsDocTagName);
+  last_id_ = static_cast<int>(TokenKind::StartOfJsDocTagName);
 #define V(name, camel, upper) Register(base::StringPiece16(L##"@" #name));
   FOR_EACH_JSDOC_TAG_NAME(V)
 #undef V
@@ -206,8 +206,9 @@ const Node& NodeFactory::NewInvalid(const SourceCodeRange& range,
   return NewNode0(range, syntax_factory_->NewInvalid(error_code));
 }
 
-const Node& NodeFactory::NewName(const SourceCodeRange& range, NameId name_id) {
-  DCHECK_EQ(name_id, NameId::YieldStar);
+const Node& NodeFactory::NewName(const SourceCodeRange& range,
+                                 TokenKind name_id) {
+  DCHECK_EQ(name_id, TokenKind::YieldStar);
   return NewNode0(range, syntax_factory_->NewName(static_cast<int>(name_id)));
 }
 
@@ -217,7 +218,7 @@ const Node& NodeFactory::NewName(const SourceCodeRange& range) {
 }
 
 const Node& NodeFactory::NewPunctuator(const SourceCodeRange& range,
-                                       PunctuatorKind kind) {
+                                       TokenKind kind) {
   return NewNode0(range, syntax_factory_->NewPunctuator(kind));
 }
 
@@ -337,19 +338,9 @@ const Node& NodeFactory::NewBinaryExpression(const SourceCodeRange& range,
                                              const Node& op,
                                              const Node& lhs,
                                              const Node& rhs) {
-  return NewNode3(
-      range, syntax_factory_->NewBinaryExpression(PunctuatorSyntax::KindOf(op)),
-      lhs, op, rhs);
-}
-
-const Node& NodeFactory::NewBinaryKeywordExpression(
-    const SourceCodeRange& range,
-    const Node& op,
-    const Node& lhs,
-    const Node& rhs) {
-  return NewNode3(range, syntax_factory_->NewBinaryKeywordExpression(
-                             static_cast<NameId>(NameSyntax::IdOf(op))),
-                  lhs, op, rhs);
+  return NewNode3(range,
+                  syntax_factory_->NewBinaryExpression(Token::KindOf(op)), lhs,
+                  op, rhs);
 }
 
 const Node& NodeFactory::NewCallExpression(
@@ -447,17 +438,7 @@ const Node& NodeFactory::NewRegExpLiteralExpression(
 const Node& NodeFactory::NewUnaryExpression(const SourceCodeRange& range,
                                             const Node& op,
                                             const Node& expression) {
-  return NewNode2(
-      range, syntax_factory_->NewUnaryExpression(PunctuatorSyntax::KindOf(op)),
-      op, expression);
-}
-
-const Node& NodeFactory::NewUnaryKeywordExpression(const SourceCodeRange& range,
-                                                   const Node& op,
-                                                   const Node& expression) {
-  DCHECK(NameSyntax::IsKeyword(op)) << op;
-  return NewNode2(range, syntax_factory_->NewUnaryKeywordExpression(
-                             static_cast<NameId>(NameSyntax::IdOf(op))),
+  return NewNode2(range, syntax_factory_->NewUnaryExpression(Token::KindOf(op)),
                   op, expression);
 }
 

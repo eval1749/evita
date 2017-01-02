@@ -178,9 +178,8 @@ const Syntax& SyntaxFactory::NewMethod(MethodKind method_kind,
 
 // Expressions
 IMPLEMENT_FACTORY_MEMBER_0(ArrayInitializer)
-IMPLEMENT_FACTORY_MEMBER_1(AssignmentExpression, PunctuatorKind, kind)
-IMPLEMENT_FACTORY_MEMBER_1(BinaryExpression, PunctuatorKind, kind)
-IMPLEMENT_FACTORY_MEMBER_1(BinaryKeywordExpression, NameId, name_id)
+IMPLEMENT_FACTORY_MEMBER_1(AssignmentExpression, TokenKind, kind)
+IMPLEMENT_FACTORY_MEMBER_1(BinaryExpression, TokenKind, kind)
 IMPLEMENT_FACTORY_MEMBER_0(CallExpression)
 IMPLEMENT_FACTORY_MEMBER_0(ComputedMemberExpression)
 IMPLEMENT_FACTORY_MEMBER_0(CommaExpression)
@@ -196,8 +195,7 @@ IMPLEMENT_FACTORY_MEMBER_0(Property)
 IMPLEMENT_FACTORY_MEMBER_0(ReferenceExpression)
 IMPLEMENT_FACTORY_MEMBER_0(RegExpLiteralExpression)
 IMPLEMENT_FACTORY_MEMBER_0(Tuple)
-IMPLEMENT_FACTORY_MEMBER_1(UnaryExpression, PunctuatorKind, kind)
-IMPLEMENT_FACTORY_MEMBER_1(UnaryKeywordExpression, NameId, name_id)
+IMPLEMENT_FACTORY_MEMBER_1(UnaryExpression, TokenKind, kind)
 
 FOR_EACH_AST_JSDOC(IMPLEMENT_FACTORY_MEMBER_0)
 
@@ -238,7 +236,7 @@ FOR_EACH_AST_STATEMENT(IMPLEMENT_FACTORY_MEMBER_0)
 IMPLEMENT_FACTORY_MEMBER_0(Comment)
 IMPLEMENT_FACTORY_MEMBER_0(Empty)
 IMPLEMENT_FACTORY_MEMBER_1(Invalid, int, error_code)
-IMPLEMENT_FACTORY_MEMBER_1(Punctuator, PunctuatorKind, kind)
+IMPLEMENT_FACTORY_MEMBER_1(Punctuator, TokenKind, kind)
 IMPLEMENT_FACTORY_MEMBER_1(Name, int, number)
 IMPLEMENT_FACTORY_MEMBER_0(RegExpSource)
 

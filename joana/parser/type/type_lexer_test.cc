@@ -49,7 +49,7 @@ class TypeLexerTest : public LexerTestBase {
 
   std::string NewError(int start, int end, TypeErrorCode error_code);
   const ast::Node& NewName(int start, int end);
-  const ast::Node& NewPunctuator(int start, int end, ast::PunctuatorKind kind);
+  const ast::Node& NewPunctuator(int start, int end, ast::TokenKind kind);
 
   std::string ScanToString(const ParserOptions& options);
   std::string ScanToString();
@@ -75,7 +75,7 @@ const ast::Node& TypeLexerTest::NewName(int start, int end) {
 
 const ast::Node& TypeLexerTest::NewPunctuator(int start,
                                               int end,
-                                              ast::PunctuatorKind kind) {
+                                              ast::TokenKind kind) {
   return node_factory().NewPunctuator(source_code().Slice(start, end), kind);
 }
 
@@ -98,22 +98,20 @@ TEST_F(TypeLexerTest, Name) {
   PrepareSouceCode("foo(new:bar, baz=, ...quux) : number");
   EXPECT_EQ(
       ToString(
-          NewName(0, 3),
-          NewPunctuator(3, 4, ast::PunctuatorKind::LeftParenthesis),
-          NewName(4, 7), NewPunctuator(7, 8, ast::PunctuatorKind::Colon),
-          NewName(8, 11), NewPunctuator(11, 12, ast::PunctuatorKind::Comma),
-          NewName(13, 16), NewPunctuator(16, 17, ast::PunctuatorKind::Equal),
-          NewPunctuator(17, 18, ast::PunctuatorKind::Comma),
-          NewPunctuator(19, 22, ast::PunctuatorKind::DotDotDot),
-          NewName(22, 26),
-          NewPunctuator(26, 27, ast::PunctuatorKind::RightParenthesis),
-          NewPunctuator(28, 29, ast::PunctuatorKind::Colon), NewName(30, 36)),
+          NewName(0, 3), NewPunctuator(3, 4, ast::TokenKind::LeftParenthesis),
+          NewName(4, 7), NewPunctuator(7, 8, ast::TokenKind::Colon),
+          NewName(8, 11), NewPunctuator(11, 12, ast::TokenKind::Comma),
+          NewName(13, 16), NewPunctuator(16, 17, ast::TokenKind::Equal),
+          NewPunctuator(17, 18, ast::TokenKind::Comma),
+          NewPunctuator(19, 22, ast::TokenKind::DotDotDot), NewName(22, 26),
+          NewPunctuator(26, 27, ast::TokenKind::RightParenthesis),
+          NewPunctuator(28, 29, ast::TokenKind::Colon), NewName(30, 36)),
       ScanToString());
 }
 
 TEST_F(TypeLexerTest, Errors) {
   PrepareSouceCode("..");
-  EXPECT_EQ(ToString(NewPunctuator(0, 2, ast::PunctuatorKind::Invalid)) +
+  EXPECT_EQ(ToString(NewPunctuator(0, 2, ast::TokenKind::Invalid)) +
                 NewError(0, 2, TypeErrorCode::ERROR_TYPE_UNEXPECT_DOT),
             ScanToString());
 }
@@ -126,48 +124,47 @@ TEST_F(TypeLexerTest, JsDocMdoe) {
 
 TEST_F(TypeLexerTest, Punctuator) {
   PrepareSouceCode("!");
-  EXPECT_EQ(ToString(NewPunctuator(0, 1, ast::PunctuatorKind::LogicalNot)),
+  EXPECT_EQ(ToString(NewPunctuator(0, 1, ast::TokenKind::LogicalNot)),
             ScanToString());
 
   PrepareSouceCode("( )");
-  EXPECT_EQ(
-      ToString(NewPunctuator(0, 1, ast::PunctuatorKind::LeftParenthesis),
-               NewPunctuator(2, 3, ast::PunctuatorKind::RightParenthesis)),
-      ScanToString());
+  EXPECT_EQ(ToString(NewPunctuator(0, 1, ast::TokenKind::LeftParenthesis),
+                     NewPunctuator(2, 3, ast::TokenKind::RightParenthesis)),
+            ScanToString());
 
   PrepareSouceCode(",");
-  EXPECT_EQ(ToString(NewPunctuator(0, 1, ast::PunctuatorKind::Comma)),
+  EXPECT_EQ(ToString(NewPunctuator(0, 1, ast::TokenKind::Comma)),
             ScanToString());
 
   PrepareSouceCode(":");
-  EXPECT_EQ(ToString(NewPunctuator(0, 1, ast::PunctuatorKind::Colon)),
+  EXPECT_EQ(ToString(NewPunctuator(0, 1, ast::TokenKind::Colon)),
             ScanToString());
 
   PrepareSouceCode("=");
-  EXPECT_EQ(ToString(NewPunctuator(0, 1, ast::PunctuatorKind::Equal)),
+  EXPECT_EQ(ToString(NewPunctuator(0, 1, ast::TokenKind::Equal)),
             ScanToString());
 
   PrepareSouceCode("?");
-  EXPECT_EQ(ToString(NewPunctuator(0, 1, ast::PunctuatorKind::Question)),
+  EXPECT_EQ(ToString(NewPunctuator(0, 1, ast::TokenKind::Question)),
             ScanToString());
 
   PrepareSouceCode("< >");
-  EXPECT_EQ(ToString(NewPunctuator(0, 1, ast::PunctuatorKind::LessThan),
-                     NewPunctuator(2, 3, ast::PunctuatorKind::GreaterThan)),
+  EXPECT_EQ(ToString(NewPunctuator(0, 1, ast::TokenKind::LessThan),
+                     NewPunctuator(2, 3, ast::TokenKind::GreaterThan)),
             ScanToString());
 
   PrepareSouceCode("[ ]");
-  EXPECT_EQ(ToString(NewPunctuator(0, 1, ast::PunctuatorKind::LeftBracket),
-                     NewPunctuator(2, 3, ast::PunctuatorKind::RightBracket)),
+  EXPECT_EQ(ToString(NewPunctuator(0, 1, ast::TokenKind::LeftBracket),
+                     NewPunctuator(2, 3, ast::TokenKind::RightBracket)),
             ScanToString());
 
   PrepareSouceCode("{ }");
-  EXPECT_EQ(ToString(NewPunctuator(0, 1, ast::PunctuatorKind::LeftBrace),
-                     NewPunctuator(2, 3, ast::PunctuatorKind::RightBrace)),
+  EXPECT_EQ(ToString(NewPunctuator(0, 1, ast::TokenKind::LeftBrace),
+                     NewPunctuator(2, 3, ast::TokenKind::RightBrace)),
             ScanToString());
 
   PrepareSouceCode(",");
-  EXPECT_EQ(ToString(NewPunctuator(0, 1, ast::PunctuatorKind::Invalid)),
+  EXPECT_EQ(ToString(NewPunctuator(0, 1, ast::TokenKind::Invalid)),
             ScanToString())
       << "Semicolon is not valid token in type";
 }

@@ -35,20 +35,20 @@ DECLARE_AST_SYNTAX_0(Tuple);
 // AssignmentExpressionSyntax
 //
 class JOANA_AST_EXPORT AssignmentExpressionSyntax final
-    : public SyntaxTemplate<Syntax, PunctuatorKind> {
+    : public SyntaxTemplate<Syntax, TokenKind> {
   DECLARE_CONCRETE_AST_SYNTAX(AssignmentExpression, Syntax);
 
  public:
   ~AssignmentExpressionSyntax() final;
 
-  PunctuatorKind op() const { return parameter_at<0>(); }
+  TokenKind op() const { return parameter_at<0>(); }
 
   static const Node& LeftHandSideOf(const Node& node);
   static const Node& OperatorOf(const Node& node);
   static const Node& RightHandSideOf(const Node& node);
 
  private:
-  explicit AssignmentExpressionSyntax(PunctuatorKind kind);
+  explicit AssignmentExpressionSyntax(TokenKind kind);
 
   DISALLOW_COPY_AND_ASSIGN(AssignmentExpressionSyntax);
 };
@@ -57,42 +57,22 @@ class JOANA_AST_EXPORT AssignmentExpressionSyntax final
 // BinaryExpressionSyntax
 //
 class JOANA_AST_EXPORT BinaryExpressionSyntax final
-    : public SyntaxTemplate<Syntax, PunctuatorKind> {
+    : public SyntaxTemplate<Syntax, TokenKind> {
   DECLARE_CONCRETE_AST_SYNTAX(BinaryExpression, Syntax);
 
  public:
   ~BinaryExpressionSyntax() final;
 
-  PunctuatorKind op() const { return parameter_at<0>(); }
+  TokenKind op() const { return parameter_at<0>(); }
 
   static const Node& LeftHandSideOf(const Node& node);
   static const Node& OperatorOf(const Node& node);
   static const Node& RightHandSideOf(const Node& node);
 
  private:
-  explicit BinaryExpressionSyntax(PunctuatorKind kind);
+  explicit BinaryExpressionSyntax(TokenKind kind);
 
   DISALLOW_COPY_AND_ASSIGN(BinaryExpressionSyntax);
-};
-
-//
-// BinaryKeywordExpressionSyntax
-//
-class JOANA_AST_EXPORT BinaryKeywordExpressionSyntax final
-    : public SyntaxTemplate<Syntax, NameId> {
-  DECLARE_CONCRETE_AST_SYNTAX(BinaryKeywordExpression, Syntax);
-
- public:
-  ~BinaryKeywordExpressionSyntax() final;
-
-  static const Node& LeftHandSideOf(const Node& node);
-  static const Node& OperatorOf(const Node& node);
-  static const Node& RightHandSideOf(const Node& node);
-
- private:
-  explicit BinaryKeywordExpressionSyntax(NameId kind);
-
-  DISALLOW_COPY_AND_ASSIGN(BinaryKeywordExpressionSyntax);
 };
 
 //
@@ -192,40 +172,21 @@ class JOANA_AST_EXPORT RegExpLiteralExpressionSyntax final
 // UnaryExpressionSyntax
 //
 class JOANA_AST_EXPORT UnaryExpressionSyntax final
-    : public SyntaxTemplate<Syntax, PunctuatorKind> {
+    : public SyntaxTemplate<Syntax, TokenKind> {
   DECLARE_CONCRETE_AST_SYNTAX(UnaryExpression, Syntax);
 
  public:
   ~UnaryExpressionSyntax() final;
 
-  PunctuatorKind op() const { return parameter_at<0>(); }
+  TokenKind op() const { return parameter_at<0>(); }
 
   static const Node& ExpressionOf(const Node& node);
   static const Node& OperatorOf(const Node& node);
 
  private:
-  explicit UnaryExpressionSyntax(PunctuatorKind kind);
+  explicit UnaryExpressionSyntax(TokenKind kind);
 
   DISALLOW_COPY_AND_ASSIGN(UnaryExpressionSyntax);
-};
-
-//
-// UnaryKeywordExpressionSyntax
-//
-class JOANA_AST_EXPORT UnaryKeywordExpressionSyntax final
-    : public SyntaxTemplate<Syntax, NameId> {
-  DECLARE_CONCRETE_AST_SYNTAX(UnaryKeywordExpression, Syntax);
-
- public:
-  ~UnaryKeywordExpressionSyntax() final;
-
-  static const Node& ExpressionOf(const Node& node);
-  static const Node& OperatorOf(const Node& node);
-
- private:
-  explicit UnaryKeywordExpressionSyntax(NameId name_id);
-
-  DISALLOW_COPY_AND_ASSIGN(UnaryKeywordExpressionSyntax);
 };
 
 }  // namespace ast

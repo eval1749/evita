@@ -103,6 +103,15 @@ TEST_F(RegExpLexerTest, Grouping) {
 }
 
 TEST_F(RegExpLexerTest, GroupingError) {
+  EXPECT_EQ("LiteralRegExp |)foo|\n", Scan(")foo"))
+      << "')' is not syntax character";
+
+  EXPECT_EQ(
+      "Punctuator |)|\n"
+      "LiteralRegExp |foo|\n",
+      ScanStrictly(")foo"))
+      << "')' is syntax character";
+
   EXPECT_EQ(
       "Punctuator |(?|\n"
       "LiteralRegExp |abc|\n"
@@ -132,6 +141,19 @@ TEST_F(RegExpLexerTest, Or) {
       "Punctuator |)|\n"
       "RegExpRepeat<*> |*|\n",
       Scan("(abc|def)*"));
+
+  EXPECT_EQ(
+      "Punctuator |||\n"
+      "LiteralRegExp |foo|\n",
+      Scan("|foo"))
+      << "Matches empty string or 'foo'";
+
+  EXPECT_EQ(
+      "Punctuator |(|\n"
+      "LiteralRegExp |abc|\n"
+      "Punctuator |||\n"
+      "Punctuator |)|\n",
+      Scan("(abc|)"));
 }
 
 TEST_F(RegExpLexerTest, RepeatError) {

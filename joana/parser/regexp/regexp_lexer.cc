@@ -132,10 +132,11 @@ const ast::Node& RegExpLexer::HandleRepeat() {
 bool RegExpLexer::IsSyntaxChar(base::char16 char_code) const {
   if (char_code == '$' || char_code == '*' || char_code == '+' ||
       char_code == '?' || char_code == '|' || char_code == kLeftParenthesis ||
-      char_code == kLeftBrace || char_code == kLeftBracket ||
-      char_code == kRightParenthesis) {
+      char_code == kLeftBrace || char_code == kLeftBracket) {
     return true;
   }
+  if (group_ > 0 && char_code == kRightParenthesis)
+    return true;
   if (!options_.enable_strict_regexp())
     return false;
   return char_code == '^' || char_code == kRightBrace ||
@@ -183,6 +184,7 @@ const ast::Node* RegExpLexer::NextToken() {
         return &NewRepeat(ast::RegExpRepeatMethod::Lazy, 0, 1);
       return &NewRepeat(ast::RegExpRepeatMethod::Greedy, 0, 1);
     case '(':
+      ++group_;
       if (ConsumeCharIf('?')) {
         if (ConsumeCharIf(':'))
           return &NewSyntaxChar(ast::TokenKind::Colon);
@@ -200,7 +202,13 @@ const ast::Node* RegExpLexer::NextToken() {
         return &NewLiteral();
       return &NewSyntaxChar(ast::TokenKind::LeftParenthesis);
     case ')':
-      return &NewSyntaxChar(ast::TokenKind::RightParenthesis);
+      if (group_ > 0) {
+        --group_;
+        return &NewSyntaxChar(ast::TokenKind::RightParenthesis);
+      }
+      if (options_.enable_strict_regexp())
+        return &NewSyntaxChar(ast::TokenKind::RightParenthesis);
+      break;
     case '[':
       return &HandleCharSet();
     case '{':
@@ -216,10 +224,6 @@ const ast::Node* RegExpLexer::NextToken() {
     case '|':
       if (options_.enable_strict_regexp())
         return &NewSyntaxChar(ast::TokenKind::BitOr);
-      if (token_start_ == range_.start())
-        break;
-      if (!CanPeekToken() || PeekChar() == kRightParenthesis)
-        break;
       return &NewSyntaxChar(ast::TokenKind::BitOr);
     case '\\':
       // TODO(eval1749): NYI parse backslash

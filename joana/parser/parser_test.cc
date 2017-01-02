@@ -1373,72 +1373,34 @@ TEST_F(ParserTest, ExpressionRegExp) {
       "|  |  +--RegExpLiteralExpression\n"
       "|  |  |  +--SequenceRegExp\n"
       "|  |  |  |  +--LiteralRegExp |a|\n"
-      "|  |  |  |  +--GreedyRepeatRegExp\n"
+      "|  |  |  |  +--RepeatRegExp\n"
       "|  |  |  |  |  +--LiteralRegExp |b|\n"
+      "|  |  |  |  |  +--RegExpRepeat<*> |*|\n"
       "|  |  |  |  +--LiteralRegExp |c|\n"
       "|  |  |  +--Empty ||\n",
       Parse("var re = /ab*c/;\n"));
 
   EXPECT_EQ(
       "Module\n"
-      "+--VarStatement\n"
-      "|  +--BindingNameElement\n"
-      "|  |  +--Name |re|\n"
-      "|  |  +--RegExpLiteralExpression\n"
-      "|  |  |  +--LiteralRegExp |bar|\n"
-      "|  |  |  +--Name |u|\n",
-      Parse("var re = /bar/u;\n"));
-
-  EXPECT_EQ(
-      "Module\n"
-      "+--VarStatement\n"
-      "|  +--BindingNameElement\n"
-      "|  |  +--Name |re|\n"
+      "+--ExpressionStatement\n"
+      "|  +--AssignmentExpression<=>\n"
+      "|  |  +--ReferenceExpression\n"
+      "|  |  |  +--Name |foo|\n"
+      "|  |  +--Punctuator |=|\n"
       "|  |  +--ObjectInitializer\n"
       "|  |  |  +--Property\n"
       "|  |  |  |  +--ReferenceExpression\n"
       "|  |  |  |  |  +--Name |re|\n"
       "|  |  |  |  +--RegExpLiteralExpression\n"
       "|  |  |  |  |  +--SequenceRegExp\n"
-      "|  |  |  |  |  |  +--LiteralRegExp |^|\n"
+      "|  |  |  |  |  |  +--AssertionRegExp |^|\n"
       "|  |  |  |  |  |  +--CaptureRegExp\n"
-      "|  |  |  |  |  |  |  +--GreedyRepeatRegExp\n"
+      "|  |  |  |  |  |  |  +--RepeatRegExp\n"
       "|  |  |  |  |  |  |  |  +--AnyCharRegExp |.|\n"
+      "|  |  |  |  |  |  |  |  +--RegExpRepeat<+> |+|\n"
       "|  |  |  |  |  |  +--AssertionRegExp |$|\n"
       "|  |  |  |  |  +--Empty ||\n",
-      Parse("var re = { re: /^(.+)$/ };\n"));
-
-  EXPECT_EQ(
-      "Module\n"
-      "+--VarStatement\n"
-      "|  +--BindingNameElement\n"
-      "|  |  +--Name |re|\n"
-      "|  |  +--RegExpLiteralExpression\n"
-      "|  |  |  +--LiteralRegExp |=|\n"
-      "|  |  |  +--Empty ||\n",
-      Parse("var re = /=/;\n"));  // "'/=' is not assignment operator";
-
-  EXPECT_EQ(
-      "Module\n"
-      "+--VarStatement\n"
-      "|  +--BindingNameElement\n"
-      "|  |  +--Name |re|\n"
-      "|  |  +--RegExpLiteralExpression\n"
-      "|  |  |  +--GreedyRepeatRegExp\n"
-      "|  |  |  |  +--LiteralRegExp |a|\n"
-      "|  |  |  +--Empty ||\n",
-      Parse("var re = /a{2}/;\n"));
-
-  EXPECT_EQ(
-      "Module\n"
-      "+--VarStatement\n"
-      "|  +--BindingNameElement\n"
-      "|  |  +--Name |re|\n"
-      "|  |  +--RegExpLiteralExpression\n"
-      "|  |  |  +--GreedyRepeatRegExp\n"
-      "|  |  |  |  +--LiteralRegExp |a|\n"
-      "|  |  |  +--Empty ||\n",
-      Parse("var re = /a{2,}/;\n"));
+      Parse("foo = { re: /^(.+)$/ }"));
 
   EXPECT_EQ(
       "Module\n"
@@ -1456,41 +1418,24 @@ TEST_F(ParserTest, ExpressionRegExp) {
 
   EXPECT_EQ(
       "Module\n"
-      "+--ExpressionStatement\n"
-      "|  +--RegExpLiteralExpression\n"
-      "|  |  +--SequenceRegExp |)|\n"
-      "|  |  +--Empty ||\n",
-      Parse("/(?:)/"))
-      << "empty regexp";
-
-  // non-strict regexp
-  EXPECT_EQ(
-      "Module\n"
-      "+--ExpressionStatement\n"
-      "|  +--RegExpLiteralExpression\n"
-      "|  |  +--CaptureRegExp\n"
-      "|  |  |  +--LiteralRegExp |foo||\n"
-      "|  |  +--Empty ||\n",
-      Parse("/(foo|)/;\n"))
-      << "'|' is non-syntax char";
+      "+--VarStatement\n"
+      "|  +--BindingNameElement\n"
+      "|  |  +--Name |re|\n"
+      "|  |  +--RegExpLiteralExpression\n"
+      "|  |  |  +--LiteralRegExp |bar|\n"
+      "|  |  |  +--Name |u|\n",
+      Parse("var re = /bar/u;\n"));
 
   EXPECT_EQ(
       "Module\n"
-      "+--ExpressionStatement\n"
-      "|  +--RegExpLiteralExpression\n"
-      "|  |  +--LiteralRegExp |()foo|\n"
-      "|  |  +--Empty ||\n",
-      Parse("/()foo/;\n"))
-      << "'()' is non-syntax char";
-
-  EXPECT_EQ(
-      "Module\n"
-      "+--ExpressionStatement\n"
-      "|  +--RegExpLiteralExpression\n"
-      "|  |  +--LiteralRegExp |#{foo}|\n"
-      "|  |  +--Empty ||\n",
-      Parse("/#{foo}/;\n"))
-      << "'{}' is non-syntax char";
+      "+--VarStatement\n"
+      "|  +--BindingNameElement\n"
+      "|  |  +--Name |re|\n"
+      "|  |  +--RegExpLiteralExpression\n"
+      "|  |  |  +--LiteralRegExp |=|\n"
+      "|  |  |  +--Empty ||\n",
+      Parse("var re = /=/;\n"))
+      << "'/=' is not assignment operator";
 }
 
 TEST_F(ParserTest, ExpressionYield) {

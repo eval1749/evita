@@ -15,6 +15,7 @@ namespace joana {
 namespace ast {
 class Node;
 class NodeFactory;
+enum class SyntaxCode;
 enum class TokenKind;
 }
 
@@ -40,9 +41,9 @@ class RegExpParser final {
   const ast::Node& Parse();
 
  private:
-  friend class ScopedNodeFactory;
+  class ScopedNodeFactory;
 
-  int location() const;
+  ParserContext& context() const { return context_; }
   ast::NodeFactory& node_factory() const;
   const SourceCode& source_code() const;
 
@@ -52,10 +53,16 @@ class RegExpParser final {
   const ast::Node& ParseRepeat();
   const ast::Node& ParseSequence();
 
+  // Factory functions
+  const ast::Node& NewEmpty(const SourceCodeRange& range);
+
   // Helper functions for Lexer
   bool CanPeekToken() const;
-  void ConsumeToken();
-  bool ConsumeTokenIf(ast::TokenKind kind);
+  const ast::Node& ConsumeToken();
+
+  template <typename T>
+  bool ConsumeTokenIf(T expected);
+
   const ast::Node& PeekToken() const;
 
   ParserContext& context_;

@@ -661,12 +661,16 @@ const ast::Node& Parser::ParseRegExpLiteral() {
   auto& source = lexer_->ExtendTokenAsRegExp();
   // Consume |RegExpSource| node.
   ConsumeToken();
-  const auto source_end = source_code().CharAt(source.range().end() - 1) == '/'
+
+  // Skip starting "/"
+  const auto regexp_start = source.range().start() + 1;
+
+  // Skip ending "/" if available
+  const auto regexp_end = source_code().CharAt(source.range().end() - 1) == '/'
                               ? source.range().end() - 1
                               : source.range().end();
   const auto& regexp =
-      RegExpParser(&context_,
-                   source_code().Slice(source.range().start(), source_end),
+      RegExpParser(&context_, source_code().Slice(regexp_start, regexp_end),
                    options_)
           .Parse();
   if (is_separated_by_newline_) {

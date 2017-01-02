@@ -45,7 +45,6 @@ namespace ast {
   V(REGEXP, INVALID_DOLLAR)           \
   V(REGEXP, INVALID_GROUPING)         \
   V(REGEXP, INVALID_NUMBER)           \
-  V(REGEXP, INVALID_OR)               \
   V(REGEXP, INVALID_REPEAT)
 
 #define FOR_EACH_PARSER_ERROR_CODE(V)        \

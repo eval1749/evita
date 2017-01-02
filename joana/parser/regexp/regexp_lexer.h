@@ -73,6 +73,7 @@ class RegExpLexer final {
 
   ParserContext& context_;
   const ast::Node* current_token_ = nullptr;
+  int group_ = 0;
   const ParserOptions& options_;
   const SourceCodeRange range_;
   std::unique_ptr<CharacterReader> reader_;

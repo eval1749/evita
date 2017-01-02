@@ -62,6 +62,9 @@ class Lexer final {
 
   const ast::Node& ConsumeToken();
 
+  // Returns |RegExpSource| node starts with "/" or "/=", and ends with "/".
+  const ast::Node& ExtendTokenAsRegExp();
+
   const ast::Node& PeekToken() const;
 
  private:

@@ -84,6 +84,58 @@ const ast::Node& Lexer::ConsumeToken() {
   return token;
 }
 
+// Replaces current "/" or "/=" token with |RegExpSource|.
+const ast::Node& Lexer::ExtendTokenAsRegExp() {
+  DCHECK(PeekToken() == ast::PunctuatorKind::Divide ||
+         PeekToken() == ast::PunctuatorKind::DivideEqual);
+  token_start_ = PeekToken().range().start();
+  enum class State {
+    Backslash,
+    Bracket,
+    BracketBackslash,
+    Normal,
+  } state = State::Normal;
+  while (CanPeekChar()) {
+    const auto char_code = ConsumeChar();
+    switch (state) {
+      case State::Backslash:
+        state = State::Normal;
+        continue;
+      case State::Bracket:
+        if (char_code == kBackslash) {
+          state = State::BracketBackslash;
+          continue;
+        }
+        if (char_code == kRightBracket) {
+          state = State::Normal;
+          continue;
+        }
+        continue;
+      case State::BracketBackslash:
+        state = State::Bracket;
+        continue;
+      case State::Normal:
+        if (char_code == kBackslash) {
+          state = State::Backslash;
+          continue;
+        }
+        if (char_code == kLeftBracket) {
+          state = State::Bracket;
+          continue;
+        }
+        if (char_code == '/') {
+          current_token_ = &node_factory().NewRegExpSource(MakeTokenRange());
+          return *current_token_;
+        }
+        continue;
+    }
+    NOTREACHED() << "We should handle state=" << static_cast<int>(state);
+  }
+  AddError(ErrorCode::REGEXP_EXPECT_SLASH);
+  current_token_ = &node_factory().NewRegExpSource(MakeTokenRange());
+  return *current_token_;
+}
+
 base::char16 Lexer::PeekChar() const {
   return reader_->PeekChar();
 }

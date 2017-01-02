@@ -47,6 +47,11 @@ std::string ToString(const ast::Node& node) {
 //
 class LexerTest : public LexerTestBase {
  protected:
+  enum class LexerMode {
+    Normal,
+    RegExp,
+  };
+
   LexerTest() = default;
   ~LexerTest() override = default;
 
@@ -59,11 +64,14 @@ class LexerTest : public LexerTestBase {
   std::string NewNumericLiteral(int start, int end, double value);
   std::string NewNumericLiteral(double value);
   std::string NewPunctuator(ast::PunctuatorKind kind);
+  std::string NewRegExpSource(int start, int end);
+  std::string NewRegExpSource();
   std::string NewStringLiteral(int start, int end, base::StringPiece data);
   std::string NewStringLiteral(base::StringPiece data);
   std::string NewStringLiteral(const std::vector<base::char16> data);
-  std::string Parse(const ParserOptions& options);
-  std::string Parse();
+  std::string Parse(const ParserOptions& options,
+                    LexerMode mode = LexerMode::Normal);
+  std::string Parse(LexerMode mode = LexerMode::Normal);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(LexerTest);
@@ -108,6 +116,14 @@ std::string LexerTest::NewPunctuator(ast::PunctuatorKind kind) {
   return ToString(node_factory().NewPunctuator(MakeRange(), kind));
 }
 
+std::string LexerTest::NewRegExpSource(int start, int end) {
+  return ToString(node_factory().NewRegExpSource(MakeRange(start, end)));
+}
+
+std::string LexerTest::NewRegExpSource() {
+  return ToString(node_factory().NewRegExpSource(MakeRange()));
+}
+
 std::string LexerTest::NewStringLiteral(int start,
                                         int end,
                                         base::StringPiece data8) {
@@ -122,15 +138,20 @@ std::string LexerTest::NewStringLiteral(const std::vector<base::char16> data) {
   return ToString(node_factory().NewStringLiteral(MakeRange()));
 }
 
-std::string LexerTest::Parse(const ParserOptions& options) {
+std::string LexerTest::Parse(const ParserOptions& options, LexerMode mode) {
   Lexer lexer(&context(), source_code().range(), options);
   std::ostringstream ostream;
   auto delimiter = "";
   while (lexer.CanPeekToken()) {
     ostream << delimiter;
     delimiter = " ";
-    auto& node = lexer.ConsumeToken();
-    ostream << AsFormatted(node);
+    const auto& node = lexer.PeekToken();
+    if (node == ast::PunctuatorKind::Divide ||
+        node == ast::PunctuatorKind::DivideEqual) {
+      if (mode == LexerMode::RegExp)
+        lexer.ExtendTokenAsRegExp();
+    }
+    ostream << AsFormatted(lexer.ConsumeToken());
   }
   for (const auto* error : error_sink().errors()) {
     ostream << ' ' << error->error_code() << '@' << error->range();
@@ -138,8 +159,8 @@ std::string LexerTest::Parse(const ParserOptions& options) {
   return ostream.str();
 }
 
-std::string LexerTest::Parse() {
-  return Parse({});
+std::string LexerTest::Parse(LexerMode mode) {
+  return Parse({}, mode);
 }
 
 TEST_F(LexerTest, JsDoc) {
@@ -426,6 +447,31 @@ TEST_F(LexerTest, PunctuatorError) {
                 NewError(ERROR_PUNCTUATOR_DOT_DOT, 0, 2),
             Parse())
       << "'..' is not a valid punctuator.";
+}
+
+TEST_F(LexerTest, RegExp) {
+  PrepareSouceCode("/=/");
+  EXPECT_EQ(NewRegExpSource(), Parse(LexerMode::RegExp))
+      << "regexp starts with '='";
+
+  PrepareSouceCode("/foo/");
+  EXPECT_EQ(NewRegExpSource(), Parse(LexerMode::RegExp));
+
+  PrepareSouceCode("/[/]/");
+  EXPECT_EQ(NewRegExpSource(), Parse(LexerMode::RegExp));
+
+  PrepareSouceCode("/\\//");
+  EXPECT_EQ(NewRegExpSource(), Parse(LexerMode::RegExp));
+
+  PrepareSouceCode("/foo");
+  EXPECT_EQ(NewRegExpSource() + NewError(ERROR_REGEXP_EXPECT_SLASH, 0, 4),
+            Parse(LexerMode::RegExp))
+      << "No slash";
+
+  PrepareSouceCode("/[ab/");
+  EXPECT_EQ(NewRegExpSource() + NewError(ERROR_REGEXP_EXPECT_SLASH, 0, 5),
+            Parse(LexerMode::RegExp))
+      << "Open bracket";
 }
 
 TEST_F(LexerTest, StringLiteral) {

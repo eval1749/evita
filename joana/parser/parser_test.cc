@@ -92,12 +92,6 @@ std::string ParserTest::ToString(const ast::Node& node,
   return ostream.str();
 }
 
-#define TEST_PARSER(script_text)           \
-  {                                        \
-    auto* const source = script_text;      \
-    EXPECT_EQ(source, Parse(script_text)); \
-  }
-
 TEST_F(ParserTest, Externs) {
   PrepareSouceCode(
       "/** @fileoverview @externs */\n"
@@ -115,49 +109,110 @@ TEST_F(ParserTest, JsDoc) {
       "|  +--BindingNameElement\n"
       "|  |  +--Name |foo|\n"
       "|  |  +--NumericLiteral |1|\n"
-      "JsDocument\n"
+      "JsDocDocument\n"
       "+--JsDocText |/**|\n"
       "+--JsDocTag\n"
       "|  +--Name |@type|\n"
       "|  +--TypeName\n"
-      "|  +--Name |number|\n"
+      "|  |  +--Name |number|\n"
       "+--JsDocText |*/|\n",
       Parse("/** @type {number} */ let foo = 1;"));
 }
 
 TEST_F(ParserTest, AsyncFunction) {
-  TEST_PARSER(
-      "async function foo() {\n"
-      "  return 1;\n"
-      "}\n");
+  EXPECT_EQ(
+      "Module\n"
+      "+--Function<Async>\n"
+      "|  +--Name |foo|\n"
+      "|  +--ParameterList |()|\n"
+      "|  +--BlockStatement\n"
+      "|  |  +--ReturnStatement\n"
+      "|  |  |  +--NumericLiteral |1|\n",
+      Parse("async function foo() { return 1; }"));
 }
 
 TEST_F(ParserTest, AsyncKeyword) {
-  TEST_PARSER("async = async(1);\n");
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--AssignmentExpression<=>\n"
+      "|  |  +--ReferenceExpression\n"
+      "|  |  |  +--Name |async|\n"
+      "|  |  +--Punctuator |=|\n"
+      "|  |  +--CallExpression\n"
+      "|  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  +--Name |async|\n"
+      "|  |  |  +--NumericLiteral |1|\n",
+      Parse("async = async(1);"));
 }
 
 TEST_F(ParserTest, AutomaticSemicolon) {
-  EXPECT_EQ("foo;\n", Parse("foo // comment"));
-  EXPECT_EQ("foo;\n", Parse("foo /* comment */"));
   EXPECT_EQ(
-      "foo;\n"
-      "bar;\n",
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--ReferenceExpression\n"
+      "|  |  +--Name |foo|\n",
+      Parse("foo // comment"));
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--ReferenceExpression\n"
+      "|  |  +--Name |foo|\n",
+      Parse("foo /* comment */"));
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--ReferenceExpression\n"
+      "|  |  +--Name |foo|\n"
+      "+--ExpressionStatement\n"
+      "|  +--ReferenceExpression\n"
+      "|  |  +--Name |bar|\n",
       Parse("foo // comment\nbar"));
+
   EXPECT_EQ(
-      "foo;\n"
-      "bar;\n",
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--ReferenceExpression\n"
+      "|  |  +--Name |foo|\n"
+      "+--ExpressionStatement\n"
+      "|  +--ReferenceExpression\n"
+      "|  |  +--Name |bar|\n",
       Parse("foo /* comment */\nbar"));
+
   EXPECT_EQ(
-      "foo;\n"
-      "bar;\n",
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--ReferenceExpression\n"
+      "|  |  +--Name |foo|\n"
+      "+--ExpressionStatement\n"
+      "|  +--ReferenceExpression\n"
+      "|  |  +--Name |bar|\n",
       Parse("foo /* comment\n */bar"));
+
   EXPECT_EQ(
-      "foo;\n"
-      "++bar;\n",
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--ReferenceExpression\n"
+      "|  |  +--Name |foo|\n"
+      "+--ExpressionStatement\n"
+      "|  +--UnaryExpression<++>\n"
+      "|  |  +--Punctuator |++|\n"
+      "|  |  +--ReferenceExpression\n"
+      "|  |  |  +--Name |bar|\n",
       Parse("foo\n++bar"));
+
   EXPECT_EQ(
-      "foo;\n"
-      "++bar;\n"
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--ReferenceExpression\n"
+      "|  |  +--Name |foo|\n"
+      "+--ExpressionStatement\n"
+      "|  +--UnaryExpression<++>\n"
+      "|  |  +--Punctuator |++|\n"
+      "|  |  +--ReferenceExpression\n"
+      "|  |  |  +--Name |bar|\n"
       "PASER_ERROR_STATEMENT_UNEXPECT_NEWLINE@4:6\n"
       "PASER_ERROR_EXPRESSION_UNEXPECT_NEWLINE@4:6\n"
       "PASER_ERROR_STATEMENT_EXPECT_SEMICOLON@0:3\n"
@@ -168,358 +223,1454 @@ TEST_F(ParserTest, AutomaticSemicolon) {
 }
 
 TEST_F(ParserTest, BlockStatement) {
-  TEST_PARSER(
-      "{\n"
-      "  foo;\n"
-      "  bar;\n"
-      "}\n");
+  EXPECT_EQ(
+      "Module\n"
+      "+--BlockStatement\n"
+      "|  +--ExpressionStatement\n"
+      "|  |  +--ReferenceExpression\n"
+      "|  |  |  +--Name |foo|\n"
+      "|  +--ExpressionStatement\n"
+      "|  |  +--ReferenceExpression\n"
+      "|  |  |  +--Name |bar|\n",
+      Parse("{\n"
+            "  foo;\n"
+            "  bar;\n"
+            "}\n"));
 }
 
 TEST_F(ParserTest, Bracket) {
   EXPECT_EQ(
-      "{\n}\n"
+      "Module\n"
+      "+--BlockStatement |{|\n"
       "PASER_ERROR_BRACKET_EXPECT_RBRACE@0:1\n",
       Parse("{"));
 }
 
 TEST_F(ParserTest, BreakStatement) {
-  TEST_PARSER(
-      "do {\n"
-      "  break;\n"
-      "} while (bar);\n");
-  TEST_PARSER("break foo;\n");
   EXPECT_EQ(
-      "if (foo)\n"
-      "  break;\n"
-      "if (bar)\n"
-      "  break;\n",
+      "Module\n"
+      "+--DoStatement\n"
+      "|  +--BlockStatement\n"
+      "|  |  +--BreakStatement\n"
+      "|  |  |  +--Empty ||\n"
+      "|  +--ReferenceExpression\n"
+      "|  |  +--Name |bar|\n",
+      Parse("do { break; } while (bar);"));
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--BreakStatement\n"
+      "|  +--Name |foo|\n",
+      Parse("break foo;"));
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--IfStatement\n"
+      "|  +--ReferenceExpression\n"
+      "|  |  +--Name |foo|\n"
+      "|  +--BreakStatement\n"
+      "|  |  +--Empty ||\n"
+      "+--IfStatement\n"
+      "|  +--ReferenceExpression\n"
+      "|  |  +--Name |bar|\n"
+      "|  +--BreakStatement\n"
+      "|  |  +--Empty ||\n",
       Parse("if (foo) break\n"
             "if (bar) break\n"));
 }
 
 TEST_F(ParserTest, ClassStatement) {
-  TEST_PARSER(
-      "class Foo {\n"
-      "  foo() { return 1; }\n"
-      "  foo() { return 2; }\n"
-      "}\n");
+  EXPECT_EQ(
+      "Module\n"
+      "+--Class\n"
+      "|  +--Name |Foo|\n"
+      "|  +--ElisionExpression ||\n"
+      "|  +--ObjectInitializer\n"
+      "|  |  +--Method<NonStatic,Normal>\n"
+      "|  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  +--Name |foo|\n"
+      "|  |  |  +--ParameterList |()|\n"
+      "|  |  |  +--BlockStatement\n"
+      "|  |  |  |  +--ReturnStatement\n"
+      "|  |  |  |  |  +--NumericLiteral |1|\n"
+      "|  |  +--Method<NonStatic,Normal>\n"
+      "|  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  +--Name |foo|\n"
+      "|  |  |  +--ParameterList |()|\n"
+      "|  |  |  +--BlockStatement\n"
+      "|  |  |  |  +--ReturnStatement\n"
+      "|  |  |  |  |  +--NumericLiteral |2|\n",
+      Parse("class Foo {\n"
+            "  foo() { return 1; }\n"
+            "  foo() { return 2; }\n"
+            "}"));
 }
 
 TEST_F(ParserTest, ConstStatement) {
-  TEST_PARSER("const foo = 1;\n");
-  TEST_PARSER("const foo = 1, bar = 2;\n");
+  EXPECT_EQ(
+      "Module\n"
+      "+--ConstStatement\n"
+      "|  +--BindingNameElement\n"
+      "|  |  +--Name |foo|\n"
+      "|  |  +--NumericLiteral |1|\n",
+      Parse("const foo = 1;"));
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--ConstStatement\n"
+      "|  +--BindingNameElement\n"
+      "|  |  +--Name |foo|\n"
+      "|  |  +--NumericLiteral |1|\n"
+      "|  +--BindingNameElement\n"
+      "|  |  +--Name |bar|\n"
+      "|  |  +--NumericLiteral |2|\n",
+      Parse("const foo = 1, bar = 2;"));
 }
 
 TEST_F(ParserTest, ContinueStatement) {
-  TEST_PARSER(
-      "do {\n"
-      "  continue;\n"
-      "} while (bar);\n");
-  TEST_PARSER("continue foo;\n");
   EXPECT_EQ(
-      "if (foo)\n"
-      "  continue;\n"
-      "if (bar)\n"
-      "  continue;\n",
+      "Module\n"
+      "+--DoStatement\n"
+      "|  +--BlockStatement\n"
+      "|  |  +--ContinueStatement\n"
+      "|  |  |  +--Empty ||\n"
+      "|  +--ReferenceExpression\n"
+      "|  |  +--Name |bar|\n",
+      Parse("do {\n"
+            "  continue;\n"
+            "} while (bar);\n"));
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--ContinueStatement\n"
+      "|  +--Name |foo|\n",
+      Parse("continue foo;"));
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--IfStatement\n"
+      "|  +--ReferenceExpression\n"
+      "|  |  +--Name |foo|\n"
+      "|  +--ContinueStatement\n"
+      "|  |  +--Empty ||\n"
+      "+--IfStatement\n"
+      "|  +--ReferenceExpression\n"
+      "|  |  +--Name |bar|\n"
+      "|  +--ContinueStatement\n"
+      "|  |  +--Empty ||\n",
       Parse("if (foo) continue\n"
             "if (bar) continue\n"));
 }
 
 TEST_F(ParserTest, DebuggerStatement) {
-  EXPECT_EQ("debugger;\n", Parse("debugger")) << "automatic semicolon";
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--ReferenceExpression\n"
+      "|  |  +--Name |debugger|\n",
+      Parse("debugger"))
+      << "automatic semicolon";
 }
 
 TEST_F(ParserTest, DoStatement) {
-  TEST_PARSER(
-      "do {\n"
-      "  foo;\n"
-      "} while (bar);\n");
+  EXPECT_EQ(
+      "Module\n"
+      "+--DoStatement\n"
+      "|  +--BlockStatement\n"
+      "|  |  +--ExpressionStatement\n"
+      "|  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  +--Name |foo|\n"
+      "|  +--ReferenceExpression\n"
+      "|  |  +--Name |bar|\n",
+      Parse("do {\n"
+            "  foo;\n"
+            "} while (bar);\n"));
 }
 
 TEST_F(ParserTest, EmptyStatement) {
-  TEST_PARSER(";\n");
+  EXPECT_EQ(
+      "Module\n"
+      "+--EmptyStatement ||\n",
+      Parse(";\n"));
 }
 
 TEST_F(ParserTest, ExpressionArrayLiteral) {
-  TEST_PARSER("[];\n");
-  TEST_PARSER("[1];\n");
-  TEST_PARSER("[,];\n");
-  TEST_PARSER("[,,];\n");
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--ArrayInitializer |[]|\n",
+      Parse("[];"));
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--ArrayInitializer\n"
+      "|  |  +--NumericLiteral |1|\n",
+      Parse("[1];"));
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--ArrayInitializer\n"
+      "|  |  +--ElisionExpression ||\n",
+      Parse("[,];"));
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--ArrayInitializer\n"
+      "|  |  +--ElisionExpression ||\n"
+      "|  |  +--ElisionExpression ||\n",
+      Parse("[,,];"));
 }
 
 TEST_F(ParserTest, ExpressionArrayLiteralSpread) {
-  TEST_PARSER("[1, 2, ...x];\n");
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--ArrayInitializer\n"
+      "|  |  +--NumericLiteral |1|\n"
+      "|  |  +--NumericLiteral |2|\n"
+      "|  |  +--UnaryExpression<...>\n"
+      "|  |  |  +--Punctuator |...|\n"
+      "|  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  +--Name |x|\n",
+      Parse("[1, 2, ...x];\n"));
 }
 
 TEST_F(ParserTest, ExpressionArrowFunction) {
-  TEST_PARSER(
-      "(a) => {\n"
-      "  console.log(a);\n"
-      "};\n");
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--ArrowFunction\n"
+      "|  |  +--ParameterList\n"
+      "|  |  |  +--BindingNameElement\n"
+      "|  |  |  |  +--Name |a|\n"
+      "|  |  |  |  +--ElisionExpression ||\n"
+      "|  |  +--BlockStatement\n"
+      "|  |  |  +--ExpressionStatement\n"
+      "|  |  |  |  +--CallExpression\n"
+      "|  |  |  |  |  +--MemberExpression\n"
+      "|  |  |  |  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  |  |  |  +--Name |console|\n"
+      "|  |  |  |  |  |  +--Name |log|\n"
+      "|  |  |  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  |  |  +--Name |a|\n",
+      Parse("(a) => {\n"
+            "  console.log(a);\n"
+            "};\n"));
 }
 
 TEST_F(ParserTest, ExpressionArrowFunction0) {
-  TEST_PARSER("() => 1;\n");
-}
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--ArrowFunction\n"
+      "|  |  +--ParameterList |()|\n"
+      "|  |  +--NumericLiteral |1|\n",
+      Parse("() => 1;"));
 
-TEST_F(ParserTest, ExpressionArrowFunction1) {
-  TEST_PARSER("x => x * 2;\n");
-}
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--ArrowFunction\n"
+      "|  |  +--ReferenceExpression\n"
+      "|  |  |  +--Name |x|\n"
+      "|  |  +--BinaryExpression<*>\n"
+      "|  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  +--Name |x|\n"
+      "|  |  |  +--Punctuator |*|\n"
+      "|  |  |  +--NumericLiteral |2|\n",
+      Parse("x => x * 2;"));
 
-TEST_F(ParserTest, ExpressionArrowFunction2) {
-  TEST_PARSER("(x, y) => x * y;\n");
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--ArrowFunction\n"
+      "|  |  +--ParameterList\n"
+      "|  |  |  +--BindingNameElement\n"
+      "|  |  |  |  +--Name |x|\n"
+      "|  |  |  |  +--ElisionExpression ||\n"
+      "|  |  |  +--BindingNameElement\n"
+      "|  |  |  |  +--Name |y|\n"
+      "|  |  |  |  +--ElisionExpression ||\n"
+      "|  |  +--BinaryExpression<*>\n"
+      "|  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  +--Name |x|\n"
+      "|  |  |  +--Punctuator |*|\n"
+      "|  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  +--Name |y|\n",
+      Parse("(x, y) => x * y;"));
 }
 
 TEST_F(ParserTest, ExpressionAssignment1) {
-  TEST_PARSER("foo = 100;\n");
-  TEST_PARSER("foo = bar + baz;\n");
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--AssignmentExpression<=>\n"
+      "|  |  +--ReferenceExpression\n"
+      "|  |  |  +--Name |foo|\n"
+      "|  |  +--Punctuator |=|\n"
+      "|  |  +--NumericLiteral |100|\n",
+      Parse("foo = 100;"));
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--AssignmentExpression<=>\n"
+      "|  |  +--ReferenceExpression\n"
+      "|  |  |  +--Name |foo|\n"
+      "|  |  +--Punctuator |=|\n"
+      "|  |  +--BinaryExpression<+>\n"
+      "|  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  +--Name |bar|\n"
+      "|  |  |  +--Punctuator |+|\n"
+      "|  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  +--Name |baz|\n",
+      Parse("foo = bar + baz;"));
 }
 
 TEST_F(ParserTest, ExpressionAssignmentMultiple) {
-  TEST_PARSER("foo = bar = baz;\n");
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--AssignmentExpression<=>\n"
+      "|  |  +--ReferenceExpression\n"
+      "|  |  |  +--Name |foo|\n"
+      "|  |  +--Punctuator |=|\n"
+      "|  |  +--AssignmentExpression<=>\n"
+      "|  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  +--Name |bar|\n"
+      "|  |  |  +--Punctuator |=|\n"
+      "|  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  +--Name |baz|\n",
+      Parse("foo = bar = baz;"));
 }
 
 TEST_F(ParserTest, ExpressionAssignmentOperation) {
-  TEST_PARSER("foo += baz;\n");
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--AssignmentExpression<+=>\n"
+      "|  |  +--ReferenceExpression\n"
+      "|  |  |  +--Name |foo|\n"
+      "|  |  +--Punctuator |+=|\n"
+      "|  |  +--ReferenceExpression\n"
+      "|  |  |  +--Name |baz|\n",
+      Parse("foo += baz;"));
 }
 
 TEST_F(ParserTest, ExpressionBinary) {
-  TEST_PARSER("1 + 2 * 3;\n");
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--BinaryExpression<+>\n"
+      "|  |  +--NumericLiteral |1|\n"
+      "|  |  +--Punctuator |+|\n"
+      "|  |  +--BinaryExpression<*>\n"
+      "|  |  |  +--NumericLiteral |2|\n"
+      "|  |  |  +--Punctuator |*|\n"
+      "|  |  |  +--NumericLiteral |3|\n",
+      Parse("1 + 2 * 3;"));
 }
 
 TEST_F(ParserTest, ExpressionBinary2) {
-  TEST_PARSER("(1 + 2) * 3;\n");
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--BinaryExpression<*>\n"
+      "|  |  +--GroupExpression\n"
+      "|  |  |  +--BinaryExpression<+>\n"
+      "|  |  |  |  +--NumericLiteral |1|\n"
+      "|  |  |  |  +--Punctuator |+|\n"
+      "|  |  |  |  +--NumericLiteral |2|\n"
+      "|  |  +--Punctuator |*|\n"
+      "|  |  +--NumericLiteral |3|\n",
+      Parse("(1 + 2) * 3;"));
 }
 
 TEST_F(ParserTest, ExpressionCall0) {
-  TEST_PARSER("foo();\n");
-}
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--CallExpression\n"
+      "|  |  +--ReferenceExpression\n"
+      "|  |  |  +--Name |foo|\n",
+      Parse("foo();"));
 
-TEST_F(ParserTest, ExpressionCall1) {
-  TEST_PARSER("foo(1);\n");
-}
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--CallExpression\n"
+      "|  |  +--ReferenceExpression\n"
+      "|  |  |  +--Name |foo|\n"
+      "|  |  +--NumericLiteral |1|\n",
+      Parse("foo(1);"));
 
-TEST_F(ParserTest, ExpressionCall2) {
-  TEST_PARSER("foo(1, 2);\n");
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--CallExpression\n"
+      "|  |  +--ReferenceExpression\n"
+      "|  |  |  +--Name |foo|\n"
+      "|  |  +--CommaExpression\n"
+      "|  |  |  +--NumericLiteral |1|\n"
+      "|  |  |  +--NumericLiteral |2|\n",
+      Parse("foo(1, 2);"));
 }
 
 TEST_F(ParserTest, ExpressionClass) {
-  TEST_PARSER("var x = class {};\n");
-  TEST_PARSER("var x = class Foo {};\n");
-  TEST_PARSER("var x = class Foo extends Bar { constructor() {} };\n");
-  TEST_PARSER("var x = class Foo { static foo() {} };\n");
+  EXPECT_EQ(
+      "Module\n"
+      "+--VarStatement\n"
+      "|  +--BindingNameElement\n"
+      "|  |  +--Name |x|\n"
+      "|  |  +--Class\n"
+      "|  |  |  +--Empty ||\n"
+      "|  |  |  +--ElisionExpression ||\n"
+      "|  |  |  +--ObjectInitializer |{}|\n",
+      Parse("var x = class {};"));
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--VarStatement\n"
+      "|  +--BindingNameElement\n"
+      "|  |  +--Name |x|\n"
+      "|  |  +--Class\n"
+      "|  |  |  +--Name |Foo|\n"
+      "|  |  |  +--ElisionExpression ||\n"
+      "|  |  |  +--ObjectInitializer |{}|\n",
+      Parse("var x = class Foo {};"));
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--VarStatement\n"
+      "|  +--BindingNameElement\n"
+      "|  |  +--Name |x|\n"
+      "|  |  +--Class\n"
+      "|  |  |  +--Name |Foo|\n"
+      "|  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  +--Name |Bar|\n"
+      "|  |  |  +--ObjectInitializer\n"
+      "|  |  |  |  +--Method<NonStatic,Normal>\n"
+      "|  |  |  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  |  |  +--Name |constructor|\n"
+      "|  |  |  |  |  +--ParameterList |()|\n"
+      "|  |  |  |  |  +--BlockStatement |{}|\n",
+      Parse("var x = class Foo extends Bar { constructor() {} };"));
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--VarStatement\n"
+      "|  +--BindingNameElement\n"
+      "|  |  +--Name |x|\n"
+      "|  |  +--Class\n"
+      "|  |  |  +--Name |Foo|\n"
+      "|  |  |  +--ElisionExpression ||\n"
+      "|  |  |  +--ObjectInitializer\n"
+      "|  |  |  |  +--Method<Static,Normal>\n"
+      "|  |  |  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  |  |  +--Name |foo|\n"
+      "|  |  |  |  |  +--ParameterList |()|\n"
+      "|  |  |  |  |  +--BlockStatement |{}|\n",
+      Parse("var x = class Foo { static foo() {} };"));
 }
 
 TEST_F(ParserTest, ExpressionClassWithStatic) {
-  TEST_PARSER("class Foo { static *foo() {} }\n");
-  TEST_PARSER("class Foo { static async foo() {} }\n");
-  TEST_PARSER("class Foo { static get foo() {} }\n");
-  TEST_PARSER("class Foo { static set foo() {} }\n");
+  EXPECT_EQ(
+      "Module\n"
+      "+--Class\n"
+      "|  +--Name |Foo|\n"
+      "|  +--ElisionExpression ||\n"
+      "|  +--ObjectInitializer\n"
+      "|  |  +--Method<Static,Generator>\n"
+      "|  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  +--Name |foo|\n"
+      "|  |  |  +--ParameterList |()|\n"
+      "|  |  |  +--BlockStatement |{}|\n",
+      Parse("class Foo { static *foo() {} }"));
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--Class\n"
+      "|  +--Name |Foo|\n"
+      "|  +--ElisionExpression ||\n"
+      "|  +--ObjectInitializer\n"
+      "|  |  +--Method<Static,Async>\n"
+      "|  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  +--Name |foo|\n"
+      "|  |  |  +--ParameterList |()|\n"
+      "|  |  |  +--BlockStatement |{}|\n",
+      Parse("class Foo { static async foo() {} }"));
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--Class\n"
+      "|  +--Name |Foo|\n"
+      "|  +--ElisionExpression ||\n"
+      "|  +--ObjectInitializer\n"
+      "|  |  +--Method<Static,Getter>\n"
+      "|  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  +--Name |foo|\n"
+      "|  |  |  +--ParameterList |()|\n"
+      "|  |  |  +--BlockStatement |{}|\n",
+      Parse("class Foo { static get foo() {} }"));
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--Class\n"
+      "|  +--Name |Foo|\n"
+      "|  +--ElisionExpression ||\n"
+      "|  +--ObjectInitializer\n"
+      "|  |  +--Method<Static,Setter>\n"
+      "|  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  +--Name |foo|\n"
+      "|  |  |  +--ParameterList |()|\n"
+      "|  |  |  +--BlockStatement |{}|\n",
+      Parse("class Foo { static set foo() {} }"));
 }
 
 TEST_F(ParserTest, ExpressionCall3) {
-  TEST_PARSER("foo(1, 2, 3);\n");
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--CallExpression\n"
+      "|  |  +--ReferenceExpression\n"
+      "|  |  |  +--Name |foo|\n"
+      "|  |  +--CommaExpression\n"
+      "|  |  |  +--NumericLiteral |1|\n"
+      "|  |  |  +--NumericLiteral |2|\n"
+      "|  |  |  +--NumericLiteral |3|\n",
+      Parse("foo(1, 2, 3);"));
 }
 
 TEST_F(ParserTest, ExpressionComma) {
-  TEST_PARSER("foo, bar, baz;\n");
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--CommaExpression\n"
+      "|  |  +--ReferenceExpression\n"
+      "|  |  |  +--Name |foo|\n"
+      "|  |  +--ReferenceExpression\n"
+      "|  |  |  +--Name |bar|\n"
+      "|  |  +--ReferenceExpression\n"
+      "|  |  |  +--Name |baz|\n",
+      Parse("foo, bar, baz;"));
 }
 
 TEST_F(ParserTest, ExpressionFunctionAsync) {
-  TEST_PARSER(
-      "x = async function() {\n"
-      "  1;\n"
-      "};\n");
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--AssignmentExpression<=>\n"
+      "|  |  +--ReferenceExpression\n"
+      "|  |  |  +--Name |x|\n"
+      "|  |  +--Punctuator |=|\n"
+      "|  |  +--Function<Async>\n"
+      "|  |  |  +--Empty ||\n"
+      "|  |  |  +--ParameterList |()|\n"
+      "|  |  |  +--BlockStatement\n"
+      "|  |  |  |  +--ExpressionStatement\n"
+      "|  |  |  |  |  +--NumericLiteral |1|\n",
+      Parse("x = async function() {\n"
+            "  1;\n"
+            "};\n"));
 }
 
 TEST_F(ParserTest, ExpressionFunctionGenerator) {
-  TEST_PARSER(
-      "x = function*(x) {\n"
-      "  1;\n"
-      "};\n");
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--AssignmentExpression<=>\n"
+      "|  |  +--ReferenceExpression\n"
+      "|  |  |  +--Name |x|\n"
+      "|  |  +--Punctuator |=|\n"
+      "|  |  +--Function<Generator>\n"
+      "|  |  |  +--Empty ||\n"
+      "|  |  |  +--ParameterList\n"
+      "|  |  |  |  +--BindingNameElement\n"
+      "|  |  |  |  |  +--Name |x|\n"
+      "|  |  |  |  |  +--ElisionExpression ||\n"
+      "|  |  |  +--BlockStatement\n"
+      "|  |  |  |  +--ExpressionStatement\n"
+      "|  |  |  |  |  +--NumericLiteral |1|\n",
+      Parse("x = function*(x) {\n"
+            "  1;\n"
+            "};\n"));
 }
 
 TEST_F(ParserTest, ExpressionFunctionNormal) {
-  TEST_PARSER(
-      "x = function(a, b) {\n"
-      "  1;\n"
-      "};\n");
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--AssignmentExpression<=>\n"
+      "|  |  +--ReferenceExpression\n"
+      "|  |  |  +--Name |x|\n"
+      "|  |  +--Punctuator |=|\n"
+      "|  |  +--Function<Normal>\n"
+      "|  |  |  +--Empty ||\n"
+      "|  |  |  +--ParameterList\n"
+      "|  |  |  |  +--BindingNameElement\n"
+      "|  |  |  |  |  +--Name |a|\n"
+      "|  |  |  |  |  +--ElisionExpression ||\n"
+      "|  |  |  |  +--BindingNameElement\n"
+      "|  |  |  |  |  +--Name |b|\n"
+      "|  |  |  |  |  +--ElisionExpression ||\n"
+      "|  |  |  +--BlockStatement\n"
+      "|  |  |  |  +--ExpressionStatement\n"
+      "|  |  |  |  |  +--NumericLiteral |1|\n",
+      Parse("x = function(a, b) {\n"
+            "  1;\n"
+            "};\n"));
 }
 
 TEST_F(ParserTest, ExpressionConditional) {
-  TEST_PARSER("foo ? bar : baz;\n");
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--ConditionalExpression\n"
+      "|  |  +--ReferenceExpression\n"
+      "|  |  |  +--Name |foo|\n"
+      "|  |  +--ReferenceExpression\n"
+      "|  |  |  +--Name |bar|\n"
+      "|  |  +--ReferenceExpression\n"
+      "|  |  |  +--Name |baz|\n",
+      Parse("foo ? bar : baz;"));
 }
 
 TEST_F(ParserTest, ExpressionMember) {
-  TEST_PARSER("foo.bar;\n");
-  TEST_PARSER("foo.bar[0];\n");
-  TEST_PARSER("foo.bar[0](1);\n");
-  TEST_PARSER("foo.bar[0](1)(2);\n");
-  TEST_PARSER("foo.bar[0](1)(2).baz;\n");
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--MemberExpression\n"
+      "|  |  +--ReferenceExpression\n"
+      "|  |  |  +--Name |foo|\n"
+      "|  |  +--Name |bar|\n",
+      Parse("foo.bar;"));
 
-  EXPECT_EQ("foo;\nPASER_ERROR_EXPRESSION_EXPECT_NAME@4:4\n", Parse("foo."));
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--ComputedMemberExpression\n"
+      "|  |  +--MemberExpression\n"
+      "|  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  +--Name |foo|\n"
+      "|  |  |  +--Name |bar|\n"
+      "|  |  +--NumericLiteral |0|\n",
+      Parse("foo.bar[0];"));
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--CallExpression\n"
+      "|  |  +--ComputedMemberExpression\n"
+      "|  |  |  +--MemberExpression\n"
+      "|  |  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  |  +--Name |foo|\n"
+      "|  |  |  |  +--Name |bar|\n"
+      "|  |  |  +--NumericLiteral |0|\n"
+      "|  |  +--NumericLiteral |1|\n",
+      Parse("foo.bar[0](1);"));
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--CallExpression\n"
+      "|  |  +--CallExpression\n"
+      "|  |  |  +--ComputedMemberExpression\n"
+      "|  |  |  |  +--MemberExpression\n"
+      "|  |  |  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  |  |  +--Name |foo|\n"
+      "|  |  |  |  |  +--Name |bar|\n"
+      "|  |  |  |  +--NumericLiteral |0|\n"
+      "|  |  |  +--NumericLiteral |1|\n"
+      "|  |  +--NumericLiteral |2|\n",
+      Parse("foo.bar[0](1)(2);"));
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--MemberExpression\n"
+      "|  |  +--CallExpression\n"
+      "|  |  |  +--CallExpression\n"
+      "|  |  |  |  +--ComputedMemberExpression\n"
+      "|  |  |  |  |  +--MemberExpression\n"
+      "|  |  |  |  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  |  |  |  +--Name |foo|\n"
+      "|  |  |  |  |  |  +--Name |bar|\n"
+      "|  |  |  |  |  +--NumericLiteral |0|\n"
+      "|  |  |  |  +--NumericLiteral |1|\n"
+      "|  |  |  +--NumericLiteral |2|\n"
+      "|  |  +--Name |baz|\n",
+      Parse("foo.bar[0](1)(2).baz;"));
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--ReferenceExpression\n"
+      "|  |  +--Name |foo|\n"
+      "PASER_ERROR_EXPRESSION_EXPECT_NAME@4:4\n",
+      Parse("foo."))
+      << "No member name after '.'";
 }
 
 TEST_F(ParserTest, ExpressionNew) {
-  EXPECT_EQ("var foo = new Foo();\n", Parse("var foo = new Foo\n"));
-  TEST_PARSER("var foo = new Foo(1);\n");
-  TEST_PARSER("var foo = new testing.Test(1);\n");
-  TEST_PARSER("if (new.target)\n  ok;\n");
+  EXPECT_EQ(
+      "Module\n"
+      "+--VarStatement\n"
+      "|  +--BindingNameElement\n"
+      "|  |  +--Name |foo|\n"
+      "|  |  +--NewExpression\n"
+      "|  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  +--Name |Foo|\n",
+      Parse("var foo = new Foo\n"));
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--VarStatement\n"
+      "|  +--BindingNameElement\n"
+      "|  |  +--Name |foo|\n"
+      "|  |  +--NewExpression\n"
+      "|  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  +--Name |Foo|\n"
+      "|  |  |  +--NumericLiteral |1|\n",
+      Parse("var foo = new Foo(1);"));
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--VarStatement\n"
+      "|  +--BindingNameElement\n"
+      "|  |  +--Name |foo|\n"
+      "|  |  +--NewExpression\n"
+      "|  |  |  +--MemberExpression\n"
+      "|  |  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  |  +--Name |testing|\n"
+      "|  |  |  |  +--Name |Test|\n"
+      "|  |  |  +--NumericLiteral |1|\n",
+      Parse("var foo = new testing.Test(1);"));
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--IfStatement\n"
+      "|  +--MemberExpression\n"
+      "|  |  +--ReferenceExpression\n"
+      "|  |  |  +--Name |new|\n"
+      "|  |  +--Name |target|\n"
+      "|  +--ExpressionStatement\n"
+      "|  |  +--ReferenceExpression\n"
+      "|  |  |  +--Name |ok|\n",
+      Parse("if (new.target)\n  ok;"));
 }
 
 TEST_F(ParserTest, ExpressionObjectLiteral) {
-  TEST_PARSER(
-      "x = {\n"
-      "  foo: 1,\n"
-      "  bar() { 1; }\n"
-      "  *baz() { 2; }\n"
-      "  async quux() { 3; }\n"
-      "  get getter() { 4; }\n"
-      "  set setter() { 5; }\n"
-      "  123: 456,\n"
-      "  'foo': 789,\n"
-      "  [1]: 6,\n"
-      "  [2]() { 7; }\n"
-      "};\n");
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--AssignmentExpression<=>\n"
+      "|  |  +--ReferenceExpression\n"
+      "|  |  |  +--Name |x|\n"
+      "|  |  +--Punctuator |=|\n"
+      "|  |  +--ObjectInitializer\n"
+      "|  |  |  +--Property\n"
+      "|  |  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  |  +--Name |foo|\n"
+      "|  |  |  |  +--NumericLiteral |1|\n"
+      "|  |  |  +--DelimiterExpression |,|\n"
+      "|  |  |  +--Method<NonStatic,Normal>\n"
+      "|  |  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  |  +--Name |bar|\n"
+      "|  |  |  |  +--ParameterList |()|\n"
+      "|  |  |  |  +--BlockStatement\n"
+      "|  |  |  |  |  +--ExpressionStatement\n"
+      "|  |  |  |  |  |  +--NumericLiteral |1|\n"
+      "|  |  |  +--Method<NonStatic,Generator>\n"
+      "|  |  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  |  +--Name |baz|\n"
+      "|  |  |  |  +--ParameterList |()|\n"
+      "|  |  |  |  +--BlockStatement\n"
+      "|  |  |  |  |  +--ExpressionStatement\n"
+      "|  |  |  |  |  |  +--NumericLiteral |2|\n"
+      "|  |  |  +--Method<NonStatic,Async>\n"
+      "|  |  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  |  +--Name |quux|\n"
+      "|  |  |  |  +--ParameterList |()|\n"
+      "|  |  |  |  +--BlockStatement\n"
+      "|  |  |  |  |  +--ExpressionStatement\n"
+      "|  |  |  |  |  |  +--NumericLiteral |3|\n"
+      "|  |  |  +--Method<NonStatic,Getter>\n"
+      "|  |  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  |  +--Name |getter|\n"
+      "|  |  |  |  +--ParameterList |()|\n"
+      "|  |  |  |  +--BlockStatement\n"
+      "|  |  |  |  |  +--ExpressionStatement\n"
+      "|  |  |  |  |  |  +--NumericLiteral |4|\n"
+      "|  |  |  +--Method<NonStatic,Setter>\n"
+      "|  |  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  |  +--Name |setter|\n"
+      "|  |  |  |  +--ParameterList |()|\n"
+      "|  |  |  |  +--BlockStatement\n"
+      "|  |  |  |  |  +--ExpressionStatement\n"
+      "|  |  |  |  |  |  +--NumericLiteral |5|\n"
+      "|  |  |  +--Property\n"
+      "|  |  |  |  +--NumericLiteral |123|\n"
+      "|  |  |  |  +--NumericLiteral |456|\n"
+      "|  |  |  +--DelimiterExpression |,|\n"
+      "|  |  |  +--Property\n"
+      "|  |  |  |  +--StringLiteral |'foo'|\n"
+      "|  |  |  |  +--NumericLiteral |789|\n"
+      "|  |  |  +--DelimiterExpression |,|\n"
+      "|  |  |  +--Property\n"
+      "|  |  |  |  +--ArrayInitializer\n"
+      "|  |  |  |  |  +--NumericLiteral |1|\n"
+      "|  |  |  |  +--NumericLiteral |6|\n"
+      "|  |  |  +--DelimiterExpression |,|\n"
+      "|  |  |  +--Method<NonStatic,Normal>\n"
+      "|  |  |  |  +--ArrayInitializer\n"
+      "|  |  |  |  |  +--NumericLiteral |2|\n"
+      "|  |  |  |  +--ParameterList |()|\n"
+      "|  |  |  |  +--BlockStatement\n"
+      "|  |  |  |  |  +--ExpressionStatement\n"
+      "|  |  |  |  |  |  +--NumericLiteral |7|\n",
+      Parse("x = {\n"
+            "  foo: 1,\n"
+            "  bar() { 1; }\n"
+            "  *baz() { 2; }\n"
+            "  async quux() { 3; }\n"
+            "  get getter() { 4; }\n"
+            "  set setter() { 5; }\n"
+            "  123: 456,\n"
+            "  'foo': 789,\n"
+            "  [1]: 6,\n"
+            "  [2]() { 7; }\n"
+            "};\n"));
 }
 
 TEST_F(ParserTest, ExpressionObjectLiteralWithArrowFunction) {
-  TEST_PARSER("x = { foo: x => x + 1, };\n");
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--AssignmentExpression<=>\n"
+      "|  |  +--ReferenceExpression\n"
+      "|  |  |  +--Name |x|\n"
+      "|  |  +--Punctuator |=|\n"
+      "|  |  +--ObjectInitializer\n"
+      "|  |  |  +--Property\n"
+      "|  |  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  |  +--Name |foo|\n"
+      "|  |  |  |  +--ArrowFunction\n"
+      "|  |  |  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  |  |  +--Name |x|\n"
+      "|  |  |  |  |  +--BinaryExpression<+>\n"
+      "|  |  |  |  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  |  |  |  +--Name |x|\n"
+      "|  |  |  |  |  |  +--Punctuator |+|\n"
+      "|  |  |  |  |  |  +--NumericLiteral |1|\n"
+      "|  |  |  +--DelimiterExpression |,|\n",
+      Parse("x = { foo: x => x + 1, };"));
 }
 
 TEST_F(ParserTest, ExpressionObjectLiteralWithKeywords) {
-  TEST_PARSER("x = { aync: 1 };\n");
-  TEST_PARSER("x = { get: 1 };\n");
-  TEST_PARSER("x = { set: 1 };\n");
-  TEST_PARSER("x = { static: 1 };\n");
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--AssignmentExpression<=>\n"
+      "|  |  +--ReferenceExpression\n"
+      "|  |  |  +--Name |x|\n"
+      "|  |  +--Punctuator |=|\n"
+      "|  |  +--ObjectInitializer\n"
+      "|  |  |  +--Property\n"
+      "|  |  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  |  +--Name |aync|\n"
+      "|  |  |  |  +--NumericLiteral |1|\n",
+      Parse("x = { aync: 1 };"));
 
-  TEST_PARSER("x = { aync() {} };\n");
-  TEST_PARSER("x = { get() {} };\n");
-  TEST_PARSER("x = { set() {} };\n");
-  TEST_PARSER("x = { static() {} };\n");
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--AssignmentExpression<=>\n"
+      "|  |  +--ReferenceExpression\n"
+      "|  |  |  +--Name |x|\n"
+      "|  |  +--Punctuator |=|\n"
+      "|  |  +--ObjectInitializer\n"
+      "|  |  |  +--Property\n"
+      "|  |  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  |  +--Name |get|\n"
+      "|  |  |  |  +--NumericLiteral |1|\n",
+      Parse("x = { get: 1 };"));
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--AssignmentExpression<=>\n"
+      "|  |  +--ReferenceExpression\n"
+      "|  |  |  +--Name |x|\n"
+      "|  |  +--Punctuator |=|\n"
+      "|  |  +--ObjectInitializer\n"
+      "|  |  |  +--Property\n"
+      "|  |  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  |  +--Name |set|\n"
+      "|  |  |  |  +--NumericLiteral |1|\n",
+      Parse("x = { set: 1 };"));
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--AssignmentExpression<=>\n"
+      "|  |  +--ReferenceExpression\n"
+      "|  |  |  +--Name |x|\n"
+      "|  |  +--Punctuator |=|\n"
+      "|  |  +--ObjectInitializer\n"
+      "|  |  |  +--Property\n"
+      "|  |  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  |  +--Name |static|\n"
+      "|  |  |  |  +--NumericLiteral |1|\n",
+      Parse("x = { static: 1 };"));
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--AssignmentExpression<=>\n"
+      "|  |  +--ReferenceExpression\n"
+      "|  |  |  +--Name |x|\n"
+      "|  |  +--Punctuator |=|\n"
+      "|  |  +--ObjectInitializer\n"
+      "|  |  |  +--Method<NonStatic,Normal>\n"
+      "|  |  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  |  +--Name |aync|\n"
+      "|  |  |  |  +--ParameterList |()|\n"
+      "|  |  |  |  +--BlockStatement |{}|\n",
+      Parse("x = { aync() {} };"));
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--AssignmentExpression<=>\n"
+      "|  |  +--ReferenceExpression\n"
+      "|  |  |  +--Name |x|\n"
+      "|  |  +--Punctuator |=|\n"
+      "|  |  +--ObjectInitializer\n"
+      "|  |  |  +--Method<NonStatic,Normal>\n"
+      "|  |  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  |  +--Name |get|\n"
+      "|  |  |  |  +--ParameterList |()|\n"
+      "|  |  |  |  +--BlockStatement |{}|\n",
+      Parse("x = { get() {} };"));
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--AssignmentExpression<=>\n"
+      "|  |  +--ReferenceExpression\n"
+      "|  |  |  +--Name |x|\n"
+      "|  |  +--Punctuator |=|\n"
+      "|  |  +--ObjectInitializer\n"
+      "|  |  |  +--Method<NonStatic,Normal>\n"
+      "|  |  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  |  +--Name |set|\n"
+      "|  |  |  |  +--ParameterList |()|\n"
+      "|  |  |  |  +--BlockStatement |{}|\n",
+      Parse("x = { set() {} };"));
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--AssignmentExpression<=>\n"
+      "|  |  +--ReferenceExpression\n"
+      "|  |  |  +--Name |x|\n"
+      "|  |  +--Punctuator |=|\n"
+      "|  |  +--ObjectInitializer\n"
+      "|  |  |  +--Method<NonStatic,Normal>\n"
+      "|  |  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  |  +--Name |static|\n"
+      "|  |  |  |  +--ParameterList |()|\n"
+      "|  |  |  |  +--BlockStatement |{}|\n",
+      Parse("x = { static() {} };"));
 }
 
 TEST_F(ParserTest, ExpressionObjectLiteralAndPropertyName) {
-  TEST_PARSER("x = { get 5e0() { 1; } };\n");
-  TEST_PARSER("x = { get 'foo'() { 1; } };\n");
-  TEST_PARSER("x = { get [1]() { 1; } };\n");
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--AssignmentExpression<=>\n"
+      "|  |  +--ReferenceExpression\n"
+      "|  |  |  +--Name |x|\n"
+      "|  |  +--Punctuator |=|\n"
+      "|  |  +--ObjectInitializer\n"
+      "|  |  |  +--Method<NonStatic,Getter>\n"
+      "|  |  |  |  +--NumericLiteral |5e0|\n"
+      "|  |  |  |  +--ParameterList |()|\n"
+      "|  |  |  |  +--BlockStatement\n"
+      "|  |  |  |  |  +--ExpressionStatement\n"
+      "|  |  |  |  |  |  +--NumericLiteral |1|\n",
+      Parse("x = { get 5e0() { 1; } };"));
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--AssignmentExpression<=>\n"
+      "|  |  +--ReferenceExpression\n"
+      "|  |  |  +--Name |x|\n"
+      "|  |  +--Punctuator |=|\n"
+      "|  |  +--ObjectInitializer\n"
+      "|  |  |  +--Method<NonStatic,Getter>\n"
+      "|  |  |  |  +--StringLiteral |'foo'|\n"
+      "|  |  |  |  +--ParameterList |()|\n"
+      "|  |  |  |  +--BlockStatement\n"
+      "|  |  |  |  |  +--ExpressionStatement\n"
+      "|  |  |  |  |  |  +--NumericLiteral |1|\n",
+      Parse("x = { get 'foo'() { 1; } };"));
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--AssignmentExpression<=>\n"
+      "|  |  +--ReferenceExpression\n"
+      "|  |  |  +--Name |x|\n"
+      "|  |  +--Punctuator |=|\n"
+      "|  |  +--ObjectInitializer\n"
+      "|  |  |  +--Method<NonStatic,Getter>\n"
+      "|  |  |  |  +--ArrayInitializer\n"
+      "|  |  |  |  |  +--NumericLiteral |1|\n"
+      "|  |  |  |  +--ParameterList |()|\n"
+      "|  |  |  |  +--BlockStatement\n"
+      "|  |  |  |  |  +--ExpressionStatement\n"
+      "|  |  |  |  |  |  +--NumericLiteral |1|\n",
+      Parse("x = { get [1]() { 1; } };"));
 }
 
 TEST_F(ParserTest, ExpressionUnary) {
-  TEST_PARSER("!foo;\n");
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--UnaryExpression<!>\n"
+      "|  |  +--Punctuator |!|\n"
+      "|  |  +--ReferenceExpression\n"
+      "|  |  |  +--Name |foo|\n",
+      Parse("!foo;"));
 }
 
 TEST_F(ParserTest, ExpressionUnaryAwait) {
-  TEST_PARSER("await foo;\n");
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--UnaryKeywordExpression\n"
+      "|  |  +--Name |await|\n"
+      "|  |  +--ReferenceExpression\n"
+      "|  |  |  +--Name |foo|\n",
+      Parse("await foo;"));
 }
 
 TEST_F(ParserTest, ExpressionUnaryDelete) {
-  TEST_PARSER("delete foo;\n");
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--UnaryKeywordExpression\n"
+      "|  |  +--Name |delete|\n"
+      "|  |  +--ReferenceExpression\n"
+      "|  |  |  +--Name |foo|\n",
+      Parse("delete foo;"));
 }
 
 TEST_F(ParserTest, ExpressionUnaryTypeOf) {
-  TEST_PARSER("typeof foo;\n");
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--UnaryKeywordExpression\n"
+      "|  |  +--Name |typeof|\n"
+      "|  |  +--ReferenceExpression\n"
+      "|  |  |  +--Name |foo|\n",
+      Parse("typeof foo;"));
 }
 
 TEST_F(ParserTest, ExpressionUnaryVoid) {
-  TEST_PARSER("void foo;\n");
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--UnaryKeywordExpression\n"
+      "|  |  +--Name |void|\n"
+      "|  |  +--ReferenceExpression\n"
+      "|  |  |  +--Name |foo|\n",
+      Parse("void foo;"));
 }
 
 TEST_F(ParserTest, ExpressionName) {
-  TEST_PARSER("false;\n");
-  TEST_PARSER("foo;\n");
-  TEST_PARSER("null;\n");
-  TEST_PARSER("true;\n");
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--BooleanLiteral |false|\n",
+      Parse("false;"));
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--ReferenceExpression\n"
+      "|  |  +--Name |foo|\n",
+      Parse("foo;"));
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--NullLiteral |null|\n",
+      Parse("null;"));
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--BooleanLiteral |true|\n",
+      Parse("true;"));
 }
 
 TEST_F(ParserTest, ExpressionRegExp) {
-  TEST_PARSER("var re = /ab*c/;\n");
-  TEST_PARSER("var re = /bar/u;\n");
-  TEST_PARSER("var re = { re: /^(.+)$/ };\n");
-  TEST_PARSER("var re = /=/;\n");  // "'/=' is not assignment operator";
-  TEST_PARSER("var re = /a{2}/;\n");
-  TEST_PARSER("var re = /a{2,}/;\n");
-  EXPECT_EQ("var re = /a/;\nfoo;\n", Parse("var re = /a/\nfoo\n"))
+  EXPECT_EQ(
+      "Module\n"
+      "+--VarStatement\n"
+      "|  +--BindingNameElement\n"
+      "|  |  +--Name |re|\n"
+      "|  |  +--RegExpLiteralExpression\n"
+      "|  |  |  +--SequenceRegExp\n"
+      "|  |  |  |  +--LiteralRegExp |a|\n"
+      "|  |  |  |  +--GreedyRepeatRegExp\n"
+      "|  |  |  |  |  +--LiteralRegExp |b|\n"
+      "|  |  |  |  +--LiteralRegExp |c|\n"
+      "|  |  |  +--Empty ||\n",
+      Parse("var re = /ab*c/;\n"));
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--VarStatement\n"
+      "|  +--BindingNameElement\n"
+      "|  |  +--Name |re|\n"
+      "|  |  +--RegExpLiteralExpression\n"
+      "|  |  |  +--LiteralRegExp |bar|\n"
+      "|  |  |  +--Name |u|\n",
+      Parse("var re = /bar/u;\n"));
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--VarStatement\n"
+      "|  +--BindingNameElement\n"
+      "|  |  +--Name |re|\n"
+      "|  |  +--ObjectInitializer\n"
+      "|  |  |  +--Property\n"
+      "|  |  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  |  +--Name |re|\n"
+      "|  |  |  |  +--RegExpLiteralExpression\n"
+      "|  |  |  |  |  +--SequenceRegExp\n"
+      "|  |  |  |  |  |  +--LiteralRegExp |^|\n"
+      "|  |  |  |  |  |  +--CaptureRegExp\n"
+      "|  |  |  |  |  |  |  +--GreedyRepeatRegExp\n"
+      "|  |  |  |  |  |  |  |  +--AnyCharRegExp |.|\n"
+      "|  |  |  |  |  |  +--AssertionRegExp |$|\n"
+      "|  |  |  |  |  +--Empty ||\n",
+      Parse("var re = { re: /^(.+)$/ };\n"));
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--VarStatement\n"
+      "|  +--BindingNameElement\n"
+      "|  |  +--Name |re|\n"
+      "|  |  +--RegExpLiteralExpression\n"
+      "|  |  |  +--LiteralRegExp |=|\n"
+      "|  |  |  +--Empty ||\n",
+      Parse("var re = /=/;\n"));  // "'/=' is not assignment operator";
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--VarStatement\n"
+      "|  +--BindingNameElement\n"
+      "|  |  +--Name |re|\n"
+      "|  |  +--RegExpLiteralExpression\n"
+      "|  |  |  +--GreedyRepeatRegExp\n"
+      "|  |  |  |  +--LiteralRegExp |a|\n"
+      "|  |  |  +--Empty ||\n",
+      Parse("var re = /a{2}/;\n"));
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--VarStatement\n"
+      "|  +--BindingNameElement\n"
+      "|  |  +--Name |re|\n"
+      "|  |  +--RegExpLiteralExpression\n"
+      "|  |  |  +--GreedyRepeatRegExp\n"
+      "|  |  |  |  +--LiteralRegExp |a|\n"
+      "|  |  |  +--Empty ||\n",
+      Parse("var re = /a{2,}/;\n"));
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--VarStatement\n"
+      "|  +--BindingNameElement\n"
+      "|  |  +--Name |re|\n"
+      "|  |  +--RegExpLiteralExpression\n"
+      "|  |  |  +--LiteralRegExp |a|\n"
+      "|  |  |  +--Empty ||\n"
+      "+--ExpressionStatement\n"
+      "|  +--ReferenceExpression\n"
+      "|  |  +--Name |foo|\n",
+      Parse("var re = /a/\nfoo\n"))
       << "'foo' is not regexp flags.";
-  EXPECT_EQ("/(?:)/;\n", Parse("/(?:)/")) << "empty regexp";
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--RegExpLiteralExpression\n"
+      "|  |  +--SequenceRegExp |)|\n"
+      "|  |  +--Empty ||\n",
+      Parse("/(?:)/"))
+      << "empty regexp";
+
   // non-strict regexp
-  TEST_PARSER("/(foo|)/;\n");  // '|' is non-syntax char
-  TEST_PARSER("/()foo/;\n");   // '()' is non-syntax char
-  TEST_PARSER("/#{foo}/;\n");  // '{}' is non-syntax char
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--RegExpLiteralExpression\n"
+      "|  |  +--CaptureRegExp\n"
+      "|  |  |  +--LiteralRegExp |foo||\n"
+      "|  |  +--Empty ||\n",
+      Parse("/(foo|)/;\n"))
+      << "'|' is non-syntax char";
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--RegExpLiteralExpression\n"
+      "|  |  +--LiteralRegExp |()foo|\n"
+      "|  |  +--Empty ||\n",
+      Parse("/()foo/;\n"))
+      << "'()' is non-syntax char";
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--RegExpLiteralExpression\n"
+      "|  |  +--LiteralRegExp |#{foo}|\n"
+      "|  |  +--Empty ||\n",
+      Parse("/#{foo}/;\n"))
+      << "'{}' is non-syntax char";
 }
 
 TEST_F(ParserTest, ExpressionYield) {
-  TEST_PARSER("yield;\n");
-  TEST_PARSER("yield 1;\n");
-  TEST_PARSER("yield* foo();\n");
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--UnaryKeywordExpression\n"
+      "|  |  +--Name |yield|\n"
+      "|  |  +--ElisionExpression ||\n",
+      Parse("yield;"));
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--UnaryKeywordExpression\n"
+      "|  |  +--Name |yield|\n"
+      "|  |  +--NumericLiteral |1|\n",
+      Parse("yield 1;"));
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--UnaryKeywordExpression\n"
+      "|  |  +--Name |yield*|\n"
+      "|  |  +--CallExpression\n"
+      "|  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  +--Name |foo|\n",
+      Parse("yield* foo();"));
 }
 
 TEST_F(ParserTest, ForStatement) {
-  TEST_PARSER(
-      "for (index = 0; index < 10; ++index)\n"
-      "  call(index);\n");
+  EXPECT_EQ(
+      "Module\n"
+      "+--ForStatement\n"
+      "|  +--AssignmentExpression<=>\n"
+      "|  |  +--ReferenceExpression\n"
+      "|  |  |  +--Name |index|\n"
+      "|  |  +--Punctuator |=|\n"
+      "|  |  +--NumericLiteral |0|\n"
+      "|  +--BinaryExpression<<>\n"
+      "|  |  +--ReferenceExpression\n"
+      "|  |  |  +--Name |index|\n"
+      "|  |  +--Punctuator |<|\n"
+      "|  |  +--NumericLiteral |10|\n"
+      "|  +--UnaryExpression<++>\n"
+      "|  |  +--Punctuator |++|\n"
+      "|  |  +--ReferenceExpression\n"
+      "|  |  |  +--Name |index|\n"
+      "|  +--ExpressionStatement\n"
+      "|  |  +--CallExpression\n"
+      "|  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  +--Name |call|\n"
+      "|  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  +--Name |index|\n",
+      Parse("for (index = 0; index < 10; ++index)\n"
+            "  call(index);\n"));
 }
 
 TEST_F(ParserTest, ForStatementInfinite) {
-  TEST_PARSER(
-      "for (;;)\n"
-      "  call(index);\n");
+  EXPECT_EQ(
+      "Module\n"
+      "+--ForStatement\n"
+      "|  +--ElisionExpression ||\n"
+      "|  +--ElisionExpression ||\n"
+      "|  +--ElisionExpression ||\n"
+      "|  +--ExpressionStatement\n"
+      "|  |  +--CallExpression\n"
+      "|  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  +--Name |call|\n"
+      "|  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  +--Name |index|\n",
+      Parse("for (;;)\n"
+            "  call(index);\n"));
 }
 
 TEST_F(ParserTest, ForInStatement) {
-  TEST_PARSER(
-      "for (foo.x in bar)\n"
-      "  call(foo.x);\n");
+  EXPECT_EQ(
+      "Module\n"
+      "+--ForInStatement\n"
+      "|  +--BinaryKeywordExpression\n"
+      "|  |  +--MemberExpression\n"
+      "|  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  +--Name |foo|\n"
+      "|  |  |  +--Name |x|\n"
+      "|  |  +--Name |in|\n"
+      "|  |  +--ReferenceExpression\n"
+      "|  |  |  +--Name |bar|\n"
+      "|  +--ExpressionStatement\n"
+      "|  |  +--CallExpression\n"
+      "|  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  +--Name |call|\n"
+      "|  |  |  +--MemberExpression\n"
+      "|  |  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  |  +--Name |foo|\n"
+      "|  |  |  |  +--Name |x|\n",
+      Parse("for (foo.x in bar)\n"
+            "  call(foo.x);\n"));
 }
 
 TEST_F(ParserTest, ForOfStatement) {
-  TEST_PARSER(
-      "for (const element of elements)\n"
-      "  call(element);\n");
+  EXPECT_EQ(
+      "Module\n"
+      "+--ForOfStatement\n"
+      "|  +--ReferenceExpression\n"
+      "|  |  +--Name |element|\n"
+      "|  +--ReferenceExpression\n"
+      "|  |  +--Name |elements|\n"
+      "|  +--ExpressionStatement\n"
+      "|  |  +--CallExpression\n"
+      "|  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  +--Name |call|\n"
+      "|  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  +--Name |element|\n",
+      Parse("for (const element of elements)\n"
+            "  call(element);\n"));
 }
 
 TEST_F(ParserTest, FunctionStatement) {
-  TEST_PARSER(
-      "function foo(a, b, c) {\n"
-      "  bar(a + b);\n"
-      "}\n");
+  EXPECT_EQ(
+      "Module\n"
+      "+--Function<Normal>\n"
+      "|  +--Name |foo|\n"
+      "|  +--ParameterList\n"
+      "|  |  +--BindingNameElement\n"
+      "|  |  |  +--Name |a|\n"
+      "|  |  |  +--ElisionExpression ||\n"
+      "|  |  +--BindingNameElement\n"
+      "|  |  |  +--Name |b|\n"
+      "|  |  |  +--ElisionExpression ||\n"
+      "|  |  +--BindingNameElement\n"
+      "|  |  |  +--Name |c|\n"
+      "|  |  |  +--ElisionExpression ||\n"
+      "|  +--BlockStatement\n"
+      "|  |  +--ExpressionStatement\n"
+      "|  |  |  +--CallExpression\n"
+      "|  |  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  |  +--Name |bar|\n"
+      "|  |  |  |  +--BinaryExpression<+>\n"
+      "|  |  |  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  |  |  +--Name |a|\n"
+      "|  |  |  |  |  +--Punctuator |+|\n"
+      "|  |  |  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  |  |  +--Name |b|\n",
+      Parse("function foo(a, b, c) {\n"
+            "  bar(a + b);\n"
+            "}\n"));
 }
 
 TEST_F(ParserTest, IfStatement) {
-  TEST_PARSER(
-      "if (foo)\n"
-      "  bar;\n");
-  TEST_PARSER(
-      "if (foo)\n"
-      "  bar;\n"
-      "else\n"
-      "  baz;\n");
   EXPECT_EQ(
-      "if (foo)\n"
-      "  foo2;\n"
-      "if (bar)\n"
-      "  bar2;\n",
+      "Module\n"
+      "+--IfStatement\n"
+      "|  +--ReferenceExpression\n"
+      "|  |  +--Name |foo|\n"
+      "|  +--ExpressionStatement\n"
+      "|  |  +--ReferenceExpression\n"
+      "|  |  |  +--Name |bar|\n",
+      Parse("if (foo)\n"
+            "  bar;\n"));
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--IfElseStatement\n"
+      "|  +--ReferenceExpression\n"
+      "|  |  +--Name |foo|\n"
+      "|  +--ExpressionStatement\n"
+      "|  |  +--ReferenceExpression\n"
+      "|  |  |  +--Name |bar|\n"
+      "|  +--ExpressionStatement\n"
+      "|  |  +--ReferenceExpression\n"
+      "|  |  |  +--Name |baz|\n",
+      Parse("if (foo)\n"
+            "  bar;\n"
+            "else\n"
+            "  baz;\n"));
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--IfStatement\n"
+      "|  +--ReferenceExpression\n"
+      "|  |  +--Name |foo|\n"
+      "|  +--ExpressionStatement\n"
+      "|  |  +--ReferenceExpression\n"
+      "|  |  |  +--Name |foo2|\n"
+      "+--IfStatement\n"
+      "|  +--ReferenceExpression\n"
+      "|  |  +--Name |bar|\n"
+      "|  +--ExpressionStatement\n"
+      "|  |  +--ReferenceExpression\n"
+      "|  |  |  +--Name |bar2|\n",
       Parse("if (foo) foo2\n"
             "if (bar) bar2\n"));
 }
 
 TEST_F(ParserTest, LabeledStatement) {
   // There are no label indentation for toplevel label.
-  TEST_PARSER(
-      "label:\n"
-      "foo;\n");
-
-  TEST_PARSER(
-      "{\n"
-      " label:\n"
-      "  foo;\n"
-      "}\n");
+  EXPECT_EQ(
+      "Module\n"
+      "+--LabeledStatement\n"
+      "|  +--ExpressionStatement\n"
+      "|  |  +--ReferenceExpression\n"
+      "|  |  |  +--Name |foo|\n",
+      Parse("label:\n"
+            "foo;\n"));
 
   EXPECT_EQ(
-      "switch (foo) {\n"
-      "  default:\n"
-      "    ;\n"
-      "}\n",
+      "Module\n"
+      "+--BlockStatement\n"
+      "|  +--LabeledStatement\n"
+      "|  |  +--ExpressionStatement\n"
+      "|  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  +--Name |foo|\n",
+      Parse("{\n"
+            " label:\n"
+            "  foo;\n"
+            "}\n"));
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--SwitchStatement\n"
+      "|  +--ReferenceExpression\n"
+      "|  |  +--Name |foo|\n"
+      "|  +--LabeledStatement\n"
+      "|  |  +--EmptyStatement ||\n",
       Parse("switch (foo) {\n"
             "  default:\n"
             "}\n"))
@@ -527,82 +1678,217 @@ TEST_F(ParserTest, LabeledStatement) {
 }
 
 TEST_F(ParserTest, LetStatement) {
-  TEST_PARSER("let foo = 1;\n");
-  TEST_PARSER("let foo = 1, bar;\n");
+  EXPECT_EQ(
+      "Module\n"
+      "+--LetStatement\n"
+      "|  +--BindingNameElement\n"
+      "|  |  +--Name |foo|\n"
+      "|  |  +--NumericLiteral |1|\n",
+      Parse("let foo = 1;\n"));
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--LetStatement\n"
+      "|  +--BindingNameElement\n"
+      "|  |  +--Name |foo|\n"
+      "|  |  +--NumericLiteral |1|\n"
+      "|  +--BindingNameElement\n"
+      "|  |  +--Name |bar|\n"
+      "|  |  +--ElisionExpression ||\n",
+      Parse("let foo = 1, bar;\n"));
 }
 
 TEST_F(ParserTest, ReturnStatement) {
-  TEST_PARSER("return;\n");
-  TEST_PARSER("return 1;\n");
-  TEST_PARSER("return 1, 2;\n");
+  EXPECT_EQ(
+      "Module\n"
+      "+--ReturnStatement\n"
+      "|  +--ElisionExpression ||\n",
+      Parse("return;"))
+      << "We have elision expression for return.";
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--ReturnStatement\n"
+      "|  +--NumericLiteral |1|\n",
+      Parse("return 1;"));
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--ReturnStatement\n"
+      "|  +--CommaExpression\n"
+      "|  |  +--NumericLiteral |1|\n"
+      "|  |  +--NumericLiteral |2|\n",
+      Parse("return 1, 2;"));
 }
 
 TEST_F(ParserTest, SwitchStatement) {
-  TEST_PARSER(
-      "switch (foo) {\n"
-      "  case 1:\n"
-      "    one;\n"
-      "    break;\n"
-      "  case 2:\n"
-      "  case 3:\n"
-      "    two_or_three;\n"
-      "  default:\n"
-      "    others;\n"
-      "}\n");
   EXPECT_EQ(
-      "switch (foo) {\n"
-      "  case 1:\n"
-      "    ;\n"
-      "}\n",
+      "Module\n"
+      "+--SwitchStatement\n"
+      "|  +--ReferenceExpression\n"
+      "|  |  +--Name |foo|\n"
+      "|  +--CaseClause\n"
+      "|  |  +--NumericLiteral |1|\n"
+      "|  |  +--ExpressionStatement\n"
+      "|  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  +--Name |one|\n"
+      "|  +--BreakStatement\n"
+      "|  |  +--Empty ||\n"
+      "|  +--CaseClause\n"
+      "|  |  +--NumericLiteral |2|\n"
+      "|  |  +--CaseClause\n"
+      "|  |  |  +--NumericLiteral |3|\n"
+      "|  |  |  +--ExpressionStatement\n"
+      "|  |  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  |  +--Name |two_or_three|\n"
+      "|  +--LabeledStatement\n"
+      "|  |  +--ExpressionStatement\n"
+      "|  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  +--Name |others|\n",
+      Parse("switch (foo) {\n"
+            "  case 1:\n"
+            "    one;\n"
+            "    break;\n"
+            "  case 2:\n"
+            "  case 3:\n"
+            "    two_or_three;\n"
+            "  default:\n"
+            "    others;\n"
+            "}\n"));
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--SwitchStatement\n"
+      "|  +--ReferenceExpression\n"
+      "|  |  +--Name |foo|\n"
+      "|  +--CaseClause\n"
+      "|  |  +--NumericLiteral |1|\n"
+      "|  |  +--EmptyStatement ||\n",
       Parse("switch (foo) { case 1: }"))
       << "Insert empty statement";
 }
 
 TEST_F(ParserTest, ThrowStatement) {
-  TEST_PARSER("throw foo;\n");
+  EXPECT_EQ(
+      "Module\n"
+      "+--ThrowStatement\n"
+      "|  +--ReferenceExpression\n"
+      "|  |  +--Name |foo|\n",
+      Parse("throw foo;"));
 }
 
 TEST_F(ParserTest, TryStatement) {
-  TEST_PARSER(
-      "try {\n"
-      "  foo;\n"
-      "} catch (bar) {\n"
-      "  baz;\n"
-      "}\n");
+  EXPECT_EQ(
+      "Module\n"
+      "+--TryCatchStatement\n"
+      "|  +--BlockStatement\n"
+      "|  |  +--ExpressionStatement\n"
+      "|  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  +--Name |foo|\n"
+      "|  +--GroupExpression\n"
+      "|  |  +--ReferenceExpression\n"
+      "|  |  |  +--Name |bar|\n"
+      "|  +--BlockStatement\n"
+      "|  |  +--ExpressionStatement\n"
+      "|  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  +--Name |baz|\n",
+      Parse("try {\n"
+            "  foo;\n"
+            "} catch (bar) {\n"
+            "  baz;\n"
+            "}\n"));
 
-  TEST_PARSER(
-      "try {\n"
-      "  foo;\n"
-      "} finally {\n"
-      "  baz;\n"
-      "}\n");
+  EXPECT_EQ(
+      "Module\n"
+      "+--TryFinallyStatement\n"
+      "|  +--BlockStatement\n"
+      "|  |  +--ExpressionStatement\n"
+      "|  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  +--Name |foo|\n"
+      "|  +--BlockStatement\n"
+      "|  |  +--ExpressionStatement\n"
+      "|  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  +--Name |baz|\n",
+      Parse("try {\n"
+            "  foo;\n"
+            "} finally {\n"
+            "  baz;\n"
+            "}\n"));
 
-  TEST_PARSER(
-      "try {\n"
-      "  foo;\n"
-      "} catch (bar) {\n"
-      "  baz;\n"
-      "} finally {\n"
-      "  quux;\n"
-      "}\n");
+  EXPECT_EQ(
+      "Module\n"
+      "+--TryCatchFinallyStatement\n"
+      "|  +--BlockStatement\n"
+      "|  |  +--ExpressionStatement\n"
+      "|  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  +--Name |foo|\n"
+      "|  +--GroupExpression\n"
+      "|  |  +--ReferenceExpression\n"
+      "|  |  |  +--Name |bar|\n"
+      "|  +--BlockStatement\n"
+      "|  |  +--ExpressionStatement\n"
+      "|  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  +--Name |baz|\n"
+      "|  +--BlockStatement\n"
+      "|  |  +--ExpressionStatement\n"
+      "|  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  +--Name |quux|\n",
+      Parse("try {\n"
+            "  foo;\n"
+            "} catch (bar) {\n"
+            "  baz;\n"
+            "} finally {\n"
+            "  quux;\n"
+            "}\n"));
 }
 
 TEST_F(ParserTest, VarStatement) {
-  TEST_PARSER("var foo = 1;\n");
-  TEST_PARSER("var foo = 1, bar;\n");
+  EXPECT_EQ(
+      "Module\n"
+      "+--VarStatement\n"
+      "|  +--BindingNameElement\n"
+      "|  |  +--Name |foo|\n"
+      "|  |  +--NumericLiteral |1|\n",
+      Parse("var foo = 1;\n"));
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--VarStatement\n"
+      "|  +--BindingNameElement\n"
+      "|  |  +--Name |foo|\n"
+      "|  |  +--NumericLiteral |1|\n"
+      "|  +--BindingNameElement\n"
+      "|  |  +--Name |bar|\n"
+      "|  |  +--ElisionExpression ||\n",
+      Parse("var foo = 1, bar;\n"));
 }
 
 TEST_F(ParserTest, WhileStatement) {
-  TEST_PARSER(
-      "while (foo) {\n"
-      "  bar;\n"
-      "}\n");
+  EXPECT_EQ(
+      "Module\n"
+      "+--WhileStatement\n"
+      "|  +--ReferenceExpression\n"
+      "|  |  +--Name |foo|\n"
+      "|  +--BlockStatement\n"
+      "|  |  +--ExpressionStatement\n"
+      "|  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  +--Name |bar|\n",
+      Parse("while (foo) {\n"
+            "  bar;\n"
+            "}\n"));
 }
 
 TEST_F(ParserTest, WithStatement) {
-  TEST_PARSER(
-      "with (foo)\n"
-      "  bar;\n");
+  EXPECT_EQ(
+      "Module\n"
+      "+--WithStatement\n"
+      "|  +--ReferenceExpression\n"
+      "|  |  +--Name |foo|\n"
+      "|  +--ExpressionStatement\n"
+      "|  |  +--ReferenceExpression\n"
+      "|  |  |  +--Name |bar|\n",
+      Parse("with (foo)\n"
+            "  bar;\n"));
 }
 
 // Bindings
@@ -740,28 +2026,42 @@ TEST_F(ParserTest, ParseArrayBindingPattern) {
 
 TEST_F(ParserTest, ParseArrayBindingPatternError) {
   EXPECT_EQ(
-      "#array_pattern\n"
+      "ArrayBindingPattern\n"
+      "+--ElisionExpression ||\n"
       "PASER_ERROR_BRACKET_EXPECT_RBRACKET@0:1\n",
       ToString(ParseBindingElement("[")))
       << "no closing bracket";
 
   EXPECT_EQ(
-      "#array_pattern\n"
-      "+--#binding_name foo\n"
-      "+--#binding_comma\n"
-      "+--#binding_rest\n"
-      "|  +--#binding_name bar\n"
-      "+--#binding_comma\n"
-      "+--#binding_name baz\n"
+      "ArrayBindingPattern\n"
+      "+--ElisionExpression ||\n"
+      "+--BindingNameElement\n"
+      "|  +--Name |foo|\n"
+      "|  +--ElisionExpression ||\n"
+      "+--BindingCommaElement |,|\n"
+      "+--BindingRestElement\n"
+      "|  +--BindingNameElement\n"
+      "|  |  +--Name |bar|\n"
+      "|  |  +--ElisionExpression ||\n"
+      "+--BindingCommaElement |,|\n"
+      "+--BindingNameElement\n"
+      "|  +--Name |baz|\n"
+      "|  +--ElisionExpression ||\n"
       "PASER_ERROR_BINDING_UNEXPECT_REST@6:12\n",
       ToString(ParseBindingElement("[foo, ...bar, baz]")))
       << "rest element should be the last element";
 
   EXPECT_EQ(
-      "#object_pattern\n"
-      "+--#binding_name foo\n"
-      "+--#array_pattern\n"
-      "|  +--#binding_name bar\n"
+      "ObjectBindingPattern\n"
+      "+--ElisionExpression ||\n"
+      "+--BindingNameElement\n"
+      "|  +--Name |foo|\n"
+      "|  +--ElisionExpression ||\n"
+      "+--ArrayBindingPattern\n"
+      "|  +--ElisionExpression ||\n"
+      "|  +--BindingNameElement\n"
+      "|  |  +--Name |bar|\n"
+      "|  |  +--ElisionExpression ||\n"
       "PASER_ERROR_BINDING_EXPECT_COMMA@1:5\n"
       "PASER_ERROR_BRACKET_UNEXPECT_RBRACE@5:11\n"
       "PASER_ERROR_BRACKET_EXPECT_RBRACKET@5:11\n",
@@ -769,10 +2069,15 @@ TEST_F(ParserTest, ParseArrayBindingPatternError) {
       << "Missing right bracket";
 
   EXPECT_EQ(
-      "#array_pattern\n"
-      "+--#binding_name foo\n"
-      "+--#binding_comma\n"
-      "+--#binding_name bar\n"
+      "ArrayBindingPattern\n"
+      "+--ElisionExpression ||\n"
+      "+--BindingNameElement\n"
+      "|  +--Name |foo|\n"
+      "|  +--ElisionExpression ||\n"
+      "+--BindingCommaElement |,|\n"
+      "+--BindingNameElement\n"
+      "|  +--Name |bar|\n"
+      "|  +--ElisionExpression ||\n"
       "PASER_ERROR_BINDING_INVALID_ELEMENT@6:7\n",
       ToString(ParseBindingElement("[foo, = 1, bar]")))
       << "no name before equal";
@@ -795,119 +2100,175 @@ TEST_F(ParserTest, ParseBindingNameElement) {
 }
 
 TEST_F(ParserTest, ParseObjectBindingPattern) {
-  EXPECT_EQ("#object_pattern\n", ToString(ParseBindingElement("{}")))
+  EXPECT_EQ(
+      "ObjectBindingPattern\n"
+      "+--ElisionExpression ||\n",
+      ToString(ParseBindingElement("{}")))
       << "no elements";
 
   EXPECT_EQ(
-      "#object_pattern\n"
-      "+--#binding_name foo\n",
+      "ObjectBindingPattern\n"
+      "+--ElisionExpression ||\n"
+      "+--BindingNameElement\n"
+      "|  +--Name |foo|\n"
+      "|  +--ElisionExpression ||\n",
       ToString(ParseBindingElement("{foo}")))
       << "one element";
 
   EXPECT_EQ(
-      "#object_pattern\n"
-      "+--#binding_name foo\n"
-      "+--1\n",
+      "ObjectBindingPattern\n"
+      "+--NumericLiteral |1|\n"
+      "+--BindingNameElement\n"
+      "|  +--Name |foo|\n"
+      "|  +--ElisionExpression ||\n",
       ToString(ParseBindingElement("{foo} = 1")))
       << "with initializer";
 
   EXPECT_EQ(
-      "#object_pattern\n"
-      "+--#binding_name foo\n"
-      "|  +--1\n",
+      "ObjectBindingPattern\n"
+      "+--ElisionExpression ||\n"
+      "+--BindingNameElement\n"
+      "|  +--Name |foo|\n"
+      "|  +--NumericLiteral |1|\n",
       ToString(ParseBindingElement("{foo = 1}")))
       << "one element with initializer";
 
   EXPECT_EQ(
-      "#object_pattern\n"
-      "+--#binding_property foo\n"
-      "|  +--#binding_name bar\n",
+      "ObjectBindingPattern\n"
+      "+--ElisionExpression ||\n"
+      "+--BindingProperty\n"
+      "|  +--Name |foo|\n"
+      "|  +--BindingNameElement\n"
+      "|  |  +--Name |bar|\n"
+      "|  |  +--ElisionExpression ||\n",
       ToString(ParseBindingElement("{foo: bar}")))
       << "property";
 
   EXPECT_EQ(
-      "#object_pattern\n"
-      "+--#binding_property foo\n"
-      "|  +--#object_pattern\n"
-      "|  |  +--#binding_property bar\n"
-      "|  |  |  +--#array_pattern\n"
-      "|  |  |  |  +--#binding_name baz\n",
+      "ObjectBindingPattern\n"
+      "+--ElisionExpression ||\n"
+      "+--BindingProperty\n"
+      "|  +--Name |foo|\n"
+      "|  +--ObjectBindingPattern\n"
+      "|  |  +--ElisionExpression ||\n"
+      "|  |  +--BindingProperty\n"
+      "|  |  |  +--Name |bar|\n"
+      "|  |  |  +--ArrayBindingPattern\n"
+      "|  |  |  |  +--ElisionExpression ||\n"
+      "|  |  |  |  +--BindingNameElement\n"
+      "|  |  |  |  |  +--Name |baz|\n"
+      "|  |  |  |  |  +--ElisionExpression ||\n",
       ToString(ParseBindingElement("{foo: {bar: [baz]} }")))
       << "nested property";
 
   EXPECT_EQ(
-      "#object_pattern\n"
-      "+--#binding_name foo\n"
-      "+--#binding_comma\n"
-      "+--#binding_name bar\n",
+      "ObjectBindingPattern\n"
+      "+--ElisionExpression ||\n"
+      "+--BindingNameElement\n"
+      "|  +--Name |foo|\n"
+      "|  +--ElisionExpression ||\n"
+      "+--BindingCommaElement |,|\n"
+      "+--BindingNameElement\n"
+      "|  +--Name |bar|\n"
+      "|  +--ElisionExpression ||\n",
       ToString(ParseBindingElement("{foo, bar}")))
       << "two elements";
 
   EXPECT_EQ(
-      "#object_pattern\n"
-      "+--#binding_name foo\n"
-      "+--#binding_comma\n"
-      "+--#binding_name bar\n"
-      "+--#binding_comma\n",
+      "ObjectBindingPattern\n"
+      "+--ElisionExpression ||\n"
+      "+--BindingNameElement\n"
+      "|  +--Name |foo|\n"
+      "|  +--ElisionExpression ||\n"
+      "+--BindingCommaElement |,|\n"
+      "+--BindingNameElement\n"
+      "|  +--Name |bar|\n"
+      "|  +--ElisionExpression ||\n"
+      "+--BindingCommaElement |,|\n",
       ToString(ParseBindingElement("{foo, bar,}")))
       << "two elements with trailing comma";
 
   EXPECT_EQ(
-      "#object_pattern\n"
-      "+--#binding_name foo\n"
-      "+--#binding_comma\n"
-      "+--#binding_name bar\n"
-      "+--#binding_comma\n"
-      "+--#binding_name baz\n",
+      "ObjectBindingPattern\n"
+      "+--ElisionExpression ||\n"
+      "+--BindingNameElement\n"
+      "|  +--Name |foo|\n"
+      "|  +--ElisionExpression ||\n"
+      "+--BindingCommaElement |,|\n"
+      "+--BindingNameElement\n"
+      "|  +--Name |bar|\n"
+      "|  +--ElisionExpression ||\n"
+      "+--BindingCommaElement |,|\n"
+      "+--BindingNameElement\n"
+      "|  +--Name |baz|\n"
+      "|  +--ElisionExpression ||\n",
       ToString(ParseBindingElement("{foo, bar, baz}")))
       << "three elements";
 }
 
 TEST_F(ParserTest, ParseObjectBindingPatternError) {
   EXPECT_EQ(
-      "#object_pattern\n"
-      "+--#binding_comma\n"
+      "ObjectBindingPattern\n"
+      "+--ElisionExpression ||\n"
+      "+--BindingCommaElement |,|\n"
       "PASER_ERROR_BINDING_UNEXPECT_COMMA@1:2\n",
       ToString(ParseBindingElement("{,}")))
       << "only comma";
 
   EXPECT_EQ(
-      "#object_pattern\n"
-      "+--#binding_comma\n"
-      "+--#binding_name foo\n"
+      "ObjectBindingPattern\n"
+      "+--ElisionExpression ||\n"
+      "+--BindingCommaElement |,|\n"
+      "+--BindingNameElement\n"
+      "|  +--Name |foo|\n"
+      "|  +--ElisionExpression ||\n"
       "PASER_ERROR_BINDING_UNEXPECT_COMMA@1:2\n",
       ToString(ParseBindingElement("{, foo}")))
       << "no name before comma";
 
   EXPECT_EQ(
-      "#object_pattern\n"
-      "+--#binding_name foo\n"
-      "+--#binding_name bar\n"
+      "ObjectBindingPattern\n"
+      "+--ElisionExpression ||\n"
+      "+--BindingNameElement\n"
+      "|  +--Name |foo|\n"
+      "|  +--ElisionExpression ||\n"
+      "+--BindingNameElement\n"
+      "|  +--Name |bar|\n"
+      "|  +--ElisionExpression ||\n"
       "PASER_ERROR_BINDING_EXPECT_COMMA@1:5\n",
       ToString(ParseBindingElement("{foo bar}")))
       << "no comma between names";
 
   EXPECT_EQ(
-      "#object_pattern\n"
-      "+--#binding_name foo\n"
-      "|  +--}\n"
+      "ObjectBindingPattern\n"
+      "+--ElisionExpression ||\n"
+      "+--BindingNameElement\n"
+      "|  +--Name |foo|\n"
+      "|  +--Invalid |}|\n"
       "PASER_ERROR_EXPRESSION_INVALID@7:8\n",
       ToString(ParseBindingElement("{foo = }")))
       << "no expression after equal";
 
   EXPECT_EQ(
-      "#object_pattern\n"
-      "+--#binding_property foo\n"
-      "|  +--#binding_invalid\n"
+      "ObjectBindingPattern\n"
+      "+--ElisionExpression ||\n"
+      "+--BindingProperty\n"
+      "|  +--Name |foo|\n"
+      "|  +--BindingInvalidElement |}|\n"
       "PASER_ERROR_BINDING_INVALID_ELEMENT@6:7\n",
       ToString(ParseBindingElement("{foo: }")))
       << "no element after colon";
 
   EXPECT_EQ(
-      "#object_pattern\n"
-      "+--#binding_name foo\n"
-      "+--#binding_comma\n"
-      "+--#binding_name bar\n"
+      "ObjectBindingPattern\n"
+      "+--ElisionExpression ||\n"
+      "+--BindingNameElement\n"
+      "|  +--Name |foo|\n"
+      "|  +--ElisionExpression ||\n"
+      "+--BindingCommaElement |,|\n"
+      "+--BindingNameElement\n"
+      "|  +--Name |bar|\n"
+      "|  +--ElisionExpression ||\n"
       "PASER_ERROR_BINDING_INVALID_ELEMENT@6:7\n",
       ToString(ParseBindingElement("{foo, = 1, bar}")))
       << "no name before equal";

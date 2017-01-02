@@ -463,7 +463,7 @@ const Node& NodeFactory::NewUnaryKeywordExpression(const SourceCodeRange& range,
 }
 
 // JsDoc
-const JsDocDocument& NodeFactory::NewJsDocDocument(
+const Node& NodeFactory::NewJsDocDocument(
     const SourceCodeRange& range,
     const std::vector<const Node*>& nodes) {
   return NewNode(range, syntax_factory_->NewJsDocDocument(), nodes);

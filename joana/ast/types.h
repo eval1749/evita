@@ -5,6 +5,7 @@
 #ifndef JOANA_AST_TYPES_H_
 #define JOANA_AST_TYPES_H_
 
+#include <iosfwd>
 #include <utility>
 #include <vector>
 
@@ -17,13 +18,21 @@ namespace joana {
 namespace ast {
 
 //
-// FunctionKind
+// FunctionTypeKind
 //
+#define FOR_EACH_AST_FUNCTION_TYPE_KIND(V) \
+  V(Normal)                                \
+  V(This)                                  \
+  V(New)
+
 enum class FunctionTypeKind {
-  Normal,
-  This,
-  New,
+#define V(name) name,
+  FOR_EACH_AST_FUNCTION_TYPE_KIND(V)
+#undef V
 };
+
+JOANA_AST_EXPORT std::ostream& operator<<(std::ostream& ostream,
+                                          FunctionTypeKind kind);
 
 DECLARE_AST_SYNTAX_0(AnyType)
 DECLARE_AST_SYNTAX_1(FunctionType, FunctionTypeKind, kind)

@@ -5,6 +5,8 @@
 #ifndef JOANA_AST_TOKENS_H_
 #define JOANA_AST_TOKENS_H_
 
+#include <iosfwd>
+
 #include "joana/ast/node.h"
 
 #include "joana/ast/jsdoc_tags.h"
@@ -14,8 +16,6 @@
 namespace joana {
 namespace ast {
 
-using JsDocDocument = Node;
-
 //
 // PunctuatorKind
 //
@@ -24,6 +24,9 @@ enum class PunctuatorKind {
   FOR_EACH_JAVASCRIPT_PUNCTUATOR(V)
 #undef V
 };
+
+JOANA_AST_EXPORT std::ostream& operator<<(std::ostream& ostream,
+                                          PunctuatorKind kind);
 
 //
 // NameId

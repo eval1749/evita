@@ -33,9 +33,10 @@ ArrayInitializerSyntax::~ArrayInitializerSyntax() = default;
 // AssignmentExpressionSyntax
 //
 AssignmentExpressionSyntax::AssignmentExpressionSyntax(PunctuatorKind kind)
-    : SyntaxTemplate(kind,
-                     SyntaxCode::AssignmentExpression,
-                     Format::Builder().set_arity(3).Build()) {}
+    : SyntaxTemplate(
+          kind,
+          SyntaxCode::AssignmentExpression,
+          Format::Builder().set_arity(3).set_number_of_parameters(1).Build()) {}
 
 AssignmentExpressionSyntax::~AssignmentExpressionSyntax() = default;
 
@@ -58,9 +59,10 @@ const Node& AssignmentExpressionSyntax::RightHandSideOf(const Node& node) {
 // BinaryExpressionSyntax
 //
 BinaryExpressionSyntax::BinaryExpressionSyntax(PunctuatorKind kind)
-    : SyntaxTemplate(kind,
-                     SyntaxCode::BinaryExpression,
-                     Format::Builder().set_arity(3).Build()) {}
+    : SyntaxTemplate(
+          kind,
+          SyntaxCode::BinaryExpression,
+          Format::Builder().set_arity(3).set_number_of_parameters(1).Build()) {}
 
 BinaryExpressionSyntax::~BinaryExpressionSyntax() = default;
 
@@ -83,9 +85,10 @@ const Node& BinaryExpressionSyntax::RightHandSideOf(const Node& node) {
 // BinaryKeywordExpressionSyntax
 //
 BinaryKeywordExpressionSyntax::BinaryKeywordExpressionSyntax(NameId name_id)
-    : SyntaxTemplate(name_id,
-                     SyntaxCode::BinaryKeywordExpression,
-                     Format::Builder().set_arity(3).Build()) {}
+    : SyntaxTemplate(
+          name_id,
+          SyntaxCode::BinaryKeywordExpression,
+          Format::Builder().set_arity(3).set_number_of_parameters(1).Build()) {}
 
 BinaryKeywordExpressionSyntax::~BinaryKeywordExpressionSyntax() = default;
 
@@ -245,9 +248,10 @@ TupleSyntax::~TupleSyntax() = default;
 // UnaryExpressionSyntax
 //
 UnaryExpressionSyntax::UnaryExpressionSyntax(PunctuatorKind kind)
-    : SyntaxTemplate(kind,
-                     SyntaxCode::UnaryExpression,
-                     Format::Builder().set_arity(2).Build()) {}
+    : SyntaxTemplate(
+          kind,
+          SyntaxCode::UnaryExpression,
+          Format::Builder().set_arity(2).set_number_of_parameters(1).Build()) {}
 
 UnaryExpressionSyntax::~UnaryExpressionSyntax() = default;
 
@@ -265,9 +269,10 @@ const Node& UnaryExpressionSyntax::OperatorOf(const Node& node) {
 // UnaryKeywordExpressionSyntax
 //
 UnaryKeywordExpressionSyntax::UnaryKeywordExpressionSyntax(NameId name_id)
-    : SyntaxTemplate(name_id,
-                     SyntaxCode::UnaryKeywordExpression,
-                     Format::Builder().set_arity(2).Build()) {}
+    : SyntaxTemplate(
+          name_id,
+          SyntaxCode::UnaryKeywordExpression,
+          Format::Builder().set_arity(2).set_number_of_parameters(1).Build()) {}
 
 UnaryKeywordExpressionSyntax::~UnaryKeywordExpressionSyntax() = default;
 

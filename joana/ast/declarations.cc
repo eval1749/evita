@@ -13,9 +13,10 @@ namespace ast {
 // ArrowFunctionSyntax
 //
 ArrowFunctionSyntax::ArrowFunctionSyntax(FunctionKind kind)
-    : SyntaxTemplate(kind,
-                     SyntaxCode::ArrowFunction,
-                     Format::Builder().set_arity(2).Build()) {}
+    : SyntaxTemplate(
+          kind,
+          SyntaxCode::ArrowFunction,
+          Format::Builder().set_arity(2).set_number_of_parameters(1).Build()) {}
 
 ArrowFunctionSyntax::~ArrowFunctionSyntax() = default;
 
@@ -58,9 +59,10 @@ const Node& ClassSyntax::NameOf(const Node& node) {
 // FunctionSyntax
 //
 FunctionSyntax::FunctionSyntax(FunctionKind kind)
-    : SyntaxTemplate(kind,
-                     SyntaxCode::Function,
-                     Format::Builder().set_arity(3).Build()) {}
+    : SyntaxTemplate(
+          kind,
+          SyntaxCode::Function,
+          Format::Builder().set_arity(3).set_number_of_parameters(1).Build()) {}
 
 FunctionSyntax::~FunctionSyntax() = default;
 
@@ -83,9 +85,10 @@ const Node& FunctionSyntax::ParametersOf(const Node& node) {
 // MethodSyntax
 //
 MethodSyntax::MethodSyntax(MethodKind method_kind, FunctionKind kind)
-    : SyntaxTemplate(std::make_tuple(method_kind, kind),
-                     SyntaxCode::Method,
-                     Format::Builder().set_arity(3).Build()) {}
+    : SyntaxTemplate(
+          std::make_tuple(method_kind, kind),
+          SyntaxCode::Method,
+          Format::Builder().set_arity(3).set_number_of_parameters(2).Build()) {}
 
 MethodSyntax::~MethodSyntax() = default;
 

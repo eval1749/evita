@@ -114,7 +114,9 @@ SyntaxFactory::~SyntaxFactory() = default;
   const Syntax& SyntaxFactory::New##name() {                    \
     if (const auto* present = cache_->TryGet(SyntaxCode::name)) \
       return *present;                                          \
-    return cache_->Set(*new (&zone_) name##Syntax());           \
+    const auto& new_op = *new (&zone_) name##Syntax();          \
+    DCHECK_EQ(new_op.format().number_of_parameters(), 0);       \
+    return cache_->Set(new_op);                                 \
   }
 
 #define IMPLEMENT_FACTORY_MEMBER_1(name, type1, parameter1)          \
@@ -123,6 +125,7 @@ SyntaxFactory::~SyntaxFactory() = default;
     if (const auto* present = cache_->Find(key))                     \
       return *present;                                               \
     const auto& new_op = *new (&zone_) name##Syntax(parameter1);     \
+    DCHECK_EQ(new_op.format().number_of_parameters(), 1);            \
     return cache_->Register(key, new_op);                            \
   }
 
@@ -133,6 +136,7 @@ SyntaxFactory::~SyntaxFactory() = default;
     if (const auto* present = cache_->Find(key))                               \
       return *present;                                                         \
     const auto& new_op = *new (&zone_) name##Syntax(parameter1, parameter2);   \
+    DCHECK_EQ(new_op.format().number_of_parameters(), 2);                      \
     return cache_->Register(key, new_op);                                      \
   }
 

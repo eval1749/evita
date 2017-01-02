@@ -5,6 +5,8 @@
 #ifndef JOANA_AST_DECLARATIONS_H_
 #define JOANA_AST_DECLARATIONS_H_
 
+#include <iosfwd>
+
 #include "joana/ast/node.h"
 #include "joana/ast/syntax.h"
 #include "joana/ast/syntax_forward.h"
@@ -15,23 +17,39 @@ namespace ast {
 //
 // FunctionKind
 //
+#define FOR_EACH_AST_FUNCTION_KIND(V) \
+  V(Invalid)                          \
+  V(Async)                            \
+  V(Generator)                        \
+  V(Getter)                           \
+  V(Normal)                           \
+  V(Setter)
+
 enum class FunctionKind {
-  Invalid,
-  Async,
-  Generator,
-  Getter,
-  Normal,
-  Setter,
+#define V(name) name,
+  FOR_EACH_AST_FUNCTION_KIND(V)
+#undef V
 };
+
+JOANA_AST_EXPORT std::ostream& operator<<(std::ostream& ostream,
+                                          FunctionKind kind);
 
 //
 // MethodKind
 //
+#define FOR_EACH_AST_METHOD_KIND(V) \
+  V(Constructor)                    \
+  V(NonStatic)                      \
+  V(Static)
+
 enum class MethodKind {
-  Constructor,
-  NonStatic,
-  Static,
+#define V(name) name,
+  FOR_EACH_AST_METHOD_KIND(V)
+#undef V
 };
+
+JOANA_AST_EXPORT std::ostream& operator<<(std::ostream& ostream,
+                                          MethodKind kind);
 
 //
 // ArrowFunctionSyntax
@@ -85,8 +103,15 @@ class JOANA_AST_EXPORT FunctionSyntax final
  public:
   ~FunctionSyntax() final;
 
+  FunctionKind kind() const { return parameter_at<0>(); }
+
+  // Returns |BlockStatement|.
   static const Node& BodyOf(const Node& node);
+
+  // Returns |Name| or |Empty|.
   static const Node& NameOf(const Node& node);
+
+  // Returns |ParameterList| node.
   static const Node& ParametersOf(const Node& node);
 
  private:
@@ -105,8 +130,17 @@ class JOANA_AST_EXPORT MethodSyntax final
  public:
   ~MethodSyntax() final;
 
+  FunctionKind kind() const { return parameter_at<1>(); }
+  MethodKind method_kind() const { return parameter_at<0>(); }
+
+  // Returns |BlockStatement|.
   static const Node& BodyOf(const Node& node);
+
+  // Returns either |ArrayInitializer|, e.g. "[Symbol.foo]" or
+  // |ReferenceExpression|.
   static const Node& NameOf(const Node& node);
+
+  // Returns |ParameterList| node.
   static const Node& ParametersOf(const Node& node);
 
  private:

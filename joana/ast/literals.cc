@@ -17,7 +17,10 @@ namespace ast {
 BooleanLiteralSyntax::BooleanLiteralSyntax(bool value)
     : SyntaxTemplate(value,
                      SyntaxCode::BooleanLiteral,
-                     Format::Builder().set_is_literal(true).Build()) {}
+                     Format::Builder()
+                         .set_is_literal(true)
+                         .set_number_of_parameters(1)
+                         .Build()) {}
 
 BooleanLiteralSyntax::~BooleanLiteralSyntax() = default;
 
@@ -27,7 +30,10 @@ BooleanLiteralSyntax::~BooleanLiteralSyntax() = default;
 NumericLiteralSyntax::NumericLiteralSyntax(float64_t value)
     : SyntaxTemplate(value,
                      SyntaxCode::NumericLiteral,
-                     Format::Builder().set_is_literal(true).Build()) {}
+                     Format::Builder()
+                         .set_is_literal(true)
+                         .set_number_of_parameters(1)
+                         .Build()) {}
 
 NumericLiteralSyntax::~NumericLiteralSyntax() = default;
 

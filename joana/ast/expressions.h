@@ -42,6 +42,8 @@ class JOANA_AST_EXPORT AssignmentExpressionSyntax final
  public:
   ~AssignmentExpressionSyntax() final;
 
+  PunctuatorKind op() const { return parameter_at<0>(); }
+
   static const Node& LeftHandSideOf(const Node& node);
   static const Node& OperatorOf(const Node& node);
   static const Node& RightHandSideOf(const Node& node);
@@ -61,6 +63,8 @@ class JOANA_AST_EXPORT BinaryExpressionSyntax final
 
  public:
   ~BinaryExpressionSyntax() final;
+
+  PunctuatorKind op() const { return parameter_at<0>(); }
 
   static const Node& LeftHandSideOf(const Node& node);
   static const Node& OperatorOf(const Node& node);
@@ -194,6 +198,8 @@ class JOANA_AST_EXPORT UnaryExpressionSyntax final
 
  public:
   ~UnaryExpressionSyntax() final;
+
+  PunctuatorKind op() const { return parameter_at<0>(); }
 
   static const Node& ExpressionOf(const Node& node);
   static const Node& OperatorOf(const Node& node);

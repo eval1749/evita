@@ -525,22 +525,9 @@ const Node& NodeFactory::NewComplementCharSetRegExp(
   return NewNode0(range, syntax_factory_->NewComplementCharSetRegExp());
 }
 
-const Node& NodeFactory::NewGreedyRepeatRegExp(const SourceCodeRange& range,
-                                               const Node& pattern,
-                                               const RegExpRepeat& repeat) {
-  return NewNode1(range, syntax_factory_->NewGreedyRepeatRegExp(repeat),
-                  pattern);
-}
-
 const Node& NodeFactory::NewInvalidRegExp(const SourceCodeRange& range,
                                           int error_code) {
   return NewNode0(range, syntax_factory_->NewInvalidRegExp());
-}
-
-const Node& NodeFactory::NewLazyRepeatRegExp(const SourceCodeRange& range,
-                                             const Node& pattern,
-                                             const RegExpRepeat& repeat) {
-  return NewNode1(range, syntax_factory_->NewLazyRepeatRegExp(repeat), pattern);
 }
 
 const Node& NodeFactory::NewLiteralRegExp(const SourceCodeRange& range) {
@@ -560,6 +547,20 @@ const Node& NodeFactory::NewLookAheadNotRegExp(const SourceCodeRange& range,
 const Node& NodeFactory::NewOrRegExp(const SourceCodeRange& range,
                                      const std::vector<const Node*> patterns) {
   return NewNode(range, syntax_factory_->NewOrRegExp(), patterns);
+}
+
+const Node& NodeFactory::NewRegExpRepeat(const SourceCodeRange& range,
+                                         RegExpRepeatMethod method,
+                                         int min,
+                                         int max) {
+  return NewNode0(range, syntax_factory_->NewRegExpRepeat(method, min, max));
+}
+
+const Node& NodeFactory::NewRepeatRegExp(const SourceCodeRange& range,
+                                         const Node& pattern,
+                                         const Node& repeat) {
+  DCHECK_EQ(repeat, SyntaxCode::RegExpRepeat);
+  return NewNode2(range, syntax_factory_->NewRepeatRegExp(), pattern, repeat);
 }
 
 const Node& NodeFactory::NewSequenceRegExp(

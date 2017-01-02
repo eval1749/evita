@@ -5,6 +5,7 @@
 #include <array>
 #include <map>
 #include <tuple>
+#include <type_traits>
 #include <unordered_map>
 
 #include "joana/ast/syntax_factory.h"
@@ -22,17 +23,32 @@
 namespace joana {
 namespace ast {
 
+template <typename T, bool is_enum = std::is_enum<T>::value>
+struct Normalizer;
+
+template <typename T>
+struct Normalizer<T, true> {
+  using type = typename std::underlying_type<T>::type;
+  static type Normalize(T value) { return static_cast<type>(value); }
+};
+
+template <typename T>
+struct Normalizer<T, false> {
+  static_assert(std::is_arithmetic<T>::value, "Should be arithmetic type");
+  static T Normalize(T value) { return value; }
+};
+
+template <typename T>
+auto Normalize(T value) {
+  return Normalizer<T>::Normalize(value);
+}
+
 // TODO(eval1749): We should convert enum class type to int.
-#define FOR_EACH_PARAMETER(V)              \
-  V(float64, float64_t)                    \
-  V(function_kind, FunctionKind)           \
-  V(function_type_kind, FunctionTypeKind)  \
-  V(method_kind, MethodKind, FunctionKind) \
-  V(name, int)                             \
-  V(name_id, NameId)                       \
-  V(punctuator, PunctuatorKind)            \
-  V(regexp_assetion, RegExpAssertionKind)  \
-  V(regexp_repeat, RegExpRepeat)           \
+#define FOR_EACH_PARAMETER(V)   \
+  V(float64, float64_t)         \
+  V(int, int)                   \
+  V(int_int, int, int)          \
+  V(int_int_int, int, int, int) \
   V(size, size_t)
 
 //
@@ -110,34 +126,36 @@ SyntaxFactory::SyntaxFactory(Zone* zone)
 
 SyntaxFactory::~SyntaxFactory() = default;
 
-#define IMPLEMENT_FACTORY_MEMBER_0(name)                        \
-  const Syntax& SyntaxFactory::New##name() {                    \
-    if (const auto* present = cache_->TryGet(SyntaxCode::name)) \
-      return *present;                                          \
-    const auto& new_op = *new (&zone_) name##Syntax();          \
-    DCHECK_EQ(new_op.format().number_of_parameters(), 0);       \
-    return cache_->Set(new_op);                                 \
-  }
+template <typename SyntaxClass, typename... Parameters>
+const Syntax& SyntaxFactory::NewSyntax(Parameters... parameters) {
+  static_assert(std::is_base_of<Syntax, SyntaxClass>::value,
+                "should be derived from class Syntax.");
+  const auto& key =
+      std::make_tuple(SyntaxClass::kSyntaxCode, Normalize(parameters)...);
+  if (const auto& present = cache_->Find(key))
+    return *present;
+  const auto& new_op = *new (&zone_) SyntaxClass(parameters...);
+  DCHECK_EQ(new_op.format().number_of_parameters(), sizeof...(Parameters));
+  return cache_->Register(key, new_op);
+}
 
-#define IMPLEMENT_FACTORY_MEMBER_1(name, type1, parameter1)          \
-  const Syntax& SyntaxFactory::New##name(type1 parameter1) {         \
-    const auto& key = std::make_tuple(SyntaxCode::name, parameter1); \
-    if (const auto* present = cache_->Find(key))                     \
-      return *present;                                               \
-    const auto& new_op = *new (&zone_) name##Syntax(parameter1);     \
-    DCHECK_EQ(new_op.format().number_of_parameters(), 1);            \
-    return cache_->Register(key, new_op);                            \
-  }
+template <typename SyntaxClass>
+const Syntax& SyntaxFactory::NewSyntax() {
+  static_assert(std::is_base_of<Syntax, SyntaxClass>::value,
+                "should be derived from class Syntax.");
+  if (const auto* present = cache_->TryGet(SyntaxClass::kSyntaxCode))
+    return *present;
+  const auto& new_op = *new (&zone_) SyntaxClass();
+  DCHECK_EQ(new_op.format().number_of_parameters(), 0);
+  return cache_->Set(new_op);
+}
 
-#define IMPLEMENT_FACTORY_MEMBER_2(name, type1, parameter1, type2, parameter2) \
-  const Syntax& SyntaxFactory::New##name(type1 parameter1, type2 parameter2) { \
-    const auto& key =                                                          \
-        std::make_tuple(SyntaxCode::name, parameter1, parameter2);             \
-    if (const auto* present = cache_->Find(key))                               \
-      return *present;                                                         \
-    const auto& new_op = *new (&zone_) name##Syntax(parameter1, parameter2);   \
-    DCHECK_EQ(new_op.format().number_of_parameters(), 2);                      \
-    return cache_->Register(key, new_op);                                      \
+#define IMPLEMENT_FACTORY_MEMBER_0(name) \
+  const Syntax& SyntaxFactory::New##name() { return NewSyntax<name##Syntax>(); }
+
+#define IMPLEMENT_FACTORY_MEMBER_1(name, type1, parameter1)  \
+  const Syntax& SyntaxFactory::New##name(type1 parameter1) { \
+    return NewSyntax<name##Syntax>(parameter1);              \
   }
 
 FOR_EACH_AST_BINDING_ELEMENT(IMPLEMENT_FACTORY_MEMBER_0)
@@ -145,10 +163,18 @@ FOR_EACH_AST_COMPILATION_UNIT(IMPLEMENT_FACTORY_MEMBER_0)
 
 // Declarations
 IMPLEMENT_FACTORY_MEMBER_0(Annotation)
-IMPLEMENT_FACTORY_MEMBER_1(ArrowFunction, FunctionKind, kind)
+
+const Syntax& SyntaxFactory::NewArrowFunction(FunctionKind kind) {
+  return NewSyntax<ArrowFunctionSyntax>(kind);
+}
+
 IMPLEMENT_FACTORY_MEMBER_0(Class)
 IMPLEMENT_FACTORY_MEMBER_1(Function, FunctionKind, kind)
-IMPLEMENT_FACTORY_MEMBER_2(Method, MethodKind, method_kind, FunctionKind, kind)
+
+const Syntax& SyntaxFactory::NewMethod(MethodKind method_kind,
+                                       FunctionKind kind) {
+  return NewSyntax<MethodSyntax>(method_kind, kind);
+}
 
 // Expressions
 IMPLEMENT_FACTORY_MEMBER_0(ArrayInitializer)
@@ -191,15 +217,21 @@ IMPLEMENT_FACTORY_MEMBER_1(AssertionRegExp, RegExpAssertionKind, kind)
 IMPLEMENT_FACTORY_MEMBER_0(CaptureRegExp)
 IMPLEMENT_FACTORY_MEMBER_0(CharSetRegExp)
 IMPLEMENT_FACTORY_MEMBER_0(ComplementCharSetRegExp)
-IMPLEMENT_FACTORY_MEMBER_1(GreedyRepeatRegExp, RegExpRepeat, repeat)
 IMPLEMENT_FACTORY_MEMBER_0(InvalidRegExp)
-IMPLEMENT_FACTORY_MEMBER_1(LazyRepeatRegExp, RegExpRepeat, repeat)
 IMPLEMENT_FACTORY_MEMBER_0(LiteralRegExp)
 IMPLEMENT_FACTORY_MEMBER_0(LookAheadRegExp)
 IMPLEMENT_FACTORY_MEMBER_0(LookAheadNotRegExp)
 IMPLEMENT_FACTORY_MEMBER_0(OrRegExp)
+IMPLEMENT_FACTORY_MEMBER_0(RepeatRegExp)
 IMPLEMENT_FACTORY_MEMBER_0(SequenceRegExp)
 
+const Syntax& SyntaxFactory::NewRegExpRepeat(RegExpRepeatMethod method,
+                                             int min,
+                                             int max) {
+  return NewSyntax<RegExpRepeatSyntax>(method, min, max);
+}
+
+// Statements
 FOR_EACH_AST_STATEMENT(IMPLEMENT_FACTORY_MEMBER_0)
 
 // Tokens

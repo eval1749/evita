@@ -48,7 +48,8 @@ const size_t kNumberOfOperations =
 
 #define DECLARE_CONCRETE_AST_SYNTAX(name, base) \
   DECLARE_AST_SYNTAX(name, base);               \
-  friend class SyntaxFactory;
+  friend class SyntaxFactory;                   \
+  static constexpr auto kSyntaxCode = SyntaxCode::name;
 
 //
 // Syntax
@@ -155,7 +156,7 @@ class SyntaxTemplate : public Base {
 
 #define DECLARE_AST_SYNTAX_0(name)                                            \
   class JOANA_AST_EXPORT name##Syntax final : public SyntaxTemplate<Syntax> { \
-    DECLARE_CONCRETE_AST_SYNTAX(name##Syntax, Syntax);                        \
+    DECLARE_CONCRETE_AST_SYNTAX(name, Syntax);                                \
                                                                               \
    public:                                                                    \
     ~name##Syntax();                                                          \
@@ -169,7 +170,7 @@ class SyntaxTemplate : public Base {
 #define DECLARE_AST_SYNTAX_1(name, type1, parameter1)      \
   class JOANA_AST_EXPORT name##Syntax final                \
       : public SyntaxTemplate<Syntax, type1> {             \
-    DECLARE_CONCRETE_AST_SYNTAX(name##Syntax, Syntax);     \
+    DECLARE_CONCRETE_AST_SYNTAX(name, Syntax);             \
                                                            \
    public:                                                 \
     ~name##Syntax();                                       \
@@ -185,7 +186,7 @@ class SyntaxTemplate : public Base {
 #define DECLARE_AST_SYNTAX_2(name, type1, parameter1, type2, member2) \
   class JOANA_AST_EXPORT name##Syntax final                           \
       : public SyntaxTemplate<Syntax, type1, type2> {                 \
-    DECLARE_CONCRETE_AST_SYNTAX(name##Syntax, Syntax);                \
+    DECLARE_CONCRETE_AST_SYNTAX(name, Syntax);                        \
                                                                       \
    public:                                                            \
     ~name##Syntax();                                                  \

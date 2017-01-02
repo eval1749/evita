@@ -10,6 +10,7 @@
 #include "joana/ast/declarations.h"
 #include "joana/ast/expressions.h"
 #include "joana/ast/lexical_grammar.h"
+#include "joana/ast/regexp.h"
 #include "joana/ast/types.h"
 
 namespace joana {
@@ -51,6 +52,25 @@ std::ostream& operator<<(std::ostream& ostream,
                          const Printable<MethodSyntax>& printable) {
   const auto& syntax = *printable.value;
   return ostream << '<' << syntax.method_kind() << ',' << syntax.kind() << '>';
+}
+
+std::ostream& operator<<(std::ostream& ostream,
+                         const Printable<RegExpRepeatSyntax>& printable) {
+  const auto& syntax = *printable.value;
+  const auto min = syntax.min();
+  const auto max = syntax.max();
+  const auto method = syntax.is_lazy() ? "?" : "";
+  if (min == 0 && max == 1)
+    return ostream << "<?" << method << '>';
+  if (min == 0 && max == kRegExpInfinity)
+    return ostream << "<*" << method << '>';
+  if (min == 1 && max == kRegExpInfinity)
+    return ostream << "<+" << method << '>';
+  if (min == max)
+    return ostream << "<{" << min << '}' << method << '>';
+  if (max == kRegExpInfinity)
+    return ostream << "<{" << min << ",}" << method << '>';
+  return ostream << "<{" << min << ',' << max << '}' << method << '>';
 }
 
 std::ostream& operator<<(std::ostream& ostream,
@@ -128,6 +148,7 @@ std::ostream& operator<<(std::ostream& ostream, const Syntax& syntax) {
   PRINT_PARAMETERS_IF(Function);
   PRINT_PARAMETERS_IF(FunctionType);
   PRINT_PARAMETERS_IF(Method);
+  PRINT_PARAMETERS_IF(RegExpRepeat);
   PRINT_PARAMETERS_IF(UnaryExpression);
 #undef PRINT_PARAMETERS
 

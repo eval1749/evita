@@ -55,7 +55,7 @@ DECLARE_AST_SYNTAX_0(VoidType)
 //
 class JOANA_AST_EXPORT TypeApplicationSyntax final
     : public SyntaxTemplate<Syntax> {
-  DECLARE_CONCRETE_AST_SYNTAX(TypeApplicationSyntax, Syntax);
+  DECLARE_CONCRETE_AST_SYNTAX(TypeApplication, Syntax);
 
  public:
   ~TypeApplicationSyntax() final;

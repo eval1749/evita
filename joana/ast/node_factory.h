@@ -210,7 +210,7 @@ class JOANA_AST_EXPORT NodeFactory final {
 
   const Node& NewUndefinedLiteral(const Node& name);
 
-  // Node
+  // RegExp
   const Node& NewAnyCharRegExp(const SourceCodeRange& range);
 
   const Node& NewAssertionRegExp(const SourceCodeRange& range,
@@ -223,15 +223,7 @@ class JOANA_AST_EXPORT NodeFactory final {
 
   const Node& NewComplementCharSetRegExp(const SourceCodeRange& range);
 
-  const Node& NewGreedyRepeatRegExp(const SourceCodeRange& range,
-                                    const Node& pattern,
-                                    const RegExpRepeat& repeat);
-
   const Node& NewInvalidRegExp(const SourceCodeRange& range, int error_code);
-
-  const Node& NewLazyRepeatRegExp(const SourceCodeRange& range,
-                                  const Node& pattern,
-                                  const RegExpRepeat& repeat);
 
   const Node& NewLiteralRegExp(const SourceCodeRange& range);
 
@@ -243,6 +235,15 @@ class JOANA_AST_EXPORT NodeFactory final {
 
   const Node& NewOrRegExp(const SourceCodeRange& range,
                           const std::vector<const Node*> patterns);
+
+  const Node& NewRegExpRepeat(const SourceCodeRange& range,
+                              RegExpRepeatMethod method,
+                              int min,
+                              int max);
+
+  const Node& NewRepeatRegExp(const SourceCodeRange& range,
+                              const Node& pattern,
+                              const Node& repeat);
 
   const Node& NewSequenceRegExp(const SourceCodeRange& range,
                                 const std::vector<const Node*> patterns);

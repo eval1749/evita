@@ -61,7 +61,7 @@ DECLARE_AST_SYNTAX_1(Invalid, int, error_code)
 // NameSyntax
 //
 class JOANA_AST_EXPORT NameSyntax final : public SyntaxTemplate<Syntax, int> {
-  DECLARE_CONCRETE_AST_SYNTAX(NameSyntax, Syntax);
+  DECLARE_CONCRETE_AST_SYNTAX(Name, Syntax);
 
  public:
   ~NameSyntax() final;
@@ -82,7 +82,7 @@ class JOANA_AST_EXPORT NameSyntax final : public SyntaxTemplate<Syntax, int> {
 //
 class JOANA_AST_EXPORT PunctuatorSyntax final
     : public SyntaxTemplate<Syntax, PunctuatorKind> {
-  DECLARE_CONCRETE_AST_SYNTAX(PunctuatorSyntax, Syntax);
+  DECLARE_CONCRETE_AST_SYNTAX(Punctuator, Syntax);
 
  public:
   ~PunctuatorSyntax() final;
@@ -102,7 +102,7 @@ class JOANA_AST_EXPORT PunctuatorSyntax final
 //
 class JOANA_AST_EXPORT RegExpSourceSyntax final
     : public SyntaxTemplate<Syntax> {
-  DECLARE_CONCRETE_AST_SYNTAX(RegExpSourceSyntax, Syntax);
+  DECLARE_CONCRETE_AST_SYNTAX(RegExpSource, Syntax);
 
  public:
   ~RegExpSourceSyntax() final;

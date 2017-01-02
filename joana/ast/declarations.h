@@ -55,7 +55,7 @@ JOANA_AST_EXPORT std::ostream& operator<<(std::ostream& ostream,
 // AnnotationSyntax
 //
 class JOANA_AST_EXPORT AnnotationSyntax final : public SyntaxTemplate<Syntax> {
-  DECLARE_CONCRETE_AST_SYNTAX(AnnotationSyntax, Syntax);
+  DECLARE_CONCRETE_AST_SYNTAX(Annotation, Syntax);
 
  public:
   ~AnnotationSyntax() final;
@@ -74,7 +74,7 @@ class JOANA_AST_EXPORT AnnotationSyntax final : public SyntaxTemplate<Syntax> {
 //
 class JOANA_AST_EXPORT ArrowFunctionSyntax final
     : public SyntaxTemplate<Syntax, FunctionKind> {
-  DECLARE_CONCRETE_AST_SYNTAX(ArrowFunctionSyntax, Syntax);
+  DECLARE_CONCRETE_AST_SYNTAX(ArrowFunction, Syntax);
 
  public:
   ~ArrowFunctionSyntax() final;
@@ -96,7 +96,7 @@ class JOANA_AST_EXPORT ArrowFunctionSyntax final
 // ClassSyntax
 //
 class JOANA_AST_EXPORT ClassSyntax final : public SyntaxTemplate<Syntax> {
-  DECLARE_CONCRETE_AST_SYNTAX(ClassSyntax, Syntax);
+  DECLARE_CONCRETE_AST_SYNTAX(Class, Syntax);
 
  public:
   ~ClassSyntax() final;
@@ -116,7 +116,7 @@ class JOANA_AST_EXPORT ClassSyntax final : public SyntaxTemplate<Syntax> {
 //
 class JOANA_AST_EXPORT FunctionSyntax final
     : public SyntaxTemplate<Syntax, FunctionKind> {
-  DECLARE_CONCRETE_AST_SYNTAX(FunctionSyntax, Syntax);
+  DECLARE_CONCRETE_AST_SYNTAX(Function, Syntax);
 
  public:
   ~FunctionSyntax() final;
@@ -143,7 +143,7 @@ class JOANA_AST_EXPORT FunctionSyntax final
 //
 class JOANA_AST_EXPORT MethodSyntax final
     : public SyntaxTemplate<Syntax, MethodKind, FunctionKind> {
-  DECLARE_CONCRETE_AST_SYNTAX(MethodSyntax, Syntax);
+  DECLARE_CONCRETE_AST_SYNTAX(Method, Syntax);
 
  public:
   ~MethodSyntax() final;

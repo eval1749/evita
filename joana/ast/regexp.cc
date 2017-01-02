@@ -14,35 +14,11 @@ IMPLEMENT_AST_SYNTAX_1(RegExp, AssertionRegExp, 0, RegExpAssertionKind, kind)
 IMPLEMENT_AST_SYNTAX_0(RegExp, CaptureRegExp, 1)
 IMPLEMENT_AST_SYNTAX_0(RegExp, CharSetRegExp, 0)
 IMPLEMENT_AST_SYNTAX_0(RegExp, ComplementCharSetRegExp, 0)
-IMPLEMENT_AST_SYNTAX_1(RegExp, GreedyRepeatRegExp, 1, RegExpRepeat, repeat)
 IMPLEMENT_AST_SYNTAX_0(RegExp, InvalidRegExp, 0)
-IMPLEMENT_AST_SYNTAX_1(RegExp, LazyRepeatRegExp, 1, RegExpRepeat, repeat)
 IMPLEMENT_AST_SYNTAX_0(RegExp, LiteralRegExp, 0)
 IMPLEMENT_AST_SYNTAX_0(RegExp, LookAheadRegExp, 1)
 IMPLEMENT_AST_SYNTAX_0(RegExp, LookAheadNotRegExp, 1)
-
-//
-// RegExpRepeat
-//
-bool operator<(const RegExpRepeat& repeat1, const RegExpRepeat& repeat2) {
-  if (repeat1.min != repeat2.min)
-    return repeat1.min < repeat2.min;
-  return repeat1.max < repeat2.max;
-}
-
-std::ostream& operator<<(std::ostream& ostream, const RegExpRepeat& repeat) {
-  if (repeat.min == 0 && repeat.max == 1)
-    return ostream << '?';
-  if (repeat.min == 0 && repeat.max == ast::RegExpRepeat::kInfinity)
-    return ostream << '*';
-  if (repeat.min == 1 && repeat.max == ast::RegExpRepeat::kInfinity)
-    return ostream << '+';
-  if (repeat.min == repeat.max)
-    return ostream << '{' << repeat.min << '}';
-  if (repeat.max == ast::RegExpRepeat::kInfinity)
-    return ostream << '{' << repeat.min << ",}";
-  return ostream << '{' << repeat.min << ',' << repeat.max << '}';
-}
+IMPLEMENT_AST_SYNTAX_0(RegExp, RepeatRegExp, 2)
 
 //
 // OrRegExpSyntax
@@ -53,6 +29,18 @@ OrRegExpSyntax::OrRegExpSyntax()
                      Format::Builder().set_is_variadic(true).Build()) {}
 
 OrRegExpSyntax::~OrRegExpSyntax() = default;
+
+//
+// RegExpRepeatSyntax
+//
+RegExpRepeatSyntax::RegExpRepeatSyntax(RegExpRepeatMethod method,
+                                       int min,
+                                       int max)
+    : SyntaxTemplate(std::make_tuple(method, min, max),
+                     SyntaxCode::RegExpRepeat,
+                     Format::Builder().set_number_of_parameters(3).Build()) {}
+
+RegExpRepeatSyntax::~RegExpRepeatSyntax() = default;
 
 //
 // SequenceRegExpSyntax

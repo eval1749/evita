@@ -43,7 +43,7 @@ DECLARE_AST_SYNTAX_0(WithStatement)
 //
 class JOANA_AST_EXPORT SwitchStatementSyntax final
     : public SyntaxTemplate<Syntax> {
-  DECLARE_CONCRETE_AST_SYNTAX(SwitchStatementSyntax, Syntax);
+  DECLARE_CONCRETE_AST_SYNTAX(SwitchStatement, Syntax);
 
  public:
   ~SwitchStatementSyntax() final;

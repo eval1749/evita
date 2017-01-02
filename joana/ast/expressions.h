@@ -20,7 +20,6 @@ class ChildNodes;
 class Node;
 
 DECLARE_AST_SYNTAX_0(ArrayInitializer)
-DECLARE_AST_SYNTAX_0(AwaitExpression)
 DECLARE_AST_SYNTAX_0(CommaExpression)
 DECLARE_AST_SYNTAX_0(ComputedMemberExpression)
 DECLARE_AST_SYNTAX_0(ConditionalExpression)
@@ -37,7 +36,7 @@ DECLARE_AST_SYNTAX_0(Tuple);
 //
 class JOANA_AST_EXPORT AssignmentExpressionSyntax final
     : public SyntaxTemplate<Syntax, PunctuatorKind> {
-  DECLARE_CONCRETE_AST_SYNTAX(AssignmentExpressionSyntax, Syntax);
+  DECLARE_CONCRETE_AST_SYNTAX(AssignmentExpression, Syntax);
 
  public:
   ~AssignmentExpressionSyntax() final;
@@ -59,7 +58,7 @@ class JOANA_AST_EXPORT AssignmentExpressionSyntax final
 //
 class JOANA_AST_EXPORT BinaryExpressionSyntax final
     : public SyntaxTemplate<Syntax, PunctuatorKind> {
-  DECLARE_CONCRETE_AST_SYNTAX(BinaryExpressionSyntax, Syntax);
+  DECLARE_CONCRETE_AST_SYNTAX(BinaryExpression, Syntax);
 
  public:
   ~BinaryExpressionSyntax() final;
@@ -81,7 +80,7 @@ class JOANA_AST_EXPORT BinaryExpressionSyntax final
 //
 class JOANA_AST_EXPORT BinaryKeywordExpressionSyntax final
     : public SyntaxTemplate<Syntax, NameId> {
-  DECLARE_CONCRETE_AST_SYNTAX(BinaryKeywordExpressionSyntax, Syntax);
+  DECLARE_CONCRETE_AST_SYNTAX(BinaryKeywordExpression, Syntax);
 
  public:
   ~BinaryKeywordExpressionSyntax() final;
@@ -101,7 +100,7 @@ class JOANA_AST_EXPORT BinaryKeywordExpressionSyntax final
 //
 class JOANA_AST_EXPORT CallExpressionSyntax final
     : public SyntaxTemplate<Syntax> {
-  DECLARE_CONCRETE_AST_SYNTAX(CallExpressionSyntax, Syntax);
+  DECLARE_CONCRETE_AST_SYNTAX(CallExpression, Syntax);
 
  public:
   ~CallExpressionSyntax() final;
@@ -120,7 +119,7 @@ class JOANA_AST_EXPORT CallExpressionSyntax final
 //
 class JOANA_AST_EXPORT NewExpressionSyntax final
     : public SyntaxTemplate<Syntax> {
-  DECLARE_CONCRETE_AST_SYNTAX(NewExpressionSyntax, Syntax);
+  DECLARE_CONCRETE_AST_SYNTAX(NewExpression, Syntax);
 
  public:
   ~NewExpressionSyntax() final;
@@ -138,7 +137,7 @@ class JOANA_AST_EXPORT NewExpressionSyntax final
 // PropertySyntax
 //
 class JOANA_AST_EXPORT PropertySyntax final : public SyntaxTemplate<Syntax> {
-  DECLARE_CONCRETE_AST_SYNTAX(PropertySyntax, Syntax);
+  DECLARE_CONCRETE_AST_SYNTAX(Property, Syntax);
 
  public:
   ~PropertySyntax() final;
@@ -157,7 +156,7 @@ class JOANA_AST_EXPORT PropertySyntax final : public SyntaxTemplate<Syntax> {
 //
 class JOANA_AST_EXPORT ReferenceExpressionSyntax final
     : public SyntaxTemplate<Syntax> {
-  DECLARE_CONCRETE_AST_SYNTAX(ReferenceExpressionSyntax, Syntax);
+  DECLARE_CONCRETE_AST_SYNTAX(ReferenceExpression, Syntax);
 
  public:
   ~ReferenceExpressionSyntax() final;
@@ -175,7 +174,7 @@ class JOANA_AST_EXPORT ReferenceExpressionSyntax final
 //
 class JOANA_AST_EXPORT RegExpLiteralExpressionSyntax final
     : public SyntaxTemplate<Syntax> {
-  DECLARE_CONCRETE_AST_SYNTAX(RegExpLiteralExpressionSyntax, Syntax);
+  DECLARE_CONCRETE_AST_SYNTAX(RegExpLiteralExpression, Syntax);
 
  public:
   ~RegExpLiteralExpressionSyntax() final;
@@ -194,7 +193,7 @@ class JOANA_AST_EXPORT RegExpLiteralExpressionSyntax final
 //
 class JOANA_AST_EXPORT UnaryExpressionSyntax final
     : public SyntaxTemplate<Syntax, PunctuatorKind> {
-  DECLARE_CONCRETE_AST_SYNTAX(UnaryExpressionSyntax, Syntax);
+  DECLARE_CONCRETE_AST_SYNTAX(UnaryExpression, Syntax);
 
  public:
   ~UnaryExpressionSyntax() final;
@@ -215,7 +214,7 @@ class JOANA_AST_EXPORT UnaryExpressionSyntax final
 //
 class JOANA_AST_EXPORT UnaryKeywordExpressionSyntax final
     : public SyntaxTemplate<Syntax, NameId> {
-  DECLARE_CONCRETE_AST_SYNTAX(UnaryKeywordExpressionSyntax, Syntax);
+  DECLARE_CONCRETE_AST_SYNTAX(UnaryKeywordExpression, Syntax);
 
  public:
   ~UnaryKeywordExpressionSyntax() final;

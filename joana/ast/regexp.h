@@ -44,35 +44,45 @@ enum class RegExpAssertionKind {
 #undef V
 };
 
-//
-// RegExpRepeat
-//
-struct JOANA_AST_EXPORT RegExpRepeat {
-  static constexpr auto kInfinity = std::numeric_limits<int>::max();
-
-  int min = 0;
-  int max = 0;
+enum class RegExpRepeatMethod {
+  Greedy,
+  Lazy,
 };
 
-JOANA_AST_EXPORT bool operator<(const RegExpRepeat& repeat1,
-                                const RegExpRepeat& repeat2);
-
-JOANA_AST_EXPORT std::ostream& operator<<(std::ostream& ostream,
-                                          const RegExpRepeat& repeat);
+constexpr auto kRegExpInfinity = std::numeric_limits<int>::max();
 
 DECLARE_AST_SYNTAX_0(AnyCharRegExp)
 DECLARE_AST_SYNTAX_1(AssertionRegExp, RegExpAssertionKind, kind)
 DECLARE_AST_SYNTAX_0(CaptureRegExp)
 DECLARE_AST_SYNTAX_0(CharSetRegExp)
 DECLARE_AST_SYNTAX_0(ComplementCharSetRegExp)
-DECLARE_AST_SYNTAX_1(GreedyRepeatRegExp, RegExpRepeat, repeat)
 DECLARE_AST_SYNTAX_0(InvalidRegExp)
-DECLARE_AST_SYNTAX_1(LazyRepeatRegExp, RegExpRepeat, repeat)
 DECLARE_AST_SYNTAX_0(LiteralRegExp)
 DECLARE_AST_SYNTAX_0(LookAheadRegExp)
 DECLARE_AST_SYNTAX_0(LookAheadNotRegExp)
 DECLARE_AST_SYNTAX_0(OrRegExp)
+DECLARE_AST_SYNTAX_0(RepeatRegExp)
 DECLARE_AST_SYNTAX_0(SequenceRegExp)
+
+//
+// RegExpRepeatSyntax
+//
+class JOANA_AST_EXPORT RegExpRepeatSyntax final
+    : public SyntaxTemplate<Syntax, RegExpRepeatMethod, int, int> {
+  DECLARE_CONCRETE_AST_SYNTAX(RegExpRepeat, Syntax);
+
+ public:
+  ~RegExpRepeatSyntax() final;
+
+  bool is_lazy() const { return parameter_at<0>() == RegExpRepeatMethod::Lazy; }
+  int max() const { return parameter_at<2>(); }
+  int min() const { return parameter_at<1>(); }
+
+ private:
+  RegExpRepeatSyntax(RegExpRepeatMethod mode, int min, int max);
+
+  DISALLOW_COPY_AND_ASSIGN(RegExpRepeatSyntax);
+};
 
 }  // namespace ast
 }  // namespace joana

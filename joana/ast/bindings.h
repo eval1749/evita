@@ -24,7 +24,7 @@ DECLARE_AST_SYNTAX_0(BindingRestElement)
 //
 class JOANA_AST_EXPORT ArrayBindingPatternSyntax final
     : public SyntaxTemplate<Syntax> {
-  DECLARE_CONCRETE_AST_SYNTAX(ArrayBindingPatternSyntax, Syntax);
+  DECLARE_CONCRETE_AST_SYNTAX(ArrayBindingPattern, Syntax);
 
  public:
   ~ArrayBindingPatternSyntax() final;
@@ -43,7 +43,7 @@ class JOANA_AST_EXPORT ArrayBindingPatternSyntax final
 //
 class JOANA_AST_EXPORT ObjectBindingPatternSyntax final
     : public SyntaxTemplate<Syntax> {
-  DECLARE_CONCRETE_AST_SYNTAX(ObjectBindingPatternSyntax, Syntax);
+  DECLARE_CONCRETE_AST_SYNTAX(ObjectBindingPattern, Syntax);
 
  public:
   ~ObjectBindingPatternSyntax() final;

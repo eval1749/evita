@@ -70,13 +70,13 @@ namespace ast {
   V(CaptureRegExp)             \
   V(CharSetRegExp)             \
   V(ComplementCharSetRegExp)   \
-  V(GreedyRepeatRegExp)        \
   V(InvalidRegExp)             \
-  V(LazyRepeatRegExp)          \
   V(LiteralRegExp)             \
   V(LookAheadRegExp)           \
   V(LookAheadNotRegExp)        \
   V(OrRegExp)                  \
+  V(RegExpRepeat)              \
+  V(RepeatRegExp)              \
   V(SequenceRegExp)
 
 #define FOR_EACH_AST_STATEMENT(V) \
@@ -151,6 +151,7 @@ enum class NameId;
 enum class RegExpAssertionKind;
 struct RegExpRepeat;
 enum class PunctuatorKind;
+enum class RegExpRepeatMethod;
 enum class SyntaxCode;
 class Syntax;
 

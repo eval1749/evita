@@ -21,7 +21,7 @@ class Node;
 //
 class JOANA_AST_EXPORT JsDocDocumentSyntax final
     : public SyntaxTemplate<Syntax> {
-  DECLARE_CONCRETE_AST_SYNTAX(JsDocDocumentSyntax, Syntax);
+  DECLARE_CONCRETE_AST_SYNTAX(JsDocDocument, Syntax);
 
  public:
   ~JsDocDocumentSyntax() final;
@@ -36,7 +36,7 @@ class JOANA_AST_EXPORT JsDocDocumentSyntax final
 // JsDocTagSyntax
 //
 class JOANA_AST_EXPORT JsDocTagSyntax final : public SyntaxTemplate<Syntax> {
-  DECLARE_CONCRETE_AST_SYNTAX(JsDocTagSyntax, Syntax);
+  DECLARE_CONCRETE_AST_SYNTAX(JsDocTag, Syntax);
 
  public:
   ~JsDocTagSyntax() final;
@@ -54,7 +54,7 @@ class JOANA_AST_EXPORT JsDocTagSyntax final : public SyntaxTemplate<Syntax> {
 // JsDocTextSyntax
 //
 class JOANA_AST_EXPORT JsDocTextSyntax final : public SyntaxTemplate<Syntax> {
-  DECLARE_CONCRETE_AST_SYNTAX(JsDocTextSyntax, Syntax);
+  DECLARE_CONCRETE_AST_SYNTAX(JsDocText, Syntax);
 
  public:
   ~JsDocTextSyntax() final;

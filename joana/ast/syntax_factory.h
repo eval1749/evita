@@ -80,14 +80,14 @@ class JOANA_AST_EXPORT SyntaxFactory final {
   DECLARE_FACTORY_MEMBER_0(CaptureRegExp)
   DECLARE_FACTORY_MEMBER_0(CharSetRegExp)
   DECLARE_FACTORY_MEMBER_0(ComplementCharSetRegExp)
-  DECLARE_FACTORY_MEMBER_1(GreedyRepeatRegExp, RegExpRepeat, repeat)
   DECLARE_FACTORY_MEMBER_0(InvalidRegExp)
-  DECLARE_FACTORY_MEMBER_1(LazyRepeatRegExp, RegExpRepeat, repeat)
   DECLARE_FACTORY_MEMBER_0(LiteralRegExp)
   DECLARE_FACTORY_MEMBER_0(LookAheadRegExp)
   DECLARE_FACTORY_MEMBER_0(LookAheadNotRegExp)
   DECLARE_FACTORY_MEMBER_0(OrRegExp)
+  const Syntax& NewRepeatRegExp();
   DECLARE_FACTORY_MEMBER_0(SequenceRegExp)
+  const Syntax& NewRegExpRepeat(RegExpRepeatMethod method, int min, int max);
 
   // Tokens
   DECLARE_FACTORY_MEMBER_0(Comment)
@@ -121,6 +121,12 @@ class JOANA_AST_EXPORT SyntaxFactory final {
 
  private:
   class Cache;
+
+  template <typename SyntaxClass>
+  const Syntax& NewSyntax();
+
+  template <typename SyntaxClass, typename... Parameters>
+  const Syntax& NewSyntax(Parameters... parameters);
 
   Zone& zone_;
 

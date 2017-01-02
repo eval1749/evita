@@ -23,17 +23,7 @@ namespace ast {
   V(NUMERIC_LITERAL, INTEGER_OVERFLOW)   \
   V(NUMERIC_LITERAL, PREFIX_ZERO)        \
   V(PUNCTUATOR, DOT_DOT)                 \
-  V(REGEXP, EXPECT_CHAR)                 \
-  V(REGEXP, EXPECT_PATTERN)              \
-  V(REGEXP, EXPECT_PRIMARY)              \
-  V(REGEXP, EXPECT_RBRACE)               \
-  V(REGEXP, EXPECT_RBRACKET)             \
-  V(REGEXP, EXPECT_RPAREN)               \
   V(REGEXP, EXPECT_SLASH)                \
-  V(REGEXP, INVALID_GROUPING)            \
-  V(REGEXP, INVALID_NUMBER)              \
-  V(REGEXP, INVALID_OR)                  \
-  V(REGEXP, INVALID_REPEAT)              \
   V(STRING_LITERAL, BACKSLASH)           \
   V(STRING_LITERAL, BACKSLASH_HEX_DIGIT) \
   V(STRING_LITERAL, BACKSLASH_UNICODE)   \
@@ -44,6 +34,19 @@ namespace ast {
   V(JSDOC, EXPECT_LBRACE)            \
   V(JSDOC, EXPECT_RBRACE)            \
   V(JSDOC, UNKNOWN_TAG)
+
+#define FOR_EACH_REGEXP_ERROR_CODE(V) \
+  V(REGEXP, EXPECT_CHAR)              \
+  V(REGEXP, EXPECT_PATTERN)           \
+  V(REGEXP, EXPECT_PRIMARY)           \
+  V(REGEXP, EXPECT_RBRACE)            \
+  V(REGEXP, EXPECT_RBRACKET)          \
+  V(REGEXP, EXPECT_RPAREN)            \
+  V(REGEXP, INVALID_DOLLAR)           \
+  V(REGEXP, INVALID_GROUPING)         \
+  V(REGEXP, INVALID_NUMBER)           \
+  V(REGEXP, INVALID_OR)               \
+  V(REGEXP, INVALID_REPEAT)
 
 #define FOR_EACH_PARSER_ERROR_CODE(V)        \
   V(BINDING, EXPECT_COMMA)                   \
@@ -116,9 +119,10 @@ namespace ast {
   V(TYPE, UNEXPECT_RPAREN)
 
 const auto kLexerErrorCodeBase = 10000;
-const auto kParserErrorCodeBase = 20000;
-const auto kJsDocErrorCodeBase = 30000;
-const auto kTypeErrorCodeBase = 40000;
+const auto kJsDocErrorCodeBase = 11000;
+const auto kParserErrorCodeBase = 12000;
+const auto kTypeErrorCodeBase = 13000;
+const auto kRegExpErrorCodeBase = 20000;
 
 JOANA_AST_EXPORT base::StringPiece ErrorStringOf(int error_code);
 

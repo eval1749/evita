@@ -111,6 +111,7 @@ namespace ast {
   V(Empty)                    \
   V(Invalid)                  \
   V(Punctuator)               \
+  V(RegExpSource)             \
   V(Name)
 
 #define FOR_EACH_AST_TYPE(V) \

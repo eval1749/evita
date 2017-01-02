@@ -221,6 +221,10 @@ const Node& NodeFactory::NewPunctuator(const SourceCodeRange& range,
   return NewNode0(range, syntax_factory_->NewPunctuator(kind));
 }
 
+const Node& NodeFactory::NewRegExpSource(const SourceCodeRange& range) {
+  return NewNode0(range, syntax_factory_->NewRegExpSource());
+}
+
 // Bindings
 const Node& NodeFactory::NewArrayBindingPattern(
     const SourceCodeRange& range,

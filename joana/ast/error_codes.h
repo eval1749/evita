@@ -29,6 +29,7 @@ namespace ast {
   V(REGEXP, EXPECT_RBRACE)               \
   V(REGEXP, EXPECT_RBRACKET)             \
   V(REGEXP, EXPECT_RPAREN)               \
+  V(REGEXP, EXPECT_SLASH)                \
   V(REGEXP, INVALID_GROUPING)            \
   V(REGEXP, INVALID_NUMBER)              \
   V(REGEXP, INVALID_OR)                  \

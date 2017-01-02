@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <string>
+#include <tuple>
 
 #include "joana/ast/tokens.h"
 
@@ -33,6 +33,16 @@ bool NameSyntax::IsKeyword(const Node& node) {
   return number > static_cast<int>(NameId::StartOfKeyword) &&
          number < static_cast<int>(NameId::EndOfKeyword);
 }
+
+//
+// RegExpSourceSyntax
+//
+RegExpSourceSyntax::RegExpSourceSyntax()
+    : SyntaxTemplate(std::tuple<>(),
+                     SyntaxCode::RegExpSource,
+                     Syntax::Format()) {}
+
+RegExpSourceSyntax::~RegExpSourceSyntax() = default;
 
 }  // namespace ast
 }  // namespace joana

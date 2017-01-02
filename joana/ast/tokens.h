@@ -58,6 +58,26 @@ DECLARE_AST_SYNTAX_0(Empty)
 DECLARE_AST_SYNTAX_1(Invalid, int, error_code)
 
 //
+// NameSyntax
+//
+class JOANA_AST_EXPORT NameSyntax final : public SyntaxTemplate<Syntax, int> {
+  DECLARE_CONCRETE_AST_SYNTAX(NameSyntax, Syntax);
+
+ public:
+  ~NameSyntax() final;
+
+  int number() const { return parameter_at<0>(); }
+
+  static int IdOf(const Node& node);
+  static bool IsKeyword(const Node& node);
+
+ private:
+  explicit NameSyntax(int number);
+
+  DISALLOW_COPY_AND_ASSIGN(NameSyntax);
+};
+
+//
 // PunctuatorSyntax
 //
 class JOANA_AST_EXPORT PunctuatorSyntax final
@@ -78,23 +98,19 @@ class JOANA_AST_EXPORT PunctuatorSyntax final
 };
 
 //
-// NameSyntax
+// RegExpSourceSyntax
 //
-class JOANA_AST_EXPORT NameSyntax final : public SyntaxTemplate<Syntax, int> {
-  DECLARE_CONCRETE_AST_SYNTAX(NameSyntax, Syntax);
+class JOANA_AST_EXPORT RegExpSourceSyntax final
+    : public SyntaxTemplate<Syntax> {
+  DECLARE_CONCRETE_AST_SYNTAX(RegExpSourceSyntax, Syntax);
 
  public:
-  ~NameSyntax() final;
-
-  int number() const { return parameter_at<0>(); }
-
-  static int IdOf(const Node& node);
-  static bool IsKeyword(const Node& node);
+  ~RegExpSourceSyntax() final;
 
  private:
-  explicit NameSyntax(int number);
+  RegExpSourceSyntax();
 
-  DISALLOW_COPY_AND_ASSIGN(NameSyntax);
+  DISALLOW_COPY_AND_ASSIGN(RegExpSourceSyntax);
 };
 
 }  // namespace ast

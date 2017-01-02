@@ -93,9 +93,9 @@ class JOANA_AST_EXPORT SyntaxFactory final {
   DECLARE_FACTORY_MEMBER_0(Comment)
   DECLARE_FACTORY_MEMBER_0(Empty)
   DECLARE_FACTORY_MEMBER_1(Invalid, int, error_code)
-  DECLARE_FACTORY_MEMBER_0(JsDocToken)
   DECLARE_FACTORY_MEMBER_1(Punctuator, PunctuatorKind, kind)
   DECLARE_FACTORY_MEMBER_1(Name, int, number)
+  DECLARE_FACTORY_MEMBER_0(RegExpSource)
 
   // Types
   DECLARE_FACTORY_MEMBER_0(AnyType)

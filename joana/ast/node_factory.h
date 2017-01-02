@@ -57,6 +57,7 @@ class JOANA_AST_EXPORT NodeFactory final {
   const Node& NewName(const SourceCodeRange& range);
 
   const Node& NewPunctuator(const SourceCodeRange& range, PunctuatorKind kind);
+  const Node& NewRegExpSource(const SourceCodeRange& range);
 
   //
   // Bindings factory members

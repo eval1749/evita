@@ -126,7 +126,6 @@ Parser::OperatorPrecedence Parser::CategoryOf(const ast::Node& token) const {
 const ast::Node& Parser::ConvertExpressionToBindingElement(
     const ast::Node& expression,
     const ast::Node* initializer) {
-  // TODO(eval1749): We should associate |BindingElement| to |JsDocDocument|.
   if (expression == ast::SyntaxCode::ReferenceExpression) {
     return node_factory().NewBindingNameElement(
         expression.range(), ast::ReferenceExpressionSyntax::NameOf(expression),

@@ -107,22 +107,60 @@ TEST_F(ParserTest, Externs) {
             "var foo;\n"));
 }
 
-TEST_F(ParserTest, JsDoc) {
+TEST_F(ParserTest, AnnotateExpression) {
   EXPECT_EQ(
-    "Module\n"
-    "+--Annotation\n"
-    "|  +--JsDocDocument\n"
-    "|  |  +--JsDocText |/**|\n"
-    "|  |  +--JsDocTag\n"
-    "|  |  |  +--Name |@type|\n"
-    "|  |  |  +--TypeName\n"
-    "|  |  |  |  +--Name |number|\n"
-    "|  |  +--JsDocText |*/|\n"
-    "|  +--LetStatement\n"
-    "|  |  +--BindingNameElement\n"
-    "|  |  |  +--Name |foo|\n"
-    "|  |  |  +--NumericLiteral |1|\n",
-    Parse("/** @type {number} */ let foo = 1;"));
+      "Module\n"
+      "+--ReturnStatement\n"
+      "|  +--Annotation\n"
+      "|  |  +--JsDocDocument\n"
+      "|  |  |  +--JsDocText |/**|\n"
+      "|  |  |  +--JsDocTag\n"
+      "|  |  |  |  +--Name |@type|\n"
+      "|  |  |  |  +--TypeName\n"
+      "|  |  |  |  |  +--Name |number|\n"
+      "|  |  |  +--JsDocText |*/|\n"
+      "|  |  +--GroupExpression\n"
+      "|  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  +--Name |foo|\n",
+      Parse("return /** @type {number} */(foo);"));
+}
+
+TEST_F(ParserTest, AnnotateExpressionError) {
+  EXPECT_EQ(
+      "Module\n"
+      "+--ReturnStatement\n"
+      "|  +--Annotation\n"
+      "|  |  +--JsDocDocument\n"
+      "|  |  |  +--JsDocText |/**|\n"
+      "|  |  |  +--JsDocTag\n"
+      "|  |  |  |  +--Name |@type|\n"
+      "|  |  |  |  +--TypeName\n"
+      "|  |  |  |  |  +--Name |number|\n"
+      "|  |  |  +--JsDocText |*/|\n"
+      "|  |  +--ReferenceExpression\n"
+      "|  |  |  +--Name |foo|\n"
+      "PASER_ERROR_EXPRESSION_UNEXPECT_ANNOTATION@7:28\n",
+      //     0123456789012345678901234567890123456789
+      Parse("return /** @type {number} */ foo;"))
+      << "only group expression has an annotation.";
+}
+
+TEST_F(ParserTest, AnnotateStatement) {
+  EXPECT_EQ(
+      "Module\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@type|\n"
+      "|  |  |  +--TypeName\n"
+      "|  |  |  |  +--Name |number|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--LetStatement\n"
+      "|  |  +--BindingNameElement\n"
+      "|  |  |  +--Name |foo|\n"
+      "|  |  |  +--NumericLiteral |1|\n",
+      Parse("/** @type {number} */ let foo = 1;"));
 }
 
 TEST_F(ParserTest, AsyncFunction) {

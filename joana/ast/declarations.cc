@@ -10,6 +10,26 @@ namespace joana {
 namespace ast {
 
 //
+// AnnotationSyntax
+//
+AnnotationSyntax::AnnotationSyntax()
+    : SyntaxTemplate(std::tuple<>(),
+                     SyntaxCode::Annotation,
+                     Format::Builder().set_arity(2).Build()) {}
+
+AnnotationSyntax::~AnnotationSyntax() = default;
+
+const Node& AnnotationSyntax::AnnotatedOf(const Node& node) {
+  DCHECK_EQ(node, SyntaxCode::Annotation);
+  return node.child_at(0);
+}
+
+const Node& AnnotationSyntax::AnnotationOf(const Node& node) {
+  DCHECK_EQ(node, SyntaxCode::Annotation);
+  return node.child_at(1);
+}
+
+//
 // ArrowFunctionSyntax
 //
 ArrowFunctionSyntax::ArrowFunctionSyntax(FunctionKind kind)

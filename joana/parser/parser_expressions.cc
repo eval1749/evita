@@ -265,14 +265,12 @@ const ast::Node& Parser::NewUnaryExpression(const ast::Node& op,
 }
 
 const ast::Node& Parser::ParseJsDocAsExpression() {
+  NodeRangeScope scope(this);
   auto& jsdoc = ConsumeToken();
   auto& expression = ParsePrimaryExpression();
-  if (!CanHaveJsDoc(expression)) {
+  if (!CanHaveJsDoc(expression))
     AddError(jsdoc, ErrorCode::ERROR_EXPRESSION_UNEXPECT_ANNOTATION);
-    return expression;
-  }
-  AssociateJsDoc(jsdoc, expression);
-  return expression;
+  return node_factory().NewAnnotation(GetSourceCodeRange(), jsdoc, expression);
 }
 
 // Parse argument list after consuming left parenthesis.

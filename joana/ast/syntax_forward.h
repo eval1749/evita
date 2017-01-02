@@ -23,6 +23,7 @@ namespace ast {
   V(Module)
 
 #define FOR_EACH_AST_DECLARATION(V) \
+  V(Annotation)                     \
   V(ArrowFunction)                  \
   V(Class)                          \
   V(Function)                       \

@@ -124,23 +124,6 @@ void Parser::Advance() {
   SkipCommentTokens();
 }
 
-void Parser::AssociateJsDoc(const ast::Node& document, const ast::Node& node) {
-  const auto& result = jsdoc_map_.emplace(&node, &document);
-  if (result.second)
-    return;
-  if (HasJsDocTag(ast::NameId::JsDocFileOverview, document)) {
-    if (file_overview_) {
-      AddError(
-          SourceCodeRange::Merge(file_overview_->range(), document.range()),
-          ErrorCode::ERROR_JSDOC_MULTIPLE_FILE_OVERVIEWS);
-    }
-    file_overview_ = &document;
-    return;
-  }
-  // We don't allow statement/expression has more than one annotation.
-  AddError(document, ErrorCode::ERROR_STATEMENT_UNEXPECT_ANNOTATION);
-}
-
 bool Parser::CanPeekToken() const {
   if (!token_stack_.empty())
     return true;
@@ -243,24 +226,33 @@ const ast::Node& Parser::Run() {
   std::vector<const ast::Node*> statements;
   SkipCommentTokens();
   while (CanPeekToken()) {
-    auto& token = PeekToken();
+    const auto& token = PeekToken();
     if (token != ast::SyntaxCode::JsDocDocument) {
       statements.push_back(&ParseStatement());
       continue;
     }
-    auto& jsdoc = ConsumeToken();
-    auto& statement = ParseStatement();
-    AssociateJsDoc(jsdoc, statement);
-    statements.push_back(&statement);
+
+    if (HasJsDocTag(ast::NameId::JsDocFileOverview, token)) {
+      const auto& document = ConsumeToken();
+      if (file_overview_) {
+        AddError(
+            SourceCodeRange::Merge(file_overview_->range(), document.range()),
+            ErrorCode::ERROR_JSDOC_MULTIPLE_FILE_OVERVIEWS);
+      }
+      file_overview_ = &document;
+      statements.push_back(&document);
+      continue;
+    }
+
+    statements.push_back(&ParseStatement());
+    continue;
   }
   Finish();
   if (file_overview_ &&
       HasJsDocTag(ast::NameId::JsDocExterns, *file_overview_)) {
-    return node_factory().NewExterns(source_code().range(), statements,
-                                     jsdoc_map_);
+    return node_factory().NewExterns(source_code().range(), statements);
   }
-  return node_factory().NewModule(source_code().range(), statements,
-                                  jsdoc_map_);
+  return node_factory().NewModule(source_code().range(), statements);
 }
 
 void Parser::SkipCommentTokens() {

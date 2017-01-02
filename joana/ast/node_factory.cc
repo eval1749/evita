@@ -90,11 +90,6 @@ NodeFactory::NodeFactory(Zone* zone)
 
 NodeFactory::~NodeFactory() = default;
 
-const Node* NodeFactory::JsDocFor(const Node& node) const {
-  const auto& it = jsdoc_map_.find(&node);
-  return it == jsdoc_map_.end() ? nullptr : it->second;
-}
-
 const Node& NodeFactory::NewNode(const SourceCodeRange& range,
                                  const Syntax& tag,
                                  const std::vector<const Node*>& nodes) {
@@ -183,25 +178,17 @@ const Node& NodeFactory::NewTuple(const SourceCodeRange& range,
 // Compilation units
 const Node& NodeFactory::NewExterns(
     const SourceCodeRange& range,
-    const std::vector<const Node*>& statements,
-    const std::unordered_map<const Node*, const Node*>& jsdoc_map) {
-  jsdoc_map_.insert(jsdoc_map.begin(), jsdoc_map.end());
+    const std::vector<const Node*>& statements) {
   return NewNode(range, syntax_factory_->NewExterns(), statements);
 }
 
-const Node& NodeFactory::NewModule(
-    const SourceCodeRange& range,
-    const std::vector<const Node*>& statements,
-    const std::unordered_map<const Node*, const Node*>& jsdoc_map) {
-  jsdoc_map_.insert(jsdoc_map.begin(), jsdoc_map.end());
+const Node& NodeFactory::NewModule(const SourceCodeRange& range,
+                                   const std::vector<const Node*>& statements) {
   return NewNode(range, syntax_factory_->NewModule(), statements);
 }
 
-const Node& NodeFactory::NewScript(
-    const SourceCodeRange& range,
-    const std::vector<const Node*>& statements,
-    const std::unordered_map<const Node*, const Node*>& jsdoc_map) {
-  jsdoc_map_.insert(jsdoc_map.begin(), jsdoc_map.end());
+const Node& NodeFactory::NewScript(const SourceCodeRange& range,
+                                   const std::vector<const Node*>& statements) {
   return NewNode(range, syntax_factory_->NewScript(), statements);
 }
 
@@ -279,6 +266,14 @@ const Node& NodeFactory::NewObjectBindingPattern(
 }
 
 // Declarations
+const Node& NodeFactory::NewAnnotation(const SourceCodeRange& range,
+                                       const Node& annotation,
+                                       const Node& annotated) {
+  DCHECK_EQ(annotation, SyntaxCode::JsDocDocument);
+  return NewNode2(range, syntax_factory_->NewAnnotation(), annotation,
+                  annotated);
+}
+
 const Node& NodeFactory::NewArrowFunction(const SourceCodeRange& range,
                                           FunctionKind kind,
                                           const Node& parameter_list,

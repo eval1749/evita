@@ -6,7 +6,6 @@
 #define JOANA_AST_NODE_FACTORY_H_
 
 #include <memory>
-#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -32,26 +31,18 @@ class JOANA_AST_EXPORT NodeFactory final {
   explicit NodeFactory(Zone* zone);
   ~NodeFactory();
 
-  const Node* JsDocFor(const Node& node) const;
-
   const Node& NewTuple(const SourceCodeRange& range,
                        const std::vector<const Node*>& nodes);
 
   // Compilation unit factory members
-  const Node& NewExterns(
-      const SourceCodeRange& range,
-      const std::vector<const Node*>& statements,
-      const std::unordered_map<const Node*, const Node*>& jsdoc_map);
+  const Node& NewExterns(const SourceCodeRange& range,
+                         const std::vector<const Node*>& statements);
 
-  const Node& NewModule(
-      const SourceCodeRange& range,
-      const std::vector<const Node*>& statements,
-      const std::unordered_map<const Node*, const Node*>& jsdoc_map);
+  const Node& NewModule(const SourceCodeRange& range,
+                        const std::vector<const Node*>& statements);
 
-  const Node& NewScript(
-      const SourceCodeRange& range,
-      const std::vector<const Node*>& statements,
-      const std::unordered_map<const Node*, const Node*>& jsdoc_map);
+  const Node& NewScript(const SourceCodeRange& range,
+                        const std::vector<const Node*>& statements);
 
   //
   // Nodes factory members
@@ -96,6 +87,10 @@ class JOANA_AST_EXPORT NodeFactory final {
   //
   // Declarations factory members
   //
+  const Node& NewAnnotation(const SourceCodeRange& range,
+                            const Node& annotation,
+                            const Node& annotated);
+
   const Node& NewArrowFunction(const SourceCodeRange& range,
                                FunctionKind kind,
                                const Node& parameter_list,
@@ -427,7 +422,6 @@ class JOANA_AST_EXPORT NodeFactory final {
 
   std::unique_ptr<NameIdMap> name_id_map_;
   std::unique_ptr<SyntaxFactory> syntax_factory_;
-  std::unordered_map<const Node*, const Node*> jsdoc_map_;
   Zone& zone_;
 
   DISALLOW_COPY_AND_ASSIGN(NodeFactory);

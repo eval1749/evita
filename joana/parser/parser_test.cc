@@ -52,12 +52,6 @@ std::string ParserTest::Parse(base::StringPiece script_text,
   ostream << AsPrintableTree(module) << std::endl;
   for (const auto& error : error_sink().errors())
     ostream << error << std::endl;
-  for (const auto& statement : ast::NodeTraversal::ChildNodesOf(module)) {
-    auto* jsdoc = node_factory().JsDocFor(statement);
-    if (!jsdoc)
-      continue;
-    ostream << AsPrintableTree(*jsdoc) << std::endl;
-  }
   return ostream.str();
 }
 
@@ -81,42 +75,54 @@ std::string ParserTest::ToString(const ast::Node& node,
   ostream << AsPrintableTree(node) << std::endl;
   for (const auto& error : error_sink().errors())
     ostream << error << std::endl;
-  if (!module)
-    return ostream.str();
-  for (const auto& statement : ast::NodeTraversal::ChildNodesOf(*module)) {
-    auto* jsdoc = node_factory().JsDocFor(statement);
-    if (!jsdoc)
-      continue;
-    ostream << statement << ':' << *jsdoc << std::endl;
-  }
   return ostream.str();
 }
 
 TEST_F(ParserTest, Externs) {
-  PrepareSouceCode(
-      "/** @fileoverview @externs */\n"
-      "/** @const {!Object} */\n"
-      "var foo;\n");
-  Parser parser(&context(), source_code().range(), {});
-  const auto& externs = parser.Run();
-  EXPECT_EQ(externs, ast::SyntaxCode::Externs);
+  EXPECT_EQ(
+      "Externs\n"
+      "+--JsDocDocument\n"
+      "|  +--JsDocText |/**|\n"
+      "|  +--JsDocTag\n"
+      "|  |  +--Name |@fileoverview|\n"
+      "|  |  +--JsDocText ||\n"
+      "|  +--JsDocTag\n"
+      "|  |  +--Name |@externs|\n"
+      "|  +--JsDocText |*/|\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@const|\n"
+      "|  |  |  +--NonNullableType\n"
+      "|  |  |  |  +--TypeName\n"
+      "|  |  |  |  |  +--Name |Object|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--VarStatement\n"
+      "|  |  +--BindingNameElement\n"
+      "|  |  |  +--Name |foo|\n"
+      "|  |  |  +--ElisionExpression ||\n",
+      Parse("/** @fileoverview @externs */\n"
+            "/** @const {!Object} */\n"
+            "var foo;\n"));
 }
 
 TEST_F(ParserTest, JsDoc) {
   EXPECT_EQ(
-      "Module\n"
-      "+--LetStatement\n"
-      "|  +--BindingNameElement\n"
-      "|  |  +--Name |foo|\n"
-      "|  |  +--NumericLiteral |1|\n"
-      "JsDocDocument\n"
-      "+--JsDocText |/**|\n"
-      "+--JsDocTag\n"
-      "|  +--Name |@type|\n"
-      "|  +--TypeName\n"
-      "|  |  +--Name |number|\n"
-      "+--JsDocText |*/|\n",
-      Parse("/** @type {number} */ let foo = 1;"));
+    "Module\n"
+    "+--Annotation\n"
+    "|  +--JsDocDocument\n"
+    "|  |  +--JsDocText |/**|\n"
+    "|  |  +--JsDocTag\n"
+    "|  |  |  +--Name |@type|\n"
+    "|  |  |  +--TypeName\n"
+    "|  |  |  |  +--Name |number|\n"
+    "|  |  +--JsDocText |*/|\n"
+    "|  +--LetStatement\n"
+    "|  |  +--BindingNameElement\n"
+    "|  |  |  +--Name |foo|\n"
+    "|  |  |  +--NumericLiteral |1|\n",
+    Parse("/** @type {number} */ let foo = 1;"));
 }
 
 TEST_F(ParserTest, AsyncFunction) {

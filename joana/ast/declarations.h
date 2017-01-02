@@ -52,6 +52,24 @@ JOANA_AST_EXPORT std::ostream& operator<<(std::ostream& ostream,
                                           MethodKind kind);
 
 //
+// AnnotationSyntax
+//
+class JOANA_AST_EXPORT AnnotationSyntax final : public SyntaxTemplate<Syntax> {
+  DECLARE_CONCRETE_AST_SYNTAX(AnnotationSyntax, Syntax);
+
+ public:
+  ~AnnotationSyntax() final;
+
+  static const Node& AnnotatedOf(const Node& node);
+  static const Node& AnnotationOf(const Node& node);
+
+ private:
+  AnnotationSyntax();
+
+  DISALLOW_COPY_AND_ASSIGN(AnnotationSyntax);
+};
+
+//
 // ArrowFunctionSyntax
 //
 class JOANA_AST_EXPORT ArrowFunctionSyntax final

@@ -70,8 +70,6 @@ class Parser final {
 
   void Advance();
 
-  // Associate |jsdoc| to |node|.
-  void AssociateJsDoc(const ast::Node& jsdoc, const ast::Node& node);
   bool CanPeekToken() const;
   const ast::Node& ConsumeToken();
 
@@ -231,8 +229,6 @@ class Parser final {
   const ast::Node& ParseNameBindingElement();
   const ast::Node& ParseObjectBindingPattern();
 
-  // Map node to jsdoc
-  std::unordered_map<const ast::Node*, const ast::Node*> jsdoc_map_;
   const std::unique_ptr<BracketTracker> bracket_tracker_;
   ParserContext& context_;
 

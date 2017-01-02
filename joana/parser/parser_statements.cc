@@ -85,12 +85,16 @@ const ast::Node& Parser::NewInvalidStatement(ErrorCode error_code) {
 }
 
 const ast::Node& Parser::ParseJsDocAsStatement() {
-  auto& jsdoc = ConsumeToken();
-  auto& statement = ParseStatement();
+  NodeRangeScope scope(this);
+  const auto& jsdoc = ConsumeToken();
+  const auto& statement = ParseStatement();
+  if (statement == ast::SyntaxCode::Annotation) {
+    // We don't allow statement/expression has more than one annotation.
+    AddError(jsdoc, ErrorCode::ERROR_STATEMENT_UNEXPECT_ANNOTATION);
+  }
   if (!CanHaveJsDoc(statement))
     AddError(jsdoc, ErrorCode::ERROR_STATEMENT_UNEXPECT_ANNOTATION);
-  AssociateJsDoc(jsdoc, statement);
-  return statement;
+  return node_factory().NewAnnotation(GetSourceCodeRange(), jsdoc, statement);
 }
 
 const ast::Node& Parser::ParseBlockStatement() {
@@ -229,8 +233,6 @@ const ast::Node& Parser::ParseForStatement() {
   if (jsdoc) {
     if (keyword == ast::SyntaxCode::Empty)
       AddError(*jsdoc, ErrorCode::ERROR_STATEMENT_UNEXPECT_ANNOTATION);
-    else
-      AssociateJsDoc(*jsdoc, expression);
   }
 
   if (ConsumeTokenIf(ast::PunctuatorKind::Semicolon)) {

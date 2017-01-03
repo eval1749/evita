@@ -14,6 +14,7 @@
 #include "joana/ast/syntax_visitor.h"
 #include "joana/base/escaped_string_piece.h"
 #include "joana/parser/public/parse.h"
+#include "joana/testing/simple_error_sink.h"
 
 namespace joana {
 namespace analyzer {
@@ -41,28 +42,27 @@ std::ostream& operator<<(std::ostream& ostream, const Printable& printable) {
 //
 class ValueSink final : public ast::SyntaxVisitor {
  public:
-  explicit ValueSink(const Context& context);
+  explicit ValueSink(std::ostream* ostream, const Context& context);
   ~ValueSink() = default;
-
-  std::string GetResult() const { return ostream_.str(); }
 
  private:
   // |ast::SyntaxVisitor| members
   void VisitDefault(const ast::Node& node);
 
   const Context& context_;
-  std::ostringstream ostream_;
+  std::ostream* const ostream_;
 
   DISALLOW_COPY_AND_ASSIGN(ValueSink);
 };
 
-ValueSink::ValueSink(const Context& context) : context_(context) {}
+ValueSink::ValueSink(std::ostream* ostream, const Context& context)
+    : context_(context), ostream_(ostream) {}
 
 void ValueSink::VisitDefault(const ast::Node& node) {
   const auto* value = context_.TryValueOf(node);
   if (!value)
     return;
-  ostream_ << AsPrintable(*value) << std::endl;
+  *ostream_ << AsPrintable(*value) << std::endl;
 }
 
 }  // namespace
@@ -85,17 +85,27 @@ std::string EnvironmentBuilderTest::ListValues(base::StringPiece script_text) {
   const auto& module = ParseAsModule(script_text);
   EnvironmentBuilder builder(&analyzer_context());
   builder.RunOn(module);
-  ValueSink sink(analyzer_context());
+  std::ostringstream ostream;
+  ValueSink sink(&ostream, analyzer_context());
   DepthFirstTraverse(&sink, module);
-  return sink.GetResult();
+  for (const auto& error : error_sink().errors())
+    ostream << error << std::endl;
+  return ostream.str();
 }
 
 TEST_F(EnvironmentBuilderTest, Class) {
   EXPECT_EQ(
       "Class@1[0-31] |class Foo { bar() {}...|\n"
-      "Function@2[12-20] |bar() {}|\n"
-      "Function@3[21-29] |baz() {}|\n",
+      "Method@2[12-20] |bar() {}|\n"
+      "Method@3[21-29] |baz() {}|\n",
       ListValues("class Foo { bar() {} baz() {} }"));
+}
+
+TEST_F(EnvironmentBuilderTest, ClassError) {
+  EXPECT_EQ(
+      "Class@1[0-15] |class Foo { 1 }|\n"
+      "ANALYZER_ERROR_ENVIRONMENT_EXPECT_METHOD@12:13\n",
+      ListValues("class Foo { 1 }"));
 }
 
 TEST_F(EnvironmentBuilderTest, Function) {

@@ -21,6 +21,7 @@ class Node;
 
 namespace analyzer {
 
+class Class;
 class Context;
 class Environment;
 enum class VariableKind;
@@ -39,7 +40,7 @@ class EnvironmentBuilder final : public Pass, public ast::SyntaxVisitor {
   class LocalEnvironment;
 
   // Binding helpers
-  void BindToClass(const ast::Node& name, const ast::Node& declaration);
+  Class& BindToClass(const ast::Node& name, const ast::Node& declaration);
 
   void BindToFunction(const ast::Node& name, const ast::Node& declaration);
 

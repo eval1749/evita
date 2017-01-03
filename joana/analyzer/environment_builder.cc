@@ -18,6 +18,7 @@
 #include "joana/ast/compilation_units.h"
 #include "joana/ast/declarations.h"
 #include "joana/ast/expressions.h"
+#include "joana/ast/node_traversal.h"
 #include "joana/ast/statements.h"
 #include "joana/ast/syntax_forward.h"
 #include "joana/ast/tokens.h"
@@ -102,24 +103,28 @@ void EnvironmentBuilder::RunOn(const ast::Node& node) {
 }
 
 // Binding helpers
-void EnvironmentBuilder::BindToClass(const ast::Node& name,
-                                     const ast::Node& declaration) {
+Class& EnvironmentBuilder::BindToClass(const ast::Node& name,
+                                       const ast::Node& declaration) {
+  auto& klass = factory().NewClass(declaration).As<Class>();
+  if (name != ast::SyntaxCode::Name)
+    return klass;
   if (environment_) {
     if (auto* present = environment_->Find(name)) {
       AddError(name, ErrorCode::ENVIRONMENT_MULTIPLE_BINDINGS, present->node());
-      return;
+      return klass;
     }
-    environment_->Bind(name, &factory().NewClass(declaration));
-    return;
+    environment_->Bind(name, &klass);
+    return klass;
   }
 
   if (auto* present = toplevel_environment_->TryValueOf(name)) {
     AddError(name, ErrorCode::ENVIRONMENT_MULTIPLE_BINDINGS, present->node());
-    return;
+    return klass;
   }
   // TODO(eval1749): We should bind to |Constructor| if |declaration| has
   // "@constructor" annotation.
-  toplevel_environment_->Bind(name, &factory().NewClass(declaration));
+  toplevel_environment_->Bind(name, &klass);
+  return klass;
 }
 
 void EnvironmentBuilder::BindToFunction(const ast::Node& name,
@@ -199,12 +204,28 @@ void EnvironmentBuilder::Visit(const ast::BindingNameElement& syntax,
 void EnvironmentBuilder::Visit(const ast::Class& syntax,
                                const ast::Node& node) {
   // TODO(eval1749): Report warning for toplevel anonymous class
-  const auto& name = ast::Class::NameOf(node);
-  if (name == ast::SyntaxCode::Name)
-    BindToClass(name, node);
-  else
-    factory().NewFunction(node);
-  LocalEnvironment environment(this, node);
+  auto& klass = BindToClass(ast::Class::NameOf(node), node);
+  auto& environment = klass.environment();
+  for (const auto& member :
+       ast::NodeTraversal::ChildNodesOf(ast::Class::BodyOf(node))) {
+    if (member != ast::SyntaxCode::Method) {
+      AddError(member, ErrorCode::ENVIRONMENT_EXPECT_METHOD);
+      continue;
+    }
+    auto& method = factory().NewMethod(member, &klass);
+    const auto& name = ast::Method::NameOf(member);
+    if (name != ast::SyntaxCode::Name) {
+      // TODO(eval1749): We should handle computed method name, e.g.
+      // |[Symbol.iterator]() { ... }|
+      continue;
+    }
+    auto* const present = environment.TryValueOf(name);
+    if (present) {
+      AddError(name, ErrorCode::ENVIRONMENT_MULTIPLE_BINDINGS, present->node());
+      continue;
+    }
+    environment.Bind(name, &method);
+  }
   VisitChildNodes(node);
 }
 
@@ -223,12 +244,7 @@ void EnvironmentBuilder::Visit(const ast::Function& syntax,
 
 void EnvironmentBuilder::Visit(const ast::Method& syntax,
                                const ast::Node& node) {
-  // TODO(eval1749): Report warning for toplevel anonymous class
-  const auto& name = ast::Method::NameOf(node);
-  if (name == ast::SyntaxCode::Name)
-    BindToFunction(name, node);
-  else
-    factory().NewFunction(node);
+  // Methods are bound during processing class declaration.
   LocalEnvironment environment(this, node);
   variable_origin_ = &node;
   VisitChildNodes(node);

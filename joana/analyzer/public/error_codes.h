@@ -12,6 +12,7 @@ namespace joana {
 
 // V(pass, reason)
 #define FOR_EACH_ANALYZER_ERROR_CODE(V) \
+  V(ENVIRONMENT, EXPECT_METHOD)         \
   V(ENVIRONMENT, MULTIPLE_BINDINGS)     \
   V(TYPE_CHECKER, UNDEFIEND_VARIABLE)
 

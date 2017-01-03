@@ -18,6 +18,7 @@ class Node;
 }
 namespace analyzer {
 
+class Class;
 class Environment;
 class Value;
 
@@ -44,6 +45,7 @@ class Factory final {
   Environment& NewEnvironment(Environment* outer, const ast::Node& owner);
   Value& NewClass(const ast::Node& node);
   Value& NewFunction(const ast::Node& node);
+  Value& NewMethod(const ast::Node& node, Class* owner);
   Value& NewProperty(const ast::Node& node);
   Value& NewUndefined(const ast::Node& node);
   Value& NewVariable(const ast::Node& assignment, const ast::Node& name);

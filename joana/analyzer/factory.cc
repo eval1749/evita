@@ -52,12 +52,23 @@ Environment& Factory::NewEnvironment(Environment* outer,
 }
 
 Value& Factory::NewClass(const ast::Node& node) {
-  return RegisterValue(node, new (&zone_) Class(&zone_, NextValueId(), node));
+  DCHECK(node == ast::SyntaxCode::Class || node == ast::SyntaxCode::Function)
+      << node;
+  auto& environment = NewEnvironment(nullptr, node);
+  return RegisterValue(
+      node, new (&zone_) Class(&zone_, NextValueId(), node, &environment));
 }
 
 Value& Factory::NewFunction(const ast::Node& node) {
   return RegisterValue(node,
                        new (&zone_) Function(&zone_, NextValueId(), node));
+}
+
+Value& Factory::NewMethod(const ast::Node& node, Class* owner) {
+  DCHECK_EQ(node, ast::SyntaxCode::Method);
+  DCHECK(owner);
+  return RegisterValue(node,
+                       new (&zone_) Method(&zone_, NextValueId(), node, owner));
 }
 
 Value& Factory::NewProperty(const ast::Node& node) {

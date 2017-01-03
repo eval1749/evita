@@ -30,19 +30,19 @@ Printable<Value> AsPrintable(const Value& value) {
 std::ostream& operator<<(std::ostream& ostream,
                          const Printable<Function>& printable) {
   const auto& value = *printable.value;
-  return ostream << "$Function " << value.node();
+  return ostream << "$Function@" << value.id() << ' ' << value.node();
 }
 
 std::ostream& operator<<(std::ostream& ostream,
                          const Printable<Property>& printable) {
   const auto& value = *printable.value;
-  return ostream << "$Property " << value.node();
+  return ostream << "$Property@" << value.id() << ' ' << value.node();
 }
 
 std::ostream& operator<<(std::ostream& ostream,
                          const Printable<Variable>& printable) {
   const auto& value = *printable.value;
-  return ostream << "$Variable " << value.node();
+  return ostream << "$Variable@" << value.id() << ' ' << value.node();
 }
 
 // Dispatcher

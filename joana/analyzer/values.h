@@ -11,6 +11,8 @@
 namespace joana {
 namespace analyzer {
 
+class Environment;
+
 //
 // LexicalBinding
 //
@@ -45,8 +47,14 @@ class Class final : public LexicalBinding {
  public:
   ~Class() final;
 
+  const Environment& environment() const { return environment_; }
+  Environment& environment() { return environment_; }
+
  private:
-  Class(Zone* zone, int id, const ast::Node& node);
+  Class(Zone* zone, int id, const ast::Node& node, Environment* environment);
+
+  // Holds methods
+  Environment& environment_;
 
   DISALLOW_COPY_AND_ASSIGN(Class);
 };
@@ -64,6 +72,25 @@ class Function final : public LexicalBinding {
   Function(Zone* zone, int id, const ast::Node& node);
 
   DISALLOW_COPY_AND_ASSIGN(Function);
+};
+
+//
+// Method
+//
+class Method final : public LexicalBinding {
+  DECLARE_CONCRETE_ANALYZE_VALUE(Method, LexicalBinding)
+
+ public:
+  ~Method() final;
+
+  Class& owner() const { return owner_; }
+
+ private:
+  Method(Zone* zone, int id, const ast::Node& node, Class* owner);
+
+  Class& owner_;
+
+  DISALLOW_COPY_AND_ASSIGN(Method);
 };
 
 //

@@ -14,8 +14,13 @@ namespace analyzer {
 //
 // Class
 //
-Class::Class(Zone* zone, int id, const ast::Node& node)
-    : LexicalBinding(zone, id, node) {}
+Class::Class(Zone* zone,
+             int id,
+             const ast::Node& node,
+             Environment* environment)
+    : LexicalBinding(zone, id, node), environment_(*environment) {
+  DCHECK(environment);
+}
 
 Class::~Class() = default;
 
@@ -26,6 +31,16 @@ Function::Function(Zone* zone, int id, const ast::Node& node)
     : LexicalBinding(zone, id, node) {}
 
 Function::~Function() = default;
+
+//
+// Method
+//
+Method::Method(Zone* zone, int id, const ast::Node& node, Class* owner)
+    : LexicalBinding(zone, id, node), owner_(*owner) {
+  DCHECK(owner);
+}
+
+Method::~Method() = default;
 
 //
 // LexicalBinding

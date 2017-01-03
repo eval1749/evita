@@ -27,6 +27,7 @@ namespace analyzer {
 #define FOR_EACH_ANALYZE_VALUE(name) \
   V(Class)                           \
   V(Function)                        \
+  V(Method)                          \
   V(Property)                        \
   V(Undefined)                       \
   V(Variable)

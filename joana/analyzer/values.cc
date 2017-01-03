@@ -38,6 +38,12 @@ Property::Property(Zone* zone, int id, const ast::Node& node)
 Property::~Property() = default;
 
 //
+// Undefined
+//
+Undefined::Undefined(int id, const ast::Node& node) : Value(id, node) {}
+Undefined::~Undefined() = default;
+
+//
 // Variable
 //
 Variable::Variable(Zone* zone,

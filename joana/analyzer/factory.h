@@ -34,6 +34,7 @@ class Factory final {
 
   // Query members
   Environment& EnvironmentOf(const ast::Node& node) const;
+  Value* TryValueOf(const ast::Node& node) const;
   Value& ValueOf(const ast::Node& node) const;
 
   // Registration
@@ -43,6 +44,7 @@ class Factory final {
   Environment& NewEnvironment(Environment* outer, const ast::Node& owner);
   Value& NewFunction(const ast::Node& node);
   Value& NewProperty(const ast::Node& node);
+  Value& NewUndefined(const ast::Node& node);
   Value& NewVariable(const ast::Node& assignment, const ast::Node& name);
 
  private:

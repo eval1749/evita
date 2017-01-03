@@ -67,6 +67,21 @@ class Property final : public LexicalBinding {
 };
 
 //
+// Undefined
+//
+class Undefined final : public Value {
+  DECLARE_CONCRETE_ANALYZE_VALUE(Undefined, Value)
+
+ public:
+  ~Undefined() final;
+
+ private:
+  Undefined(int id, const ast::Node& node);
+
+  DISALLOW_COPY_AND_ASSIGN(Undefined);
+};
+
+//
 // Variable
 //
 class Variable final : public LexicalBinding {

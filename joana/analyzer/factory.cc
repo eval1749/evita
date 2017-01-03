@@ -30,10 +30,16 @@ Environment& Factory::EnvironmentOf(const ast::Node& node) const {
   return global_environment();
 }
 
-Value& Factory::ValueOf(const ast::Node& node) const {
+Value* Factory::TryValueOf(const ast::Node& node) const {
   const auto& it = value_map_.find(&node);
-  DCHECK(it != value_map_.end()) << node;
-  return *it->second;
+  return it == value_map_.end() ? nullptr : it->second;
+}
+
+Value& Factory::ValueOf(const ast::Node& node) const {
+  if (auto* present = TryValueOf(node))
+    return *present;
+  NOTREACHED() << "No value for " << node;
+  return const_cast<Factory*>(this)->NewUndefined(node);
 }
 
 // Factory members
@@ -53,6 +59,10 @@ Value& Factory::NewFunction(const ast::Node& node) {
 Value& Factory::NewProperty(const ast::Node& node) {
   return RegisterValue(node,
                        new (&zone_) Property(&zone_, NextValueId(), node));
+}
+
+Value& Factory::NewUndefined(const ast::Node& node) {
+  return RegisterValue(node, new (&zone_) Undefined(NextValueId(), node));
 }
 
 Value& Factory::NewVariable(const ast::Node& assignment,

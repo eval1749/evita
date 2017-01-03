@@ -40,6 +40,12 @@ std::ostream& operator<<(std::ostream& ostream,
 }
 
 std::ostream& operator<<(std::ostream& ostream,
+                         const Printable<Undefined>& printable) {
+  const auto& value = *printable.value;
+  return ostream << "$Undefined@" << value.id() << ' ' << value.node();
+}
+
+std::ostream& operator<<(std::ostream& ostream,
                          const Printable<Variable>& printable) {
   const auto& value = *printable.value;
   return ostream << "$Variable@" << value.id() << ' ' << value.node();

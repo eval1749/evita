@@ -47,9 +47,7 @@ BlockStatementSyntax::~BlockStatementSyntax() = default;
 // ConstStatementSyntax
 //
 ConstStatementSyntax::ConstStatementSyntax()
-    : SyntaxTemplate(std::tuple<>(),
-                     SyntaxCode::ConstStatement,
-                     Format::Builder().set_is_variadic(true).Build()) {}
+    : VariableDeclaration(SyntaxCode::ConstStatement) {}
 
 ConstStatementSyntax::~ConstStatementSyntax() = default;
 
@@ -57,9 +55,7 @@ ConstStatementSyntax::~ConstStatementSyntax() = default;
 // LetStatementSyntax
 //
 LetStatementSyntax::LetStatementSyntax()
-    : SyntaxTemplate(std::tuple<>(),
-                     SyntaxCode::LetStatement,
-                     Format::Builder().set_is_variadic(true).Build()) {}
+    : VariableDeclaration(SyntaxCode::LetStatement) {}
 
 LetStatementSyntax::~LetStatementSyntax() = default;
 
@@ -85,12 +81,20 @@ const Node& SwitchStatementSyntax::ExpressionOf(const Node& node) {
 }
 
 //
+// VariableDeclaration
+//
+VariableDeclaration::VariableDeclaration(SyntaxCode syntax_code)
+    : SyntaxTemplate(std::tuple<>(),
+                     syntax_code,
+                     Format::Builder().set_is_variadic(true).Build()) {}
+
+VariableDeclaration::~VariableDeclaration() = default;
+
+//
 // VarStatementSyntax
 //
 VarStatementSyntax::VarStatementSyntax()
-    : SyntaxTemplate(std::tuple<>(),
-                     SyntaxCode::VarStatement,
-                     Format::Builder().set_is_variadic(true).Build()) {}
+    : VariableDeclaration(SyntaxCode::VarStatement) {}
 
 VarStatementSyntax::~VarStatementSyntax() = default;
 

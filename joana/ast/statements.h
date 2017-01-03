@@ -16,7 +16,6 @@ class Node;
 DECLARE_AST_SYNTAX_0(BlockStatement)
 DECLARE_AST_SYNTAX_0(BreakStatement)
 DECLARE_AST_SYNTAX_0(CaseClause)
-DECLARE_AST_SYNTAX_0(ConstStatement)
 DECLARE_AST_SYNTAX_0(ContinueStatement)
 DECLARE_AST_SYNTAX_0(DoStatement)
 DECLARE_AST_SYNTAX_0(EmptyStatement)
@@ -28,15 +27,59 @@ DECLARE_AST_SYNTAX_0(IfElseStatement)
 DECLARE_AST_SYNTAX_0(IfStatement)
 DECLARE_AST_SYNTAX_0(InvalidStatement)
 DECLARE_AST_SYNTAX_0(LabeledStatement)
-DECLARE_AST_SYNTAX_0(LetStatement)
 DECLARE_AST_SYNTAX_0(ReturnStatement)
 DECLARE_AST_SYNTAX_0(ThrowStatement)
 DECLARE_AST_SYNTAX_0(TryCatchStatement)
 DECLARE_AST_SYNTAX_0(TryCatchFinallyStatement)
 DECLARE_AST_SYNTAX_0(TryFinallyStatement)
-DECLARE_AST_SYNTAX_0(VarStatement)
 DECLARE_AST_SYNTAX_0(WhileStatement)
 DECLARE_AST_SYNTAX_0(WithStatement)
+
+//
+// VariableDeclaration
+//
+class JOANA_AST_EXPORT VariableDeclaration : public SyntaxTemplate<Syntax> {
+  DECLARE_ABSTRACT_AST_SYNTAX(VariableDeclaration, Syntax);
+
+ public:
+  ~VariableDeclaration() override;
+
+ protected:
+  explicit VariableDeclaration(SyntaxCode syntax_code);
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(VariableDeclaration);
+};
+
+//
+// ConstStatementSyntax
+//
+class JOANA_AST_EXPORT ConstStatementSyntax final : public VariableDeclaration {
+  DECLARE_CONCRETE_AST_SYNTAX(ConstStatement, VariableDeclaration);
+
+ public:
+  ~ConstStatementSyntax() final;
+
+ private:
+  ConstStatementSyntax();
+
+  DISALLOW_COPY_AND_ASSIGN(ConstStatementSyntax);
+};
+
+//
+// LetStatementSyntax
+//
+class JOANA_AST_EXPORT LetStatementSyntax final : public VariableDeclaration {
+  DECLARE_CONCRETE_AST_SYNTAX(LetStatement, VariableDeclaration);
+
+ public:
+  ~LetStatementSyntax() final;
+
+ private:
+  LetStatementSyntax();
+
+  DISALLOW_COPY_AND_ASSIGN(LetStatementSyntax);
+};
 
 //
 // SwitchStatementSyntax
@@ -55,6 +98,21 @@ class JOANA_AST_EXPORT SwitchStatementSyntax final
   SwitchStatementSyntax();
 
   DISALLOW_COPY_AND_ASSIGN(SwitchStatementSyntax);
+};
+
+//
+// VarStatementSyntax
+//
+class JOANA_AST_EXPORT VarStatementSyntax final : public VariableDeclaration {
+  DECLARE_CONCRETE_AST_SYNTAX(VarStatement, VariableDeclaration);
+
+ public:
+  ~VarStatementSyntax() final;
+
+ private:
+  VarStatementSyntax();
+
+  DISALLOW_COPY_AND_ASSIGN(VarStatementSyntax);
 };
 
 }  // namespace ast

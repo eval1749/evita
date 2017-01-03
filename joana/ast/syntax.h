@@ -19,6 +19,9 @@
 namespace joana {
 namespace ast {
 
+class Node;
+class SyntaxVisitor;
+
 //
 // SyntaxCode
 //
@@ -46,10 +49,11 @@ const size_t kNumberOfOperations =
 
 #define DECLARE_ABSTRACT_AST_SYNTAX(name, base) DECLARE_AST_SYNTAX(name, base);
 
-#define DECLARE_CONCRETE_AST_SYNTAX(name, base) \
-  DECLARE_AST_SYNTAX(name, base);               \
-  friend class SyntaxFactory;                   \
-  static constexpr auto kSyntaxCode = SyntaxCode::name;
+#define DECLARE_CONCRETE_AST_SYNTAX(name, base)         \
+  DECLARE_AST_SYNTAX(name, base);                       \
+  friend class SyntaxFactory;                           \
+  static constexpr auto kSyntaxCode = SyntaxCode::name; \
+  void Accept(SyntaxVisitor* visitor, const ast::Node& node) const final;
 
 //
 // Syntax
@@ -97,6 +101,8 @@ class JOANA_AST_EXPORT Syntax : public Castable<Syntax>, public ZoneAllocated {
   bool is_##underscore() const { return format_.is_##underscore(); }
   FOR_EACH_AST_SYNTAX_FLAG_BIT(V)
 #undef V
+
+  virtual void Accept(SyntaxVisitor* visitor, const ast::Node& node) const = 0;
 
  protected:
   Syntax(SyntaxCode opcode, const Format& format);

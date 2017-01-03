@@ -40,6 +40,8 @@ component("ast") {
     "syntax_factory.h",
     "syntax_forward.h",
     "syntax_printer.cc",
+    "syntax_visitor.cc",
+    "syntax_visitor.h",
     "tokens.cc",
     "tokens.h",
     "types.cc",

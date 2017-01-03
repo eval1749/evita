@@ -154,6 +154,10 @@ enum class RegExpRepeatMethod;
 enum class SyntaxCode;
 class Syntax;
 
+#define V(name) class name##Syntax;
+FOR_EACH_AST_SYNTAX(V)
+#undef V
+
 }  // namespace ast
 }  // namespace joana
 

@@ -13,7 +13,6 @@
 namespace joana {
 namespace ast {
 class Node;
-using Name = Node;
 }
 namespace analyzer {
 
@@ -28,7 +27,7 @@ class Environment final : public ZoneAllocated {
 
   virtual ~Environment();
 
-  const ZoneVector<const ast::Name*>& names() const { return names_; }
+  const ZoneVector<const ast::Node*>& names() const { return names_; }
 
   // Returns outer environment of this environment, or returns null If this
   // environment is *global* environment.
@@ -48,8 +47,8 @@ class Environment final : public ZoneAllocated {
 
   void Bind(const ast::Node& name, Value* value);
 
-  ZoneVector<const ast::Name*> names_;
-  ZoneUnorderedMap<int, const ast::Name*> name_map_;
+  ZoneVector<const ast::Node*> names_;
+  ZoneUnorderedMap<int, const ast::Node*> name_map_;
   Environment* const outer_;
   const ast::Node& owner_;
   ZoneUnorderedMap<int, Value*> value_map_;

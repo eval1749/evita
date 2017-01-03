@@ -17,22 +17,26 @@ namespace joana {
 
 class JOANA_BASE_EXPORT EscapedStringPiece16 {
  public:
+  EscapedStringPiece16(base::StringPiece16 piece,
+                       char delimiter,
+                       size_t max_length);
   EscapedStringPiece16(base::StringPiece16 piece, char delimiter);
   ~EscapedStringPiece16();
 
   char delimiter() const { return delimiter_; }
+  size_t max_length() const { return max_length_; }
   base::StringPiece16 string() const { return string_; }
 
  private:
   const char delimiter_;
+  const size_t max_length_;
   const base::StringPiece16 string_;
 
   DISALLOW_COPY_AND_ASSIGN(EscapedStringPiece16);
 };
 
-JOANA_BASE_EXPORT std::ostream& operator<<(
-    std::ostream& ostream,
-    const EscapedStringPiece16& escaped);
+JOANA_BASE_EXPORT std::ostream& operator<<(std::ostream& ostream,
+                                           const EscapedStringPiece16& escaped);
 
 }  // namespace joana
 

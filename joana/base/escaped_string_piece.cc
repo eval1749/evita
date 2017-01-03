@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <limits>
 #include <ostream>
 
 #include "joana/base/escaped_string_piece.h"
@@ -9,8 +10,15 @@
 namespace joana {
 
 EscapedStringPiece16::EscapedStringPiece16(base::StringPiece16 piece,
+                                           char delimiter,
+                                           size_t max_length)
+    : delimiter_(delimiter), max_length_(max_length), string_(piece) {}
+
+EscapedStringPiece16::EscapedStringPiece16(base::StringPiece16 piece,
                                            char delimiter)
-    : delimiter_(delimiter), string_(piece) {}
+    : EscapedStringPiece16(piece,
+                           delimiter,
+                           std::numeric_limits<size_t>::max()) {}
 
 EscapedStringPiece16::~EscapedStringPiece16() = default;
 
@@ -20,7 +28,13 @@ std::ostream& operator<<(std::ostream& ostream,
   static const char* const kEscapes = "01234567btnvfr";
   const auto delimiter = escaped.delimiter();
   ostream << delimiter;
+  size_t counter = 0;
   for (const auto char_code : escaped.string()) {
+    if (counter == escaped.max_length()) {
+      ostream << "...";
+      break;
+    }
+    ++counter;
     if (char_code == delimiter) {
       ostream << '\\' << delimiter;
       continue;

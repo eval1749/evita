@@ -15,6 +15,7 @@ source_set("testing") {
     "simple_formatter.h",
   ]
   public_deps = [
+    "//joana/analyzer/public",
     "//joana/ast",
     "//joana/base",
     "//joana/parser/public",

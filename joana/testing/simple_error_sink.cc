@@ -6,7 +6,7 @@
 
 #include "joana/testing/simple_error_sink.h"
 
-#include "joana/ast/error_codes.h"
+#include "joana/analyzer/error_codes.h"
 
 namespace joana {
 
@@ -32,7 +32,7 @@ void SimpleErrorSink::Reset() {
 
 std::ostream& operator<<(std::ostream& ostream,
                          const SimpleErrorSink::Error& error) {
-  ostream << ast::ErrorStringOf(error.error_code()) << '@'
+  ostream << analyzer::ErrorStringOf(error.error_code()) << '@'
           << error.range().start() << ':' << error.range().end();
   return ostream;
 }

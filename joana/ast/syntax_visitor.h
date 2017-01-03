@@ -38,6 +38,9 @@ class JOANA_AST_EXPORT SyntaxVisitor {
   DISALLOW_COPY_AND_ASSIGN(SyntaxVisitor);
 };
 
+void JOANA_AST_EXPORT DepthFirstTraverse(SyntaxVisitor* visitor,
+                                         const Node& start_node);
+
 }  // namespace ast
 }  // namespace joana
 

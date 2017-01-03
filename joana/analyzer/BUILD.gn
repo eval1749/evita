@@ -45,10 +45,15 @@ source_set("analyzer") {
 
 source_set("test_files") {
   testonly = true
-  sources = []
+  sources = [
+    "analyzer_test_base.cc",
+    "analyzer_test_base.h",
+    "environment_builder_test.cc",
+  ]
   deps = [
     ":analyzer",
     "//joana/analyzer/public",
+    "//joana/testing",
     "//testing/gtest",
   ]
 }

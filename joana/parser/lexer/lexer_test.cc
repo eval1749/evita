@@ -239,24 +239,24 @@ TEST_F(LexerTest, Name) {
 
 TEST_F(LexerTest, NodeFactoryNewName) {
   PrepareSouceCode("while");
-  EXPECT_EQ(static_cast<int>(ast::TokenKind::While),
-            node_factory().NewName(MakeRange(0, 5)).name_id())
+  EXPECT_EQ(ast::TokenKind::While,
+            ast::Name::KindOf(node_factory().NewName(MakeRange(0, 5))))
       << "We can identify keyword 'while'.";
 
   PrepareSouceCode("while");
   EXPECT_TRUE(ast::Name::IsKeyword(node_factory().NewName(MakeRange(0, 5))));
 
   PrepareSouceCode("from");
-  EXPECT_EQ(static_cast<int>(ast::TokenKind::From),
-            node_factory().NewName(MakeRange(0, 4)).name_id())
+  EXPECT_EQ(ast::TokenKind::From,
+            ast::Name::KindOf(node_factory().NewName(MakeRange(0, 4))))
       << "We can identify contextual keyword 'from'.";
 
   PrepareSouceCode("from");
   EXPECT_FALSE(ast::Name::IsKeyword(node_factory().NewName(MakeRange(0, 4))));
 
   PrepareSouceCode("of");
-  EXPECT_EQ(static_cast<int>(ast::TokenKind::Of),
-            node_factory().NewName(MakeRange(0, 2)).name_id())
+  EXPECT_EQ(ast::TokenKind::Of,
+            ast::Name::KindOf(node_factory().NewName(MakeRange(0, 2))))
       << "We can identify contextual keyword 'of'.";
 }
 

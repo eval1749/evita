@@ -407,7 +407,7 @@ const ast::Node& Parser::ParseLeftHandSideExpression() {
 const ast::Node& Parser::ParseNameAsExpression() {
   NodeRangeScope scope(this);
   auto& name = ConsumeToken();
-  switch (static_cast<ast::TokenKind>(name.name_id())) {
+  switch (ast::Token::KindOf(name)) {
     case ast::TokenKind::Async:
       if (CanPeekToken() && PeekToken() == ast::TokenKind::Function) {
         ConsumeToken();

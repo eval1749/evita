@@ -51,9 +51,6 @@ class JOANA_AST_EXPORT Node final {
 
   bool is_literal() const;
 
-  // Operator helper functions
-  int name_id() const;
-
  protected:
   Node(const SourceCodeRange& range, const Syntax& syntax, size_t arity);
 

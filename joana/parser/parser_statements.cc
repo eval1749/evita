@@ -290,7 +290,7 @@ const ast::Node& Parser::ParseKeywordStatement() {
   NodeRangeScope scope(this);
   const auto& keyword = PeekToken();
   DCHECK(ast::Name::IsKeyword(keyword)) << keyword;
-  switch (static_cast<ast::TokenKind>(keyword.name_id())) {
+  switch (ast::Name::KindOf(keyword)) {
     case ast::TokenKind::Async:
       ConsumeToken();
       if (CanPeekToken() && PeekToken() == ast::TokenKind::Function)

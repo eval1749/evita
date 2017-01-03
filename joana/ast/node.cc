@@ -70,10 +70,6 @@ bool Node::is_literal() const {
   return syntax_.is_literal();
 }
 
-int Node::name_id() const {
-  return syntax_.As<Name>().number();
-}
-
 std::ostream& operator<<(std::ostream& ostream, const Node& node) {
   const auto& range = node.range();
   return ostream << node.syntax() << '(' << range << ", "

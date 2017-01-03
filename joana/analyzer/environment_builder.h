@@ -10,6 +10,8 @@
 #include "joana/analyzer/pass.h"
 
 #include "base/logging.h"
+#include "joana/ast/syntax_forward.h"
+#include "joana/ast/syntax_visitor.h"
 
 namespace joana {
 
@@ -26,18 +28,15 @@ enum class VariableKind;
 //
 // EnvironmentBuilder
 //
-class EnvironmentBuilder final : public Pass {
+class EnvironmentBuilder final : public Pass, public ast::SyntaxVisitor {
  public:
   explicit EnvironmentBuilder(Context* context);
   ~EnvironmentBuilder();
 
-  void Load(const ast::Node& node);
+  void RunOn(const ast::Node& node);
 
  private:
   class LocalEnvironment;
-
-  void Visit(const ast::Node& node);
-  void VisitChildNodes(const ast::Node& node);
 
   // Binding helpers
   void BindToFunction(const ast::Node& name, const ast::Node& declaration);
@@ -49,18 +48,30 @@ class EnvironmentBuilder final : public Pass {
 
   // ast::NodeVisitor implementations
 
+  // |ast::SyntaxVisitor| members
+  void VisitDefault(const ast::Node& node) final;
+
   // Binding elements
-  void VisitBindingNameElement(const ast::Node& node);
+  void Visit(const ast::BindingNameElementSyntax& syntax,
+             const ast::Node& node) final;
 
   // Declarations
-  void VisitClass(const ast::Node& node);
-  void VisitFunction(const ast::Node& node);
+  void Visit(const ast::ClassSyntax& syntax, const ast::Node& node) final;
+  void Visit(const ast::FunctionSyntax& syntax, const ast::Node& node) final;
 
   // Expressions
-  void VisitReferenceExpression(const ast::Node& node);
+  void Visit(const ast::ReferenceExpressionSyntax& syntax,
+             const ast::Node& node) final;
 
   // Statement
-  void VisitBlockStatement(const ast::Node& node);
+  void Visit(const ast::BlockStatementSyntax& syntax,
+             const ast::Node& node) final;
+  void Visit(const ast::ConstStatementSyntax& syntax,
+             const ast::Node& node) final;
+  void Visit(const ast::LetStatementSyntax& syntax,
+             const ast::Node& node) final;
+  void Visit(const ast::VarStatementSyntax& syntax,
+             const ast::Node& node) final;
 
   LocalEnvironment* environment_ = nullptr;
 

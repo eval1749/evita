@@ -37,7 +37,7 @@ class Environment final : public ZoneAllocated {
   // Return the AST node which associated to this Environment.
   const ast::Node& owner() const { return owner_; }
 
-  Value* BindingOf(const ast::Node& name) const;
+  Value* TryValueOf(const ast::Node& name) const;
 
  private:
   friend class EnvironmentBuilder;

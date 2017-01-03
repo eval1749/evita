@@ -10,8 +10,10 @@
 #include "joana/analyzer/environment.h"
 #include "joana/analyzer/environment_builder.h"
 #include "joana/analyzer/factory.h"
+#include "joana/analyzer/type_checker.h"
 #include "joana/analyzer/values.h"
 #include "joana/ast/node.h"
+#include "joana/ast/syntax_visitor.h"
 
 namespace joana {
 namespace analyzer {
@@ -47,7 +49,7 @@ std::ostream& operator<<(std::ostream& ostream, const Dump& dump) {
   ostream << Indent{depth} << "Environment " << environment.owner()
           << std::endl;
   for (const auto& name : environment.names()) {
-    const auto& value = *environment.BindingOf(*name);
+    const auto& value = *environment.TryValueOf(*name);
     ostream << Indent{depth + 1} << value << std::endl;
   }
   return ostream;
@@ -69,7 +71,9 @@ Factory& Controller::factory() const {
 
 void Controller::Analyze() {
   std::cout << Dump{0, &context_->global_environment()};
+  TypeChecker type_checker(context_.get());
   for (const auto& node : nodes_) {
+    type_checker.RunOn(*node);
     const auto& environment = factory().EnvironmentOf(*node);
     if (!environment.outer())
       continue;
@@ -80,7 +84,7 @@ void Controller::Analyze() {
 void Controller::Load(const ast::Node& node) {
   nodes_.push_back(&node);
   EnvironmentBuilder builder(context_.get());
-  builder.Load(node);
+  builder.RunOn(node);
 }
 
 }  // namespace analyzer

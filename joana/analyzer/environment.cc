@@ -34,7 +34,7 @@ void Environment::Bind(const ast::Node& name, Value* value) {
   names_.push_back(&name);
 }
 
-Value* Environment::BindingOf(const ast::Node& name) const {
+Value* Environment::TryValueOf(const ast::Node& name) const {
   const auto& it = value_map_.find(name.name_id());
   return it == value_map_.end() ? nullptr : it->second;
 }

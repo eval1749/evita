@@ -32,6 +32,7 @@ class LexerTestBase : public ::testing::Test {
   ParserContext& context() { return *context_; }
   SimpleErrorSink& error_sink() { return error_sink_; }
   const SourceCode& source_code() const;
+  Zone& zone() { return zone_; }
 
   void PrepareSouceCode(base::StringPiece script_text);
 

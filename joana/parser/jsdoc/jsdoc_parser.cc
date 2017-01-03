@@ -30,20 +30,20 @@ namespace parser {
 
 namespace {
 
-enum class Syntax {
+enum class TagSyntax {
   Unknown,
 #define V(name, ...) name,
   FOR_EACH_JSDOC_TAG_SYNTAX(V)
 #undef V
 };
 
-Syntax TagSyntaxOf(const ast::Node& name) {
+TagSyntax TagSyntaxOf(const ast::Node& name) {
 #define V(underscore, capital, syntax)                                    \
   if (name.name_id() == static_cast<int>(ast::TokenKind::JsDoc##capital)) \
-    return Syntax::syntax;
+    return TagSyntax::syntax;
   FOR_EACH_JSDOC_TAG_NAME(V)
 #undef V
-  return Syntax::Unknown;
+  return TagSyntax::Unknown;
 }
 
 }  // namespace
@@ -245,36 +245,36 @@ const ast::Node& JsDocParser::ParseSingleLine() {
 // Called after consuming '@'.
 const ast::Node& JsDocParser::ParseTag(const ast::Node& tag_name) {
   switch (TagSyntaxOf(tag_name)) {
-    case Syntax::Description:
+    case TagSyntax::Description:
       SkipWhitespaces();
       return NewTag(tag_name, ParseDescription());
-    case Syntax::NameList:
+    case TagSyntax::NameList:
       return NewTagWithVector(tag_name, ParseNameList());
-    case Syntax::Names:
+    case TagSyntax::Names:
       return NewTagWithVector(tag_name, ParseNames());
-    case Syntax::None:
+    case TagSyntax::None:
       return NewTag(tag_name);
-    case Syntax::OptionalType:
+    case TagSyntax::OptionalType:
       SkipWhitespaces();
       if (CanPeekChar() && PeekChar() == kLeftBrace)
         return NewTag(tag_name, ParseType());
       return NewTag(tag_name);
-    case Syntax::SingleLine:
+    case TagSyntax::SingleLine:
       return NewTag(tag_name, ParseSingleLine());
-    case Syntax::Type:
+    case TagSyntax::Type:
       return NewTag(tag_name, ParseType());
-    case Syntax::TypeDescription: {
+    case TagSyntax::TypeDescription: {
       auto& type = ParseType();
       auto& description = ParseDescription();
       return NewTag(tag_name, type, description);
     }
-    case Syntax::TypeNameDescription: {
+    case TagSyntax::TypeNameDescription: {
       auto& type = ParseType();
       auto& name = ParseName();
       auto& description = ParseDescription();
       return NewTag(tag_name, type, name, description);
     }
-    case Syntax::Unknown:
+    case TagSyntax::Unknown:
       AddError(tag_name.range(), JsDocErrorCode::ERROR_JSDOC_UNKNOWN_TAG);
       return NewTag(tag_name);
   }

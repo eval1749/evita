@@ -8,6 +8,7 @@
 #include "joana/analyzer/environment.h"
 #include "joana/analyzer/values.h"
 #include "joana/ast/compilation_units.h"
+#include "joana/ast/node.h"
 
 namespace joana {
 namespace analyzer {
@@ -25,7 +26,7 @@ Environment& Factory::EnvironmentOf(const ast::Node& node) const {
   const auto& it = environment_map_.find(&node);
   if (it != environment_map_.end())
     return *it->second;
-  DCHECK(node.Is<ast::CompilationUnit>()) << node;
+  DCHECK(node.syntax().Is<ast::CompilationUnit>()) << node;
   return global_environment();
 }
 

@@ -12,6 +12,8 @@ component("public") {
     "analyzer_settings.h",
     "analyzer_settings_builder.cc",
     "analyzer_settings_builder.h",
+    "error_codes.cc",
+    "error_codes.h",
   ]
 
   public_deps = [

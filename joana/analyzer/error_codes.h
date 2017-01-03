@@ -5,8 +5,6 @@
 #ifndef JOANA_ANALYZER_ERROR_CODES_H_
 #define JOANA_ANALYZER_ERROR_CODES_H_
 
-#include "base/strings/string_piece.h"
-#include "joana/analyzer/public/analyzer_export.h"
 #include "joana/analyzer/public/error_codes.h"
 
 namespace joana {
@@ -19,8 +17,6 @@ enum class ErrorCode {
 #undef V
       End,
 };
-
-JOANA_ANALYZER_EXPORT base::StringPiece ErrorStringOf(int error_code);
 
 }  // namespace analyzer
 }  // namespace joana

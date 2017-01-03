@@ -18,7 +18,6 @@ source_set("analyzer") {
     "environment.h",
     "environment_builder.cc",
     "environment_builder.h",
-    "error_codes.cc",
     "error_codes.h",
     "factory.cc",
     "factory.h",

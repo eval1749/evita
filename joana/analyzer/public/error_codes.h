@@ -5,6 +5,9 @@
 #ifndef JOANA_ANALYZER_PUBLIC_ERROR_CODES_H_
 #define JOANA_ANALYZER_PUBLIC_ERROR_CODES_H_
 
+#include "base/strings/string_piece.h"
+#include "joana/analyzer/public/analyzer_export.h"
+
 namespace joana {
 
 // V(pass, reason)
@@ -14,6 +17,11 @@ namespace joana {
 
 const auto kAnalyzerErrorCodeBase = 70000;
 
+namespace analyzer {
+
+JOANA_ANALYZER_EXPORT base::StringPiece ErrorStringOf(int error_code);
+
+}  // namespace analyzer
 }  // namespace joana
 
 #endif  // JOANA_ANALYZER_PUBLIC_ERROR_CODES_H_

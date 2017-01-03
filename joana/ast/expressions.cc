@@ -20,221 +20,221 @@ IMPLEMENT_AST_SYNTAX_0(Expression, GroupExpression, 1)
 IMPLEMENT_AST_SYNTAX_0(Expression, MemberExpression, 2)
 
 //
-// ArrayInitializerSyntax
+// ArrayInitializer
 //
-ArrayInitializerSyntax::ArrayInitializerSyntax()
+ArrayInitializer::ArrayInitializer()
     : SyntaxTemplate(std::tuple<>(),
                      SyntaxCode::ArrayInitializer,
                      Format::Builder().set_is_variadic(true).Build()) {}
 
-ArrayInitializerSyntax::~ArrayInitializerSyntax() = default;
+ArrayInitializer::~ArrayInitializer() = default;
 
 //
-// AssignmentExpressionSyntax
+// AssignmentExpression
 //
-AssignmentExpressionSyntax::AssignmentExpressionSyntax(TokenKind kind)
+AssignmentExpression::AssignmentExpression(TokenKind kind)
     : SyntaxTemplate(
           kind,
           SyntaxCode::AssignmentExpression,
           Format::Builder().set_arity(3).set_number_of_parameters(1).Build()) {}
 
-AssignmentExpressionSyntax::~AssignmentExpressionSyntax() = default;
+AssignmentExpression::~AssignmentExpression() = default;
 
-const Node& AssignmentExpressionSyntax::LeftHandSideOf(const Node& node) {
+const Node& AssignmentExpression::LeftHandSideOf(const Node& node) {
   DCHECK_EQ(node, SyntaxCode::AssignmentExpression);
   return node.child_at(0);
 }
 
-const Node& AssignmentExpressionSyntax::OperatorOf(const Node& node) {
+const Node& AssignmentExpression::OperatorOf(const Node& node) {
   DCHECK_EQ(node, SyntaxCode::AssignmentExpression);
   return node.child_at(1);
 }
 
-const Node& AssignmentExpressionSyntax::RightHandSideOf(const Node& node) {
+const Node& AssignmentExpression::RightHandSideOf(const Node& node) {
   DCHECK_EQ(node, SyntaxCode::AssignmentExpression);
   return node.child_at(2);
 }
 
 //
-// BinaryExpressionSyntax
+// BinaryExpression
 //
-BinaryExpressionSyntax::BinaryExpressionSyntax(TokenKind kind)
+BinaryExpression::BinaryExpression(TokenKind kind)
     : SyntaxTemplate(
           kind,
           SyntaxCode::BinaryExpression,
           Format::Builder().set_arity(3).set_number_of_parameters(1).Build()) {}
 
-BinaryExpressionSyntax::~BinaryExpressionSyntax() = default;
+BinaryExpression::~BinaryExpression() = default;
 
-const Node& BinaryExpressionSyntax::LeftHandSideOf(const Node& node) {
+const Node& BinaryExpression::LeftHandSideOf(const Node& node) {
   DCHECK_EQ(node, SyntaxCode::BinaryExpression);
   return node.child_at(0);
 }
 
-const Node& BinaryExpressionSyntax::OperatorOf(const Node& node) {
+const Node& BinaryExpression::OperatorOf(const Node& node) {
   DCHECK_EQ(node, SyntaxCode::BinaryExpression);
   return node.child_at(1);
 }
 
-const Node& BinaryExpressionSyntax::RightHandSideOf(const Node& node) {
+const Node& BinaryExpression::RightHandSideOf(const Node& node) {
   DCHECK_EQ(node, SyntaxCode::BinaryExpression);
   return node.child_at(2);
 }
 
 //
-// CallExpressionSyntax
+// CallExpression
 //
-CallExpressionSyntax::CallExpressionSyntax()
+CallExpression::CallExpression()
     : SyntaxTemplate(
           std::tuple<>(),
           SyntaxCode::CallExpression,
           Format::Builder().set_arity(1).set_is_variadic(true).Build()) {}
 
-CallExpressionSyntax::~CallExpressionSyntax() = default;
+CallExpression::~CallExpression() = default;
 
-ChildNodes CallExpressionSyntax::ArgumentsOf(const Node& node) {
+ChildNodes CallExpression::ArgumentsOf(const Node& node) {
   DCHECK_EQ(node, SyntaxCode::CallExpression);
   return ast::NodeTraversal::ChildNodesFrom(node, 1);
 }
 
-const Node& CallExpressionSyntax::ExpressionOf(const Node& node) {
+const Node& CallExpression::ExpressionOf(const Node& node) {
   DCHECK_EQ(node, SyntaxCode::CallExpression);
   return node.child_at(0);
 }
 
 //
-// CommaExpressionSyntax
+// CommaExpression
 //
-CommaExpressionSyntax::CommaExpressionSyntax()
+CommaExpression::CommaExpression()
     : SyntaxTemplate(std::tuple<>(),
                      SyntaxCode::CommaExpression,
                      Format::Builder().set_is_variadic(true).Build()) {}
 
-CommaExpressionSyntax::~CommaExpressionSyntax() = default;
+CommaExpression::~CommaExpression() = default;
 
 //
-// NewExpressionSyntax
+// NewExpression
 //
-NewExpressionSyntax::NewExpressionSyntax()
+NewExpression::NewExpression()
     : SyntaxTemplate(
           std::tuple<>(),
           SyntaxCode::NewExpression,
           Format::Builder().set_arity(1).set_is_variadic(true).Build()) {}
 
-NewExpressionSyntax::~NewExpressionSyntax() = default;
+NewExpression::~NewExpression() = default;
 
-ChildNodes NewExpressionSyntax::ArgumentsOf(const Node& node) {
+ChildNodes NewExpression::ArgumentsOf(const Node& node) {
   DCHECK_EQ(node, SyntaxCode::NewExpression);
   return ast::NodeTraversal::ChildNodesFrom(node, 1);
 }
 
-const Node& NewExpressionSyntax::ExpressionOf(const Node& node) {
+const Node& NewExpression::ExpressionOf(const Node& node) {
   DCHECK_EQ(node, SyntaxCode::NewExpression);
   return node.child_at(0);
 }
 
 //
-// ObjectInitializerSyntax
+// ObjectInitializer
 //
-ObjectInitializerSyntax::ObjectInitializerSyntax()
+ObjectInitializer::ObjectInitializer()
     : SyntaxTemplate(std::tuple<>(),
                      SyntaxCode::ObjectInitializer,
                      Format::Builder().set_is_variadic(true).Build()) {}
 
-ObjectInitializerSyntax::~ObjectInitializerSyntax() = default;
+ObjectInitializer::~ObjectInitializer() = default;
 
 //
-// ParameterListSyntax
+// ParameterList
 //
-ParameterListSyntax::ParameterListSyntax()
+ParameterList::ParameterList()
     : SyntaxTemplate(std::tuple<>(),
                      SyntaxCode::ParameterList,
                      Format::Builder().set_is_variadic(true).Build()) {}
 
-ParameterListSyntax::~ParameterListSyntax() = default;
+ParameterList::~ParameterList() = default;
 
 //
-// PropertySyntax
+// Property
 //
-PropertySyntax::PropertySyntax()
+Property::Property()
     : SyntaxTemplate(std::tuple<>(),
                      SyntaxCode::Property,
                      Format::Builder().set_arity(2).Build()) {}
 
-PropertySyntax::~PropertySyntax() = default;
+Property::~Property() = default;
 
-const Node& PropertySyntax::NameOf(const Node& node) {
+const Node& Property::NameOf(const Node& node) {
   DCHECK_EQ(node, SyntaxCode::Property);
   return node.child_at(0);
 }
 
-const Node& PropertySyntax::ValueOf(const Node& node) {
+const Node& Property::ValueOf(const Node& node) {
   DCHECK_EQ(node, SyntaxCode::Property);
   return node.child_at(1);
 }
 
 //
-// ReferenceExpressionSyntax
+// ReferenceExpression
 //
-ReferenceExpressionSyntax::ReferenceExpressionSyntax()
+ReferenceExpression::ReferenceExpression()
     : SyntaxTemplate(std::tuple<>(),
                      SyntaxCode::ReferenceExpression,
                      Format::Builder().set_arity(1).Build()) {}
 
-ReferenceExpressionSyntax::~ReferenceExpressionSyntax() = default;
+ReferenceExpression::~ReferenceExpression() = default;
 
-const Node& ReferenceExpressionSyntax::NameOf(const Node& node) {
+const Node& ReferenceExpression::NameOf(const Node& node) {
   DCHECK_EQ(node, SyntaxCode::ReferenceExpression);
   return node.child_at(0);
 }
 
 //
-// RegExpLiteralExpressionSyntax
+// RegExpLiteralExpression
 //
-RegExpLiteralExpressionSyntax::RegExpLiteralExpressionSyntax()
+RegExpLiteralExpression::RegExpLiteralExpression()
     : SyntaxTemplate(std::tuple<>(),
                      SyntaxCode::RegExpLiteralExpression,
                      Format::Builder().set_arity(2).Build()) {}
 
-RegExpLiteralExpressionSyntax::~RegExpLiteralExpressionSyntax() = default;
+RegExpLiteralExpression::~RegExpLiteralExpression() = default;
 
-const Node& RegExpLiteralExpressionSyntax::RegExpOf(const Node& node) {
+const Node& RegExpLiteralExpression::RegExpOf(const Node& node) {
   DCHECK_EQ(node, SyntaxCode::RegExpLiteralExpression);
   return node.child_at(0);
 }
 
-const Node& RegExpLiteralExpressionSyntax::FlagsOf(const Node& node) {
+const Node& RegExpLiteralExpression::FlagsOf(const Node& node) {
   DCHECK_EQ(node, SyntaxCode::RegExpLiteralExpression);
   return node.child_at(1);
 }
 
 //
-// TupleSyntax
+// Tuple
 //
-TupleSyntax::TupleSyntax()
+Tuple::Tuple()
     : SyntaxTemplate(std::tuple<>(),
                      SyntaxCode::Tuple,
                      Format::Builder().set_is_variadic(true).Build()) {}
 
-TupleSyntax::~TupleSyntax() = default;
+Tuple::~Tuple() = default;
 
 //
-// UnaryExpressionSyntax
+// UnaryExpression
 //
-UnaryExpressionSyntax::UnaryExpressionSyntax(TokenKind kind)
+UnaryExpression::UnaryExpression(TokenKind kind)
     : SyntaxTemplate(
           kind,
           SyntaxCode::UnaryExpression,
           Format::Builder().set_arity(2).set_number_of_parameters(1).Build()) {}
 
-UnaryExpressionSyntax::~UnaryExpressionSyntax() = default;
+UnaryExpression::~UnaryExpression() = default;
 
-const Node& UnaryExpressionSyntax::ExpressionOf(const Node& node) {
+const Node& UnaryExpression::ExpressionOf(const Node& node) {
   DCHECK_EQ(node, SyntaxCode::UnaryExpression);
   return node.child_at(1);
 }
 
-const Node& UnaryExpressionSyntax::OperatorOf(const Node& node) {
+const Node& UnaryExpression::OperatorOf(const Node& node) {
   DCHECK_EQ(node, SyntaxCode::UnaryExpression);
   return node.child_at(0);
 }

@@ -244,8 +244,7 @@ TEST_F(LexerTest, NodeFactoryNewName) {
       << "We can identify keyword 'while'.";
 
   PrepareSouceCode("while");
-  EXPECT_TRUE(
-      ast::NameSyntax::IsKeyword(node_factory().NewName(MakeRange(0, 5))));
+  EXPECT_TRUE(ast::Name::IsKeyword(node_factory().NewName(MakeRange(0, 5))));
 
   PrepareSouceCode("from");
   EXPECT_EQ(static_cast<int>(ast::TokenKind::From),
@@ -253,8 +252,7 @@ TEST_F(LexerTest, NodeFactoryNewName) {
       << "We can identify contextual keyword 'from'.";
 
   PrepareSouceCode("from");
-  EXPECT_FALSE(
-      ast::NameSyntax::IsKeyword(node_factory().NewName(MakeRange(0, 4))));
+  EXPECT_FALSE(ast::Name::IsKeyword(node_factory().NewName(MakeRange(0, 4))));
 
   PrepareSouceCode("of");
   EXPECT_EQ(static_cast<int>(ast::TokenKind::Of),

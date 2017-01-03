@@ -20,41 +20,41 @@ DECLARE_AST_SYNTAX_0(BindingProperty)
 DECLARE_AST_SYNTAX_0(BindingRestElement)
 
 //
-// ArrayBindingPatternSyntax
+// ArrayBindingPattern
 //
-class JOANA_AST_EXPORT ArrayBindingPatternSyntax final
+class JOANA_AST_EXPORT ArrayBindingPattern final
     : public SyntaxTemplate<Syntax> {
   DECLARE_CONCRETE_AST_SYNTAX(ArrayBindingPattern, Syntax);
 
  public:
-  ~ArrayBindingPatternSyntax() final;
+  ~ArrayBindingPattern() final;
 
   static ChildNodes ElementsOf(const Node& node);
   static const Node& InitializerOf(const Node& node);
 
  private:
-  ArrayBindingPatternSyntax();
+  ArrayBindingPattern();
 
-  DISALLOW_COPY_AND_ASSIGN(ArrayBindingPatternSyntax);
+  DISALLOW_COPY_AND_ASSIGN(ArrayBindingPattern);
 };
 
 //
-// ObjectBindingPatternSyntax
+// ObjectBindingPattern
 //
-class JOANA_AST_EXPORT ObjectBindingPatternSyntax final
+class JOANA_AST_EXPORT ObjectBindingPattern final
     : public SyntaxTemplate<Syntax> {
   DECLARE_CONCRETE_AST_SYNTAX(ObjectBindingPattern, Syntax);
 
  public:
-  ~ObjectBindingPatternSyntax() final;
+  ~ObjectBindingPattern() final;
 
   static ChildNodes ElementsOf(const Node& node);
   static const Node& InitializerOf(const Node& node);
 
  private:
-  ObjectBindingPatternSyntax();
+  ObjectBindingPattern();
 
-  DISALLOW_COPY_AND_ASSIGN(ObjectBindingPatternSyntax);
+  DISALLOW_COPY_AND_ASSIGN(ObjectBindingPattern);
 };
 
 }  // namespace ast

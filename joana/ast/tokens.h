@@ -72,53 +72,52 @@ DECLARE_AST_SYNTAX_0(Empty)
 DECLARE_AST_SYNTAX_1(Invalid, int, error_code)
 
 //
-// NameSyntax
+// Name
 //
-class JOANA_AST_EXPORT NameSyntax final : public Token {
+class JOANA_AST_EXPORT Name final : public Token {
   DECLARE_CONCRETE_AST_SYNTAX(Name, Token);
 
  public:
-  ~NameSyntax() final;
+  ~Name() final;
 
   static bool IsKeyword(const Node& node);
 
  private:
-  explicit NameSyntax(int number);
+  explicit Name(int number);
 
-  DISALLOW_COPY_AND_ASSIGN(NameSyntax);
+  DISALLOW_COPY_AND_ASSIGN(Name);
 };
 
 //
-// PunctuatorSyntax
+// Punctuator
 //
-class JOANA_AST_EXPORT PunctuatorSyntax final : public Token {
+class JOANA_AST_EXPORT Punctuator final : public Token {
   DECLARE_CONCRETE_AST_SYNTAX(Punctuator, Token);
 
  public:
-  ~PunctuatorSyntax() final;
+  ~Punctuator() final;
 
   TokenKind kind() const { return static_cast<TokenKind>(number()); }
 
  private:
-  explicit PunctuatorSyntax(TokenKind kind);
+  explicit Punctuator(TokenKind kind);
 
-  DISALLOW_COPY_AND_ASSIGN(PunctuatorSyntax);
+  DISALLOW_COPY_AND_ASSIGN(Punctuator);
 };
 
 //
-// RegExpSourceSyntax
+// RegExpSource
 //
-class JOANA_AST_EXPORT RegExpSourceSyntax final
-    : public SyntaxTemplate<Syntax> {
+class JOANA_AST_EXPORT RegExpSource final : public SyntaxTemplate<Syntax> {
   DECLARE_CONCRETE_AST_SYNTAX(RegExpSource, Syntax);
 
  public:
-  ~RegExpSourceSyntax() final;
+  ~RegExpSource() final;
 
  private:
-  RegExpSourceSyntax();
+  RegExpSource();
 
-  DISALLOW_COPY_AND_ASSIGN(RegExpSourceSyntax);
+  DISALLOW_COPY_AND_ASSIGN(RegExpSource);
 };
 
 }  // namespace ast

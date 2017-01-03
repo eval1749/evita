@@ -71,7 +71,7 @@ bool Node::is_literal() const {
 }
 
 int Node::name_id() const {
-  return syntax_.As<NameSyntax>().number();
+  return syntax_.As<Name>().number();
 }
 
 std::ostream& operator<<(std::ostream& ostream, const Node& node) {

@@ -52,67 +52,66 @@ class JOANA_AST_EXPORT VariableDeclaration : public SyntaxTemplate<Syntax> {
 };
 
 //
-// ConstStatementSyntax
+// ConstStatement
 //
-class JOANA_AST_EXPORT ConstStatementSyntax final : public VariableDeclaration {
+class JOANA_AST_EXPORT ConstStatement final : public VariableDeclaration {
   DECLARE_CONCRETE_AST_SYNTAX(ConstStatement, VariableDeclaration);
 
  public:
-  ~ConstStatementSyntax() final;
+  ~ConstStatement() final;
 
  private:
-  ConstStatementSyntax();
+  ConstStatement();
 
-  DISALLOW_COPY_AND_ASSIGN(ConstStatementSyntax);
+  DISALLOW_COPY_AND_ASSIGN(ConstStatement);
 };
 
 //
-// LetStatementSyntax
+// LetStatement
 //
-class JOANA_AST_EXPORT LetStatementSyntax final : public VariableDeclaration {
+class JOANA_AST_EXPORT LetStatement final : public VariableDeclaration {
   DECLARE_CONCRETE_AST_SYNTAX(LetStatement, VariableDeclaration);
 
  public:
-  ~LetStatementSyntax() final;
+  ~LetStatement() final;
 
  private:
-  LetStatementSyntax();
+  LetStatement();
 
-  DISALLOW_COPY_AND_ASSIGN(LetStatementSyntax);
+  DISALLOW_COPY_AND_ASSIGN(LetStatement);
 };
 
 //
-// SwitchStatementSyntax
+// SwitchStatement
 //
-class JOANA_AST_EXPORT SwitchStatementSyntax final
-    : public SyntaxTemplate<Syntax> {
+class JOANA_AST_EXPORT SwitchStatement final : public SyntaxTemplate<Syntax> {
   DECLARE_CONCRETE_AST_SYNTAX(SwitchStatement, Syntax);
 
  public:
-  ~SwitchStatementSyntax() final;
+  ~SwitchStatement() final;
 
   static ChildNodes ClausesOf(const Node& node);
   static const Node& ExpressionOf(const Node& node);
 
  private:
-  SwitchStatementSyntax();
+  SwitchStatement();
 
-  DISALLOW_COPY_AND_ASSIGN(SwitchStatementSyntax);
+  DISALLOW_COPY_AND_ASSIGN(SwitchStatement);
 };
 
 //
-// VarStatementSyntax
+// VarStatement
 //
-class JOANA_AST_EXPORT VarStatementSyntax final : public VariableDeclaration {
+class JOANA_AST_EXPORT VarStatement final : public VariableDeclaration {
   DECLARE_CONCRETE_AST_SYNTAX(VarStatement, VariableDeclaration);
 
  public:
-  ~VarStatementSyntax() final;
+  ~VarStatement() final;
 
  private:
-  VarStatementSyntax();
+  VarStatement();
 
-  DISALLOW_COPY_AND_ASSIGN(VarStatementSyntax);
+  DISALLOW_COPY_AND_ASSIGN(VarStatement);
 };
 
 }  // namespace ast

@@ -148,13 +148,12 @@ enum class FunctionTypeKind;
 enum class MethodKind;
 enum class TokenKind;
 enum class RegExpAssertionKind;
-struct RegExpRepeat;
 enum class TokenKind;
 enum class RegExpRepeatMethod;
 enum class SyntaxCode;
 class Syntax;
 
-#define V(name) class name##Syntax;
+#define V(name) class name;
 FOR_EACH_AST_SYNTAX(V)
 #undef V
 

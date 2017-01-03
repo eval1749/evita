@@ -10,119 +10,119 @@ namespace joana {
 namespace ast {
 
 //
-// AnnotationSyntax
+// Annotation
 //
-AnnotationSyntax::AnnotationSyntax()
+Annotation::Annotation()
     : SyntaxTemplate(std::tuple<>(),
                      SyntaxCode::Annotation,
                      Format::Builder().set_arity(2).Build()) {}
 
-AnnotationSyntax::~AnnotationSyntax() = default;
+Annotation::~Annotation() = default;
 
-const Node& AnnotationSyntax::AnnotatedOf(const Node& node) {
+const Node& Annotation::AnnotatedOf(const Node& node) {
   DCHECK_EQ(node, SyntaxCode::Annotation);
   return node.child_at(0);
 }
 
-const Node& AnnotationSyntax::AnnotationOf(const Node& node) {
+const Node& Annotation::AnnotationOf(const Node& node) {
   DCHECK_EQ(node, SyntaxCode::Annotation);
   return node.child_at(1);
 }
 
 //
-// ArrowFunctionSyntax
+// ArrowFunction
 //
-ArrowFunctionSyntax::ArrowFunctionSyntax(FunctionKind kind)
+ArrowFunction::ArrowFunction(FunctionKind kind)
     : SyntaxTemplate(
           kind,
           SyntaxCode::ArrowFunction,
           Format::Builder().set_arity(2).set_number_of_parameters(1).Build()) {}
 
-ArrowFunctionSyntax::~ArrowFunctionSyntax() = default;
+ArrowFunction::~ArrowFunction() = default;
 
-const Node& ArrowFunctionSyntax::BodyOf(const Node& node) {
+const Node& ArrowFunction::BodyOf(const Node& node) {
   DCHECK_EQ(node, SyntaxCode::ArrowFunction);
   return node.child_at(1);
 }
 
-const Node& ArrowFunctionSyntax::ParametersOf(const Node& node) {
+const Node& ArrowFunction::ParametersOf(const Node& node) {
   DCHECK_EQ(node, SyntaxCode::ArrowFunction);
   return node.child_at(0);
 }
 
 //
-// ClassSyntax
+// Class
 //
-ClassSyntax::ClassSyntax()
+Class::Class()
     : SyntaxTemplate(std::tuple<>(),
                      SyntaxCode::Class,
                      Format::Builder().set_arity(3).Build()) {}
 
-ClassSyntax::~ClassSyntax() = default;
+Class::~Class() = default;
 
-const Node& ClassSyntax::BodyOf(const Node& node) {
+const Node& Class::BodyOf(const Node& node) {
   DCHECK_EQ(node, SyntaxCode::Class);
   return node.child_at(2);
 }
 
-const Node& ClassSyntax::HerisyntaxeOf(const Node& node) {
+const Node& Class::HerisyntaxeOf(const Node& node) {
   DCHECK_EQ(node, SyntaxCode::Class);
   return node.child_at(1);
 }
 
-const Node& ClassSyntax::NameOf(const Node& node) {
+const Node& Class::NameOf(const Node& node) {
   DCHECK_EQ(node, SyntaxCode::Class);
   return node.child_at(0);
 }
 
 //
-// FunctionSyntax
+// Function
 //
-FunctionSyntax::FunctionSyntax(FunctionKind kind)
+Function::Function(FunctionKind kind)
     : SyntaxTemplate(
           kind,
           SyntaxCode::Function,
           Format::Builder().set_arity(3).set_number_of_parameters(1).Build()) {}
 
-FunctionSyntax::~FunctionSyntax() = default;
+Function::~Function() = default;
 
-const Node& FunctionSyntax::BodyOf(const Node& node) {
+const Node& Function::BodyOf(const Node& node) {
   DCHECK_EQ(node, SyntaxCode::Function);
   return node.child_at(2);
 }
 
-const Node& FunctionSyntax::NameOf(const Node& node) {
+const Node& Function::NameOf(const Node& node) {
   DCHECK_EQ(node, SyntaxCode::Function);
   return node.child_at(0);
 }
 
-const Node& FunctionSyntax::ParametersOf(const Node& node) {
+const Node& Function::ParametersOf(const Node& node) {
   DCHECK_EQ(node, SyntaxCode::Function);
   return node.child_at(1);
 }
 
 //
-// MethodSyntax
+// Method
 //
-MethodSyntax::MethodSyntax(MethodKind method_kind, FunctionKind kind)
+Method::Method(MethodKind method_kind, FunctionKind kind)
     : SyntaxTemplate(
           std::make_tuple(method_kind, kind),
           SyntaxCode::Method,
           Format::Builder().set_arity(3).set_number_of_parameters(2).Build()) {}
 
-MethodSyntax::~MethodSyntax() = default;
+Method::~Method() = default;
 
-const Node& MethodSyntax::BodyOf(const Node& node) {
+const Node& Method::BodyOf(const Node& node) {
   DCHECK_EQ(node, SyntaxCode::Method);
   return node.child_at(2);
 }
 
-const Node& MethodSyntax::NameOf(const Node& node) {
+const Node& Method::NameOf(const Node& node) {
   DCHECK_EQ(node, SyntaxCode::Method);
   return node.child_at(0);
 }
 
-const Node& MethodSyntax::ParametersOf(const Node& node) {
+const Node& Method::ParametersOf(const Node& node) {
   DCHECK_EQ(node, SyntaxCode::Method);
   return node.child_at(1);
 }

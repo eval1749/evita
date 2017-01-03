@@ -17,52 +17,51 @@ class ChildNodes;
 class Node;
 
 //
-// JsDocDocumentSyntax
+// JsDocDocument
 //
-class JOANA_AST_EXPORT JsDocDocumentSyntax final
-    : public SyntaxTemplate<Syntax> {
+class JOANA_AST_EXPORT JsDocDocument final : public SyntaxTemplate<Syntax> {
   DECLARE_CONCRETE_AST_SYNTAX(JsDocDocument, Syntax);
 
  public:
-  ~JsDocDocumentSyntax() final;
+  ~JsDocDocument() final;
 
  private:
-  JsDocDocumentSyntax();
+  JsDocDocument();
 
-  DISALLOW_COPY_AND_ASSIGN(JsDocDocumentSyntax);
+  DISALLOW_COPY_AND_ASSIGN(JsDocDocument);
 };
 
 //
-// JsDocTagSyntax
+// JsDocTag
 //
-class JOANA_AST_EXPORT JsDocTagSyntax final : public SyntaxTemplate<Syntax> {
+class JOANA_AST_EXPORT JsDocTag final : public SyntaxTemplate<Syntax> {
   DECLARE_CONCRETE_AST_SYNTAX(JsDocTag, Syntax);
 
  public:
-  ~JsDocTagSyntax() final;
+  ~JsDocTag() final;
 
   static const Node& NameOf(const Node& node);
   static ChildNodes OperandsOf(const Node& node);
 
  private:
-  JsDocTagSyntax();
+  JsDocTag();
 
-  DISALLOW_COPY_AND_ASSIGN(JsDocTagSyntax);
+  DISALLOW_COPY_AND_ASSIGN(JsDocTag);
 };
 
 //
-// JsDocTextSyntax
+// JsDocText
 //
-class JOANA_AST_EXPORT JsDocTextSyntax final : public SyntaxTemplate<Syntax> {
+class JOANA_AST_EXPORT JsDocText final : public SyntaxTemplate<Syntax> {
   DECLARE_CONCRETE_AST_SYNTAX(JsDocText, Syntax);
 
  public:
-  ~JsDocTextSyntax() final;
+  ~JsDocText() final;
 
  private:
-  JsDocTextSyntax();
+  JsDocText();
 
-  DISALLOW_COPY_AND_ASSIGN(JsDocTextSyntax);
+  DISALLOW_COPY_AND_ASSIGN(JsDocText);
 };
 
 }  // namespace ast

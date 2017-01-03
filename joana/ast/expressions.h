@@ -32,14 +32,14 @@ DECLARE_AST_SYNTAX_0(ParameterList)
 DECLARE_AST_SYNTAX_0(Tuple);
 
 //
-// AssignmentExpressionSyntax
+// AssignmentExpression
 //
-class JOANA_AST_EXPORT AssignmentExpressionSyntax final
+class JOANA_AST_EXPORT AssignmentExpression final
     : public SyntaxTemplate<Syntax, TokenKind> {
   DECLARE_CONCRETE_AST_SYNTAX(AssignmentExpression, Syntax);
 
  public:
-  ~AssignmentExpressionSyntax() final;
+  ~AssignmentExpression() final;
 
   TokenKind op() const { return parameter_at<0>(); }
 
@@ -48,20 +48,20 @@ class JOANA_AST_EXPORT AssignmentExpressionSyntax final
   static const Node& RightHandSideOf(const Node& node);
 
  private:
-  explicit AssignmentExpressionSyntax(TokenKind kind);
+  explicit AssignmentExpression(TokenKind kind);
 
-  DISALLOW_COPY_AND_ASSIGN(AssignmentExpressionSyntax);
+  DISALLOW_COPY_AND_ASSIGN(AssignmentExpression);
 };
 
 //
-// BinaryExpressionSyntax
+// BinaryExpression
 //
-class JOANA_AST_EXPORT BinaryExpressionSyntax final
+class JOANA_AST_EXPORT BinaryExpression final
     : public SyntaxTemplate<Syntax, TokenKind> {
   DECLARE_CONCRETE_AST_SYNTAX(BinaryExpression, Syntax);
 
  public:
-  ~BinaryExpressionSyntax() final;
+  ~BinaryExpression() final;
 
   TokenKind op() const { return parameter_at<0>(); }
 
@@ -70,113 +70,111 @@ class JOANA_AST_EXPORT BinaryExpressionSyntax final
   static const Node& RightHandSideOf(const Node& node);
 
  private:
-  explicit BinaryExpressionSyntax(TokenKind kind);
+  explicit BinaryExpression(TokenKind kind);
 
-  DISALLOW_COPY_AND_ASSIGN(BinaryExpressionSyntax);
+  DISALLOW_COPY_AND_ASSIGN(BinaryExpression);
 };
 
 //
-// CallExpressionSyntax
+// CallExpression
 //
-class JOANA_AST_EXPORT CallExpressionSyntax final
-    : public SyntaxTemplate<Syntax> {
+class JOANA_AST_EXPORT CallExpression final : public SyntaxTemplate<Syntax> {
   DECLARE_CONCRETE_AST_SYNTAX(CallExpression, Syntax);
 
  public:
-  ~CallExpressionSyntax() final;
+  ~CallExpression() final;
 
   static ChildNodes ArgumentsOf(const Node& node);
   static const Node& ExpressionOf(const Node& node);
 
  private:
-  CallExpressionSyntax();
+  CallExpression();
 
-  DISALLOW_COPY_AND_ASSIGN(CallExpressionSyntax);
+  DISALLOW_COPY_AND_ASSIGN(CallExpression);
 };
 
 //
-// NewExpressionSyntax
+// NewExpression
 //
-class JOANA_AST_EXPORT NewExpressionSyntax final
-    : public SyntaxTemplate<Syntax> {
+class JOANA_AST_EXPORT NewExpression final : public SyntaxTemplate<Syntax> {
   DECLARE_CONCRETE_AST_SYNTAX(NewExpression, Syntax);
 
  public:
-  ~NewExpressionSyntax() final;
+  ~NewExpression() final;
 
   static ChildNodes ArgumentsOf(const Node& node);
   static const Node& ExpressionOf(const Node& node);
 
  private:
-  NewExpressionSyntax();
+  NewExpression();
 
-  DISALLOW_COPY_AND_ASSIGN(NewExpressionSyntax);
+  DISALLOW_COPY_AND_ASSIGN(NewExpression);
 };
 
 //
-// PropertySyntax
+// Property
 //
-class JOANA_AST_EXPORT PropertySyntax final : public SyntaxTemplate<Syntax> {
+class JOANA_AST_EXPORT Property final : public SyntaxTemplate<Syntax> {
   DECLARE_CONCRETE_AST_SYNTAX(Property, Syntax);
 
  public:
-  ~PropertySyntax() final;
+  ~Property() final;
 
   static const Node& NameOf(const Node& node);
   static const Node& ValueOf(const Node& node);
 
  private:
-  PropertySyntax();
+  Property();
 
-  DISALLOW_COPY_AND_ASSIGN(PropertySyntax);
+  DISALLOW_COPY_AND_ASSIGN(Property);
 };
 
 //
-// ReferenceExpressionSyntax
+// ReferenceExpression
 //
-class JOANA_AST_EXPORT ReferenceExpressionSyntax final
+class JOANA_AST_EXPORT ReferenceExpression final
     : public SyntaxTemplate<Syntax> {
   DECLARE_CONCRETE_AST_SYNTAX(ReferenceExpression, Syntax);
 
  public:
-  ~ReferenceExpressionSyntax() final;
+  ~ReferenceExpression() final;
 
   static const Node& NameOf(const Node& node);
 
  private:
-  ReferenceExpressionSyntax();
+  ReferenceExpression();
 
-  DISALLOW_COPY_AND_ASSIGN(ReferenceExpressionSyntax);
+  DISALLOW_COPY_AND_ASSIGN(ReferenceExpression);
 };
 
 //
-// RegExpLiteralExpressionSyntax
+// RegExpLiteralExpression
 //
-class JOANA_AST_EXPORT RegExpLiteralExpressionSyntax final
+class JOANA_AST_EXPORT RegExpLiteralExpression final
     : public SyntaxTemplate<Syntax> {
   DECLARE_CONCRETE_AST_SYNTAX(RegExpLiteralExpression, Syntax);
 
  public:
-  ~RegExpLiteralExpressionSyntax() final;
+  ~RegExpLiteralExpression() final;
 
   static const Node& RegExpOf(const Node& node);
   static const Node& FlagsOf(const Node& node);
 
  private:
-  RegExpLiteralExpressionSyntax();
+  RegExpLiteralExpression();
 
-  DISALLOW_COPY_AND_ASSIGN(RegExpLiteralExpressionSyntax);
+  DISALLOW_COPY_AND_ASSIGN(RegExpLiteralExpression);
 };
 
 //
-// UnaryExpressionSyntax
+// UnaryExpression
 //
-class JOANA_AST_EXPORT UnaryExpressionSyntax final
+class JOANA_AST_EXPORT UnaryExpression final
     : public SyntaxTemplate<Syntax, TokenKind> {
   DECLARE_CONCRETE_AST_SYNTAX(UnaryExpression, Syntax);
 
  public:
-  ~UnaryExpressionSyntax() final;
+  ~UnaryExpression() final;
 
   TokenKind op() const { return parameter_at<0>(); }
 
@@ -184,9 +182,9 @@ class JOANA_AST_EXPORT UnaryExpressionSyntax final
   static const Node& OperatorOf(const Node& node);
 
  private:
-  explicit UnaryExpressionSyntax(TokenKind kind);
+  explicit UnaryExpression(TokenKind kind);
 
-  DISALLOW_COPY_AND_ASSIGN(UnaryExpressionSyntax);
+  DISALLOW_COPY_AND_ASSIGN(UnaryExpression);
 };
 
 }  // namespace ast

@@ -66,23 +66,23 @@ DECLARE_AST_SYNTAX_0(RepeatRegExp)
 DECLARE_AST_SYNTAX_0(SequenceRegExp)
 
 //
-// RegExpRepeatSyntax
+// RegExpRepeat
 //
-class JOANA_AST_EXPORT RegExpRepeatSyntax final
+class JOANA_AST_EXPORT RegExpRepeat final
     : public SyntaxTemplate<Syntax, RegExpRepeatMethod, int, int> {
   DECLARE_CONCRETE_AST_SYNTAX(RegExpRepeat, Syntax);
 
  public:
-  ~RegExpRepeatSyntax() final;
+  ~RegExpRepeat() final;
 
   bool is_lazy() const { return parameter_at<0>() == RegExpRepeatMethod::Lazy; }
   int max() const { return parameter_at<2>(); }
   int min() const { return parameter_at<1>(); }
 
  private:
-  RegExpRepeatSyntax(RegExpRepeatMethod mode, int min, int max);
+  RegExpRepeat(RegExpRepeatMethod mode, int min, int max);
 
-  DISALLOW_COPY_AND_ASSIGN(RegExpRepeatSyntax);
+  DISALLOW_COPY_AND_ASSIGN(RegExpRepeat);
 };
 
 }  // namespace ast

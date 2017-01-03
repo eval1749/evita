@@ -37,13 +37,11 @@ void SyntaxVisitor::VisitChildNodes(const ast::Node& node) {
 void SyntaxVisitor::VisitDefault(const ast::Node& node) {}
 
 #define V(name)                                                            \
-  void SyntaxVisitor::Visit(const name##Syntax& syntax,                    \
-                            const ast::Node& node) {                       \
+  void SyntaxVisitor::Visit(const name& syntax, const ast::Node& node) {   \
     VisitDefault(node);                                                    \
   }                                                                        \
                                                                            \
-  void name##Syntax::Accept(SyntaxVisitor* visitor, const ast::Node& node) \
-      const {                                                              \
+  void name::Accept(SyntaxVisitor* visitor, const ast::Node& node) const { \
     visitor->Visit(*this, node);                                           \
   }
 

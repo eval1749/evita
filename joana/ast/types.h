@@ -51,22 +51,21 @@ DECLARE_AST_SYNTAX_0(UnknownType)
 DECLARE_AST_SYNTAX_0(VoidType)
 
 //
-// TypeApplicationSyntax
+// TypeApplication
 //
-class JOANA_AST_EXPORT TypeApplicationSyntax final
-    : public SyntaxTemplate<Syntax> {
+class JOANA_AST_EXPORT TypeApplication final : public SyntaxTemplate<Syntax> {
   DECLARE_CONCRETE_AST_SYNTAX(TypeApplication, Syntax);
 
  public:
-  ~TypeApplicationSyntax() final;
+  ~TypeApplication() final;
 
   static const Node& ArgumentsOf(const Node& node);
   static const Node& NameOf(const Node& node);
 
  private:
-  TypeApplicationSyntax();
+  TypeApplication();
 
-  DISALLOW_COPY_AND_ASSIGN(TypeApplicationSyntax);
+  DISALLOW_COPY_AND_ASSIGN(TypeApplication);
 };
 
 }  // namespace ast

@@ -289,7 +289,7 @@ const ast::Node& Parser::ParseIfStatement() {
 const ast::Node& Parser::ParseKeywordStatement() {
   NodeRangeScope scope(this);
   const auto& keyword = PeekToken();
-  DCHECK(ast::NameSyntax::IsKeyword(keyword)) << keyword;
+  DCHECK(ast::Name::IsKeyword(keyword)) << keyword;
   switch (static_cast<ast::TokenKind>(keyword.name_id())) {
     case ast::TokenKind::Async:
       ConsumeToken();
@@ -371,7 +371,7 @@ const ast::Node& Parser::ParseLetStatement() {
 
 const ast::Node& Parser::ParseNameAsStatement() {
   auto& name = PeekToken();
-  if (ast::NameSyntax::IsKeyword(name))
+  if (ast::Name::IsKeyword(name))
     return ParseKeywordStatement();
   ConsumeToken();
   if (!CanPeekToken()) {

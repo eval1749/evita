@@ -34,48 +34,47 @@ IMPLEMENT_AST_SYNTAX_0(Statement, WhileStatement, 2)
 IMPLEMENT_AST_SYNTAX_0(Statement, WithStatement, 2)
 
 //
-// BlockStatementSyntax
+// BlockStatement
 //
-BlockStatementSyntax::BlockStatementSyntax()
+BlockStatement::BlockStatement()
     : SyntaxTemplate(std::tuple<>(),
                      SyntaxCode::BlockStatement,
                      Format::Builder().set_is_variadic(true).Build()) {}
 
-BlockStatementSyntax::~BlockStatementSyntax() = default;
+BlockStatement::~BlockStatement() = default;
 
 //
-// ConstStatementSyntax
+// ConstStatement
 //
-ConstStatementSyntax::ConstStatementSyntax()
+ConstStatement::ConstStatement()
     : VariableDeclaration(SyntaxCode::ConstStatement) {}
 
-ConstStatementSyntax::~ConstStatementSyntax() = default;
+ConstStatement::~ConstStatement() = default;
 
 //
-// LetStatementSyntax
+// LetStatement
 //
-LetStatementSyntax::LetStatementSyntax()
-    : VariableDeclaration(SyntaxCode::LetStatement) {}
+LetStatement::LetStatement() : VariableDeclaration(SyntaxCode::LetStatement) {}
 
-LetStatementSyntax::~LetStatementSyntax() = default;
+LetStatement::~LetStatement() = default;
 
 //
-// SwitchStatementSyntax
+// SwitchStatement
 //
-SwitchStatementSyntax::SwitchStatementSyntax()
+SwitchStatement::SwitchStatement()
     : SyntaxTemplate(
           std::tuple<>(),
           SyntaxCode::SwitchStatement,
           Format::Builder().set_arity(1).set_is_variadic(true).Build()) {}
 
-SwitchStatementSyntax::~SwitchStatementSyntax() = default;
+SwitchStatement::~SwitchStatement() = default;
 
-ChildNodes SwitchStatementSyntax::ClausesOf(const Node& node) {
+ChildNodes SwitchStatement::ClausesOf(const Node& node) {
   DCHECK_EQ(node, SyntaxCode::SwitchStatement);
   return ast::NodeTraversal::ChildNodesFrom(node, 1);
 }
 
-const Node& SwitchStatementSyntax::ExpressionOf(const Node& node) {
+const Node& SwitchStatement::ExpressionOf(const Node& node) {
   DCHECK_EQ(node, SyntaxCode::SwitchStatement);
   return node.child_at(0);
 }
@@ -91,12 +90,11 @@ VariableDeclaration::VariableDeclaration(SyntaxCode syntax_code)
 VariableDeclaration::~VariableDeclaration() = default;
 
 //
-// VarStatementSyntax
+// VarStatement
 //
-VarStatementSyntax::VarStatementSyntax()
-    : VariableDeclaration(SyntaxCode::VarStatement) {}
+VarStatement::VarStatement() : VariableDeclaration(SyntaxCode::VarStatement) {}
 
-VarStatementSyntax::~VarStatementSyntax() = default;
+VarStatement::~VarStatement() = default;
 
 }  // namespace ast
 }  // namespace joana

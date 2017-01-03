@@ -13,45 +13,45 @@ namespace joana {
 namespace ast {
 
 //
-// JsDocDocumentSyntax
+// JsDocDocument
 //
-JsDocDocumentSyntax::JsDocDocumentSyntax()
+JsDocDocument::JsDocDocument()
     : SyntaxTemplate(std::tuple<>(),
                      SyntaxCode::JsDocDocument,
                      Format::Builder().set_is_variadic(true).Build()) {}
 
-JsDocDocumentSyntax::~JsDocDocumentSyntax() = default;
+JsDocDocument::~JsDocDocument() = default;
 
 //
-// JsDocTagSyntax
+// JsDocTag
 //
-JsDocTagSyntax::JsDocTagSyntax()
+JsDocTag::JsDocTag()
     : SyntaxTemplate(
           std::tuple<>(),
           SyntaxCode::JsDocTag,
           Format::Builder().set_arity(1).set_is_variadic(true).Build()) {}
 
-JsDocTagSyntax::~JsDocTagSyntax() = default;
+JsDocTag::~JsDocTag() = default;
 
-const Node& JsDocTagSyntax::NameOf(const Node& node) {
+const Node& JsDocTag::NameOf(const Node& node) {
   DCHECK_EQ(node, SyntaxCode::JsDocTag);
   return node.child_at(0);
 }
 
-ChildNodes JsDocTagSyntax::OperandsOf(const Node& node) {
+ChildNodes JsDocTag::OperandsOf(const Node& node) {
   DCHECK_EQ(node, SyntaxCode::JsDocTag);
   return ast::NodeTraversal::ChildNodesFrom(node, 1);
 }
 
 //
-// JsDocTextSyntax
+// JsDocText
 //
-JsDocTextSyntax::JsDocTextSyntax()
+JsDocText::JsDocText()
     : SyntaxTemplate(std::tuple<>(),
                      SyntaxCode::JsDocText,
                      Format::Builder().Build()) {}
 
-JsDocTextSyntax::~JsDocTextSyntax() = default;
+JsDocText::~JsDocText() = default;
 
 }  // namespace ast
 }  // namespace joana

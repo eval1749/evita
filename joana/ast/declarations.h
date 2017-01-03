@@ -52,32 +52,32 @@ JOANA_AST_EXPORT std::ostream& operator<<(std::ostream& ostream,
                                           MethodKind kind);
 
 //
-// AnnotationSyntax
+// Annotation
 //
-class JOANA_AST_EXPORT AnnotationSyntax final : public SyntaxTemplate<Syntax> {
+class JOANA_AST_EXPORT Annotation final : public SyntaxTemplate<Syntax> {
   DECLARE_CONCRETE_AST_SYNTAX(Annotation, Syntax);
 
  public:
-  ~AnnotationSyntax() final;
+  ~Annotation() final;
 
   static const Node& AnnotatedOf(const Node& node);
   static const Node& AnnotationOf(const Node& node);
 
  private:
-  AnnotationSyntax();
+  Annotation();
 
-  DISALLOW_COPY_AND_ASSIGN(AnnotationSyntax);
+  DISALLOW_COPY_AND_ASSIGN(Annotation);
 };
 
 //
-// ArrowFunctionSyntax
+// ArrowFunction
 //
-class JOANA_AST_EXPORT ArrowFunctionSyntax final
+class JOANA_AST_EXPORT ArrowFunction final
     : public SyntaxTemplate<Syntax, FunctionKind> {
   DECLARE_CONCRETE_AST_SYNTAX(ArrowFunction, Syntax);
 
  public:
-  ~ArrowFunctionSyntax() final;
+  ~ArrowFunction() final;
 
   static const Node& BodyOf(const Node& node);
 
@@ -87,39 +87,39 @@ class JOANA_AST_EXPORT ArrowFunctionSyntax final
   static const Node& ParametersOf(const Node& node);
 
  private:
-  explicit ArrowFunctionSyntax(FunctionKind kind);
+  explicit ArrowFunction(FunctionKind kind);
 
-  DISALLOW_COPY_AND_ASSIGN(ArrowFunctionSyntax);
+  DISALLOW_COPY_AND_ASSIGN(ArrowFunction);
 };
 
 //
-// ClassSyntax
+// Class
 //
-class JOANA_AST_EXPORT ClassSyntax final : public SyntaxTemplate<Syntax> {
+class JOANA_AST_EXPORT Class final : public SyntaxTemplate<Syntax> {
   DECLARE_CONCRETE_AST_SYNTAX(Class, Syntax);
 
  public:
-  ~ClassSyntax() final;
+  ~Class() final;
 
   static const Node& BodyOf(const Node& node);
   static const Node& HerisyntaxeOf(const Node& node);
   static const Node& NameOf(const Node& node);
 
  private:
-  ClassSyntax();
+  Class();
 
-  DISALLOW_COPY_AND_ASSIGN(ClassSyntax);
+  DISALLOW_COPY_AND_ASSIGN(Class);
 };
 
 //
-// FunctionSyntax
+// Function
 //
-class JOANA_AST_EXPORT FunctionSyntax final
+class JOANA_AST_EXPORT Function final
     : public SyntaxTemplate<Syntax, FunctionKind> {
   DECLARE_CONCRETE_AST_SYNTAX(Function, Syntax);
 
  public:
-  ~FunctionSyntax() final;
+  ~Function() final;
 
   FunctionKind kind() const { return parameter_at<0>(); }
 
@@ -133,20 +133,20 @@ class JOANA_AST_EXPORT FunctionSyntax final
   static const Node& ParametersOf(const Node& node);
 
  private:
-  explicit FunctionSyntax(FunctionKind kind);
+  explicit Function(FunctionKind kind);
 
-  DISALLOW_COPY_AND_ASSIGN(FunctionSyntax);
+  DISALLOW_COPY_AND_ASSIGN(Function);
 };
 
 //
-// MethodSyntax
+// Method
 //
-class JOANA_AST_EXPORT MethodSyntax final
+class JOANA_AST_EXPORT Method final
     : public SyntaxTemplate<Syntax, MethodKind, FunctionKind> {
   DECLARE_CONCRETE_AST_SYNTAX(Method, Syntax);
 
  public:
-  ~MethodSyntax() final;
+  ~Method() final;
 
   FunctionKind kind() const { return parameter_at<1>(); }
   MethodKind method_kind() const { return parameter_at<0>(); }
@@ -162,9 +162,9 @@ class JOANA_AST_EXPORT MethodSyntax final
   static const Node& ParametersOf(const Node& node);
 
  private:
-  MethodSyntax(MethodKind method_kind, FunctionKind kind);
+  Method(MethodKind method_kind, FunctionKind kind);
 
-  DISALLOW_COPY_AND_ASSIGN(MethodSyntax);
+  DISALLOW_COPY_AND_ASSIGN(Method);
 };
 
 }  // namespace ast

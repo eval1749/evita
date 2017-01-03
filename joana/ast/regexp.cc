@@ -22,36 +22,34 @@ IMPLEMENT_AST_SYNTAX_0(RegExp, LookAheadNotRegExp, 1)
 IMPLEMENT_AST_SYNTAX_0(RegExp, RepeatRegExp, 2)
 
 //
-// OrRegExpSyntax
+// OrRegExp
 //
-OrRegExpSyntax::OrRegExpSyntax()
+OrRegExp::OrRegExp()
     : SyntaxTemplate(std::tuple<>(),
                      SyntaxCode::OrRegExp,
                      Format::Builder().set_is_variadic(true).Build()) {}
 
-OrRegExpSyntax::~OrRegExpSyntax() = default;
+OrRegExp::~OrRegExp() = default;
 
 //
-// RegExpRepeatSyntax
+// RegExpRepeat
 //
-RegExpRepeatSyntax::RegExpRepeatSyntax(RegExpRepeatMethod method,
-                                       int min,
-                                       int max)
+RegExpRepeat::RegExpRepeat(RegExpRepeatMethod method, int min, int max)
     : SyntaxTemplate(std::make_tuple(method, min, max),
                      SyntaxCode::RegExpRepeat,
                      Format::Builder().set_number_of_parameters(3).Build()) {}
 
-RegExpRepeatSyntax::~RegExpRepeatSyntax() = default;
+RegExpRepeat::~RegExpRepeat() = default;
 
 //
-// SequenceRegExpSyntax
+// SequenceRegExp
 //
-SequenceRegExpSyntax::SequenceRegExpSyntax()
+SequenceRegExp::SequenceRegExp()
     : SyntaxTemplate(std::tuple<>(),
                      SyntaxCode::SequenceRegExp,
                      Format::Builder().set_is_variadic(true).Build()) {}
 
-SequenceRegExpSyntax::~SequenceRegExpSyntax() = default;
+SequenceRegExp::~SequenceRegExp() = default;
 
 }  // namespace ast
 }  // namespace joana

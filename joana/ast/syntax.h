@@ -160,76 +160,75 @@ class SyntaxTemplate : public Base {
   DISALLOW_COPY_AND_ASSIGN(SyntaxTemplate);
 };
 
-#define DECLARE_AST_SYNTAX_0(name)                                            \
-  class JOANA_AST_EXPORT name##Syntax final : public SyntaxTemplate<Syntax> { \
-    DECLARE_CONCRETE_AST_SYNTAX(name, Syntax);                                \
-                                                                              \
-   public:                                                                    \
-    ~name##Syntax();                                                          \
-                                                                              \
-   private:                                                                   \
-    name##Syntax();                                                           \
-                                                                              \
-    DISALLOW_COPY_AND_ASSIGN(name##Syntax);                                   \
+#define DECLARE_AST_SYNTAX_0(name)                                    \
+  class JOANA_AST_EXPORT name final : public SyntaxTemplate<Syntax> { \
+    DECLARE_CONCRETE_AST_SYNTAX(name, Syntax);                        \
+                                                                      \
+   public:                                                            \
+    ~name();                                                          \
+                                                                      \
+   private:                                                           \
+    name();                                                           \
+                                                                      \
+    DISALLOW_COPY_AND_ASSIGN(name);                                   \
   };
 
-#define DECLARE_AST_SYNTAX_1(name, type1, parameter1)      \
-  class JOANA_AST_EXPORT name##Syntax final                \
-      : public SyntaxTemplate<Syntax, type1> {             \
-    DECLARE_CONCRETE_AST_SYNTAX(name, Syntax);             \
-                                                           \
-   public:                                                 \
-    ~name##Syntax();                                       \
-                                                           \
-    type1 parameter1() const { return parameter_at<0>(); } \
-                                                           \
-   private:                                                \
-    explicit name##Syntax(type1 parameter1);               \
-                                                           \
-    DISALLOW_COPY_AND_ASSIGN(name##Syntax);                \
+#define DECLARE_AST_SYNTAX_1(name, type1, parameter1)                        \
+  class JOANA_AST_EXPORT name final : public SyntaxTemplate<Syntax, type1> { \
+    DECLARE_CONCRETE_AST_SYNTAX(name, Syntax);                               \
+                                                                             \
+   public:                                                                   \
+    ~name();                                                                 \
+                                                                             \
+    type1 parameter1() const { return parameter_at<0>(); }                   \
+                                                                             \
+   private:                                                                  \
+    explicit name(type1 parameter1);                                         \
+                                                                             \
+    DISALLOW_COPY_AND_ASSIGN(name);                                          \
   };
 
 #define DECLARE_AST_SYNTAX_2(name, type1, parameter1, type2, member2) \
-  class JOANA_AST_EXPORT name##Syntax final                           \
+  class JOANA_AST_EXPORT name final                                   \
       : public SyntaxTemplate<Syntax, type1, type2> {                 \
     DECLARE_CONCRETE_AST_SYNTAX(name, Syntax);                        \
                                                                       \
    public:                                                            \
-    ~name##Syntax();                                                  \
+    ~name();                                                          \
                                                                       \
     type1 parameter1() const { return parameter_at<0>(); }            \
     type2 parameter2() const { return parameter_at<1>(); }            \
                                                                       \
    private:                                                           \
-    name##Syntax(type1 parameter1, type2 parameter2);                 \
+    name(type1 parameter1, type2 parameter2);                         \
                                                                       \
-    DISALLOW_COPY_AND_ASSIGN(name##Syntax);                           \
+    DISALLOW_COPY_AND_ASSIGN(name);                                   \
   };
 
 #define IMPLEMENT_AST_SYNTAX_0(base, name, arity)                     \
-  name##Syntax::name##Syntax()                                        \
+  name::name()                                                        \
       : SyntaxTemplate(std::tuple<>(), SyntaxCode::name,              \
                        Format::Builder().set_arity(arity).Build()) {} \
-  name##Syntax::~name##Syntax() = default;
+  name::~name() = default;
 
 #define IMPLEMENT_AST_SYNTAX_1(base, name, arity, type1, parameter1)  \
-  name##Syntax::name##Syntax(type1 parameter1)                        \
+  name::name(type1 parameter1)                                        \
       : SyntaxTemplate(std::make_tuple(parameter1), SyntaxCode::name, \
                        Format::Builder()                              \
                            .set_arity(arity)                          \
                            .set_number_of_parameters(1)               \
                            .Build()) {}                               \
-  name##Syntax::~name##Syntax() = default;
+  name::~name() = default;
 
 #define IMPLEMENT_AST_SYNTAX_2(base, name, arity, type1, parameter1, type2, \
                                parameter2)                                  \
-  name##Syntax::name##Syntax(type1 parameter1, type2 parameter2)            \
+  name::name(type1 parameter1, type2 parameter2)                            \
       : SyntaxTemplate(std::make_tuple(parameter1, parameter2),             \
                        SyntaxCode::name, Format::Builder()                  \
                                              .set_arity(arity)              \
                                              .set_number_of_parameters(2)   \
                                              .Build()) {}                   \
-  name##Syntax::~name##Syntax() = default;
+  name::~name() = default;
 
 // See "syntax_printer.cc" for implementation
 JOANA_AST_EXPORT std::ostream& operator<<(std::ostream& ostream,

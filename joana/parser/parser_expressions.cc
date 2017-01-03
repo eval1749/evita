@@ -114,7 +114,7 @@ Parser::OperatorPrecedence Parser::CategoryOf(const ast::Node& token) const {
     return Parser::OperatorPrecedence::Relational;
   if (token != ast::SyntaxCode::Punctuator)
     return Parser::OperatorPrecedence::None;
-  const auto kind = ast::PunctuatorSyntax::KindOf(token);
+  const auto kind = ast::Punctuator::KindOf(token);
   const auto& it = std::begin(CategoryMap) + static_cast<size_t>(kind);
   DCHECK(it >= std::begin(CategoryMap)) << token;
   DCHECK(it < std::end(CategoryMap)) << token;
@@ -126,7 +126,7 @@ const ast::Node& Parser::ConvertExpressionToBindingElement(
     const ast::Node* initializer) {
   if (expression == ast::SyntaxCode::ReferenceExpression) {
     return node_factory().NewBindingNameElement(
-        expression.range(), ast::ReferenceExpressionSyntax::NameOf(expression),
+        expression.range(), ast::ReferenceExpression::NameOf(expression),
         initializer ? *initializer : NewElisionExpression(expression));
   }
   if (expression == ast::SyntaxCode::ArrayInitializer) {
@@ -146,20 +146,19 @@ const ast::Node& Parser::ConvertExpressionToBindingElement(
         initializer ? *initializer : NewElisionExpression(expression));
   }
   if (expression == ast::SyntaxCode::Property) {
-    const auto& property_name = ast::PropertySyntax::NameOf(expression);
+    const auto& property_name = ast::Property::NameOf(expression);
     if (property_name == ast::SyntaxCode::ReferenceExpression) {
       return node_factory().NewBindingProperty(
-          expression.range(),
-          ast::ReferenceExpressionSyntax::NameOf(property_name),
-          ConvertExpressionToBindingElement(
-              ast::PropertySyntax::ValueOf(expression), nullptr));
+          expression.range(), ast::ReferenceExpression::NameOf(property_name),
+          ConvertExpressionToBindingElement(ast::Property::ValueOf(expression),
+                                            nullptr));
     }
   } else if (expression == ast::SyntaxCode::AssignmentExpression) {
-    if (ast::AssignmentExpressionSyntax::OperatorOf(expression) ==
+    if (ast::AssignmentExpression::OperatorOf(expression) ==
         ast::TokenKind::Equal) {
       return ConvertExpressionToBindingElement(
-          ast::AssignmentExpressionSyntax::LeftHandSideOf(expression),
-          &ast::AssignmentExpressionSyntax::RightHandSideOf(expression));
+          ast::AssignmentExpression::LeftHandSideOf(expression),
+          &ast::AssignmentExpression::RightHandSideOf(expression));
     }
   }
   return node_factory().NewBindingInvalidElement(expression.range());
@@ -429,7 +428,7 @@ const ast::Node& Parser::ParseNameAsExpression() {
     case ast::TokenKind::True:
       return node_factory().NewBooleanLiteral(name, true);
   }
-  if (ast::NameSyntax::IsKeyword(name))
+  if (ast::Name::IsKeyword(name))
     return NewInvalidExpression(name, ErrorCode::ERROR_EXPRESSION_INVALID);
   if (ConsumeTokenIf(ast::TokenKind::Arrow)) {
     auto& statement = ParseArrowFunctionBody();

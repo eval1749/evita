@@ -98,8 +98,8 @@ class SyntaxFactory::Cache final {
 };
 
 SyntaxFactory::Cache::Cache(Zone* zone)
-    : false_syntax_(*new (zone) BooleanLiteralSyntax(false)),
-      true_syntax_(*new (zone) BooleanLiteralSyntax(true)) {
+    : false_syntax_(*new (zone) BooleanLiteral(false)),
+      true_syntax_(*new (zone) BooleanLiteral(true)) {
   syntaxes_.fill(nullptr);
 }
 
@@ -151,11 +151,11 @@ const Syntax& SyntaxFactory::NewSyntax() {
 }
 
 #define IMPLEMENT_FACTORY_MEMBER_0(name) \
-  const Syntax& SyntaxFactory::New##name() { return NewSyntax<name##Syntax>(); }
+  const Syntax& SyntaxFactory::New##name() { return NewSyntax<name>(); }
 
 #define IMPLEMENT_FACTORY_MEMBER_1(name, type1, parameter1)  \
   const Syntax& SyntaxFactory::New##name(type1 parameter1) { \
-    return NewSyntax<name##Syntax>(parameter1);              \
+    return NewSyntax<name>(parameter1);                      \
   }
 
 FOR_EACH_AST_BINDING_ELEMENT(IMPLEMENT_FACTORY_MEMBER_0)
@@ -165,7 +165,7 @@ FOR_EACH_AST_COMPILATION_UNIT(IMPLEMENT_FACTORY_MEMBER_0)
 IMPLEMENT_FACTORY_MEMBER_0(Annotation)
 
 const Syntax& SyntaxFactory::NewArrowFunction(FunctionKind kind) {
-  return NewSyntax<ArrowFunctionSyntax>(kind);
+  return NewSyntax<ArrowFunction>(kind);
 }
 
 IMPLEMENT_FACTORY_MEMBER_0(Class)
@@ -173,7 +173,7 @@ IMPLEMENT_FACTORY_MEMBER_1(Function, FunctionKind, kind)
 
 const Syntax& SyntaxFactory::NewMethod(MethodKind method_kind,
                                        FunctionKind kind) {
-  return NewSyntax<MethodSyntax>(method_kind, kind);
+  return NewSyntax<Method>(method_kind, kind);
 }
 
 // Expressions
@@ -227,7 +227,7 @@ IMPLEMENT_FACTORY_MEMBER_0(SequenceRegExp)
 const Syntax& SyntaxFactory::NewRegExpRepeat(RegExpRepeatMethod method,
                                              int min,
                                              int max) {
-  return NewSyntax<RegExpRepeatSyntax>(method, min, max);
+  return NewSyntax<RegExpRepeat>(method, min, max);
 }
 
 // Statements

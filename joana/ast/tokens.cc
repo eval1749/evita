@@ -16,34 +16,34 @@ IMPLEMENT_AST_SYNTAX_0(Token, Empty, 0)
 IMPLEMENT_AST_SYNTAX_1(Token, Invalid, 0, int, error_code)
 
 //
-// NameSyntax
+// Name
 //
-NameSyntax::NameSyntax(int number) : Token(SyntaxCode::Name, number) {}
-NameSyntax::~NameSyntax() = default;
+Name::Name(int number) : Token(SyntaxCode::Name, number) {}
+Name::~Name() = default;
 
-bool NameSyntax::IsKeyword(const Node& node) {
+bool Name::IsKeyword(const Node& node) {
   const auto number = IdOf(node);
   return number > static_cast<int>(TokenKind::StartOfKeyword) &&
          number < static_cast<int>(TokenKind::EndOfKeyword);
 }
 
 //
-// PunctuatorSyntax
+// Punctuator
 //
-PunctuatorSyntax::PunctuatorSyntax(TokenKind kind)
+Punctuator::Punctuator(TokenKind kind)
     : Token(SyntaxCode::Punctuator, static_cast<int>(kind)) {}
 
-PunctuatorSyntax::~PunctuatorSyntax() = default;
+Punctuator::~Punctuator() = default;
 
 //
-// RegExpSourceSyntax
+// RegExpSource
 //
-RegExpSourceSyntax::RegExpSourceSyntax()
+RegExpSource::RegExpSource()
     : SyntaxTemplate(std::tuple<>(),
                      SyntaxCode::RegExpSource,
                      Syntax::Format()) {}
 
-RegExpSourceSyntax::~RegExpSourceSyntax() = default;
+RegExpSource::~RegExpSource() = default;
 
 //
 // Token

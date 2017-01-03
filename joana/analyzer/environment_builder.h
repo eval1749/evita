@@ -54,27 +54,23 @@ class EnvironmentBuilder final : public Pass, public ast::SyntaxVisitor {
   void VisitDefault(const ast::Node& node) final;
 
   // Binding elements
-  void Visit(const ast::BindingNameElementSyntax& syntax,
+  void Visit(const ast::BindingNameElement& syntax,
              const ast::Node& node) final;
 
   // Declarations
-  void Visit(const ast::ClassSyntax& syntax, const ast::Node& node) final;
-  void Visit(const ast::FunctionSyntax& syntax, const ast::Node& node) final;
-  void Visit(const ast::MethodSyntax& syntax, const ast::Node& node) final;
+  void Visit(const ast::Class& syntax, const ast::Node& node) final;
+  void Visit(const ast::Function& syntax, const ast::Node& node) final;
+  void Visit(const ast::Method& syntax, const ast::Node& node) final;
 
   // Expressions
-  void Visit(const ast::ReferenceExpressionSyntax& syntax,
+  void Visit(const ast::ReferenceExpression& syntax,
              const ast::Node& node) final;
 
   // Statement
-  void Visit(const ast::BlockStatementSyntax& syntax,
-             const ast::Node& node) final;
-  void Visit(const ast::ConstStatementSyntax& syntax,
-             const ast::Node& node) final;
-  void Visit(const ast::LetStatementSyntax& syntax,
-             const ast::Node& node) final;
-  void Visit(const ast::VarStatementSyntax& syntax,
-             const ast::Node& node) final;
+  void Visit(const ast::BlockStatement& syntax, const ast::Node& node) final;
+  void Visit(const ast::ConstStatement& syntax, const ast::Node& node) final;
+  void Visit(const ast::LetStatement& syntax, const ast::Node& node) final;
+  void Visit(const ast::VarStatement& syntax, const ast::Node& node) final;
 
   LocalEnvironment* environment_ = nullptr;
 

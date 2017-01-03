@@ -59,7 +59,7 @@ Value* TypeChecker::TryValueOf(const ast::Node& node) const {
 }
 
 // |ast::SyntaxVisitor| members
-void TypeChecker::Visit(const ast::ReferenceExpressionSyntax& syntax,
+void TypeChecker::Visit(const ast::ReferenceExpression& syntax,
                         const ast::Node& node) {
   if (factory().TryValueOf(node))
     return;

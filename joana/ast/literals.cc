@@ -12,9 +12,9 @@ namespace joana {
 namespace ast {
 
 //
-// BooleanLiteralSyntax
+// BooleanLiteral
 //
-BooleanLiteralSyntax::BooleanLiteralSyntax(bool value)
+BooleanLiteral::BooleanLiteral(bool value)
     : SyntaxTemplate(value,
                      SyntaxCode::BooleanLiteral,
                      Format::Builder()
@@ -22,12 +22,12 @@ BooleanLiteralSyntax::BooleanLiteralSyntax(bool value)
                          .set_number_of_parameters(1)
                          .Build()) {}
 
-BooleanLiteralSyntax::~BooleanLiteralSyntax() = default;
+BooleanLiteral::~BooleanLiteral() = default;
 
 //
-// NumericLiteralSyntax
+// NumericLiteral
 //
-NumericLiteralSyntax::NumericLiteralSyntax(float64_t value)
+NumericLiteral::NumericLiteral(float64_t value)
     : SyntaxTemplate(value,
                      SyntaxCode::NumericLiteral,
                      Format::Builder()
@@ -35,37 +35,37 @@ NumericLiteralSyntax::NumericLiteralSyntax(float64_t value)
                          .set_number_of_parameters(1)
                          .Build()) {}
 
-NumericLiteralSyntax::~NumericLiteralSyntax() = default;
+NumericLiteral::~NumericLiteral() = default;
 
 //
-// NullLiteralSyntax
+// NullLiteral
 //
-NullLiteralSyntax::NullLiteralSyntax()
+NullLiteral::NullLiteral()
     : SyntaxTemplate(std::tuple<>(),
                      SyntaxCode::NullLiteral,
                      Format::Builder().set_is_literal(true).Build()) {}
 
-NullLiteralSyntax::~NullLiteralSyntax() = default;
+NullLiteral::~NullLiteral() = default;
 
 //
-// StringLiteralSyntax
+// StringLiteral
 //
-StringLiteralSyntax::StringLiteralSyntax()
+StringLiteral::StringLiteral()
     : SyntaxTemplate(std::tuple<>(),
                      SyntaxCode::StringLiteral,
                      Format::Builder().set_is_literal(true).Build()) {}
 
-StringLiteralSyntax::~StringLiteralSyntax() = default;
+StringLiteral::~StringLiteral() = default;
 
 //
-// UndefinedLiteralSyntax
+// UndefinedLiteral
 //
-UndefinedLiteralSyntax::UndefinedLiteralSyntax()
+UndefinedLiteral::UndefinedLiteral()
     : SyntaxTemplate(std::tuple<>(),
                      SyntaxCode::UndefinedLiteral,
                      Format::Builder().set_is_literal(true).Build()) {}
 
-UndefinedLiteralSyntax::~UndefinedLiteralSyntax() = default;
+UndefinedLiteral::~UndefinedLiteral() = default;
 
 }  // namespace ast
 }  // namespace joana

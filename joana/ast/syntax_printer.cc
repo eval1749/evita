@@ -23,39 +23,38 @@ struct Printable {
   const T* value;
 };
 
-std::ostream& operator<<(
-    std::ostream& ostream,
-    const Printable<AssignmentExpressionSyntax>& printable) {
+std::ostream& operator<<(std::ostream& ostream,
+                         const Printable<AssignmentExpression>& printable) {
   const auto& syntax = *printable.value;
   return ostream << '<' << syntax.op() << '>';
 }
 
 std::ostream& operator<<(std::ostream& ostream,
-                         const Printable<BinaryExpressionSyntax>& printable) {
+                         const Printable<BinaryExpression>& printable) {
   const auto& syntax = *printable.value;
   return ostream << '<' << syntax.op() << '>';
 }
 
 std::ostream& operator<<(std::ostream& ostream,
-                         const Printable<FunctionSyntax>& printable) {
+                         const Printable<Function>& printable) {
   const auto& syntax = *printable.value;
   return ostream << '<' << syntax.kind() << '>';
 }
 
 std::ostream& operator<<(std::ostream& ostream,
-                         const Printable<FunctionTypeSyntax>& printable) {
+                         const Printable<FunctionType>& printable) {
   const auto& syntax = *printable.value;
   return ostream << '<' << syntax.kind() << '>';
 }
 
 std::ostream& operator<<(std::ostream& ostream,
-                         const Printable<MethodSyntax>& printable) {
+                         const Printable<Method>& printable) {
   const auto& syntax = *printable.value;
   return ostream << '<' << syntax.method_kind() << ',' << syntax.kind() << '>';
 }
 
 std::ostream& operator<<(std::ostream& ostream,
-                         const Printable<RegExpRepeatSyntax>& printable) {
+                         const Printable<RegExpRepeat>& printable) {
   const auto& syntax = *printable.value;
   const auto min = syntax.min();
   const auto max = syntax.max();
@@ -74,7 +73,7 @@ std::ostream& operator<<(std::ostream& ostream,
 }
 
 std::ostream& operator<<(std::ostream& ostream,
-                         const Printable<UnaryExpressionSyntax>& printable) {
+                         const Printable<UnaryExpression>& printable) {
   const auto& syntax = *printable.value;
   return ostream << '<' << syntax.op() << '>';
 }
@@ -157,8 +156,8 @@ std::ostream& operator<<(std::ostream& ostream, const Syntax& syntax) {
     return ostream;
 
 #define PRINT_PARAMETERS_IF(name) \
-  if (syntax.Is<name##Syntax>())  \
-    return ostream << Printable<name##Syntax>{&syntax.As<name##Syntax>()};
+  if (syntax.Is<name>())          \
+    return ostream << Printable<name>{&syntax.As<name>()};
 
   PRINT_PARAMETERS_IF(AssignmentExpression);
   PRINT_PARAMETERS_IF(BinaryExpression);

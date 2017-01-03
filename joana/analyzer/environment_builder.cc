@@ -74,12 +74,12 @@ EnvironmentBuilder::LocalEnvironment::~LocalEnvironment() {
 
 void EnvironmentBuilder::LocalEnvironment::Bind(const ast::Node& name,
                                                 Value* value) {
-  const auto& result = value_map_.emplace(ast::NameSyntax::IdOf(name), value);
+  const auto& result = value_map_.emplace(ast::Name::IdOf(name), value);
   DCHECK(result.second);
 }
 
 Value* EnvironmentBuilder::LocalEnvironment::Find(const ast::Node& name) const {
-  const auto& it = value_map_.find(ast::NameSyntax::IdOf(name));
+  const auto& it = value_map_.find(ast::Name::IdOf(name));
   return it == value_map_.end() ? nullptr : it->second;
 }
 
@@ -189,17 +189,17 @@ void EnvironmentBuilder::VisitDefault(const ast::Node& node) {
 }
 
 // Binding elements
-void EnvironmentBuilder::Visit(const ast::BindingNameElementSyntax& syntax,
+void EnvironmentBuilder::Visit(const ast::BindingNameElement& syntax,
                                const ast::Node& node) {
   BindToVariable(*variable_origin_, node);
   VisitChildNodes(node);
 }
 
 // Declarations
-void EnvironmentBuilder::Visit(const ast::ClassSyntax& syntax,
+void EnvironmentBuilder::Visit(const ast::Class& syntax,
                                const ast::Node& node) {
   // TODO(eval1749): Report warning for toplevel anonymous class
-  const auto& name = ast::ClassSyntax::NameOf(node);
+  const auto& name = ast::Class::NameOf(node);
   if (name == ast::SyntaxCode::Name)
     BindToClass(name, node);
   else
@@ -208,10 +208,10 @@ void EnvironmentBuilder::Visit(const ast::ClassSyntax& syntax,
   VisitChildNodes(node);
 }
 
-void EnvironmentBuilder::Visit(const ast::FunctionSyntax& syntax,
+void EnvironmentBuilder::Visit(const ast::Function& syntax,
                                const ast::Node& node) {
   // TODO(eval1749): Report warning for toplevel anonymous class
-  const auto& name = ast::FunctionSyntax::NameOf(node);
+  const auto& name = ast::Function::NameOf(node);
   if (name == ast::SyntaxCode::Name)
     BindToFunction(name, node);
   else
@@ -221,10 +221,10 @@ void EnvironmentBuilder::Visit(const ast::FunctionSyntax& syntax,
   VisitChildNodes(node);
 }
 
-void EnvironmentBuilder::Visit(const ast::MethodSyntax& syntax,
+void EnvironmentBuilder::Visit(const ast::Method& syntax,
                                const ast::Node& node) {
   // TODO(eval1749): Report warning for toplevel anonymous class
-  const auto& name = ast::MethodSyntax::NameOf(node);
+  const auto& name = ast::Method::NameOf(node);
   if (name == ast::SyntaxCode::Name)
     BindToFunction(name, node);
   else
@@ -235,9 +235,9 @@ void EnvironmentBuilder::Visit(const ast::MethodSyntax& syntax,
 }
 
 // Expressions
-void EnvironmentBuilder::Visit(const ast::ReferenceExpressionSyntax& syntax,
+void EnvironmentBuilder::Visit(const ast::ReferenceExpression& syntax,
                                const ast::Node& node) {
-  const auto& name = ast::ReferenceExpressionSyntax::NameOf(node);
+  const auto& name = ast::ReferenceExpression::NameOf(node);
   for (auto* runner = environment_; runner; runner = runner->outer()) {
     if (auto* present = runner->Find(name)) {
       factory().RegisterValue(node, present);
@@ -251,23 +251,23 @@ void EnvironmentBuilder::Visit(const ast::ReferenceExpressionSyntax& syntax,
 }
 
 // Statements
-void EnvironmentBuilder::Visit(const ast::BlockStatementSyntax& syntax,
+void EnvironmentBuilder::Visit(const ast::BlockStatement& syntax,
                                const ast::Node& node) {
   LocalEnvironment environment(this, node);
   VisitChildNodes(node);
 }
 
-void EnvironmentBuilder::Visit(const ast::ConstStatementSyntax& syntax,
+void EnvironmentBuilder::Visit(const ast::ConstStatement& syntax,
                                const ast::Node& node) {
   ProcessVariables(node);
 }
 
-void EnvironmentBuilder::Visit(const ast::LetStatementSyntax& syntax,
+void EnvironmentBuilder::Visit(const ast::LetStatement& syntax,
                                const ast::Node& node) {
   ProcessVariables(node);
 }
 
-void EnvironmentBuilder::Visit(const ast::VarStatementSyntax& syntax,
+void EnvironmentBuilder::Visit(const ast::VarStatement& syntax,
                                const ast::Node& node) {
   ProcessVariables(node);
 }

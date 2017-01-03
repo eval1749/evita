@@ -20,25 +20,25 @@ CompilationUnit::CompilationUnit(SyntaxCode syntax_code)
 CompilationUnit::~CompilationUnit() = default;
 
 //
-// ExternsSyntax
+// Externs
 //
-ExternsSyntax::ExternsSyntax() : CompilationUnit(SyntaxCode::Externs) {}
+Externs::Externs() : CompilationUnit(SyntaxCode::Externs) {}
 
-ExternsSyntax::~ExternsSyntax() = default;
-
-//
-// ModuleSyntax
-//
-ModuleSyntax::ModuleSyntax() : CompilationUnit(SyntaxCode::Module) {}
-
-ModuleSyntax::~ModuleSyntax() = default;
+Externs::~Externs() = default;
 
 //
-// ScriptSyntax
+// Module
 //
-ScriptSyntax::ScriptSyntax() : CompilationUnit(SyntaxCode::Script) {}
+Module::Module() : CompilationUnit(SyntaxCode::Module) {}
 
-ScriptSyntax::~ScriptSyntax() = default;
+Module::~Module() = default;
+
+//
+// Script
+//
+Script::Script() : CompilationUnit(SyntaxCode::Script) {}
+
+Script::~Script() = default;
 
 }  // namespace ast
 }  // namespace joana

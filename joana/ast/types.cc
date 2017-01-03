@@ -23,54 +23,54 @@ IMPLEMENT_AST_SYNTAX_0(Type, UnknownType, 0)
 IMPLEMENT_AST_SYNTAX_0(Type, VoidType, 0)
 
 //
-// RecordTypeSyntax
+// RecordType
 //
-RecordTypeSyntax::RecordTypeSyntax()
+RecordType::RecordType()
     : SyntaxTemplate(std::tuple<>(),
                      SyntaxCode::RecordType,
                      Format::Builder().set_is_variadic(true).Build()) {}
 
-RecordTypeSyntax::~RecordTypeSyntax() = default;
+RecordType::~RecordType() = default;
 
 //
-// TupleTypeSyntax
+// TupleType
 //
-TupleTypeSyntax::TupleTypeSyntax()
+TupleType::TupleType()
     : SyntaxTemplate(std::tuple<>(),
                      SyntaxCode::TupleType,
                      Format::Builder().set_is_variadic(true).Build()) {}
 
-TupleTypeSyntax::~TupleTypeSyntax() = default;
+TupleType::~TupleType() = default;
 
 //
-// TypeApplicationSyntax
+// TypeApplication
 //
-TypeApplicationSyntax::TypeApplicationSyntax()
+TypeApplication::TypeApplication()
     : SyntaxTemplate(std::tuple<>(),
                      SyntaxCode::TypeApplication,
                      Format::Builder().set_arity(2).Build()) {}
 
-TypeApplicationSyntax::~TypeApplicationSyntax() = default;
+TypeApplication::~TypeApplication() = default;
 
-const Node& TypeApplicationSyntax::ArgumentsOf(const Node& node) {
+const Node& TypeApplication::ArgumentsOf(const Node& node) {
   DCHECK_EQ(node, SyntaxCode::TypeApplication);
   return node.child_at(1);
 }
 
-const Node& TypeApplicationSyntax::NameOf(const Node& node) {
+const Node& TypeApplication::NameOf(const Node& node) {
   DCHECK_EQ(node, SyntaxCode::TypeApplication);
   return node.child_at(0);
 }
 
 //
-// UnionTypeSyntax
+// UnionType
 //
-UnionTypeSyntax::UnionTypeSyntax()
+UnionType::UnionType()
     : SyntaxTemplate(std::tuple<>(),
                      SyntaxCode::UnionType,
                      Format::Builder().set_is_variadic(true).Build()) {}
 
-UnionTypeSyntax::~UnionTypeSyntax() = default;
+UnionType::~UnionType() = default;
 
 }  // namespace ast
 }  // namespace joana

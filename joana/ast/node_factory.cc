@@ -329,9 +329,9 @@ const Node& NodeFactory::NewAssignmentExpression(const SourceCodeRange& range,
                                                  const Node& op,
                                                  const Node& lhs,
                                                  const Node& rhs) {
-  return NewNode3(range, syntax_factory_->NewAssignmentExpression(
-                             PunctuatorSyntax::KindOf(op)),
-                  lhs, op, rhs);
+  return NewNode3(
+      range, syntax_factory_->NewAssignmentExpression(Punctuator::KindOf(op)),
+      lhs, op, rhs);
 }
 
 const Node& NodeFactory::NewBinaryExpression(const SourceCodeRange& range,

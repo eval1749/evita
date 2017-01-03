@@ -30,48 +30,48 @@ class JOANA_AST_EXPORT CompilationUnit : public SyntaxTemplate<Syntax> {
 };
 
 //
-// ExternsSyntax
+// Externs
 //
-class JOANA_AST_EXPORT ExternsSyntax final : public CompilationUnit {
+class JOANA_AST_EXPORT Externs final : public CompilationUnit {
   DECLARE_CONCRETE_AST_SYNTAX(Externs, CompilationUnit);
 
  public:
-  ~ExternsSyntax() final;
+  ~Externs() final;
 
  private:
-  ExternsSyntax();
+  Externs();
 
-  DISALLOW_COPY_AND_ASSIGN(ExternsSyntax);
+  DISALLOW_COPY_AND_ASSIGN(Externs);
 };
 
 //
-// ModuleSyntax
+// Module
 //
-class JOANA_AST_EXPORT ModuleSyntax final : public CompilationUnit {
+class JOANA_AST_EXPORT Module final : public CompilationUnit {
   DECLARE_CONCRETE_AST_SYNTAX(Module, CompilationUnit);
 
  public:
-  ~ModuleSyntax() final;
+  ~Module() final;
 
  private:
-  ModuleSyntax();
+  Module();
 
-  DISALLOW_COPY_AND_ASSIGN(ModuleSyntax);
+  DISALLOW_COPY_AND_ASSIGN(Module);
 };
 
 //
-// ScriptSyntax
+// Script
 //
-class JOANA_AST_EXPORT ScriptSyntax final : public CompilationUnit {
+class JOANA_AST_EXPORT Script final : public CompilationUnit {
   DECLARE_CONCRETE_AST_SYNTAX(Script, CompilationUnit);
 
  public:
-  ~ScriptSyntax() final;
+  ~Script() final;
 
  private:
-  ScriptSyntax();
+  Script();
 
-  DISALLOW_COPY_AND_ASSIGN(ScriptSyntax);
+  DISALLOW_COPY_AND_ASSIGN(Script);
 };
 
 }  // namespace ast

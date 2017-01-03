@@ -77,7 +77,7 @@ int Node::name_id() const {
 std::ostream& operator<<(std::ostream& ostream, const Node& node) {
   const auto& range = node.range();
   return ostream << node.syntax() << '(' << range << ", "
-                 << EscapedStringPiece16(range.GetString(), '|') << ')';
+                 << EscapedStringPiece16(range.GetString(), '|', 20) << ')';
 }
 
 std::ostream& operator<<(std::ostream& ostream, const Node* node) {

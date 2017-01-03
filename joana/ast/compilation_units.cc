@@ -10,32 +10,33 @@ namespace joana {
 namespace ast {
 
 //
+// CompilationUnit
+//
+CompilationUnit::CompilationUnit(SyntaxCode syntax_code)
+    : SyntaxTemplate(std::tuple<>(),
+                     syntax_code,
+                     Format::Builder().set_is_variadic(true).Build()) {}
+
+CompilationUnit::~CompilationUnit() = default;
+
+//
 // ExternsSyntax
 //
-ExternsSyntax::ExternsSyntax()
-    : SyntaxTemplate(std::tuple<>(),
-                     SyntaxCode::Externs,
-                     Format::Builder().set_is_variadic(true).Build()) {}
+ExternsSyntax::ExternsSyntax() : CompilationUnit(SyntaxCode::Externs) {}
 
 ExternsSyntax::~ExternsSyntax() = default;
 
 //
 // ModuleSyntax
 //
-ModuleSyntax::ModuleSyntax()
-    : SyntaxTemplate(std::tuple<>(),
-                     SyntaxCode::Module,
-                     Format::Builder().set_is_variadic(true).Build()) {}
+ModuleSyntax::ModuleSyntax() : CompilationUnit(SyntaxCode::Module) {}
 
 ModuleSyntax::~ModuleSyntax() = default;
 
 //
 // ScriptSyntax
 //
-ScriptSyntax::ScriptSyntax()
-    : SyntaxTemplate(std::tuple<>(),
-                     SyntaxCode::Script,
-                     Format::Builder().set_is_variadic(true).Build()) {}
+ScriptSyntax::ScriptSyntax() : CompilationUnit(SyntaxCode::Script) {}
 
 ScriptSyntax::~ScriptSyntax() = default;
 

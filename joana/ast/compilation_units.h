@@ -13,9 +13,66 @@
 namespace joana {
 namespace ast {
 
-DECLARE_AST_SYNTAX_0(Externs)
-DECLARE_AST_SYNTAX_0(Module)
-DECLARE_AST_SYNTAX_0(Script)
+//
+// CompilationUnit
+//
+class JOANA_AST_EXPORT CompilationUnit : public SyntaxTemplate<Syntax> {
+  DECLARE_ABSTRACT_AST_SYNTAX(CompilationUnit, Syntax);
+
+ public:
+  ~CompilationUnit() override;
+
+ protected:
+  explicit CompilationUnit(SyntaxCode syntax_code);
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(CompilationUnit);
+};
+
+//
+// ExternsSyntax
+//
+class JOANA_AST_EXPORT ExternsSyntax final : public CompilationUnit {
+  DECLARE_CONCRETE_AST_SYNTAX(Externs, CompilationUnit);
+
+ public:
+  ~ExternsSyntax() final;
+
+ private:
+  ExternsSyntax();
+
+  DISALLOW_COPY_AND_ASSIGN(ExternsSyntax);
+};
+
+//
+// ModuleSyntax
+//
+class JOANA_AST_EXPORT ModuleSyntax final : public CompilationUnit {
+  DECLARE_CONCRETE_AST_SYNTAX(Module, CompilationUnit);
+
+ public:
+  ~ModuleSyntax() final;
+
+ private:
+  ModuleSyntax();
+
+  DISALLOW_COPY_AND_ASSIGN(ModuleSyntax);
+};
+
+//
+// ScriptSyntax
+//
+class JOANA_AST_EXPORT ScriptSyntax final : public CompilationUnit {
+  DECLARE_CONCRETE_AST_SYNTAX(Script, CompilationUnit);
+
+ public:
+  ~ScriptSyntax() final;
+
+ private:
+  ScriptSyntax();
+
+  DISALLOW_COPY_AND_ASSIGN(ScriptSyntax);
+};
 
 }  // namespace ast
 }  // namespace joana

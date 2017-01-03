@@ -5,11 +5,9 @@
 #include "joana/parser/public/parse.h"
 
 #include "joana/ast/node_factory.h"
-// #include "joana/parser/parser.h"
+#include "joana/parser/parser.h"
 
 namespace joana {
-
-// using Parser = parser::Parser;
 
 //
 // Parse; the entry point
@@ -17,9 +15,8 @@ namespace joana {
 const ast::Node& Parse(ParserContext* context,
                        const SourceCodeRange& range,
                        const ParserOptions& options) {
-  // Parser parser(context, range, options);
-  // return parser.Run();
-  return context->node_factory().NewInvalid(range, 1);
+  parser::Parser parser(context, range, options);
+  return parser.Run();
 }
 
 }  // namespace joana

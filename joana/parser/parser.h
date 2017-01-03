@@ -89,7 +89,12 @@ class Parser final {
 
   SourceCodeRange GetSourceCodeRange() const;
   const ast::Node& PeekToken() const;
+
+  // Push |token| to stack for look-ahead for
+  //  - async (?=function) to async-function or name "async"
+  //  - name (?=:) to label or expression statement
   void PushBackToken(const ast::Node& token);
+
   void SkipCommentTokens();
 
   // Returns true if we stop before list element.
@@ -246,7 +251,8 @@ class Parser final {
   std::vector<const ast::Node*> tokens_;
 
   // |token_stack_| is used for look ahead, e.g. detecting whether name is
-  // part of an expression or label.
+  // part of an expression or label. |PushBackToken()| pushes token to this
+  // stack.
   std::stack<const ast::Node*> token_stack_;
 
   DISALLOW_COPY_AND_ASSIGN(Parser);

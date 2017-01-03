@@ -28,5 +28,9 @@ Environment& Context::global_environment() const {
   return factory_->global_environment();
 }
 
+Value* Context::TryValueOf(const ast::Node& node) const {
+  return factory_->TryValueOf(node);
+}
+
 }  // namespace analyzer
 }  // namespace joana

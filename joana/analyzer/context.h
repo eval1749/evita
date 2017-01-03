@@ -11,6 +11,10 @@
 
 namespace joana {
 
+namespace ast {
+class Node;
+}
+
 class AnalyzerSettings;
 class ErrorSink;
 class SourceCodeRange;
@@ -18,8 +22,9 @@ class SourceCodeRange;
 namespace analyzer {
 
 class Environment;
-class Factory;
 enum class ErrorCode;
+class Factory;
+class Value;
 
 //
 // Context
@@ -32,6 +37,8 @@ class Context final {
   ErrorSink& error_sink() const;
   Factory& factory() const { return *factory_; }
   Environment& global_environment() const;
+
+  Value* TryValueOf(const ast::Node& node) const;
 
  private:
   std::unique_ptr<Factory> factory_;

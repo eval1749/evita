@@ -39,6 +39,8 @@ class EnvironmentBuilder final : public Pass, public ast::SyntaxVisitor {
   class LocalEnvironment;
 
   // Binding helpers
+  void BindToClass(const ast::Node& name, const ast::Node& declaration);
+
   void BindToFunction(const ast::Node& name, const ast::Node& declaration);
 
   void BindToVariable(const ast::Node& origin, const ast::Node& name);
@@ -58,6 +60,7 @@ class EnvironmentBuilder final : public Pass, public ast::SyntaxVisitor {
   // Declarations
   void Visit(const ast::ClassSyntax& syntax, const ast::Node& node) final;
   void Visit(const ast::FunctionSyntax& syntax, const ast::Node& node) final;
+  void Visit(const ast::MethodSyntax& syntax, const ast::Node& node) final;
 
   // Expressions
   void Visit(const ast::ReferenceExpressionSyntax& syntax,

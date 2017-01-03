@@ -102,6 +102,26 @@ void EnvironmentBuilder::RunOn(const ast::Node& node) {
 }
 
 // Binding helpers
+void EnvironmentBuilder::BindToClass(const ast::Node& name,
+                                     const ast::Node& declaration) {
+  if (environment_) {
+    if (auto* present = environment_->Find(name)) {
+      AddError(name, ErrorCode::ENVIRONMENT_MULTIPLE_BINDINGS, present->node());
+      return;
+    }
+    environment_->Bind(name, &factory().NewFunction(declaration));
+    return;
+  }
+
+  if (auto* present = toplevel_environment_->TryValueOf(name)) {
+    AddError(name, ErrorCode::ENVIRONMENT_MULTIPLE_BINDINGS, present->node());
+    return;
+  }
+  // TODO(eval1749): We should bind to |Constructor| if |declaration| has
+  // "@constructor" annotation.
+  toplevel_environment_->Bind(name, &factory().NewFunction(declaration));
+}
+
 void EnvironmentBuilder::BindToFunction(const ast::Node& name,
                                         const ast::Node& declaration) {
   if (environment_) {
@@ -172,6 +192,7 @@ void EnvironmentBuilder::VisitDefault(const ast::Node& node) {
 void EnvironmentBuilder::Visit(const ast::BindingNameElementSyntax& syntax,
                                const ast::Node& node) {
   BindToVariable(*variable_origin_, node);
+  VisitChildNodes(node);
 }
 
 // Declarations
@@ -180,7 +201,10 @@ void EnvironmentBuilder::Visit(const ast::ClassSyntax& syntax,
   // TODO(eval1749): Report warning for toplevel anonymous class
   const auto& name = ast::ClassSyntax::NameOf(node);
   if (name == ast::SyntaxCode::Name)
-    BindToFunction(name, node);
+    BindToClass(name, node);
+  else
+    factory().NewFunction(node);
+  LocalEnvironment environment(this, node);
   VisitChildNodes(node);
 }
 
@@ -190,6 +214,21 @@ void EnvironmentBuilder::Visit(const ast::FunctionSyntax& syntax,
   const auto& name = ast::FunctionSyntax::NameOf(node);
   if (name == ast::SyntaxCode::Name)
     BindToFunction(name, node);
+  else
+    factory().NewFunction(node);
+  LocalEnvironment environment(this, node);
+  variable_origin_ = &node;
+  VisitChildNodes(node);
+}
+
+void EnvironmentBuilder::Visit(const ast::MethodSyntax& syntax,
+                               const ast::Node& node) {
+  // TODO(eval1749): Report warning for toplevel anonymous class
+  const auto& name = ast::MethodSyntax::NameOf(node);
+  if (name == ast::SyntaxCode::Name)
+    BindToFunction(name, node);
+  else
+    factory().NewFunction(node);
   LocalEnvironment environment(this, node);
   variable_origin_ = &node;
   VisitChildNodes(node);

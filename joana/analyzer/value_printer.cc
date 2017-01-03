@@ -28,6 +28,12 @@ Printable<Value> AsPrintable(const Value& value) {
 }
 
 std::ostream& operator<<(std::ostream& ostream,
+                         const Printable<Class>& printable) {
+  const auto& value = *printable.value;
+  return ostream << "$Class@" << value.id() << ' ' << value.node();
+}
+
+std::ostream& operator<<(std::ostream& ostream,
                          const Printable<Function>& printable) {
   const auto& value = *printable.value;
   return ostream << "$Function@" << value.id() << ' ' << value.node();

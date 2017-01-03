@@ -51,6 +51,10 @@ Environment& Factory::NewEnvironment(Environment* outer,
   return environment;
 }
 
+Value& Factory::NewClass(const ast::Node& node) {
+  return RegisterValue(node, new (&zone_) Class(&zone_, NextValueId(), node));
+}
+
 Value& Factory::NewFunction(const ast::Node& node) {
   return RegisterValue(node,
                        new (&zone_) Function(&zone_, NextValueId(), node));

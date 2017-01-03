@@ -42,6 +42,7 @@ class Factory final {
 
   // Factory members
   Environment& NewEnvironment(Environment* outer, const ast::Node& owner);
+  Value& NewClass(const ast::Node& node);
   Value& NewFunction(const ast::Node& node);
   Value& NewProperty(const ast::Node& node);
   Value& NewUndefined(const ast::Node& node);

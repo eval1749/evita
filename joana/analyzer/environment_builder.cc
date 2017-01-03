@@ -109,7 +109,7 @@ void EnvironmentBuilder::BindToClass(const ast::Node& name,
       AddError(name, ErrorCode::ENVIRONMENT_MULTIPLE_BINDINGS, present->node());
       return;
     }
-    environment_->Bind(name, &factory().NewFunction(declaration));
+    environment_->Bind(name, &factory().NewClass(declaration));
     return;
   }
 
@@ -119,7 +119,7 @@ void EnvironmentBuilder::BindToClass(const ast::Node& name,
   }
   // TODO(eval1749): We should bind to |Constructor| if |declaration| has
   // "@constructor" annotation.
-  toplevel_environment_->Bind(name, &factory().NewFunction(declaration));
+  toplevel_environment_->Bind(name, &factory().NewClass(declaration));
 }
 
 void EnvironmentBuilder::BindToFunction(const ast::Node& name,

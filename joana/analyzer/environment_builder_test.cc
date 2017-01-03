@@ -92,7 +92,7 @@ std::string EnvironmentBuilderTest::ListValues(base::StringPiece script_text) {
 
 TEST_F(EnvironmentBuilderTest, Class) {
   EXPECT_EQ(
-      "Function@1[0-31] |class Foo { bar() {}...|\n"
+      "Class@1[0-31] |class Foo { bar() {}...|\n"
       "Function@2[12-20] |bar() {}|\n"
       "Function@3[21-29] |baz() {}|\n",
       ListValues("class Foo { bar() {} baz() {} }"));

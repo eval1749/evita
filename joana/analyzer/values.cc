@@ -12,6 +12,14 @@ namespace joana {
 namespace analyzer {
 
 //
+// Class
+//
+Class::Class(Zone* zone, int id, const ast::Node& node)
+    : LexicalBinding(zone, id, node) {}
+
+Class::~Class() = default;
+
+//
 // Function
 //
 Function::Function(Zone* zone, int id, const ast::Node& node)

@@ -37,6 +37,21 @@ class LexicalBinding : public Value {
 };
 
 //
+// Class
+//
+class Class final : public LexicalBinding {
+  DECLARE_CONCRETE_ANALYZE_VALUE(Class, LexicalBinding)
+
+ public:
+  ~Class() final;
+
+ private:
+  Class(Zone* zone, int id, const ast::Node& node);
+
+  DISALLOW_COPY_AND_ASSIGN(Class);
+};
+
+//
 // Function
 //
 class Function final : public LexicalBinding {

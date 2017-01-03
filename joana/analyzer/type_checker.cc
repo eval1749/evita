@@ -16,29 +16,6 @@
 namespace joana {
 namespace analyzer {
 
-namespace {
-
-void DepthFirstTraverse(ast::SyntaxVisitor* visitor,
-                        const ast::Node& start_node) {
-  std::stack<std::pair<const ast::Node*, size_t>> stack;
-  stack.push(std::make_pair(&start_node, 0));
-  start_node.syntax().Accept(visitor, start_node);
-  while (!stack.empty()) {
-    const auto& container = *stack.top().first;
-    const auto index = stack.top().second;
-    if (index == container.arity()) {
-      stack.pop();
-      continue;
-    }
-    stack.top().second = index + 1;
-    const auto& child = container.child_at(index);
-    stack.push(std::make_pair(&child, 0));
-    child.syntax().Accept(visitor, child);
-  }
-}
-
-}  // namespace
-
 //
 // TypeChecker
 //
@@ -47,7 +24,7 @@ TypeChecker::~TypeChecker() = default;
 
 void TypeChecker::RunOn(const ast::Node& node) {
   environment_ = &factory().EnvironmentOf(node);
-  DepthFirstTraverse(this, node);
+  ast::DepthFirstTraverse(this, node);
 }
 
 Value* TypeChecker::TryValueOf(const ast::Node& node) const {

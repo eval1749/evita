@@ -45,7 +45,7 @@ bool ChildNodes::Iterator::operator!=(const Iterator& other) const {
 //
 ChildNodes::ChildNodes(const Node& container, size_t start)
     : container_(&container), start_(start) {
-  DCHECK_LT(start_, container_->arity());
+  DCHECK_LE(start_, container_->arity());
 }
 
 ChildNodes::~ChildNodes() = default;

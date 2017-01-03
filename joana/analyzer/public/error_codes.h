@@ -8,7 +8,9 @@
 namespace joana {
 
 // V(pass, reason)
-#define FOR_EACH_ANALYZER_ERROR(V) V(ENVIRONMENT, MULTIPLE_BINDINGS)
+#define FOR_EACH_ANALYZER_ERROR_CODE(V) \
+  V(ENVIRONMENT, MULTIPLE_BINDINGS)     \
+  V(TYPE_CHECKER, UNDEFIEND_VARIABLE)
 
 const auto kAnalyzerErrorCodeBase = 70000;
 

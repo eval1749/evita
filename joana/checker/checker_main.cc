@@ -18,10 +18,10 @@
 #include "base/strings/string_piece.h"
 #include "base/strings/string_split.h"
 #include "base/strings/utf_string_conversions.h"
+#include "joana/analyzer/error_codes.h"
 #include "joana/analyzer/public/analyzer.h"
 #include "joana/analyzer/public/analyzer_settings.h"
 #include "joana/analyzer/public/analyzer_settings_builder.h"
-#include "joana/ast/error_codes.h"
 #include "joana/ast/node_factory.h"
 #include "joana/base/error_sink.h"
 #include "joana/base/memory/zone.h"
@@ -290,7 +290,8 @@ int Checker::Run() {
     const auto& start_line = module.SourceCodeLinetAt(error->range().start());
     const auto& end_line = module.SourceCodeLinetAt(error->range().end());
     std::cout << source_code.file_path().value() << '(' << end_line.number()
-              << ") " << ast::ErrorStringOf(error->error_code()) << std::endl;
+              << ") " << analyzer::ErrorStringOf(error->error_code())
+              << std::endl;
     PrintSourceCodeRange(start_line, end_line, error->range());
   }
   return error_sink_.errors().size() == 0 ? 0 : 1;

@@ -72,7 +72,7 @@ void Controller::Analyze() {
   for (const auto& node : nodes_) {
     const auto& environment = factory().EnvironmentOf(*node);
     if (!environment.outer())
-      return;
+      continue;
     std::cout << Dump{0, &environment};
   }
 }

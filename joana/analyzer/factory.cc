@@ -73,8 +73,9 @@ int Factory::NextValueId() {
 
 Value& Factory::RegisterValue(const ast::Node& node, Value* value) {
   const auto& result = value_map_.emplace(&node, value);
-  DCHECK(result.second) << "Node can have only one value " << node << ' '
-                        << *value;
+  DCHECK(result.second) << "Node can have only one value " << node << std::endl
+                        << *value << std::endl
+                        << *result.first->second;
   return *value;
 }
 

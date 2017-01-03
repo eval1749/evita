@@ -5,19 +5,16 @@
 #ifndef JOANA_ANALYZER_ENVIRONMENT_BUILDER_H_
 #define JOANA_ANALYZER_ENVIRONMENT_BUILDER_H_
 
+#include <unordered_set>
+
 #include "joana/analyzer/pass.h"
+
+#include "base/logging.h"
 
 namespace joana {
 
 namespace ast {
 class Node;
-using BindingElement = Node;
-using CompilationUnit = Node;
-using Declaration = Node;
-using Expression = Node;
-using Name = Node;
-using Statement = Node;
-using VariableDeclaration = Node;
 }
 
 namespace analyzer {
@@ -39,8 +36,8 @@ class EnvironmentBuilder final : public Pass {
  private:
   class LocalEnvironment;
 
-  // Dummy
   void Visit(const ast::Node& node);
+  void VisitChildNodes(const ast::Node& node);
 
   // Binding helpers
   void BindToFunction(const ast::Node& name, const ast::Node& declaration);
@@ -64,9 +61,6 @@ class EnvironmentBuilder final : public Pass {
 
   // Statement
   void VisitBlockStatement(const ast::Node& node);
-  void VisitConstStatement(const ast::Node& node);
-  void VisitLetStatement(const ast::Node& node);
-  void VisitVarStatement(const ast::Node& node);
 
   LocalEnvironment* environment_ = nullptr;
 
@@ -75,6 +69,10 @@ class EnvironmentBuilder final : public Pass {
 
   // |ast::Function|, |ast::Method| or |ast::VariableDeclaration|.
   const ast::Node* variable_origin_ = nullptr;
+
+#if DCHECK_IS_ON()
+  std::unordered_set<const ast::Node*> visited_nodes_;
+#endif
 
   DISALLOW_COPY_AND_ASSIGN(EnvironmentBuilder);
 };

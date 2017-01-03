@@ -6,8 +6,7 @@ import("//testing/test.gni")
 
 group("joana") {
   deps = [
-    #"//joana/checker",
-    "//joana/parser",
+    "//joana/checker",
   ]
 }
 

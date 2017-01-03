@@ -65,7 +65,6 @@ BuiltInWorld::BuiltInWorld()
     : private_(std::make_unique<Private>()),
       global_module_(private_->node_factory().NewModule(
           SourceCodeRange::CollapseToStart(private_->source_code().range()),
-          {},
           {})) {}
 
 BuiltInWorld::~BuiltInWorld() = default;

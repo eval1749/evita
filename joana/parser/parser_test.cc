@@ -331,15 +331,13 @@ TEST_F(ParserTest, ClassStatement) {
       "|  +--ElisionExpression ||\n"
       "|  +--ObjectInitializer\n"
       "|  |  +--Method<NonStatic,Normal>\n"
-      "|  |  |  +--ReferenceExpression\n"
-      "|  |  |  |  +--Name |foo|\n"
+      "|  |  |  +--Name |foo|\n"
       "|  |  |  +--ParameterList |()|\n"
       "|  |  |  +--BlockStatement\n"
       "|  |  |  |  +--ReturnStatement\n"
       "|  |  |  |  |  +--NumericLiteral |1|\n"
       "|  |  +--Method<NonStatic,Normal>\n"
-      "|  |  |  +--ReferenceExpression\n"
-      "|  |  |  |  +--Name |foo|\n"
+      "|  |  |  +--Name |foo|\n"
       "|  |  |  +--ParameterList |()|\n"
       "|  |  |  +--BlockStatement\n"
       "|  |  |  |  +--ReturnStatement\n"
@@ -697,8 +695,7 @@ TEST_F(ParserTest, ExpressionClass) {
       "|  |  |  |  +--Name |Bar|\n"
       "|  |  |  +--ObjectInitializer\n"
       "|  |  |  |  +--Method<NonStatic,Normal>\n"
-      "|  |  |  |  |  +--ReferenceExpression\n"
-      "|  |  |  |  |  |  +--Name |constructor|\n"
+      "|  |  |  |  |  +--Name |constructor|\n"
       "|  |  |  |  |  +--ParameterList |()|\n"
       "|  |  |  |  |  +--BlockStatement |{}|\n",
       Parse("var x = class Foo extends Bar { constructor() {} };"));
@@ -713,8 +710,7 @@ TEST_F(ParserTest, ExpressionClass) {
       "|  |  |  +--ElisionExpression ||\n"
       "|  |  |  +--ObjectInitializer\n"
       "|  |  |  |  +--Method<Static,Normal>\n"
-      "|  |  |  |  |  +--ReferenceExpression\n"
-      "|  |  |  |  |  |  +--Name |foo|\n"
+      "|  |  |  |  |  +--Name |foo|\n"
       "|  |  |  |  |  +--ParameterList |()|\n"
       "|  |  |  |  |  +--BlockStatement |{}|\n",
       Parse("var x = class Foo { static foo() {} };"));
@@ -728,8 +724,7 @@ TEST_F(ParserTest, ExpressionClassWithStatic) {
       "|  +--ElisionExpression ||\n"
       "|  +--ObjectInitializer\n"
       "|  |  +--Method<Static,Generator>\n"
-      "|  |  |  +--ReferenceExpression\n"
-      "|  |  |  |  +--Name |foo|\n"
+      "|  |  |  +--Name |foo|\n"
       "|  |  |  +--ParameterList |()|\n"
       "|  |  |  +--BlockStatement |{}|\n",
       Parse("class Foo { static *foo() {} }"));
@@ -741,8 +736,7 @@ TEST_F(ParserTest, ExpressionClassWithStatic) {
       "|  +--ElisionExpression ||\n"
       "|  +--ObjectInitializer\n"
       "|  |  +--Method<Static,Async>\n"
-      "|  |  |  +--ReferenceExpression\n"
-      "|  |  |  |  +--Name |foo|\n"
+      "|  |  |  +--Name |foo|\n"
       "|  |  |  +--ParameterList |()|\n"
       "|  |  |  +--BlockStatement |{}|\n",
       Parse("class Foo { static async foo() {} }"));
@@ -754,8 +748,7 @@ TEST_F(ParserTest, ExpressionClassWithStatic) {
       "|  +--ElisionExpression ||\n"
       "|  +--ObjectInitializer\n"
       "|  |  +--Method<Static,Getter>\n"
-      "|  |  |  +--ReferenceExpression\n"
-      "|  |  |  |  +--Name |foo|\n"
+      "|  |  |  +--Name |foo|\n"
       "|  |  |  +--ParameterList |()|\n"
       "|  |  |  +--BlockStatement |{}|\n",
       Parse("class Foo { static get foo() {} }"));
@@ -767,8 +760,7 @@ TEST_F(ParserTest, ExpressionClassWithStatic) {
       "|  +--ElisionExpression ||\n"
       "|  +--ObjectInitializer\n"
       "|  |  +--Method<Static,Setter>\n"
-      "|  |  |  +--ReferenceExpression\n"
-      "|  |  |  |  +--Name |foo|\n"
+      "|  |  |  +--Name |foo|\n"
       "|  |  |  +--ParameterList |()|\n"
       "|  |  |  +--BlockStatement |{}|\n",
       Parse("class Foo { static set foo() {} }"));
@@ -1016,41 +1008,35 @@ TEST_F(ParserTest, ExpressionObjectLiteral) {
       "|  |  +--Punctuator |=|\n"
       "|  |  +--ObjectInitializer\n"
       "|  |  |  +--Property\n"
-      "|  |  |  |  +--ReferenceExpression\n"
-      "|  |  |  |  |  +--Name |foo|\n"
+      "|  |  |  |  +--Name |foo|\n"
       "|  |  |  |  +--NumericLiteral |1|\n"
       "|  |  |  +--DelimiterExpression |,|\n"
       "|  |  |  +--Method<NonStatic,Normal>\n"
-      "|  |  |  |  +--ReferenceExpression\n"
-      "|  |  |  |  |  +--Name |bar|\n"
+      "|  |  |  |  +--Name |bar|\n"
       "|  |  |  |  +--ParameterList |()|\n"
       "|  |  |  |  +--BlockStatement\n"
       "|  |  |  |  |  +--ExpressionStatement\n"
       "|  |  |  |  |  |  +--NumericLiteral |1|\n"
       "|  |  |  +--Method<NonStatic,Generator>\n"
-      "|  |  |  |  +--ReferenceExpression\n"
-      "|  |  |  |  |  +--Name |baz|\n"
+      "|  |  |  |  +--Name |baz|\n"
       "|  |  |  |  +--ParameterList |()|\n"
       "|  |  |  |  +--BlockStatement\n"
       "|  |  |  |  |  +--ExpressionStatement\n"
       "|  |  |  |  |  |  +--NumericLiteral |2|\n"
       "|  |  |  +--Method<NonStatic,Async>\n"
-      "|  |  |  |  +--ReferenceExpression\n"
-      "|  |  |  |  |  +--Name |quux|\n"
+      "|  |  |  |  +--Name |quux|\n"
       "|  |  |  |  +--ParameterList |()|\n"
       "|  |  |  |  +--BlockStatement\n"
       "|  |  |  |  |  +--ExpressionStatement\n"
       "|  |  |  |  |  |  +--NumericLiteral |3|\n"
       "|  |  |  +--Method<NonStatic,Getter>\n"
-      "|  |  |  |  +--ReferenceExpression\n"
-      "|  |  |  |  |  +--Name |getter|\n"
+      "|  |  |  |  +--Name |getter|\n"
       "|  |  |  |  +--ParameterList |()|\n"
       "|  |  |  |  +--BlockStatement\n"
       "|  |  |  |  |  +--ExpressionStatement\n"
       "|  |  |  |  |  |  +--NumericLiteral |4|\n"
       "|  |  |  +--Method<NonStatic,Setter>\n"
-      "|  |  |  |  +--ReferenceExpression\n"
-      "|  |  |  |  |  +--Name |setter|\n"
+      "|  |  |  |  +--Name |setter|\n"
       "|  |  |  |  +--ParameterList |()|\n"
       "|  |  |  |  +--BlockStatement\n"
       "|  |  |  |  |  +--ExpressionStatement\n"
@@ -1099,8 +1085,7 @@ TEST_F(ParserTest, ExpressionObjectLiteralWithArrowFunction) {
       "|  |  +--Punctuator |=|\n"
       "|  |  +--ObjectInitializer\n"
       "|  |  |  +--Property\n"
-      "|  |  |  |  +--ReferenceExpression\n"
-      "|  |  |  |  |  +--Name |foo|\n"
+      "|  |  |  |  +--Name |foo|\n"
       "|  |  |  |  +--ArrowFunction\n"
       "|  |  |  |  |  +--ReferenceExpression\n"
       "|  |  |  |  |  |  +--Name |x|\n"
@@ -1123,8 +1108,7 @@ TEST_F(ParserTest, ExpressionObjectLiteralWithKeywords) {
       "|  |  +--Punctuator |=|\n"
       "|  |  +--ObjectInitializer\n"
       "|  |  |  +--Property\n"
-      "|  |  |  |  +--ReferenceExpression\n"
-      "|  |  |  |  |  +--Name |aync|\n"
+      "|  |  |  |  +--Name |aync|\n"
       "|  |  |  |  +--NumericLiteral |1|\n",
       Parse("x = { aync: 1 };"));
 
@@ -1137,8 +1121,7 @@ TEST_F(ParserTest, ExpressionObjectLiteralWithKeywords) {
       "|  |  +--Punctuator |=|\n"
       "|  |  +--ObjectInitializer\n"
       "|  |  |  +--Property\n"
-      "|  |  |  |  +--ReferenceExpression\n"
-      "|  |  |  |  |  +--Name |get|\n"
+      "|  |  |  |  +--Name |get|\n"
       "|  |  |  |  +--NumericLiteral |1|\n",
       Parse("x = { get: 1 };"));
 
@@ -1151,8 +1134,7 @@ TEST_F(ParserTest, ExpressionObjectLiteralWithKeywords) {
       "|  |  +--Punctuator |=|\n"
       "|  |  +--ObjectInitializer\n"
       "|  |  |  +--Property\n"
-      "|  |  |  |  +--ReferenceExpression\n"
-      "|  |  |  |  |  +--Name |set|\n"
+      "|  |  |  |  +--Name |set|\n"
       "|  |  |  |  +--NumericLiteral |1|\n",
       Parse("x = { set: 1 };"));
 
@@ -1165,8 +1147,7 @@ TEST_F(ParserTest, ExpressionObjectLiteralWithKeywords) {
       "|  |  +--Punctuator |=|\n"
       "|  |  +--ObjectInitializer\n"
       "|  |  |  +--Property\n"
-      "|  |  |  |  +--ReferenceExpression\n"
-      "|  |  |  |  |  +--Name |static|\n"
+      "|  |  |  |  +--Name |static|\n"
       "|  |  |  |  +--NumericLiteral |1|\n",
       Parse("x = { static: 1 };"));
 
@@ -1179,8 +1160,7 @@ TEST_F(ParserTest, ExpressionObjectLiteralWithKeywords) {
       "|  |  +--Punctuator |=|\n"
       "|  |  +--ObjectInitializer\n"
       "|  |  |  +--Method<NonStatic,Normal>\n"
-      "|  |  |  |  +--ReferenceExpression\n"
-      "|  |  |  |  |  +--Name |aync|\n"
+      "|  |  |  |  +--Name |aync|\n"
       "|  |  |  |  +--ParameterList |()|\n"
       "|  |  |  |  +--BlockStatement |{}|\n",
       Parse("x = { aync() {} };"));
@@ -1194,8 +1174,7 @@ TEST_F(ParserTest, ExpressionObjectLiteralWithKeywords) {
       "|  |  +--Punctuator |=|\n"
       "|  |  +--ObjectInitializer\n"
       "|  |  |  +--Method<NonStatic,Normal>\n"
-      "|  |  |  |  +--ReferenceExpression\n"
-      "|  |  |  |  |  +--Name |get|\n"
+      "|  |  |  |  +--Name |get|\n"
       "|  |  |  |  +--ParameterList |()|\n"
       "|  |  |  |  +--BlockStatement |{}|\n",
       Parse("x = { get() {} };"));
@@ -1209,8 +1188,7 @@ TEST_F(ParserTest, ExpressionObjectLiteralWithKeywords) {
       "|  |  +--Punctuator |=|\n"
       "|  |  +--ObjectInitializer\n"
       "|  |  |  +--Method<NonStatic,Normal>\n"
-      "|  |  |  |  +--ReferenceExpression\n"
-      "|  |  |  |  |  +--Name |set|\n"
+      "|  |  |  |  +--Name |set|\n"
       "|  |  |  |  +--ParameterList |()|\n"
       "|  |  |  |  +--BlockStatement |{}|\n",
       Parse("x = { set() {} };"));
@@ -1224,8 +1202,7 @@ TEST_F(ParserTest, ExpressionObjectLiteralWithKeywords) {
       "|  |  +--Punctuator |=|\n"
       "|  |  +--ObjectInitializer\n"
       "|  |  |  +--Method<NonStatic,Normal>\n"
-      "|  |  |  |  +--ReferenceExpression\n"
-      "|  |  |  |  |  +--Name |static|\n"
+      "|  |  |  |  +--Name |static|\n"
       "|  |  |  |  +--ParameterList |()|\n"
       "|  |  |  |  +--BlockStatement |{}|\n",
       Parse("x = { static() {} };"));
@@ -1389,8 +1366,7 @@ TEST_F(ParserTest, ExpressionRegExp) {
       "|  |  +--Punctuator |=|\n"
       "|  |  +--ObjectInitializer\n"
       "|  |  |  +--Property\n"
-      "|  |  |  |  +--ReferenceExpression\n"
-      "|  |  |  |  |  +--Name |re|\n"
+      "|  |  |  |  +--Name |re|\n"
       "|  |  |  |  +--RegExpLiteralExpression\n"
       "|  |  |  |  |  +--SequenceRegExp\n"
       "|  |  |  |  |  |  +--AssertionRegExp |^|\n"

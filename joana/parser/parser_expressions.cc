@@ -598,8 +598,6 @@ const ast::Node& Parser::ParsePropertyAfterName(
     // 'async' PropertyName '(' ParameterList ')' '{' StatementList '}'
     // 'get' PropertyName '(' ParameterList ')' '{' StatementList '}'
     // 'set' PropertyName '(' ParameterList ')' '{' StatementList '}'
-    DCHECK(property_name == ast::SyntaxCode::ReferenceExpression)
-        << property_name;
     return ParseMethod(method_kind, function_kind);
   }
 
@@ -649,7 +647,7 @@ const ast::Node& Parser::ParsePropertyName() {
   }
   if (PeekToken() == ast::SyntaxCode::Name) {
     // Note: we can use any name as property name including keywords.
-    return node_factory().NewReferenceExpression(ConsumeToken());
+    return ConsumeToken();
   }
   if (PeekToken().is_literal())
     return ConsumeToken();

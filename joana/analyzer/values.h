@@ -27,7 +27,7 @@ class LexicalBinding : public Value {
   const ZoneVector<const ast::Node*>& references() const { return references_; }
 
  protected:
-  LexicalBinding(Zone* zone, const ast::Node& node);
+  LexicalBinding(Zone* zone, int id, const ast::Node& node);
 
  private:
   ZoneVector<const ast::Node*> assignments_;
@@ -46,7 +46,7 @@ class Function final : public LexicalBinding {
   ~Function() final;
 
  private:
-  Function(Zone* zone, const ast::Node& node);
+  Function(Zone* zone, int id, const ast::Node& node);
 
   DISALLOW_COPY_AND_ASSIGN(Function);
 };
@@ -61,7 +61,7 @@ class Property final : public LexicalBinding {
   ~Property() final;
 
  private:
-  Property(Zone* zone, const ast::Node& node);
+  Property(Zone* zone, int id, const ast::Node& node);
 
   DISALLOW_COPY_AND_ASSIGN(Property);
 };
@@ -79,7 +79,10 @@ class Variable final : public LexicalBinding {
 
  private:
   // |name| should be |ast::Name| or |ast::BindingNameElement|.
-  Variable(Zone* zone, const ast::Node& assignment, const ast::Node& name);
+  Variable(Zone* zone,
+           int id,
+           const ast::Node& assignment,
+           const ast::Node& name);
 
   const ast::Node& assignment_;
 

@@ -10,7 +10,7 @@ namespace analyzer {
 //
 // Value
 //
-Value::Value(const ast::Node& node) : node_(node) {}
+Value::Value(int id, const ast::Node& node) : id_(id), node_(node) {}
 Value::~Value() = default;
 
 }  // namespace analyzer

@@ -48,6 +48,9 @@ class Factory final {
  private:
   static Environment& NewGlobalEnvironment(Zone* zone);
 
+  int NextValueId();
+
+  int current_value_id_ = 0;
   std::unordered_map<const ast::Node*, Environment*> environment_map_;
   Environment& global_environment_;
   std::unordered_map<const ast::Node*, Value*> value_map_;

@@ -46,22 +46,29 @@ Environment& Factory::NewEnvironment(Environment* outer,
 }
 
 Value& Factory::NewFunction(const ast::Node& node) {
-  return RegisterValue(node, new (&zone_) Function(&zone_, node));
+  return RegisterValue(node,
+                       new (&zone_) Function(&zone_, NextValueId(), node));
 }
 
 Value& Factory::NewProperty(const ast::Node& node) {
-  return RegisterValue(node, new (&zone_) Property(&zone_, node));
+  return RegisterValue(node,
+                       new (&zone_) Property(&zone_, NextValueId(), node));
 }
 
 Value& Factory::NewVariable(const ast::Node& assignment,
                             const ast::Node& name) {
-  return RegisterValue(name, new (&zone_) Variable(&zone_, assignment, name));
+  return RegisterValue(
+      name, new (&zone_) Variable(&zone_, NextValueId(), assignment, name));
 }
 
 // static
 Environment& Factory::NewGlobalEnvironment(Zone* zone) {
   const auto& module = BuiltInWorld::GetInstance()->global_module();
   return *new (zone) Environment(zone, module);
+}
+
+int Factory::NextValueId() {
+  return ++current_value_id_;
 }
 
 Value& Factory::RegisterValue(const ast::Node& node, Value* value) {

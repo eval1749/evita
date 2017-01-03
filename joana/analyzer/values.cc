@@ -14,16 +14,16 @@ namespace analyzer {
 //
 // Function
 //
-Function::Function(Zone* zone, const ast::Node& node)
-    : LexicalBinding(zone, node) {}
+Function::Function(Zone* zone, int id, const ast::Node& node)
+    : LexicalBinding(zone, id, node) {}
 
 Function::~Function() = default;
 
 //
 // LexicalBinding
 //
-LexicalBinding::LexicalBinding(Zone* zone, const ast::Node& node)
-    : Value(node), assignments_(zone), references_(zone) {
+LexicalBinding::LexicalBinding(Zone* zone, int id, const ast::Node& node)
+    : Value(id, node), assignments_(zone), references_(zone) {
   assignments_.push_back(&node);
 }
 
@@ -32,8 +32,8 @@ LexicalBinding::~LexicalBinding() = default;
 //
 // Property
 //
-Property::Property(Zone* zone, const ast::Node& node)
-    : LexicalBinding(zone, node) {}
+Property::Property(Zone* zone, int id, const ast::Node& node)
+    : LexicalBinding(zone, id, node) {}
 
 Property::~Property() = default;
 
@@ -41,9 +41,10 @@ Property::~Property() = default;
 // Variable
 //
 Variable::Variable(Zone* zone,
+                   int id,
                    const ast::Node& assignment,
                    const ast::Node& name)
-    : LexicalBinding(zone, name), assignment_(assignment) {
+    : LexicalBinding(zone, id, name), assignment_(assignment) {
   DCHECK(name == ast::SyntaxCode::Name ||
          name == ast::SyntaxCode::BindingNameElement)
       << name;

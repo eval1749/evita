@@ -39,15 +39,19 @@ class Value : public Castable<Value>, public ZoneAllocated {
 
   virtual ~Value();
 
+  // Returns unique identifier of |Value|.
+  int id() const { return id_; }
+
   // Return the AST node which associated to this value.
   const ast::Node& node() const { return node_; }
 
  protected:
-  explicit Value(const ast::Node& node);
+  Value(int id, const ast::Node& node);
 
  private:
   friend class Factory;
 
+  const int id_;
   const ast::Node& node_;
 
   DISALLOW_COPY_AND_ASSIGN(Value);

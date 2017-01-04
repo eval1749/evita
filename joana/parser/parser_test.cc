@@ -943,6 +943,19 @@ TEST_F(ParserTest, ExpressionMember) {
   EXPECT_EQ(
       "Module\n"
       "+--ExpressionStatement\n"
+      "|  +--MemberExpression\n"
+      "|  |  +--MemberExpression\n"
+      "|  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  +--Name |foo|\n"
+      "|  |  |  +--Name |bar|\n"
+      "|  |  +--Name |baz|\n",
+      Parse("foo.bar.baz"));
+}
+
+TEST_F(ParserTest, ExpressionMemberError) {
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
       "|  +--ReferenceExpression\n"
       "|  |  +--Name |foo|\n"
       "PASER_ERROR_EXPRESSION_EXPECT_NAME@4:4\n",

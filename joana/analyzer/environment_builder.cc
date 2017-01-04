@@ -309,10 +309,11 @@ void EnvironmentBuilder::Visit(const ast::MemberExpression& syntax,
     return;
   auto& properties = value->As<Object>().properties();
   const auto& name = ast::MemberExpression::NameOf(node);
+  // TODO(eval1749): We should not create property if this |MemberExpression|
+  // is right and side.
   auto& property = factory().GetOrNewProperty(&properties, name);
-  if (property.assignments().empty()) {
+  if (property.assignments().empty())
     return;
-  }
   auto* const property_value =
       factory().TryValueOf(*property.assignments().front());
   if (!property_value)

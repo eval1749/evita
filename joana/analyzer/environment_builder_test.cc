@@ -11,6 +11,7 @@
 #include "joana/analyzer/context.h"
 #include "joana/analyzer/value.h"
 #include "joana/ast/node.h"
+#include "joana/ast/syntax.h"
 #include "joana/ast/syntax_visitor.h"
 #include "joana/base/escaped_string_piece.h"
 #include "joana/parser/public/parse.h"
@@ -62,7 +63,8 @@ void ValueSink::VisitDefault(const ast::Node& node) {
   const auto* value = context_.TryValueOf(node);
   if (!value)
     return;
-  *ostream_ << AsPrintable(*value) << std::endl;
+  *ostream_ << node.syntax() << '[' << node.range().start() << '-'
+            << node.range().end() << "]=" << AsPrintable(*value) << std::endl;
 }
 
 }  // namespace
@@ -95,45 +97,45 @@ std::string EnvironmentBuilderTest::ListValues(base::StringPiece script_text) {
 
 TEST_F(EnvironmentBuilderTest, Class) {
   EXPECT_EQ(
-      "Class@2[0-31] |class Foo { bar() {}...|\n"
-      "Object@1[10-31] |{ bar() {} baz() {} ...|\n"  // Foo.prototype
-      "Method@3[12-20] |bar() {}|\n"
-      "Method@4[21-29] |baz() {}|\n",
+      "Class[0-31]=Class@2[0-31] |class Foo { bar() {}...|\n"
+      "ObjectInitializer[10-31]=Object@1[10-31] |{ bar() {} baz() {} ...|\n"
+      "Method<NonStatic,Normal>[12-20]=Method@3[12-20] |bar() {}|\n"
+      "Method<NonStatic,Normal>[21-29]=Method@4[21-29] |baz() {}|\n",
       ListValues("class Foo { bar() {} baz() {} }"));
 }
 
 TEST_F(EnvironmentBuilderTest, ClassError) {
   EXPECT_EQ(
-      "Class@2[0-15] |class Foo { 1 }|\n"
-      "Object@1[10-15] |{ 1 }|\n"  // Foo.prototype
+      "Class[0-15]=Class@2[0-15] |class Foo { 1 }|\n"
+      "ObjectInitializer[10-15]=Object@1[10-15] |{ 1 }|\n"  // Foo.prototype
       "ANALYZER_ERROR_ENVIRONMENT_EXPECT_METHOD@12:13\n",
       ListValues("class Foo { 1 }"));
 }
 
 TEST_F(EnvironmentBuilderTest, Function) {
   EXPECT_EQ(
-      "Function@1[0-36] |function foo(a, b) {...|\n"
-      "Variable@2[13-14] |a|\n"
-      "Variable@3[16-17] |b|\n"
-      "Variable@2[13-14] |a|\n"
-      "Variable@3[16-17] |b|\n",
+      "Function<Normal>[0-36]=Function@1[0-36] |function foo(a, b) {...|\n"
+      "BindingNameElement[13-14]=Variable@2[13-14] |a|\n"
+      "BindingNameElement[16-17]=Variable@3[16-17] |b|\n"
+      "ReferenceExpression[28-29]=Variable@2[13-14] |a|\n"
+      "ReferenceExpression[32-33]=Variable@3[16-17] |b|\n",
       ListValues("function foo(a, b) { return a + b; }"));
 }
 
 TEST_F(EnvironmentBuilderTest, Let) {
   EXPECT_EQ(
-      "Variable@1[4-9] |a = 1|\n"
-      "Variable@2[11-16] |b = 2|\n",
+      "BindingNameElement[4-9]=Variable@1[4-9] |a = 1|\n"
+      "BindingNameElement[11-16]=Variable@2[11-16] |b = 2|\n",
       ListValues("let a = 1, b = 2;"));
 }
 
 TEST_F(EnvironmentBuilderTest, MemberExpression) {
   EXPECT_EQ(
-      "Object@1[4-16] |@constructor|\n"  // prototype
-      "Class@2[20-37] |function Foo() {}|\n"
-      "Object@1[4-16] |@constructor|\n"
-      "Class@2[20-37] |function Foo() {}|\n"
-      "Variable@3[66-69] |bar|\n",
+      "Name[4-16]=Object@1[4-16] |@constructor|\n"  // prototype
+      "Function<Normal>[20-37]=Class@2[20-37] |function Foo() {}|\n"
+      "MemberExpression[52-65]=Object@1[4-16] |@constructor|\n"
+      "ReferenceExpression[52-55]=Class@2[20-37] |function Foo() {}|\n"
+      "Name[66-69]=Variable@3[66-69] |bar|\n",
       ListValues("/** @constructor */ function Foo() {}\n"
                  "/** @const */ Foo.prototype.bar\n"))
       << "Old style class externs";

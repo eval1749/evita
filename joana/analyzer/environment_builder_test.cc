@@ -127,5 +127,17 @@ TEST_F(EnvironmentBuilderTest, Let) {
       ListValues("let a = 1, b = 2;"));
 }
 
+TEST_F(EnvironmentBuilderTest, MemberExpression) {
+  EXPECT_EQ(
+      "Object@1[4-16] |@constructor|\n"  // prototype
+      "Class@2[20-37] |function Foo() {}|\n"
+      "Object@1[4-16] |@constructor|\n"
+      "Class@2[20-37] |function Foo() {}|\n"
+      "Variable@3[66-69] |bar|\n",
+      ListValues("/** @constructor */ function Foo() {}\n"
+                 "/** @const */ Foo.prototype.bar\n"))
+      << "Old style class externs";
+}
+
 }  // namespace analyzer
 }  // namespace joana

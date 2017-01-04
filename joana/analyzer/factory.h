@@ -49,11 +49,16 @@ class Factory final {
   Property& GetOrNewProperty(Properties* properties, const ast::Node& node);
   Property& NewProperty(const ast::Node& node);
 
-  // Value
+  // Values
+
+  // Returns new |Class| value associated to |node| with prototype object
+  // associated to |prototype_node|. This function is used for creating |Class|
+  // object for class annotation.
+  Value& NewClass(const ast::Node& node, const ast::Node& prototype_node);
   Value& NewClass(const ast::Node& node);
   Value& NewFunction(const ast::Node& node);
   Value& NewMethod(const ast::Node& node, Class* owner);
-  Value& NewObject(const ast::Node& node);
+  Value& NewOrdinaryObject(const ast::Node& node);
   Value& NewUndefined(const ast::Node& node);
   Value& NewVariable(const ast::Node& assignment, const ast::Node& name);
 

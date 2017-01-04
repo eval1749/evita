@@ -16,10 +16,31 @@ class Object;
 class Properties;
 
 //
+// Object
+//
+class Object : public Value {
+  DECLARE_ABSTRACT_ANALYZE_VALUE(Object, Value);
+
+ public:
+  ~Object() override;
+
+  const Properties& properties() const { return properties_; }
+  Properties& properties() { return properties_; }
+
+ protected:
+  Object(int id, const ast::Node& node, Properties* properties);
+
+ private:
+  Properties& properties_;
+
+  DISALLOW_COPY_AND_ASSIGN(Object);
+};
+
+//
 // LexicalBinding
 //
-class LexicalBinding : public Value {
-  DECLARE_ABSTRACT_ANALYZE_VALUE(LexicalBinding, Value);
+class LexicalBinding : public Object {
+  DECLARE_ABSTRACT_ANALYZE_VALUE(LexicalBinding, Object);
 
  public:
   ~LexicalBinding() override;
@@ -27,9 +48,6 @@ class LexicalBinding : public Value {
   const ZoneVector<const ast::Node*>& assignments() const {
     return assignments_;
   }
-
-  const Properties& properties() const { return properties_; }
-  Properties& properties() { return properties_; }
 
   const ZoneVector<const ast::Node*>& references() const { return references_; }
 
@@ -41,7 +59,6 @@ class LexicalBinding : public Value {
 
  private:
   ZoneVector<const ast::Node*> assignments_;
-  Properties& properties_;
   ZoneVector<const ast::Node*> references_;
 
   DISALLOW_COPY_AND_ASSIGN(LexicalBinding);
@@ -111,23 +128,18 @@ class Method final : public LexicalBinding {
 };
 
 //
-// Object
+// OrdinaryObject
 //
-class Object final : public Value {
-  DECLARE_CONCRETE_ANALYZE_VALUE(Object, Value)
+class OrdinaryObject final : public Object {
+  DECLARE_CONCRETE_ANALYZE_VALUE(OrdinaryObject, Object)
 
  public:
-  ~Object() final;
-
-  const Properties& properties() const { return properties_; }
-  Properties& properties() { return properties_; }
+  ~OrdinaryObject() final;
 
  private:
-  Object(int id, const ast::Node& node, Properties* properties);
+  OrdinaryObject(int id, const ast::Node& node, Properties* properties);
 
-  Properties& properties_;
-
-  DISALLOW_COPY_AND_ASSIGN(Object);
+  DISALLOW_COPY_AND_ASSIGN(OrdinaryObject);
 };
 
 //

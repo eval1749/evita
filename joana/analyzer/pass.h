@@ -31,6 +31,7 @@ class Pass {
  protected:
   explicit Pass(Context* context);
 
+  const Factory& factory() const;
   Factory& factory();
 
   void AddError(const ast::Node& node,

@@ -24,6 +24,9 @@ namespace analyzer {
 class Class;
 class Context;
 class Environment;
+class Function;
+class Properties;
+class Value;
 enum class VariableKind;
 
 //
@@ -40,11 +43,12 @@ class EnvironmentBuilder final : public Pass, public ast::SyntaxVisitor {
   class LocalEnvironment;
 
   // Binding helpers
-  Class& BindToClass(const ast::Node& name, const ast::Node& declaration);
-
-  void BindToFunction(const ast::Node& name, const ast::Node& declaration);
+  void Bind(const ast::Node& name, Value* value);
 
   void BindToVariable(const ast::Node& origin, const ast::Node& name);
+
+  void ProcessMemberExpressionWithAnnotation(const ast::Node& node,
+                                             const ast::Node& annotation);
 
   // Process AST nodes
   void ProcessVariables(const ast::Node& declaration);
@@ -59,19 +63,25 @@ class EnvironmentBuilder final : public Pass, public ast::SyntaxVisitor {
              const ast::Node& node) final;
 
   // Declarations
+  void Visit(const ast::Annotation& syntax, const ast::Node& node) final;
   void Visit(const ast::Class& syntax, const ast::Node& node) final;
   void Visit(const ast::Function& syntax, const ast::Node& node) final;
   void Visit(const ast::Method& syntax, const ast::Node& node) final;
 
   // Expressions
+  void Visit(const ast::MemberExpression& syntax, const ast::Node& node) final;
   void Visit(const ast::ReferenceExpression& syntax,
              const ast::Node& node) final;
 
   // Statement
   void Visit(const ast::BlockStatement& syntax, const ast::Node& node) final;
+  void Visit(const ast::ExpressionStatement& syntax,
+             const ast::Node& node) final;
   void Visit(const ast::ConstStatement& syntax, const ast::Node& node) final;
   void Visit(const ast::LetStatement& syntax, const ast::Node& node) final;
   void Visit(const ast::VarStatement& syntax, const ast::Node& node) final;
+
+  const ast::Node* annotation_ = nullptr;
 
   LocalEnvironment* environment_ = nullptr;
 

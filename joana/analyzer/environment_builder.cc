@@ -6,6 +6,7 @@
 
 #include "joana/analyzer/environment_builder.h"
 
+#include "base/auto_reset.h"
 #include "joana/analyzer/context.h"
 #include "joana/analyzer/environment.h"
 #include "joana/analyzer/error_codes.h"
@@ -18,6 +19,7 @@
 #include "joana/ast/compilation_units.h"
 #include "joana/ast/declarations.h"
 #include "joana/ast/expressions.h"
+#include "joana/ast/jsdoc_syntaxes.h"
 #include "joana/ast/node_traversal.h"
 #include "joana/ast/statements.h"
 #include "joana/ast/syntax_forward.h"
@@ -27,6 +29,37 @@ namespace joana {
 namespace analyzer {
 
 namespace {
+
+const ast::Node* FindClassAnnotation(const ast::Node& document) {
+  DCHECK_EQ(document, ast::SyntaxCode::JsDocDocument);
+  for (const auto& member : ast::NodeTraversal::ChildNodesOf(document)) {
+    if (member != ast::SyntaxCode::JsDocTag)
+      continue;
+    const auto& tag = ast::JsDocTag::NameOf(member);
+    if (tag == ast::TokenKind::JsDocConstructor ||
+        tag == ast::TokenKind::JsDocInterface ||
+        tag == ast::TokenKind::JsDocRecord) {
+      return &tag;
+    }
+  }
+  return nullptr;
+}
+
+// Returns true if |document| contains |@param|, |@return| or |@this| tag.
+bool IsFunctionAnnotation(const ast::Node& document) {
+  DCHECK_EQ(document, ast::SyntaxCode::JsDocDocument);
+  for (const auto& member : ast::NodeTraversal::ChildNodesOf(document)) {
+    if (member != ast::SyntaxCode::JsDocTag)
+      continue;
+    const auto& tag = ast::JsDocTag::NameOf(member);
+    if (tag == ast::TokenKind::JsDocParam ||
+        tag == ast::TokenKind::JsDocReturn ||
+        tag == ast::TokenKind::JsDocThis) {
+      return true;
+    }
+  }
+  return false;
+}
 
 const ast::Node& NameOf(const ast::Node& node) {
   if (node == ast::SyntaxCode::Name)
@@ -103,38 +136,14 @@ void EnvironmentBuilder::RunOn(const ast::Node& node) {
 }
 
 // Binding helpers
-Class& EnvironmentBuilder::BindToClass(const ast::Node& name,
-                                       const ast::Node& declaration) {
-  auto& klass = factory().NewClass(declaration).As<Class>();
-  if (name != ast::SyntaxCode::Name)
-    return klass;
-  if (environment_) {
-    if (auto* present = environment_->Find(name)) {
-      AddError(name, ErrorCode::ENVIRONMENT_MULTIPLE_BINDINGS, present->node());
-      return klass;
-    }
-    environment_->Bind(name, &klass);
-    return klass;
-  }
-
-  if (auto* present = toplevel_environment_->TryValueOf(name)) {
-    AddError(name, ErrorCode::ENVIRONMENT_MULTIPLE_BINDINGS, present->node());
-    return klass;
-  }
-  // TODO(eval1749): We should bind to |Constructor| if |declaration| has
-  // "@constructor" annotation.
-  toplevel_environment_->Bind(name, &klass);
-  return klass;
-}
-
-void EnvironmentBuilder::BindToFunction(const ast::Node& name,
-                                        const ast::Node& declaration) {
+void EnvironmentBuilder::Bind(const ast::Node& name, Value* value) {
+  DCHECK_EQ(name, ast::SyntaxCode::Name);
   if (environment_) {
     if (auto* present = environment_->Find(name)) {
       AddError(name, ErrorCode::ENVIRONMENT_MULTIPLE_BINDINGS, present->node());
       return;
     }
-    environment_->Bind(name, &factory().NewFunction(declaration));
+    environment_->Bind(name, value);
     return;
   }
 
@@ -144,7 +153,7 @@ void EnvironmentBuilder::BindToFunction(const ast::Node& name,
   }
   // TODO(eval1749): We should bind to |Constructor| if |declaration| has
   // "@constructor" annotation.
-  toplevel_environment_->Bind(name, &factory().NewFunction(declaration));
+  toplevel_environment_->Bind(name, value);
 }
 
 void EnvironmentBuilder::BindToVariable(const ast::Node& origin,
@@ -181,6 +190,30 @@ void EnvironmentBuilder::BindToVariable(const ast::Node& origin,
 }
 
 // AST node handlers
+void EnvironmentBuilder::ProcessMemberExpressionWithAnnotation(
+    const ast::Node& node,
+    const ast::Node& annotation) {
+  const auto& expression = ast::MemberExpression::ExpressionOf(node);
+  auto* const value = factory().TryValueOf(expression);
+  if (!value || !value->Is<Object>()) {
+    AddError(expression, ErrorCode::ENVIRONMENT_EXPECT_OBJECT);
+    return;
+  }
+  auto& properties = value->As<Object>().properties();
+  const auto& name = ast::MemberExpression::NameOf(node);
+  auto* const property = properties.TryGet(name);
+  if (!property || !property->assignments().empty()) {
+    AddError(node, ErrorCode::ENVIRONMENT_MULTIPLE_BINDINGS);
+    return;
+  }
+  property->AddAssignment(node);
+  if (IsFunctionAnnotation(annotation)) {
+    factory().NewFunction(node);
+    return;
+  }
+  factory().NewVariable(node, name);
+}
+
 void EnvironmentBuilder::ProcessVariables(const ast::Node& statement) {
   variable_origin_ = &statement;
   VisitChildNodes(statement);
@@ -201,10 +234,18 @@ void EnvironmentBuilder::Visit(const ast::BindingNameElement& syntax,
 }
 
 // Declarations
+void EnvironmentBuilder::Visit(const ast::Annotation& syntax,
+                               const ast::Node& node) {
+  base::AutoReset<const ast::Node*> scope(&annotation_, &node);
+  VisitChildNodes(node);
+}
+
 void EnvironmentBuilder::Visit(const ast::Class& syntax,
                                const ast::Node& node) {
   // TODO(eval1749): Report warning for toplevel anonymous class
-  auto& klass = BindToClass(ast::Class::NameOf(node), node);
+  auto& klass = factory().NewClass(node).As<Class>();
+  if (ast::Class::NameOf(node) == ast::SyntaxCode::Name)
+    Bind(ast::Class::NameOf(node), &klass);
   for (const auto& member :
        ast::NodeTraversal::ChildNodesOf(ast::Class::BodyOf(node))) {
     if (member != ast::SyntaxCode::Method) {
@@ -230,12 +271,21 @@ void EnvironmentBuilder::Visit(const ast::Class& syntax,
 
 void EnvironmentBuilder::Visit(const ast::Function& syntax,
                                const ast::Node& node) {
-  // TODO(eval1749): Report warning for toplevel anonymous class
   const auto& name = ast::Function::NameOf(node);
-  if (name == ast::SyntaxCode::Name)
-    BindToFunction(name, node);
-  else
-    factory().NewFunction(node);
+  const auto* const class_tag =
+      annotation_
+          ? FindClassAnnotation(ast::Annotation::AnnotationOf(*annotation_))
+          : nullptr;
+  if (class_tag) {
+    auto& klass = factory().NewClass(node, *class_tag);
+    if (name == ast::SyntaxCode::Name)
+      Bind(name, &klass);
+  } else {
+    // TODO(eval1749): Report warning for toplevel anonymous class
+    auto& function = factory().NewFunction(node);
+    if (name == ast::SyntaxCode::Name)
+      Bind(name, &function);
+  }
   LocalEnvironment environment(this, node);
   variable_origin_ = &node;
   VisitChildNodes(node);
@@ -250,6 +300,26 @@ void EnvironmentBuilder::Visit(const ast::Method& syntax,
 }
 
 // Expressions
+void EnvironmentBuilder::Visit(const ast::MemberExpression& syntax,
+                               const ast::Node& node) {
+  VisitDefault(node);
+  auto* const value =
+      factory().TryValueOf(ast::MemberExpression::ExpressionOf(node));
+  if (!value || !value->Is<Object>())
+    return;
+  auto& properties = value->As<Object>().properties();
+  const auto& name = ast::MemberExpression::NameOf(node);
+  auto& property = factory().GetOrNewProperty(&properties, name);
+  if (property.assignments().empty()) {
+    return;
+  }
+  auto* const property_value =
+      factory().TryValueOf(*property.assignments().front());
+  if (!property_value)
+    return;
+  factory().RegisterValue(node, property_value);
+}
+
 void EnvironmentBuilder::Visit(const ast::ReferenceExpression& syntax,
                                const ast::Node& node) {
   const auto& name = ast::ReferenceExpression::NameOf(node);
@@ -275,6 +345,18 @@ void EnvironmentBuilder::Visit(const ast::BlockStatement& syntax,
 void EnvironmentBuilder::Visit(const ast::ConstStatement& syntax,
                                const ast::Node& node) {
   ProcessVariables(node);
+}
+
+void EnvironmentBuilder::Visit(const ast::ExpressionStatement& syntax,
+                               const ast::Node& node) {
+  VisitDefault(node);
+  if (!annotation_ || ast::Annotation::AnnotatedOf(*annotation_) != node)
+    return;
+  const auto& expression = ast::ExpressionStatement::ExpressionOf(node);
+  const auto& annotation = ast::Annotation::AnnotationOf(*annotation_);
+  if (expression == ast::SyntaxCode::MemberExpression)
+    return ProcessMemberExpressionWithAnnotation(expression, annotation);
+  AddError(*annotation_, ErrorCode::ENVIRONMENT_UNEXPECT_ANNOTATION);
 }
 
 void EnvironmentBuilder::Visit(const ast::LetStatement& syntax,

@@ -19,6 +19,10 @@ namespace analyzer {
 Pass::Pass(Context* context) : context_(*context) {}
 Pass::~Pass() = default;
 
+const Factory& Pass::factory() const {
+  return context_.factory();
+}
+
 Factory& Pass::factory() {
   return context_.factory();
 }

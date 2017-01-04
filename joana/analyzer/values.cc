@@ -38,6 +38,19 @@ Function::Function(Zone* zone,
 Function::~Function() = default;
 
 //
+// LexicalBinding
+//
+LexicalBinding::LexicalBinding(Zone* zone,
+                               int id,
+                               const ast::Node& node,
+                               Properties* properties)
+    : Object(id, node, properties), assignments_(zone), references_(zone) {
+  assignments_.push_back(&node);
+}
+
+LexicalBinding::~LexicalBinding() = default;
+
+//
 // Method
 //
 Method::Method(Zone* zone,
@@ -52,28 +65,22 @@ Method::Method(Zone* zone,
 Method::~Method() = default;
 
 //
-// LexicalBinding
-//
-LexicalBinding::LexicalBinding(Zone* zone,
-                               int id,
-                               const ast::Node& node,
-                               Properties* properties)
-    : Value(id, node),
-      assignments_(zone),
-      properties_(*properties),
-      references_(zone) {
-  assignments_.push_back(&node);
-}
-
-LexicalBinding::~LexicalBinding() = default;
-
-//
 // Object
 //
 Object::Object(int id, const ast::Node& node, Properties* properties)
     : Value(id, node), properties_(*properties) {}
 
 Object::~Object() = default;
+
+//
+// OrdinaryObject
+//
+OrdinaryObject::OrdinaryObject(int id,
+                               const ast::Node& node,
+                               Properties* properties)
+    : Object(id, node, properties) {}
+
+OrdinaryObject::~OrdinaryObject() = default;
 
 //
 // Undefined

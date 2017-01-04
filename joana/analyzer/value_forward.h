@@ -22,13 +22,14 @@ namespace analyzer {
 
 #define FOR_EACH_ABSTRACT_ANALYZE_VALUE(name) \
   V(LexicalBinding)                           \
+  V(Object)                                   \
   V(Value)
 
 #define FOR_EACH_ANALYZE_VALUE(name) \
   V(Class)                           \
   V(Function)                        \
   V(Method)                          \
-  V(Object)                          \
+  V(OrdinaryObject)                  \
   V(Undefined)                       \
   V(Variable)
 

@@ -17,6 +17,7 @@ struct DefaultSingletonTraits;
 namespace joana {
 namespace ast {
 class Node;
+enum class TokenKind;
 }
 namespace analyzer {
 
@@ -28,6 +29,8 @@ class BuiltInWorld final {
   ~BuiltInWorld();
 
   const ast::Node& global_module() const { return global_module_; }
+
+  const ast::Node& NameOf(ast::TokenKind kind) const;
 
   static BuiltInWorld* GetInstance();
 

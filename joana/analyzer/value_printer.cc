@@ -85,7 +85,7 @@ std::ostream& operator<<(std::ostream& ostream, const Value& value) {
 
 std::ostream& operator<<(std::ostream& ostream, const Value* value) {
   if (!value)
-    return ostream << "(value)";
+    return ostream << "(null)";
   return ostream << *value;
 }
 

@@ -48,7 +48,7 @@ std::ostream& operator<<(std::ostream& ostream, const Dump& dump) {
   const auto depth = dump.depth;
   ostream << Indent{depth} << "Environment " << environment.owner()
           << std::endl;
-  for (const auto& name : environment.names()) {
+  for (const auto& name : environment.names_for_testing()) {
     const auto& value = *environment.TryValueOf(*name);
     ostream << Indent{depth + 1} << value << std::endl;
   }

@@ -27,7 +27,9 @@ class Environment final : public ZoneAllocated {
 
   virtual ~Environment();
 
-  const ZoneVector<const ast::Node*>& names() const { return names_; }
+  const ZoneVector<const ast::Node*>& names_for_testing() const {
+    return names_;
+  }
 
   // Returns outer environment of this environment, or returns null If this
   // environment is *global* environment.

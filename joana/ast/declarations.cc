@@ -21,12 +21,12 @@ Annotation::~Annotation() = default;
 
 const Node& Annotation::AnnotatedOf(const Node& node) {
   DCHECK_EQ(node, SyntaxCode::Annotation);
-  return node.child_at(0);
+  return node.child_at(1);
 }
 
 const Node& Annotation::AnnotationOf(const Node& node) {
   DCHECK_EQ(node, SyntaxCode::Annotation);
-  return node.child_at(1);
+  return node.child_at(0);
 }
 
 //

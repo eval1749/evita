@@ -8,6 +8,7 @@
 #include "joana/parser/parser.h"
 
 #include "joana/ast/declarations.h"
+#include "joana/ast/expressions.h"
 #include "joana/ast/node.h"
 #include "joana/ast/node_factory.h"
 #include "joana/ast/tokens.h"
@@ -19,6 +20,17 @@ namespace joana {
 namespace parser {
 
 namespace {
+
+bool IsMemberExpression(const ast::Node& node) {
+  const auto* runner = &node;
+  for (;;) {
+    if (*runner == ast::SyntaxCode::ReferenceExpression)
+      return node != runner;
+    if (*runner != ast::SyntaxCode::MemberExpression)
+      return false;
+    runner = &ast::MemberExpression::ExpressionOf(*runner);
+  }
+}
 
 bool CanHaveJsDoc(const ast::Node& statement) {
   if (statement == ast::SyntaxCode::Class)
@@ -34,8 +46,14 @@ bool CanHaveJsDoc(const ast::Node& statement) {
   if (statement != ast::SyntaxCode::ExpressionStatement)
     return false;
   auto& expression = statement.child_at(0);
-  if (expression == ast::SyntaxCode::AssignmentExpression)
-    return true;
+  if (expression == ast::SyntaxCode::AssignmentExpression) {
+    if (ast::AssignmentExpression::OperatorOf(expression) !=
+        ast::TokenKind::Equal) {
+      return false;
+    }
+    return IsMemberExpression(
+        ast::AssignmentExpression::LeftHandSideOf(expression));
+  }
   if (expression == ast::SyntaxCode::ReferenceExpression)
     return true;
   if (expression == ast::SyntaxCode::MemberExpression)

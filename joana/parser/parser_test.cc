@@ -161,6 +161,63 @@ TEST_F(ParserTest, AnnotateStatement) {
       "|  |  |  +--Name |foo|\n"
       "|  |  |  +--NumericLiteral |1|\n",
       Parse("/** @type {number} */ let foo = 1;"));
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@type|\n"
+      "|  |  |  +--TypeName\n"
+      "|  |  |  |  +--Name |number|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--ExpressionStatement\n"
+      "|  |  +--AssignmentExpression<=>\n"
+      "|  |  |  +--MemberExpression\n"
+      "|  |  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  |  +--Name |foo|\n"
+      "|  |  |  |  +--Name |bar|\n"
+      "|  |  |  +--Punctuator |=|\n"
+      "|  |  |  +--NumericLiteral |1|\n",
+      Parse("/** @type {number} */ foo.bar = 1;"));
+}
+
+TEST_F(ParserTest, AnnotateStatementError) {
+  EXPECT_EQ(
+      "Module\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@const|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--ExpressionStatement\n"
+      "|  |  +--AssignmentExpression<=>\n"
+      "|  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  +--Name |foo|\n"
+      "|  |  |  +--Punctuator |=|\n"
+      "|  |  |  +--NumericLiteral |1|\n"
+      "PASER_ERROR_STATEMENT_UNEXPECT_ANNOTATION@0:13\n",
+      Parse("/** @const */ foo = 1;"));
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@const|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--ExpressionStatement\n"
+      "|  |  +--AssignmentExpression<+=>\n"
+      "|  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  +--Name |foo|\n"
+      "|  |  |  +--Punctuator |+=|\n"
+      "|  |  |  +--NumericLiteral |1|\n"
+      "PASER_ERROR_STATEMENT_UNEXPECT_ANNOTATION@0:13\n",
+      Parse("/** @const */ foo += 1;"))
+      << "Annotation for += is not allowed.";
 }
 
 TEST_F(ParserTest, AsyncFunction) {

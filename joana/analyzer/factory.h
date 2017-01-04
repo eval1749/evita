@@ -20,6 +20,8 @@ namespace analyzer {
 
 class Class;
 class Environment;
+class Properties;
+class Property;
 class Value;
 
 //
@@ -43,10 +45,15 @@ class Factory final {
 
   // Factory members
   Environment& NewEnvironment(Environment* outer, const ast::Node& owner);
+
+  Property& GetOrNewProperty(Properties* properties, const ast::Node& node);
+  Property& NewProperty(const ast::Node& node);
+
+  // Value
   Value& NewClass(const ast::Node& node);
   Value& NewFunction(const ast::Node& node);
   Value& NewMethod(const ast::Node& node, Class* owner);
-  Value& NewProperty(const ast::Node& node);
+  Value& NewObject(const ast::Node& node);
   Value& NewUndefined(const ast::Node& node);
   Value& NewVariable(const ast::Node& assignment, const ast::Node& name);
 
@@ -54,6 +61,9 @@ class Factory final {
   static Environment& NewGlobalEnvironment(Zone* zone);
 
   int NextValueId();
+
+  // Properties
+  Properties& NewProperties(const ast::Node& node);
 
   int current_value_id_ = 0;
   std::unordered_map<const ast::Node*, Environment*> environment_map_;

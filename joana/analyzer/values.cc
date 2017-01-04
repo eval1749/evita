@@ -17,9 +17,11 @@ namespace analyzer {
 Class::Class(Zone* zone,
              int id,
              const ast::Node& node,
-             Environment* environment)
-    : LexicalBinding(zone, id, node), environment_(*environment) {
-  DCHECK(environment);
+             Properties* properties,
+             Object* prototype)
+    : LexicalBinding(zone, id, node, properties), prototype_(*prototype) {
+  DCHECK(properties);
+  DCHECK(prototype);
 }
 
 Class::~Class() = default;
@@ -27,16 +29,23 @@ Class::~Class() = default;
 //
 // Function
 //
-Function::Function(Zone* zone, int id, const ast::Node& node)
-    : LexicalBinding(zone, id, node) {}
+Function::Function(Zone* zone,
+                   int id,
+                   const ast::Node& node,
+                   Properties* properties)
+    : LexicalBinding(zone, id, node, properties) {}
 
 Function::~Function() = default;
 
 //
 // Method
 //
-Method::Method(Zone* zone, int id, const ast::Node& node, Class* owner)
-    : LexicalBinding(zone, id, node), owner_(*owner) {
+Method::Method(Zone* zone,
+               int id,
+               const ast::Node& node,
+               Class* owner,
+               Properties* properties)
+    : LexicalBinding(zone, id, node, properties), owner_(*owner) {
   DCHECK(owner);
 }
 
@@ -45,20 +54,26 @@ Method::~Method() = default;
 //
 // LexicalBinding
 //
-LexicalBinding::LexicalBinding(Zone* zone, int id, const ast::Node& node)
-    : Value(id, node), assignments_(zone), references_(zone) {
+LexicalBinding::LexicalBinding(Zone* zone,
+                               int id,
+                               const ast::Node& node,
+                               Properties* properties)
+    : Value(id, node),
+      assignments_(zone),
+      properties_(*properties),
+      references_(zone) {
   assignments_.push_back(&node);
 }
 
 LexicalBinding::~LexicalBinding() = default;
 
 //
-// Property
+// Object
 //
-Property::Property(Zone* zone, int id, const ast::Node& node)
-    : LexicalBinding(zone, id, node) {}
+Object::Object(int id, const ast::Node& node, Properties* properties)
+    : Value(id, node), properties_(*properties) {}
 
-Property::~Property() = default;
+Object::~Object() = default;
 
 //
 // Undefined
@@ -72,8 +87,9 @@ Undefined::~Undefined() = default;
 Variable::Variable(Zone* zone,
                    int id,
                    const ast::Node& assignment,
-                   const ast::Node& name)
-    : LexicalBinding(zone, id, name), assignment_(assignment) {
+                   const ast::Node& name,
+                   Properties* properties)
+    : LexicalBinding(zone, id, name, properties), assignment_(assignment) {
   DCHECK(name == ast::SyntaxCode::Name ||
          name == ast::SyntaxCode::BindingNameElement)
       << name;

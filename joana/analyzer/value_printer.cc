@@ -46,9 +46,9 @@ std::ostream& operator<<(std::ostream& ostream,
 }
 
 std::ostream& operator<<(std::ostream& ostream,
-                         const Printable<Property>& printable) {
+                         const Printable<Object>& printable) {
   const auto& value = *printable.value;
-  return ostream << "$Property@" << value.id() << ' ' << value.node();
+  return ostream << "$Object@" << value.id() << ' ' << value.node();
 }
 
 std::ostream& operator<<(std::ostream& ostream,

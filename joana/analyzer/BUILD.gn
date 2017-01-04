@@ -23,6 +23,8 @@ source_set("analyzer") {
     "factory.h",
     "pass.cc",
     "pass.h",
+    "properties.cc",
+    "properties.h",
     "type_checker.cc",
     "type_checker.h",
     "value.cc",

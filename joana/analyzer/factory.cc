@@ -6,9 +6,12 @@
 
 #include "joana/analyzer/built_in_world.h"
 #include "joana/analyzer/environment.h"
+#include "joana/analyzer/properties.h"
 #include "joana/analyzer/values.h"
 #include "joana/ast/compilation_units.h"
+#include "joana/ast/declarations.h"
 #include "joana/ast/node.h"
+#include "joana/ast/tokens.h"
 
 namespace joana {
 namespace analyzer {
@@ -43,6 +46,13 @@ Value& Factory::ValueOf(const ast::Node& node) const {
 }
 
 // Factory members
+Property& Factory::GetOrNewProperty(Properties* properties,
+                                    const ast::Node& node) {
+  if (auto* present = properties->TryGet(node))
+    return *present;
+  return properties->Add(&NewProperty(node));
+}
+
 Environment& Factory::NewEnvironment(Environment* outer,
                                      const ast::Node& owner) {
   auto& environment = *new (&zone_) Environment(&zone_, outer, owner);
@@ -54,26 +64,42 @@ Environment& Factory::NewEnvironment(Environment* outer,
 Value& Factory::NewClass(const ast::Node& node) {
   DCHECK(node == ast::SyntaxCode::Class || node == ast::SyntaxCode::Function)
       << node;
-  auto& environment = NewEnvironment(nullptr, node);
-  return RegisterValue(
-      node, new (&zone_) Class(&zone_, NextValueId(), node, &environment));
+  auto& properties = NewProperties(node);
+  auto& prototype = NewObject(ast::Class::BodyOf(node)).As<Object>();
+  auto& prototype_property = NewProperty(
+      BuiltInWorld::GetInstance()->NameOf(ast::TokenKind::Prototype));
+  prototype_property.AddAssignment(ast::Class::BodyOf(node));
+  properties.Add(&prototype_property);
+  return RegisterValue(node, new (&zone_) Class(&zone_, NextValueId(), node,
+                                                &properties, &prototype));
 }
 
 Value& Factory::NewFunction(const ast::Node& node) {
-  return RegisterValue(node,
-                       new (&zone_) Function(&zone_, NextValueId(), node));
+  auto& properties = NewProperties(node);
+  return RegisterValue(
+      node, new (&zone_) Function(&zone_, NextValueId(), node, &properties));
 }
 
 Value& Factory::NewMethod(const ast::Node& node, Class* owner) {
   DCHECK_EQ(node, ast::SyntaxCode::Method);
   DCHECK(owner);
-  return RegisterValue(node,
-                       new (&zone_) Method(&zone_, NextValueId(), node, owner));
+  auto& properties = NewProperties(node);
+  return RegisterValue(node, new (&zone_) Method(&zone_, NextValueId(), node,
+                                                 owner, &properties));
 }
 
-Value& Factory::NewProperty(const ast::Node& node) {
+Properties& Factory::NewProperties(const ast::Node& owner) {
+  return *new (&zone_) Properties(&zone_, owner);
+}
+
+Property& Factory::NewProperty(const ast::Node& key) {
+  return *new (&zone_) Property(&zone_, key);
+}
+
+Value& Factory::NewObject(const ast::Node& node) {
+  auto& properties = NewProperties(node);
   return RegisterValue(node,
-                       new (&zone_) Property(&zone_, NextValueId(), node));
+                       new (&zone_) Object(NextValueId(), node, &properties));
 }
 
 Value& Factory::NewUndefined(const ast::Node& node) {
@@ -82,8 +108,10 @@ Value& Factory::NewUndefined(const ast::Node& node) {
 
 Value& Factory::NewVariable(const ast::Node& assignment,
                             const ast::Node& name) {
+  auto& properties = NewProperties(name);
   return RegisterValue(
-      name, new (&zone_) Variable(&zone_, NextValueId(), assignment, name));
+      name, new (&zone_)
+                Variable(&zone_, NextValueId(), assignment, name, &properties));
 }
 
 // static

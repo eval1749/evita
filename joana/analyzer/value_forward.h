@@ -28,7 +28,7 @@ namespace analyzer {
   V(Class)                           \
   V(Function)                        \
   V(Method)                          \
-  V(Property)                        \
+  V(Object)                          \
   V(Undefined)                       \
   V(Variable)
 

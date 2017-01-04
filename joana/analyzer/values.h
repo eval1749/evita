@@ -12,6 +12,8 @@ namespace joana {
 namespace analyzer {
 
 class Environment;
+class Object;
+class Properties;
 
 //
 // LexicalBinding
@@ -26,13 +28,20 @@ class LexicalBinding : public Value {
     return assignments_;
   }
 
+  const Properties& properties() const { return properties_; }
+  Properties& properties() { return properties_; }
+
   const ZoneVector<const ast::Node*>& references() const { return references_; }
 
  protected:
-  LexicalBinding(Zone* zone, int id, const ast::Node& node);
+  LexicalBinding(Zone* zone,
+                 int id,
+                 const ast::Node& node,
+                 Properties* properties);
 
  private:
   ZoneVector<const ast::Node*> assignments_;
+  Properties& properties_;
   ZoneVector<const ast::Node*> references_;
 
   DISALLOW_COPY_AND_ASSIGN(LexicalBinding);
@@ -47,14 +56,18 @@ class Class final : public LexicalBinding {
  public:
   ~Class() final;
 
-  const Environment& environment() const { return environment_; }
-  Environment& environment() { return environment_; }
+  const Object& prototype() const { return prototype_; }
+  Object& prototype() { return prototype_; }
 
  private:
-  Class(Zone* zone, int id, const ast::Node& node, Environment* environment);
+  Class(Zone* zone,
+        int id,
+        const ast::Node& node,
+        Properties* properties,
+        Object* prototype);
 
-  // Holds methods
-  Environment& environment_;
+  // The prototype
+  Object& prototype_;
 
   DISALLOW_COPY_AND_ASSIGN(Class);
 };
@@ -69,7 +82,7 @@ class Function final : public LexicalBinding {
   ~Function() final;
 
  private:
-  Function(Zone* zone, int id, const ast::Node& node);
+  Function(Zone* zone, int id, const ast::Node& node, Properties* properties);
 
   DISALLOW_COPY_AND_ASSIGN(Function);
 };
@@ -86,7 +99,11 @@ class Method final : public LexicalBinding {
   Class& owner() const { return owner_; }
 
  private:
-  Method(Zone* zone, int id, const ast::Node& node, Class* owner);
+  Method(Zone* zone,
+         int id,
+         const ast::Node& node,
+         Class* owner,
+         Properties* properties);
 
   Class& owner_;
 
@@ -94,18 +111,23 @@ class Method final : public LexicalBinding {
 };
 
 //
-// Property
+// Object
 //
-class Property final : public LexicalBinding {
-  DECLARE_CONCRETE_ANALYZE_VALUE(Property, LexicalBinding)
+class Object final : public Value {
+  DECLARE_CONCRETE_ANALYZE_VALUE(Object, Value)
 
  public:
-  ~Property() final;
+  ~Object() final;
+
+  const Properties& properties() const { return properties_; }
+  Properties& properties() { return properties_; }
 
  private:
-  Property(Zone* zone, int id, const ast::Node& node);
+  Object(int id, const ast::Node& node, Properties* properties);
 
-  DISALLOW_COPY_AND_ASSIGN(Property);
+  Properties& properties_;
+
+  DISALLOW_COPY_AND_ASSIGN(Object);
 };
 
 //
@@ -139,7 +161,8 @@ class Variable final : public LexicalBinding {
   Variable(Zone* zone,
            int id,
            const ast::Node& assignment,
-           const ast::Node& name);
+           const ast::Node& name,
+           Properties* properties);
 
   const ast::Node& assignment_;
 

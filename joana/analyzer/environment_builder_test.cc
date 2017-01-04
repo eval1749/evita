@@ -95,15 +95,17 @@ std::string EnvironmentBuilderTest::ListValues(base::StringPiece script_text) {
 
 TEST_F(EnvironmentBuilderTest, Class) {
   EXPECT_EQ(
-      "Class@1[0-31] |class Foo { bar() {}...|\n"
-      "Method@2[12-20] |bar() {}|\n"
-      "Method@3[21-29] |baz() {}|\n",
+      "Class@2[0-31] |class Foo { bar() {}...|\n"
+      "Object@1[10-31] |{ bar() {} baz() {} ...|\n"  // Foo.prototype
+      "Method@3[12-20] |bar() {}|\n"
+      "Method@4[21-29] |baz() {}|\n",
       ListValues("class Foo { bar() {} baz() {} }"));
 }
 
 TEST_F(EnvironmentBuilderTest, ClassError) {
   EXPECT_EQ(
-      "Class@1[0-15] |class Foo { 1 }|\n"
+      "Class@2[0-15] |class Foo { 1 }|\n"
+      "Object@1[10-15] |{ 1 }|\n"  // Foo.prototype
       "ANALYZER_ERROR_ENVIRONMENT_EXPECT_METHOD@12:13\n",
       ListValues("class Foo { 1 }"));
 }

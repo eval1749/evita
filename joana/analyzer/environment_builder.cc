@@ -10,7 +10,7 @@
 #include "joana/analyzer/environment.h"
 #include "joana/analyzer/error_codes.h"
 #include "joana/analyzer/factory.h"
-#include "joana/analyzer/value.h"
+#include "joana/analyzer/properties.h"
 #include "joana/analyzer/value_editor.h"
 #include "joana/analyzer/value_forward.h"
 #include "joana/analyzer/values.h"
@@ -205,26 +205,25 @@ void EnvironmentBuilder::Visit(const ast::Class& syntax,
                                const ast::Node& node) {
   // TODO(eval1749): Report warning for toplevel anonymous class
   auto& klass = BindToClass(ast::Class::NameOf(node), node);
-  auto& environment = klass.environment();
   for (const auto& member :
        ast::NodeTraversal::ChildNodesOf(ast::Class::BodyOf(node))) {
     if (member != ast::SyntaxCode::Method) {
       AddError(member, ErrorCode::ENVIRONMENT_EXPECT_METHOD);
       continue;
     }
-    auto& method = factory().NewMethod(member, &klass);
-    const auto& name = ast::Method::NameOf(member);
-    if (name != ast::SyntaxCode::Name) {
-      // TODO(eval1749): We should handle computed method name, e.g.
-      // |[Symbol.iterator]() { ... }|
+    auto& properties =
+        ast::Method::MethodKindOf(member) == ast::MethodKind::Static
+            ? klass.properties()
+            : klass.prototype().properties();
+    auto& property =
+        factory().GetOrNewProperty(&properties, ast::Method::NameOf(member));
+    factory().NewMethod(member, &klass);
+    if (!property.assignments().empty()) {
+      AddError(member, ErrorCode::ENVIRONMENT_MULTIPLE_BINDINGS,
+               *property.assignments().front());
       continue;
     }
-    auto* const present = environment.TryValueOf(name);
-    if (present) {
-      AddError(name, ErrorCode::ENVIRONMENT_MULTIPLE_BINDINGS, present->node());
-      continue;
-    }
-    environment.Bind(name, &method);
+    property.AddAssignment(member);
   }
   VisitChildNodes(node);
 }

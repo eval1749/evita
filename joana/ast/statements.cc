@@ -17,7 +17,6 @@ IMPLEMENT_AST_SYNTAX_0(Statement, CaseClause, 2)
 IMPLEMENT_AST_SYNTAX_0(Statement, ContinueStatement, 1)
 IMPLEMENT_AST_SYNTAX_0(Statement, DoStatement, 2)
 IMPLEMENT_AST_SYNTAX_0(Statement, EmptyStatement, 0)
-IMPLEMENT_AST_SYNTAX_0(Statement, ExpressionStatement, 1)
 IMPLEMENT_AST_SYNTAX_0(Statement, ForStatement, 4)
 IMPLEMENT_AST_SYNTAX_0(Statement, ForInStatement, 2)
 IMPLEMENT_AST_SYNTAX_0(Statement, ForOfStatement, 3)
@@ -50,6 +49,21 @@ ConstStatement::ConstStatement()
     : VariableDeclaration(SyntaxCode::ConstStatement) {}
 
 ConstStatement::~ConstStatement() = default;
+
+//
+// ExpressionStatement
+//
+ExpressionStatement::ExpressionStatement()
+    : SyntaxTemplate(std::tuple<>(),
+                     SyntaxCode::ExpressionStatement,
+                     Format::Builder().set_arity(1).Build()) {}
+
+ExpressionStatement::~ExpressionStatement() = default;
+
+const Node& ExpressionStatement::ExpressionOf(const Node& node) {
+  DCHECK_EQ(node, SyntaxCode::ExpressionStatement);
+  return node.child_at(0);
+}
 
 //
 // LetStatement

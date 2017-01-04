@@ -19,7 +19,6 @@ DECLARE_AST_SYNTAX_0(CaseClause)
 DECLARE_AST_SYNTAX_0(ContinueStatement)
 DECLARE_AST_SYNTAX_0(DoStatement)
 DECLARE_AST_SYNTAX_0(EmptyStatement)
-DECLARE_AST_SYNTAX_0(ExpressionStatement)
 DECLARE_AST_SYNTAX_0(ForStatement)
 DECLARE_AST_SYNTAX_0(ForInStatement)
 DECLARE_AST_SYNTAX_0(ForOfStatement)
@@ -64,6 +63,24 @@ class JOANA_AST_EXPORT ConstStatement final : public VariableDeclaration {
   ConstStatement();
 
   DISALLOW_COPY_AND_ASSIGN(ConstStatement);
+};
+
+//
+// ExpressionStatement
+//
+class JOANA_AST_EXPORT ExpressionStatement final
+    : public SyntaxTemplate<Syntax> {
+  DECLARE_CONCRETE_AST_SYNTAX(ExpressionStatement, Syntax);
+
+ public:
+  ~ExpressionStatement() final;
+
+  static const ast::Node& ExpressionOf(const ast::Node& node);
+
+ private:
+  ExpressionStatement();
+
+  DISALLOW_COPY_AND_ASSIGN(ExpressionStatement);
 };
 
 //

@@ -26,9 +26,15 @@ bool IsMemberExpression(const ast::Node& node) {
   for (;;) {
     if (*runner == ast::SyntaxCode::ReferenceExpression)
       return node != runner;
-    if (*runner != ast::SyntaxCode::MemberExpression)
-      return false;
-    runner = &ast::MemberExpression::ExpressionOf(*runner);
+    if (*runner == ast::SyntaxCode::MemberExpression) {
+      runner = &ast::MemberExpression::ExpressionOf(*runner);
+      continue;
+    }
+    if (*runner == ast::SyntaxCode::ComputedMemberExpression) {
+      runner = &ast::ComputedMemberExpression::ExpressionOf(*runner);
+      continue;
+    }
+    return false;
   }
 }
 

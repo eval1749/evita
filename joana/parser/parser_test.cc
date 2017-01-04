@@ -181,6 +181,39 @@ TEST_F(ParserTest, AnnotateStatement) {
       "|  |  |  +--Punctuator |=|\n"
       "|  |  |  +--NumericLiteral |1|\n",
       Parse("/** @type {number} */ foo.bar = 1;"));
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@return|\n"
+      "|  |  |  +--TypeApplication\n"
+      "|  |  |  |  +--TypeName\n"
+      "|  |  |  |  |  +--Name |Iterator|\n"
+      "|  |  |  |  +--Tuple\n"
+      "|  |  |  |  |  +--TypeName\n"
+      "|  |  |  |  |  |  +--Name |T|\n"
+      "|  |  |  +--JsDocText |*/|\n"
+      "|  +--ExpressionStatement\n"
+      "|  |  +--AssignmentExpression<=>\n"
+      "|  |  |  +--ComputedMemberExpression\n"
+      "|  |  |  |  +--MemberExpression\n"
+      "|  |  |  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  |  |  +--Name |Array|\n"
+      "|  |  |  |  |  +--Name |prototype|\n"
+      "|  |  |  |  +--MemberExpression\n"
+      "|  |  |  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  |  |  +--Name |Symbol|\n"
+      "|  |  |  |  |  +--Name |iterator|\n"
+      "|  |  |  +--Punctuator |=|\n"
+      "|  |  |  +--Function<Normal>\n"
+      "|  |  |  |  +--Empty ||\n"
+      "|  |  |  |  +--ParameterList |()|\n"
+      "|  |  |  |  +--BlockStatement |{}|\n",
+      Parse("/** @return {Iterator<T>} */\n"
+            "Array.prototype[Symbol.iterator] = function() {};\n"));
 }
 
 TEST_F(ParserTest, AnnotateStatementError) {

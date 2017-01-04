@@ -47,6 +47,9 @@ class EnvironmentBuilder final : public Pass, public ast::SyntaxVisitor {
 
   void BindToVariable(const ast::Node& origin, const ast::Node& name);
 
+  void ProcessAssignmentExpressionWithAnnotation(const ast::Node& node,
+                                                 const ast::Node& annotation);
+
   void ProcessMemberExpressionWithAnnotation(const ast::Node& node,
                                              const ast::Node& annotation);
 

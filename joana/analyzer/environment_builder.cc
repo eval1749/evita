@@ -190,6 +190,13 @@ void EnvironmentBuilder::BindToVariable(const ast::Node& origin,
 }
 
 // AST node handlers
+void EnvironmentBuilder::ProcessAssignmentExpressionWithAnnotation(
+    const ast::Node& node,
+    const ast::Node& annotation) {
+  if (ast::AssignmentExpression::OperatorOf(node) != ast::TokenKind::Equal)
+    return;
+}
+
 void EnvironmentBuilder::ProcessMemberExpressionWithAnnotation(
     const ast::Node& node,
     const ast::Node& annotation) {
@@ -355,6 +362,8 @@ void EnvironmentBuilder::Visit(const ast::ExpressionStatement& syntax,
     return;
   const auto& expression = ast::ExpressionStatement::ExpressionOf(node);
   const auto& annotation = ast::Annotation::AnnotationOf(*annotation_);
+  if (expression == ast::SyntaxCode::AssignmentExpression)
+    return ProcessAssignmentExpressionWithAnnotation(expression, annotation);
   if (expression == ast::SyntaxCode::MemberExpression)
     return ProcessMemberExpressionWithAnnotation(expression, annotation);
   AddError(*annotation_, ErrorCode::ENVIRONMENT_UNEXPECT_ANNOTATION);

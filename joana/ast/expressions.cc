@@ -12,7 +12,6 @@
 namespace joana {
 namespace ast {
 
-IMPLEMENT_AST_SYNTAX_0(Expression, ComputedMemberExpression, 2)
 IMPLEMENT_AST_SYNTAX_0(Expression, ConditionalExpression, 3)
 IMPLEMENT_AST_SYNTAX_0(Expression, DelimiterExpression, 0)
 IMPLEMENT_AST_SYNTAX_0(Expression, ElisionExpression, 0)
@@ -110,6 +109,26 @@ CommaExpression::CommaExpression()
                      Format::Builder().set_is_variadic(true).Build()) {}
 
 CommaExpression::~CommaExpression() = default;
+
+//
+// ComputedMemberExpression
+//
+ComputedMemberExpression::ComputedMemberExpression()
+    : SyntaxTemplate(std::tuple<>(),
+                     SyntaxCode::ComputedMemberExpression,
+                     Format::Builder().set_arity(2).Build()) {}
+
+ComputedMemberExpression::~ComputedMemberExpression() = default;
+
+const Node& ComputedMemberExpression::ExpressionOf(const Node& node) {
+  DCHECK_EQ(node, SyntaxCode::ComputedMemberExpression);
+  return node.child_at(1);
+}
+
+const Node& ComputedMemberExpression::MemberExpressionOf(const Node& node) {
+  DCHECK_EQ(node, SyntaxCode::ComputedMemberExpression);
+  return node.child_at(0);
+}
 
 //
 // MemberExpression

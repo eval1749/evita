@@ -21,7 +21,6 @@ class Node;
 
 DECLARE_AST_SYNTAX_0(ArrayInitializer)
 DECLARE_AST_SYNTAX_0(CommaExpression)
-DECLARE_AST_SYNTAX_0(ComputedMemberExpression)
 DECLARE_AST_SYNTAX_0(ConditionalExpression)
 DECLARE_AST_SYNTAX_0(DelimiterExpression)
 DECLARE_AST_SYNTAX_0(GroupExpression)
@@ -90,6 +89,25 @@ class JOANA_AST_EXPORT CallExpression final : public SyntaxTemplate<Syntax> {
   CallExpression();
 
   DISALLOW_COPY_AND_ASSIGN(CallExpression);
+};
+
+//
+// ComputedMemberExpression
+//
+class JOANA_AST_EXPORT ComputedMemberExpression final
+    : public SyntaxTemplate<Syntax> {
+  DECLARE_CONCRETE_AST_SYNTAX(ComputedMemberExpression, Syntax);
+
+ public:
+  ~ComputedMemberExpression() final;
+
+  static const Node& ExpressionOf(const Node& node);
+  static const Node& MemberExpressionOf(const Node& node);
+
+ private:
+  ComputedMemberExpression();
+
+  DISALLOW_COPY_AND_ASSIGN(ComputedMemberExpression);
 };
 
 //

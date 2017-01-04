@@ -19,14 +19,14 @@ namespace analyzer {
 
 #define DECLARE_ANALYZE_VALUE(name, base) \
   DECLARE_CASTABLE_CLASS(name, base);     \
-  friend class Editor;                    \
-  friend class Factory;
+  friend class Editor;
 
 #define DECLARE_ABSTRACT_ANALYZE_VALUE(name, base) \
   DECLARE_ANALYZE_VALUE(name, base)
 
 #define DECLARE_CONCRETE_ANALYZE_VALUE(name, base) \
-  DECLARE_ANALYZE_VALUE(name, base)
+  DECLARE_ANALYZE_VALUE(name, base)                \
+  friend class Factory;
 
 //
 // Value

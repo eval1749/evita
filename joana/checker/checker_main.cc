@@ -156,6 +156,8 @@ void PrintSourceCodeRange(const SourceCodeLine& start_line,
     return;
   if (start_line.end() != end_line.start())
     std::cout << "  ...." << std::endl;
+  if (end_line.size() <= kLineWidth)
+    return PrintSourceCodeLine(end_line.start(), end_line.end(), range);
   PrintSourceCodeLine(std::max(end_line.start(), range.end() - kBeforeContext),
                       std::min(end_line.end(), range.end() + kAfterContext),
                       range);

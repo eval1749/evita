@@ -5,6 +5,7 @@
 #ifndef JOANA_BASE_MEMORY_ZONE_UNORDERED_MAP_H_
 #define JOANA_BASE_MEMORY_ZONE_UNORDERED_MAP_H_
 
+#include <functional>
 #include <unordered_map>
 
 #include "joana/base/memory/zone.h"
@@ -17,15 +18,12 @@ namespace joana {
 // ZoneUnorderedMap
 // A wrapper subclass for |std::unordered_map|.
 //
-template <typename K, typename T>
+template <typename K,
+          typename T,
+          typename Hash = std::hash<K>,
+          typename KeyEqual = std::equal_to<K>>
 class ZoneUnorderedMap
-    : public std::unordered_map<K,
-                                T,
-                                typename std::unordered_map<K, T>::hasher,
-                                typename std::unordered_map<K, T>::key_equal,
-                                ZoneAllocator<T>> {
-  using Hash = typename std::unordered_map<K, T>::hasher;
-  using KeyEqual = typename std::unordered_map<K, T>::key_equal;
+    : public std::unordered_map<K, T, Hash, KeyEqual, ZoneAllocator<T>> {
   using BaseClass = std::unordered_map<K, T, Hash, KeyEqual, ZoneAllocator<T>>;
 
  public:

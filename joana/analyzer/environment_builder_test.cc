@@ -98,7 +98,8 @@ std::string EnvironmentBuilderTest::ListValues(base::StringPiece script_text) {
 TEST_F(EnvironmentBuilderTest, Class) {
   EXPECT_EQ(
       "Class[0-31]=Class@2[0-31] |class Foo { bar() {}...|\n"
-      "ObjectInitializer[10-31]=Object@1[10-31] |{ bar() {} baz() {} ...|\n"
+      "ObjectInitializer[10-31]=OrdinaryObject@1[10-31] |{ bar() {} baz() {} "
+      "...|\n"
       "Method<NonStatic,Normal>[12-20]=Method@3[12-20] |bar() {}|\n"
       "Method<NonStatic,Normal>[21-29]=Method@4[21-29] |baz() {}|\n",
       ListValues("class Foo { bar() {} baz() {} }"));
@@ -107,7 +108,8 @@ TEST_F(EnvironmentBuilderTest, Class) {
 TEST_F(EnvironmentBuilderTest, ClassError) {
   EXPECT_EQ(
       "Class[0-15]=Class@2[0-15] |class Foo { 1 }|\n"
-      "ObjectInitializer[10-15]=Object@1[10-15] |{ 1 }|\n"  // Foo.prototype
+      // Foo.prototype
+      "ObjectInitializer[10-15]=OrdinaryObject@1[10-15] |{ 1 }|\n"
       "ANALYZER_ERROR_ENVIRONMENT_EXPECT_METHOD@12:13\n",
       ListValues("class Foo { 1 }"));
 }
@@ -131,9 +133,9 @@ TEST_F(EnvironmentBuilderTest, Let) {
 
 TEST_F(EnvironmentBuilderTest, MemberExpression) {
   EXPECT_EQ(
-      "Name[4-16]=Object@1[4-16] |@constructor|\n"  // prototype
+      "Name[4-16]=OrdinaryObject@1[4-16] |@constructor|\n"  // prototype
       "Function<Normal>[20-37]=Class@2[20-37] |function Foo() {}|\n"
-      "MemberExpression[52-65]=Object@1[4-16] |@constructor|\n"
+      "MemberExpression[52-65]=OrdinaryObject@1[4-16] |@constructor|\n"
       "ReferenceExpression[52-55]=Class@2[20-37] |function Foo() {}|\n"
       "Name[66-69]=Variable@3[66-69] |bar|\n",
       ListValues("/** @constructor */ function Foo() {}\n"

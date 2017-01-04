@@ -102,8 +102,8 @@ Property& Factory::NewProperty(const ast::Node& key) {
 
 Value& Factory::NewOrdinaryObject(const ast::Node& node) {
   auto& properties = NewProperties(node);
-  return RegisterValue(node,
-                       new (&zone_) Object(NextValueId(), node, &properties));
+  return RegisterValue(
+      node, new (&zone_) OrdinaryObject(NextValueId(), node, &properties));
 }
 
 Value& Factory::NewUndefined(const ast::Node& node) {

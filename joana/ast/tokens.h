@@ -48,20 +48,22 @@ JOANA_AST_EXPORT std::ostream& operator<<(std::ostream& ostream,
 
 //
 // Token
-//
-class JOANA_AST_EXPORT Token : public SyntaxTemplate<Syntax, int> {
+// Note: For ease of debugging, |Token| hold |TokenKind| even if it will be
+// out of range.
+class JOANA_AST_EXPORT Token : public SyntaxTemplate<Syntax, TokenKind> {
   DECLARE_ABSTRACT_AST_SYNTAX(Token, Syntax);
 
  public:
   ~Token() override;
 
-  int number() const { return parameter_at<0>(); }
+  TokenKind kind() const { return parameter_at<0>(); }
+  int number() const { return static_cast<int>(kind()); }
 
   static int IdOf(const Node& node);
   static TokenKind KindOf(const Node& node);
 
  protected:
-  Token(SyntaxCode syntax_code, int number);
+  Token(SyntaxCode syntax_code, TokenKind kind);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(Token);

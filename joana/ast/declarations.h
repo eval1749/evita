@@ -154,6 +154,9 @@ class JOANA_AST_EXPORT Method final
   // Returns |BlockStatement|.
   static const Node& BodyOf(const Node& node);
 
+  static FunctionKind FunctionKindOf(const Node& node);
+  static MethodKind MethodKindOf(const Node& node);
+
   // Returns either |ArrayInitializer|, e.g. "[Symbol.foo]" or
   // |ReferenceExpression|.
   static const Node& NameOf(const Node& node);

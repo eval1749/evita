@@ -117,6 +117,16 @@ const Node& Method::BodyOf(const Node& node) {
   return node.child_at(2);
 }
 
+FunctionKind Method::FunctionKindOf(const Node& node) {
+  DCHECK_EQ(node, SyntaxCode::Method);
+  return node.syntax().As<Method>().kind();
+}
+
+MethodKind Method::MethodKindOf(const Node& node) {
+  DCHECK_EQ(node, SyntaxCode::Method);
+  return node.syntax().As<Method>().method_kind();
+}
+
 const Node& Method::NameOf(const Node& node) {
   DCHECK_EQ(node, SyntaxCode::Method);
   return node.child_at(0);

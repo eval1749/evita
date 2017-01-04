@@ -13,6 +13,8 @@
 #include "joana/analyzer/type_checker.h"
 #include "joana/analyzer/values.h"
 #include "joana/ast/node.h"
+#include "joana/ast/node_traversal.h"
+#include "joana/ast/syntax.h"
 #include "joana/ast/syntax_visitor.h"
 
 namespace joana {
@@ -70,13 +72,30 @@ Factory& Controller::factory() const {
 }
 
 void Controller::Analyze() {
-  std::cout << Dump{0, &context_->global_environment()};
+  for (const auto& toplevel : nodes_) {
+    for (const auto& node : ast::NodeTraversal::DescendantsOf(*toplevel)) {
+      const auto* const value = factory().TryValueOf(node);
+      if (!value)
+        continue;
+      std::cout << node.syntax() << '[' << node.range().start() << '-'
+                << node.range().end() << "] = " << value << std::endl;
+    }
+  }
+
   TypeChecker type_checker(context_.get());
-  for (const auto& node : nodes_) {
+  for (const auto& node : nodes_)
     type_checker.RunOn(*node);
+
+  std::cout << std::endl << "Dump global environments" << std::endl;
+  std::cout << Dump{0, &context_->global_environment()};
+
+  auto counter = 0;
+  for (const auto& node : nodes_) {
     const auto& environment = factory().EnvironmentOf(*node);
     if (!environment.outer())
       continue;
+    if (++counter == 1)
+      std::cout << std::endl << "Dump module environments" << std::endl;
     std::cout << Dump{0, &environment};
   }
 }

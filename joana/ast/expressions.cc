@@ -17,7 +17,6 @@ IMPLEMENT_AST_SYNTAX_0(Expression, ConditionalExpression, 3)
 IMPLEMENT_AST_SYNTAX_0(Expression, DelimiterExpression, 0)
 IMPLEMENT_AST_SYNTAX_0(Expression, ElisionExpression, 0)
 IMPLEMENT_AST_SYNTAX_0(Expression, GroupExpression, 1)
-IMPLEMENT_AST_SYNTAX_0(Expression, MemberExpression, 2)
 
 //
 // ArrayInitializer
@@ -111,6 +110,26 @@ CommaExpression::CommaExpression()
                      Format::Builder().set_is_variadic(true).Build()) {}
 
 CommaExpression::~CommaExpression() = default;
+
+//
+// MemberExpression
+//
+MemberExpression::MemberExpression()
+    : SyntaxTemplate(std::tuple<>(),
+                     SyntaxCode::MemberExpression,
+                     Format::Builder().set_arity(2).Build()) {}
+
+MemberExpression::~MemberExpression() = default;
+
+const Node& MemberExpression::ExpressionOf(const Node& node) {
+  DCHECK_EQ(node, SyntaxCode::MemberExpression);
+  return node.child_at(0);
+}
+
+const Node& MemberExpression::NameOf(const Node& node) {
+  DCHECK_EQ(node, SyntaxCode::MemberExpression);
+  return node.child_at(1);
+}
 
 //
 // NewExpression

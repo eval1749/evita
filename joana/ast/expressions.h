@@ -26,7 +26,6 @@ DECLARE_AST_SYNTAX_0(ConditionalExpression)
 DECLARE_AST_SYNTAX_0(DelimiterExpression)
 DECLARE_AST_SYNTAX_0(GroupExpression)
 DECLARE_AST_SYNTAX_0(ElisionExpression)
-DECLARE_AST_SYNTAX_0(MemberExpression)
 DECLARE_AST_SYNTAX_0(ObjectInitializer)
 DECLARE_AST_SYNTAX_0(ParameterList)
 DECLARE_AST_SYNTAX_0(Tuple);
@@ -91,6 +90,24 @@ class JOANA_AST_EXPORT CallExpression final : public SyntaxTemplate<Syntax> {
   CallExpression();
 
   DISALLOW_COPY_AND_ASSIGN(CallExpression);
+};
+
+//
+// MemberExpression
+//
+class JOANA_AST_EXPORT MemberExpression final : public SyntaxTemplate<Syntax> {
+  DECLARE_CONCRETE_AST_SYNTAX(MemberExpression, Syntax);
+
+ public:
+  ~MemberExpression() final;
+
+  static const Node& NameOf(const Node& node);
+  static const Node& ExpressionOf(const Node& node);
+
+ private:
+  MemberExpression();
+
+  DISALLOW_COPY_AND_ASSIGN(MemberExpression);
 };
 
 //

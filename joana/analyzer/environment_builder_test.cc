@@ -11,8 +11,8 @@
 #include "joana/analyzer/context.h"
 #include "joana/analyzer/value.h"
 #include "joana/ast/node.h"
+#include "joana/ast/node_traversal.h"
 #include "joana/ast/syntax.h"
-#include "joana/ast/syntax_visitor.h"
 #include "joana/base/escaped_string_piece.h"
 #include "joana/parser/public/parse.h"
 #include "joana/testing/simple_error_sink.h"
@@ -38,35 +38,6 @@ std::ostream& operator<<(std::ostream& ostream, const Printable& printable) {
                  << EscapedStringPiece16(range.GetString(), '|', 20);
 }
 
-//
-// ValueSink
-//
-class ValueSink final : public ast::SyntaxVisitor {
- public:
-  explicit ValueSink(std::ostream* ostream, const Context& context);
-  ~ValueSink() = default;
-
- private:
-  // |ast::SyntaxVisitor| members
-  void VisitDefault(const ast::Node& node);
-
-  const Context& context_;
-  std::ostream* const ostream_;
-
-  DISALLOW_COPY_AND_ASSIGN(ValueSink);
-};
-
-ValueSink::ValueSink(std::ostream* ostream, const Context& context)
-    : context_(context), ostream_(ostream) {}
-
-void ValueSink::VisitDefault(const ast::Node& node) {
-  const auto* value = context_.TryValueOf(node);
-  if (!value)
-    return;
-  *ostream_ << node.syntax() << '[' << node.range().start() << '-'
-            << node.range().end() << "]=" << AsPrintable(*value) << std::endl;
-}
-
 }  // namespace
 
 //
@@ -88,8 +59,13 @@ std::string EnvironmentBuilderTest::ListValues(base::StringPiece script_text) {
   EnvironmentBuilder builder(&analyzer_context());
   builder.RunOn(module);
   std::ostringstream ostream;
-  ValueSink sink(&ostream, analyzer_context());
-  DepthFirstTraverse(&sink, module);
+  for (const auto& node : ast::NodeTraversal::DescendantsOf(module)) {
+    const auto* value = analyzer_context().TryValueOf(node);
+    if (!value)
+      continue;
+    ostream << node.syntax() << '[' << node.range().start() << '-'
+            << node.range().end() << "]=" << AsPrintable(*value) << std::endl;
+  }
   for (const auto& error : error_sink().errors())
     ostream << error << std::endl;
   return ostream.str();

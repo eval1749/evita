@@ -4,28 +4,13 @@
 
 #include "joana/analyzer/properties.h"
 
+#include "joana/analyzer/values.h"
 #include "joana/ast/node.h"
 #include "joana/ast/syntax.h"
 #include "joana/ast/tokens.h"
 
 namespace joana {
 namespace analyzer {
-
-//
-// Property
-//
-Property::Property(Zone* zone, const ast::Node& key)
-    : assignments_(zone), key_(key), references_(zone) {}
-
-Property::~Property() = default;
-
-void Property::AddAssignment(const ast::Node& assignment) {
-  assignments_.push_back(&assignment);
-}
-
-void Property::AddReference(const ast::Node& reference) {
-  references_.push_back(&reference);
-}
 
 //
 // Properties

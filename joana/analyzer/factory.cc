@@ -92,18 +92,19 @@ Value& Factory::NewMethod(const ast::Node& node, Class* owner) {
                                                  owner, &properties));
 }
 
+Value& Factory::NewOrdinaryObject(const ast::Node& node) {
+  auto& properties = NewProperties(node);
+  return RegisterValue(
+      node, new (&zone_) OrdinaryObject(NextValueId(), node, &properties));
+}
+
 Properties& Factory::NewProperties(const ast::Node& owner) {
   return *new (&zone_) Properties(&zone_, owner);
 }
 
 Property& Factory::NewProperty(const ast::Node& key) {
-  return *new (&zone_) Property(&zone_, key);
-}
-
-Value& Factory::NewOrdinaryObject(const ast::Node& node) {
-  auto& properties = NewProperties(node);
-  return RegisterValue(
-      node, new (&zone_) OrdinaryObject(NextValueId(), node, &properties));
+  auto& properties = NewProperties(key);
+  return *new (&zone_) Property(&zone_, NextValueId(), key, &properties);
 }
 
 Value& Factory::NewUndefined(const ast::Node& node) {

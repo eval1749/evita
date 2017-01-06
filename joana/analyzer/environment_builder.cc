@@ -214,25 +214,12 @@ void EnvironmentBuilder::ProcessAssignmentExpressionWithAnnotation(
 void EnvironmentBuilder::ProcessMemberExpressionWithAnnotation(
     const ast::Node& node,
     const ast::Node& annotation) {
-  const auto& expression = ast::MemberExpression::ExpressionOf(node);
-  auto* const value = factory().TryValueOf(expression);
-  if (!value || !value->Is<Object>()) {
-    AddError(expression, ErrorCode::ENVIRONMENT_EXPECT_OBJECT);
-    return;
-  }
-  auto& properties = value->As<Object>().properties();
-  const auto& name = ast::MemberExpression::NameOf(node);
-  auto* const property = properties.TryGet(name);
-  if (!property || !property->assignments().empty()) {
+  auto& property = factory().ValueOf(node).As<Property>();
+  if (!property.assignments().empty()) {
     AddError(node, ErrorCode::ENVIRONMENT_MULTIPLE_BINDINGS);
     return;
   }
-  property->AddAssignment(node);
-  if (IsFunctionAnnotation(annotation)) {
-    factory().NewFunction(node);
-    return;
-  }
-  factory().NewVariable(node, name);
+  property.AddAssignment(node);
 }
 
 void EnvironmentBuilder::ProcessVariables(const ast::Node& statement) {
@@ -330,16 +317,8 @@ void EnvironmentBuilder::Visit(const ast::MemberExpression& syntax,
     return;
   auto& properties = value->As<Object>().properties();
   const auto& name = ast::MemberExpression::NameOf(node);
-  // TODO(eval1749): We should not create property if this |MemberExpression|
-  // is right and side.
   auto& property = factory().GetOrNewProperty(&properties, name);
-  if (property.assignments().empty())
-    return;
-  auto* const property_value =
-      factory().TryValueOf(*property.assignments().front());
-  if (!property_value)
-    return;
-  factory().RegisterValue(node, property_value);
+  factory().RegisterValue(node, &property);
 }
 
 void EnvironmentBuilder::Visit(const ast::ReferenceExpression& syntax,

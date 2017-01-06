@@ -143,6 +143,36 @@ class OrdinaryObject final : public Object {
 };
 
 //
+// Property
+//
+class Property final : public Object {
+  DECLARE_CONCRETE_ANALYZE_VALUE(Property, Object)
+
+ public:
+  ~Property();
+
+  const ZoneVector<const ast::Node*>& assignments() const {
+    return assignments_;
+  }
+
+  const ast::Node& key() const { return key_; }
+
+  const ZoneVector<const ast::Node*>& references() const { return references_; }
+
+ private:
+  Property(Zone* zone, int id, const ast::Node& key, Properties* properties);
+
+  void AddAssignment(const ast::Node& assignment);
+  void AddReference(const ast::Node& reference);
+
+  ZoneVector<const ast::Node*> assignments_;
+  const ast::Node& key_;
+  ZoneVector<const ast::Node*> references_;
+
+  DISALLOW_COPY_AND_ASSIGN(Property);
+};
+
+//
 // Undefined
 //
 class Undefined final : public Value {

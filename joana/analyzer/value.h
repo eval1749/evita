@@ -26,6 +26,7 @@ namespace analyzer {
 
 #define DECLARE_CONCRETE_ANALYZE_VALUE(name, base) \
   DECLARE_ANALYZE_VALUE(name, base)                \
+  friend class EnvironmentBuilder;                 \
   friend class Factory;
 
 //

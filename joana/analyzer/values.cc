@@ -83,6 +83,28 @@ OrdinaryObject::OrdinaryObject(int id,
 OrdinaryObject::~OrdinaryObject() = default;
 
 //
+// Property
+//
+Property::Property(Zone* zone,
+                   int id,
+                   const ast::Node& key,
+                   Properties* properties)
+    : Object(id, key, properties),
+      assignments_(zone),
+      key_(key),
+      references_(zone) {}
+
+Property::~Property() = default;
+
+void Property::AddAssignment(const ast::Node& assignment) {
+  assignments_.push_back(&assignment);
+}
+
+void Property::AddReference(const ast::Node& reference) {
+  references_.push_back(&reference);
+}
+
+//
 // Undefined
 //
 Undefined::Undefined(int id, const ast::Node& node) : Value(id, node) {}

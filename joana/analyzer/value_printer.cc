@@ -52,6 +52,12 @@ std::ostream& operator<<(std::ostream& ostream,
 }
 
 std::ostream& operator<<(std::ostream& ostream,
+                         const Printable<Property>& printable) {
+  const auto& value = *printable.value;
+  return ostream << "$Property@" << value.id() << ' ' << value.node();
+}
+
+std::ostream& operator<<(std::ostream& ostream,
                          const Printable<Undefined>& printable) {
   const auto& value = *printable.value;
   return ostream << "$Undefined@" << value.id() << ' ' << value.node();

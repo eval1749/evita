@@ -19,36 +19,7 @@ class Node;
 
 namespace analyzer {
 
-//
-// Property
-//
-class Property final : public ZoneAllocated {
- public:
-  ~Property();
-
-  const ZoneVector<const ast::Node*>& assignments() const {
-    return assignments_;
-  }
-
-  const ast::Node& key() const { return key_; }
-
-  const ZoneVector<const ast::Node*>& references() const { return references_; }
-
- private:
-  friend class EnvironmentBuilder;
-  friend class Factory;
-
-  Property(Zone* zone, const ast::Node& key);
-
-  void AddAssignment(const ast::Node& assignment);
-  void AddReference(const ast::Node& reference);
-
-  ZoneVector<const ast::Node*> assignments_;
-  const ast::Node& key_;
-  ZoneVector<const ast::Node*> references_;
-
-  DISALLOW_COPY_AND_ASSIGN(Property);
-};
+class Property;
 
 //
 // Properties

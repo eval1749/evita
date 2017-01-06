@@ -30,6 +30,7 @@ namespace analyzer {
   V(Function)                        \
   V(Method)                          \
   V(OrdinaryObject)                  \
+  V(Property)                        \
   V(Undefined)                       \
   V(Variable)
 

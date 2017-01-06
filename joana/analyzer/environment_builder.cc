@@ -195,6 +195,20 @@ void EnvironmentBuilder::ProcessAssignmentExpressionWithAnnotation(
     const ast::Node& annotation) {
   if (ast::AssignmentExpression::OperatorOf(node) != ast::TokenKind::Equal)
     return;
+  const auto& lhs = ast::AssignmentExpression::LeftHandSideOf(node);
+  if (lhs == ast::SyntaxCode::ReferenceExpression) {
+    if (auto* const present = factory().TryValueOf(lhs)) {
+      AddError(lhs, ErrorCode::ENVIRONMENT_MULTIPLE_BINDINGS, present->node());
+      return;
+    }
+    const auto& name = ast::ReferenceExpression::NameOf(lhs);
+    auto& value = factory().NewVariable(node, name);
+    toplevel_environment_->Bind(name, &value);
+    return;
+  }
+  if (lhs == ast::SyntaxCode::MemberExpression)
+    return ProcessMemberExpressionWithAnnotation(lhs, annotation);
+  AddError(annotation, ErrorCode::ENVIRONMENT_UNEXPECT_ANNOTATION);
 }
 
 void EnvironmentBuilder::ProcessMemberExpressionWithAnnotation(

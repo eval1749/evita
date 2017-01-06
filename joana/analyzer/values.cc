@@ -20,17 +20,6 @@ Function::Function(int id, const ast::Node& node, Properties* properties)
 Function::~Function() = default;
 
 //
-// LexicalBinding
-//
-LexicalBinding::LexicalBinding(Zone* zone,
-                               int id,
-                               const ast::Node& node,
-                               Properties* properties)
-    : Object(id, node, properties), assignments_(zone), references_(zone) {}
-
-LexicalBinding::~LexicalBinding() = default;
-
-//
 // Object
 //
 Object::Object(int id, const ast::Node& node, Properties* properties)
@@ -77,6 +66,17 @@ Undefined::Undefined(int id, const ast::Node& node) : Value(id, node) {}
 Undefined::~Undefined() = default;
 
 //
+// ValueHolder
+//
+ValueHolder::ValueHolder(Zone* zone,
+                         int id,
+                         const ast::Node& node,
+                         Properties* properties)
+    : Object(id, node, properties), assignments_(zone), references_(zone) {}
+
+ValueHolder::~ValueHolder() = default;
+
+//
 // Variable
 //
 Variable::Variable(Zone* zone,
@@ -84,7 +84,7 @@ Variable::Variable(Zone* zone,
                    const ast::Node& origin,
                    const ast::Node& name,
                    Properties* properties)
-    : LexicalBinding(zone, id, name, properties), origin_(origin) {
+    : ValueHolder(zone, id, name, properties), origin_(origin) {
   DCHECK_EQ(name, ast::SyntaxCode::Name);
 }
 

@@ -10,7 +10,7 @@
 namespace joana {
 namespace analyzer {
 
-class LexicalBinding;
+class ValueHolder;
 
 //
 // Value::Editor
@@ -20,7 +20,7 @@ class Value::Editor final {
   Editor();
   ~Editor();
 
-  void AddAssignment(LexicalBinding* binding, const ast::Node& node);
+  void AddAssignment(ValueHolder* binding, const ast::Node& node);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(Editor);

@@ -37,13 +37,13 @@ class Object : public Value {
 };
 
 //
-// LexicalBinding
+// ValueHolder
 //
-class LexicalBinding : public Object {
-  DECLARE_ABSTRACT_ANALYZE_VALUE(LexicalBinding, Object);
+class ValueHolder : public Object {
+  DECLARE_ABSTRACT_ANALYZE_VALUE(ValueHolder, Object);
 
  public:
-  ~LexicalBinding() override;
+  ~ValueHolder() override;
 
   const ZoneVector<const ast::Node*>& assignments() const {
     return assignments_;
@@ -52,16 +52,16 @@ class LexicalBinding : public Object {
   const ZoneVector<const ast::Node*>& references() const { return references_; }
 
  protected:
-  LexicalBinding(Zone* zone,
-                 int id,
-                 const ast::Node& node,
-                 Properties* properties);
+  ValueHolder(Zone* zone,
+              int id,
+              const ast::Node& node,
+              Properties* properties);
 
  private:
   ZoneVector<const ast::Node*> assignments_;
   ZoneVector<const ast::Node*> references_;
 
-  DISALLOW_COPY_AND_ASSIGN(LexicalBinding);
+  DISALLOW_COPY_AND_ASSIGN(ValueHolder);
 };
 
 //
@@ -143,8 +143,8 @@ class Undefined final : public Value {
 //
 // Variable
 //
-class Variable final : public LexicalBinding {
-  DECLARE_CONCRETE_ANALYZE_VALUE(Variable, LexicalBinding)
+class Variable final : public ValueHolder {
+  DECLARE_CONCRETE_ANALYZE_VALUE(Variable, ValueHolder)
 
  public:
   ~Variable() final;

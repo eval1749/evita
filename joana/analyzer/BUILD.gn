@@ -32,6 +32,8 @@ source_set("analyzer") {
     "value_editor.cc",
     "value_editor.h",
     "value_forward.h",
+    "value_map.cc",
+    "value_map.h",
     "value_printer.cc",
     "values.cc",
     "values.h",

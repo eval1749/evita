@@ -23,6 +23,7 @@ class Environment;
 class Properties;
 class Property;
 class Value;
+class ValueMap;
 class Variable;
 
 //
@@ -68,7 +69,7 @@ class Factory final {
   int current_value_id_ = 0;
   std::unordered_map<const ast::Node*, Environment*> environment_map_;
   Environment& global_environment_;
-  std::unordered_map<const ast::Node*, Value*> value_map_;
+  std::unique_ptr<ValueMap> value_map_;
   Zone& zone_;
 
   DISALLOW_COPY_AND_ASSIGN(Factory);

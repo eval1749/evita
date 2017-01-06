@@ -7,6 +7,7 @@
 #include "joana/analyzer/built_in_world.h"
 #include "joana/analyzer/environment.h"
 #include "joana/analyzer/properties.h"
+#include "joana/analyzer/value_map.h"
 #include "joana/analyzer/values.h"
 #include "joana/ast/compilation_units.h"
 #include "joana/ast/declarations.h"
@@ -20,7 +21,9 @@ namespace analyzer {
 // Factory
 //
 Factory::Factory(Zone* zone)
-    : global_environment_(NewGlobalEnvironment(zone)), zone_(*zone) {}
+    : global_environment_(NewGlobalEnvironment(zone)),
+      value_map_(new ValueMap()),
+      zone_(*zone) {}
 
 Factory::~Factory() = default;
 
@@ -34,15 +37,11 @@ Environment& Factory::EnvironmentOf(const ast::Node& node) const {
 }
 
 Value* Factory::TryValueOf(const ast::Node& node) const {
-  const auto& it = value_map_.find(&node);
-  return it == value_map_.end() ? nullptr : it->second;
+  return value_map_->TryValueOf(node);
 }
 
 Value& Factory::ValueOf(const ast::Node& node) const {
-  if (auto* present = TryValueOf(node))
-    return *present;
-  NOTREACHED() << "No value for " << node;
-  return const_cast<Factory*>(this)->NewUndefined(node);
+  return value_map_->ValueOf(node);
 }
 
 // Factory members
@@ -81,7 +80,7 @@ Property& Factory::NewProperty(const ast::Node& key) {
 }
 
 Value& Factory::NewUndefined(const ast::Node& node) {
-  return RegisterValue(node, new (&zone_) Undefined(NextValueId(), node));
+  return *new (&zone_) Undefined(NextValueId(), node);
 }
 
 Variable& Factory::NewVariable(const ast::Node& origin, const ast::Node& name) {
@@ -102,11 +101,7 @@ int Factory::NextValueId() {
 }
 
 Value& Factory::RegisterValue(const ast::Node& node, Value* value) {
-  const auto& result = value_map_.emplace(&node, value);
-  DCHECK(result.second) << "Node can have only one value " << node << std::endl
-                        << *value << std::endl
-                        << *result.first->second;
-  return *value;
+  return value_map_->RegisterValue(node, value);
 }
 
 }  // namespace analyzer

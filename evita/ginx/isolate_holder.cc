@@ -3,10 +3,13 @@
 
 #include "evita/ginx/isolate_holder.h"
 
+#include "base/threading/thread_task_runner_handle.h"
 #include "evita/ginx/per_isolate_data.h"
 
 namespace ginx {
 
-IsolateHolder::IsolateHolder() : isolate_data_(new PerIsolateData(isolate())) {}
+IsolateHolder::IsolateHolder()
+    : gin::IsolateHolder(base::ThreadTaskRunnerHandle::Get()),
+      isolate_data_(new PerIsolateData(isolate())) {}
 
 }  // namespace ginx

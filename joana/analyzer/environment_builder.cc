@@ -186,7 +186,7 @@ void EnvironmentBuilder::ProcessMemberExpressionWithAnnotation(
     AddError(node, ErrorCode::ENVIRONMENT_MULTIPLE_BINDINGS);
     return;
   }
-  property.AddAssignment(node);
+  Value::Editor().AddAssignment(&property, node);
 }
 
 void EnvironmentBuilder::ProcessVariables(const ast::Node& statement) {
@@ -245,7 +245,7 @@ void EnvironmentBuilder::Visit(const ast::Class& syntax,
 
   auto& prototype_property = factory().NewProperty(
       BuiltInWorld::GetInstance()->NameOf(ast::TokenKind::Prototype));
-  prototype_property.AddAssignment(node);
+  Value::Editor().AddAssignment(&prototype_property, node);
   klass.properties().Add(&prototype_property);
 
   for (const auto& member :
@@ -267,7 +267,7 @@ void EnvironmentBuilder::Visit(const ast::Class& syntax,
                *property.assignments().front());
       continue;
     }
-    property.AddAssignment(member);
+    Value::Editor().AddAssignment(&property, member);
   }
   VisitChildNodes(node);
 }

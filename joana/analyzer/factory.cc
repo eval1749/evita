@@ -68,8 +68,7 @@ Function& Factory::NewFunction(const ast::Node& node) {
 
 Value& Factory::NewOrdinaryObject(const ast::Node& node) {
   auto& properties = NewProperties(node);
-  return RegisterValue(
-      node, new (&zone_) OrdinaryObject(NextValueId(), node, &properties));
+  return *new (&zone_) OrdinaryObject(NextValueId(), node, &properties);
 }
 
 Properties& Factory::NewProperties(const ast::Node& owner) {

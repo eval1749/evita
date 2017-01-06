@@ -16,7 +16,7 @@ class Node;
 }
 namespace analyzer {
 
-class Value;
+class Variable;
 
 //
 // Environment
@@ -38,7 +38,7 @@ class Environment final : public ZoneAllocated {
   // Return the AST node which associated to this Environment.
   const ast::Node& owner() const { return owner_; }
 
-  Value* TryValueOf(const ast::Node& name) const;
+  Variable* TryValueOf(const ast::Node& name) const;
 
  private:
   friend class EnvironmentBuilder;
@@ -47,13 +47,13 @@ class Environment final : public ZoneAllocated {
   Environment(Zone* zone, Environment* outer, const ast::Node& owner);
   Environment(Zone* zone, const ast::Node& owner);
 
-  void Bind(const ast::Node& name, Value* value);
+  void Bind(const ast::Node& name, Variable* value);
 
   ZoneVector<const ast::Node*> names_;
   ZoneUnorderedMap<int, const ast::Node*> name_map_;
   Environment* const outer_;
   const ast::Node& owner_;
-  ZoneUnorderedMap<int, Value*> value_map_;
+  ZoneUnorderedMap<int, Variable*> value_map_;
 
   DISALLOW_COPY_AND_ASSIGN(Environment);
 };

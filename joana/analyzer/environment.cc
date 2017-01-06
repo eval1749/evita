@@ -26,7 +26,7 @@ Environment::Environment(Zone* zone, const ast::Node& owner)
 
 Environment::~Environment() = default;
 
-void Environment::Bind(const ast::Node& name, Value* value) {
+void Environment::Bind(const ast::Node& name, Variable* value) {
   const auto key = ast::Name::IdOf(name);
   const auto& result = value_map_.emplace(key, value);
   DCHECK(result.second) << name << " is already bound.";
@@ -35,7 +35,7 @@ void Environment::Bind(const ast::Node& name, Value* value) {
   names_.push_back(&name);
 }
 
-Value* Environment::TryValueOf(const ast::Node& name) const {
+Variable* Environment::TryValueOf(const ast::Node& name) const {
   const auto& it = value_map_.find(ast::Name::IdOf(name));
   return it == value_map_.end() ? nullptr : it->second;
 }

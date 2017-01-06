@@ -29,7 +29,7 @@ void TypeChecker::RunOn(const ast::Node& toplevel_node) {
     SyntaxVisitor::Visit(node);
 }
 
-Value* TypeChecker::TryValueOf(const ast::Node& node) const {
+Variable* TypeChecker::TryValueOf(const ast::Node& node) const {
   for (const auto* runner = environment_; runner; runner = runner->outer()) {
     if (auto* present = runner->TryValueOf(node))
       return present;

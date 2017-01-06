@@ -83,14 +83,14 @@ class EnvironmentBuilder::LocalEnvironment final {
   const LocalEnvironment* outer() const { return outer_; }
   LocalEnvironment* outer() { return outer_; }
 
-  void Bind(const ast::Node& name, Value* value);
-  Value* Find(const ast::Node& name) const;
+  void Bind(const ast::Node& name, Variable* value);
+  Variable* Find(const ast::Node& name) const;
 
  private:
   EnvironmentBuilder& builder_;
   LocalEnvironment* const outer_;
   const ast::Node& owner_;
-  std::unordered_map<int, Value*> value_map_;
+  std::unordered_map<int, Variable*> value_map_;
 
   DISALLOW_COPY_AND_ASSIGN(LocalEnvironment);
 };
@@ -107,12 +107,13 @@ EnvironmentBuilder::LocalEnvironment::~LocalEnvironment() {
 }
 
 void EnvironmentBuilder::LocalEnvironment::Bind(const ast::Node& name,
-                                                Value* value) {
+                                                Variable* value) {
   const auto& result = value_map_.emplace(ast::Name::IdOf(name), value);
   DCHECK(result.second);
 }
 
-Value* EnvironmentBuilder::LocalEnvironment::Find(const ast::Node& name) const {
+Variable* EnvironmentBuilder::LocalEnvironment::Find(
+    const ast::Node& name) const {
   const auto& it = value_map_.find(ast::Name::IdOf(name));
   return it == value_map_.end() ? nullptr : it->second;
 }
@@ -135,65 +136,23 @@ void EnvironmentBuilder::RunOn(const ast::Node& node) {
   SyntaxVisitor::Visit(node);
 }
 
-// Binding helpers
-void EnvironmentBuilder::Bind(const ast::Node& name, Value* value) {
+Variable& EnvironmentBuilder::BindToVariable(const ast::Node& origin,
+                                             const ast::Node& node,
+                                             const ast::Node& name) {
   DCHECK_EQ(name, ast::SyntaxCode::Name);
   if (environment_) {
-    if (auto* present = environment_->Find(name)) {
-      AddError(name, ErrorCode::ENVIRONMENT_MULTIPLE_BINDINGS, present->node());
-      return;
-    }
-    environment_->Bind(name, value);
-    return;
-  }
-
-  if (auto* present = toplevel_environment_->TryValueOf(name)) {
-    AddError(name, ErrorCode::ENVIRONMENT_MULTIPLE_BINDINGS, present->node());
-    return;
-  }
-  // TODO(eval1749): We should bind to |Constructor| if |declaration| has
-  // "@constructor" annotation.
-  toplevel_environment_->Bind(name, value);
-}
-
-void EnvironmentBuilder::BindToVariable(const ast::Node& origin,
-                                        const ast::Node& name_node) {
-  const auto& name = NameOf(name_node);
-  if (environment_) {
-    if (auto* present = environment_->Find(name)) {
-      if (present->node() == ast::SyntaxCode::VarStatement &&
-          origin == ast::SyntaxCode::VarStatement) {
-        // TODO(eval1749): We should report error if |present| has type
-        // annotation.
-        Value::Editor().AddAssignment(&present->As<LexicalBinding>(),
-                                      name_node);
-        return;
-      }
-      AddError(name, ErrorCode::ENVIRONMENT_MULTIPLE_BINDINGS, present->node());
-      return;
-    }
-    auto& variable = factory().NewVariable(name).As<Variable>();
-    Value::Editor().AddAssignment(&variable, name_node);
-    factory().RegisterValue(name_node, &variable);
+    if (auto* present = environment_->Find(name))
+      return *present;
+    auto& variable = factory().NewVariable(origin, name);
     environment_->Bind(name, &variable);
-    return;
+    return variable;
   }
-  if (auto* present = toplevel_environment_->TryValueOf(name)) {
-    if (present->node() == ast::SyntaxCode::VarStatement &&
-        origin == ast::SyntaxCode::VarStatement) {
-      // TODO(eval1749): We should report error if |present| has type
-      // annotation.
-      Value::Editor().AddAssignment(&present->As<LexicalBinding>(), name_node);
-      return;
-    }
-    AddError(name, ErrorCode::ENVIRONMENT_MULTIPLE_BINDINGS, present->node());
-    return;
-  }
+  if (auto* present = toplevel_environment_->TryValueOf(name))
+    return *present;
   // TODO(eval1749): Expose global "var" binding to global object.
-  auto& variable = factory().NewVariable(name).As<Variable>();
-  Value::Editor().AddAssignment(&variable, name_node);
-  factory().RegisterValue(name_node, &variable);
+  auto& variable = factory().NewVariable(origin, name).As<Variable>();
   toplevel_environment_->Bind(name, &variable);
+  return variable;
 }
 
 // AST node handlers
@@ -209,7 +168,7 @@ void EnvironmentBuilder::ProcessAssignmentExpressionWithAnnotation(
       return;
     }
     const auto& name = ast::ReferenceExpression::NameOf(lhs);
-    auto& variable = factory().NewVariable(name);
+    auto& variable = factory().NewVariable(node, name);
     toplevel_environment_->Bind(name, &variable);
     return;
   }
@@ -244,8 +203,20 @@ void EnvironmentBuilder::VisitDefault(const ast::Node& node) {
 // Binding elements
 void EnvironmentBuilder::Visit(const ast::BindingNameElement& syntax,
                                const ast::Node& node) {
-  BindToVariable(*variable_origin_, node);
   VisitChildNodes(node);
+  auto& variable = BindToVariable(*variable_origin_, node,
+                                  ast::BindingNameElement::NameOf(node));
+  Value::Editor().AddAssignment(&variable, node);
+  factory().RegisterValue(node, &variable);
+  if (variable.assignments().size() == 1)
+    return;
+  if (variable.origin() == ast::SyntaxCode::VarStatement &&
+      *variable_origin_ == ast::SyntaxCode::VarStatement) {
+    // TODO(eval1749): We should report error if |present| has type
+    // annotation.
+    return;
+  }
+  AddError(node, ErrorCode::ENVIRONMENT_MULTIPLE_BINDINGS, variable.origin());
 }
 
 // Declarations
@@ -259,8 +230,15 @@ void EnvironmentBuilder::Visit(const ast::Class& syntax,
                                const ast::Node& node) {
   // TODO(eval1749): Report warning for toplevel anonymous class
   auto& klass = factory().NewClass(node).As<Class>();
-  if (ast::Class::NameOf(node) == ast::SyntaxCode::Name)
-    Bind(ast::Class::NameOf(node), &klass);
+  const auto& klass_name = ast::Class::NameOf(node);
+  if (klass_name == ast::SyntaxCode::Name) {
+    auto& variable = BindToVariable(node, node, klass_name);
+    if (!variable.assignments().empty()) {
+      AddError(node, ErrorCode::ENVIRONMENT_MULTIPLE_BINDINGS,
+               *variable.assignments().front());
+    }
+    Value::Editor().AddAssignment(&variable, node);
+  }
   for (const auto& member :
        ast::NodeTraversal::ChildNodesOf(ast::Class::BodyOf(node))) {
     if (member != ast::SyntaxCode::Method) {
@@ -286,20 +264,17 @@ void EnvironmentBuilder::Visit(const ast::Class& syntax,
 
 void EnvironmentBuilder::Visit(const ast::Function& syntax,
                                const ast::Node& node) {
+  // TODO(eval1749): Report warning for toplevel anonymous class
   const auto& name = ast::Function::NameOf(node);
-  const auto* const class_tag =
-      annotation_
-          ? FindClassAnnotation(ast::Annotation::AnnotationOf(*annotation_))
-          : nullptr;
-  if (class_tag) {
-    auto& klass = factory().NewClass(node, *class_tag);
-    if (name == ast::SyntaxCode::Name)
-      Bind(name, &klass);
-  } else {
-    // TODO(eval1749): Report warning for toplevel anonymous class
-    auto& function = factory().NewFunction(node);
-    if (name == ast::SyntaxCode::Name)
-      Bind(name, &function);
+  auto& function = factory().NewFunction(node);
+  factory().RegisterValue(node, &function);
+  if (name == ast::SyntaxCode::Name) {
+    auto& variable = BindToVariable(node, node, name);
+    if (!variable.assignments().empty()) {
+      AddError(node, ErrorCode::ENVIRONMENT_MULTIPLE_BINDINGS,
+               *variable.assignments().front());
+    }
+    Value::Editor().AddAssignment(&variable, node);
   }
   LocalEnvironment environment(this, node);
   variable_origin_ = &node;

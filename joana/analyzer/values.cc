@@ -113,9 +113,10 @@ Undefined::~Undefined() = default;
 //
 Variable::Variable(Zone* zone,
                    int id,
+                   const ast::Node& origin,
                    const ast::Node& name,
                    Properties* properties)
-    : LexicalBinding(zone, id, name, properties) {
+    : LexicalBinding(zone, id, name, properties), origin_(origin) {
   DCHECK_EQ(name, ast::SyntaxCode::Name);
 }
 

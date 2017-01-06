@@ -76,8 +76,8 @@ TEST_F(EnvironmentBuilderTest, Class) {
       "Class[0-31]=Class@3[0-31] |class Foo { bar() {}...|\n"
       "ObjectInitializer[10-31]=OrdinaryObject@1[10-31] |{ bar() {} baz() {} "
       "...|\n"
-      "Method<NonStatic,Normal>[12-20]=Method@5[12-20] |bar() {}|\n"
-      "Method<NonStatic,Normal>[21-29]=Method@7[21-29] |baz() {}|\n",
+      "Method<NonStatic,Normal>[12-20]=Method@6[12-20] |bar() {}|\n"
+      "Method<NonStatic,Normal>[21-29]=Method@8[21-29] |baz() {}|\n",
       ListValues("class Foo { bar() {} baz() {} }"));
 }
 
@@ -93,10 +93,10 @@ TEST_F(EnvironmentBuilderTest, ClassError) {
 TEST_F(EnvironmentBuilderTest, Function) {
   EXPECT_EQ(
       "Function<Normal>[0-36]=Function@1[0-36] |function foo(a, b) {...|\n"
-      "BindingNameElement[13-14]=Variable@2[13-14] |a|\n"
-      "BindingNameElement[16-17]=Variable@3[16-17] |b|\n"
-      "ReferenceExpression[28-29]=Variable@2[13-14] |a|\n"
-      "ReferenceExpression[32-33]=Variable@3[16-17] |b|\n",
+      "BindingNameElement[13-14]=Variable@3[13-14] |a|\n"
+      "BindingNameElement[16-17]=Variable@4[16-17] |b|\n"
+      "ReferenceExpression[28-29]=Variable@3[13-14] |a|\n"
+      "ReferenceExpression[32-33]=Variable@4[16-17] |b|\n",
       ListValues("function foo(a, b) { return a + b; }"));
 }
 
@@ -109,11 +109,10 @@ TEST_F(EnvironmentBuilderTest, Let) {
 
 TEST_F(EnvironmentBuilderTest, MemberExpression) {
   EXPECT_EQ(
-      "Name[4-16]=OrdinaryObject@1[4-16] |@constructor|\n"  // prototype
-      "Function<Normal>[20-37]=Class@3[20-37] |function Foo() {}|\n"
+      "Function<Normal>[20-37]=Function@1[20-37] |function Foo() {}|\n"
       "MemberExpression[52-69]=Property@4[66-69] |bar|\n"
-      "MemberExpression[52-65]=Property@2[0-9] |prototype|\n"
-      "ReferenceExpression[52-55]=Class@3[20-37] |function Foo() {}|\n",
+      "MemberExpression[52-65]=Property@3[56-65] |prototype|\n"
+      "ReferenceExpression[52-55]=Variable@2[29-32] |Foo|\n",
       ListValues("/** @constructor */ function Foo() {}\n"
                  "/** @const */ Foo.prototype.bar\n"))
       << "Old style class externs";

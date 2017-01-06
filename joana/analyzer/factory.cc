@@ -80,8 +80,7 @@ Value& Factory::NewClass(const ast::Node& node) {
 
 Value& Factory::NewFunction(const ast::Node& node) {
   auto& properties = NewProperties(node);
-  return RegisterValue(
-      node, new (&zone_) Function(&zone_, NextValueId(), node, &properties));
+  return *new (&zone_) Function(&zone_, NextValueId(), node, &properties);
 }
 
 Value& Factory::NewMethod(const ast::Node& node, Class* owner) {
@@ -111,10 +110,11 @@ Value& Factory::NewUndefined(const ast::Node& node) {
   return RegisterValue(node, new (&zone_) Undefined(NextValueId(), node));
 }
 
-Value& Factory::NewVariable(const ast::Node& name) {
+Variable& Factory::NewVariable(const ast::Node& origin, const ast::Node& name) {
   DCHECK_EQ(name, ast::SyntaxCode::Name);
   auto& properties = NewProperties(name);
-  return *new (&zone_) Variable(&zone_, NextValueId(), name, &properties);
+  return *new (&zone_)
+      Variable(&zone_, NextValueId(), origin, name, &properties);
 }
 
 // static

@@ -23,6 +23,7 @@ class Environment;
 class Properties;
 class Property;
 class Value;
+class Variable;
 
 //
 // Factory
@@ -60,7 +61,7 @@ class Factory final {
   Value& NewMethod(const ast::Node& node, Class* owner);
   Value& NewOrdinaryObject(const ast::Node& node);
   Value& NewUndefined(const ast::Node& node);
-  Value& NewVariable(const ast::Node& name);
+  Variable& NewVariable(const ast::Node& origin, const ast::Node& name);
 
  private:
   static Environment& NewGlobalEnvironment(Zone* zone);

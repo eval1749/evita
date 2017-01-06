@@ -27,6 +27,7 @@ class Environment;
 class Function;
 class Properties;
 class Value;
+class Variable;
 enum class VariableKind;
 
 //
@@ -42,10 +43,11 @@ class EnvironmentBuilder final : public Pass, public ast::SyntaxVisitor {
  private:
   class LocalEnvironment;
 
-  // Binding helpers
-  void Bind(const ast::Node& name, Value* value);
-
-  void BindToVariable(const ast::Node& origin, const ast::Node& name);
+  // |origin| is one of |{Const,Let,Var}Statement|, |Class|, or |Function|.
+  // |node| is one of |BindingNameElement|, |Class|, or |Function|.
+  Variable& BindToVariable(const ast::Node& origin,
+                           const ast::Node& node,
+                           const ast::Node& name);
 
   void ProcessAssignmentExpressionWithAnnotation(const ast::Node& node,
                                                  const ast::Node& annotation);

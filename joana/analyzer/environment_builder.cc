@@ -181,7 +181,12 @@ void EnvironmentBuilder::ProcessAssignmentExpressionWithAnnotation(
 void EnvironmentBuilder::ProcessMemberExpressionWithAnnotation(
     const ast::Node& node,
     const ast::Node& annotation) {
-  auto& property = factory().ValueOf(node).As<Property>();
+  auto* const value = factory().TryValueOf(node);
+  if (!value) {
+    // We've not known value of member expression.
+    return;
+  }
+  auto& property = value->As<Property>();
   if (!property.assignments().empty()) {
     AddError(node, ErrorCode::ENVIRONMENT_MULTIPLE_BINDINGS);
     return;

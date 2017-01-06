@@ -12,6 +12,7 @@
 #include "joana/analyzer/factory.h"
 #include "joana/ast/expressions.h"
 #include "joana/ast/node.h"
+#include "joana/ast/node_traversal.h"
 
 namespace joana {
 namespace analyzer {
@@ -22,9 +23,10 @@ namespace analyzer {
 TypeChecker::TypeChecker(Context* context) : Pass(context) {}
 TypeChecker::~TypeChecker() = default;
 
-void TypeChecker::RunOn(const ast::Node& node) {
-  environment_ = &factory().EnvironmentOf(node);
-  ast::DepthFirstTraverse(this, node);
+void TypeChecker::RunOn(const ast::Node& toplevel_node) {
+  environment_ = &factory().EnvironmentOf(toplevel_node);
+  for (const auto& node : ast::NodeTraversal::DescendantsOf(toplevel_node))
+    SyntaxVisitor::Visit(node);
 }
 
 Value* TypeChecker::TryValueOf(const ast::Node& node) const {

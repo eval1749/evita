@@ -15,7 +15,6 @@
 #include "joana/ast/node.h"
 #include "joana/ast/node_traversal.h"
 #include "joana/ast/syntax.h"
-#include "joana/ast/syntax_visitor.h"
 
 namespace joana {
 namespace analyzer {
@@ -77,8 +76,7 @@ void Controller::Analyze() {
       const auto* const value = factory().TryValueOf(node);
       if (!value)
         continue;
-      std::cout << node.syntax() << '[' << node.range().start() << '-'
-                << node.range().end() << "] = " << value << std::endl;
+      std::cout << node << " = " << value << std::endl;
     }
   }
 

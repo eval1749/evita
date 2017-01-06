@@ -251,7 +251,8 @@ void EnvironmentBuilder::Visit(const ast::Class& syntax,
             : klass.prototype().properties();
     auto& property =
         factory().GetOrNewProperty(&properties, ast::Method::NameOf(member));
-    factory().NewMethod(member, &klass);
+    auto& method = factory().NewFunction(member);
+    factory().RegisterValue(member, &method);
     if (!property.assignments().empty()) {
       AddError(member, ErrorCode::ENVIRONMENT_MULTIPLE_BINDINGS,
                *property.assignments().front());

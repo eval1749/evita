@@ -76,8 +76,8 @@ TEST_F(EnvironmentBuilderTest, Class) {
       "Class[0-31]=Class@3[0-31] |class Foo { bar() {}...|\n"
       "ObjectInitializer[10-31]=OrdinaryObject@1[10-31] |{ bar() {} baz() {} "
       "...|\n"
-      "Method<NonStatic,Normal>[12-20]=Method@6[12-20] |bar() {}|\n"
-      "Method<NonStatic,Normal>[21-29]=Method@8[21-29] |baz() {}|\n",
+      "Method<NonStatic,Normal>[12-20]=Function@6[12-20] |bar() {}|\n"
+      "Method<NonStatic,Normal>[21-29]=Function@8[21-29] |baz() {}|\n",
       ListValues("class Foo { bar() {} baz() {} }"));
 }
 

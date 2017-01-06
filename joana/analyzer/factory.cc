@@ -114,9 +114,8 @@ Value& Factory::NewUndefined(const ast::Node& node) {
 Value& Factory::NewVariable(const ast::Node& assignment,
                             const ast::Node& name) {
   auto& properties = NewProperties(name);
-  return RegisterValue(
-      name, new (&zone_)
-                Variable(&zone_, NextValueId(), assignment, name, &properties));
+  return *new (&zone_)
+      Variable(&zone_, NextValueId(), assignment, name, &properties);
 }
 
 // static

@@ -14,7 +14,6 @@ namespace ast {
 
 IMPLEMENT_AST_SYNTAX_0(BidingElement, BindingCommaElement, 0)
 IMPLEMENT_AST_SYNTAX_0(BidingElement, BindingInvalidElement, 0)
-IMPLEMENT_AST_SYNTAX_0(BidingElement, BindingNameElement, 2)
 IMPLEMENT_AST_SYNTAX_0(BidingElement, BindingProperty, 2)
 IMPLEMENT_AST_SYNTAX_0(BidingElement, BindingRestElement, 1)
 
@@ -36,6 +35,26 @@ ChildNodes ArrayBindingPattern::ElementsOf(const Node& node) {
 
 const Node& ArrayBindingPattern::InitializerOf(const Node& node) {
   DCHECK_EQ(node, SyntaxCode::ArrayBindingPattern);
+  return node.child_at(0);
+}
+
+//
+// BindingNameElement
+//
+BindingNameElement::BindingNameElement()
+    : SyntaxTemplate(std::tuple<>(),
+                     SyntaxCode::BindingNameElement,
+                     Format::Builder().set_arity(2).Build()) {}
+
+BindingNameElement::~BindingNameElement() = default;
+
+const Node& BindingNameElement::InitializerOf(const Node& node) {
+  DCHECK_EQ(node, SyntaxCode::BindingNameElement);
+  return node.child_at(1);
+}
+
+const Node& BindingNameElement::NameOf(const Node& node) {
+  DCHECK_EQ(node, SyntaxCode::BindingNameElement);
   return node.child_at(0);
 }
 

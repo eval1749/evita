@@ -15,7 +15,6 @@ class Node;
 
 DECLARE_AST_SYNTAX_0(BindingCommaElement)
 DECLARE_AST_SYNTAX_0(BindingInvalidElement)
-DECLARE_AST_SYNTAX_0(BindingNameElement)
 DECLARE_AST_SYNTAX_0(BindingProperty)
 DECLARE_AST_SYNTAX_0(BindingRestElement)
 
@@ -36,6 +35,25 @@ class JOANA_AST_EXPORT ArrayBindingPattern final
   ArrayBindingPattern();
 
   DISALLOW_COPY_AND_ASSIGN(ArrayBindingPattern);
+};
+
+//
+// BindingNameElement
+//
+class JOANA_AST_EXPORT BindingNameElement final
+    : public SyntaxTemplate<Syntax> {
+  DECLARE_CONCRETE_AST_SYNTAX(BindingNameElement, Syntax);
+
+ public:
+  ~BindingNameElement() final;
+
+  static const Node& InitializerOf(const Node& node);
+  static const Node& NameOf(const Node& node);
+
+ private:
+  BindingNameElement();
+
+  DISALLOW_COPY_AND_ASSIGN(BindingNameElement);
 };
 
 //

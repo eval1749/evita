@@ -18,7 +18,7 @@ class Node;
 }
 namespace analyzer {
 
-class Class;
+class Function;
 class Environment;
 class Properties;
 class Property;
@@ -52,12 +52,7 @@ class Factory final {
 
   // Values
 
-  // Returns new |Class| value associated to |node| with prototype object
-  // associated to |prototype_node|. This function is used for creating |Class|
-  // object for class annotation.
-  Value& NewClass(const ast::Node& node, const ast::Node& prototype_node);
-  Value& NewClass(const ast::Node& node);
-  Value& NewFunction(const ast::Node& node);
+  Function& NewFunction(const ast::Node& node);
   Value& NewOrdinaryObject(const ast::Node& node);
   Value& NewUndefined(const ast::Node& node);
   Variable& NewVariable(const ast::Node& origin, const ast::Node& name);

@@ -61,25 +61,9 @@ Environment& Factory::NewEnvironment(Environment* outer,
   return environment;
 }
 
-Value& Factory::NewClass(const ast::Node& node,
-                         const ast::Node& prototype_node) {
+Function& Factory::NewFunction(const ast::Node& node) {
   auto& properties = NewProperties(node);
-  auto& prototype = NewOrdinaryObject(prototype_node).As<Object>();
-  auto& prototype_property = NewProperty(
-      BuiltInWorld::GetInstance()->NameOf(ast::TokenKind::Prototype));
-  prototype_property.AddAssignment(prototype.node());
-  properties.Add(&prototype_property);
-  return RegisterValue(node, new (&zone_) Class(&zone_, NextValueId(), node,
-                                                &properties, &prototype));
-}
-
-Value& Factory::NewClass(const ast::Node& node) {
-  DCHECK_EQ(node, ast::SyntaxCode::Class);
-  return NewClass(node, ast::Class::BodyOf(node));
-}
-
-Value& Factory::NewFunction(const ast::Node& node) {
-  return *new (&zone_) Function(NextValueId(), node);
+  return *new (&zone_) Function(NextValueId(), node, &properties);
 }
 
 Value& Factory::NewOrdinaryObject(const ast::Node& node) {

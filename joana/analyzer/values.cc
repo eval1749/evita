@@ -29,7 +29,8 @@ Class::~Class() = default;
 //
 // Function
 //
-Function::Function(int id, const ast::Node& node) : Value(id, node) {}
+Function::Function(int id, const ast::Node& node, Properties* properties)
+    : Object(id, node, properties) {}
 
 Function::~Function() = default;
 

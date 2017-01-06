@@ -92,14 +92,15 @@ class Class final : public LexicalBinding {
 //
 // Function
 //
-class Function final : public Value {
+class Function final : public Object {
   DECLARE_CONCRETE_ANALYZE_VALUE(Function, Value)
 
  public:
   ~Function() final;
 
  private:
-  Function(int id, const ast::Node& node);
+  // |properties| is used for holding members of anonymous class
+  Function(int id, const ast::Node& node, Properties* properties);
 
   DISALLOW_COPY_AND_ASSIGN(Function);
 };

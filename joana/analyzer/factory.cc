@@ -79,8 +79,7 @@ Value& Factory::NewClass(const ast::Node& node) {
 }
 
 Value& Factory::NewFunction(const ast::Node& node) {
-  auto& properties = NewProperties(node);
-  return *new (&zone_) Function(&zone_, NextValueId(), node, &properties);
+  return *new (&zone_) Function(NextValueId(), node);
 }
 
 Value& Factory::NewMethod(const ast::Node& node, Class* owner) {

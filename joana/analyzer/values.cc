@@ -29,11 +29,7 @@ Class::~Class() = default;
 //
 // Function
 //
-Function::Function(Zone* zone,
-                   int id,
-                   const ast::Node& node,
-                   Properties* properties)
-    : LexicalBinding(zone, id, node, properties) {}
+Function::Function(int id, const ast::Node& node) : Value(id, node) {}
 
 Function::~Function() = default;
 

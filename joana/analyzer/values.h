@@ -92,14 +92,14 @@ class Class final : public LexicalBinding {
 //
 // Function
 //
-class Function final : public LexicalBinding {
-  DECLARE_CONCRETE_ANALYZE_VALUE(Function, LexicalBinding)
+class Function final : public Value {
+  DECLARE_CONCRETE_ANALYZE_VALUE(Function, Value)
 
  public:
   ~Function() final;
 
  private:
-  Function(Zone* zone, int id, const ast::Node& node, Properties* properties);
+  Function(int id, const ast::Node& node);
 
   DISALLOW_COPY_AND_ASSIGN(Function);
 };

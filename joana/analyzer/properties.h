@@ -33,6 +33,7 @@ class Properties final : public ZoneAllocated {
   Property* TryGet(const ast::Node& key) const;
 
  private:
+  friend class EnvironmentBuilder;
   friend class Factory;
 
   Properties(Zone* zone, const ast::Node& node);

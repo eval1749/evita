@@ -73,19 +73,15 @@ std::string EnvironmentBuilderTest::ListValues(base::StringPiece script_text) {
 
 TEST_F(EnvironmentBuilderTest, Class) {
   EXPECT_EQ(
-      "Class[0-31]=Class@3[0-31] |class Foo { bar() {}...|\n"
-      "ObjectInitializer[10-31]=OrdinaryObject@1[10-31] |{ bar() {} baz() {} "
-      "...|\n"
-      "Method<NonStatic,Normal>[12-20]=Function@6[12-20] |bar() {}|\n"
-      "Method<NonStatic,Normal>[21-29]=Function@8[21-29] |baz() {}|\n",
+      "Class[0-31]=Function@1[0-31] |class Foo { bar() {}...|\n"
+      "Method<NonStatic,Normal>[12-20]=Function@5[12-20] |bar() {}|\n"
+      "Method<NonStatic,Normal>[21-29]=Function@7[21-29] |baz() {}|\n",
       ListValues("class Foo { bar() {} baz() {} }"));
 }
 
 TEST_F(EnvironmentBuilderTest, ClassError) {
   EXPECT_EQ(
-      "Class[0-15]=Class@3[0-15] |class Foo { 1 }|\n"
-      // Foo.prototype
-      "ObjectInitializer[10-15]=OrdinaryObject@1[10-15] |{ 1 }|\n"
+      "Class[0-15]=Function@1[0-15] |class Foo { 1 }|\n"
       "ANALYZER_ERROR_ENVIRONMENT_EXPECT_METHOD@12:13\n",
       ListValues("class Foo { 1 }"));
 }

@@ -7,6 +7,7 @@
 #include "joana/analyzer/environment_builder.h"
 
 #include "base/auto_reset.h"
+#include "joana/analyzer/built_in_world.h"
 #include "joana/analyzer/context.h"
 #include "joana/analyzer/environment.h"
 #include "joana/analyzer/error_codes.h"
@@ -229,8 +230,10 @@ void EnvironmentBuilder::Visit(const ast::Annotation& syntax,
 void EnvironmentBuilder::Visit(const ast::Class& syntax,
                                const ast::Node& node) {
   // TODO(eval1749): Report warning for toplevel anonymous class
-  auto& klass = factory().NewClass(node).As<Class>();
+  auto& klass = factory().NewFunction(node);
+  factory().RegisterValue(node, &klass);
   const auto& klass_name = ast::Class::NameOf(node);
+
   if (klass_name == ast::SyntaxCode::Name) {
     auto& variable = BindToVariable(node, node, klass_name);
     if (!variable.assignments().empty()) {
@@ -239,6 +242,12 @@ void EnvironmentBuilder::Visit(const ast::Class& syntax,
     }
     Value::Editor().AddAssignment(&variable, node);
   }
+
+  auto& prototype_property = factory().NewProperty(
+      BuiltInWorld::GetInstance()->NameOf(ast::TokenKind::Prototype));
+  prototype_property.AddAssignment(node);
+  klass.properties().Add(&prototype_property);
+
   for (const auto& member :
        ast::NodeTraversal::ChildNodesOf(ast::Class::BodyOf(node))) {
     if (member != ast::SyntaxCode::Method) {
@@ -248,7 +257,7 @@ void EnvironmentBuilder::Visit(const ast::Class& syntax,
     auto& properties =
         ast::Method::MethodKindOf(member) == ast::MethodKind::Static
             ? klass.properties()
-            : klass.prototype().properties();
+            : prototype_property.properties();
     auto& property =
         factory().GetOrNewProperty(&properties, ast::Method::NameOf(member));
     auto& method = factory().NewFunction(member);

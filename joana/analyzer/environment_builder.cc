@@ -171,7 +171,8 @@ void EnvironmentBuilder::BindToVariable(const ast::Node& origin,
       AddError(name, ErrorCode::ENVIRONMENT_MULTIPLE_BINDINGS, present->node());
       return;
     }
-    auto& variable = factory().NewVariable(origin, name_node);
+    auto& variable = factory().NewVariable(name).As<Variable>();
+    Value::Editor().AddAsignment(&variable, name_node);
     factory().RegisterValue(name_node, &variable);
     environment_->Bind(name, &variable);
     return;
@@ -188,7 +189,8 @@ void EnvironmentBuilder::BindToVariable(const ast::Node& origin,
     return;
   }
   // TODO(eval1749): Expose global "var" binding to global object.
-  auto& variable = factory().NewVariable(origin, name_node);
+  auto& variable = factory().NewVariable(name).As<Variable>();
+  Value::Editor().AddAsignment(&variable, name_node);
   factory().RegisterValue(name_node, &variable);
   toplevel_environment_->Bind(name, &variable);
 }
@@ -206,7 +208,7 @@ void EnvironmentBuilder::ProcessAssignmentExpressionWithAnnotation(
       return;
     }
     const auto& name = ast::ReferenceExpression::NameOf(lhs);
-    auto& variable = factory().NewVariable(node, name);
+    auto& variable = factory().NewVariable(name);
     toplevel_environment_->Bind(name, &variable);
     return;
   }

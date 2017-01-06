@@ -102,8 +102,8 @@ TEST_F(EnvironmentBuilderTest, Function) {
 
 TEST_F(EnvironmentBuilderTest, Let) {
   EXPECT_EQ(
-      "BindingNameElement[4-9]=Variable@1[4-9] |a = 1|\n"
-      "BindingNameElement[11-16]=Variable@2[11-16] |b = 2|\n",
+      "BindingNameElement[4-9]=Variable@1[4-5] |a|\n"
+      "BindingNameElement[11-16]=Variable@2[11-12] |b|\n",
       ListValues("let a = 1, b = 2;"));
 }
 

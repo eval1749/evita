@@ -111,11 +111,10 @@ Value& Factory::NewUndefined(const ast::Node& node) {
   return RegisterValue(node, new (&zone_) Undefined(NextValueId(), node));
 }
 
-Value& Factory::NewVariable(const ast::Node& assignment,
-                            const ast::Node& name) {
+Value& Factory::NewVariable(const ast::Node& name) {
+  DCHECK_EQ(name, ast::SyntaxCode::Name);
   auto& properties = NewProperties(name);
-  return *new (&zone_)
-      Variable(&zone_, NextValueId(), assignment, name, &properties);
+  return *new (&zone_) Variable(&zone_, NextValueId(), name, &properties);
 }
 
 // static

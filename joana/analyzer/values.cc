@@ -44,9 +44,7 @@ LexicalBinding::LexicalBinding(Zone* zone,
                                int id,
                                const ast::Node& node,
                                Properties* properties)
-    : Object(id, node, properties), assignments_(zone), references_(zone) {
-  assignments_.push_back(&node);
-}
+    : Object(id, node, properties), assignments_(zone), references_(zone) {}
 
 LexicalBinding::~LexicalBinding() = default;
 
@@ -115,13 +113,10 @@ Undefined::~Undefined() = default;
 //
 Variable::Variable(Zone* zone,
                    int id,
-                   const ast::Node& assignment,
                    const ast::Node& name,
                    Properties* properties)
-    : LexicalBinding(zone, id, name, properties), assignment_(assignment) {
-  DCHECK(name == ast::SyntaxCode::Name ||
-         name == ast::SyntaxCode::BindingNameElement)
-      << name;
+    : LexicalBinding(zone, id, name, properties) {
+  DCHECK_EQ(name, ast::SyntaxCode::Name);
 }
 
 Variable::~Variable() = default;

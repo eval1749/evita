@@ -196,17 +196,9 @@ class Variable final : public LexicalBinding {
  public:
   ~Variable() final;
 
-  const ast::Node& assignment() const { return assignment_; }
-
  private:
   // |name| should be |ast::Name| or |ast::BindingNameElement|.
-  Variable(Zone* zone,
-           int id,
-           const ast::Node& assignment,
-           const ast::Node& name,
-           Properties* properties);
-
-  const ast::Node& assignment_;
+  Variable(Zone* zone, int id, const ast::Node& name, Properties* properties);
 
   DISALLOW_COPY_AND_ASSIGN(Variable);
 };

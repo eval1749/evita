@@ -60,7 +60,7 @@ class Factory final {
   Value& NewMethod(const ast::Node& node, Class* owner);
   Value& NewOrdinaryObject(const ast::Node& node);
   Value& NewUndefined(const ast::Node& node);
-  Value& NewVariable(const ast::Node& assignment, const ast::Node& name);
+  Value& NewVariable(const ast::Node& name);
 
  private:
   static Environment& NewGlobalEnvironment(Zone* zone);

@@ -20,7 +20,7 @@ class Value::Editor final {
   Editor();
   ~Editor();
 
-  void AddAsignment(LexicalBinding* binding, const ast::Node& node);
+  void AddAssignment(LexicalBinding* binding, const ast::Node& node);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(Editor);

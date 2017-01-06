@@ -15,8 +15,8 @@ namespace analyzer {
 Value::Editor::Editor() = default;
 Value::Editor::~Editor() = default;
 
-void Value::Editor::AddAsignment(LexicalBinding* binding,
-                                 const ast::Node& node) {
+void Value::Editor::AddAssignment(LexicalBinding* binding,
+                                  const ast::Node& node) {
   binding->assignments_.push_back(&node);
 }
 

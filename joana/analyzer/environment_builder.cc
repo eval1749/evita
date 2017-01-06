@@ -165,14 +165,15 @@ void EnvironmentBuilder::BindToVariable(const ast::Node& origin,
           origin == ast::SyntaxCode::VarStatement) {
         // TODO(eval1749): We should report error if |present| has type
         // annotation.
-        Value::Editor().AddAsignment(&present->As<LexicalBinding>(), name_node);
+        Value::Editor().AddAssignment(&present->As<LexicalBinding>(),
+                                      name_node);
         return;
       }
       AddError(name, ErrorCode::ENVIRONMENT_MULTIPLE_BINDINGS, present->node());
       return;
     }
     auto& variable = factory().NewVariable(name).As<Variable>();
-    Value::Editor().AddAsignment(&variable, name_node);
+    Value::Editor().AddAssignment(&variable, name_node);
     factory().RegisterValue(name_node, &variable);
     environment_->Bind(name, &variable);
     return;
@@ -182,7 +183,7 @@ void EnvironmentBuilder::BindToVariable(const ast::Node& origin,
         origin == ast::SyntaxCode::VarStatement) {
       // TODO(eval1749): We should report error if |present| has type
       // annotation.
-      Value::Editor().AddAsignment(&present->As<LexicalBinding>(), name_node);
+      Value::Editor().AddAssignment(&present->As<LexicalBinding>(), name_node);
       return;
     }
     AddError(name, ErrorCode::ENVIRONMENT_MULTIPLE_BINDINGS, present->node());
@@ -190,7 +191,7 @@ void EnvironmentBuilder::BindToVariable(const ast::Node& origin,
   }
   // TODO(eval1749): Expose global "var" binding to global object.
   auto& variable = factory().NewVariable(name).As<Variable>();
-  Value::Editor().AddAsignment(&variable, name_node);
+  Value::Editor().AddAssignment(&variable, name_node);
   factory().RegisterValue(name_node, &variable);
   toplevel_environment_->Bind(name, &variable);
 }

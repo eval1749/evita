@@ -40,12 +40,6 @@ std::ostream& operator<<(std::ostream& ostream,
 }
 
 std::ostream& operator<<(std::ostream& ostream,
-                         const Printable<Method>& printable) {
-  const auto& value = *printable.value;
-  return ostream << "$Method@" << value.id() << ' ' << value.node();
-}
-
-std::ostream& operator<<(std::ostream& ostream,
                          const Printable<OrdinaryObject>& printable) {
   const auto& value = *printable.value;
   return ostream << "$OrdinaryObject@" << value.id() << ' ' << value.node();

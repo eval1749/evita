@@ -45,20 +45,6 @@ LexicalBinding::LexicalBinding(Zone* zone,
 LexicalBinding::~LexicalBinding() = default;
 
 //
-// Method
-//
-Method::Method(Zone* zone,
-               int id,
-               const ast::Node& node,
-               Class* owner,
-               Properties* properties)
-    : LexicalBinding(zone, id, node, properties), owner_(*owner) {
-  DCHECK(owner);
-}
-
-Method::~Method() = default;
-
-//
 // Object
 //
 Object::Object(int id, const ast::Node& node, Properties* properties)

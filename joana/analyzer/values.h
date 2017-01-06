@@ -105,29 +105,6 @@ class Function final : public Value {
 };
 
 //
-// Method
-//
-class Method final : public LexicalBinding {
-  DECLARE_CONCRETE_ANALYZE_VALUE(Method, LexicalBinding)
-
- public:
-  ~Method() final;
-
-  Class& owner() const { return owner_; }
-
- private:
-  Method(Zone* zone,
-         int id,
-         const ast::Node& node,
-         Class* owner,
-         Properties* properties);
-
-  Class& owner_;
-
-  DISALLOW_COPY_AND_ASSIGN(Method);
-};
-
-//
 // OrdinaryObject
 //
 class OrdinaryObject final : public Object {

@@ -58,7 +58,6 @@ class Factory final {
   Value& NewClass(const ast::Node& node, const ast::Node& prototype_node);
   Value& NewClass(const ast::Node& node);
   Value& NewFunction(const ast::Node& node);
-  Value& NewMethod(const ast::Node& node, Class* owner);
   Value& NewOrdinaryObject(const ast::Node& node);
   Value& NewUndefined(const ast::Node& node);
   Variable& NewVariable(const ast::Node& origin, const ast::Node& name);

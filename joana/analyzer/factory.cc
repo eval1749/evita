@@ -82,14 +82,6 @@ Value& Factory::NewFunction(const ast::Node& node) {
   return *new (&zone_) Function(NextValueId(), node);
 }
 
-Value& Factory::NewMethod(const ast::Node& node, Class* owner) {
-  DCHECK_EQ(node, ast::SyntaxCode::Method);
-  DCHECK(owner);
-  auto& properties = NewProperties(node);
-  return RegisterValue(node, new (&zone_) Method(&zone_, NextValueId(), node,
-                                                 owner, &properties));
-}
-
 Value& Factory::NewOrdinaryObject(const ast::Node& node) {
   auto& properties = NewProperties(node);
   return RegisterValue(

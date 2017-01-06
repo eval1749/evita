@@ -65,31 +65,6 @@ class LexicalBinding : public Object {
 };
 
 //
-// Class
-//
-class Class final : public LexicalBinding {
-  DECLARE_CONCRETE_ANALYZE_VALUE(Class, LexicalBinding)
-
- public:
-  ~Class() final;
-
-  const Object& prototype() const { return prototype_; }
-  Object& prototype() { return prototype_; }
-
- private:
-  Class(Zone* zone,
-        int id,
-        const ast::Node& node,
-        Properties* properties,
-        Object* prototype);
-
-  // The prototype
-  Object& prototype_;
-
-  DISALLOW_COPY_AND_ASSIGN(Class);
-};
-
-//
 // Function
 //
 class Function final : public Object {

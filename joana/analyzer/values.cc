@@ -12,21 +12,6 @@ namespace joana {
 namespace analyzer {
 
 //
-// Class
-//
-Class::Class(Zone* zone,
-             int id,
-             const ast::Node& node,
-             Properties* properties,
-             Object* prototype)
-    : LexicalBinding(zone, id, node, properties), prototype_(*prototype) {
-  DCHECK(properties);
-  DCHECK(prototype);
-}
-
-Class::~Class() = default;
-
-//
 // Function
 //
 Function::Function(int id, const ast::Node& node, Properties* properties)

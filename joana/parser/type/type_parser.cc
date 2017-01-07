@@ -180,6 +180,11 @@ const ast::Node& TypeParser::NewOptionalType(const ast::Node& type) {
   return node_factory().NewOptionalType(ComputeNodeRange(), type);
 }
 
+const ast::Node& TypeParser::NewProperty(const ast::Node& name,
+                                         const ast::Node& type) {
+  return node_factory().NewProperty(name.range(), name, type);
+}
+
 const ast::Node& TypeParser::NewRecordType(
     const std::vector<const ast::Node*>& members) {
   return node_factory().NewRecordType(ComputeNodeRange(), members);
@@ -209,11 +214,6 @@ const ast::Node& TypeParser::NewTypeGroup(const ast::Node& type) {
 const ast::Node& TypeParser::NewTypeName(const ast::Node& name) {
   DCHECK_EQ(name, ast::SyntaxCode::Name);
   return node_factory().NewTypeName(name.range(), name);
-}
-
-const ast::Node& TypeParser::NewTypeProperty(const ast::Node& name,
-                                             const ast::Node& type) {
-  return node_factory().NewProperty(name.range(), name, type);
 }
 
 const ast::Node& TypeParser::NewUnionType(
@@ -283,7 +283,7 @@ const ast::Node& TypeParser::ParseRecordType() {
     if (!CanPeekToken())
       break;
     const auto& type = ParseType();
-    members.push_back(&NewTypeProperty(name, type));
+    members.push_back(&NewProperty(name, type));
     if (!ConsumeTokenIf(ast::TokenKind::Comma))
       break;
   }

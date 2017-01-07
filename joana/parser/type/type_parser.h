@@ -85,6 +85,7 @@ class TypeParser final {
   const ast::Node& NewNullableType(const ast::Node& type);
   const ast::Node& NewNonNullableType(const ast::Node& type);
   const ast::Node& NewOptionalType(const ast::Node& type);
+  const ast::Node& NewProperty(const ast::Node& name, const ast::Node& type);
   const ast::Node& NewRecordType(const std::vector<const ast::Node*>& members);
   const ast::Node& NewRestType(const ast::Node& type);
   const ast::Node& NewTupleType(const std::vector<const ast::Node*>& members);
@@ -92,8 +93,6 @@ class TypeParser final {
                                       const ast::Node& argument_list);
   const ast::Node& NewTypeGroup(const ast::Node& type);
   const ast::Node& NewTypeName(const ast::Node& name);
-  const ast::Node& NewTypeProperty(const ast::Node& name,
-                                   const ast::Node& type);
   const ast::Node& NewUnionType(const std::vector<const ast::Node*>& members);
   const ast::Node& NewVoidType(const SourceCodeRange& range);
 

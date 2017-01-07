@@ -6,6 +6,7 @@
 #define JOANA_ANALYZER_BUILT_IN_WORLD_H_
 
 #include <memory>
+#include <vector>
 
 #include "base/macros.h"
 
@@ -29,6 +30,7 @@ class BuiltInWorld final {
   ~BuiltInWorld();
 
   const ast::Node& global_module() const { return global_module_; }
+  const std::vector<ast::TokenKind>& primitive_types() const;
 
   const ast::Node& NameOf(ast::TokenKind kind) const;
   const ast::Node& TypeOf(ast::TokenKind kind) const;

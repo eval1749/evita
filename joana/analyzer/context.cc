@@ -61,10 +61,11 @@ void Context::InstallPrimitiveTypes() {
       ast::TokenKind::Boolean, ast::TokenKind::Null,
       ast::TokenKind::Number,  ast::TokenKind::String,
       ast::TokenKind::Symbol,  ast::TokenKind::Undefined,
+      ast::TokenKind::Void,
   };
-  for (auto it = std::begin(kTypeNames); it != std::end(kTypeNames); ++it) {
-    const auto& name = BuiltInWorld::GetInstance()->NameOf(*it);
-    const auto& type = BuiltInWorld::GetInstance()->TypeOf(*it);
+  for (const auto id : BuiltInWorld::GetInstance()->primitive_types()) {
+    const auto& name = BuiltInWorld::GetInstance()->NameOf(id);
+    const auto& type = BuiltInWorld::GetInstance()->TypeOf(id);
     RegisterValue(type, &factory().NewPrimitiveType(name));
     auto& variable = factory().NewVariable(name, name);
     Value::Editor().AddAssignment(&variable, type);

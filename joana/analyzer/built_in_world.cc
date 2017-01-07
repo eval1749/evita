@@ -31,6 +31,7 @@ const char* const kSourceCode =
     "string\n"
     "symbol\n"
     "undefined\n"
+    "void\n"
     "(global)\n";
 
 const SourceCode& NewSourceCodeForBuildIn(Zone* zone) {
@@ -54,6 +55,7 @@ class BuiltInWorld::Private final {
   ~Private() = default;
 
   ast::NodeFactory& node_factory() { return node_factory_; }
+  const std::vector<ast::TokenKind>& primitive_types() const;
   const SourceCode& source_code() const { return source_code_; }
 
   const ast::Node& NameOf(ast::TokenKind kind) const;
@@ -69,6 +71,7 @@ class BuiltInWorld::Private final {
 
   // |ast::NodeFactory| constructor takes |zone_|.
   ast::NodeFactory node_factory_;
+  const std::vector<ast::TokenKind> primitive_types_;
   const SourceCode& source_code_;
 
   // Mapping from known type name to type AST.
@@ -80,9 +83,17 @@ class BuiltInWorld::Private final {
 BuiltInWorld::Private::Private()
     : zone_("BuiltInWorld"),
       node_factory_(&zone_),
+      primitive_types_({ast::TokenKind::Boolean, ast::TokenKind::Null,
+                        ast::TokenKind::Number, ast::TokenKind::String,
+                        ast::TokenKind::Symbol, ast::TokenKind::Undefined}),
       source_code_(NewSourceCodeForBuildIn(&zone_)) {
   PopulateNameTable();
   RegisterTypes();
+}
+
+const std::vector<ast::TokenKind>& BuiltInWorld::Private::primitive_types()
+    const {
+  return primitive_types_;
 }
 
 const ast::Node& BuiltInWorld::Private::NameOf(ast::TokenKind kind) const {
@@ -112,15 +123,10 @@ const ast::Node& BuiltInWorld::Private::TypeOf(ast::TokenKind kind) const {
 }
 
 void BuiltInWorld::Private::RegisterTypes() {
-  static const ast::TokenKind kTypeNames[] = {
-      ast::TokenKind::Boolean, ast::TokenKind::Null,
-      ast::TokenKind::Number,  ast::TokenKind::String,
-      ast::TokenKind::Symbol,  ast::TokenKind::Undefined,
-  };
-  for (auto it = std::begin(kTypeNames); it != std::end(kTypeNames); ++it) {
-    const auto& name = NameOf(*it);
+  for (const auto id : primitive_types_) {
+    const auto& name = NameOf(id);
     const auto& node = node_factory_.NewPrimitiveType(name);
-    const auto& result = type_map_.emplace(*it, &node);
+    const auto& result = type_map_.emplace(id, &node);
     DCHECK(result.second) << "Multiple occurrence of " << name;
   }
 }
@@ -135,6 +141,10 @@ BuiltInWorld::BuiltInWorld()
           {})) {}
 
 BuiltInWorld::~BuiltInWorld() = default;
+
+const std::vector<ast::TokenKind>& BuiltInWorld::primitive_types() const {
+  return private_->primitive_types();
+}
 
 const ast::Node& BuiltInWorld::NameOf(ast::TokenKind kind) const {
   return private_->NameOf(kind);

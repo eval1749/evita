@@ -25,6 +25,7 @@
 #include "joana/ast/statements.h"
 #include "joana/ast/syntax_forward.h"
 #include "joana/ast/tokens.h"
+#include "joana/ast/types.h"
 
 namespace joana {
 namespace analyzer {
@@ -199,6 +200,22 @@ void EnvironmentBuilder::ProcessVariables(const ast::Node& statement) {
   VisitChildNodes(statement);
 }
 
+void EnvironmentBuilder::ResolveName(const ast::Node& name,
+                                     const ast::Node& node) {
+  DCHECK_EQ(name, ast::SyntaxCode::Name);
+  DCHECK_NE(name, node);
+  for (auto* runner = environment_; runner; runner = runner->outer()) {
+    if (auto* present = runner->Find(name)) {
+      factory().RegisterValue(node, present);
+      return;
+    }
+  }
+  auto* present = toplevel_environment_->TryValueOf(name);
+  if (!present)
+    return;
+  factory().RegisterValue(node, present);
+}
+
 //
 // ast::NodeVisitor members
 //
@@ -323,17 +340,7 @@ void EnvironmentBuilder::Visit(const ast::MemberExpression& syntax,
 
 void EnvironmentBuilder::Visit(const ast::ReferenceExpression& syntax,
                                const ast::Node& node) {
-  const auto& name = ast::ReferenceExpression::NameOf(node);
-  for (auto* runner = environment_; runner; runner = runner->outer()) {
-    if (auto* present = runner->Find(name)) {
-      factory().RegisterValue(node, present);
-      return;
-    }
-  }
-  auto* present = toplevel_environment_->TryValueOf(name);
-  if (!present)
-    return;
-  factory().RegisterValue(node, present);
+  ResolveName(ast::ReferenceExpression::NameOf(node), node);
 }
 
 // Statements
@@ -370,6 +377,13 @@ void EnvironmentBuilder::Visit(const ast::LetStatement& syntax,
 void EnvironmentBuilder::Visit(const ast::VarStatement& syntax,
                                const ast::Node& node) {
   ProcessVariables(node);
+}
+
+// Types
+void EnvironmentBuilder::Visit(const ast::TypeName& syntax,
+                               const ast::Node& node) {
+  const auto& name = ast::TypeName::NameOf(node);
+  ResolveName(name, node);
 }
 
 }  // namespace analyzer

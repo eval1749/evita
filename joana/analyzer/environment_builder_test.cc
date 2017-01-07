@@ -128,5 +128,14 @@ TEST_F(EnvironmentBuilderTest, MemberExpression) {
       << "Old style class externs";
 }
 
+TEST_F(EnvironmentBuilderTest, Type) {
+  EXPECT_EQ(
+      "BindingNameElement[22-25]=Variable@1[22-25] |Foo|\n"
+      "TypeName[39-42]=Variable@1[22-25] |Foo|\n"
+      "BindingNameElement[51-54]=Variable@2[51-54] |foo|\n",
+      ListValues("/** @interface */ var Foo;\n"
+                 "/** @type {!Foo} */ var foo;\n"));
+}
+
 }  // namespace analyzer
 }  // namespace joana

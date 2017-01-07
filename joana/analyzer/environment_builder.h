@@ -58,6 +58,8 @@ class EnvironmentBuilder final : public Pass, public ast::SyntaxVisitor {
   // Process AST nodes
   void ProcessVariables(const ast::Node& declaration);
 
+  void ResolveName(const ast::Node& name, const ast::Node& node);
+
   // ast::NodeVisitor implementations
 
   // |ast::SyntaxVisitor| members
@@ -85,6 +87,9 @@ class EnvironmentBuilder final : public Pass, public ast::SyntaxVisitor {
   void Visit(const ast::ConstStatement& syntax, const ast::Node& node) final;
   void Visit(const ast::LetStatement& syntax, const ast::Node& node) final;
   void Visit(const ast::VarStatement& syntax, const ast::Node& node) final;
+
+  // Types
+  void Visit(const ast::TypeName& syntax, const ast::Node& node) final;
 
   const ast::Node* annotation_ = nullptr;
 

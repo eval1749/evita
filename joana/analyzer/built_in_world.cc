@@ -24,7 +24,10 @@ namespace analyzer {
 namespace {
 
 const char* const kSourceCode =
+    "boolean\n"
+    "number\n"
     "prototype\n"
+    "string\n"
     "(global)\n";
 
 const SourceCode& NewSourceCodeForBuildIn(Zone* zone) {

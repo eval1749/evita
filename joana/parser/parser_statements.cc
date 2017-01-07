@@ -21,52 +21,6 @@ namespace parser {
 
 namespace {
 
-bool IsMemberExpression(const ast::Node& node) {
-  const auto* runner = &node;
-  for (;;) {
-    if (*runner == ast::SyntaxCode::ReferenceExpression)
-      return node != runner;
-    if (*runner == ast::SyntaxCode::MemberExpression) {
-      runner = &ast::MemberExpression::ExpressionOf(*runner);
-      continue;
-    }
-    if (*runner == ast::SyntaxCode::ComputedMemberExpression) {
-      runner = &ast::ComputedMemberExpression::ExpressionOf(*runner);
-      continue;
-    }
-    return false;
-  }
-}
-
-bool CanHaveJsDoc(const ast::Node& statement) {
-  if (statement == ast::SyntaxCode::Class)
-    return true;
-  if (statement == ast::SyntaxCode::ConstStatement)
-    return true;
-  if (statement == ast::SyntaxCode::Function)
-    return true;
-  if (statement == ast::SyntaxCode::LetStatement)
-    return true;
-  if (statement == ast::SyntaxCode::VarStatement)
-    return true;
-  if (statement != ast::SyntaxCode::ExpressionStatement)
-    return false;
-  auto& expression = statement.child_at(0);
-  if (expression == ast::SyntaxCode::AssignmentExpression) {
-    if (ast::AssignmentExpression::OperatorOf(expression) !=
-        ast::TokenKind::Equal) {
-      return false;
-    }
-    return IsMemberExpression(
-        ast::AssignmentExpression::LeftHandSideOf(expression));
-  }
-  if (expression == ast::SyntaxCode::ReferenceExpression)
-    return true;
-  if (expression == ast::SyntaxCode::MemberExpression)
-    return true;
-  return false;
-}
-
 bool IsDeclarationKeyword(const ast::Node& name) {
   if (name != ast::SyntaxCode::Name)
     return false;
@@ -116,8 +70,6 @@ const ast::Node& Parser::ParseJsDocAsStatement() {
     // We don't allow statement/expression has more than one annotation.
     AddError(jsdoc, ErrorCode::ERROR_STATEMENT_UNEXPECT_ANNOTATION);
   }
-  if (!CanHaveJsDoc(statement))
-    AddError(jsdoc, ErrorCode::ERROR_STATEMENT_UNEXPECT_ANNOTATION);
   return node_factory().NewAnnotation(GetSourceCodeRange(), jsdoc, statement);
 }
 

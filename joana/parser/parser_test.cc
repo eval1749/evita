@@ -214,9 +214,6 @@ TEST_F(ParserTest, AnnotateStatement) {
       "|  |  |  |  +--BlockStatement |{}|\n",
       Parse("/** @return {Iterator<T>} */\n"
             "Array.prototype[Symbol.iterator] = function() {};\n"));
-}
-
-TEST_F(ParserTest, AnnotateStatementError) {
   EXPECT_EQ(
       "Module\n"
       "+--Annotation\n"
@@ -230,9 +227,9 @@ TEST_F(ParserTest, AnnotateStatementError) {
       "|  |  |  +--ReferenceExpression\n"
       "|  |  |  |  +--Name |foo|\n"
       "|  |  |  +--Punctuator |=|\n"
-      "|  |  |  +--NumericLiteral |1|\n"
-      "PASER_ERROR_STATEMENT_UNEXPECT_ANNOTATION@0:13\n",
-      Parse("/** @const */ foo = 1;"));
+      "|  |  |  +--NumericLiteral |1|\n",
+      Parse("/** @const */ foo = 1;"))
+      << "Parser does not check statement can have annotation";
 
   EXPECT_EQ(
       "Module\n"
@@ -247,10 +244,9 @@ TEST_F(ParserTest, AnnotateStatementError) {
       "|  |  |  +--ReferenceExpression\n"
       "|  |  |  |  +--Name |foo|\n"
       "|  |  |  +--Punctuator |+=|\n"
-      "|  |  |  +--NumericLiteral |1|\n"
-      "PASER_ERROR_STATEMENT_UNEXPECT_ANNOTATION@0:13\n",
+      "|  |  |  +--NumericLiteral |1|\n",
       Parse("/** @const */ foo += 1;"))
-      << "Annotation for += is not allowed.";
+      << "Parser does not check statement can have annotation";
 }
 
 TEST_F(ParserTest, AsyncFunction) {

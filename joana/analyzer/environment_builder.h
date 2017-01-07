@@ -43,8 +43,7 @@ class EnvironmentBuilder final : public Pass, public ast::SyntaxVisitor {
  private:
   class LocalEnvironment;
 
-  // |node| is one of |BindingNameElement|, |Class|, or |Function|.
-  Variable& BindToVariable(const ast::Node& node, const ast::Node& name);
+  Variable& BindToVariable(const ast::Node& name);
 
   void ProcessAssignmentExpressionWithAnnotation(const ast::Node& node,
                                                  const ast::Node& annotation);

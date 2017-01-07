@@ -25,10 +25,12 @@ namespace {
 
 const char* const kSourceCode =
     "boolean\n"
+    "null\n"
     "number\n"
     "prototype\n"
     "string\n"
     "symbol\n"
+    "undefined\n"
     "(global)\n";
 
 const SourceCode& NewSourceCodeForBuildIn(Zone* zone) {
@@ -111,8 +113,9 @@ const ast::Node& BuiltInWorld::Private::TypeOf(ast::TokenKind kind) const {
 
 void BuiltInWorld::Private::RegisterTypes() {
   static const ast::TokenKind kTypeNames[] = {
-      ast::TokenKind::Boolean, ast::TokenKind::Number, ast::TokenKind::String,
-      ast::TokenKind::Symbol,
+      ast::TokenKind::Boolean, ast::TokenKind::Null,
+      ast::TokenKind::Number,  ast::TokenKind::String,
+      ast::TokenKind::Symbol,  ast::TokenKind::Undefined,
   };
   for (auto it = std::begin(kTypeNames); it != std::end(kTypeNames); ++it) {
     const auto& name = NameOf(*it);

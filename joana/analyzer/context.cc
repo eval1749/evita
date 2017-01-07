@@ -58,8 +58,9 @@ Environment& Context::EnvironmentOf(const ast::Node& node) const {
 
 void Context::InstallPrimitiveTypes() {
   static const ast::TokenKind kTypeNames[] = {
-      ast::TokenKind::Boolean, ast::TokenKind::Number, ast::TokenKind::String,
-      ast::TokenKind::Symbol,
+      ast::TokenKind::Boolean, ast::TokenKind::Null,
+      ast::TokenKind::Number,  ast::TokenKind::String,
+      ast::TokenKind::Symbol,  ast::TokenKind::Undefined,
   };
   for (auto it = std::begin(kTypeNames); it != std::end(kTypeNames); ++it) {
     const auto& name = BuiltInWorld::GetInstance()->NameOf(*it);

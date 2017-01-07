@@ -764,6 +764,11 @@ const Node& NodeFactory::NewOptionalType(const SourceCodeRange& range,
   return NewNode1(range, syntax_factory_->NewOptionalType(), type);
 }
 
+const Node& NodeFactory::NewPrimitiveType(const Node& name) {
+  DCHECK_EQ(name, SyntaxCode::Name);
+  return NewNode1(name.range(), syntax_factory_->NewPrimitiveType(), name);
+}
+
 const Node& NodeFactory::NewRecordType(
     const SourceCodeRange& range,
     const std::vector<const Node*>& members) {

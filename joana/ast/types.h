@@ -67,6 +67,24 @@ class JOANA_AST_EXPORT MemberType final : public SyntaxTemplate<Syntax> {
 };
 
 //
+// PrimitiveType is a placeholder of primitive type. The parser does not use
+// this node.
+//
+class JOANA_AST_EXPORT PrimitiveType final : public SyntaxTemplate<Syntax> {
+  DECLARE_CONCRETE_AST_SYNTAX(PrimitiveType, Syntax);
+
+ public:
+  ~PrimitiveType() final;
+
+  static const Node& NameOf(const Node& node);
+
+ private:
+  PrimitiveType();
+
+  DISALLOW_COPY_AND_ASSIGN(PrimitiveType);
+};
+
+//
 // TypeApplication
 //
 class JOANA_AST_EXPORT TypeApplication final : public SyntaxTemplate<Syntax> {

@@ -358,6 +358,8 @@ class JOANA_AST_EXPORT NodeFactory final {
 
   const Node& NewOptionalType(const SourceCodeRange& range, const Node& type);
 
+  const Node& NewPrimitiveType(const Node& name);
+
   const Node& NewRecordType(const SourceCodeRange& range,
                             const std::vector<const Node*>& members);
 

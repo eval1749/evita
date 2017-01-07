@@ -41,6 +41,21 @@ const Node& MemberType::NameOf(const Node& node) {
 }
 
 //
+// PrimitiveType
+//
+PrimitiveType::PrimitiveType()
+    : SyntaxTemplate(std::tuple<>(),
+                     SyntaxCode::PrimitiveType,
+                     Format::Builder().set_arity(1).Build()) {}
+
+PrimitiveType::~PrimitiveType() = default;
+
+const Node& PrimitiveType::NameOf(const Node& node) {
+  DCHECK_EQ(node, SyntaxCode::PrimitiveType);
+  return node.child_at(0);
+}
+
+//
 // RecordType
 //
 RecordType::RecordType()

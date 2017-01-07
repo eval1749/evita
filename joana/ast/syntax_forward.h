@@ -121,6 +121,7 @@ namespace ast {
   V(NullableType)            \
   V(NonNullableType)         \
   V(OptionalType)            \
+  V(PrimitiveType)           \
   V(RecordType)              \
   V(RestType)                \
   V(TupleType)               \

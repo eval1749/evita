@@ -246,7 +246,17 @@ void EnvironmentBuilder::VisitInternal(const ast::BindingNameElement& syntax,
 void EnvironmentBuilder::VisitInternal(const ast::Annotation& syntax,
                                        const ast::Node& node) {
   base::AutoReset<const ast::Node*> scope(&annotation_, &node);
-  VisitChildNodes(node);
+  // Process annotated node before annotation to handle reference of class
+  // name in constructor and parameter names for "@param".
+  // Example:
+  //  /**
+  //   * @constructor
+  //   * @return {!Foo} this repugnant though
+  //   * @param {number} x
+  //   */
+  //  function Foo(x) {}
+  Visit(ast::Annotation::AnnotatedOf(node));
+  Visit(ast::Annotation::AnnotationOf(node));
 }
 
 void EnvironmentBuilder::VisitInternal(const ast::Class& syntax,

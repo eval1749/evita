@@ -51,8 +51,6 @@ class EnvironmentBuilder final : public Pass, public ast::SyntaxVisitor {
   void ProcessMemberExpressionWithAnnotation(const ast::Node& node,
                                              const ast::Node& annotation);
 
-  void ResolveName(const ast::Node& name, const ast::Node& node);
-
   // ast::NodeVisitor implementations
 
   // |ast::SyntaxVisitor| members

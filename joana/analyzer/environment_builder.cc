@@ -141,8 +141,10 @@ void EnvironmentBuilder::RunOn(const ast::Node& node) {
 Variable& EnvironmentBuilder::BindToVariable(const ast::Node& name) {
   DCHECK_EQ(name, ast::SyntaxCode::Name);
   if (environment_) {
-    if (auto* present = environment_->Find(name))
-      return *present;
+    for (auto* runner = environment_; runner; runner = runner->outer()) {
+      if (auto* present = runner->Find(name))
+        return *present;
+    }
     auto& variable = factory().NewVariable(name);
     environment_->Bind(name, &variable);
     return variable;
@@ -191,22 +193,6 @@ void EnvironmentBuilder::ProcessMemberExpressionWithAnnotation(
     return;
   }
   Value::Editor().AddAssignment(&property, node);
-}
-
-void EnvironmentBuilder::ResolveName(const ast::Node& name,
-                                     const ast::Node& node) {
-  DCHECK_EQ(name, ast::SyntaxCode::Name);
-  DCHECK_NE(name, node);
-  for (auto* runner = environment_; runner; runner = runner->outer()) {
-    if (auto* present = runner->Find(name)) {
-      context().RegisterValue(node, present);
-      return;
-    }
-  }
-  auto* present = toplevel_environment_->TryValueOf(name);
-  if (!present)
-    return;
-  context().RegisterValue(node, present);
 }
 
 //
@@ -335,7 +321,8 @@ void EnvironmentBuilder::VisitInternal(const ast::MemberExpression& syntax,
 
 void EnvironmentBuilder::VisitInternal(const ast::ReferenceExpression& syntax,
                                        const ast::Node& node) {
-  ResolveName(ast::ReferenceExpression::NameOf(node), node);
+  auto& variable = BindToVariable(ast::ReferenceExpression::NameOf(node));
+  context().RegisterValue(node, &variable);
 }
 
 // Statements
@@ -362,8 +349,8 @@ void EnvironmentBuilder::VisitInternal(const ast::ExpressionStatement& syntax,
 // Types
 void EnvironmentBuilder::VisitInternal(const ast::TypeName& syntax,
                                        const ast::Node& node) {
-  const auto& name = ast::TypeName::NameOf(node);
-  ResolveName(name, node);
+  auto& variable = BindToVariable(ast::TypeName::NameOf(node));
+  context().RegisterValue(node, &variable);
 }
 
 }  // namespace analyzer

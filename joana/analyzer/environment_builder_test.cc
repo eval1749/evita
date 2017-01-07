@@ -136,8 +136,10 @@ TEST_F(EnvironmentBuilderTest, Type) {
       ListValues("/** @interface */ var Foo;\n"
                  "/** @type {!Foo} */ var foo;\n"));
 
-  EXPECT_EQ("BindingNameElement[26-27]=Variable@17[26-27] |x|\n",
-            ListValues("/** @type {number} */ var x;"));
+  EXPECT_EQ(
+      "TypeName[11-17]=Variable@18[11-17] |number|\n"
+      "BindingNameElement[26-27]=Variable@17[26-27] |x|\n",
+      ListValues("/** @type {number} */ var x;"));
 }
 
 }  // namespace analyzer

@@ -39,11 +39,19 @@ Variable* TypeChecker::TryValueOf(const ast::Node& node) const {
 }
 
 // |ast::SyntaxVisitor| members
+// Expressions
 void TypeChecker::Visit(const ast::ReferenceExpression& syntax,
                         const ast::Node& node) {
   if (context().TryValueOf(node))
     return;
   AddError(node, ErrorCode::TYPE_CHECKER_UNDEFIEND_VARIABLE);
+}
+
+// Types
+void TypeChecker::Visit(const ast::TypeName& syntax, const ast::Node& node) {
+  if (context().TryValueOf(node))
+    return;
+  AddError(node, ErrorCode::TYPE_CHECKER_UNDEFIEND_TYPE);
 }
 
 }  // namespace analyzer

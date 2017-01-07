@@ -18,6 +18,7 @@ namespace joana {
   V(ENVIRONMENT, MULTIPLE_BINDINGS)           \
   V(ENVIRONMENT, UNDEFIEND_VARIABLE)          \
   V(ENVIRONMENT, UNEXPECT_ANNOTATION)         \
+  V(TYPE_CHECKER, UNDEFIEND_TYPE)             \
   V(TYPE_CHECKER, UNDEFIEND_VARIABLE)
 
 const auto kAnalyzerErrorCodeBase = 70000;

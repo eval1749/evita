@@ -42,12 +42,12 @@ void Environment::BindVariable(const ast::Node& name, Variable* value) {
   names_.push_back(&name);
 }
 
-Type* Environment::TryTypeOf(const ast::Node& name) const {
+Type* Environment::FindType(const ast::Node& name) const {
   const auto& it = type_map_.find(ast::Name::IdOf(name));
   return it == type_map_.end() ? nullptr : it->second;
 }
 
-Variable* Environment::TryValueOf(const ast::Node& name) const {
+Variable* Environment::FindVariable(const ast::Node& name) const {
   const auto& it = value_map_.find(ast::Name::IdOf(name));
   return it == value_map_.end() ? nullptr : it->second;
 }

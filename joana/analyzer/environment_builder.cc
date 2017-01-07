@@ -169,7 +169,7 @@ void EnvironmentBuilder::BindAsType(const ast::Node& name, Variable* variable) {
     return;
   }
   for (auto* runner = toplevel_environment_; runner; runner = runner->outer()) {
-    auto* const present = runner->TryTypeOf(name);
+    auto* const present = runner->FindType(name);
     if (!present)
       continue;
     if (present->Is<TypeReference>())
@@ -193,7 +193,7 @@ Variable& EnvironmentBuilder::BindToVariable(const ast::Node& name) {
     return variable;
   }
   for (auto* runner = toplevel_environment_; runner; runner = runner->outer()) {
-    if (auto* present = runner->TryValueOf(name))
+    if (auto* present = runner->FindVariable(name))
       return *present;
   }
   // TODO(eval1749): Expose global "var" binding to global object.
@@ -211,7 +211,7 @@ Type* EnvironmentBuilder::FindType(const ast::Node& name) const {
     }
   }
   for (auto* runner = toplevel_environment_; runner; runner = runner->outer()) {
-    if (auto* present = runner->TryTypeOf(name))
+    if (auto* present = runner->FindType(name))
       return present;
   }
   return nullptr;
@@ -226,7 +226,7 @@ Variable* EnvironmentBuilder::FindVariable(const ast::Node& name) const {
     }
   }
   for (auto* runner = toplevel_environment_; runner; runner = runner->outer()) {
-    if (auto* present = runner->TryValueOf(name))
+    if (auto* present = runner->FindVariable(name))
       return present;
   }
   return nullptr;
@@ -273,7 +273,7 @@ Type& EnvironmentBuilder::ResolveTypeName(const ast::Node& name) {
   if (auto* present_type = FindType(name))
     return *present_type;
 
-  if (auto* present = toplevel_environment_->TryValueOf(name)) {
+  if (auto* present = toplevel_environment_->FindVariable(name)) {
     auto& type = factory().NewTypeReference(present);
     toplevel_environment_->BindType(name, &type);
     return type;

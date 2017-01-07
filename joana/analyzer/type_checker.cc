@@ -32,7 +32,7 @@ void TypeChecker::RunOn(const ast::Node& toplevel_node) {
 
 Variable* TypeChecker::TryValueOf(const ast::Node& node) const {
   for (const auto* runner = environment_; runner; runner = runner->outer()) {
-    if (auto* present = runner->TryValueOf(node))
+    if (auto* present = runner->FindVariable(node))
       return present;
   }
   return nullptr;

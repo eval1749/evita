@@ -59,6 +59,12 @@ std::ostream& operator<<(std::ostream& ostream,
 }
 
 std::ostream& operator<<(std::ostream& ostream,
+                         const Printable<TypeParameter>& printable) {
+  const auto& value = *printable.value;
+  return ostream << "$TypeParameter@" << value.id() << ' ' << value.node();
+}
+
+std::ostream& operator<<(std::ostream& ostream,
                          const Printable<TypeReference>& printable) {
   const auto& value = *printable.value;
   return ostream << "$TypeReference@" << value.id() << ' ' << value.node();

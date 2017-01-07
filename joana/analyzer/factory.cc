@@ -57,6 +57,11 @@ Type& Factory::NewTypeName(const ast::Node& name) {
   return *new (&zone_) TypeName(NextValueId(), name);
 }
 
+Type& Factory::NewTypeParameter(const ast::Node& name) {
+  DCHECK_EQ(name, ast::SyntaxCode::Name);
+  return *new (&zone_) TypeParameter(NextValueId(), name);
+}
+
 Type& Factory::NewTypeReference(Variable* variable) {
   DCHECK(variable);
   return *new (&zone_) TypeReference(NextValueId(), variable);

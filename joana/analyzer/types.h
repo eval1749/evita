@@ -59,6 +59,21 @@ class TypeName final : public Type {
 };
 
 //
+// TypeParameter
+//
+class TypeParameter final : public Type {
+  DECLARE_CONCRETE_ANALYZE_VALUE(TypeParameter, Type)
+
+ public:
+  ~TypeParameter() final;
+
+ private:
+  TypeParameter(int id, const ast::Node& node);
+
+  DISALLOW_COPY_AND_ASSIGN(TypeParameter);
+};
+
+//
 // TypeReference
 //
 class TypeReference final : public Type {

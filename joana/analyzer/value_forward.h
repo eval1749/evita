@@ -26,13 +26,17 @@ namespace analyzer {
   V(Type)                                     \
   V(Value)
 
+#define FOR_EACH_ANALYZE_TYPE(name) \
+  V(TypeName)                       \
+  V(TypeParameter)                  \
+  V(TypeReference)
+
 #define FOR_EACH_ANALYZE_VALUE(name) \
+  FOR_EACH_ANALYZE_TYPE(name)        \
   V(Function)                        \
   V(OrdinaryObject)                  \
   V(Property)                        \
   V(PrimitiveType)                   \
-  V(TypeName)                        \
-  V(TypeReference)                   \
   V(Undefined)                       \
   V(Variable)
 

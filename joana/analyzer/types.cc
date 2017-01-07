@@ -22,6 +22,12 @@ TypeName::TypeName(int id, const ast::Node& node) : Type(id, node) {}
 TypeName::~TypeName() = default;
 
 //
+// TypeParameter
+//
+TypeParameter::TypeParameter(int id, const ast::Node& node) : Type(id, node) {}
+TypeParameter::~TypeParameter() = default;
+
+//
 // TypeReference
 //
 TypeReference::TypeReference(int id, Variable* variable)

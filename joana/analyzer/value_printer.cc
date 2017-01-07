@@ -5,6 +5,7 @@
 #include <ostream>
 
 #include "base/logging.h"
+#include "joana/analyzer/types.h"
 #include "joana/analyzer/value_forward.h"
 #include "joana/analyzer/values.h"
 #include "joana/ast/node.h"
@@ -37,6 +38,12 @@ std::ostream& operator<<(std::ostream& ostream,
                          const Printable<OrdinaryObject>& printable) {
   const auto& value = *printable.value;
   return ostream << "$OrdinaryObject@" << value.id() << ' ' << value.node();
+}
+
+std::ostream& operator<<(std::ostream& ostream,
+                         const Printable<PrimitiveType>& printable) {
+  const auto& value = *printable.value;
+  return ostream << "$PrimitiveType@" << value.id() << ' ' << value.node();
 }
 
 std::ostream& operator<<(std::ostream& ostream,

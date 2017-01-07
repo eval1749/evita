@@ -27,7 +27,7 @@ TypeChecker::~TypeChecker() = default;
 void TypeChecker::RunOn(const ast::Node& toplevel_node) {
   environment_ = &context().EnvironmentOf(toplevel_node);
   for (const auto& node : ast::NodeTraversal::DescendantsOf(toplevel_node))
-    SyntaxVisitor::Visit(node);
+    Visit(node);
 }
 
 Variable* TypeChecker::TryValueOf(const ast::Node& node) const {
@@ -40,15 +40,16 @@ Variable* TypeChecker::TryValueOf(const ast::Node& node) const {
 
 // |ast::SyntaxVisitor| members
 // Expressions
-void TypeChecker::Visit(const ast::ReferenceExpression& syntax,
-                        const ast::Node& node) {
+void TypeChecker::VisitInternal(const ast::ReferenceExpression& syntax,
+                                const ast::Node& node) {
   if (context().TryValueOf(node))
     return;
   AddError(node, ErrorCode::TYPE_CHECKER_UNDEFIEND_VARIABLE);
 }
 
 // Types
-void TypeChecker::Visit(const ast::TypeName& syntax, const ast::Node& node) {
+void TypeChecker::VisitInternal(const ast::TypeName& syntax,
+                                const ast::Node& node) {
   if (context().TryValueOf(node))
     return;
   AddError(node, ErrorCode::TYPE_CHECKER_UNDEFIEND_TYPE);

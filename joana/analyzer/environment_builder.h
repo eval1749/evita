@@ -66,30 +66,36 @@ class EnvironmentBuilder final : public Pass, public ast::SyntaxVisitor {
   void VisitDefault(const ast::Node& node) final;
 
   // Binding elements
-  void Visit(const ast::BindingNameElement& syntax,
-             const ast::Node& node) final;
+  void VisitInternal(const ast::BindingNameElement& syntax,
+                     const ast::Node& node) final;
 
   // Declarations
-  void Visit(const ast::Annotation& syntax, const ast::Node& node) final;
-  void Visit(const ast::Class& syntax, const ast::Node& node) final;
-  void Visit(const ast::Function& syntax, const ast::Node& node) final;
-  void Visit(const ast::Method& syntax, const ast::Node& node) final;
+  void VisitInternal(const ast::Annotation& syntax,
+                     const ast::Node& node) final;
+  void VisitInternal(const ast::Class& syntax, const ast::Node& node) final;
+  void VisitInternal(const ast::Function& syntax, const ast::Node& node) final;
+  void VisitInternal(const ast::Method& syntax, const ast::Node& node) final;
 
   // Expressions
-  void Visit(const ast::MemberExpression& syntax, const ast::Node& node) final;
-  void Visit(const ast::ReferenceExpression& syntax,
-             const ast::Node& node) final;
+  void VisitInternal(const ast::MemberExpression& syntax,
+                     const ast::Node& node) final;
+  void VisitInternal(const ast::ReferenceExpression& syntax,
+                     const ast::Node& node) final;
 
   // Statement
-  void Visit(const ast::BlockStatement& syntax, const ast::Node& node) final;
-  void Visit(const ast::ExpressionStatement& syntax,
-             const ast::Node& node) final;
-  void Visit(const ast::ConstStatement& syntax, const ast::Node& node) final;
-  void Visit(const ast::LetStatement& syntax, const ast::Node& node) final;
-  void Visit(const ast::VarStatement& syntax, const ast::Node& node) final;
+  void VisitInternal(const ast::BlockStatement& syntax,
+                     const ast::Node& node) final;
+  void VisitInternal(const ast::ExpressionStatement& syntax,
+                     const ast::Node& node) final;
+  void VisitInternal(const ast::ConstStatement& syntax,
+                     const ast::Node& node) final;
+  void VisitInternal(const ast::LetStatement& syntax,
+                     const ast::Node& node) final;
+  void VisitInternal(const ast::VarStatement& syntax,
+                     const ast::Node& node) final;
 
   // Types
-  void Visit(const ast::TypeName& syntax, const ast::Node& node) final;
+  void VisitInternal(const ast::TypeName& syntax, const ast::Node& node) final;
 
   const ast::Node* annotation_ = nullptr;
 

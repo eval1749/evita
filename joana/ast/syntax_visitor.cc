@@ -40,12 +40,13 @@ void SyntaxVisitor::VisitChildNodes(const ast::Node& node) {
 void SyntaxVisitor::VisitDefault(const ast::Node& node) {}
 
 #define V(name)                                                            \
-  void SyntaxVisitor::Visit(const name& syntax, const ast::Node& node) {   \
+  void SyntaxVisitor::VisitInternal(const name& syntax,                    \
+                                    const ast::Node& node) {               \
     VisitDefault(node);                                                    \
   }                                                                        \
                                                                            \
   void name::Accept(SyntaxVisitor* visitor, const ast::Node& node) const { \
-    visitor->Visit(*this, node);                                           \
+    visitor->VisitInternal(*this, node);                                   \
   }
 
 FOR_EACH_AST_SYNTAX(V)

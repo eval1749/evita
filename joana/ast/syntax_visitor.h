@@ -25,9 +25,8 @@ class JOANA_AST_EXPORT SyntaxVisitor {
   void VisitChildNodes(const ast::Node& node);
   virtual void VisitDefault(const ast::Node& node);
 
-#define V(name)                                       \
-  virtual void Visit(const name& syntax, /* NOLINT */ \
-                     const ast::Node& node);
+#define V(name) \
+  virtual void VisitInternal(const name& syntax, const ast::Node& node);
   FOR_EACH_AST_SYNTAX(V)
 #undef V
 

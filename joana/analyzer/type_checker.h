@@ -35,11 +35,11 @@ class TypeChecker final : public Pass, public ast::SyntaxVisitor {
 
   // |ast::SyntaxVisitor| members
   // Expressions
-  void Visit(const ast::ReferenceExpression& syntax,
-             const ast::Node& node) final;
+  void VisitInternal(const ast::ReferenceExpression& syntax,
+                     const ast::Node& node) final;
 
   // Types
-  void Visit(const ast::TypeName& syntax, const ast::Node& node) final;
+  void VisitInternal(const ast::TypeName& syntax, const ast::Node& node) final;
 
   Environment* environment_ = nullptr;
 

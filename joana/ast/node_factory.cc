@@ -739,6 +739,16 @@ const Node& NodeFactory::NewInvalidType(const SourceCodeRange& range) {
   return NewNode0(range, syntax_factory_->NewInvalidType());
 }
 
+const Node& NodeFactory::NewMemberType(const SourceCodeRange& range,
+                                       const Node& member,
+                                       const Node& name) {
+  DCHECK(member == ast::SyntaxCode::TypeName ||
+         member == ast::SyntaxCode::MemberType)
+      << member;
+  DCHECK_EQ(name, ast::SyntaxCode::Name);
+  return NewNode2(range, syntax_factory_->NewMemberType(), member, name);
+}
+
 const Node& NodeFactory::NewNullableType(const SourceCodeRange& range,
                                          const Node& type) {
   return NewNode1(range, syntax_factory_->NewNullableType(), type);

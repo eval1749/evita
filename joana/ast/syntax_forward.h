@@ -117,6 +117,7 @@ namespace ast {
   V(AnyType)                 \
   V(FunctionType)            \
   V(InvalidType)             \
+  V(MemberType)              \
   V(NullableType)            \
   V(NonNullableType)         \
   V(OptionalType)            \

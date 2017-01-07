@@ -100,6 +100,7 @@ class JOANA_AST_EXPORT SyntaxFactory final {
   DECLARE_FACTORY_MEMBER_0(AnyType)
   DECLARE_FACTORY_MEMBER_1(FunctionType, FunctionTypeKind, kind)
   DECLARE_FACTORY_MEMBER_0(InvalidType)
+  DECLARE_FACTORY_MEMBER_0(MemberType)
   DECLARE_FACTORY_MEMBER_0(NullableType)
   DECLARE_FACTORY_MEMBER_0(NonNullableType)
   DECLARE_FACTORY_MEMBER_0(OptionalType)

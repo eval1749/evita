@@ -49,6 +49,24 @@ DECLARE_AST_SYNTAX_0(UnknownType)
 DECLARE_AST_SYNTAX_0(VoidType)
 
 //
+// MemberType
+//
+class JOANA_AST_EXPORT MemberType final : public SyntaxTemplate<Syntax> {
+  DECLARE_CONCRETE_AST_SYNTAX(MemberType, Syntax);
+
+ public:
+  ~MemberType() final;
+
+  static const Node& MemberOf(const Node& node);
+  static const Node& NameOf(const Node& node);
+
+ private:
+  MemberType();
+
+  DISALLOW_COPY_AND_ASSIGN(MemberType);
+};
+
+//
 // TypeApplication
 //
 class JOANA_AST_EXPORT TypeApplication final : public SyntaxTemplate<Syntax> {

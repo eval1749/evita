@@ -21,6 +21,26 @@ IMPLEMENT_AST_SYNTAX_0(Type, UnknownType, 0)
 IMPLEMENT_AST_SYNTAX_0(Type, VoidType, 0)
 
 //
+// MemberType
+//
+MemberType::MemberType()
+    : SyntaxTemplate(std::tuple<>(),
+                     SyntaxCode::MemberType,
+                     Format::Builder().set_arity(2).Build()) {}
+
+MemberType::~MemberType() = default;
+
+const Node& MemberType::MemberOf(const Node& node) {
+  DCHECK_EQ(node, SyntaxCode::MemberType);
+  return node.child_at(0);
+}
+
+const Node& MemberType::NameOf(const Node& node) {
+  DCHECK_EQ(node, SyntaxCode::MemberType);
+  return node.child_at(1);
+}
+
+//
 // RecordType
 //
 RecordType::RecordType()

@@ -347,6 +347,10 @@ class JOANA_AST_EXPORT NodeFactory final {
 
   const Node& NewInvalidType(const SourceCodeRange& range);
 
+  const Node& NewMemberType(const SourceCodeRange& range,
+                            const Node& member,
+                            const Node& name);
+
   const Node& NewNullableType(const SourceCodeRange& range, const Node& type);
 
   const Node& NewNonNullableType(const SourceCodeRange& range,

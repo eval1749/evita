@@ -176,6 +176,8 @@ void EnvironmentBuilder::ProcessAssignmentExpressionWithAnnotation(
   }
   if (lhs == ast::SyntaxCode::MemberExpression)
     return ProcessMemberExpressionWithAnnotation(lhs, annotation);
+  if (lhs == ast::SyntaxCode::ComputedMemberExpression)
+    return ProcessMemberExpressionWithAnnotation(lhs, annotation);
   AddError(annotation, ErrorCode::ENVIRONMENT_UNEXPECT_ANNOTATION);
 }
 
@@ -187,7 +189,7 @@ void EnvironmentBuilder::ProcessMemberExpressionWithAnnotation(
     // We've not known value of member expression.
     return;
   }
-  auto& property = value->As<Property>();
+  auto& property = value->As<ValueHolder>();
   if (!property.assignments().empty()) {
     AddError(node, ErrorCode::ENVIRONMENT_MULTIPLE_BINDINGS);
     return;
@@ -306,6 +308,22 @@ void EnvironmentBuilder::VisitInternal(const ast::Method& syntax,
 }
 
 // Expressions
+void EnvironmentBuilder::VisitInternal(
+    const ast::ComputedMemberExpression& syntax,
+    const ast::Node& node) {
+  VisitDefault(node);
+  auto* const value = context().TryValueOf(
+      ast::ComputedMemberExpression::MemberExpressionOf(node));
+  if (!value || !value->Is<Object>())
+    return;
+  auto& properties = value->As<Object>().properties();
+  const auto& key = ast::ComputedMemberExpression::ExpressionOf(node);
+  if (!ast::IsKnownSymbol(key))
+    return;
+  auto& property = factory().GetOrNewProperty(&properties, key);
+  context().RegisterValue(node, &property);
+}
+
 void EnvironmentBuilder::VisitInternal(const ast::MemberExpression& syntax,
                                        const ast::Node& node) {
   VisitDefault(node);
@@ -342,6 +360,8 @@ void EnvironmentBuilder::VisitInternal(const ast::ExpressionStatement& syntax,
   if (expression == ast::SyntaxCode::AssignmentExpression)
     return ProcessAssignmentExpressionWithAnnotation(expression, annotation);
   if (expression == ast::SyntaxCode::MemberExpression)
+    return ProcessMemberExpressionWithAnnotation(expression, annotation);
+  if (expression == ast::SyntaxCode::ComputedMemberExpression)
     return ProcessMemberExpressionWithAnnotation(expression, annotation);
   AddError(*annotation_, ErrorCode::ENVIRONMENT_UNEXPECT_ANNOTATION);
 }

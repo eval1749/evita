@@ -93,6 +93,17 @@ TEST_F(EnvironmentBuilderTest, ClassError) {
       ListValues("class Foo { 1 }"));
 }
 
+TEST_F(EnvironmentBuilderTest, ComputedMemberExpression) {
+  EXPECT_EQ(
+      "Function<Normal>[20-37]=Variable@16[29-32] |Foo|\n"
+      "ComputedMemberExpression[52-72]=Property@19[56-71] |Symbol.iterator|\n"
+      "ReferenceExpression[52-55]=Variable@16[29-32] |Foo|\n"
+      "MemberExpression[56-71]=Property@18[63-71] |iterator|\n"
+      "ReferenceExpression[56-62]=Variable@17[56-62] |Symbol|\n",
+      ListValues("/** @constructor */ function Foo() {}\n"
+                 "/** @const */ Foo[Symbol.iterator]\n"));
+}
+
 TEST_F(EnvironmentBuilderTest, Function) {
   EXPECT_EQ(
       "Function<Normal>[0-36]=Variable@16[9-12] |foo|\n"

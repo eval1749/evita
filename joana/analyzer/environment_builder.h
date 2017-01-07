@@ -68,6 +68,8 @@ class EnvironmentBuilder final : public Pass, public ast::SyntaxVisitor {
   void VisitInternal(const ast::Method& syntax, const ast::Node& node) final;
 
   // Expressions
+  void VisitInternal(const ast::ComputedMemberExpression& syntax,
+                     const ast::Node& node) final;
   void VisitInternal(const ast::MemberExpression& syntax,
                      const ast::Node& node) final;
   void VisitInternal(const ast::ReferenceExpression& syntax,

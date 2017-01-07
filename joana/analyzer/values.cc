@@ -5,6 +5,7 @@
 #include "joana/analyzer/values.h"
 
 #include "joana/ast/bindings.h"
+#include "joana/ast/expressions.h"
 #include "joana/ast/syntax_forward.h"
 #include "joana/ast/tokens.h"
 
@@ -45,7 +46,7 @@ Property::Property(Zone* zone,
                    const ast::Node& key,
                    Properties* properties)
     : ValueHolder(zone, id, key, properties) {
-  DCHECK_EQ(key, ast::SyntaxCode::Name);
+  DCHECK(key == ast::SyntaxCode::Name || ast::IsKnownSymbol(key)) << key;
 }
 
 Property::~Property() = default;

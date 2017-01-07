@@ -55,6 +55,7 @@ class Context final {
  private:
   Zone& zone() const;
 
+  void InstallPrimitiveTypes();
   static Environment& NewGlobalEnvironment(Zone* zone);
 
   std::unordered_map<const ast::Node*, Environment*> environment_map_;

@@ -73,56 +73,56 @@ std::string EnvironmentBuilderTest::ListValues(base::StringPiece script_text) {
 
 TEST_F(EnvironmentBuilderTest, Class) {
   EXPECT_EQ(
-      "Class[0-31]=Variable@2[6-9] |Foo|\n"
-      "Method<NonStatic,Normal>[12-20]=Function@5[12-20] |bar() {}|\n"
-      "Method<NonStatic,Normal>[21-29]=Function@7[21-29] |baz() {}|\n",
+      "Class[0-31]=Variable@10[6-9] |Foo|\n"
+      "Method<NonStatic,Normal>[12-20]=Function@13[12-20] |bar() {}|\n"
+      "Method<NonStatic,Normal>[21-29]=Function@15[21-29] |baz() {}|\n",
       ListValues("class Foo { bar() {} baz() {} }"));
 }
 
 TEST_F(EnvironmentBuilderTest, ClassAnonymous) {
   EXPECT_EQ(
-      "BindingNameElement[4-16]=Variable@3[4-5] |a|\n"
-      "Class[8-16]=Function@1[8-16] |class {}|\n",
+      "BindingNameElement[4-16]=Variable@11[4-5] |a|\n"
+      "Class[8-16]=Function@9[8-16] |class {}|\n",
       ListValues("var a = class {};"));
 }
 
 TEST_F(EnvironmentBuilderTest, ClassError) {
   EXPECT_EQ(
-      "Class[0-15]=Variable@2[6-9] |Foo|\n"
+      "Class[0-15]=Variable@10[6-9] |Foo|\n"
       "ANALYZER_ERROR_ENVIRONMENT_EXPECT_METHOD@12:13\n",
       ListValues("class Foo { 1 }"));
 }
 
 TEST_F(EnvironmentBuilderTest, Function) {
   EXPECT_EQ(
-      "Function<Normal>[0-36]=Variable@2[9-12] |foo|\n"
-      "BindingNameElement[13-14]=Variable@3[13-14] |a|\n"
-      "BindingNameElement[16-17]=Variable@4[16-17] |b|\n"
-      "ReferenceExpression[28-29]=Variable@3[13-14] |a|\n"
-      "ReferenceExpression[32-33]=Variable@4[16-17] |b|\n",
+      "Function<Normal>[0-36]=Variable@10[9-12] |foo|\n"
+      "BindingNameElement[13-14]=Variable@11[13-14] |a|\n"
+      "BindingNameElement[16-17]=Variable@12[16-17] |b|\n"
+      "ReferenceExpression[28-29]=Variable@11[13-14] |a|\n"
+      "ReferenceExpression[32-33]=Variable@12[16-17] |b|\n",
       ListValues("function foo(a, b) { return a + b; }"));
 }
 
 TEST_F(EnvironmentBuilderTest, FunctionAnonymous) {
   EXPECT_EQ(
-      "BindingNameElement[4-21]=Variable@2[4-5] |a|\n"
-      "Function<Normal>[8-21]=Function@1[8-21] |function() {}|\n",
+      "BindingNameElement[4-21]=Variable@10[4-5] |a|\n"
+      "Function<Normal>[8-21]=Function@9[8-21] |function() {}|\n",
       ListValues("var a = function() {};"));
 }
 
 TEST_F(EnvironmentBuilderTest, Let) {
   EXPECT_EQ(
-      "BindingNameElement[4-9]=Variable@1[4-5] |a|\n"
-      "BindingNameElement[11-16]=Variable@2[11-12] |b|\n",
+      "BindingNameElement[4-9]=Variable@9[4-5] |a|\n"
+      "BindingNameElement[11-16]=Variable@10[11-12] |b|\n",
       ListValues("let a = 1, b = 2;"));
 }
 
 TEST_F(EnvironmentBuilderTest, MemberExpression) {
   EXPECT_EQ(
-      "Function<Normal>[20-37]=Variable@2[29-32] |Foo|\n"
-      "MemberExpression[52-69]=Property@4[66-69] |bar|\n"
-      "MemberExpression[52-65]=Property@3[56-65] |prototype|\n"
-      "ReferenceExpression[52-55]=Variable@2[29-32] |Foo|\n",
+      "Function<Normal>[20-37]=Variable@10[29-32] |Foo|\n"
+      "MemberExpression[52-69]=Property@12[66-69] |bar|\n"
+      "MemberExpression[52-65]=Property@11[56-65] |prototype|\n"
+      "ReferenceExpression[52-55]=Variable@10[29-32] |Foo|\n",
       ListValues("/** @constructor */ function Foo() {}\n"
                  "/** @const */ Foo.prototype.bar\n"))
       << "Old style class externs";
@@ -130,11 +130,14 @@ TEST_F(EnvironmentBuilderTest, MemberExpression) {
 
 TEST_F(EnvironmentBuilderTest, Type) {
   EXPECT_EQ(
-      "BindingNameElement[22-25]=Variable@1[22-25] |Foo|\n"
-      "TypeName[39-42]=Variable@1[22-25] |Foo|\n"
-      "BindingNameElement[51-54]=Variable@2[51-54] |foo|\n",
+      "BindingNameElement[22-25]=Variable@9[22-25] |Foo|\n"
+      "TypeName[39-42]=Variable@9[22-25] |Foo|\n"
+      "BindingNameElement[51-54]=Variable@10[51-54] |foo|\n",
       ListValues("/** @interface */ var Foo;\n"
                  "/** @type {!Foo} */ var foo;\n"));
+
+  EXPECT_EQ("BindingNameElement[26-27]=Variable@11[26-27] |x|\n",
+            ListValues("/** @type {number} */ var x;"));
 }
 
 }  // namespace analyzer

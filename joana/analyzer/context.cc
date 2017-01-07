@@ -2,13 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <iterator>
+
 #include "joana/analyzer/context.h"
 
 #include "joana/analyzer/built_in_world.h"
 #include "joana/analyzer/environment.h"
 #include "joana/analyzer/factory.h"
 #include "joana/analyzer/public/analyzer_settings.h"
+#include "joana/analyzer/types.h"
+#include "joana/analyzer/value_editor.h"
 #include "joana/analyzer/value_map.h"
+#include "joana/analyzer/values.h"
 #include "joana/ast/compilation_units.h"
 #include "joana/ast/node.h"
 #include "joana/ast/tokens.h"
@@ -25,7 +30,9 @@ Context::Context(const AnalyzerSettings& settings)
     : factory_(new Factory(&settings.zone())),
       global_environment_(NewGlobalEnvironment(&settings.zone())),
       settings_(settings),
-      value_map_(new ValueMap()) {}
+      value_map_(new ValueMap()) {
+  InstallPrimitiveTypes();
+}
 
 Context::~Context() = default;
 
@@ -47,6 +54,21 @@ Environment& Context::EnvironmentOf(const ast::Node& node) const {
     return *it->second;
   DCHECK(node.syntax().Is<ast::CompilationUnit>()) << node;
   return global_environment();
+}
+
+void Context::InstallPrimitiveTypes() {
+  static const ast::TokenKind kTypeNames[] = {
+      ast::TokenKind::Boolean, ast::TokenKind::Number, ast::TokenKind::String,
+      ast::TokenKind::Symbol,
+  };
+  for (auto it = std::begin(kTypeNames); it != std::end(kTypeNames); ++it) {
+    const auto& name = BuiltInWorld::GetInstance()->NameOf(*it);
+    const auto& type = BuiltInWorld::GetInstance()->TypeOf(*it);
+    RegisterValue(type, &factory().NewPrimitiveType(name));
+    auto& variable = factory().NewVariable(name, name);
+    Value::Editor().AddAssignment(&variable, type);
+    global_environment_.Bind(name, &variable);
+  }
 }
 
 Environment& Context::NewEnvironment(Environment* outer,

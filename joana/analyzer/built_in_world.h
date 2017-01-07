@@ -31,6 +31,7 @@ class BuiltInWorld final {
   const ast::Node& global_module() const { return global_module_; }
 
   const ast::Node& NameOf(ast::TokenKind kind) const;
+  const ast::Node& TypeOf(ast::TokenKind kind) const;
 
   static BuiltInWorld* GetInstance();
 

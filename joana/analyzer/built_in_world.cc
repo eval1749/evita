@@ -28,6 +28,7 @@ const char* const kSourceCode =
     "number\n"
     "prototype\n"
     "string\n"
+    "symbol\n"
     "(global)\n";
 
 const SourceCode& NewSourceCodeForBuildIn(Zone* zone) {
@@ -54,9 +55,11 @@ class BuiltInWorld::Private final {
   const SourceCode& source_code() const { return source_code_; }
 
   const ast::Node& NameOf(ast::TokenKind kind) const;
+  const ast::Node& TypeOf(ast::TokenKind kind) const;
 
  private:
   void PopulateNameTable();
+  void RegisterTypes();
 
   Zone zone_;
 
@@ -66,6 +69,9 @@ class BuiltInWorld::Private final {
   ast::NodeFactory node_factory_;
   const SourceCode& source_code_;
 
+  // Mapping from known type name to type AST.
+  std::unordered_map<ast::TokenKind, const ast::Node*> type_map_;
+
   DISALLOW_COPY_AND_ASSIGN(Private);
 };
 
@@ -74,6 +80,7 @@ BuiltInWorld::Private::Private()
       node_factory_(&zone_),
       source_code_(NewSourceCodeForBuildIn(&zone_)) {
   PopulateNameTable();
+  RegisterTypes();
 }
 
 const ast::Node& BuiltInWorld::Private::NameOf(ast::TokenKind kind) const {
@@ -96,6 +103,25 @@ void BuiltInWorld::Private::PopulateNameTable() {
   }
 }
 
+const ast::Node& BuiltInWorld::Private::TypeOf(ast::TokenKind kind) const {
+  const auto& it = type_map_.find(kind);
+  DCHECK(it != type_map_.end()) << static_cast<int>(kind);
+  return *it->second;
+}
+
+void BuiltInWorld::Private::RegisterTypes() {
+  static const ast::TokenKind kTypeNames[] = {
+      ast::TokenKind::Boolean, ast::TokenKind::Number, ast::TokenKind::String,
+      ast::TokenKind::Symbol,
+  };
+  for (auto it = std::begin(kTypeNames); it != std::end(kTypeNames); ++it) {
+    const auto& name = NameOf(*it);
+    const auto& node = node_factory_.NewPrimitiveType(name);
+    const auto& result = type_map_.emplace(*it, &node);
+    DCHECK(result.second) << "Multiple occurrence of " << name;
+  }
+}
+
 //
 // BuiltInWorld
 //
@@ -109,6 +135,10 @@ BuiltInWorld::~BuiltInWorld() = default;
 
 const ast::Node& BuiltInWorld::NameOf(ast::TokenKind kind) const {
   return private_->NameOf(kind);
+}
+
+const ast::Node& BuiltInWorld::TypeOf(ast::TokenKind kind) const {
+  return private_->TypeOf(kind);
 }
 
 // static

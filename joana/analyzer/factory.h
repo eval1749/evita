@@ -20,6 +20,7 @@ class Function;
 class Environment;
 class Properties;
 class Property;
+class Type;
 class Value;
 class Variable;
 
@@ -38,8 +39,10 @@ class Factory final {
   Property& GetOrNewProperty(Properties* properties, const ast::Node& node);
   Property& NewProperty(const ast::Node& node);
 
-  // Values
+  // Types
+  Type& NewPrimitiveType(const ast::Node& name);
 
+  // Values
   Function& NewFunction(const ast::Node& node);
   Value& NewOrdinaryObject(const ast::Node& node);
   Value& NewUndefined(const ast::Node& node);

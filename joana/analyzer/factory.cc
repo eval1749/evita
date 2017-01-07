@@ -5,6 +5,7 @@
 #include "joana/analyzer/factory.h"
 
 #include "joana/analyzer/properties.h"
+#include "joana/analyzer/types.h"
 #include "joana/analyzer/values.h"
 #include "joana/ast/node.h"
 #include "joana/ast/tokens.h"
@@ -35,6 +36,11 @@ Function& Factory::NewFunction(const ast::Node& node) {
 Value& Factory::NewOrdinaryObject(const ast::Node& node) {
   auto& properties = NewProperties(node);
   return *new (&zone_) OrdinaryObject(NextValueId(), node, &properties);
+}
+
+Type& Factory::NewPrimitiveType(const ast::Node& name) {
+  DCHECK_EQ(name, ast::SyntaxCode::Name);
+  return *new (&zone_) PrimitiveType(NextValueId(), name);
 }
 
 Properties& Factory::NewProperties(const ast::Node& owner) {

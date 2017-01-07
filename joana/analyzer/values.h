@@ -11,8 +11,6 @@
 namespace joana {
 namespace analyzer {
 
-class Environment;
-class Object;
 class Properties;
 
 //

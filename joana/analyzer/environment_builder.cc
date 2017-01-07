@@ -161,24 +161,20 @@ Variable& EnvironmentBuilder::BindToVariable(const ast::Node& name) {
 void EnvironmentBuilder::ProcessAssignmentExpressionWithAnnotation(
     const ast::Node& node,
     const ast::Node& annotation) {
-  if (ast::AssignmentExpression::OperatorOf(node) != ast::TokenKind::Equal)
-    return;
-  const auto& lhs = ast::AssignmentExpression::LeftHandSideOf(node);
-  if (lhs == ast::SyntaxCode::ReferenceExpression) {
-    if (auto* const present = context().TryValueOf(lhs)) {
-      AddError(lhs, ErrorCode::ENVIRONMENT_MULTIPLE_BINDINGS, present->node());
-      return;
-    }
-    const auto& name = ast::ReferenceExpression::NameOf(lhs);
-    auto& variable = factory().NewVariable(name);
-    toplevel_environment_->Bind(name, &variable);
+  if (ast::AssignmentExpression::OperatorOf(node) != ast::TokenKind::Equal) {
+    AddError(annotation, ErrorCode::ENVIRONMENT_UNEXPECT_ANNOTATION);
     return;
   }
-  if (lhs == ast::SyntaxCode::MemberExpression)
-    return ProcessMemberExpressionWithAnnotation(lhs, annotation);
-  if (lhs == ast::SyntaxCode::ComputedMemberExpression)
-    return ProcessMemberExpressionWithAnnotation(lhs, annotation);
-  AddError(annotation, ErrorCode::ENVIRONMENT_UNEXPECT_ANNOTATION);
+  const auto& lhs = ast::AssignmentExpression::LeftHandSideOf(node);
+  auto* const value = context().TryValueOf(lhs);
+  if (!value || !value->Is<ValueHolder>()) {
+    // We've not known value of reference expression.
+    return;
+  }
+  const auto& holder = value->As<ValueHolder>();
+  if (holder.assignments().size() == 1)
+    return;
+  AddError(node, ErrorCode::ENVIRONMENT_MULTIPLE_BINDINGS);
 }
 
 void EnvironmentBuilder::ProcessMemberExpressionWithAnnotation(
@@ -308,6 +304,19 @@ void EnvironmentBuilder::VisitInternal(const ast::Method& syntax,
 }
 
 // Expressions
+void EnvironmentBuilder::VisitInternal(const ast::AssignmentExpression& syntax,
+                                       const ast::Node& node) {
+  VisitChildNodes(node);
+  const auto& lhs = ast::AssignmentExpression::LeftHandSideOf(node);
+  auto* const value = context().TryValueOf(lhs);
+  if (!value) {
+    // We've not known value of reference expression.
+    return;
+  }
+  auto& holder = value->As<ValueHolder>();
+  Value::Editor().AddAssignment(&holder, node);
+}
+
 void EnvironmentBuilder::VisitInternal(
     const ast::ComputedMemberExpression& syntax,
     const ast::Node& node) {
@@ -339,7 +348,10 @@ void EnvironmentBuilder::VisitInternal(const ast::MemberExpression& syntax,
 
 void EnvironmentBuilder::VisitInternal(const ast::ReferenceExpression& syntax,
                                        const ast::Node& node) {
-  auto& variable = BindToVariable(ast::ReferenceExpression::NameOf(node));
+  const auto& name = ast::ReferenceExpression::NameOf(node);
+  if (ast::Name::IsKeyword(name))
+    return;
+  auto& variable = BindToVariable(name);
   context().RegisterValue(node, &variable);
 }
 

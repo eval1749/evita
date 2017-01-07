@@ -139,6 +139,22 @@ TEST_F(EnvironmentBuilderTest, MemberExpression) {
       << "Old style class externs";
 }
 
+TEST_F(EnvironmentBuilderTest, Super) {
+  EXPECT_EQ("", ListValues("super.foo = 1;")) << "'super' has no value";
+
+  EXPECT_EQ("TypeName[11-17]=Variable@15[11-17] |number|\n",
+            ListValues("/** @type {number} */ super.foo = 1;"))
+      << "'super' has no value";
+}
+
+TEST_F(EnvironmentBuilderTest, This) {
+  EXPECT_EQ("", ListValues("this.foo = 1;")) << "'this' has no value";
+
+  EXPECT_EQ("TypeName[11-17]=Variable@15[11-17] |number|\n",
+            ListValues("/** @type {number} */ this.foo = 1;"))
+      << "'this' has no value";
+}
+
 TEST_F(EnvironmentBuilderTest, Type) {
   EXPECT_EQ(
       "BindingNameElement[22-25]=Variable@15[22-25] |Foo|\n"

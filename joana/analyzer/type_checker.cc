@@ -11,6 +11,8 @@
 #include "joana/analyzer/environment.h"
 #include "joana/analyzer/error_codes.h"
 #include "joana/analyzer/factory.h"
+#include "joana/analyzer/types.h"
+#include "joana/analyzer/values.h"
 #include "joana/ast/expressions.h"
 #include "joana/ast/node.h"
 #include "joana/ast/node_traversal.h"
@@ -42,7 +44,12 @@ Variable* TypeChecker::TryValueOf(const ast::Node& node) const {
 // Expressions
 void TypeChecker::VisitInternal(const ast::ReferenceExpression& syntax,
                                 const ast::Node& node) {
-  if (context().TryValueOf(node))
+  const auto* value = context().TryValueOf(node);
+  if (!value) {
+    AddError(node, ErrorCode::TYPE_CHECKER_UNDEFIEND_VARIABLE);
+    return;
+  }
+  if (!value->Is<Variable>() || !value->As<Variable>().assignments().empty())
     return;
   AddError(node, ErrorCode::TYPE_CHECKER_UNDEFIEND_VARIABLE);
 }
@@ -50,7 +57,15 @@ void TypeChecker::VisitInternal(const ast::ReferenceExpression& syntax,
 // Types
 void TypeChecker::VisitInternal(const ast::TypeName& syntax,
                                 const ast::Node& node) {
-  if (context().TryValueOf(node))
+  const auto* present = context().TryValueOf(node);
+  if (!present) {
+    AddError(node, ErrorCode::TYPE_CHECKER_UNDEFIEND_TYPE);
+    return;
+  }
+  if (!present->Is<TypeReference>())
+    return;
+  const auto& variable = present->As<TypeReference>().variable();
+  if (!variable.assignments().empty())
     return;
   AddError(node, ErrorCode::TYPE_CHECKER_UNDEFIEND_TYPE);
 }

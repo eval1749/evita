@@ -185,6 +185,17 @@ TEST_F(TypeParserTest, FunctionTypeError) {
       << "No type after new:'";
 }
 
+TEST_F(TypeParserTest, Member) {
+  EXPECT_EQ(
+      "MemberType\n"
+      "+--MemberType\n"
+      "|  +--TypeName\n"
+      "|  |  +--Name |foo|\n"
+      "|  +--Name |bar|\n"
+      "+--Name |baz|\n",
+      Parse("foo.bar.baz"));
+}
+
 TEST_F(TypeParserTest, NullableType) {
   EXPECT_EQ(
       "NullableType\n"

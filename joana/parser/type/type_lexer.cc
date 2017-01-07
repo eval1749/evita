@@ -17,14 +17,6 @@
 namespace joana {
 namespace parser {
 
-namespace {
-
-bool IsTypeNamePart(base::char16 char_code) {
-  return IsIdentifierPart(char_code) || char_code == '.';
-}
-
-}  // namespace
-
 //
 // TypeLexer
 //
@@ -163,16 +155,17 @@ start_over:
       auto number_of_dots = 0;
       while (ConsumeCharIf('.'))
         ++number_of_dots;
-      if (number_of_dots != 3) {
-        AddError(TypeErrorCode::ERROR_TYPE_UNEXPECT_DOT);
-        return &NewPunctuator(ast::TokenKind::Invalid);
-      }
-      return &NewPunctuator(ast::TokenKind::DotDotDot);
+      if (number_of_dots == 1)
+        return &NewPunctuator(ast::TokenKind::Dot);
+      if (number_of_dots == 3)
+        return &NewPunctuator(ast::TokenKind::DotDotDot);
+      AddError(TypeErrorCode::ERROR_TYPE_UNEXPECT_DOT);
+      return &NewPunctuator(ast::TokenKind::Invalid);
     }
   }
   if (IsIdentifierStart(PeekChar())) {
     ConsumeChar();
-    while (CanPeekChar() && IsTypeNamePart(PeekChar()))
+    while (CanPeekChar() && IsIdentifierPart(PeekChar()))
       ConsumeChar();
     return &node_factory().NewName(ComputeTokenRange());
   }

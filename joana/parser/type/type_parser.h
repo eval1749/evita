@@ -82,6 +82,8 @@ class TypeParser final {
                                    const ast::Node& parameter_list,
                                    const ast::Node& return_type);
   const ast::Node& NewInvalidType();
+  const ast::Node& NewMemberType(const ast::Node& member,
+                                 const ast::Node& name);
   const ast::Node& NewNullableType(const ast::Node& type);
   const ast::Node& NewNonNullableType(const ast::Node& type);
   const ast::Node& NewOptionalType(const ast::Node& type);
@@ -101,6 +103,7 @@ class TypeParser final {
   const ast::Node& ParseNameAsType(const ast::Node& name);
   std::pair<const ast::Node*, ast::FunctionTypeKind> ParseParameters();
   const ast::Node& ParseRecordType();
+  const ast::Node& ParseQualifiedName(const ast::Node& name);
   const ast::Node& ParseTupleType();
   const ast::Node& ParseType();
   const ast::Node& ParseTypeArguments();

@@ -168,6 +168,15 @@ const ast::Node& TypeParser::NewInvalidType() {
   return node_factory().NewInvalidType(ComputeNodeRange());
 }
 
+const ast::Node& TypeParser::NewMemberType(const ast::Node& member,
+                                           const ast::Node& name) {
+  DCHECK(member == ast::SyntaxCode::TypeName ||
+         member == ast::SyntaxCode::MemberType)
+      << member;
+  DCHECK_EQ(name, ast::SyntaxCode::Name);
+  return node_factory().NewMemberType(ComputeNodeRange(), member, name);
+}
+
 const ast::Node& TypeParser::NewNullableType(const ast::Node& type) {
   return node_factory().NewNullableType(ComputeNodeRange(), type);
 }
@@ -264,11 +273,12 @@ const ast::Node& TypeParser::ParseFunctionType(const ast::Node& name) {
 }
 
 const ast::Node& TypeParser::ParseNameAsType(const ast::Node& name) {
+  const auto& type_name = ParseQualifiedName(name);
   if (!CanPeekToken() || PeekToken() != ast::TokenKind::LessThan)
-    return NewTypeName(name);
+    return type_name;
   // TypeApplication ::= TypeName '<' (Type',')* '>'
   const auto& arguments = ParseTypeArguments();
-  return NewTypeApplication(NewTypeName(name), arguments);
+  return NewTypeApplication(type_name, arguments);
 }
 
 // RecordType ::= '{' (Name ':' Type ','?)* '}'
@@ -329,6 +339,19 @@ TypeParser::ParseParameters() {
   SkipTokensTo(ast::TokenKind::RightParenthesis);
   return std::make_pair(
       &node_factory().NewTuple(ComputeNodeRange(), parameters), kind);
+}
+
+const ast::Node& TypeParser::ParseQualifiedName(const ast::Node& name) {
+  DCHECK_EQ(name, ast::SyntaxCode::Name);
+  const auto* member = &NewTypeName(name);
+  while (ConsumeTokenIf(ast::TokenKind::Dot)) {
+    if (!CanPeekToken() || PeekToken() != ast::SyntaxCode::Name) {
+      AddError(TypeErrorCode::ERROR_TYPE_EXPECT_TYPE);
+      break;
+    }
+    member = &NewMemberType(*member, ConsumeToken());
+  }
+  return *member;
 }
 
 // TupleType ::= '[' (Name ','?)* ']'

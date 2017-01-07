@@ -199,7 +199,7 @@ var NaN;
  * @see http://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined
  * @const
  */
-// var undefined;
+var undefined;
 
 /**
  * @param {string} uri

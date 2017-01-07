@@ -26,6 +26,7 @@ class Context;
 class Environment;
 class Function;
 class Properties;
+class Type;
 class Value;
 class Variable;
 enum class VariableKind;
@@ -43,13 +44,20 @@ class EnvironmentBuilder final : public Pass, public ast::SyntaxVisitor {
  private:
   class LocalEnvironment;
 
+  void BindAsType(const ast::Node& name, Variable* variable);
   Variable& BindToVariable(const ast::Node& name);
+
+  Type* FindType(const ast::Node& name) const;
+  Variable* FindVariable(const ast::Node& name) const;
 
   void ProcessAssignmentExpressionWithAnnotation(const ast::Node& node,
                                                  const ast::Node& annotation);
 
   void ProcessMemberExpressionWithAnnotation(const ast::Node& node,
                                              const ast::Node& annotation);
+
+  Type& ResolveTypeName(const ast::Node& name);
+  Variable& ResolveVariableName(const ast::Node& name);
 
   // ast::NodeVisitor implementations
 

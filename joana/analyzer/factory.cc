@@ -52,6 +52,16 @@ Property& Factory::NewProperty(const ast::Node& key) {
   return *new (&zone_) Property(&zone_, NextValueId(), key, &properties);
 }
 
+Type& Factory::NewTypeName(const ast::Node& name) {
+  DCHECK_EQ(name, ast::SyntaxCode::Name);
+  return *new (&zone_) TypeName(NextValueId(), name);
+}
+
+Type& Factory::NewTypeReference(Variable* variable) {
+  DCHECK(variable);
+  return *new (&zone_) TypeReference(NextValueId(), variable);
+}
+
 Value& Factory::NewUndefined(const ast::Node& node) {
   return *new (&zone_) Undefined(NextValueId(), node);
 }

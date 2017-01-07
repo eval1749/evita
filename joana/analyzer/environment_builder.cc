@@ -13,6 +13,7 @@
 #include "joana/analyzer/error_codes.h"
 #include "joana/analyzer/factory.h"
 #include "joana/analyzer/properties.h"
+#include "joana/analyzer/types.h"
 #include "joana/analyzer/value_editor.h"
 #include "joana/analyzer/value_forward.h"
 #include "joana/analyzer/values.h"
@@ -86,12 +87,15 @@ class EnvironmentBuilder::LocalEnvironment final {
   LocalEnvironment* outer() { return outer_; }
 
   void Bind(const ast::Node& name, Variable* value);
+  void BindType(const ast::Node& name, Type* type);
   Variable* Find(const ast::Node& name) const;
+  Type* FindType(const ast::Node& name) const;
 
  private:
   EnvironmentBuilder& builder_;
   LocalEnvironment* const outer_;
   const ast::Node& owner_;
+  std::unordered_map<int, Type*> type_map_;
   std::unordered_map<int, Variable*> value_map_;
 
   DISALLOW_COPY_AND_ASSIGN(LocalEnvironment);
@@ -114,10 +118,22 @@ void EnvironmentBuilder::LocalEnvironment::Bind(const ast::Node& name,
   DCHECK(result.second);
 }
 
+void EnvironmentBuilder::LocalEnvironment::BindType(const ast::Node& name,
+                                                    Type* type) {
+  const auto& result = type_map_.emplace(ast::Name::IdOf(name), type);
+  DCHECK(result.second);
+}
+
 Variable* EnvironmentBuilder::LocalEnvironment::Find(
     const ast::Node& name) const {
   const auto& it = value_map_.find(ast::Name::IdOf(name));
   return it == value_map_.end() ? nullptr : it->second;
+}
+
+Type* EnvironmentBuilder::LocalEnvironment::FindType(
+    const ast::Node& name) const {
+  const auto& it = type_map_.find(ast::Name::IdOf(name));
+  return it == type_map_.end() ? nullptr : it->second;
 }
 
 //
@@ -136,6 +152,33 @@ void EnvironmentBuilder::RunOn(const ast::Node& node) {
           ? &context().NewEnvironment(&global_environment, node)
           : &global_environment;
   Visit(node);
+}
+
+void EnvironmentBuilder::BindAsType(const ast::Node& name, Variable* variable) {
+  DCHECK_EQ(name, ast::SyntaxCode::Name);
+  if (environment_) {
+    auto* const present = environment_->FindType(name);
+    if (!present) {
+      auto& type = factory().NewTypeReference(variable);
+      environment_->BindType(name, &type);
+      return;
+    }
+    if (present->Is<TypeReference>())
+      return;
+    AddError(name, ErrorCode::ENVIRONMENT_MULTIPLE_BINDINGS, present->node());
+    return;
+  }
+  for (auto* runner = toplevel_environment_; runner; runner = runner->outer()) {
+    auto* const present = runner->TryTypeOf(name);
+    if (!present)
+      continue;
+    if (present->Is<TypeReference>())
+      return;
+    AddError(name, ErrorCode::ENVIRONMENT_MULTIPLE_BINDINGS, present->node());
+    return;
+  }
+  auto& type = factory().NewTypeReference(variable);
+  toplevel_environment_->BindType(name, &type);
 }
 
 Variable& EnvironmentBuilder::BindToVariable(const ast::Node& name) {
@@ -157,6 +200,36 @@ Variable& EnvironmentBuilder::BindToVariable(const ast::Node& name) {
   auto& variable = factory().NewVariable(name);
   toplevel_environment_->Bind(name, &variable);
   return variable;
+}
+
+Type* EnvironmentBuilder::FindType(const ast::Node& name) const {
+  DCHECK_EQ(name, ast::SyntaxCode::Name);
+  if (environment_) {
+    for (auto* runner = environment_; runner; runner = runner->outer()) {
+      if (auto* present = runner->FindType(name))
+        return present;
+    }
+  }
+  for (auto* runner = toplevel_environment_; runner; runner = runner->outer()) {
+    if (auto* present = runner->TryTypeOf(name))
+      return present;
+  }
+  return nullptr;
+}
+
+Variable* EnvironmentBuilder::FindVariable(const ast::Node& name) const {
+  DCHECK_EQ(name, ast::SyntaxCode::Name);
+  if (environment_) {
+    for (auto* runner = environment_; runner; runner = runner->outer()) {
+      if (auto* present = runner->Find(name))
+        return present;
+    }
+  }
+  for (auto* runner = toplevel_environment_; runner; runner = runner->outer()) {
+    if (auto* present = runner->TryValueOf(name))
+      return present;
+  }
+  return nullptr;
 }
 
 // AST node handlers
@@ -193,6 +266,34 @@ void EnvironmentBuilder::ProcessMemberExpressionWithAnnotation(
     return;
   }
   Value::Editor().AddAssignment(&property, node);
+}
+
+Type& EnvironmentBuilder::ResolveTypeName(const ast::Node& name) {
+  DCHECK_EQ(name, ast::SyntaxCode::Name);
+  if (auto* present_type = FindType(name))
+    return *present_type;
+
+  if (auto* present = toplevel_environment_->TryValueOf(name)) {
+    auto& type = factory().NewTypeReference(present);
+    toplevel_environment_->BindType(name, &type);
+    return type;
+  }
+
+  auto& variable = factory().NewVariable(name);
+  toplevel_environment_->Bind(name, &variable);
+  auto& type = factory().NewTypeReference(&variable);
+  toplevel_environment_->BindType(name, &type);
+  return type;
+}
+
+Variable& EnvironmentBuilder::ResolveVariableName(const ast::Node& name) {
+  DCHECK_EQ(name, ast::SyntaxCode::Name);
+  if (auto* present = FindVariable(name))
+    return *present;
+  // TODO(eval1749): Expose global "var" binding to global object.
+  auto& variable = factory().NewVariable(name);
+  toplevel_environment_->Bind(name, &variable);
+  return variable;
 }
 
 //
@@ -236,15 +337,16 @@ void EnvironmentBuilder::VisitInternal(const ast::Class& syntax,
                                        const ast::Node& node) {
   // TODO(eval1749): Report warning for toplevel anonymous class
   auto& klass = factory().NewFunction(node);
-  const auto& klass_name = ast::Class::NameOf(node);
-  if (klass_name == ast::SyntaxCode::Name) {
-    auto& variable = BindToVariable(klass_name);
+  const auto& class_name = ast::Class::NameOf(node);
+  if (class_name == ast::SyntaxCode::Name) {
+    auto& variable = BindToVariable(class_name);
     if (!variable.assignments().empty()) {
       AddError(node, ErrorCode::ENVIRONMENT_MULTIPLE_BINDINGS,
                *variable.assignments().front());
     }
     Value::Editor().AddAssignment(&variable, node);
     context().RegisterValue(node, &variable);
+    BindAsType(class_name, &variable);
   } else {
     context().RegisterValue(node, &klass);
   }
@@ -291,6 +393,11 @@ void EnvironmentBuilder::VisitInternal(const ast::Function& syntax,
     }
     Value::Editor().AddAssignment(&variable, node);
     context().RegisterValue(node, &variable);
+    if (annotation_ && ast::Annotation::AnnotatedOf(*annotation_) == node &&
+        FindClassAnnotation(ast::Annotation::AnnotationOf(*annotation_)) !=
+            nullptr) {
+      BindAsType(name, &variable);
+    }
   } else {
     context().RegisterValue(node, &function);
   }
@@ -353,7 +460,7 @@ void EnvironmentBuilder::VisitInternal(const ast::ReferenceExpression& syntax,
   const auto& name = ast::ReferenceExpression::NameOf(node);
   if (ast::Name::IsKeyword(name))
     return;
-  auto& variable = BindToVariable(name);
+  auto& variable = ResolveVariableName(name);
   context().RegisterValue(node, &variable);
 }
 
@@ -383,8 +490,8 @@ void EnvironmentBuilder::VisitInternal(const ast::ExpressionStatement& syntax,
 // Types
 void EnvironmentBuilder::VisitInternal(const ast::TypeName& syntax,
                                        const ast::Node& node) {
-  auto& variable = BindToVariable(ast::TypeName::NameOf(node));
-  context().RegisterValue(node, &variable);
+  auto& type = ResolveTypeName(ast::TypeName::NameOf(node));
+  context().RegisterValue(node, &type);
 }
 
 }  // namespace analyzer

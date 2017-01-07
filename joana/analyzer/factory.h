@@ -41,6 +41,8 @@ class Factory final {
 
   // Types
   Type& NewPrimitiveType(const ast::Node& name);
+  Type& NewTypeName(const ast::Node& node);
+  Type& NewTypeReference(Variable* variable);
 
   // Values
   Function& NewFunction(const ast::Node& node);

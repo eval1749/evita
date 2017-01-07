@@ -10,6 +10,8 @@
 namespace joana {
 namespace analyzer {
 
+class Variable;
+
 //
 // Type
 //
@@ -39,6 +41,40 @@ class PrimitiveType final : public Type {
   PrimitiveType(int id, const ast::Node& node);
 
   DISALLOW_COPY_AND_ASSIGN(PrimitiveType);
+};
+
+//
+// TypeName
+//
+class TypeName final : public Type {
+  DECLARE_CONCRETE_ANALYZE_VALUE(TypeName, Type)
+
+ public:
+  ~TypeName() final;
+
+ private:
+  TypeName(int id, const ast::Node& node);
+
+  DISALLOW_COPY_AND_ASSIGN(TypeName);
+};
+
+//
+// TypeReference
+//
+class TypeReference final : public Type {
+  DECLARE_CONCRETE_ANALYZE_VALUE(TypeReference, Type)
+
+ public:
+  ~TypeReference() final;
+
+  Variable& variable() const { return variable_; }
+
+ private:
+  TypeReference(int id, Variable* variable);
+
+  Variable& variable_;
+
+  DISALLOW_COPY_AND_ASSIGN(TypeReference);
 };
 
 }  // namespace analyzer

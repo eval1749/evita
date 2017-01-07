@@ -71,9 +71,8 @@ void Context::InstallPrimitiveTypes() {
     const auto& name = BuiltInWorld::GetInstance()->NameOf(id);
     const auto& type = BuiltInWorld::GetInstance()->TypeOf(id);
     RegisterValue(type, &factory().NewPrimitiveType(name));
-    auto& variable = factory().NewVariable(name);
-    Value::Editor().AddAssignment(&variable, type);
-    global_environment_.Bind(name, &variable);
+    auto& variable = factory().NewPrimitiveType(name);
+    global_environment_.BindType(name, &variable);
   }
 }
 

@@ -74,8 +74,8 @@ std::string EnvironmentBuilderTest::ListValues(base::StringPiece script_text) {
 TEST_F(EnvironmentBuilderTest, Class) {
   EXPECT_EQ(
       "Class[0-31]=Variable@1002[6-9] |Foo|\n"
-      "Method<NonStatic,Normal>[12-20]=Function@1005[12-20] |bar() {}|\n"
-      "Method<NonStatic,Normal>[21-29]=Function@1007[21-29] |baz() {}|\n",
+      "Method<NonStatic,Normal>[12-20]=Function@1006[12-20] |bar() {}|\n"
+      "Method<NonStatic,Normal>[21-29]=Function@1008[21-29] |baz() {}|\n",
       ListValues("class Foo { bar() {} baz() {} }"));
 }
 
@@ -96,10 +96,10 @@ TEST_F(EnvironmentBuilderTest, ClassError) {
 TEST_F(EnvironmentBuilderTest, ComputedMemberExpression) {
   EXPECT_EQ(
       "Function<Normal>[20-37]=Variable@1002[29-32] |Foo|\n"
-      "ComputedMemberExpression[52-72]=Property@1005[56-71] |Symbol.iterator|\n"
+      "ComputedMemberExpression[52-72]=Property@1006[56-71] |Symbol.iterator|\n"
       "ReferenceExpression[52-55]=Variable@1002[29-32] |Foo|\n"
-      "MemberExpression[56-71]=Property@1004[63-71] |iterator|\n"
-      "ReferenceExpression[56-62]=Variable@1003[56-62] |Symbol|\n",
+      "MemberExpression[56-71]=Property@1005[63-71] |iterator|\n"
+      "ReferenceExpression[56-62]=Variable@1004[56-62] |Symbol|\n",
       ListValues("/** @constructor */ function Foo() {}\n"
                  "/** @const */ Foo[Symbol.iterator]\n"));
 }
@@ -138,8 +138,8 @@ TEST_F(EnvironmentBuilderTest, Let) {
 TEST_F(EnvironmentBuilderTest, MemberExpression) {
   EXPECT_EQ(
       "Function<Normal>[20-37]=Variable@1002[29-32] |Foo|\n"
-      "MemberExpression[52-69]=Property@1004[66-69] |bar|\n"
-      "MemberExpression[52-65]=Property@1003[56-65] |prototype|\n"
+      "MemberExpression[52-69]=Property@1005[66-69] |bar|\n"
+      "MemberExpression[52-65]=Property@1004[56-65] |prototype|\n"
       "ReferenceExpression[52-55]=Variable@1002[29-32] |Foo|\n",
       ListValues("/** @constructor */ function Foo() {}\n"
                  "/** @const */ Foo.prototype.bar\n"))
@@ -149,7 +149,7 @@ TEST_F(EnvironmentBuilderTest, MemberExpression) {
 TEST_F(EnvironmentBuilderTest, Super) {
   EXPECT_EQ("", ListValues("super.foo = 1;")) << "'super' has no value";
 
-  EXPECT_EQ("TypeName[11-17]=Variable@6[20-26] |number|\n",
+  EXPECT_EQ("TypeName[11-17]=PrimitiveType@6[20-26] |number|\n",
             ListValues("/** @type {number} */ super.foo = 1;"))
       << "'super' has no value";
 }
@@ -157,7 +157,7 @@ TEST_F(EnvironmentBuilderTest, Super) {
 TEST_F(EnvironmentBuilderTest, This) {
   EXPECT_EQ("", ListValues("this.foo = 1;")) << "'this' has no value";
 
-  EXPECT_EQ("TypeName[11-17]=Variable@6[20-26] |number|\n",
+  EXPECT_EQ("TypeName[11-17]=PrimitiveType@6[20-26] |number|\n",
             ListValues("/** @type {number} */ this.foo = 1;"))
       << "'this' has no value";
 }
@@ -165,14 +165,14 @@ TEST_F(EnvironmentBuilderTest, This) {
 TEST_F(EnvironmentBuilderTest, Type) {
   EXPECT_EQ(
       "BindingNameElement[22-25]=Variable@1001[22-25] |Foo|\n"
-      "TypeName[39-42]=Variable@1001[22-25] |Foo|\n"
+      "TypeName[39-42]=TypeReference@1003[22-25] |Foo|\n"
       "BindingNameElement[51-54]=Variable@1002[51-54] |foo|\n",
       ListValues("/** @interface */ var Foo;\n"
                  "/** @type {!Foo} */ var foo;\n"));
 
   EXPECT_EQ(
-      "TypeName[11-17]=Variable@6[20-26] |number|\n"
-      "BindingNameElement[26-27]=Variable@1003[26-27] |x|\n",
+      "TypeName[11-17]=PrimitiveType@6[20-26] |number|\n"
+      "BindingNameElement[26-27]=Variable@1004[26-27] |x|\n",
       ListValues("/** @type {number} */ var x;"));
 }
 

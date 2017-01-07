@@ -4,6 +4,8 @@
 
 #include "joana/analyzer/types.h"
 
+#include "joana/analyzer/values.h"
+
 namespace joana {
 namespace analyzer {
 
@@ -12,6 +14,19 @@ namespace analyzer {
 //
 PrimitiveType::PrimitiveType(int id, const ast::Node& node) : Type(id, node) {}
 PrimitiveType::~PrimitiveType() = default;
+
+//
+// TypeName
+//
+TypeName::TypeName(int id, const ast::Node& node) : Type(id, node) {}
+TypeName::~TypeName() = default;
+
+//
+// TypeReference
+//
+TypeReference::TypeReference(int id, Variable* variable)
+    : Type(id, variable->node()), variable_(*variable) {}
+TypeReference::~TypeReference() = default;
 
 //
 // Type

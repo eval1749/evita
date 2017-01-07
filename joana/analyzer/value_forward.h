@@ -31,6 +31,8 @@ namespace analyzer {
   V(OrdinaryObject)                  \
   V(Property)                        \
   V(PrimitiveType)                   \
+  V(TypeName)                        \
+  V(TypeReference)                   \
   V(Undefined)                       \
   V(Variable)
 

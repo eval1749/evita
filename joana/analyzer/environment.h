@@ -16,6 +16,7 @@ class Node;
 }
 namespace analyzer {
 
+class Type;
 class Variable;
 
 //
@@ -39,6 +40,7 @@ class Environment final : public ZoneAllocated {
   const ast::Node& owner() const { return owner_; }
 
   Variable* TryValueOf(const ast::Node& name) const;
+  Type* TryTypeOf(const ast::Node& name) const;
 
  private:
   friend class Context;
@@ -48,11 +50,13 @@ class Environment final : public ZoneAllocated {
   Environment(Zone* zone, const ast::Node& owner);
 
   void Bind(const ast::Node& name, Variable* value);
+  void BindType(const ast::Node& name, Type* type);
 
   ZoneVector<const ast::Node*> names_;
   ZoneUnorderedMap<int, const ast::Node*> name_map_;
   Environment* const outer_;
   const ast::Node& owner_;
+  ZoneUnorderedMap<int, Type*> type_map_;
   ZoneUnorderedMap<int, Variable*> value_map_;
 
   DISALLOW_COPY_AND_ASSIGN(Environment);

@@ -94,7 +94,7 @@ function Iterable() {}
  * @return {Iterator<VALUE>}
  * @suppress {externsValidation}
  */
-// Iterable.prototype[Symbol.iterator] = function() {};
+Iterable.prototype[Symbol.iterator] = function() {};
 
 
 
@@ -194,12 +194,12 @@ var Infinity;
  */
 var NaN;
 
-/**
+/* Note: |undefined| is well-known name. We handle it specially.
  * @type {undefined}
  * @see http://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined
  * @const
  */
-var undefined;
+// var undefined;
 
 /**
  * @param {string} uri

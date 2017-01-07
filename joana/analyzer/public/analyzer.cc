@@ -13,6 +13,10 @@ Analyzer::Analyzer(const AnalyzerSettings& settings)
 
 Analyzer::~Analyzer() = default;
 
+const ast::Node& Analyzer::built_in_module() const {
+  return controller_->built_in_module();
+}
+
 void Analyzer::Analyze() {
   controller_->Analyze();
 }

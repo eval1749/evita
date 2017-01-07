@@ -32,6 +32,8 @@ class Controller final {
   explicit Controller(const AnalyzerSettings& settings);
   ~Controller();
 
+  const ast::Node& built_in_module() const;
+
   void Analyze();
   void Load(const ast::Node& node);
 

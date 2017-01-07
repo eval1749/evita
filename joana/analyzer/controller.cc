@@ -7,6 +7,7 @@
 #include "joana/analyzer/controller.h"
 
 #include "base/command_line.h"
+#include "joana/analyzer/built_in_world.h"
 #include "joana/analyzer/context.h"
 #include "joana/analyzer/environment.h"
 #include "joana/analyzer/environment_builder.h"
@@ -67,6 +68,10 @@ Controller::Controller(const AnalyzerSettings& settings)
     : context_(new Context(settings)) {}
 
 Controller::~Controller() = default;
+
+const ast::Node& Controller::built_in_module() const {
+  return BuiltInWorld::GetInstance()->global_module();
+}
 
 Factory& Controller::factory() const {
   return context_->factory();

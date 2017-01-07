@@ -29,6 +29,9 @@ class JOANA_ANALYZER_EXPORT Analyzer final {
   explicit Analyzer(const AnalyzerSettings& settings);
   ~Analyzer();
 
+  // Returns built-in module for error message.
+  const ast::Node& built_in_module() const;
+
   void Analyze();
   void Load(const ast::Node& node);
 

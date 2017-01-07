@@ -17,7 +17,6 @@ IMPLEMENT_AST_SYNTAX_0(Type, NonNullableType, 1)
 IMPLEMENT_AST_SYNTAX_0(Type, OptionalType, 1)
 IMPLEMENT_AST_SYNTAX_0(Type, RestType, 1)
 IMPLEMENT_AST_SYNTAX_0(Type, TypeGroup, 1)
-IMPLEMENT_AST_SYNTAX_0(Type, TypeName, 1)
 IMPLEMENT_AST_SYNTAX_0(Type, TypeProperty, 2)
 IMPLEMENT_AST_SYNTAX_0(Type, UnknownType, 0)
 IMPLEMENT_AST_SYNTAX_0(Type, VoidType, 0)
@@ -59,6 +58,21 @@ const Node& TypeApplication::ArgumentsOf(const Node& node) {
 
 const Node& TypeApplication::NameOf(const Node& node) {
   DCHECK_EQ(node, SyntaxCode::TypeApplication);
+  return node.child_at(0);
+}
+
+//
+// TypeName
+//
+TypeName::TypeName()
+    : SyntaxTemplate(std::tuple<>(),
+                     SyntaxCode::TypeName,
+                     Format::Builder().set_arity(1).Build()) {}
+
+TypeName::~TypeName() = default;
+
+const Node& TypeName::NameOf(const Node& node) {
+  DCHECK_EQ(node, SyntaxCode::TypeName);
   return node.child_at(0);
 }
 

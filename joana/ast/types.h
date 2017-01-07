@@ -44,7 +44,6 @@ DECLARE_AST_SYNTAX_0(RecordType)
 DECLARE_AST_SYNTAX_0(RestType)
 DECLARE_AST_SYNTAX_0(TupleType)
 DECLARE_AST_SYNTAX_0(TypeGroup)
-DECLARE_AST_SYNTAX_0(TypeName)
 DECLARE_AST_SYNTAX_0(TypeProperty)
 DECLARE_AST_SYNTAX_0(UnionType)
 DECLARE_AST_SYNTAX_0(UnknownType)
@@ -66,6 +65,23 @@ class JOANA_AST_EXPORT TypeApplication final : public SyntaxTemplate<Syntax> {
   TypeApplication();
 
   DISALLOW_COPY_AND_ASSIGN(TypeApplication);
+};
+
+//
+// TypeName
+//
+class JOANA_AST_EXPORT TypeName final : public SyntaxTemplate<Syntax> {
+  DECLARE_CONCRETE_AST_SYNTAX(TypeName, Syntax);
+
+ public:
+  ~TypeName() final;
+
+  static const Node& NameOf(const Node& node);
+
+ private:
+  TypeName();
+
+  DISALLOW_COPY_AND_ASSIGN(TypeName);
 };
 
 }  // namespace ast

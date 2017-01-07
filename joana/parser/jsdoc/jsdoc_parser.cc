@@ -189,6 +189,19 @@ const ast::Node& JsDocParser::ParseDescription() {
   return NewText(text_start, text_end);
 }
 
+const ast::Node& JsDocParser::ParseModifies() {
+  SkipWhitespaces();
+  if (!ConsumeCharIf(kLeftBrace))
+    AddError(JsDocErrorCode::ERROR_JSDOC_EXPECT_LBRACE);
+  const auto& name = ParseName();
+  if (name != ast::TokenKind::Arguments && name != ast::TokenKind::This)
+    AddError(JsDocErrorCode::ERROR_JSDOC_EXPECT_ARGUMENTS_OR_THIS);
+  SkipWhitespaces();
+  if (!ConsumeCharIf(kRightBrace))
+    AddError(JsDocErrorCode::ERROR_JSDOC_EXPECT_RBRACE);
+  return name;
+}
+
 // Returns list of comma separated words.
 std::vector<const ast::Node*> JsDocParser::ParseNameList() {
   SkipWhitespaces();
@@ -248,6 +261,8 @@ const ast::Node& JsDocParser::ParseTag(const ast::Node& tag_name) {
     case TagSyntax::Description:
       SkipWhitespaces();
       return NewTag(tag_name, ParseDescription());
+    case TagSyntax::Modifies:
+      return NewTag(tag_name, ParseModifies());
     case TagSyntax::NameList:
       return NewTagWithVector(tag_name, ParseNameList());
     case TagSyntax::Names:

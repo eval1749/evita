@@ -79,6 +79,7 @@ namespace joana {
   V(yield_star, YieldStar, YIELD_STAR)
 
 #define FOR_EACH_JAVASCRIPT_KNOWN_WORD(V)  \
+  V(arguments, Arguments, ARGUMENTS)       \
   V(async, Async, ASYNC)                   \
   V(boolean, Boolean, BOOLEAN)             \
   V(constructor, Constructor, CONSTRUCTOR) \

@@ -94,6 +94,44 @@ TEST_F(JsDocParserTest, SyntaxDescription) {
       Parse("@deprecated foo bar"));
 }
 
+TEST_F(JsDocParserTest, SyntaxModifies) {
+  EXPECT_EQ(
+      "JsDocDocument\n"
+      "+--JsDocTag\n"
+      "|  +--Name |@modifies|\n"
+      "|  +--Name |this|\n",
+      Parse("@modifies { this }"));
+}
+
+TEST_F(JsDocParserTest, SyntaxModifiesError) {
+  EXPECT_EQ(
+      "JsDocDocument\n"
+      "+--JsDocTag\n"
+      "|  +--Name |@modifies|\n"
+      "|  +--Name ||\n"
+      "JSDOC_ERROR_JSDOC_EXPECT_LBRACE@0:9\n"
+      "JSDOC_ERROR_JSDOC_EXPECT_ARGUMENTS_OR_THIS@0:9\n"
+      "JSDOC_ERROR_JSDOC_EXPECT_RBRACE@0:9\n",
+      Parse("@modifies"));
+
+  EXPECT_EQ(
+      "JsDocDocument\n"
+      "+--JsDocTag\n"
+      "|  +--Name |@modifies|\n"
+      "|  +--Name |this|\n"
+      "JSDOC_ERROR_JSDOC_EXPECT_LBRACE@0:10\n"
+      "JSDOC_ERROR_JSDOC_EXPECT_RBRACE@0:14\n",
+      Parse("@modifies this"));
+
+  EXPECT_EQ(
+      "JsDocDocument\n"
+      "+--JsDocTag\n"
+      "|  +--Name |@modifies|\n"
+      "|  +--Name |foo|\n"
+      "JSDOC_ERROR_JSDOC_EXPECT_ARGUMENTS_OR_THIS@0:15\n",
+      Parse("@modifies { foo}"));
+}
+
 TEST_F(JsDocParserTest, SyntaxNameList) {
   EXPECT_EQ(
       "JsDocDocument\n"

@@ -82,6 +82,7 @@ class JsDocParser final {
 
   // Parsing functions
   const ast::Node& ParseDescription();
+  const ast::Node& ParseModifies();
   const ast::Node& ParseName();
   std::vector<const ast::Node*> ParseNameList();
   std::vector<const ast::Node*> ParseNames();

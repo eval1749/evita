@@ -6,6 +6,7 @@
 #define JOANA_ANALYZER_ENVIRONMENT_BUILDER_H_
 
 #include <unordered_set>
+#include <vector>
 
 #include "joana/analyzer/pass.h"
 
@@ -55,6 +56,8 @@ class EnvironmentBuilder final : public Pass, public ast::SyntaxVisitor {
 
   void ProcessMemberExpressionWithAnnotation(const ast::Node& node,
                                              const ast::Node& annotation);
+
+  std::vector<Type*> ProcessTypeTemplate(const ast::Node& document);
 
   Type& ResolveTypeName(const ast::Node& name);
   Variable& ResolveVariableName(const ast::Node& name);

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include <unordered_map>
+#include <utility>
 
 #include "joana/analyzer/environment_builder.h"
 
@@ -44,6 +45,18 @@ const ast::Node* FindClassAnnotation(const ast::Node& document) {
         tag == ast::TokenKind::JsDocRecord) {
       return &tag;
     }
+  }
+  return nullptr;
+}
+
+const ast::Node* FindTag(ast::TokenKind tag_name, const ast::Node& document) {
+  DCHECK_EQ(document, ast::SyntaxCode::JsDocDocument);
+  for (const auto& node : ast::NodeTraversal::ChildNodesOf(document)) {
+    if (node != ast::SyntaxCode::JsDocTag)
+      continue;
+    if (ast::JsDocTag::NameOf(node) != tag_name)
+      continue;
+    return &node;
   }
   return nullptr;
 }
@@ -268,6 +281,24 @@ void EnvironmentBuilder::ProcessMemberExpressionWithAnnotation(
   Value::Editor().AddAssignment(&property, node);
 }
 
+std::vector<Type*> EnvironmentBuilder::ProcessTypeTemplate(
+    const ast::Node& document) {
+  DCHECK_EQ(document, ast::SyntaxCode::JsDocDocument);
+  const auto* const template_tag =
+      FindTag(ast::TokenKind::JsDocTemplate, document);
+  if (!template_tag)
+    return {};
+  std::vector<Type*> types;
+  for (const auto& name : ast::JsDocTag::OperandsOf(*template_tag)) {
+    if (const auto* present = environment_->FindType(name)) {
+      AddError(name, ErrorCode::ENVIRONMENT_MULTIPLE_BINDINGS, present->node());
+      continue;
+    }
+    types.push_back(&factory().NewTypeParameter(name));
+  }
+  return std::move(types);
+}
+
 Type& EnvironmentBuilder::ResolveTypeName(const ast::Node& name) {
   DCHECK_EQ(name, ast::SyntaxCode::Name);
   if (auto* present_type = FindType(name))
@@ -330,7 +361,12 @@ void EnvironmentBuilder::VisitInternal(const ast::Annotation& syntax,
   //   */
   //  function Foo(x) {}
   Visit(ast::Annotation::AnnotatedOf(node));
-  Visit(ast::Annotation::AnnotationOf(node));
+  const auto& annotation = ast::Annotation::AnnotationOf(node);
+  LocalEnvironment environment(this, annotation);
+  const auto& type_parameters = ProcessTypeTemplate(annotation);
+  for (const auto& type_parameter : type_parameters)
+    environment_->BindType(type_parameter->node(), type_parameter);
+  Visit(annotation);
 }
 
 void EnvironmentBuilder::VisitInternal(const ast::Class& syntax,

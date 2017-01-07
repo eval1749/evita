@@ -174,6 +174,12 @@ TEST_F(EnvironmentBuilderTest, Type) {
       "TypeName[11-17]=PrimitiveType@6[20-26] |number|\n"
       "BindingNameElement[26-27]=Variable@1004[26-27] |x|\n",
       ListValues("/** @type {number} */ var x;"));
+
+  EXPECT_EQ(
+      "TypeName[11-16]=TypeReference@1008[11-16] |Array|\n"
+      "TypeName[17-18]=TypeParameter@1006[31-32] |T|\n"
+      "BindingNameElement[42-45]=Variable@1005[42-45] |foo|\n",
+      ListValues("/** @type {Array<T>} @template T */ const foo;"));
 }
 
 }  // namespace analyzer

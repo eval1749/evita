@@ -86,10 +86,10 @@ class EnvironmentBuilder::LocalEnvironment final {
   const LocalEnvironment* outer() const { return outer_; }
   LocalEnvironment* outer() { return outer_; }
 
-  void Bind(const ast::Node& name, Variable* value);
   void BindType(const ast::Node& name, Type* type);
-  Variable* Find(const ast::Node& name) const;
+  void BindVariable(const ast::Node& name, Variable* value);
   Type* FindType(const ast::Node& name) const;
+  Variable* FindVariable(const ast::Node& name) const;
 
  private:
   EnvironmentBuilder& builder_;
@@ -112,28 +112,28 @@ EnvironmentBuilder::LocalEnvironment::~LocalEnvironment() {
   builder_.environment_ = outer_;
 }
 
-void EnvironmentBuilder::LocalEnvironment::Bind(const ast::Node& name,
-                                                Variable* value) {
-  const auto& result = value_map_.emplace(ast::Name::IdOf(name), value);
-  DCHECK(result.second);
-}
-
 void EnvironmentBuilder::LocalEnvironment::BindType(const ast::Node& name,
                                                     Type* type) {
   const auto& result = type_map_.emplace(ast::Name::IdOf(name), type);
   DCHECK(result.second);
 }
 
-Variable* EnvironmentBuilder::LocalEnvironment::Find(
-    const ast::Node& name) const {
-  const auto& it = value_map_.find(ast::Name::IdOf(name));
-  return it == value_map_.end() ? nullptr : it->second;
+void EnvironmentBuilder::LocalEnvironment::BindVariable(const ast::Node& name,
+                                                        Variable* value) {
+  const auto& result = value_map_.emplace(ast::Name::IdOf(name), value);
+  DCHECK(result.second);
 }
 
 Type* EnvironmentBuilder::LocalEnvironment::FindType(
     const ast::Node& name) const {
   const auto& it = type_map_.find(ast::Name::IdOf(name));
   return it == type_map_.end() ? nullptr : it->second;
+}
+
+Variable* EnvironmentBuilder::LocalEnvironment::FindVariable(
+    const ast::Node& name) const {
+  const auto& it = value_map_.find(ast::Name::IdOf(name));
+  return it == value_map_.end() ? nullptr : it->second;
 }
 
 //
@@ -185,11 +185,11 @@ Variable& EnvironmentBuilder::BindToVariable(const ast::Node& name) {
   DCHECK_EQ(name, ast::SyntaxCode::Name);
   if (environment_) {
     for (auto* runner = environment_; runner; runner = runner->outer()) {
-      if (auto* present = runner->Find(name))
+      if (auto* present = runner->FindVariable(name))
         return *present;
     }
     auto& variable = factory().NewVariable(name);
-    environment_->Bind(name, &variable);
+    environment_->BindVariable(name, &variable);
     return variable;
   }
   for (auto* runner = toplevel_environment_; runner; runner = runner->outer()) {
@@ -221,7 +221,7 @@ Variable* EnvironmentBuilder::FindVariable(const ast::Node& name) const {
   DCHECK_EQ(name, ast::SyntaxCode::Name);
   if (environment_) {
     for (auto* runner = environment_; runner; runner = runner->outer()) {
-      if (auto* present = runner->Find(name))
+      if (auto* present = runner->FindVariable(name))
         return present;
     }
   }

@@ -52,6 +52,10 @@ std::ostream& operator<<(std::ostream& ostream, const Dump& dump) {
   for (const auto& name : environment.names_for_testing()) {
     const auto& value = *environment.TryValueOf(*name);
     ostream << Indent{depth + 1} << value << std::endl;
+    if (auto* variable = value.TryAs<Variable>()) {
+      for (const auto& assignment : variable->assignments())
+        std::cout << Indent{depth + 2} << assignment << std::endl;
+    }
   }
   return ostream;
 }
@@ -77,6 +81,10 @@ void Controller::Analyze() {
       if (!value)
         continue;
       std::cout << node << " = " << value << std::endl;
+      if (auto* variable = value->TryAs<Variable>()) {
+        for (const auto& assignment : variable->assignments())
+          std::cout << "+--" << assignment << std::endl;
+      }
     }
   }
 

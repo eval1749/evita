@@ -26,7 +26,7 @@
    * @param {!Form} form
    */
   function moveFocusToNext(form) {
-    /** @type {!Array.<!FormControl>} */
+    /** @type {!Array<!FormControl>} */
     const controls = form.controls;
     function findFocusable(start) {
       for (let i = start + 1; i < controls.length; ++i) {
@@ -51,7 +51,7 @@
    * @param {!Form} form
    */
   function moveFocusToPrevious(form) {
-    /** @type {!Array.<!FormControl>} */
+    /** @type {!Array<!FormControl>} */
     const controls = form.controls;
     function findFocusable(start) {
       for (let i = start - 1; i >= 0; --i) {

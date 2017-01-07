@@ -4,6 +4,6 @@
 
 /**
  * @param {!Editor.RegExp} regexp
- * @return {!Generator.<!Array.<!Editor.RegExp.Match>>}
+ * @return {!Generator<!Array<!Editor.RegExp.Match>>}
  */
 TextRange.prototype.matches = function(regexp) {};

@@ -70,7 +70,7 @@ Object.defineProperties(TextFieldControl.prototype, {
    annotation: type {DragController} */
   TextFieldControl.prototype.dragController_ = null;
 
-  /** @type {!Map.<number, !TextFieldEditCommand>} */
+  /** @type {!Map<number, !TextFieldEditCommand>} */
   const keymap = new Map();
 
   /**

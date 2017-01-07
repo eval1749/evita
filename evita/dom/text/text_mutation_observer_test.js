@@ -32,12 +32,12 @@ testing.test('TextMutationObserver.takeRecords', function(t) {
   range.collapseTo(11);
   range.insertBefore('----');
   // "abcdefghijk----lmnopqrstuvwxyz"
-  //            >....<
+  //            >...<
   range.collapseTo(20);
   range.end = 25;
   range.text = '';
   // "abcdefghijk----lmnopvwxyz"
-  //            >.........<
+  //            >........<
   const records = observer.takeRecords();
   t.expect(records.length).toEqual(1);
   const actual = records[0];

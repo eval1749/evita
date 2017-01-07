@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 goog.scope(function() {
-/** @const @type {!WeakMap.<!TextDocument, !TextDocumentObserver>} */
+/** @const @type {!WeakMap<!TextDocument, !TextDocumentObserver>} */
 const observerMap = new WeakMap();
 
 /**

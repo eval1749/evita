@@ -93,7 +93,7 @@ function forceExit() {
 
 /**
  * @param {string} format_text
- * @param {Object.<string, string>=} opt_dict
+ * @param {Object<string, string>=} opt_dict
  * @return {string}
  * @suppress {globalThis}
  */

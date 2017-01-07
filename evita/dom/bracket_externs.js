@@ -23,5 +23,5 @@ Bracket.Detail = function(type, pair) {};
 /** @type{number} */ Bracket.Detail.prototype.pair;
 /** @type{!Bracket.Type} */ Bracket.Detail.prototype.type;
 
-/** @const @type {Object.<number, !Bracket.Detail>} */
+/** @const @type {Object<number, !Bracket.Detail>} */
 Bracket.DATA = {};

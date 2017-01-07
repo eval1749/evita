@@ -148,7 +148,7 @@ const HEADER_MODEL = [
   {id: 'file', label: 'File', width: 200, align: 'left'}
 ];
 
-/** @type {!Map.<!symbol, string>} */
+/** @type {!Map<!symbol, string>} */
 const OBSOLETE_MARK_MAP = new Map([
   [TextDocument.Obsolete.NO, '-'], [TextDocument.Obsolete.CHECKING, '.'],
   [TextDocument.Obsolete.IGNORE, '%'], [TextDocument.Obsolete.UNKNOWN, '?'],
@@ -588,7 +588,7 @@ class TextDocumentModel {
 
   /**
    * @private
-   * @param {!Array.<!TextMutationRecord>} mutations
+   * @param {!Array<!TextMutationRecord>} mutations
    * @param {!TextMutationObserver} observer
    */
   mutationCallback(mutations, observer) { this.update(); }

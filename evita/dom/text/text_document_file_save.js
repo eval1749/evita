@@ -26,7 +26,7 @@ FileWriter.prototype.buffer;
 /** @type {!Os.File} */
 FileWriter.prototype.file;
 
-/** @type {!Array.<!Uint8Array>} */
+/** @type {!Array<!Uint8Array>} */
 FileWriter.prototype.freeBuffers;
 
 /** @type {number} */

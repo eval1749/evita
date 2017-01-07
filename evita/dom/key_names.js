@@ -4,7 +4,7 @@
 
 goog.scope(function() {
 
-/** @const @type{Array.<string>} */
+/** @const @type{Array<string>} */
 const VKEY_NAMES = [
   '00',            // 0x00
   'LeftButton',    // 0x01
@@ -177,9 +177,9 @@ const VKEY_NAMES = [
   'FF'
 ];
 
-/** @const @type {!Array.<string>} */
+/** @const @type {!Array<string>} */
 const KEY_NAMES = (function() {
-  /** @const @type {Array.<string>} */
+  /** @const @type {Array<string>} */
   var names = new Array(256);
   /**
    * @param{number} start
@@ -199,7 +199,7 @@ const KEY_NAMES = (function() {
   return names;
 })();
 
-/** @const @type {!Map.<string, number>} */
+/** @const @type {!Map<string, number>} */
 const KEY_CODE_MAP = (function() {
   const map = new Map();
   KEY_NAMES.forEach(function(name, index) {
@@ -210,21 +210,21 @@ const KEY_CODE_MAP = (function() {
   return map;
 })();
 
-/** @const @type {!Array.<string>} */
+/** @const @type {!Array<string>} */
 core.KEY_NAMES = KEY_NAMES;
 
-/** @const @type {!Map.<string, number>} */
+/** @const @type {!Map<string, number>} */
 core.KEY_CODE_MAP = KEY_CODE_MAP;
 
-/** @const @type{Array.<string>} */
+/** @const @type{Array<string>} */
 core.VKEY_NAMES = VKEY_NAMES;
 });
 
-/** @const @type {!Array.<string>} */
+/** @const @type {!Array<string>} */
 var KEY_NAMES = core.KEY_NAMES;
 
-/** @const @type {!Map.<string, number>} */
+/** @const @type {!Map<string, number>} */
 var KEY_CODE_MAP = core.KEY_CODE_MAP;
 
-/** @const @type{Array.<string>} */
+/** @const @type{Array<string>} */
 var VKEY_NAMES = core.VKEY_NAMES;

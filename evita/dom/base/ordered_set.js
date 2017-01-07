@@ -281,7 +281,7 @@ class OrderedSet {
     --this.size_;
   }
 
-  /** @return {!Generator.<!base.OrderedSetNode<T>>} */
+  /** @return {!Generator<!base.OrderedSetNode<T>>} */
   * values() {
     let node = this.root_;
     while (node) {

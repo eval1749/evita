@@ -21,7 +21,7 @@ class TextFieldLogger {
     this.control_ = control;
     /** @private @type {number} */
     this.cursor_ = 0;
-    /** @private @type {!Array.<string>} */
+    /** @private @type {!Array<string>} */
     this.texts_ = [];
     Object.seal(TextFieldLogger);
   }

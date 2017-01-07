@@ -58,7 +58,7 @@ class History {
   constructor() {
     /** @type {number} */
     this.index_ = 0;
-    /** @type {!Array.<string>} */
+    /** @type {!Array<string>} */
     this.lines_ = [];
   }
 

@@ -7,11 +7,11 @@
  * @externs
  */
 
-/** @const @type {!Map.<string, number>} */
+/** @const @type {!Map<string, number>} */
 var KEY_CODE_MAP;
 
-/** @const @type {Array.<string>} */
+/** @const @type {Array<string>} */
 var KEY_NAMES;
 
-/** @const @type{Array.<string>} */
+/** @const @type{Array<string>} */
 var VKEY_NAMES;

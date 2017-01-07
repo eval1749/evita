@@ -143,7 +143,7 @@ function hasNonAscii(string) {
 }
 
 /**
- * @param {!Array.<{key: string, value: *}>} rows
+ * @param {!Array<{key: string, value: *}>} rows
  */
 function printAsTable(rows) {
   const maxKeyLen = rows.reduce(

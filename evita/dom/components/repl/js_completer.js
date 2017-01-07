@@ -25,7 +25,7 @@ function evalAsContainer(string) {
 /**
  * @param {*} container
  * @param {string} prefix
- * @return {!Set.<string>}
+ * @return {!Set<string>}
  *
  */
 function propertyNamesStartWith(container, prefix) {
@@ -43,7 +43,7 @@ function propertyNamesStartWith(container, prefix) {
 
 /**
  * @param {!Object} object
- * @return {!Array.<!Object>}
+ * @return {!Array<!Object>}
  */
 function prototypeChainOf(object) {
   let path = [];
@@ -63,7 +63,7 @@ class CompletionSession {
    */
   constructor(commandLoop) {
     this.beforeText_ = '';
-    /** @type {!Array.<string>} */
+    /** @type {!Array<string>} */
     this.candidates_ = [];
     /** @type {number} */
     this.index_ = 0;
@@ -92,7 +92,7 @@ class CompletionSession {
         this.lastLine_ === this.commandLoop_.lastLine;
   }
 
-  /** @param {!Set.<string>} nameSet */
+  /** @param {!Set<string>} nameSet */
   setCandidates_(nameSet) {
     this.candidates_ =
         Array.from(nameSet, x => x).sort((a, b) => a.localeCompare(b));
@@ -116,7 +116,7 @@ class CompletionSession {
   }
 }
 
-/** @type {!Map.<!TextSelection, !JsCompleter>} */
+/** @type {!Map<!TextSelection, !JsCompleter>} */
 const completers = new Map();
 
 //////////////////////////////////////////////////////////////////////

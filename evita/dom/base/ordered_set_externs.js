@@ -16,13 +16,13 @@ base.OrderedSetNode.prototype.data;
 
 /**
  * @template T
- * @return {?base.OrderedSetNode.<T>}
+ * @return {?base.OrderedSetNode<T>}
  */
 base.OrderedSetNode.prototype.next = function() {};
 
 /**
  * @template T
- * @return {?base.OrderedSetNode.<T>}
+ * @return {?base.OrderedSetNode<T>}
  */
 base.OrderedSetNode.prototype.previous = function() {};
 
@@ -66,7 +66,7 @@ base.OrderedSet.prototype.empty = function() {};
 /**
  * @template T
  * @param {T} data
- * @return {?base.OrderedSetNode.<T>}
+ * @return {?base.OrderedSetNode<T>}
  */
 base.OrderedSet.prototype.find = function(data) {};
 
@@ -79,7 +79,7 @@ base.OrderedSet.prototype.forEach = function(callback) {};
 /**
  * @template T
  * @param {T} data
- * @return {?base.OrderedSetNode.<T>}
+ * @return {?base.OrderedSetNode<T>}
  */
 base.OrderedSet.prototype.lowerBound = function(data) {};
 
@@ -91,7 +91,7 @@ base.OrderedSet.prototype.remove = function(data) {};
 
 /**
  * @template T
- * @param {base.OrderedSetNode.<T>} node
+ * @param {base.OrderedSetNode<T>} node
  */
 base.OrderedSet.prototype.removeNode = function(node) {};
 

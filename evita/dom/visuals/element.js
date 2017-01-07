@@ -86,7 +86,7 @@ class Element extends Node {
     this.reloadRawStyle(newStyle.rawStyle_);
     NodeHandle.setInlineStyle(
         this.handle_,
-        /** @type {!Map.<number, string>} */ (this.rawStyle_));
+        /** @type {!Map<number, string>} */ (this.rawStyle_));
   }
 
   /**

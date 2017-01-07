@@ -18,7 +18,7 @@ class TaskScheduler {
     /** @type {boolean} */
     this.isWaiting_ = false;
 
-    /** @const @type {!Set.<Runnable>} */
+    /** @const @type {!Set<Runnable>} */
     this.tasks_ = new Set();
   }
 

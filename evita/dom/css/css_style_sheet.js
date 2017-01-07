@@ -33,7 +33,7 @@ class CSSStyleSheet {
       this.cachedCssRules_ = Array.from(
           /** @type {!Iterable<!CSSRule>} */ (this.cssRules_), x => x);
     }
-    return /** @type {!Array.<!CSSRule>} */ (this.cachedCssRules_);
+    return /** @type {!Array<!CSSRule>} */ (this.cachedCssRules_);
   }
 
   /** @return {string} */

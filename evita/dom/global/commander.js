@@ -274,7 +274,7 @@ class Commander {
   constructor() {
     /** @const @type {!Argument} */
     this.argument_ = new Argument();
-    /** @type {!Array.<number>} */
+    /** @type {!Array<number>} */
     this.keyCodes_ = [];
     /** @type {?Keymap} */
     this.keymap_ = null;

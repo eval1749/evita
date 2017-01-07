@@ -6,13 +6,13 @@
  * @externs
  */
 
-/** @export  @type {!Generator.<string>} */
+/** @export  @type {!Generator<string>} */
 TextDocument.prototype.lines;
 
 /** @export @type {!TextDocument.Obsolete} */
 TextDocument.prototype.obsolete;
 
-/** @export  @type {!Map.<string, *>} */
+/** @export  @type {!Map<string, *>} */
 TextDocument.prototype.properties;
 
 /**

@@ -28,7 +28,7 @@ const staticDocumentModeMap = new Map();
 /** @typedef {string|function(!TextDocument):string} */
 var TextDocumentTemplate;
 
-/** @const @type {!Map.<string, !TextDocumentTemplate>} */
+/** @const @type {!Map<string, !TextDocumentTemplate>} */
 const staticTemplateMap = new Map();
 
 /**

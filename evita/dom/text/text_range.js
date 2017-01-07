@@ -193,7 +193,7 @@ function endOf(unit, alter = Alter.MOVE) {
 /**
  * @this {!TextRange}
  * @param {!Editor.RegExp} regexp
- * @return {?Array.<string>}
+ * @return {?Array<string>}
  */
 function rangeMatch(regexp) {
   /** @const @type {!TextDocument} */

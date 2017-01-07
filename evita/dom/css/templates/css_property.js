@@ -6,7 +6,7 @@ goog.provide('css.Property');
 
 goog.scope(function() {
 
-/** @const @type {!Array.<string>} */
+/** @const @type {!Array<string>} */
 const CSS_PROPERTY_NAMES = [
   "invalid",
 {% for property in properties %}

@@ -49,7 +49,7 @@ Array.prototype.push = function(var_args) {};
  * @template T
  * @param {number} start
  * @param {number=} opt_end
- * @return {Array.<T>}
+ * @return {Array<T>}
  */
 Array.prototype.slice = function(start, opt_end) {};
 

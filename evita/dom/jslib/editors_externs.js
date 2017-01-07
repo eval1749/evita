@@ -6,5 +6,5 @@
 /** @const @type{!Object} */
 var editors;
 
-/** @param {!Array.<string>} args */
+/** @param {!Array<string>} args */
 editors.start = function(args) {};

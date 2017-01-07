@@ -4,7 +4,7 @@
 
 
 goog.scope(function() {
-/** @const @type {!Array.<!function():*>} */
+/** @const @type {!Array<!function():*>} */
 const initializers = [];
 
 class Initializer {

@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 /**
- * @param {function(...): !Generator.<?>} makeGenerator
- * @return {function(...): Promise.<?>}
+ * @param {function(...): !Generator<?>} makeGenerator
+ * @return {function(...): Promise<?>}
  */
 function async(makeGenerator) {
   return function() {
@@ -12,7 +12,7 @@ function async(makeGenerator) {
 
     /**
      * @param {{done: boolean, value: ?}} result
-     * @return {Promise.<?>}
+     * @return {Promise<?>}
      */
     function handle(result) {
       if (result.done)

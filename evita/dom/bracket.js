@@ -23,7 +23,7 @@ Bracket.Detail = function(type, pair) {
   this.pair = pair;
 };
 
-/** @const @type {Object.<number, !Bracket.Detail>} */
+/** @const @type {Object<number, !Bracket.Detail>} */
 Bracket.DATA = {};
 
 Bracket.DATA[Unicode.LEFT_PARENTHESIS] =

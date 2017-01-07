@@ -66,7 +66,7 @@ class TextDocumentState {
 
   /**
    * @private
-   * @param {!Array.<!TextMutationRecord>} mutations
+   * @param {!Array<!TextMutationRecord>} mutations
    * @param {!TextMutationObserver} observer
    */
   mutationCallback(mutations, observer) {

@@ -101,10 +101,10 @@ class Controller {
   }
 
   /**
-   * TODO(eval1749): We should use |Promise.<boolean>| for return type
+   * TODO(eval1749): We should use |Promise<boolean>| for return type
    * once Blink IDL parser supports Promise type.
    * @param {string} word
-   * @return {!Promise.<?>}
+   * @return {!Promise<?>}
    */
   requestCheckSpelling(word) {
     ++this.numberOfRequests_;
@@ -391,7 +391,7 @@ class ColdScanner extends Scanner {
     /** @type {number} */
     this.checked_ = 0;
 
-    // TODO(eval1749): We should use |Promise.<boolean>| for return type
+    // TODO(eval1749): We should use |Promise<boolean>| for return type
     // once Blink IDL parser supports Promise type.
     this.painter_ = new ColdPainter(document);
   }

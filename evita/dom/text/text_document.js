@@ -12,7 +12,7 @@ const WordClass = {
   WORD: 'w'
 };
 
-/** @const @type {Map.<string, WordClass>} */
+/** @const @type {Map<string, WordClass>} */
 const WORD_CLASS_MAP = (function() {
   /** @param {string} name */
   function mapCategoryToWordClass(name) {
@@ -408,7 +408,7 @@ function * lines() {
 
 /**
  * @this {!TextDocument}
- * @return {Array.<!TextWindow>}
+ * @return {Array<!TextWindow>}
  */
 function listWindows() {
   const windows = [];
@@ -448,13 +448,13 @@ function undoGroup(name, callback, opt_receiver) {
   }
 }
 
-/** @type {!Map.<string, !TextDocument>} */
+/** @type {!Map<string, !TextDocument>} */
 const documentNameMap = new Map();
 
-/** @type {!Set.<!TextDocumentSetObserver>} */
+/** @type {!Set<!TextDocumentSetObserver>} */
 let documentSetObservers = new Set();
 
-/** @type {!Set.<!TextDocumentSetObserver>} */
+/** @type {!Set<!TextDocumentSetObserver>} */
 let internalTextDocumentSetObservers = new Set();
 
 /** @param {!TextDocumentSetObserver} callback */
@@ -471,7 +471,7 @@ function findTextDocument(name) {
 }
 
 /**
- * @return {!Array.<!TextDocument>}
+ * @return {!Array<!TextDocument>}
  */
 function listTextDocument() {
   return [...documentNameMap.values()];

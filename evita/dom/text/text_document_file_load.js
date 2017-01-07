@@ -216,7 +216,7 @@ function finishLoad(document, obsolete) {
 /**
  * @this {!TextDocument}
  * @param {string=} opt_fileName
- * @return {!Promise.<number>}
+ * @return {!Promise<number>}
  */
 function load(opt_fileName) {
   /** @const  @type {!TextDocument} */

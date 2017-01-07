@@ -13,8 +13,8 @@
  * $param {!Iterable<T>} arrayLike
  * $param {!function(T):U=} opt_mapFn
  * $param {*=} opt_thisArg
- * TODO(eval1749): |Array.from()| should return |!Array.<U>|.
- * $return {!Array.<T|U>}
+ * TODO(eval1749): |Array.from()| should return |!Array<U>|.
+ * $return {!Array<T|U>}
  */
 // Array.from = function(arrayLike, opt_mapFn, opt_thisArg) {};
 
@@ -62,7 +62,7 @@ var TextOffset;
 var StackFrame;
 
 /**
- * @typedef {Object.<string, string>}
+ * @typedef {Object<string, string>}
  */
 var StringDict;
 
@@ -70,7 +70,7 @@ var StringDict;
  * @typedef {{
  *  exception: Error,
  *  value: *,
- *  stackTrace: Array.<!StackFrame>,
+ *  stackTrace: Array<!StackFrame>,
  *  stackTraceString: string,
  *  lineNumber: number,
  *  start: number,
@@ -87,7 +87,7 @@ var SwitchValue;
 /**
  * @typedef {{
  *  absolute: boolean,
- *  components: !Array.<string>,
+ *  components: !Array<string>,
  *  winDrive: ?string}}
  */
 var FilePathSplit;

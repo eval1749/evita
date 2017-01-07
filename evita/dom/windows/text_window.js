@@ -550,10 +550,10 @@ function stopControllers(window) {
     window.dragController_.stop();
 }
 
-/** @const @type {!Array.<string>} */
+/** @const @type {!Array<string>} */
 const DOCUMENT_STATE_TEXTS = ['Ready', 'Loading...', 'Saving...'];
 
-/** @const @type {!Array.<string>} */
+/** @const @type {!Array<string>} */
 const NEWLINE_MODES = ['--', 'LF', 'CR', 'CRLF'];
 
 /**
@@ -657,7 +657,7 @@ function updateStatusBar(window, stateText) {
   window.parent.setStatusBar(newTexts);
 }
 
-/** @type {!Map.<string, !function(!TextWindow, !Event)>} */
+/** @type {!Map<string, !function(!TextWindow, !Event)>} */
 const handlerMap = new Map([
   [Event.Names.BLUR, stopControllers],
   [Event.Names.DBLCLICK, handleDoubleClick],

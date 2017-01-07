@@ -5,7 +5,7 @@
 (function() {
   class TraceLogger {
     constructor() {
-      /** @type {!Array.<!Object>} */
+      /** @type {!Array<!Object>} */
       this.events_ = [];
     }
 
@@ -15,7 +15,7 @@
       Editor.startTraceLog('{"excluded_categories": []}');
     }
 
-    /** @return {!Promise.<number>} */
+    /** @return {!Promise<number>} */
     stop() {
       let resultResolver;
       const resultPromise = new Promise(resolver => resultResolver = resolver);
@@ -28,13 +28,13 @@
         if (more)
           return;
         json += '\u005d';
-        this.events_ = /** @type {!Array.<Object>} */ (JSON.parse(json));
+        this.events_ = /** @type {!Array<Object>} */ (JSON.parse(json));
         resultResolver(this.events_.length);
       });
       return resultPromise;
     }
 
-    /** @return {!Promise.<?>} */
+    /** @return {!Promise<?>} */
     writeTo(fileName) {
       /** @type {Os.File} */
       let file = null;

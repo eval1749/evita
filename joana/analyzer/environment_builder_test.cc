@@ -73,27 +73,41 @@ std::string EnvironmentBuilderTest::ListValues(base::StringPiece script_text) {
 
 TEST_F(EnvironmentBuilderTest, Class) {
   EXPECT_EQ(
-      "Class[0-31]=Function@1[0-31] |class Foo { bar() {}...|\n"
+      "Class[0-31]=Variable@2[6-9] |Foo|\n"
       "Method<NonStatic,Normal>[12-20]=Function@5[12-20] |bar() {}|\n"
       "Method<NonStatic,Normal>[21-29]=Function@7[21-29] |baz() {}|\n",
       ListValues("class Foo { bar() {} baz() {} }"));
 }
 
+TEST_F(EnvironmentBuilderTest, ClassAnonymous) {
+  EXPECT_EQ(
+      "BindingNameElement[4-16]=Variable@3[4-5] |a|\n"
+      "Class[8-16]=Function@1[8-16] |class {}|\n",
+      ListValues("var a = class {};"));
+}
+
 TEST_F(EnvironmentBuilderTest, ClassError) {
   EXPECT_EQ(
-      "Class[0-15]=Function@1[0-15] |class Foo { 1 }|\n"
+      "Class[0-15]=Variable@2[6-9] |Foo|\n"
       "ANALYZER_ERROR_ENVIRONMENT_EXPECT_METHOD@12:13\n",
       ListValues("class Foo { 1 }"));
 }
 
 TEST_F(EnvironmentBuilderTest, Function) {
   EXPECT_EQ(
-      "Function<Normal>[0-36]=Function@1[0-36] |function foo(a, b) {...|\n"
+      "Function<Normal>[0-36]=Variable@2[9-12] |foo|\n"
       "BindingNameElement[13-14]=Variable@3[13-14] |a|\n"
       "BindingNameElement[16-17]=Variable@4[16-17] |b|\n"
       "ReferenceExpression[28-29]=Variable@3[13-14] |a|\n"
       "ReferenceExpression[32-33]=Variable@4[16-17] |b|\n",
       ListValues("function foo(a, b) { return a + b; }"));
+}
+
+TEST_F(EnvironmentBuilderTest, FunctionAnonymous) {
+  EXPECT_EQ(
+      "BindingNameElement[4-21]=Variable@2[4-5] |a|\n"
+      "Function<Normal>[8-21]=Function@1[8-21] |function() {}|\n",
+      ListValues("var a = function() {};"));
 }
 
 TEST_F(EnvironmentBuilderTest, Let) {
@@ -105,7 +119,7 @@ TEST_F(EnvironmentBuilderTest, Let) {
 
 TEST_F(EnvironmentBuilderTest, MemberExpression) {
   EXPECT_EQ(
-      "Function<Normal>[20-37]=Function@1[20-37] |function Foo() {}|\n"
+      "Function<Normal>[20-37]=Variable@2[29-32] |Foo|\n"
       "MemberExpression[52-69]=Property@4[66-69] |bar|\n"
       "MemberExpression[52-65]=Property@3[56-65] |prototype|\n"
       "ReferenceExpression[52-55]=Variable@2[29-32] |Foo|\n",

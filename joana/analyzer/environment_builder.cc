@@ -236,9 +236,7 @@ void EnvironmentBuilder::Visit(const ast::Class& syntax,
                                const ast::Node& node) {
   // TODO(eval1749): Report warning for toplevel anonymous class
   auto& klass = factory().NewFunction(node);
-  factory().RegisterValue(node, &klass);
   const auto& klass_name = ast::Class::NameOf(node);
-
   if (klass_name == ast::SyntaxCode::Name) {
     auto& variable = BindToVariable(node, node, klass_name);
     if (!variable.assignments().empty()) {
@@ -246,6 +244,9 @@ void EnvironmentBuilder::Visit(const ast::Class& syntax,
                *variable.assignments().front());
     }
     Value::Editor().AddAssignment(&variable, node);
+    factory().RegisterValue(node, &variable);
+  } else {
+    factory().RegisterValue(node, &klass);
   }
 
   auto& prototype_property = factory().NewProperty(
@@ -282,7 +283,6 @@ void EnvironmentBuilder::Visit(const ast::Function& syntax,
   // TODO(eval1749): Report warning for toplevel anonymous class
   const auto& name = ast::Function::NameOf(node);
   auto& function = factory().NewFunction(node);
-  factory().RegisterValue(node, &function);
   if (name == ast::SyntaxCode::Name) {
     auto& variable = BindToVariable(node, node, name);
     if (!variable.assignments().empty()) {
@@ -290,6 +290,9 @@ void EnvironmentBuilder::Visit(const ast::Function& syntax,
                *variable.assignments().front());
     }
     Value::Editor().AddAssignment(&variable, node);
+    factory().RegisterValue(node, &variable);
+  } else {
+    factory().RegisterValue(node, &function);
   }
   LocalEnvironment environment(this, node);
   variable_origin_ = &node;

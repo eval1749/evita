@@ -78,22 +78,34 @@ namespace joana {
   V(yield, Yield, YIELD)                 \
   V(yield_star, YieldStar, YIELD_STAR)
 
-#define FOR_EACH_JAVASCRIPT_KNOWN_WORD(V)  \
-  V(arguments, Arguments, ARGUMENTS)       \
-  V(async, Async, ASYNC)                   \
-  V(boolean, Boolean, BOOLEAN)             \
-  V(constructor, Constructor, CONSTRUCTOR) \
-  V(from, From, CONSTRUCTOR)               \
-  V(get, Get, GET)                         \
-  V(number, Number, NUMBER)                \
-  V(Object, Object, OBJECT)                \
-  V(of, Of, OF)                            \
-  V(prototype, Prototype, PROTOTYPE)       \
-  V(set, Set, SET)                         \
-  V(string, String, String) /* NOLINT */   \
-  V(symbol, Symbol, Symbol)                \
-  /** new.target */                        \
-  V(target, Target, Target)                \
+#define FOR_EACH_JAVASCRIPT_KNOWN_WORD(V)                         \
+  V(arguments, Arguments, ARGUMENTS)                              \
+  V(async, Async, ASYNC)                                          \
+  V(boolean, Boolean, BOOLEAN)                                    \
+  V(constructor, Constructor, CONSTRUCTOR)                        \
+  V(from, From, CONSTRUCTOR)                                      \
+  V(get, Get, GET)                                                \
+  V(hasInstance, HasInstance, HAS_INSTANCE)                       \
+  V(isConcatSpreadable, IsConcatSpreadable, IS_concat_spreadable) \
+  V(iterator, Iterator, ITERATOR)                                 \
+  V(match, Match, Match)                                          \
+  V(number, Number, NUMBER)                                       \
+  V(Object, Object, OBJECT)                                       \
+  V(of, Of, OF)                                                   \
+  V(prototype, Prototype, PROTOTYPE)                              \
+  V(replace, Replace, REPLACE)                                    \
+  V(search, Search, SEARCH)                                       \
+  V(set, Set, SET)                                                \
+  V(species, Species, SPECIES)                                    \
+  V(split, Split, SPLIT)                                          \
+  V(string, String, String) /* NOLINT */                          \
+  V(Symbol, SymbolObject, SYMBOL_OBJECT)                          \
+  V(symbol, Symbol, SYMBOL)                                       \
+  /** new.target */                                               \
+  V(target, Target, Target)                                       \
+  V(toPrimitive, ToPrimitive, TO_PRIMITIVE)                       \
+  V(toStringTag, ToStringTag, TO_STRINGTAG)                       \
+  V(unscopables, Unscopables, unscopables)                        \
   V(undefined, Undefined, UNDEFINED)
 
 // Visitor parameter takes:

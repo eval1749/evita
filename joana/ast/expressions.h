@@ -222,6 +222,8 @@ class JOANA_AST_EXPORT UnaryExpression final
   DISALLOW_COPY_AND_ASSIGN(UnaryExpression);
 };
 
+JOANA_AST_EXPORT bool IsKnownSymbol(const ast::Node& node);
+
 }  // namespace ast
 }  // namespace joana
 

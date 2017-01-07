@@ -277,5 +277,23 @@ const Node& UnaryExpression::OperatorOf(const Node& node) {
   return node.child_at(0);
 }
 
+bool IsKnownSymbol(const ast::Node& node) {
+  if (node != SyntaxCode::MemberExpression)
+    return false;
+  const auto& member = MemberExpression::ExpressionOf(node);
+  if (member != SyntaxCode::ReferenceExpression)
+    return false;
+  if (ReferenceExpression::NameOf(member) != TokenKind::SymbolObject)
+    return false;
+  const auto& name = MemberExpression::NameOf(node);
+  return name == TokenKind::HasInstance ||
+         name == TokenKind::IsConcatSpreadable || name == TokenKind::Iterator ||
+         name == TokenKind::Match || name == TokenKind::Replace ||
+         name == TokenKind::Search || name == TokenKind::Species ||
+         name == TokenKind::Search || name == TokenKind::Split ||
+         name == TokenKind::ToPrimitive || name == TokenKind::ToStringTag ||
+         name == TokenKind::Unscopables;
+}
+
 }  // namespace ast
 }  // namespace joana

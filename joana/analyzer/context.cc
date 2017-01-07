@@ -67,12 +67,6 @@ void Context::InstallGlobalObject() {
 }
 
 void Context::InstallPrimitiveTypes() {
-  static const ast::TokenKind kTypeNames[] = {
-      ast::TokenKind::Boolean, ast::TokenKind::Null,
-      ast::TokenKind::Number,  ast::TokenKind::String,
-      ast::TokenKind::Symbol,  ast::TokenKind::Undefined,
-      ast::TokenKind::Void,
-  };
   for (const auto id : BuiltInWorld::GetInstance()->primitive_types()) {
     const auto& name = BuiltInWorld::GetInstance()->NameOf(id);
     const auto& type = BuiltInWorld::GetInstance()->TypeOf(id);

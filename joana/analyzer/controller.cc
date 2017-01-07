@@ -89,7 +89,7 @@ void Controller::Analyze() {
 
   auto counter = 0;
   for (const auto& node : nodes_) {
-    const auto& environment = factory().EnvironmentOf(*node);
+    const auto& environment = context_->EnvironmentOf(*node);
     if (!environment.outer())
       continue;
     if (++counter == 1)

@@ -6,6 +6,7 @@
 #define JOANA_ANALYZER_CONTEXT_H_
 
 #include <memory>
+#include <unordered_map>
 
 #include "base/macros.h"
 
@@ -18,6 +19,7 @@ class Node;
 class AnalyzerSettings;
 class ErrorSink;
 class SourceCodeRange;
+class Zone;
 
 namespace analyzer {
 
@@ -38,9 +40,20 @@ class Context final {
   Factory& factory() const { return *factory_; }
   Environment& global_environment() const;
 
+  // Query
+  Environment& EnvironmentOf(const ast::Node& node) const;
   Value* TryValueOf(const ast::Node& node) const;
 
+  // Factory
+  Environment& NewEnvironment(Environment* outer, const ast::Node& node);
+
  private:
+  Zone& zone() const;
+
+  static Environment& NewGlobalEnvironment(Zone* zone);
+
+  std::unordered_map<const ast::Node*, Environment*> environment_map_;
+  Environment& global_environment_;
   std::unique_ptr<Factory> factory_;
   const AnalyzerSettings& settings_;
 

@@ -130,10 +130,10 @@ EnvironmentBuilder::~EnvironmentBuilder() = default;
 // The entry point. |node| is one of |ast::Externs|, |ast::Module| or
 // |ast::Script|.
 void EnvironmentBuilder::RunOn(const ast::Node& node) {
-  auto& global_environment = factory().global_environment();
+  auto& global_environment = context().global_environment();
   toplevel_environment_ =
       node == ast::SyntaxCode::Module
-          ? &factory().NewEnvironment(&global_environment, node)
+          ? &context().NewEnvironment(&global_environment, node)
           : &global_environment;
   SyntaxVisitor::Visit(node);
 }

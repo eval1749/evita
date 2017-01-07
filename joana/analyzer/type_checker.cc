@@ -7,6 +7,7 @@
 
 #include "joana/analyzer/type_checker.h"
 
+#include "joana/analyzer/context.h"
 #include "joana/analyzer/environment.h"
 #include "joana/analyzer/error_codes.h"
 #include "joana/analyzer/factory.h"
@@ -24,7 +25,7 @@ TypeChecker::TypeChecker(Context* context) : Pass(context) {}
 TypeChecker::~TypeChecker() = default;
 
 void TypeChecker::RunOn(const ast::Node& toplevel_node) {
-  environment_ = &factory().EnvironmentOf(toplevel_node);
+  environment_ = &context().EnvironmentOf(toplevel_node);
   for (const auto& node : ast::NodeTraversal::DescendantsOf(toplevel_node))
     SyntaxVisitor::Visit(node);
 }

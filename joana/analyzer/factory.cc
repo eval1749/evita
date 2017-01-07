@@ -4,13 +4,10 @@
 
 #include "joana/analyzer/factory.h"
 
-#include "joana/analyzer/built_in_world.h"
 #include "joana/analyzer/environment.h"
 #include "joana/analyzer/properties.h"
 #include "joana/analyzer/value_map.h"
 #include "joana/analyzer/values.h"
-#include "joana/ast/compilation_units.h"
-#include "joana/ast/declarations.h"
 #include "joana/ast/node.h"
 #include "joana/ast/tokens.h"
 
@@ -20,22 +17,11 @@ namespace analyzer {
 //
 // Factory
 //
-Factory::Factory(Zone* zone)
-    : global_environment_(NewGlobalEnvironment(zone)),
-      value_map_(new ValueMap()),
-      zone_(*zone) {}
+Factory::Factory(Zone* zone) : value_map_(new ValueMap()), zone_(*zone) {}
 
 Factory::~Factory() = default;
 
 // Query members
-Environment& Factory::EnvironmentOf(const ast::Node& node) const {
-  const auto& it = environment_map_.find(&node);
-  if (it != environment_map_.end())
-    return *it->second;
-  DCHECK(node.syntax().Is<ast::CompilationUnit>()) << node;
-  return global_environment();
-}
-
 Value* Factory::TryValueOf(const ast::Node& node) const {
   return value_map_->TryValueOf(node);
 }
@@ -50,14 +36,6 @@ Property& Factory::GetOrNewProperty(Properties* properties,
   if (auto* present = properties->TryGet(node))
     return *present;
   return properties->Add(&NewProperty(node));
-}
-
-Environment& Factory::NewEnvironment(Environment* outer,
-                                     const ast::Node& owner) {
-  auto& environment = *new (&zone_) Environment(&zone_, outer, owner);
-  const auto& result = environment_map_.emplace(&owner, &environment);
-  DCHECK(result.second) << "Node can have only one environment " << owner;
-  return environment;
 }
 
 Function& Factory::NewFunction(const ast::Node& node) {
@@ -88,12 +66,6 @@ Variable& Factory::NewVariable(const ast::Node& origin, const ast::Node& name) {
   auto& properties = NewProperties(name);
   return *new (&zone_)
       Variable(&zone_, NextValueId(), origin, name, &properties);
-}
-
-// static
-Environment& Factory::NewGlobalEnvironment(Zone* zone) {
-  const auto& module = BuiltInWorld::GetInstance()->global_module();
-  return *new (zone) Environment(zone, module);
 }
 
 int Factory::NextValueId() {

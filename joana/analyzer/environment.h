@@ -41,8 +41,8 @@ class Environment final : public ZoneAllocated {
   Variable* TryValueOf(const ast::Node& name) const;
 
  private:
+  friend class Context;
   friend class EnvironmentBuilder;
-  friend class Factory;
 
   Environment(Zone* zone, Environment* outer, const ast::Node& owner);
   Environment(Zone* zone, const ast::Node& owner);

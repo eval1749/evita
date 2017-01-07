@@ -6,7 +6,6 @@
 #define JOANA_ANALYZER_FACTORY_H_
 
 #include <memory>
-#include <unordered_map>
 
 #include "base/macros.h"
 #include "base/strings/string_piece.h"
@@ -35,10 +34,7 @@ class Factory final {
   explicit Factory(Zone* zone);
   ~Factory();
 
-  Environment& global_environment() const { return global_environment_; }
-
   // Query members
-  Environment& EnvironmentOf(const ast::Node& node) const;
   Value* TryValueOf(const ast::Node& node) const;
   Value& ValueOf(const ast::Node& node) const;
 
@@ -59,16 +55,12 @@ class Factory final {
   Variable& NewVariable(const ast::Node& origin, const ast::Node& name);
 
  private:
-  static Environment& NewGlobalEnvironment(Zone* zone);
-
   int NextValueId();
 
   // Properties
   Properties& NewProperties(const ast::Node& node);
 
   int current_value_id_ = 0;
-  std::unordered_map<const ast::Node*, Environment*> environment_map_;
-  Environment& global_environment_;
   std::unique_ptr<ValueMap> value_map_;
   Zone& zone_;
 

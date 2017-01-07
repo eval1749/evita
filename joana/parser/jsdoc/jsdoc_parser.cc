@@ -343,7 +343,8 @@ int JsDocParser::SkipToBlockTag() {
     Brace,
     InlineTag,
     Normal,
-  } state = State::Normal;
+    Whitespace,
+  } state = State::Whitespace;
   auto text_end = reader_->location();
   auto inline_tag_start = 0;
   while (CanPeekChar()) {
@@ -358,10 +359,12 @@ int JsDocParser::SkipToBlockTag() {
         state = State::Normal;
         continue;
       case State::Normal:
-        if (PeekChar() == '@')
-          return text_end;
-        if (!IsWhitespace(PeekChar()))
-          text_end = reader_->location() + 1;
+        if (IsWhitespace(PeekChar())) {
+          ConsumeChar();
+          state = State::Whitespace;
+          continue;
+        }
+        text_end = reader_->location() + 1;
         if (ConsumeChar() == kLeftBrace) {
           inline_tag_start = reader_->location() - 1;
           state = State::Brace;
@@ -373,6 +376,15 @@ int JsDocParser::SkipToBlockTag() {
           continue;
         state = State::Normal;
         text_end = reader_->location();
+        continue;
+      case State::Whitespace:
+        if (IsWhitespace(PeekChar())) {
+          ConsumeChar();
+          continue;
+        }
+        if (PeekChar() == '@')
+          return text_end;
+        state = State::Normal;
         continue;
     }
     NOTREACHED() << "We have missing case for state="

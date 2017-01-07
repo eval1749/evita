@@ -85,6 +85,10 @@ TEST_F(JsDocParserTest, NoTags) {
   EXPECT_EQ("", Parse("foo"));
 }
 
+TEST_F(JsDocParserTest, NotBlockTags) {
+  EXPECT_EQ("", Parse("Ctrl+@foo"));
+}
+
 TEST_F(JsDocParserTest, SyntaxDescription) {
   EXPECT_EQ(
       "JsDocDocument\n"

@@ -121,6 +121,13 @@ TEST_F(EnvironmentBuilderTest, FunctionAnonymous) {
       ListValues("var a = function() {};"));
 }
 
+TEST_F(EnvironmentBuilderTest, Global) {
+  EXPECT_EQ(
+      "MemberExpression[0-10]=Property@1001[7-10] |foo|\n"
+      "ReferenceExpression[0-6]=Variable@15[8-14] |global|\n",
+      ListValues("global.foo = 1;"));
+}
+
 TEST_F(EnvironmentBuilderTest, Let) {
   EXPECT_EQ(
       "BindingNameElement[4-9]=Variable@1001[4-5] |a|\n"
@@ -142,7 +149,7 @@ TEST_F(EnvironmentBuilderTest, MemberExpression) {
 TEST_F(EnvironmentBuilderTest, Super) {
   EXPECT_EQ("", ListValues("super.foo = 1;")) << "'super' has no value";
 
-  EXPECT_EQ("TypeName[11-17]=Variable@1001[11-17] |number|\n",
+  EXPECT_EQ("TypeName[11-17]=Variable@6[20-26] |number|\n",
             ListValues("/** @type {number} */ super.foo = 1;"))
       << "'super' has no value";
 }
@@ -150,7 +157,7 @@ TEST_F(EnvironmentBuilderTest, Super) {
 TEST_F(EnvironmentBuilderTest, This) {
   EXPECT_EQ("", ListValues("this.foo = 1;")) << "'this' has no value";
 
-  EXPECT_EQ("TypeName[11-17]=Variable@1001[11-17] |number|\n",
+  EXPECT_EQ("TypeName[11-17]=Variable@6[20-26] |number|\n",
             ListValues("/** @type {number} */ this.foo = 1;"))
       << "'this' has no value";
 }
@@ -164,7 +171,7 @@ TEST_F(EnvironmentBuilderTest, Type) {
                  "/** @type {!Foo} */ var foo;\n"));
 
   EXPECT_EQ(
-      "TypeName[11-17]=Variable@1004[11-17] |number|\n"
+      "TypeName[11-17]=Variable@6[20-26] |number|\n"
       "BindingNameElement[26-27]=Variable@1003[26-27] |x|\n",
       ListValues("/** @type {number} */ var x;"));
 }

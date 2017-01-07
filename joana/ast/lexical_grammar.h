@@ -85,6 +85,7 @@ namespace joana {
   V(constructor, Constructor, CONSTRUCTOR)                        \
   V(from, From, CONSTRUCTOR)                                      \
   V(get, Get, GET)                                                \
+  V(global, Global, Global)                                       \
   V(hasInstance, HasInstance, HAS_INSTANCE)                       \
   V(isConcatSpreadable, IsConcatSpreadable, IS_concat_spreadable) \
   V(iterator, Iterator, ITERATOR)                                 \

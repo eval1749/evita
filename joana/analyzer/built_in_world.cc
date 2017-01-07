@@ -25,14 +25,14 @@ namespace {
 
 const char* const kSourceCode =
     "boolean\n"
+    "global\n"
     "null\n"
     "number\n"
     "prototype\n"
     "string\n"
     "symbol\n"
     "undefined\n"
-    "void\n"
-    "(global)\n";
+    "void\n";
 
 const SourceCode& NewSourceCodeForBuildIn(Zone* zone) {
   SourceCode::Factory source_code_factory(zone);

@@ -149,8 +149,10 @@ Variable& EnvironmentBuilder::BindToVariable(const ast::Node& name) {
     environment_->Bind(name, &variable);
     return variable;
   }
-  if (auto* present = toplevel_environment_->TryValueOf(name))
-    return *present;
+  for (auto* runner = toplevel_environment_; runner; runner = runner->outer()) {
+    if (auto* present = runner->TryValueOf(name))
+      return *present;
+  }
   // TODO(eval1749): Expose global "var" binding to global object.
   auto& variable = factory().NewVariable(name);
   toplevel_environment_->Bind(name, &variable);

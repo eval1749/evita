@@ -32,6 +32,7 @@ Context::Context(const AnalyzerSettings& settings)
       settings_(settings),
       value_map_(new ValueMap()) {
   InstallPrimitiveTypes();
+  InstallGlobalObject();
   factory().ResetValueId();
 }
 
@@ -55,6 +56,14 @@ Environment& Context::EnvironmentOf(const ast::Node& node) const {
     return *it->second;
   DCHECK(node.syntax().Is<ast::CompilationUnit>()) << node;
   return global_environment();
+}
+
+void Context::InstallGlobalObject() {
+  const auto& name =
+      BuiltInWorld::GetInstance()->NameOf(ast::TokenKind::Global);
+  auto& variable = factory().NewVariable(name);
+  Value::Editor().AddAssignment(&variable, name);
+  global_environment_.Bind(name, &variable);
 }
 
 void Context::InstallPrimitiveTypes() {

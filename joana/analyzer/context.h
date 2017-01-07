@@ -55,6 +55,7 @@ class Context final {
  private:
   Zone& zone() const;
 
+  void InstallGlobalObject();
   void InstallPrimitiveTypes();
   static Environment& NewGlobalEnvironment(Zone* zone);
 

@@ -198,7 +198,7 @@ Variable& EnvironmentBuilder::BindToVariable(const ast::Node& name) {
   }
   // TODO(eval1749): Expose global "var" binding to global object.
   auto& variable = factory().NewVariable(name);
-  toplevel_environment_->Bind(name, &variable);
+  toplevel_environment_->BindVariable(name, &variable);
   return variable;
 }
 
@@ -280,7 +280,7 @@ Type& EnvironmentBuilder::ResolveTypeName(const ast::Node& name) {
   }
 
   auto& variable = factory().NewVariable(name);
-  toplevel_environment_->Bind(name, &variable);
+  toplevel_environment_->BindVariable(name, &variable);
   auto& type = factory().NewTypeReference(&variable);
   toplevel_environment_->BindType(name, &type);
   return type;
@@ -292,7 +292,7 @@ Variable& EnvironmentBuilder::ResolveVariableName(const ast::Node& name) {
     return *present;
   // TODO(eval1749): Expose global "var" binding to global object.
   auto& variable = factory().NewVariable(name);
-  toplevel_environment_->Bind(name, &variable);
+  toplevel_environment_->BindVariable(name, &variable);
   return variable;
 }
 

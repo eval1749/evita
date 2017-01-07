@@ -27,19 +27,19 @@ Environment::Environment(Zone* zone, const ast::Node& owner)
 
 Environment::~Environment() = default;
 
-void Environment::Bind(const ast::Node& name, Variable* value) {
+void Environment::BindType(const ast::Node& name, Type* type) {
+  const auto key = ast::Name::IdOf(name);
+  const auto& result = type_map_.emplace(key, type);
+  DCHECK(result.second) << name << " is already bound.";
+}
+
+void Environment::BindVariable(const ast::Node& name, Variable* value) {
   const auto key = ast::Name::IdOf(name);
   const auto& result = value_map_.emplace(key, value);
   DCHECK(result.second) << name << " is already bound.";
   const auto& name_result = name_map_.emplace(key, &name);
   DCHECK(name_result.second);
   names_.push_back(&name);
-}
-
-void Environment::BindType(const ast::Node& name, Type* type) {
-  const auto key = ast::Name::IdOf(name);
-  const auto& result = type_map_.emplace(key, type);
-  DCHECK(result.second) << name << " is already bound.";
 }
 
 Type* Environment::TryTypeOf(const ast::Node& name) const {

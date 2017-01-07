@@ -49,7 +49,7 @@ class Environment final : public ZoneAllocated {
   Environment(Zone* zone, Environment* outer, const ast::Node& owner);
   Environment(Zone* zone, const ast::Node& owner);
 
-  void Bind(const ast::Node& name, Variable* value);
+  void BindVariable(const ast::Node& name, Variable* value);
   void BindType(const ast::Node& name, Type* type);
 
   ZoneVector<const ast::Node*> names_;

@@ -63,7 +63,7 @@ void Context::InstallGlobalObject() {
       BuiltInWorld::GetInstance()->NameOf(ast::TokenKind::Global);
   auto& variable = factory().NewVariable(name);
   Value::Editor().AddAssignment(&variable, name);
-  global_environment_.Bind(name, &variable);
+  global_environment_.BindVariable(name, &variable);
 }
 
 void Context::InstallPrimitiveTypes() {

@@ -222,7 +222,7 @@ const ast::Node& TypeParser::NewTypeGroup(const ast::Node& type) {
 
 const ast::Node& TypeParser::NewTypeName(const ast::Node& name) {
   DCHECK_EQ(name, ast::SyntaxCode::Name);
-  return node_factory().NewTypeName(name.range(), name);
+  return node_factory().NewTypeName(name);
 }
 
 const ast::Node& TypeParser::NewUnionType(

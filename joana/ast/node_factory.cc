@@ -799,10 +799,9 @@ const Node& NodeFactory::NewTypeGroup(const SourceCodeRange& range,
   return NewNode1(range, syntax_factory_->NewTypeGroup(), type);
 }
 
-const Node& NodeFactory::NewTypeName(const SourceCodeRange& range,
-                                     const Node& name) {
+const Node& NodeFactory::NewTypeName(const Node& name) {
   DCHECK_EQ(name, SyntaxCode::Name);
-  return NewNode1(range, syntax_factory_->NewTypeName(), name);
+  return NewNode1(name.range(), syntax_factory_->NewTypeName(), name);
 }
 
 const Node& NodeFactory::NewUnionType(const SourceCodeRange& range,

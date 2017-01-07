@@ -22,6 +22,7 @@
 #include "joana/analyzer/public/analyzer.h"
 #include "joana/analyzer/public/analyzer_settings.h"
 #include "joana/analyzer/public/analyzer_settings_builder.h"
+#include "joana/ast/node.h"
 #include "joana/ast/node_factory.h"
 #include "joana/base/error_sink.h"
 #include "joana/base/memory/zone.h"
@@ -228,6 +229,14 @@ void Checker::Analyze() {
   for (const auto& module : modules_)
     analyzer.Load(*module);
   analyzer.Analyze();
+
+  // Register built-in module for error message.
+  {
+    const auto& module = analyzer.built_in_module();
+    modules_.push_back(&module);
+    const auto& source_code = module.range().source_code();
+    module_map_.emplace(&source_code, new ScriptModule(source_code, module));
+  }
 }
 
 int Checker::Main() {

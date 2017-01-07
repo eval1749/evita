@@ -80,13 +80,17 @@ namespace joana {
 
 #define FOR_EACH_JAVASCRIPT_KNOWN_WORD(V)  \
   V(async, Async, ASYNC)                   \
-  V(Object, Object, OBJECT)                \
+  V(boolean, Boolean, BOOLEAN)             \
   V(constructor, Constructor, CONSTRUCTOR) \
   V(from, From, CONSTRUCTOR)               \
   V(get, Get, GET)                         \
+  V(number, Number, NUMBER)                \
+  V(Object, Object, OBJECT)                \
   V(of, Of, OF)                            \
   V(prototype, Prototype, PROTOTYPE)       \
   V(set, Set, SET)                         \
+  V(string, String, String) /* NOLINT */   \
+  V(symbol, Symbol, Symbol)                \
   /** new.target */                        \
   V(target, Target, Target)                \
   V(undefined, Undefined, UNDEFINED)

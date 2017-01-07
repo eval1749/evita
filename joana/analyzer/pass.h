@@ -31,6 +31,8 @@ class Pass {
  protected:
   explicit Pass(Context* context);
 
+  const Context& context() const { return context_; }
+  Context& context() { return context_; }
   const Factory& factory() const;
   Factory& factory();
 

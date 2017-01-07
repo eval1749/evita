@@ -8,6 +8,7 @@
 #include "joana/analyzer/environment.h"
 #include "joana/analyzer/factory.h"
 #include "joana/analyzer/public/analyzer_settings.h"
+#include "joana/analyzer/value_map.h"
 #include "joana/ast/compilation_units.h"
 #include "joana/ast/node.h"
 #include "joana/ast/tokens.h"
@@ -23,7 +24,8 @@ namespace analyzer {
 Context::Context(const AnalyzerSettings& settings)
     : factory_(new Factory(&settings.zone())),
       global_environment_(NewGlobalEnvironment(&settings.zone())),
-      settings_(settings) {}
+      settings_(settings),
+      value_map_(new ValueMap()) {}
 
 Context::~Context() = default;
 
@@ -61,8 +63,16 @@ Environment& Context::NewGlobalEnvironment(Zone* zone) {
   return *new (zone) Environment(zone, module);
 }
 
+Value& Context::RegisterValue(const ast::Node& node, Value* value) {
+  return value_map_->RegisterValue(node, value);
+}
+
 Value* Context::TryValueOf(const ast::Node& node) const {
-  return factory_->TryValueOf(node);
+  return value_map_->TryValueOf(node);
+}
+
+Value& Context::ValueOf(const ast::Node& node) const {
+  return value_map_->ValueOf(node);
 }
 
 }  // namespace analyzer

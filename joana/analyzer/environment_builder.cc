@@ -165,7 +165,7 @@ void EnvironmentBuilder::ProcessAssignmentExpressionWithAnnotation(
     return;
   const auto& lhs = ast::AssignmentExpression::LeftHandSideOf(node);
   if (lhs == ast::SyntaxCode::ReferenceExpression) {
-    if (auto* const present = factory().TryValueOf(lhs)) {
+    if (auto* const present = context().TryValueOf(lhs)) {
       AddError(lhs, ErrorCode::ENVIRONMENT_MULTIPLE_BINDINGS, present->node());
       return;
     }
@@ -182,7 +182,7 @@ void EnvironmentBuilder::ProcessAssignmentExpressionWithAnnotation(
 void EnvironmentBuilder::ProcessMemberExpressionWithAnnotation(
     const ast::Node& node,
     const ast::Node& annotation) {
-  auto* const value = factory().TryValueOf(node);
+  auto* const value = context().TryValueOf(node);
   if (!value) {
     // We've not known value of member expression.
     return;
@@ -206,14 +206,14 @@ void EnvironmentBuilder::ResolveName(const ast::Node& name,
   DCHECK_NE(name, node);
   for (auto* runner = environment_; runner; runner = runner->outer()) {
     if (auto* present = runner->Find(name)) {
-      factory().RegisterValue(node, present);
+      context().RegisterValue(node, present);
       return;
     }
   }
   auto* present = toplevel_environment_->TryValueOf(name);
   if (!present)
     return;
-  factory().RegisterValue(node, present);
+  context().RegisterValue(node, present);
 }
 
 //
@@ -230,7 +230,7 @@ void EnvironmentBuilder::Visit(const ast::BindingNameElement& syntax,
   auto& variable = BindToVariable(*variable_origin_, node,
                                   ast::BindingNameElement::NameOf(node));
   Value::Editor().AddAssignment(&variable, node);
-  factory().RegisterValue(node, &variable);
+  context().RegisterValue(node, &variable);
   if (variable.assignments().size() == 1)
     return;
   if (variable.origin() == ast::SyntaxCode::VarStatement &&
@@ -261,9 +261,9 @@ void EnvironmentBuilder::Visit(const ast::Class& syntax,
                *variable.assignments().front());
     }
     Value::Editor().AddAssignment(&variable, node);
-    factory().RegisterValue(node, &variable);
+    context().RegisterValue(node, &variable);
   } else {
-    factory().RegisterValue(node, &klass);
+    context().RegisterValue(node, &klass);
   }
 
   auto& prototype_property = factory().NewProperty(
@@ -284,7 +284,7 @@ void EnvironmentBuilder::Visit(const ast::Class& syntax,
     auto& property =
         factory().GetOrNewProperty(&properties, ast::Method::NameOf(member));
     auto& method = factory().NewFunction(member);
-    factory().RegisterValue(member, &method);
+    context().RegisterValue(member, &method);
     if (!property.assignments().empty()) {
       AddError(member, ErrorCode::ENVIRONMENT_MULTIPLE_BINDINGS,
                *property.assignments().front());
@@ -307,9 +307,9 @@ void EnvironmentBuilder::Visit(const ast::Function& syntax,
                *variable.assignments().front());
     }
     Value::Editor().AddAssignment(&variable, node);
-    factory().RegisterValue(node, &variable);
+    context().RegisterValue(node, &variable);
   } else {
-    factory().RegisterValue(node, &function);
+    context().RegisterValue(node, &function);
   }
   LocalEnvironment environment(this, node);
   variable_origin_ = &node;
@@ -329,13 +329,13 @@ void EnvironmentBuilder::Visit(const ast::MemberExpression& syntax,
                                const ast::Node& node) {
   VisitDefault(node);
   auto* const value =
-      factory().TryValueOf(ast::MemberExpression::ExpressionOf(node));
+      context().TryValueOf(ast::MemberExpression::ExpressionOf(node));
   if (!value || !value->Is<Object>())
     return;
   auto& properties = value->As<Object>().properties();
   const auto& name = ast::MemberExpression::NameOf(node);
   auto& property = factory().GetOrNewProperty(&properties, name);
-  factory().RegisterValue(node, &property);
+  context().RegisterValue(node, &property);
 }
 
 void EnvironmentBuilder::Visit(const ast::ReferenceExpression& syntax,

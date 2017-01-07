@@ -41,7 +41,7 @@ Variable* TypeChecker::TryValueOf(const ast::Node& node) const {
 // |ast::SyntaxVisitor| members
 void TypeChecker::Visit(const ast::ReferenceExpression& syntax,
                         const ast::Node& node) {
-  if (factory().TryValueOf(node))
+  if (context().TryValueOf(node))
     return;
   AddError(node, ErrorCode::TYPE_CHECKER_UNDEFIEND_VARIABLE);
 }

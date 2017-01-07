@@ -4,9 +4,7 @@
 
 #include "joana/analyzer/factory.h"
 
-#include "joana/analyzer/environment.h"
 #include "joana/analyzer/properties.h"
-#include "joana/analyzer/value_map.h"
 #include "joana/analyzer/values.h"
 #include "joana/ast/node.h"
 #include "joana/ast/tokens.h"
@@ -17,18 +15,9 @@ namespace analyzer {
 //
 // Factory
 //
-Factory::Factory(Zone* zone) : value_map_(new ValueMap()), zone_(*zone) {}
+Factory::Factory(Zone* zone) : zone_(*zone) {}
 
 Factory::~Factory() = default;
-
-// Query members
-Value* Factory::TryValueOf(const ast::Node& node) const {
-  return value_map_->TryValueOf(node);
-}
-
-Value& Factory::ValueOf(const ast::Node& node) const {
-  return value_map_->ValueOf(node);
-}
 
 // Factory members
 Property& Factory::GetOrNewProperty(Properties* properties,
@@ -70,10 +59,6 @@ Variable& Factory::NewVariable(const ast::Node& origin, const ast::Node& name) {
 
 int Factory::NextValueId() {
   return ++current_value_id_;
-}
-
-Value& Factory::RegisterValue(const ast::Node& node, Value* value) {
-  return value_map_->RegisterValue(node, value);
 }
 
 }  // namespace analyzer

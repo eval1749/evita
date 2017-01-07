@@ -27,6 +27,7 @@ class Environment;
 enum class ErrorCode;
 class Factory;
 class Value;
+class ValueMap;
 
 //
 // Context
@@ -43,9 +44,13 @@ class Context final {
   // Query
   Environment& EnvironmentOf(const ast::Node& node) const;
   Value* TryValueOf(const ast::Node& node) const;
+  Value& ValueOf(const ast::Node& node) const;
 
   // Factory
   Environment& NewEnvironment(Environment* outer, const ast::Node& node);
+
+  // Registration
+  Value& RegisterValue(const ast::Node& node, Value* value);
 
  private:
   Zone& zone() const;
@@ -56,6 +61,7 @@ class Context final {
   Environment& global_environment_;
   std::unique_ptr<Factory> factory_;
   const AnalyzerSettings& settings_;
+  std::unique_ptr<ValueMap> value_map_;
 
   DISALLOW_COPY_AND_ASSIGN(Context);
 };

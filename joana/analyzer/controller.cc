@@ -73,7 +73,7 @@ Factory& Controller::factory() const {
 void Controller::Analyze() {
   for (const auto& toplevel : nodes_) {
     for (const auto& node : ast::NodeTraversal::DescendantsOf(*toplevel)) {
-      const auto* const value = factory().TryValueOf(node);
+      const auto* const value = context_->TryValueOf(node);
       if (!value)
         continue;
       std::cout << node << " = " << value << std::endl;

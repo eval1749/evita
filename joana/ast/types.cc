@@ -17,7 +17,6 @@ IMPLEMENT_AST_SYNTAX_0(Type, NonNullableType, 1)
 IMPLEMENT_AST_SYNTAX_0(Type, OptionalType, 1)
 IMPLEMENT_AST_SYNTAX_0(Type, RestType, 1)
 IMPLEMENT_AST_SYNTAX_0(Type, TypeGroup, 1)
-IMPLEMENT_AST_SYNTAX_0(Type, TypeProperty, 2)
 IMPLEMENT_AST_SYNTAX_0(Type, UnknownType, 0)
 IMPLEMENT_AST_SYNTAX_0(Type, VoidType, 0)
 

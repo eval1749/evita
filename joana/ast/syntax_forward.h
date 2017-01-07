@@ -126,7 +126,6 @@ namespace ast {
   V(TypeApplication)         \
   V(TypeGroup)               \
   V(TypeName)                \
-  V(TypeProperty)            \
   V(UnionType)               \
   V(UnknownType)             \
   V(VoidType)

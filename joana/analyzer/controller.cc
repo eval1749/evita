@@ -6,6 +6,7 @@
 
 #include "joana/analyzer/controller.h"
 
+#include "base/command_line.h"
 #include "joana/analyzer/context.h"
 #include "joana/analyzer/environment.h"
 #include "joana/analyzer/environment_builder.h"
@@ -29,6 +30,7 @@ struct Indent {
 };
 
 std::ostream& operator<<(std::ostream& ostream, const Indent& indent) {
+  ostream << std::endl;
   if (indent.depth == 0)
     return ostream;
   for (auto counter = 0; counter < indent.depth - 1; ++counter)
@@ -41,21 +43,17 @@ std::ostream& operator<<(std::ostream& ostream, const Indent& indent) {
 //
 struct Dump {
   int depth;
-  const Environment* environment;
+  const Value* value;
 };
 
 std::ostream& operator<<(std::ostream& ostream, const Dump& dump) {
-  const auto& environment = *dump.environment;
+  const auto& value = *dump.value;
   const auto depth = dump.depth;
-  ostream << Indent{depth} << "Environment " << environment.owner()
-          << std::endl;
-  for (const auto& name : environment.names_for_testing()) {
-    const auto& value = *environment.TryValueOf(*name);
-    ostream << Indent{depth + 1} << value << std::endl;
-    if (auto* variable = value.TryAs<Variable>()) {
-      for (const auto& assignment : variable->assignments())
-        std::cout << Indent{depth + 2} << assignment << std::endl;
-    }
+  ostream << Indent{depth + 1} << value;
+  if (auto* variable = value.TryAs<Variable>()) {
+    std::cout << Indent{depth + 2} << "Assignments";
+    for (const auto& assignment : variable->assignments())
+      std::cout << Indent{depth + 3} << assignment;
   }
   return ostream;
 }
@@ -75,34 +73,23 @@ Factory& Controller::factory() const {
 }
 
 void Controller::Analyze() {
+  TypeChecker type_checker(context_.get());
+  for (const auto& node : nodes_)
+    type_checker.RunOn(*node);
+
+  const auto* const command_line = base::CommandLine::ForCurrentProcess();
+  if (command_line->HasSwitch("dump_after_type"))
+    DumpValues();
+}
+
+void Controller::DumpValues() {
   for (const auto& toplevel : nodes_) {
     for (const auto& node : ast::NodeTraversal::DescendantsOf(*toplevel)) {
       const auto* const value = context_->TryValueOf(node);
       if (!value)
         continue;
-      std::cout << node << " = " << value << std::endl;
-      if (auto* variable = value->TryAs<Variable>()) {
-        for (const auto& assignment : variable->assignments())
-          std::cout << "+--" << assignment << std::endl;
-      }
+      std::cout << node << Dump{1, value} << std::endl;
     }
-  }
-
-  TypeChecker type_checker(context_.get());
-  for (const auto& node : nodes_)
-    type_checker.RunOn(*node);
-
-  std::cout << std::endl << "Dump global environments" << std::endl;
-  std::cout << Dump{0, &context_->global_environment()};
-
-  auto counter = 0;
-  for (const auto& node : nodes_) {
-    const auto& environment = context_->EnvironmentOf(*node);
-    if (!environment.outer())
-      continue;
-    if (++counter == 1)
-      std::cout << std::endl << "Dump module environments" << std::endl;
-    std::cout << Dump{0, &environment};
   }
 }
 
@@ -110,6 +97,10 @@ void Controller::Load(const ast::Node& node) {
   nodes_.push_back(&node);
   EnvironmentBuilder builder(context_.get());
   builder.RunOn(node);
+
+  const auto* const command_line = base::CommandLine::ForCurrentProcess();
+  if (command_line->HasSwitch("dump_after_build"))
+    DumpValues();
 }
 
 }  // namespace analyzer

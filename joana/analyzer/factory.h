@@ -48,6 +48,8 @@ class Factory final {
   Value& NewUndefined(const ast::Node& node);
   Variable& NewVariable(const ast::Node& name);
 
+  void ResetValueId();
+
  private:
   int NextValueId();
 

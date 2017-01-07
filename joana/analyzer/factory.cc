@@ -66,5 +66,11 @@ int Factory::NextValueId() {
   return ++current_value_id_;
 }
 
+void Factory::ResetValueId() {
+  const auto kValueIdStart = 1000;
+  DCHECK_LT(current_value_id_, kValueIdStart);
+  current_value_id_ = kValueIdStart;
+}
+
 }  // namespace analyzer
 }  // namespace joana

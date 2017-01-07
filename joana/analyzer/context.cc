@@ -32,6 +32,7 @@ Context::Context(const AnalyzerSettings& settings)
       settings_(settings),
       value_map_(new ValueMap()) {
   InstallPrimitiveTypes();
+  factory().ResetValueId();
 }
 
 Context::~Context() = default;

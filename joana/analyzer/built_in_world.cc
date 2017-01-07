@@ -85,7 +85,8 @@ BuiltInWorld::Private::Private()
       node_factory_(&zone_),
       primitive_types_({ast::TokenKind::Boolean, ast::TokenKind::Null,
                         ast::TokenKind::Number, ast::TokenKind::String,
-                        ast::TokenKind::Symbol, ast::TokenKind::Undefined}),
+                        ast::TokenKind::Symbol, ast::TokenKind::Undefined,
+                        ast::TokenKind::Void}),
       source_code_(NewSourceCodeForBuildIn(&zone_)) {
   PopulateNameTable();
   RegisterTypes();

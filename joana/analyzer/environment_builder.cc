@@ -138,21 +138,20 @@ void EnvironmentBuilder::RunOn(const ast::Node& node) {
   Visit(node);
 }
 
-Variable& EnvironmentBuilder::BindToVariable(const ast::Node& origin,
-                                             const ast::Node& node,
+Variable& EnvironmentBuilder::BindToVariable(const ast::Node& node,
                                              const ast::Node& name) {
   DCHECK_EQ(name, ast::SyntaxCode::Name);
   if (environment_) {
     if (auto* present = environment_->Find(name))
       return *present;
-    auto& variable = factory().NewVariable(origin, name);
+    auto& variable = factory().NewVariable(name);
     environment_->Bind(name, &variable);
     return variable;
   }
   if (auto* present = toplevel_environment_->TryValueOf(name))
     return *present;
   // TODO(eval1749): Expose global "var" binding to global object.
-  auto& variable = factory().NewVariable(origin, name).As<Variable>();
+  auto& variable = factory().NewVariable(name).As<Variable>();
   toplevel_environment_->Bind(name, &variable);
   return variable;
 }
@@ -170,7 +169,7 @@ void EnvironmentBuilder::ProcessAssignmentExpressionWithAnnotation(
       return;
     }
     const auto& name = ast::ReferenceExpression::NameOf(lhs);
-    auto& variable = factory().NewVariable(node, name);
+    auto& variable = factory().NewVariable(name);
     toplevel_environment_->Bind(name, &variable);
     return;
   }
@@ -227,19 +226,13 @@ void EnvironmentBuilder::VisitDefault(const ast::Node& node) {
 void EnvironmentBuilder::VisitInternal(const ast::BindingNameElement& syntax,
                                        const ast::Node& node) {
   VisitChildNodes(node);
-  auto& variable = BindToVariable(*variable_origin_, node,
-                                  ast::BindingNameElement::NameOf(node));
+  auto& variable = BindToVariable(node, ast::BindingNameElement::NameOf(node));
   Value::Editor().AddAssignment(&variable, node);
   context().RegisterValue(node, &variable);
   if (variable.assignments().size() == 1)
     return;
-  if (variable.origin() == ast::SyntaxCode::VarStatement &&
-      *variable_origin_ == ast::SyntaxCode::VarStatement) {
-    // TODO(eval1749): We should report error if |present| has type
-    // annotation.
-    return;
-  }
-  AddError(node, ErrorCode::ENVIRONMENT_MULTIPLE_BINDINGS, variable.origin());
+  AddError(node, ErrorCode::ENVIRONMENT_MULTIPLE_BINDINGS,
+           *variable.assignments().front());
 }
 
 // Declarations
@@ -265,7 +258,7 @@ void EnvironmentBuilder::VisitInternal(const ast::Class& syntax,
   auto& klass = factory().NewFunction(node);
   const auto& klass_name = ast::Class::NameOf(node);
   if (klass_name == ast::SyntaxCode::Name) {
-    auto& variable = BindToVariable(node, node, klass_name);
+    auto& variable = BindToVariable(node, klass_name);
     if (!variable.assignments().empty()) {
       AddError(node, ErrorCode::ENVIRONMENT_MULTIPLE_BINDINGS,
                *variable.assignments().front());
@@ -311,7 +304,7 @@ void EnvironmentBuilder::VisitInternal(const ast::Function& syntax,
   const auto& name = ast::Function::NameOf(node);
   auto& function = factory().NewFunction(node);
   if (name == ast::SyntaxCode::Name) {
-    auto& variable = BindToVariable(node, node, name);
+    auto& variable = BindToVariable(node, name);
     if (!variable.assignments().empty()) {
       AddError(node, ErrorCode::ENVIRONMENT_MULTIPLE_BINDINGS,
                *variable.assignments().front());

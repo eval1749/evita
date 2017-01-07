@@ -134,17 +134,9 @@ class Variable final : public ValueHolder {
  public:
   ~Variable() final;
 
-  const ast::Node& origin() const { return origin_; }
-
  private:
   // |name| should be |ast::Name| or |ast::BindingNameElement|.
-  Variable(Zone* zone,
-           int id,
-           const ast::Node& origin,
-           const ast::Node& name,
-           Properties* properties);
-
-  const ast::Node& origin_;
+  Variable(Zone* zone, int id, const ast::Node& name, Properties* properties);
 
   DISALLOW_COPY_AND_ASSIGN(Variable);
 };

@@ -46,7 +46,7 @@ class Factory final {
   Function& NewFunction(const ast::Node& node);
   Value& NewOrdinaryObject(const ast::Node& node);
   Value& NewUndefined(const ast::Node& node);
-  Variable& NewVariable(const ast::Node& origin, const ast::Node& name);
+  Variable& NewVariable(const ast::Node& name);
 
  private:
   int NextValueId();

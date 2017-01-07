@@ -72,10 +72,9 @@ ValueHolder::~ValueHolder() = default;
 //
 Variable::Variable(Zone* zone,
                    int id,
-                   const ast::Node& origin,
                    const ast::Node& name,
                    Properties* properties)
-    : ValueHolder(zone, id, name, properties), origin_(origin) {
+    : ValueHolder(zone, id, name, properties) {
   DCHECK_EQ(name, ast::SyntaxCode::Name);
 }
 

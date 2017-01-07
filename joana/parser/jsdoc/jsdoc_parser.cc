@@ -192,13 +192,13 @@ const ast::Node& JsDocParser::ParseDescription() {
 const ast::Node& JsDocParser::ParseModifies() {
   SkipWhitespaces();
   if (!ConsumeCharIf(kLeftBrace))
-    AddError(JsDocErrorCode::ERROR_JSDOC_EXPECT_LBRACE);
+    AddError(JsDocErrorCode::ERROR_TAG_EXPECT_LBRACE);
   const auto& name = ParseName();
   if (name != ast::TokenKind::Arguments && name != ast::TokenKind::This)
-    AddError(JsDocErrorCode::ERROR_JSDOC_EXPECT_ARGUMENTS_OR_THIS);
+    AddError(JsDocErrorCode::ERROR_TAG_EXPECT_ARGUMENTS_OR_THIS);
   SkipWhitespaces();
   if (!ConsumeCharIf(kRightBrace))
-    AddError(JsDocErrorCode::ERROR_JSDOC_EXPECT_RBRACE);
+    AddError(JsDocErrorCode::ERROR_TAG_EXPECT_RBRACE);
   return name;
 }
 
@@ -207,12 +207,12 @@ std::vector<const ast::Node*> JsDocParser::ParseNameList() {
   SkipWhitespaces();
   NodeRangeScope scope(this);
   if (!ConsumeCharIf(kLeftBrace)) {
-    AddError(JsDocErrorCode::ERROR_JSDOC_EXPECT_LBRACE);
+    AddError(JsDocErrorCode::ERROR_TAG_EXPECT_LBRACE);
     return {&NewText()};
   }
   const auto& names = ParseNames();
   if (!ConsumeCharIf(kRightBrace))
-    AddError(JsDocErrorCode::ERROR_JSDOC_EXPECT_RBRACE);
+    AddError(JsDocErrorCode::ERROR_TAG_EXPECT_RBRACE);
   return std::move(names);
 }
 
@@ -290,7 +290,7 @@ const ast::Node& JsDocParser::ParseTag(const ast::Node& tag_name) {
       return NewTag(tag_name, type, name, description);
     }
     case TagSyntax::Unknown:
-      AddError(tag_name.range(), JsDocErrorCode::ERROR_JSDOC_UNKNOWN_TAG);
+      AddError(tag_name.range(), JsDocErrorCode::ERROR_TAG_UNKNOWN_TAG);
       return NewTag(tag_name);
   }
   NOTREACHED() << "We should handle " << tag_name;
@@ -310,7 +310,7 @@ const ast::Node& JsDocParser::ParseType() {
   SkipWhitespaces();
   NodeRangeScope scope(this);
   if (!ConsumeCharIf(kLeftBrace)) {
-    AddError(JsDocErrorCode::ERROR_JSDOC_EXPECT_LBRACE);
+    AddError(JsDocErrorCode::ERROR_TAG_EXPECT_LBRACE);
     return NewText();
   }
   const auto type_start = reader_->location();
@@ -380,7 +380,7 @@ int JsDocParser::SkipToBlockTag() {
   }
   if (state == State::InlineTag) {
     AddError(inline_tag_start, reader_->location(),
-             JsDocErrorCode::ERROR_JSDOC_EXPECT_RBRACE);
+             JsDocErrorCode::ERROR_TAG_EXPECT_RBRACE);
   }
   return text_end;
 }

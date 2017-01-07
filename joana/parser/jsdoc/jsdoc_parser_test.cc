@@ -61,7 +61,7 @@ TEST_F(JsDocParserTest, InlineTag) {
       "|  +--Name |@const|\n",
       Parse("foo {@code bar} @const"));
 
-  EXPECT_EQ("JSDOC_ERROR_JSDOC_EXPECT_RBRACE@4:14\n", Parse("foo {@code bar"))
+  EXPECT_EQ("JSDOC_ERROR_TAG_EXPECT_RBRACE@4:14\n", Parse("foo {@code bar"))
       << "Open inline tag";
 }
 
@@ -109,9 +109,9 @@ TEST_F(JsDocParserTest, SyntaxModifiesError) {
       "+--JsDocTag\n"
       "|  +--Name |@modifies|\n"
       "|  +--Name ||\n"
-      "JSDOC_ERROR_JSDOC_EXPECT_LBRACE@0:9\n"
-      "JSDOC_ERROR_JSDOC_EXPECT_ARGUMENTS_OR_THIS@0:9\n"
-      "JSDOC_ERROR_JSDOC_EXPECT_RBRACE@0:9\n",
+      "JSDOC_ERROR_TAG_EXPECT_LBRACE@0:9\n"
+      "JSDOC_ERROR_TAG_EXPECT_ARGUMENTS_OR_THIS@0:9\n"
+      "JSDOC_ERROR_TAG_EXPECT_RBRACE@0:9\n",
       Parse("@modifies"));
 
   EXPECT_EQ(
@@ -119,8 +119,8 @@ TEST_F(JsDocParserTest, SyntaxModifiesError) {
       "+--JsDocTag\n"
       "|  +--Name |@modifies|\n"
       "|  +--Name |this|\n"
-      "JSDOC_ERROR_JSDOC_EXPECT_LBRACE@0:10\n"
-      "JSDOC_ERROR_JSDOC_EXPECT_RBRACE@0:14\n",
+      "JSDOC_ERROR_TAG_EXPECT_LBRACE@0:10\n"
+      "JSDOC_ERROR_TAG_EXPECT_RBRACE@0:14\n",
       Parse("@modifies this"));
 
   EXPECT_EQ(
@@ -128,7 +128,7 @@ TEST_F(JsDocParserTest, SyntaxModifiesError) {
       "+--JsDocTag\n"
       "|  +--Name |@modifies|\n"
       "|  +--Name |foo|\n"
-      "JSDOC_ERROR_JSDOC_EXPECT_ARGUMENTS_OR_THIS@0:15\n",
+      "JSDOC_ERROR_TAG_EXPECT_ARGUMENTS_OR_THIS@0:15\n",
       Parse("@modifies { foo}"));
 }
 

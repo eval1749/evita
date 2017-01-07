@@ -52,9 +52,6 @@ class EnvironmentBuilder final : public Pass, public ast::SyntaxVisitor {
   void ProcessMemberExpressionWithAnnotation(const ast::Node& node,
                                              const ast::Node& annotation);
 
-  // Process AST nodes
-  void ProcessVariables(const ast::Node& declaration);
-
   void ResolveName(const ast::Node& name, const ast::Node& node);
 
   // ast::NodeVisitor implementations
@@ -84,12 +81,6 @@ class EnvironmentBuilder final : public Pass, public ast::SyntaxVisitor {
                      const ast::Node& node) final;
   void VisitInternal(const ast::ExpressionStatement& syntax,
                      const ast::Node& node) final;
-  void VisitInternal(const ast::ConstStatement& syntax,
-                     const ast::Node& node) final;
-  void VisitInternal(const ast::LetStatement& syntax,
-                     const ast::Node& node) final;
-  void VisitInternal(const ast::VarStatement& syntax,
-                     const ast::Node& node) final;
 
   // Types
   void VisitInternal(const ast::TypeName& syntax, const ast::Node& node) final;
@@ -100,9 +91,6 @@ class EnvironmentBuilder final : public Pass, public ast::SyntaxVisitor {
 
   // The toplevel environment
   Environment* toplevel_environment_ = nullptr;
-
-  // |ast::Function|, |ast::Method| or |ast::VariableDeclaration|.
-  const ast::Node* variable_origin_ = nullptr;
 
 #if DCHECK_IS_ON()
   std::unordered_set<const ast::Node*> visited_nodes_;

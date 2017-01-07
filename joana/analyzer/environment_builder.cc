@@ -194,11 +194,6 @@ void EnvironmentBuilder::ProcessMemberExpressionWithAnnotation(
   Value::Editor().AddAssignment(&property, node);
 }
 
-void EnvironmentBuilder::ProcessVariables(const ast::Node& statement) {
-  variable_origin_ = &statement;
-  VisitChildNodes(statement);
-}
-
 void EnvironmentBuilder::ResolveName(const ast::Node& name,
                                      const ast::Node& node) {
   DCHECK_EQ(name, ast::SyntaxCode::Name);
@@ -315,7 +310,6 @@ void EnvironmentBuilder::VisitInternal(const ast::Function& syntax,
     context().RegisterValue(node, &function);
   }
   LocalEnvironment environment(this, node);
-  variable_origin_ = &node;
   VisitChildNodes(node);
 }
 
@@ -323,7 +317,6 @@ void EnvironmentBuilder::VisitInternal(const ast::Method& syntax,
                                        const ast::Node& node) {
   // Methods are bound during processing class declaration.
   LocalEnvironment environment(this, node);
-  variable_origin_ = &node;
   VisitChildNodes(node);
 }
 
@@ -353,11 +346,6 @@ void EnvironmentBuilder::VisitInternal(const ast::BlockStatement& syntax,
   VisitChildNodes(node);
 }
 
-void EnvironmentBuilder::VisitInternal(const ast::ConstStatement& syntax,
-                                       const ast::Node& node) {
-  ProcessVariables(node);
-}
-
 void EnvironmentBuilder::VisitInternal(const ast::ExpressionStatement& syntax,
                                        const ast::Node& node) {
   VisitDefault(node);
@@ -370,16 +358,6 @@ void EnvironmentBuilder::VisitInternal(const ast::ExpressionStatement& syntax,
   if (expression == ast::SyntaxCode::MemberExpression)
     return ProcessMemberExpressionWithAnnotation(expression, annotation);
   AddError(*annotation_, ErrorCode::ENVIRONMENT_UNEXPECT_ANNOTATION);
-}
-
-void EnvironmentBuilder::VisitInternal(const ast::LetStatement& syntax,
-                                       const ast::Node& node) {
-  ProcessVariables(node);
-}
-
-void EnvironmentBuilder::VisitInternal(const ast::VarStatement& syntax,
-                                       const ast::Node& node) {
-  ProcessVariables(node);
 }
 
 // Types

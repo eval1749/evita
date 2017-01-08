@@ -38,7 +38,7 @@ Value& Factory::NewOrdinaryObject(const ast::Node& node) {
   return *new (&zone_) OrdinaryObject(NextValueId(), node, &properties);
 }
 
-Type& Factory::NewPrimitiveType(const ast::Node& name) {
+const Type& Factory::NewPrimitiveType(const ast::Node& name) {
   DCHECK_EQ(name, ast::SyntaxCode::Name);
   return *new (&zone_) PrimitiveType(NextValueId(), name);
 }
@@ -52,17 +52,17 @@ Property& Factory::NewProperty(const ast::Node& key) {
   return *new (&zone_) Property(&zone_, NextValueId(), key, &properties);
 }
 
-Type& Factory::NewTypeName(const ast::Node& name) {
+const Type& Factory::NewTypeName(const ast::Node& name) {
   DCHECK_EQ(name, ast::SyntaxCode::Name);
   return *new (&zone_) TypeName(NextValueId(), name);
 }
 
-Type& Factory::NewTypeParameter(const ast::Node& name) {
+const Type& Factory::NewTypeParameter(const ast::Node& name) {
   DCHECK_EQ(name, ast::SyntaxCode::Name);
   return *new (&zone_) TypeParameter(NextValueId(), name);
 }
 
-Type& Factory::NewTypeReference(Variable* variable) {
+const Type& Factory::NewTypeReference(Variable* variable) {
   DCHECK(variable);
   return *new (&zone_) TypeReference(NextValueId(), variable);
 }

@@ -40,10 +40,10 @@ class Factory final {
   Property& NewProperty(const ast::Node& node);
 
   // Types
-  Type& NewPrimitiveType(const ast::Node& name);
-  Type& NewTypeName(const ast::Node& node);
-  Type& NewTypeParameter(const ast::Node& node);
-  Type& NewTypeReference(Variable* variable);
+  const Type& NewPrimitiveType(const ast::Node& name);
+  const Type& NewTypeName(const ast::Node& node);
+  const Type& NewTypeParameter(const ast::Node& node);
+  const Type& NewTypeReference(Variable* variable);
 
   // Values
   Function& NewFunction(const ast::Node& node);

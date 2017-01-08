@@ -57,7 +57,7 @@ void TypeChecker::VisitInternal(const ast::ReferenceExpression& syntax,
 // Types
 void TypeChecker::VisitInternal(const ast::TypeName& syntax,
                                 const ast::Node& node) {
-  const auto* present = context().TryValueOf(node);
+  const auto* present = context().TryTypeOf(node);
   if (!present) {
     AddError(node, ErrorCode::TYPE_CHECKER_UNDEFIEND_TYPE);
     return;

@@ -8,36 +8,28 @@
 namespace joana {
 namespace analyzer {
 
-#define FOR_EACH_ANALYZE_PRIMITIVE_TYPES(name) \
-  V(boolean)                                   \
-  V(function)                                  \
-  V(null)                                      \
-  V(number)                                    \
-  V(object)                                    \
-  V(string) /* NOLINT */                       \
-  V(symbol)                                    \
-  V(undefined)                                 \
-  V(unknown)                                   \
+#define FOR_EACH_ANALYZE_PRIMITIVE_TYPES(V) \
+  V(boolean)                                \
+  V(function)                               \
+  V(null)                                   \
+  V(number)                                 \
+  V(object)                                 \
+  V(string) /* NOLINT */                    \
+  V(symbol)                                 \
+  V(undefined)                              \
+  V(unknown)                                \
   V(void)
 
-#define FOR_EACH_ABSTRACT_ANALYZE_VALUE(name) \
-  V(LexicalBinding)                           \
-  V(Object)                                   \
-  V(Type)                                     \
-  V(Value)
+#define FOR_EACH_ABSTRACT_ANALYZE_VALUE(V) \
+  V(Object)                                \
+  V(Value)                                 \
+  V(ValueHolder)
 
-#define FOR_EACH_ANALYZE_TYPE(name) \
-  V(TypeName)                       \
-  V(TypeParameter)                  \
-  V(TypeReference)
-
-#define FOR_EACH_ANALYZE_VALUE(name) \
-  FOR_EACH_ANALYZE_TYPE(name)        \
-  V(Function)                        \
-  V(OrdinaryObject)                  \
-  V(Property)                        \
-  V(PrimitiveType)                   \
-  V(Undefined)                       \
+#define FOR_EACH_ANALYZE_VALUE(V) \
+  V(Function)                     \
+  V(OrdinaryObject)               \
+  V(Property)                     \
+  V(Undefined)                    \
   V(Variable)
 
 #define V(name) class name;

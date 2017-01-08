@@ -99,16 +99,16 @@ class EnvironmentBuilder::LocalEnvironment final {
   const LocalEnvironment* outer() const { return outer_; }
   LocalEnvironment* outer() { return outer_; }
 
-  void BindType(const ast::Node& name, Type* type);
+  void BindType(const ast::Node& name, const Type& type);
   void BindVariable(const ast::Node& name, Variable* value);
-  Type* FindType(const ast::Node& name) const;
+  const Type* FindType(const ast::Node& name) const;
   Variable* FindVariable(const ast::Node& name) const;
 
  private:
   EnvironmentBuilder& builder_;
   LocalEnvironment* const outer_;
   const ast::Node& owner_;
-  std::unordered_map<int, Type*> type_map_;
+  std::unordered_map<int, const Type*> type_map_;
   std::unordered_map<int, Variable*> value_map_;
 
   DISALLOW_COPY_AND_ASSIGN(LocalEnvironment);
@@ -126,8 +126,8 @@ EnvironmentBuilder::LocalEnvironment::~LocalEnvironment() {
 }
 
 void EnvironmentBuilder::LocalEnvironment::BindType(const ast::Node& name,
-                                                    Type* type) {
-  const auto& result = type_map_.emplace(ast::Name::IdOf(name), type);
+                                                    const Type& type) {
+  const auto& result = type_map_.emplace(ast::Name::IdOf(name), &type);
   DCHECK(result.second);
 }
 
@@ -137,7 +137,7 @@ void EnvironmentBuilder::LocalEnvironment::BindVariable(const ast::Node& name,
   DCHECK(result.second);
 }
 
-Type* EnvironmentBuilder::LocalEnvironment::FindType(
+const Type* EnvironmentBuilder::LocalEnvironment::FindType(
     const ast::Node& name) const {
   const auto& it = type_map_.find(ast::Name::IdOf(name));
   return it == type_map_.end() ? nullptr : it->second;
@@ -172,8 +172,8 @@ void EnvironmentBuilder::BindAsType(const ast::Node& name, Variable* variable) {
   if (environment_) {
     auto* const present = environment_->FindType(name);
     if (!present) {
-      auto& type = factory().NewTypeReference(variable);
-      environment_->BindType(name, &type);
+      const auto& type = factory().NewTypeReference(variable);
+      environment_->BindType(name, type);
       return;
     }
     if (present->Is<TypeReference>())
@@ -190,8 +190,8 @@ void EnvironmentBuilder::BindAsType(const ast::Node& name, Variable* variable) {
     AddError(name, ErrorCode::ENVIRONMENT_MULTIPLE_BINDINGS, present->node());
     return;
   }
-  auto& type = factory().NewTypeReference(variable);
-  toplevel_environment_->BindType(name, &type);
+  const auto& type = factory().NewTypeReference(variable);
+  toplevel_environment_->BindType(name, type);
 }
 
 Variable& EnvironmentBuilder::BindToVariable(const ast::Node& name) {
@@ -215,7 +215,7 @@ Variable& EnvironmentBuilder::BindToVariable(const ast::Node& name) {
   return variable;
 }
 
-Type* EnvironmentBuilder::FindType(const ast::Node& name) const {
+const Type* EnvironmentBuilder::FindType(const ast::Node& name) const {
   DCHECK_EQ(name, ast::SyntaxCode::Name);
   if (environment_) {
     for (auto* runner = environment_; runner; runner = runner->outer()) {
@@ -281,14 +281,14 @@ void EnvironmentBuilder::ProcessMemberExpressionWithAnnotation(
   Value::Editor().AddAssignment(&property, node);
 }
 
-std::vector<Type*> EnvironmentBuilder::ProcessTypeTemplate(
+std::vector<const Type*> EnvironmentBuilder::ProcessTypeTemplate(
     const ast::Node& document) {
   DCHECK_EQ(document, ast::SyntaxCode::JsDocDocument);
   const auto* const template_tag =
       FindTag(ast::TokenKind::JsDocTemplate, document);
   if (!template_tag)
     return {};
-  std::vector<Type*> types;
+  std::vector<const Type*> types;
   for (const auto& name : ast::JsDocTag::OperandsOf(*template_tag)) {
     if (const auto* present = environment_->FindType(name)) {
       AddError(name, ErrorCode::ENVIRONMENT_MULTIPLE_BINDINGS, present->node());
@@ -299,21 +299,21 @@ std::vector<Type*> EnvironmentBuilder::ProcessTypeTemplate(
   return std::move(types);
 }
 
-Type& EnvironmentBuilder::ResolveTypeName(const ast::Node& name) {
+const Type& EnvironmentBuilder::ResolveTypeName(const ast::Node& name) {
   DCHECK_EQ(name, ast::SyntaxCode::Name);
   if (auto* present_type = FindType(name))
     return *present_type;
 
   if (auto* present = toplevel_environment_->FindVariable(name)) {
-    auto& type = factory().NewTypeReference(present);
-    toplevel_environment_->BindType(name, &type);
+    const auto& type = factory().NewTypeReference(present);
+    toplevel_environment_->BindType(name, type);
     return type;
   }
 
   auto& variable = factory().NewVariable(name);
   toplevel_environment_->BindVariable(name, &variable);
-  auto& type = factory().NewTypeReference(&variable);
-  toplevel_environment_->BindType(name, &type);
+  const auto& type = factory().NewTypeReference(&variable);
+  toplevel_environment_->BindType(name, type);
   return type;
 }
 
@@ -365,7 +365,7 @@ void EnvironmentBuilder::VisitInternal(const ast::Annotation& syntax,
   LocalEnvironment environment(this, annotation);
   const auto& type_parameters = ProcessTypeTemplate(annotation);
   for (const auto& type_parameter : type_parameters)
-    environment_->BindType(type_parameter->node(), type_parameter);
+    environment_->BindType(type_parameter->node(), *type_parameter);
   Visit(annotation);
 }
 
@@ -526,8 +526,8 @@ void EnvironmentBuilder::VisitInternal(const ast::ExpressionStatement& syntax,
 // Types
 void EnvironmentBuilder::VisitInternal(const ast::TypeName& syntax,
                                        const ast::Node& node) {
-  auto& type = ResolveTypeName(ast::TypeName::NameOf(node));
-  context().RegisterValue(node, &type);
+  const auto& type = ResolveTypeName(ast::TypeName::NameOf(node));
+  context().RegisterType(node, type);
 }
 
 }  // namespace analyzer

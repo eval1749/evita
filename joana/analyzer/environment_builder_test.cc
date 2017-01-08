@@ -9,6 +9,7 @@
 
 #include "joana/analyzer/analyzer_test_base.h"
 #include "joana/analyzer/context.h"
+#include "joana/analyzer/type.h"
 #include "joana/analyzer/value.h"
 #include "joana/ast/node.h"
 #include "joana/ast/node_traversal.h"
@@ -22,16 +23,31 @@ namespace analyzer {
 
 namespace {
 
+template <typename T>
 struct Printable {
-  const Value* value;
+  const T* thing;
 };
 
-Printable AsPrintable(const Value& value) {
-  return Printable{&value};
+Printable<Type> AsPrintable(const Type& type) {
+  return Printable<Type>{&type};
 }
 
-std::ostream& operator<<(std::ostream& ostream, const Printable& printable) {
-  const auto& value = *printable.value;
+std::ostream& operator<<(std::ostream& ostream,
+                         const Printable<Type>& printable) {
+  const auto& type = *printable.thing;
+  const auto& range = type.node().range();
+  return ostream << type.class_name() << '@' << type.id() << '['
+                 << range.start() << '-' << range.end() << "] "
+                 << EscapedStringPiece16(range.GetString(), '|', 20);
+}
+
+Printable<Value> AsPrintable(const Value& value) {
+  return Printable<Value>{&value};
+}
+
+std::ostream& operator<<(std::ostream& ostream,
+                         const Printable<Value>& printable) {
+  const auto& value = *printable.thing;
   const auto& range = value.node().range();
   return ostream << value.class_name() << '@' << value.id() << '['
                  << range.start() << '-' << range.end() << "] "
@@ -60,11 +76,14 @@ std::string EnvironmentBuilderTest::ListValues(base::StringPiece script_text) {
   builder.RunOn(module);
   std::ostringstream ostream;
   for (const auto& node : ast::NodeTraversal::DescendantsOf(module)) {
-    const auto* value = analyzer_context().TryValueOf(node);
-    if (!value)
-      continue;
-    ostream << node.syntax() << '[' << node.range().start() << '-'
-            << node.range().end() << "]=" << AsPrintable(*value) << std::endl;
+    if (const auto* value = analyzer_context().TryValueOf(node)) {
+      ostream << node.syntax() << '[' << node.range().start() << '-'
+              << node.range().end() << "]=" << AsPrintable(*value) << std::endl;
+    }
+    if (const auto* type = analyzer_context().TryTypeOf(node)) {
+      ostream << node.syntax() << '[' << node.range().start() << '-'
+              << node.range().end() << "]=" << AsPrintable(*type) << std::endl;
+    }
   }
   for (const auto& error : error_sink().errors())
     ostream << error << std::endl;
@@ -124,7 +143,7 @@ TEST_F(EnvironmentBuilderTest, FunctionAnonymous) {
 TEST_F(EnvironmentBuilderTest, Global) {
   EXPECT_EQ(
       "MemberExpression[0-10]=Property@1001[7-10] |foo|\n"
-      "ReferenceExpression[0-6]=Variable@15[8-14] |global|\n",
+      "ReferenceExpression[0-6]=Variable@8[8-14] |global|\n",
       ListValues("global.foo = 1;"));
 }
 
@@ -149,7 +168,7 @@ TEST_F(EnvironmentBuilderTest, MemberExpression) {
 TEST_F(EnvironmentBuilderTest, Super) {
   EXPECT_EQ("", ListValues("super.foo = 1;")) << "'super' has no value";
 
-  EXPECT_EQ("TypeName[11-17]=PrimitiveType@6[20-26] |number|\n",
+  EXPECT_EQ("TypeName[11-17]=PrimitiveType@3[20-26] |number|\n",
             ListValues("/** @type {number} */ super.foo = 1;"))
       << "'super' has no value";
 }
@@ -157,7 +176,7 @@ TEST_F(EnvironmentBuilderTest, Super) {
 TEST_F(EnvironmentBuilderTest, This) {
   EXPECT_EQ("", ListValues("this.foo = 1;")) << "'this' has no value";
 
-  EXPECT_EQ("TypeName[11-17]=PrimitiveType@6[20-26] |number|\n",
+  EXPECT_EQ("TypeName[11-17]=PrimitiveType@3[20-26] |number|\n",
             ListValues("/** @type {number} */ this.foo = 1;"))
       << "'this' has no value";
 }
@@ -171,7 +190,7 @@ TEST_F(EnvironmentBuilderTest, Type) {
                  "/** @type {!Foo} */ var foo;\n"));
 
   EXPECT_EQ(
-      "TypeName[11-17]=PrimitiveType@6[20-26] |number|\n"
+      "TypeName[11-17]=PrimitiveType@3[20-26] |number|\n"
       "BindingNameElement[26-27]=Variable@1004[26-27] |x|\n",
       ListValues("/** @type {number} */ var x;"));
 

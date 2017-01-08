@@ -39,7 +39,7 @@ class Environment final : public ZoneAllocated {
   // Return the AST node which associated to this Environment.
   const ast::Node& owner() const { return owner_; }
 
-  Type* FindType(const ast::Node& name) const;
+  const Type* FindType(const ast::Node& name) const;
   Variable* FindVariable(const ast::Node& name) const;
 
  private:
@@ -50,13 +50,13 @@ class Environment final : public ZoneAllocated {
   Environment(Zone* zone, const ast::Node& owner);
 
   void BindVariable(const ast::Node& name, Variable* value);
-  void BindType(const ast::Node& name, Type* type);
+  void BindType(const ast::Node& name, const Type& type);
 
   ZoneVector<const ast::Node*> names_;
   ZoneUnorderedMap<int, const ast::Node*> name_map_;
   Environment* const outer_;
   const ast::Node& owner_;
-  ZoneUnorderedMap<int, Type*> type_map_;
+  ZoneUnorderedMap<int, const Type*> type_map_;
   ZoneUnorderedMap<int, Variable*> value_map_;
 
   DISALLOW_COPY_AND_ASSIGN(Environment);

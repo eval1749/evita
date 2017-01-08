@@ -10,6 +10,7 @@
 #include "joana/analyzer/environment.h"
 #include "joana/analyzer/factory.h"
 #include "joana/analyzer/public/analyzer_settings.h"
+#include "joana/analyzer/type_map.h"
 #include "joana/analyzer/types.h"
 #include "joana/analyzer/value_editor.h"
 #include "joana/analyzer/value_map.h"
@@ -30,6 +31,7 @@ Context::Context(const AnalyzerSettings& settings)
     : factory_(new Factory(&settings.zone())),
       global_environment_(NewGlobalEnvironment(&settings.zone())),
       settings_(settings),
+      type_map_(new TypeMap()),
       value_map_(new ValueMap()) {
   InstallPrimitiveTypes();
   InstallGlobalObject();
@@ -69,10 +71,10 @@ void Context::InstallGlobalObject() {
 void Context::InstallPrimitiveTypes() {
   for (const auto id : BuiltInWorld::GetInstance()->primitive_types()) {
     const auto& name = BuiltInWorld::GetInstance()->NameOf(id);
-    const auto& type = BuiltInWorld::GetInstance()->TypeOf(id);
-    RegisterValue(type, &factory().NewPrimitiveType(name));
-    auto& variable = factory().NewPrimitiveType(name);
-    global_environment_.BindType(name, &variable);
+    const auto& type_name = BuiltInWorld::GetInstance()->TypeOf(id);
+    const auto& type = factory().NewPrimitiveType(name);
+    RegisterType(type_name, type);
+    global_environment_.BindType(name, type);
   }
 }
 
@@ -90,8 +92,8 @@ Environment& Context::NewGlobalEnvironment(Zone* zone) {
   return *new (zone) Environment(zone, module);
 }
 
-Value& Context::RegisterValue(const ast::Node& node, Value* value) {
-  return value_map_->RegisterValue(node, value);
+void Context::RegisterValue(const ast::Node& node, Value* value) {
+  value_map_->RegisterValue(node, value);
 }
 
 Value* Context::TryValueOf(const ast::Node& node) const {
@@ -100,6 +102,18 @@ Value* Context::TryValueOf(const ast::Node& node) const {
 
 Value& Context::ValueOf(const ast::Node& node) const {
   return value_map_->ValueOf(node);
+}
+
+void Context::RegisterType(const ast::Node& node, const Type& type) {
+  type_map_->RegisterType(node, type);
+}
+
+const Type* Context::TryTypeOf(const ast::Node& node) const {
+  return type_map_->TryTypeOf(node);
+}
+
+const Type& Context::TypeOf(const ast::Node& node) const {
+  return type_map_->TypeOf(node);
 }
 
 }  // namespace analyzer

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include <ostream>
+#include <type_traits>
 
 #include "base/logging.h"
 #include "joana/analyzer/types.h"
@@ -41,33 +42,9 @@ std::ostream& operator<<(std::ostream& ostream,
 }
 
 std::ostream& operator<<(std::ostream& ostream,
-                         const Printable<PrimitiveType>& printable) {
-  const auto& value = *printable.value;
-  return ostream << "$PrimitiveType@" << value.id() << ' ' << value.node();
-}
-
-std::ostream& operator<<(std::ostream& ostream,
                          const Printable<Property>& printable) {
   const auto& value = *printable.value;
   return ostream << "$Property@" << value.id() << ' ' << value.node();
-}
-
-std::ostream& operator<<(std::ostream& ostream,
-                         const Printable<TypeName>& printable) {
-  const auto& value = *printable.value;
-  return ostream << "$TypeName@" << value.id() << ' ' << value.node();
-}
-
-std::ostream& operator<<(std::ostream& ostream,
-                         const Printable<TypeParameter>& printable) {
-  const auto& value = *printable.value;
-  return ostream << "$TypeParameter@" << value.id() << ' ' << value.node();
-}
-
-std::ostream& operator<<(std::ostream& ostream,
-                         const Printable<TypeReference>& printable) {
-  const auto& value = *printable.value;
-  return ostream << "$TypeReference@" << value.id() << ' ' << value.node();
 }
 
 std::ostream& operator<<(std::ostream& ostream,

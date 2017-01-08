@@ -48,7 +48,7 @@ class EnvironmentBuilder final : public Pass, public ast::SyntaxVisitor {
   void BindAsType(const ast::Node& name, Variable* variable);
   Variable& BindToVariable(const ast::Node& name);
 
-  Type* FindType(const ast::Node& name) const;
+  const Type* FindType(const ast::Node& name) const;
   Variable* FindVariable(const ast::Node& name) const;
 
   void ProcessAssignmentExpressionWithAnnotation(const ast::Node& node,
@@ -57,9 +57,9 @@ class EnvironmentBuilder final : public Pass, public ast::SyntaxVisitor {
   void ProcessMemberExpressionWithAnnotation(const ast::Node& node,
                                              const ast::Node& annotation);
 
-  std::vector<Type*> ProcessTypeTemplate(const ast::Node& document);
+  std::vector<const Type*> ProcessTypeTemplate(const ast::Node& document);
 
-  Type& ResolveTypeName(const ast::Node& name);
+  const Type& ResolveTypeName(const ast::Node& name);
   Variable& ResolveVariableName(const ast::Node& name);
 
   // ast::NodeVisitor implementations

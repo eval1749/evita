@@ -19,30 +19,42 @@ class Syntax;
 enum class SyntaxCode;
 
 //
-// Node
+// Node represents a node of Abstract Syntax Tree (AST).
 //
 class JOANA_AST_EXPORT Node final {
  public:
   ~Node();
 
+  // |Node| has variable number of child nodes and allocated in |Zone|.
   void* operator new(size_t size, void* pointer) { return pointer; }
 
   bool operator==(const Node& other) const;
   bool operator==(const Node* other) const;
   bool operator!=(const Node& other) const;
   bool operator!=(const Node* other) const;
-  bool operator==(TokenKind kind) const;
-  bool operator!=(TokenKind kind) const;
+
+  // For ease of type checking and using DCHECK_EQ(), |Node| has |operator==()|.
   bool operator==(SyntaxCode syntax_code) const;
   bool operator!=(SyntaxCode syntax_code) const;
+  bool operator==(TokenKind kind) const;
+  bool operator!=(TokenKind kind) const;
 
   // Returns number of operands in this node.
   size_t arity() const { return arity_; }
+
+  // Returns |index|th child of this node.
   const Node& child_at(size_t index) const;
+
+  // Returns source code of this node.
   const SourceCode& source_code() const { return range_.source_code(); }
+
+  // Returns source code range of this node.
   const SourceCodeRange& range() const { return range_; }
+
+  // Returns |Syntax| of this node.
   const Syntax& syntax() const { return syntax_; }
 
+  // Short cut for checking whether this |Node is literal or no.
   bool is_literal() const;
 
  protected:

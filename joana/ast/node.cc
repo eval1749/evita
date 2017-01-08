@@ -71,9 +71,11 @@ bool Node::is_literal() const {
 }
 
 std::ostream& operator<<(std::ostream& ostream, const Node& node) {
+  constexpr auto kMaxChars = 20;
   const auto& range = node.range();
   return ostream << node.syntax() << '(' << range << ", "
-                 << EscapedStringPiece16(range.GetString(), '|', 20) << ')';
+                 << EscapedStringPiece16(range.GetString(), '|', kMaxChars)
+                 << ')';
 }
 
 std::ostream& operator<<(std::ostream& ostream, const Node* node) {

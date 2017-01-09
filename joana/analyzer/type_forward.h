@@ -18,6 +18,7 @@ namespace analyzer {
   V(GenericType)                    \
   V(FunctionType)                   \
   V(InvalidType)                    \
+  V(PrimitiveType)                  \
   V(TypeApplication)                \
   V(TypeName)                       \
   V(TypeParameter)                  \

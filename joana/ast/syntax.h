@@ -50,9 +50,12 @@ const size_t kNumberOfOperations =
 #define DECLARE_ABSTRACT_AST_SYNTAX(name, base) DECLARE_AST_SYNTAX(name, base);
 
 #define DECLARE_CONCRETE_AST_SYNTAX(name, base)         \
+ public:                                                \
+  static constexpr auto kSyntaxCode = SyntaxCode::name; \
+                                                        \
+ private:                                               \
   DECLARE_AST_SYNTAX(name, base);                       \
   friend class SyntaxFactory;                           \
-  static constexpr auto kSyntaxCode = SyntaxCode::name; \
   void Accept(SyntaxVisitor* visitor, const ast::Node& node) const final;
 
 //

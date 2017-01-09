@@ -57,6 +57,15 @@ class JOANA_AST_EXPORT Node final {
   // Short cut for checking whether this |Node is literal or no.
   bool is_literal() const;
 
+  bool Is(SyntaxCode syntax_code) const;
+  bool Is(TokenKind kind) const;
+
+  template <typename T>
+  bool Is() const {
+    static_assert(std::is_base_of<Syntax, T>::value, "Should be Syntax class");
+    return Is(T::kSyntaxCode);
+  }
+
  protected:
   Node(const SourceCodeRange& range, const Syntax& syntax, size_t arity);
 

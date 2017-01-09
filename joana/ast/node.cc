@@ -44,21 +44,20 @@ bool Node::operator!=(const Node* other) const {
   return this != other;
 }
 
-bool Node::operator==(TokenKind kind) const {
-  const auto* name = syntax_.TryAs<Token>();
-  return name && name->number() == static_cast<int>(kind);
-}
-
-bool Node::operator!=(TokenKind kind) const {
-  return !operator==(kind);
-}
-
 bool Node::operator==(SyntaxCode syntax_code) const {
-  return syntax_ == syntax_code;
+  return Is(syntax_code);
 }
 
 bool Node::operator!=(SyntaxCode syntax_code) const {
   return !operator==(syntax_code);
+}
+
+bool Node::operator==(TokenKind kind) const {
+  return Is(kind);
+}
+
+bool Node::operator!=(TokenKind kind) const {
+  return !operator==(kind);
 }
 
 const Node& Node::child_at(size_t index) const {
@@ -68,6 +67,15 @@ const Node& Node::child_at(size_t index) const {
 
 bool Node::is_literal() const {
   return syntax_.is_literal();
+}
+
+bool Node::Is(SyntaxCode syntax_code) const {
+  return syntax_ == syntax_code;
+}
+
+bool Node::Is(TokenKind kind) const {
+  const auto* name = syntax_.TryAs<Token>();
+  return name && name->number() == static_cast<int>(kind);
 }
 
 std::ostream& operator<<(std::ostream& ostream, const Node& node) {

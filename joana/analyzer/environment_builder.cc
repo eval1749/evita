@@ -272,8 +272,12 @@ void EnvironmentBuilder::VisitInternal(const ast::Class& syntax,
   context().RegisterType(node, class_type);
   context().RegisterValue(node, &class_value);
 
-  for (const auto& member :
+  for (const auto& child :
        ast::NodeTraversal::ChildNodesOf(ast::Class::BodyOf(node))) {
+    const auto& member = child.Is<ast::Annotation>()
+                             ? ast::Annotation::AnnotatedOf(child)
+                             : child;
+
     if (member != ast::SyntaxCode::Method) {
       AddError(member, ErrorCode::ENVIRONMENT_EXPECT_METHOD);
       continue;
@@ -302,6 +306,13 @@ void EnvironmentBuilder::VisitInternal(const ast::Class& syntax,
     auto& method = factory().NewFunction(member);
     context().RegisterValue(member, &method);
     Value::Editor().AddMethod(&class_value, &method);
+
+    LocalEnvironment environment(this, node);
+    VisitDefault(member);
+
+    if (!child.Is<ast::Annotation>())
+      continue;
+    VisitDefault(ast::Annotation::AnnotationOf(child));
   }
 
   const auto& class_name = ast::Class::NameOf(node);
@@ -363,9 +374,7 @@ void EnvironmentBuilder::VisitInternal(const ast::Function& syntax,
 
 void EnvironmentBuilder::VisitInternal(const ast::Method& syntax,
                                        const ast::Node& node) {
-  // Methods are bound during processing class declaration.
-  LocalEnvironment environment(this, node);
-  VisitDefault(node);
+  NOTREACHED() << "Method should be processed in Class " << node;
 }
 
 // Expressions
@@ -430,7 +439,7 @@ void EnvironmentBuilder::VisitInternal(const ast::BlockStatement& syntax,
 // Types
 void EnvironmentBuilder::VisitInternal(const ast::TypeName& syntax,
                                        const ast::Node& node) {
-  const auto* type = FindType(node);
+  const auto* type = FindType(ast::TypeName::NameOf(node));
   if (!type)
     return;
   context().RegisterType(node, *type);

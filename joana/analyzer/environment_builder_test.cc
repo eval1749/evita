@@ -64,6 +64,30 @@ TEST_F(EnvironmentBuilderTest, Class) {
       "|  |  |  +--ParameterList |()|\n"
       "|  |  |  +--BlockStatement |{}|\n",
       RunOn("class Foo { bar() {} baz() {} }"));
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--Class $Class@1001 {class Foo@1001}\n"
+      "|  +--Name |Foo|\n"
+      "|  +--ElisionExpression ||\n"
+      "|  +--ObjectInitializer\n"
+      "|  |  +--Annotation\n"
+      "|  |  |  +--JsDocDocument\n"
+      "|  |  |  |  +--JsDocText |/**|\n"
+      "|  |  |  |  +--JsDocTag\n"
+      "|  |  |  |  |  +--Name |@param|\n"
+      "|  |  |  |  |  +--TypeName {%number%}\n"
+      "|  |  |  |  |  |  +--Name |number|\n"
+      "|  |  |  |  |  +--Name |x|\n"
+      "|  |  |  |  |  +--JsDocText |*/|\n"
+      "|  |  |  +--Method<NonStatic,Normal> $Function@1002\n"
+      "|  |  |  |  +--Name |foo|\n"
+      "|  |  |  |  +--ParameterList\n"
+      "|  |  |  |  |  +--BindingNameElement $Variable@1003\n"
+      "|  |  |  |  |  |  +--Name |x|\n"
+      "|  |  |  |  |  |  +--ElisionExpression ||\n"
+      "|  |  |  |  +--BlockStatement |{}|\n",
+      RunOn("class Foo { /** @param {number} x */ foo(x) {} }"));
 }
 
 TEST_F(EnvironmentBuilderTest, ClassAnonymous) {

@@ -5,6 +5,8 @@
 #ifndef JOANA_ANALYZER_VALUES_H_
 #define JOANA_ANALYZER_VALUES_H_
 
+#include <iosfwd>
+
 #include "joana/analyzer/value.h"
 #include "joana/base/iterator_utils.h"
 #include "joana/base/memory/zone_vector.h"
@@ -12,14 +14,19 @@
 namespace joana {
 namespace analyzer {
 
+class Function;
+class Properties;
+
+//
+// ClassKind
+//
 enum class ClassKind {
   Interface,
   Normal,
   Record,
 };
 
-class Function;
-class Properties;
+std::ostream& operator<<(std::ostream& ostream, ClassKind kind);
 
 //
 // Object

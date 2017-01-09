@@ -32,7 +32,8 @@ Printable<Value> AsPrintable(const Value& value) {
 std::ostream& operator<<(std::ostream& ostream,
                          const Printable<Class>& printable) {
   const auto& value = *printable.value;
-  return ostream << "$Class@" << value.id() << ' ' << value.node();
+  return ostream << '$' << value.kind() << '@' << value.id() << ' '
+                 << value.node();
 }
 
 std::ostream& operator<<(std::ostream& ostream,
@@ -80,6 +81,18 @@ std::ostream& operator<<(std::ostream& ostream,
 }
 
 }  // namespace
+
+std::ostream& operator<<(std::ostream& ostream, ClassKind kind) {
+  switch (kind) {
+    case ClassKind::Normal:
+      return ostream << "Class";
+    case ClassKind::Interface:
+      return ostream << "Interface";
+    case ClassKind::Record:
+      return ostream << "Record";
+  }
+  return ostream << "ClassKind" << static_cast<int>(kind);
+}
 
 std::ostream& operator<<(std::ostream& ostream, const Value& value) {
   return ostream << AsPrintable(value);

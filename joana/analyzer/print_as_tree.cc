@@ -103,6 +103,14 @@ const ast::Node* ValueNameOf(const Value& value) {
 std::ostream& operator<<(std::ostream& ostream,
                          const Printable<Value>& printable) {
   const auto& value = *printable.thing;
+  if (value.Is<Class>()) {
+    ostream << value.As<Class>().kind();
+    const auto& name = ValueNameOf(value);
+    if (!name)
+      return ostream << '@' << value.id();
+    return ostream << '[' << ast::AsSourceCode(*name) << '@' << value.id()
+                   << ']';
+  }
   if (value.Is<Property>()) {
     return ostream << '[' << ast::AsSourceCode(value.node()) << '@'
                    << value.id() << ']';

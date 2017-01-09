@@ -343,7 +343,8 @@ const ast::Node& JsDocParser::ParseType() {
                     source_code().Slice(type_start, reader_->location()),
                     options_, TypeLexerMode::JsDoc);
   auto& type = parser.Parse();
-  ConsumeCharIf(kRightBrace);
+  if (!ConsumeCharIf(kRightBrace))
+    AddError(JsDocErrorCode::ERROR_TAG_EXPECT_RBRACE);
   return type;
 }
 

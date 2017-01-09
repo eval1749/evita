@@ -245,6 +245,17 @@ TEST_F(JsDocParserTest, SyntaxType) {
       Parse("@enum {number}"));
 }
 
+TEST_F(JsDocParserTest, SyntaxTypeError) {
+  EXPECT_EQ(
+      "JsDocDocument\n"
+      "+--JsDocTag\n"
+      "|  +--Name |@enum|\n"
+      "|  +--TypeName\n"
+      "|  |  +--Name |number|\n"
+      "JSDOC_ERROR_TAG_EXPECT_RBRACE@6:13\n",
+      Parse("@enum {number"));
+}
+
 TEST_F(JsDocParserTest, SyntaxTypeDescription) {
   EXPECT_EQ(
       "JsDocDocument\n"

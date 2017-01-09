@@ -156,27 +156,6 @@ void EnvironmentBuilder::RunOn(const ast::Node& node) {
   Visit(node);
 }
 
-Variable& EnvironmentBuilder::BindToVariable(const ast::Node& name) {
-  DCHECK_EQ(name, ast::SyntaxCode::Name);
-  if (environment_) {
-    for (auto* runner = environment_; runner; runner = runner->outer()) {
-      if (auto* present = runner->FindVariable(name))
-        return *present;
-    }
-    auto& variable = factory().NewVariable(name);
-    environment_->BindVariable(name, &variable);
-    return variable;
-  }
-  for (auto* runner = toplevel_environment_; runner; runner = runner->outer()) {
-    if (auto* present = runner->FindVariable(name))
-      return *present;
-  }
-  // TODO(eval1749): Expose global "var" binding to global object.
-  auto& variable = factory().NewVariable(name);
-  toplevel_environment_->BindVariable(name, &variable);
-  return variable;
-}
-
 void EnvironmentBuilder::BindType(const ast::Node& name, const Type& type) {
   DCHECK_EQ(name, ast::SyntaxCode::Name);
   if (environment_) {
@@ -220,6 +199,27 @@ const Type* EnvironmentBuilder::FindType(const ast::Node& name) const {
       return present;
   }
   return nullptr;
+}
+
+Variable& EnvironmentBuilder::BindVariable(const ast::Node& name) {
+  DCHECK_EQ(name, ast::SyntaxCode::Name);
+  if (environment_) {
+    for (auto* runner = environment_; runner; runner = runner->outer()) {
+      if (auto* present = runner->FindVariable(name))
+        return *present;
+    }
+    auto& variable = factory().NewVariable(name);
+    environment_->BindVariable(name, &variable);
+    return variable;
+  }
+  for (auto* runner = toplevel_environment_; runner; runner = runner->outer()) {
+    if (auto* present = runner->FindVariable(name))
+      return *present;
+  }
+  // TODO(eval1749): Expose global "var" binding to global object.
+  auto& variable = factory().NewVariable(name);
+  toplevel_environment_->BindVariable(name, &variable);
+  return variable;
 }
 
 Variable* EnvironmentBuilder::FindVariable(const ast::Node& name) const {
@@ -316,7 +316,7 @@ void EnvironmentBuilder::ProcessClass(const ast::Node& node,
   BindType(class_name, class_type);
 
   // Set variable
-  auto& variable = BindToVariable(class_name);
+  auto& variable = BindVariable(class_name);
   if (!variable.assignments().empty()) {
     AddError(node, ErrorCode::ENVIRONMENT_MULTIPLE_OCCURRENCES,
              *variable.assignments().front());
@@ -387,7 +387,7 @@ void EnvironmentBuilder::ProcessFunction(const ast::Node& node,
   }
 
   if (name == ast::SyntaxCode::Name) {
-    auto& variable = BindToVariable(name);
+    auto& variable = BindVariable(name);
     if (!variable.assignments().empty()) {
       AddError(node, ErrorCode::ENVIRONMENT_MULTIPLE_OCCURRENCES,
                *variable.assignments().front());
@@ -462,7 +462,7 @@ void EnvironmentBuilder::VisitDefault(const ast::Node& node) {
 void EnvironmentBuilder::VisitInternal(const ast::BindingNameElement& syntax,
                                        const ast::Node& node) {
   VisitDefault(node);
-  auto& variable = BindToVariable(ast::BindingNameElement::NameOf(node));
+  auto& variable = BindVariable(ast::BindingNameElement::NameOf(node));
   Value::Editor().AddAssignment(&variable, node);
   context().RegisterValue(node, &variable);
   if (variable.assignments().size() == 1)

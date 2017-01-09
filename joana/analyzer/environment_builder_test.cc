@@ -314,6 +314,24 @@ TEST_F(EnvironmentBuilderTest, Global) {
       RunOn("global.foo = 1;"));
 }
 
+TEST_F(EnvironmentBuilderTest, GroupExpression) {
+  EXPECT_EQ(
+      "Module\n"
+      "+--ReturnStatement\n"
+      "|  +--Annotation\n"
+      "|  |  +--JsDocDocument\n"
+      "|  |  |  +--JsDocText |/**|\n"
+      "|  |  |  +--JsDocTag\n"
+      "|  |  |  |  +--Name |@type|\n"
+      "|  |  |  |  +--TypeName {%number%}\n"
+      "|  |  |  |  |  +--Name |number|\n"
+      "|  |  |  +--JsDocText |*/|\n"
+      "|  |  +--GroupExpression\n"
+      "|  |  |  +--ReferenceExpression $foo@1001\n"
+      "|  |  |  |  +--Name |foo|\n",
+      RunOn("return /** @type {number} */(foo);"));
+}
+
 TEST_F(EnvironmentBuilderTest, Let) {
   EXPECT_EQ(
       "Module\n"

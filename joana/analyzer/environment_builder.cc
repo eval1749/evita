@@ -467,10 +467,10 @@ void EnvironmentBuilder::VisitInternal(const ast::Annotation& syntax,
     return ProcessClass(annotated, &document);
   if (annotated.Is<ast::Function>())
     return ProcessFunction(annotated, &document);
-  if (annotated.syntax().Is<ast::VariableDeclaration>()) {
-    VisitChildNodes(node);
-    return;
-  }
+  if (annotated.syntax().Is<ast::VariableDeclaration>())
+    return VisitChildNodes(node);
+  if (annotated.Is<ast::GroupExpression>())
+    return VisitChildNodes(node);
   if (!annotated.Is<ast::ExpressionStatement>()) {
     AddError(node, ErrorCode::ENVIRONMENT_UNEXPECT_ANNOTATION);
     return;

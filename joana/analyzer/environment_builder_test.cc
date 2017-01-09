@@ -51,15 +51,15 @@ std::string EnvironmentBuilderTest::RunOn(base::StringPiece script_text) {
 TEST_F(EnvironmentBuilderTest, Class) {
   EXPECT_EQ(
       "Module\n"
-      "+--Class $Class@1001 {class Foo@1001}\n"
+      "+--Class Class[Foo@1001] {class Foo@1001}\n"
       "|  +--Name |Foo|\n"
       "|  +--ElisionExpression ||\n"
       "|  +--ObjectInitializer\n"
-      "|  |  +--Method<NonStatic,Normal> $Function@1002\n"
+      "|  |  +--Method<NonStatic,Normal> Function[bar@1002]\n"
       "|  |  |  +--Name |bar|\n"
       "|  |  |  +--ParameterList |()|\n"
       "|  |  |  +--BlockStatement |{}|\n"
-      "|  |  +--Method<NonStatic,Normal> $Function@1003\n"
+      "|  |  +--Method<NonStatic,Normal> Function[baz@1003]\n"
       "|  |  |  +--Name |baz|\n"
       "|  |  |  +--ParameterList |()|\n"
       "|  |  |  +--BlockStatement |{}|\n",
@@ -67,7 +67,7 @@ TEST_F(EnvironmentBuilderTest, Class) {
 
   EXPECT_EQ(
       "Module\n"
-      "+--Class $Class@1001 {class Foo@1001}\n"
+      "+--Class Class[Foo@1001] {class Foo@1001}\n"
       "|  +--Name |Foo|\n"
       "|  +--ElisionExpression ||\n"
       "|  +--ObjectInitializer\n"
@@ -78,13 +78,13 @@ TEST_F(EnvironmentBuilderTest, Class) {
       "|  |  |  |  |  +--Name |@param|\n"
       "|  |  |  |  |  +--TypeName {%number%}\n"
       "|  |  |  |  |  |  +--Name |number|\n"
-      "|  |  |  |  |  +--ReferenceExpression $Variable@1003\n"
+      "|  |  |  |  |  +--ReferenceExpression $x@1003\n"
       "|  |  |  |  |  |  +--Name |x|\n"
       "|  |  |  |  |  +--JsDocText |*/|\n"
-      "|  |  |  +--Method<NonStatic,Normal> $Function@1002\n"
+      "|  |  |  +--Method<NonStatic,Normal> Function[foo@1002]\n"
       "|  |  |  |  +--Name |foo|\n"
       "|  |  |  |  +--ParameterList\n"
-      "|  |  |  |  |  +--BindingNameElement $Variable@1003\n"
+      "|  |  |  |  |  +--BindingNameElement $x@1003\n"
       "|  |  |  |  |  |  +--Name |x|\n"
       "|  |  |  |  |  |  +--ElisionExpression ||\n"
       "|  |  |  |  +--BlockStatement |{}|\n",
@@ -95,9 +95,9 @@ TEST_F(EnvironmentBuilderTest, ClassAnonymous) {
   EXPECT_EQ(
       "Module\n"
       "+--VarStatement\n"
-      "|  +--BindingNameElement $Variable@1002\n"
+      "|  +--BindingNameElement $a@1002\n"
       "|  |  +--Name |a|\n"
-      "|  |  +--Class $Class@1001 {class@1001}\n"
+      "|  |  +--Class Class@1001 {class@1001}\n"
       "|  |  |  +--Empty ||\n"
       "|  |  |  +--ElisionExpression ||\n"
       "|  |  |  +--ObjectInitializer |{}|\n",
@@ -107,7 +107,7 @@ TEST_F(EnvironmentBuilderTest, ClassAnonymous) {
 TEST_F(EnvironmentBuilderTest, ClassError) {
   EXPECT_EQ(
       "Module\n"
-      "+--Class $Class@1001 {class Foo@1001}\n"
+      "+--Class Class[Foo@1001] {class Foo@1001}\n"
       "|  +--Name |Foo|\n"
       "|  +--ElisionExpression ||\n"
       "|  +--ObjectInitializer\n"
@@ -117,15 +117,15 @@ TEST_F(EnvironmentBuilderTest, ClassError) {
 
   EXPECT_EQ(
       "Module\n"
-      "+--Class $Class@1001 {class Foo@1001}\n"
+      "+--Class Class[Foo@1001] {class Foo@1001}\n"
       "|  +--Name |Foo|\n"
       "|  +--ElisionExpression ||\n"
       "|  +--ObjectInitializer\n"
-      "|  |  +--Method<NonStatic,Normal> $Function@1002\n"
+      "|  |  +--Method<NonStatic,Normal> Function[bar@1002]\n"
       "|  |  |  +--Name |bar|\n"
       "|  |  |  +--ParameterList |()|\n"
       "|  |  |  +--BlockStatement |{}|\n"
-      "|  |  +--Method<NonStatic,Normal> $Function@1003\n"
+      "|  |  +--Method<NonStatic,Normal> Function[bar@1003]\n"
       "|  |  |  +--Name |bar|\n"
       "|  |  |  +--ParameterList |()|\n"
       "|  |  |  +--BlockStatement |{}|\n"
@@ -136,11 +136,11 @@ TEST_F(EnvironmentBuilderTest, ClassError) {
 TEST_F(EnvironmentBuilderTest, ClassErrorConstructor) {
   EXPECT_EQ(
       "Module\n"
-      "+--Class $Class@1001 {class Foo@1001}\n"
+      "+--Class Class[Foo@1001] {class Foo@1001}\n"
       "|  +--Name |Foo|\n"
       "|  +--ElisionExpression ||\n"
       "|  +--ObjectInitializer\n"
-      "|  |  +--Method<NonStatic,Async> $Function@1002\n"
+      "|  |  +--Method<NonStatic,Async> Function[constructor@1002]\n"
       "|  |  |  +--Name |constructor|\n"
       "|  |  |  +--ParameterList |()|\n"
       "|  |  |  +--BlockStatement |{}|\n"
@@ -150,11 +150,11 @@ TEST_F(EnvironmentBuilderTest, ClassErrorConstructor) {
 
   EXPECT_EQ(
       "Module\n"
-      "+--Class $Class@1001 {class Foo@1001}\n"
+      "+--Class Class[Foo@1001] {class Foo@1001}\n"
       "|  +--Name |Foo|\n"
       "|  +--ElisionExpression ||\n"
       "|  +--ObjectInitializer\n"
-      "|  |  +--Method<NonStatic,Generator> $Function@1002\n"
+      "|  |  +--Method<NonStatic,Generator> Function[constructor@1002]\n"
       "|  |  |  +--Name |constructor|\n"
       "|  |  |  +--ParameterList |()|\n"
       "|  |  |  +--BlockStatement |{}|\n"
@@ -164,11 +164,11 @@ TEST_F(EnvironmentBuilderTest, ClassErrorConstructor) {
 
   EXPECT_EQ(
       "Module\n"
-      "+--Class $Class@1001 {class Foo@1001}\n"
+      "+--Class Class[Foo@1001] {class Foo@1001}\n"
       "|  +--Name |Foo|\n"
       "|  +--ElisionExpression ||\n"
       "|  +--ObjectInitializer\n"
-      "|  |  +--Method<Static,Normal> $Function@1002\n"
+      "|  |  +--Method<Static,Normal> Function[constructor@1002]\n"
       "|  |  |  +--Name |constructor|\n"
       "|  |  |  +--ParameterList |()|\n"
       "|  |  |  +--BlockStatement |{}|\n"
@@ -186,7 +186,7 @@ TEST_F(EnvironmentBuilderTest, ComputedMemberExpression) {
       "|  |  +--JsDocTag\n"
       "|  |  |  +--Name |@constructor|\n"
       "|  |  +--JsDocText |*/|\n"
-      "|  +--Function<Normal> $Variable@1002\n"
+      "|  +--Function<Normal> $Foo@1002\n"
       "|  |  +--Name |Foo|\n"
       "|  |  +--ParameterList |()|\n"
       "|  |  +--BlockStatement |{}|\n"
@@ -197,11 +197,11 @@ TEST_F(EnvironmentBuilderTest, ComputedMemberExpression) {
       "|  |  |  +--Name |@const|\n"
       "|  |  +--JsDocText |*/|\n"
       "|  +--ExpressionStatement\n"
-      "|  |  +--ComputedMemberExpression $Property@1005\n"
-      "|  |  |  +--ReferenceExpression $Variable@1002\n"
+      "|  |  +--ComputedMemberExpression [Symbol.iterator@1005]\n"
+      "|  |  |  +--ReferenceExpression $Foo@1002\n"
       "|  |  |  |  +--Name |Foo|\n"
-      "|  |  |  +--MemberExpression $Property@1004\n"
-      "|  |  |  |  +--ReferenceExpression $Variable@1003\n"
+      "|  |  |  +--MemberExpression [iterator@1004]\n"
+      "|  |  |  |  +--ReferenceExpression $Symbol@1003\n"
       "|  |  |  |  |  +--Name |Symbol|\n"
       "|  |  |  |  +--Name |iterator|\n",
       RunOn("/** @constructor */ function Foo() {}\n"
@@ -211,22 +211,22 @@ TEST_F(EnvironmentBuilderTest, ComputedMemberExpression) {
 TEST_F(EnvironmentBuilderTest, Function) {
   EXPECT_EQ(
       "Module\n"
-      "+--Function<Normal> $Variable@1002\n"
+      "+--Function<Normal> $foo@1002\n"
       "|  +--Name |foo|\n"
       "|  +--ParameterList\n"
-      "|  |  +--BindingNameElement $Variable@1003\n"
+      "|  |  +--BindingNameElement $a@1003\n"
       "|  |  |  +--Name |a|\n"
       "|  |  |  +--ElisionExpression ||\n"
-      "|  |  +--BindingNameElement $Variable@1004\n"
+      "|  |  +--BindingNameElement $b@1004\n"
       "|  |  |  +--Name |b|\n"
       "|  |  |  +--ElisionExpression ||\n"
       "|  +--BlockStatement\n"
       "|  |  +--ReturnStatement\n"
       "|  |  |  +--BinaryExpression<+>\n"
-      "|  |  |  |  +--ReferenceExpression $Variable@1003\n"
+      "|  |  |  |  +--ReferenceExpression $a@1003\n"
       "|  |  |  |  |  +--Name |a|\n"
       "|  |  |  |  +--Punctuator |+|\n"
-      "|  |  |  |  +--ReferenceExpression $Variable@1004\n"
+      "|  |  |  |  +--ReferenceExpression $b@1004\n"
       "|  |  |  |  |  +--Name |b|\n",
       RunOn("function foo(a, b) { return a + b; }"));
 }
@@ -235,9 +235,9 @@ TEST_F(EnvironmentBuilderTest, FunctionAnonymous) {
   EXPECT_EQ(
       "Module\n"
       "+--VarStatement\n"
-      "|  +--BindingNameElement $Variable@1002\n"
+      "|  +--BindingNameElement $a@1002\n"
       "|  |  +--Name |a|\n"
-      "|  |  +--Function<Normal> $Function@1001\n"
+      "|  |  +--Function<Normal> Function@1001\n"
       "|  |  |  +--Empty ||\n"
       "|  |  |  +--ParameterList |()|\n"
       "|  |  |  +--BlockStatement |{}|\n",
@@ -249,8 +249,8 @@ TEST_F(EnvironmentBuilderTest, Global) {
       "Module\n"
       "+--ExpressionStatement\n"
       "|  +--AssignmentExpression<=>\n"
-      "|  |  +--MemberExpression $Property@1001\n"
-      "|  |  |  +--ReferenceExpression $Variable@1\n"
+      "|  |  +--MemberExpression [foo@1001]\n"
+      "|  |  |  +--ReferenceExpression $global@1\n"
       "|  |  |  |  +--Name |global|\n"
       "|  |  |  +--Name |foo|\n"
       "|  |  +--Punctuator |=|\n"
@@ -262,10 +262,10 @@ TEST_F(EnvironmentBuilderTest, Let) {
   EXPECT_EQ(
       "Module\n"
       "+--LetStatement\n"
-      "|  +--BindingNameElement $Variable@1001\n"
+      "|  +--BindingNameElement $a@1001\n"
       "|  |  +--Name |a|\n"
       "|  |  +--NumericLiteral |1|\n"
-      "|  +--BindingNameElement $Variable@1002\n"
+      "|  +--BindingNameElement $b@1002\n"
       "|  |  +--Name |b|\n"
       "|  |  +--NumericLiteral |2|\n",
       RunOn("let a = 1, b = 2;"));
@@ -280,7 +280,7 @@ TEST_F(EnvironmentBuilderTest, MemberExpression) {
       "|  |  +--JsDocTag\n"
       "|  |  |  +--Name |@constructor|\n"
       "|  |  +--JsDocText |*/|\n"
-      "|  +--Function<Normal> $Variable@1002\n"
+      "|  +--Function<Normal> $Foo@1002\n"
       "|  |  +--Name |Foo|\n"
       "|  |  +--ParameterList |()|\n"
       "|  |  +--BlockStatement |{}|\n"
@@ -291,9 +291,9 @@ TEST_F(EnvironmentBuilderTest, MemberExpression) {
       "|  |  |  +--Name |@const|\n"
       "|  |  +--JsDocText |*/|\n"
       "|  +--ExpressionStatement\n"
-      "|  |  +--MemberExpression $Property@1004\n"
-      "|  |  |  +--MemberExpression $Property@1003\n"
-      "|  |  |  |  +--ReferenceExpression $Variable@1002\n"
+      "|  |  +--MemberExpression [bar@1004]\n"
+      "|  |  |  +--MemberExpression [prototype@1003]\n"
+      "|  |  |  |  +--ReferenceExpression $Foo@1002\n"
       "|  |  |  |  |  +--Name |Foo|\n"
       "|  |  |  |  +--Name |prototype|\n"
       "|  |  |  +--Name |bar|\n",
@@ -384,7 +384,7 @@ TEST_F(EnvironmentBuilderTest, Type) {
       "|  |  |  +--Name |@interface|\n"
       "|  |  +--JsDocText |*/|\n"
       "|  +--VarStatement\n"
-      "|  |  +--BindingNameElement $Variable@1001\n"
+      "|  |  +--BindingNameElement $Foo@1001\n"
       "|  |  |  +--Name |Foo|\n"
       "|  |  |  +--ElisionExpression ||\n"
       "+--Annotation\n"
@@ -397,7 +397,7 @@ TEST_F(EnvironmentBuilderTest, Type) {
       "|  |  |  |  |  +--Name |Foo|\n"
       "|  |  +--JsDocText |*/|\n"
       "|  +--VarStatement\n"
-      "|  |  +--BindingNameElement $Variable@1002\n"
+      "|  |  +--BindingNameElement $foo@1002\n"
       "|  |  |  +--Name |foo|\n"
       "|  |  |  +--ElisionExpression ||\n",
       RunOn("/** @interface */ var Foo;\n"
@@ -414,7 +414,7 @@ TEST_F(EnvironmentBuilderTest, Type) {
       "|  |  |  |  +--Name |number|\n"
       "|  |  +--JsDocText |*/|\n"
       "|  +--VarStatement\n"
-      "|  |  +--BindingNameElement $Variable@1001\n"
+      "|  |  +--BindingNameElement $x@1001\n"
       "|  |  |  +--Name |x|\n"
       "|  |  |  +--ElisionExpression ||\n",
       RunOn("/** @type {number} */ var x;"));
@@ -437,7 +437,7 @@ TEST_F(EnvironmentBuilderTest, Type) {
       "|  |  |  +--Name |T|\n"
       "|  |  +--JsDocText |*/|\n"
       "|  +--ConstStatement\n"
-      "|  |  +--BindingNameElement $Variable@1001\n"
+      "|  |  +--BindingNameElement $foo@1001\n"
       "|  |  |  +--Name |foo|\n"
       "|  |  |  +--ElisionExpression ||\n",
       RunOn("/** @type {Array<T>} @template T */ const foo;"));

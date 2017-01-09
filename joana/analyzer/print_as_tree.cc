@@ -10,11 +10,13 @@
 #include "base/macros.h"
 #include "joana/analyzer/context.h"
 #include "joana/analyzer/type.h"
-#include "joana/analyzer/value.h"
+#include "joana/analyzer/values.h"
+#include "joana/ast/declarations.h"
 #include "joana/ast/node.h"
 #include "joana/ast/node_printer.h"
 #include "joana/ast/node_traversal.h"
 #include "joana/ast/syntax.h"
+#include "joana/ast/tokens.h"
 
 namespace joana {
 namespace analyzer {
@@ -72,17 +74,58 @@ template <typename T>
 struct Printable {
   PrintContext* print_context;
   const Context* context;
-  const T* node;
+  const T* thing;
 };
+
+const ast::Node* ValueNameOf(const Value& value) {
+  const auto& node = value.node();
+  if (value.Is<Class>()) {
+    const auto& name = ast::Class::NameOf(node);
+    return name.Is<ast::Name>() ? &name : nullptr;
+  }
+  if (value.Is<Function>()) {
+    if (node.Is<ast::Function>()) {
+      const auto& name = node.child_at(1);
+      return name.Is<ast::Name>() ? &name : nullptr;
+    }
+    if (node.Is<ast::Method>()) {
+      return &ast::Method::NameOf(node);
+    }
+    return nullptr;
+  }
+  if (value.Is<Property>())
+    return &node;
+  if (value.Is<Variable>())
+    return &node;
+  return nullptr;
+}
+
+std::ostream& operator<<(std::ostream& ostream,
+                         const Printable<Value>& printable) {
+  const auto& value = *printable.thing;
+  if (value.Is<Property>()) {
+    return ostream << '[' << ast::AsSourceCode(value.node()) << '@'
+                   << value.id() << ']';
+  }
+  if (value.Is<Variable>()) {
+    return ostream << '$' << ast::AsSourceCode(value.node()) << '@'
+                   << value.id();
+  }
+  ostream << value.class_name();
+  const auto& name = ValueNameOf(value);
+  if (!name)
+    return ostream << '@' << value.id();
+  return ostream << '[' << ast::AsSourceCode(*name) << '@' << value.id() << ']';
+}
 
 std::ostream& operator<<(std::ostream& ostream,
                          const Printable<ast::Node>& printable) {
   const auto& context = *printable.context;
-  const auto& node = *printable.node;
+  const auto& node = *printable.thing;
   auto& print_context = *printable.print_context;
   ostream << node.syntax();
   if (const auto* value = context.TryValueOf(node))
-    ostream << " $" << value->class_name() << '@' << value->id();
+    ostream << ' ' << Printable<Value>{&print_context, &context, value};
   if (const auto* type = context.TryTypeOf(node))
     ostream << " {" << *type << '}';
   if (node.arity() == 0)

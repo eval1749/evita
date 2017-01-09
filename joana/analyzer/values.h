@@ -21,8 +21,8 @@ class Properties;
 // ClassKind
 //
 enum class ClassKind {
+  Class,
   Interface,
-  Normal,
   Record,
 };
 

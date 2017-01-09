@@ -84,7 +84,7 @@ std::ostream& operator<<(std::ostream& ostream,
 
 std::ostream& operator<<(std::ostream& ostream, ClassKind kind) {
   switch (kind) {
-    case ClassKind::Normal:
+    case ClassKind::Class:
       return ostream << "Class";
     case ClassKind::Interface:
       return ostream << "Interface";

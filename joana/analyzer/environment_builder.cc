@@ -40,13 +40,13 @@ ClassKind ClassKindOf(const ast::Node& node) {
   DCHECK_EQ(node, ast::SyntaxCode::JsDocTag);
   const auto& name = ast::JsDocTag::NameOf(node);
   if (name == ast::TokenKind::JsDocConstructor)
-    return ClassKind::Normal;
+    return ClassKind::Class;
   if (name == ast::TokenKind::JsDocInterface)
     return ClassKind::Interface;
   if (name == ast::TokenKind::JsDocRecord)
     return ClassKind::Record;
   NOTREACHED() << "Expect @constructor, @Interface or @record " << node;
-  return ClassKind::Normal;
+  return ClassKind::Class;
 }
 
 bool IsClassTag(const ast::Node& node) {
@@ -240,7 +240,7 @@ void EnvironmentBuilder::ProcessClass(const ast::Node& node,
   const auto* const class_tag =
       maybe_document ? ProcessClassTag(*maybe_document) : nullptr;
   const auto class_kind =
-      class_tag ? ClassKindOf(*class_tag) : ClassKind::Normal;
+      class_tag ? ClassKindOf(*class_tag) : ClassKind::Class;
   auto& class_value = factory().NewClass(node, class_kind);
   const auto& class_type = type_factory().NewClassType(&class_value);
   context().RegisterType(node, class_type);

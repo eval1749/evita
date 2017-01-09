@@ -432,6 +432,26 @@ TEST_F(ParserTest, ClassStatement) {
             "  foo() { return 1; }\n"
             "  foo() { return 2; }\n"
             "}"));
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--Class\n"
+      "|  +--Name |Foo|\n"
+      "|  +--ElisionExpression ||\n"
+      "|  +--ObjectInitializer\n"
+      "|  |  +--Annotation\n"
+      "|  |  |  +--JsDocDocument\n"
+      "|  |  |  |  +--JsDocText |/**|\n"
+      "|  |  |  |  +--JsDocTag\n"
+      "|  |  |  |  |  +--Name |@return|\n"
+      "|  |  |  |  |  +--TypeName\n"
+      "|  |  |  |  |  |  +--Name |number|\n"
+      "|  |  |  |  |  +--JsDocText |*/|\n"
+      "|  |  |  +--Method<NonStatic,Normal>\n"
+      "|  |  |  |  +--Name |bar|\n"
+      "|  |  |  |  +--ParameterList |()|\n"
+      "|  |  |  |  +--BlockStatement |{}|\n",
+      Parse("class Foo { /** @return {number} */ bar() {} }"));
 }
 
 TEST_F(ParserTest, ConstStatement) {
@@ -1097,7 +1117,7 @@ TEST_F(ParserTest, ExpressionNew) {
       Parse("if (new.target)\n  ok;"));
 }
 
-TEST_F(ParserTest, ExpressionObjectLiteral) {
+TEST_F(ParserTest, ExpressionObjectInitializer) {
   EXPECT_EQ(
       "Module\n"
       "+--ExpressionStatement\n"
@@ -1172,6 +1192,41 @@ TEST_F(ParserTest, ExpressionObjectLiteral) {
             "  [1]: 6,\n"
             "  [2]() { 7; }\n"
             "};\n"));
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--AssignmentExpression<=>\n"
+      "|  |  +--ReferenceExpression\n"
+      "|  |  |  +--Name |x|\n"
+      "|  |  +--Punctuator |=|\n"
+      "|  |  +--ObjectInitializer\n"
+      "|  |  |  +--Annotation\n"
+      "|  |  |  |  +--JsDocDocument\n"
+      "|  |  |  |  |  +--JsDocText |/**|\n"
+      "|  |  |  |  |  +--JsDocTag\n"
+      "|  |  |  |  |  |  +--Name |@type|\n"
+      "|  |  |  |  |  |  +--TypeName\n"
+      "|  |  |  |  |  |  |  +--Name |number|\n"
+      "|  |  |  |  |  +--JsDocText |*/|\n"
+      "|  |  |  |  +--Property\n"
+      "|  |  |  |  |  +--Name |foo|\n"
+      "|  |  |  |  |  +--NumericLiteral |1|\n",
+      Parse("x = { /** @type {number} */ foo: 1 }"));
+}
+
+TEST_F(ParserTest, ExpressionObjectInitializerError) {
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--AssignmentExpression<=>\n"
+      "|  |  +--ReferenceExpression\n"
+      "|  |  |  +--Name |x|\n"
+      "|  |  +--Punctuator |=|\n"
+      "|  |  +--ObjectInitializer |{ /** @type {number} */ }|\n"
+      "PASER_ERROR_EXPRESSION_UNEXPECT_ANNOTATION@6:27\n",
+      Parse("x = { /** @type {number} */ }"))
+      << "nothing after annotation";
 }
 
 TEST_F(ParserTest, ExpressionObjectLiteralWithArrowFunction) {

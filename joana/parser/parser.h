@@ -142,6 +142,8 @@ class Parser final {
 
   const ast::Node& NewUnaryExpression(const ast::Node& op,
                                       const ast::Node& expression);
+  const ast::Node& TryAnnotate(const ast::Node* document,
+                               const ast::Node& expression);
 
   // The entry of parsing an expression.
   const ast::Node& ParseExpression();

@@ -468,26 +468,37 @@ const ast::Node& Parser::ParseObjectInitializer() {
   DCHECK_EQ(PeekToken(), ast::TokenKind::LeftBrace);
   ConsumeToken();
   std::vector<const ast::Node*> members;
+  const ast::Node* annotation = nullptr;
   while (CanPeekToken()) {
     NodeRangeScope scope(this);
     if (ConsumeTokenIf(ast::TokenKind::RightBrace))
       break;
     if (PeekToken() == ast::TokenKind::Comma) {
+      if (annotation)
+        AddError(*annotation, ErrorCode::ERROR_EXPRESSION_UNEXPECT_ANNOTATION);
       members.push_back(&NewDelimiterExpression(ConsumeToken()));
       continue;
     }
     if (PeekToken() == ast::TokenKind::Semicolon) {
+      if (annotation)
+        AddError(*annotation, ErrorCode::ERROR_EXPRESSION_UNEXPECT_ANNOTATION);
       members.push_back(&NewDelimiterExpression(ConsumeToken()));
       continue;
     }
     if (PeekToken() == ast::SyntaxCode::JsDocDocument) {
-      // TODO(eval1749): We should handle jsdoc in object literal.
-      ConsumeToken();
+      if (annotation)
+        AddError(*annotation, ErrorCode::ERROR_EXPRESSION_UNEXPECT_ANNOTATION);
+      annotation = &ConsumeToken();
       continue;
     }
+
+    const auto* document = annotation;
+    annotation = nullptr;
+
     if (ConsumeTokenIf(ast::TokenKind::Times)) {
-      members.push_back(&ParseMethod(ast::MethodKind::NonStatic,
-                                     ast::FunctionKind::Generator));
+      members.push_back(
+          &TryAnnotate(document, ParseMethod(ast::MethodKind::NonStatic,
+                                             ast::FunctionKind::Generator)));
       continue;
     }
 
@@ -502,20 +513,24 @@ const ast::Node& Parser::ParseObjectInitializer() {
         auto& property_name = ParsePropertyName();
         if (!CanPeekToken())
           break;
-        members.push_back(&ParsePropertyAfterName(
-            property_name, ast::MethodKind::Static, function_kind));
+        members.push_back(&TryAnnotate(
+            document,
+            ParsePropertyAfterName(property_name, ast::MethodKind::Static,
+                                   function_kind)));
         continue;
       }
       if (ConsumeTokenIf(ast::TokenKind::Times)) {
         // 'static' '*' PropertyName
-        members.push_back(&ParseMethod(ast::MethodKind::Static,
-                                       ast::FunctionKind::Generator));
+        members.push_back(
+            &TryAnnotate(document, ParseMethod(ast::MethodKind::Static,
+                                               ast::FunctionKind::Generator)));
         continue;
       }
       // Found property or method named 'static'.
-      members.push_back(&ParsePropertyAfterName(property_name_static,
-                                                ast::MethodKind::NonStatic,
-                                                ast::FunctionKind::Normal));
+      members.push_back(&TryAnnotate(
+          document, ParsePropertyAfterName(property_name_static,
+                                           ast::MethodKind::NonStatic,
+                                           ast::FunctionKind::Normal)));
       continue;
     }
 
@@ -523,9 +538,13 @@ const ast::Node& Parser::ParseObjectInitializer() {
     auto& property_name = ParsePropertyName();
     if (!CanPeekToken())
       break;
-    members.push_back(&ParsePropertyAfterName(
-        property_name, ast::MethodKind::NonStatic, function_kind));
+    members.push_back(&TryAnnotate(
+        document,
+        ParsePropertyAfterName(property_name, ast::MethodKind::NonStatic,
+                               function_kind)));
   }
+  if (annotation)
+    AddError(*annotation, ErrorCode::ERROR_EXPRESSION_UNEXPECT_ANNOTATION);
   return node_factory().NewObjectInitializer(GetSourceCodeRange(), members);
 }
 
@@ -736,6 +755,17 @@ const ast::Node& Parser::ParseYieldExpression() {
   if (PeekToken() == ast::TokenKind::Semicolon)
     return NewUnaryExpression(keyword, NewElisionExpression());
   return NewUnaryExpression(keyword, ParseAssignmentExpression());
+}
+
+const ast::Node& Parser::TryAnnotate(const ast::Node* maybe_document,
+                                     const ast::Node& expression) {
+  if (!maybe_document)
+    return expression;
+  const auto& document = *maybe_document;
+  DCHECK_EQ(document, ast::SyntaxCode::JsDocDocument);
+  return node_factory().NewAnnotation(
+      SourceCodeRange::Merge(document.range(), expression.range()), document,
+      expression);
 }
 
 }  // namespace parser

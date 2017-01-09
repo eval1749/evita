@@ -28,6 +28,8 @@ component("ast") {
     "node.h",
     "node_factory.cc",
     "node_factory.h",
+    "node_printer.cc",
+    "node_printer.h",
     "node_traversal.cc",
     "node_traversal.h",
     "regexp.cc",

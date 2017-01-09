@@ -33,6 +33,8 @@ namespace ast {
 #define FOR_EACH_JSDOC_ERROR_CODE(V) \
   V(TAG, EXPECT_ARGUMENTS_OR_THIS)   \
   V(TAG, EXPECT_LBRACE)              \
+  V(TAG, EXPECT_NAME)                \
+  V(TAG, EXPECT_NAMES)               \
   V(TAG, EXPECT_RBRACE)              \
   V(TAG, UNKNOWN_TAG)
 

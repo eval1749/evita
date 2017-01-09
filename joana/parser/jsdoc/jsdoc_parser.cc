@@ -38,7 +38,7 @@ enum class TagSyntax {
 };
 
 TagSyntax TagSyntaxOf(const ast::Node& name) {
-#define V(underscore, capital, syntax)        \
+#define V(underscore, capital, syntax)     \
   if (name == ast::TokenKind::At##capital) \
     return TagSyntax::syntax;
   FOR_EACH_JSDOC_TAG_NAME(V)
@@ -228,14 +228,18 @@ std::vector<const ast::Node*> JsDocParser::ParseNames() {
   std::vector<const ast::Node*> names;
   SkipWhitespaces();
   while (CanPeekChar()) {
-    if (!IsIdentifierStart(PeekChar()))
+    if (!IsIdentifierStart(PeekChar())) {
+      AddError(JsDocErrorCode::ERROR_TAG_EXPECT_NAME);
       break;
+    }
     names.push_back(&ParseName());
     SkipWhitespaces();
     if (!ConsumeCharIf(','))
       break;
     SkipWhitespaces();
   }
+  if (names.empty())
+    AddError(JsDocErrorCode::ERROR_TAG_EXPECT_NAMES);
   return std::move(names);
 }
 

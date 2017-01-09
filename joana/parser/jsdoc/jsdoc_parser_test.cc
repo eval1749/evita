@@ -166,6 +166,34 @@ TEST_F(JsDocParserTest, SyntaxNames) {
       Parse("@template KEY, VALUE desc"));
 }
 
+TEST_F(JsDocParserTest, SyntaxNamesError) {
+  EXPECT_EQ(
+      "JsDocDocument\n"
+      "+--JsDocTag\n"
+      "|  +--Name |@template|\n"
+      "JSDOC_ERROR_TAG_EXPECT_NAMES@0:9\n",
+      Parse("@template"))
+      << "@template should have at least one name.";
+  EXPECT_EQ(
+      "JsDocDocument\n"
+      "+--JsDocTag\n"
+      "|  +--Name |@template|\n"
+      "+--JsDocText |123|\n"
+      "JSDOC_ERROR_TAG_EXPECT_NAME@0:10\n"
+      "JSDOC_ERROR_TAG_EXPECT_NAMES@0:10\n",
+      Parse("@template 123"))
+      << "'123' is not name.";
+  EXPECT_EQ(
+      "JsDocDocument\n"
+      "+--JsDocTag\n"
+      "|  +--Name |@template|\n"
+      "|  +--Name |foo|\n"
+      "+--JsDocText |123|\n"
+      "JSDOC_ERROR_TAG_EXPECT_NAME@0:15\n",
+      Parse("@template foo, 123"))
+      << "'123' is not name.";
+}
+
 TEST_F(JsDocParserTest, SyntaxNone) {
   EXPECT_EQ(
       "JsDocDocument\n"

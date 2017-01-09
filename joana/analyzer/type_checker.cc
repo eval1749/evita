@@ -16,6 +16,7 @@
 #include "joana/ast/expressions.h"
 #include "joana/ast/node.h"
 #include "joana/ast/node_traversal.h"
+#include "joana/ast/types.h"
 
 namespace joana {
 namespace analyzer {
@@ -26,15 +27,26 @@ namespace analyzer {
 TypeChecker::TypeChecker(Context* context) : Pass(context) {}
 TypeChecker::~TypeChecker() = default;
 
+// The entry point
 void TypeChecker::RunOn(const ast::Node& toplevel_node) {
   environment_ = &context().EnvironmentOf(toplevel_node);
   for (const auto& node : ast::NodeTraversal::DescendantsOf(toplevel_node))
     Visit(node);
 }
 
-Variable* TypeChecker::TryValueOf(const ast::Node& node) const {
+const Type* TypeChecker::FindType(const ast::Node& name) const {
+  DCHECK_EQ(name, ast::SyntaxCode::Name);
   for (const auto* runner = environment_; runner; runner = runner->outer()) {
-    if (auto* present = runner->FindVariable(node))
+    if (const auto* present = runner->FindType(name))
+      return present;
+  }
+  return nullptr;
+}
+
+const Variable* TypeChecker::FindVariable(const ast::Node& name) const {
+  DCHECK_EQ(name, ast::SyntaxCode::Name);
+  for (const auto* runner = environment_; runner; runner = runner->outer()) {
+    if (const auto* present = runner->FindVariable(name))
       return present;
   }
   return nullptr;
@@ -51,6 +63,9 @@ void TypeChecker::VisitInternal(const ast::ReferenceExpression& syntax,
   }
   if (!value->Is<Variable>() || !value->As<Variable>().assignments().empty())
     return;
+  const auto* variable = FindVariable(ast::ReferenceExpression::NameOf(node));
+  if (variable && !variable->assignments().empty())
+    return;
   AddError(node, ErrorCode::TYPE_CHECKER_UNDEFIEND_VARIABLE);
 }
 
@@ -58,7 +73,7 @@ void TypeChecker::VisitInternal(const ast::ReferenceExpression& syntax,
 void TypeChecker::VisitInternal(const ast::TypeName& syntax,
                                 const ast::Node& node) {
   const auto* present = context().TryTypeOf(node);
-  if (!present) {
+  if (!present && !FindType(ast::TypeName::NameOf(node))) {
     AddError(node, ErrorCode::TYPE_CHECKER_UNDEFIEND_TYPE);
     return;
   }

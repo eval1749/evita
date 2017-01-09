@@ -18,6 +18,7 @@ class ReferenceExpressionSyntax;
 namespace analyzer {
 
 class Environment;
+class Type;
 class Variable;
 
 //
@@ -31,7 +32,8 @@ class TypeChecker final : public Pass, public ast::SyntaxVisitor {
   void RunOn(const ast::Node& node);
 
  private:
-  Variable* TryValueOf(const ast::Node& node) const;
+  const Type* FindType(const ast::Node& name) const;
+  const Variable* FindVariable(const ast::Node& name) const;
 
   // |ast::SyntaxVisitor| members
   // Expressions

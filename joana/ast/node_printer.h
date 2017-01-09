@@ -15,10 +15,12 @@ namespace ast {
 class Node;
 
 struct NodeAsSourceCode {
+  char delimiter;
   const Node* node;
 };
 
-JOANA_AST_EXPORT NodeAsSourceCode AsSourceCode(const Node& node);
+JOANA_AST_EXPORT NodeAsSourceCode AsSourceCode(const Node& node,
+                                               char delimiter = 0);
 
 JOANA_AST_EXPORT std::ostream& operator<<(std::ostream& ostream,
                                           const NodeAsSourceCode& printable);

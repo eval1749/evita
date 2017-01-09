@@ -63,10 +63,5 @@ const Type& TypeFactory::NewTypeParameter(const ast::Node& name) {
   return *new (&zone_) TypeParameter(NextTypeId(), name);
 }
 
-const Type& TypeFactory::NewTypeReference(Variable* variable) {
-  DCHECK(variable);
-  return *new (&zone_) TypeReference(NextTypeId(), variable);
-}
-
 }  // namespace analyzer
 }  // namespace joana

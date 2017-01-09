@@ -62,12 +62,6 @@ void TypeChecker::VisitInternal(const ast::TypeName& syntax,
     AddError(node, ErrorCode::TYPE_CHECKER_UNDEFIEND_TYPE);
     return;
   }
-  if (!present->Is<TypeReference>())
-    return;
-  const auto& variable = present->As<TypeReference>().variable();
-  if (!variable.assignments().empty())
-    return;
-  AddError(node, ErrorCode::TYPE_CHECKER_UNDEFIEND_TYPE);
 }
 
 }  // namespace analyzer

@@ -46,7 +46,6 @@ class TypeFactory final {
   const Type& GetPrimitiveType(const ast::TokenKind id);
   const Type& NewTypeName(const ast::Node& name);
   const Type& NewTypeParameter(const ast::Node& name);
-  const Type& NewTypeReference(Variable* variable);
   const Type& GetUnknownType() const { return unknown_type_; }
   const Type& GetVoidType() const { return void_type_; }
 

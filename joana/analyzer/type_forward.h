@@ -21,7 +21,6 @@ namespace analyzer {
   V(TypeApplication)                \
   V(TypeName)                       \
   V(TypeParameter)                  \
-  V(TypeReference)                  \
   V(UnknownType)                    \
   V(VoidType)
 

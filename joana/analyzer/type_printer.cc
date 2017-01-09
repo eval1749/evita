@@ -133,12 +133,6 @@ std::ostream& operator<<(std::ostream& ostream,
 }
 
 std::ostream& operator<<(std::ostream& ostream,
-                         const Printable<TypeReference>& printable) {
-  const auto& type = *printable.type;
-  return ostream << "#TypeReference@" << type.id();
-}
-
-std::ostream& operator<<(std::ostream& ostream,
                          const Printable<UnknownType>& printable) {
   return ostream << "?";
 }

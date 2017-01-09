@@ -99,13 +99,6 @@ TypeParameter::TypeParameter(int id, const ast::Node& name)
 TypeParameter::~TypeParameter() = default;
 
 //
-// TypeReference
-//
-TypeReference::TypeReference(int id, Variable* variable)
-    : Type(id), variable_(*variable) {}
-TypeReference::~TypeReference() = default;
-
-//
 // UnknownType
 //
 UnknownType::UnknownType(int id) : Type(id) {}

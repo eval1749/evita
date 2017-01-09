@@ -23,7 +23,6 @@ namespace analyzer {
 class Class;
 class TypeParameter;
 class Value;
-class Variable;
 
 // See "type_forward.h" for list of types.
 
@@ -224,25 +223,6 @@ class TypeParameter final : public NamedType {
   TypeParameter(int id, const ast::Node& name);
 
   DISALLOW_COPY_AND_ASSIGN(TypeParameter);
-};
-
-//
-// TypeReference
-//
-class TypeReference final : public Type {
-  DECLARE_CONCRETE_ANALYZE_TYPE(TypeReference, Type)
-
- public:
-  ~TypeReference() final;
-
-  Variable& variable() const { return variable_; }
-
- private:
-  TypeReference(int id, Variable* variable);
-
-  Variable& variable_;
-
-  DISALLOW_COPY_AND_ASSIGN(TypeReference);
 };
 
 //

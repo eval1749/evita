@@ -38,7 +38,6 @@ JOANA_AST_EXPORT std::ostream& operator<<(std::ostream& ostream,
 // MethodKind
 //
 #define FOR_EACH_AST_METHOD_KIND(V) \
-  V(Constructor)                    \
   V(NonStatic)                      \
   V(Static)
 

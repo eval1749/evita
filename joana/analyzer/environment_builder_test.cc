@@ -406,6 +406,76 @@ TEST_F(EnvironmentBuilderTest, MemberExpression) {
       << "Old style class externs";
 }
 
+TEST_F(EnvironmentBuilderTest, Property) {
+  EXPECT_EQ(
+      "Module\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@constructor|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--Function<Normal> Class[Foo@1002] {class Foo@1001}\n"
+      "|  |  +--Name |Foo|\n"
+      "|  |  +--ParameterList |()|\n"
+      "|  |  +--BlockStatement |{}|\n"
+      "+--ExpressionStatement\n"
+      "|  +--AssignmentExpression<=>\n"
+      "|  |  +--MemberExpression [bar@1005]\n"
+      "|  |  |  +--MemberExpression [prototype@1004]\n"
+      "|  |  |  |  +--ReferenceExpression $Foo@1003\n"
+      "|  |  |  |  |  +--Name |Foo|\n"
+      "|  |  |  |  +--Name |prototype|\n"
+      "|  |  |  +--Name |bar|\n"
+      "|  |  +--Punctuator |=|\n"
+      "|  |  +--NumericLiteral |1|\n"
+      "+--ExpressionStatement\n"
+      "|  +--AssignmentExpression<=>\n"
+      "|  |  +--MemberExpression [baz@1006]\n"
+      "|  |  |  +--MemberExpression [prototype@1004]\n"
+      "|  |  |  |  +--ReferenceExpression $Foo@1003\n"
+      "|  |  |  |  |  +--Name |Foo|\n"
+      "|  |  |  |  +--Name |prototype|\n"
+      "|  |  |  +--Name |baz|\n"
+      "|  |  +--Punctuator |=|\n"
+      "|  |  +--NumericLiteral |2|\n",
+      RunOn("/** @constructor */ function Foo() {}\n"
+            "Foo.prototype.bar = 1;\n"
+            "Foo.prototype.baz = 2;\n"))
+      << "'Foo.prototype@1004' should be singleton.";
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--VarStatement\n"
+      "|  +--BindingNameElement $foo@1001\n"
+      "|  |  +--Name |foo|\n"
+      "|  |  +--ElisionExpression ||\n"
+      "+--ExpressionStatement\n"
+      "|  +--AssignmentExpression<=>\n"
+      "|  |  +--MemberExpression [bar@1004]\n"
+      "|  |  |  +--MemberExpression [prop@1003]\n"
+      "|  |  |  |  +--ReferenceExpression $Foo@1002\n"
+      "|  |  |  |  |  +--Name |Foo|\n"
+      "|  |  |  |  +--Name |prop|\n"
+      "|  |  |  +--Name |bar|\n"
+      "|  |  +--Punctuator |=|\n"
+      "|  |  +--NumericLiteral |1|\n"
+      "+--ExpressionStatement\n"
+      "|  +--AssignmentExpression<=>\n"
+      "|  |  +--MemberExpression [baz@1005]\n"
+      "|  |  |  +--MemberExpression [prop@1003]\n"
+      "|  |  |  |  +--ReferenceExpression $Foo@1002\n"
+      "|  |  |  |  |  +--Name |Foo|\n"
+      "|  |  |  |  +--Name |prop|\n"
+      "|  |  |  +--Name |baz|\n"
+      "|  |  +--Punctuator |=|\n"
+      "|  |  +--NumericLiteral |2|\n",
+      RunOn("var foo\n"
+            "Foo.prop.bar = 1;\n"
+            "Foo.prop.baz = 2;\n"))
+      << "'foo.prop@1003' should be singleton.";
+}
+
 TEST_F(EnvironmentBuilderTest, Super) {
   EXPECT_EQ(
       "Module\n"

@@ -71,6 +71,9 @@ class EnvironmentBuilder final : public Pass, public ast::SyntaxVisitor {
 
   Variable& ResolveVariableName(const ast::Node& name);
 
+  // Returns type of |node| if known.
+  const Type* TryTypeOf(const ast::Node& node) const;
+
   void VisitChildNodes(const ast::Node& node);
 
   // ast::NodeVisitor implementations

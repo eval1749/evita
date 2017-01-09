@@ -445,6 +445,20 @@ Variable& EnvironmentBuilder::ResolveVariableName(const ast::Node& name) {
   return variable;
 }
 
+const Type* EnvironmentBuilder::TryTypeOf(const ast::Node& node) const {
+  if (node.Is<ast::MemberExpression>()) {
+    const auto* type = TryTypeOf(ast::MemberExpression::ExpressionOf(node));
+    if (!type)
+      return nullptr;
+    if (ast::MemberExpression::NameOf(node) != ast::TokenKind::Prototype)
+      return nullptr;
+    return type;
+  }
+  if (node.Is<ast::ReferenceExpression>())
+    return FindType(ast::ReferenceExpression::NameOf(node));
+  return nullptr;
+}
+
 void EnvironmentBuilder::VisitChildNodes(const ast::Node& node) {
   ancestors_.push_back(&node);
   for (const auto& child : ast::NodeTraversal::ChildNodesOf(node))
@@ -508,6 +522,11 @@ void EnvironmentBuilder::VisitInternal(const ast::Annotation& syntax,
       Visit(annotated);
       return;
     }
+    LocalEnvironment environment(this, lhs);
+    if (const auto* type = TryTypeOf(lhs.child_at(0))) {
+      if (type->Is<GenericType>())
+        BindTypeParameters(type->As<GenericType>());
+    }
     if (rhs.Is<ast::Class>()) {
       ProcessClass(rhs, &document);
       Visit(lhs);
@@ -523,16 +542,18 @@ void EnvironmentBuilder::VisitInternal(const ast::Annotation& syntax,
     return;
   }
 
-  if (expression.Is<ast::MemberExpression>()) {
+  if (IsMemberExpression(expression)) {
+    const auto& member = expression.child_at(0);
+    LocalEnvironment environment(this, expression);
+    if (const auto* type = TryTypeOf(member)) {
+      if (type->Is<GenericType>())
+        BindTypeParameters(type->As<GenericType>());
+    }
     Visit(expression);
     Visit(document);
     return;
   }
-  if (expression.Is<ast::ComputedMemberExpression>()) {
-    Visit(expression);
-    Visit(document);
-    return;
-  }
+
   VisitDefault(node);
   AddError(node, ErrorCode::ENVIRONMENT_UNEXPECT_ANNOTATION);
 }

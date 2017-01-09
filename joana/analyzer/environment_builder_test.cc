@@ -476,6 +476,79 @@ TEST_F(EnvironmentBuilderTest, Property) {
       << "'foo.prop@1003' should be singleton.";
 }
 
+TEST_F(EnvironmentBuilderTest, Prototype) {
+  EXPECT_EQ(
+      "Module\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@constructor|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@template|\n"
+      "|  |  |  +--TypeName {T@1001}\n"
+      "|  |  |  |  +--Name |T|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--Function<Normal> Class[Foo@1002] {class Foo<T>@1002}\n"
+      "|  |  +--Name |Foo|\n"
+      "|  |  +--ParameterList |()|\n"
+      "|  |  +--BlockStatement |{}|\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@type|\n"
+      "|  |  |  +--TypeName {T@1001}\n"
+      "|  |  |  |  +--Name |T|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--ExpressionStatement\n"
+      "|  |  +--MemberExpression [baz@1005]\n"
+      "|  |  |  +--MemberExpression [prototype@1004]\n"
+      "|  |  |  |  +--ReferenceExpression $Foo@1003\n"
+      "|  |  |  |  |  +--Name |Foo|\n"
+      "|  |  |  |  +--Name |prototype|\n"
+      "|  |  |  +--Name |baz|\n",
+      RunOn("/** @constructor @template T */ function Foo() {}\n"
+            "/** @type {T} */ Foo.prototype.baz;\n"))
+      << "Bind template parameter for 'Foo.prototyp.baz'";
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@constructor|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@template|\n"
+      "|  |  |  +--TypeName {T@1001}\n"
+      "|  |  |  |  +--Name |T|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--Function<Normal> Class[Foo@1002] {class Foo<T>@1002}\n"
+      "|  |  +--Name |Foo|\n"
+      "|  |  +--ParameterList |()|\n"
+      "|  |  +--BlockStatement |{}|\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@type|\n"
+      "|  |  |  +--TypeName {T@1001}\n"
+      "|  |  |  |  +--Name |T|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--ExpressionStatement\n"
+      "|  |  +--ComputedMemberExpression\n"
+      "|  |  |  +--MemberExpression [prototype@1004]\n"
+      "|  |  |  |  +--ReferenceExpression $Foo@1003\n"
+      "|  |  |  |  |  +--Name |Foo|\n"
+      "|  |  |  |  +--Name |prototype|\n"
+      "|  |  |  +--ReferenceExpression $baz@1005\n"
+      "|  |  |  |  +--Name |baz|\n",
+      RunOn("/** @constructor @template T */ function Foo() {}\n"
+            "/** @type {T} */ Foo.prototype[baz];\n"))
+      << "Bind template parameter for 'Foo.prototyp[baz]'";
+}
+
 TEST_F(EnvironmentBuilderTest, Super) {
   EXPECT_EQ(
       "Module\n"

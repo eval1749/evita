@@ -41,6 +41,7 @@ class Controller final {
   Factory& factory() const;
 
   void DumpValues();
+  void PrintTree();
 
   const std::unique_ptr<Context> context_;
   std::vector<const ast::Node*> nodes_;

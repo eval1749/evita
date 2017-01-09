@@ -12,6 +12,7 @@
 #include "joana/analyzer/environment.h"
 #include "joana/analyzer/environment_builder.h"
 #include "joana/analyzer/factory.h"
+#include "joana/analyzer/print_as_tree.h"
 #include "joana/analyzer/type_checker.h"
 #include "joana/analyzer/values.h"
 #include "joana/ast/node.h"
@@ -85,6 +86,8 @@ void Controller::Analyze() {
   const auto* const command_line = base::CommandLine::ForCurrentProcess();
   if (command_line->HasSwitch("dump_after_type"))
     DumpValues();
+  if (command_line->HasSwitch("print_after_type"))
+    PrintTree();
 }
 
 void Controller::DumpValues() {
@@ -98,6 +101,11 @@ void Controller::DumpValues() {
   }
 }
 
+void Controller::PrintTree() {
+  for (const auto& toplevel : nodes_)
+    std::cout << AsPrintableTree(*context_, *toplevel) << std::endl;
+}
+
 void Controller::Load(const ast::Node& node) {
   nodes_.push_back(&node);
   EnvironmentBuilder builder(context_.get());
@@ -106,6 +114,8 @@ void Controller::Load(const ast::Node& node) {
   const auto* const command_line = base::CommandLine::ForCurrentProcess();
   if (command_line->HasSwitch("dump_after_build"))
     DumpValues();
+  if (command_line->HasSwitch("print_after_build"))
+    PrintTree();
 }
 
 }  // namespace analyzer

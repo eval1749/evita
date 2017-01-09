@@ -40,6 +40,7 @@ class NamedType : public Type {
  public:
   ~NamedType();
 
+  bool is_anonymous() const;
   const ast::Node& name() const { return name_; }
 
  protected:
@@ -49,6 +50,32 @@ class NamedType : public Type {
   const ast::Node& name_;
 
   DISALLOW_COPY_AND_ASSIGN(NamedType);
+};
+
+//
+// GenericType
+//
+class GenericType : public NamedType {
+  DECLARE_ABSTRACT_ANALYZE_TYPE(GenericType, NamedType)
+
+ public:
+  ~GenericType() override;
+
+  bool has_parameters() const { return !parameters_.empty(); }
+  auto parameters() const { return ReferenceRangeOf(parameters_); }
+
+ protected:
+  // |name| is |ast::Name|, |ast::ComputedMemberExpression| or
+  // |ast::MemberExpression|.
+  GenericType(Zone* zone,
+              int id,
+              const ast::Node& name,
+              const std::vector<const TypeParameter*>& parameters);
+
+ private:
+  const ZoneVector<const TypeParameter*> parameters_;
+
+  DISALLOW_COPY_AND_ASSIGN(GenericType);
 };
 
 //
@@ -69,8 +96,8 @@ class AnyType final : public Type {
 //
 // ClassType
 //
-class ClassType final : public Type {
-  DECLARE_CONCRETE_ANALYZE_TYPE(ClassType, Type)
+class ClassType final : public GenericType {
+  DECLARE_CONCRETE_ANALYZE_TYPE(ClassType, GenericType)
 
  public:
   ~ClassType() final;
@@ -78,7 +105,11 @@ class ClassType final : public Type {
   Class& value() const { return *value_; }
 
  private:
-  ClassType(int id, Class* value);
+  ClassType(Zone* zone,
+            int id,
+            const ast::Node& name,
+            const std::vector<const TypeParameter*>& parameters,
+            Class* value);
 
   Class* const value_;
 
@@ -88,8 +119,8 @@ class ClassType final : public Type {
 //
 // FunctionType
 //
-class FunctionType final : public Type {
-  DECLARE_CONCRETE_ANALYZE_TYPE(FunctionType, Type)
+class FunctionType final : public GenericType {
+  DECLARE_CONCRETE_ANALYZE_TYPE(FunctionType, GenericType)
 
  public:
   ~FunctionType() final;
@@ -103,6 +134,8 @@ class FunctionType final : public Type {
   FunctionType(Zone* zone,
                int id,
                FunctionTypeKind kind,
+               const ast::Node& name,
+               const std::vector<const TypeParameter*>& parameters,
                const std::vector<const Type*> parameter_types,
                const Type& return_type,
                const Type& this_type);
@@ -113,30 +146,6 @@ class FunctionType final : public Type {
   const Type& this_type_;
 
   DISALLOW_COPY_AND_ASSIGN(FunctionType);
-};
-
-//
-// GenericType
-//
-class GenericType final : public NamedType {
-  DECLARE_CONCRETE_ANALYZE_TYPE(GenericType, NamedType)
-
- public:
-  ~GenericType() final;
-
-  auto parameters() const { return ReferenceRangeOf(parameters_); }
-
- private:
-  // |name| is |ast::Name|, |ast::ComputedMemberExpression| or
-  // |ast::MemberExpression|.
-  GenericType(Zone* zone,
-              int id,
-              const ast::Node& name,
-              const std::vector<const TypeParameter*>& parameters);
-
-  const ZoneVector<const TypeParameter*> parameters_;
-
-  DISALLOW_COPY_AND_ASSIGN(GenericType);
 };
 
 //

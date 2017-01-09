@@ -24,8 +24,10 @@ namespace analyzer {
 class Context;
 class Environment;
 class Function;
+class GenericType;
 class Properties;
 class Type;
+class TypeParameter;
 class Value;
 class Variable;
 enum class VariableKind;
@@ -45,6 +47,7 @@ class EnvironmentBuilder final : public Pass, public ast::SyntaxVisitor {
 
   void BindAsType(const ast::Node& name, const Type& type);
   Variable& BindToVariable(const ast::Node& name);
+  void BindTypeParameters(const GenericType& type);
 
   const Type* FindType(const ast::Node& name) const;
   Variable* FindVariable(const ast::Node& name) const;
@@ -58,7 +61,8 @@ class EnvironmentBuilder final : public Pass, public ast::SyntaxVisitor {
   // Assign |Function| value to |node|.
   void ProcessFunction(const ast::Node& node, const ast::Node* maybe_document);
 
-  void ProcessTemplateTag(const ast::Node& document);
+  std::vector<const TypeParameter*> ProcessTemplateTag(
+      const ast::Node& document);
 
   Variable& ResolveVariableName(const ast::Node& name);
 

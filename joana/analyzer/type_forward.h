@@ -9,13 +9,13 @@ namespace joana {
 namespace analyzer {
 
 #define FOR_EACH_ABSTRACT_ANALYZE_TYPE(name) \
+  V(GenericType)                             \
   V(NamedType)                               \
   V(Type)
 
 #define FOR_EACH_ANALYZE_TYPE(name) \
   V(AnyType)                        \
   V(ClassType)                      \
-  V(GenericType)                    \
   V(FunctionType)                   \
   V(InvalidType)                    \
   V(PrimitiveType)                  \

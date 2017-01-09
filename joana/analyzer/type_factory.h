@@ -25,6 +25,7 @@ namespace analyzer {
 class Class;
 enum class FunctionTypeKind;
 class Type;
+class TypeParameter;
 class Value;
 class Variable;
 
@@ -37,11 +38,16 @@ class TypeFactory final {
   ~TypeFactory();
 
   const Type& GetAnyType() { return any_type_; }
-  const Type& NewClassType(Class* class_value);
-  const Type& NewFunctionType(FunctionTypeKind kind,
-                              const std::vector<const Type*>& parameter_types,
-                              const Type& return_type,
-                              const Type& this_type);
+  const Type& NewClassType(const ast::Node& name,
+                           const std::vector<const TypeParameter*>& parameters,
+                           Class* class_value);
+  const Type& NewFunctionType(
+      FunctionTypeKind kind,
+      const ast::Node& name,
+      const std::vector<const TypeParameter*>& parameters,
+      const std::vector<const Type*>& parameter_types,
+      const Type& return_type,
+      const Type& this_type);
   const Type& GetInvalidType() const { return invalid_type_; }
   const Type& GetPrimitiveType(const ast::TokenKind id);
   const Type& NewTypeName(const ast::Node& name);

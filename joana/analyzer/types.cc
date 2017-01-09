@@ -20,7 +20,12 @@ AnyType::~AnyType() = default;
 //
 // ClassType
 //
-ClassType::ClassType(int id, Class* value) : Type(id), value_(value) {}
+ClassType::ClassType(Zone* zone,
+                     int id,
+                     const ast::Node& name,
+                     const std::vector<const TypeParameter*>& parameters,
+                     Class* value)
+    : GenericType(zone, id, name, parameters), value_(value) {}
 ClassType::~ClassType() = default;
 
 //
@@ -40,10 +45,12 @@ GenericType::~GenericType() = default;
 FunctionType::FunctionType(Zone* zone,
                            int id,
                            FunctionTypeKind kind,
-                           const std::vector<const Type*> parameter_types,
+                           const ast::Node& name,
+                           const std::vector<const TypeParameter*>& parameters,
+                           std::vector<const Type*> parameter_types,
                            const Type& return_type,
                            const Type& this_type)
-    : Type(id),
+    : GenericType(zone, id, name, parameters),
       kind_(kind),
       parameter_types_(zone, parameter_types),
       return_type_(return_type),
@@ -61,11 +68,16 @@ InvalidType::~InvalidType() = default;
 // NamedType
 //
 NamedType::NamedType(int id, const ast::Node& name) : Type(id), name_(name) {
-  DCHECK(name.Is<ast::Name>() || name.Is<ast::MemberExpression>() ||
+  DCHECK(name.Is<ast::Empty>() || name.Is<ast::Name>() ||
+         name.Is<ast::MemberExpression>() ||
          name.Is<ast::ComputedMemberExpression>());
 }
 
 NamedType::~NamedType() = default;
+
+bool NamedType::is_anonymous() const {
+  return name_.Is<ast::Empty>();
+}
 
 //
 // PrimitiveType

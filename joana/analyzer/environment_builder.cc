@@ -202,6 +202,11 @@ Variable& EnvironmentBuilder::BindToVariable(const ast::Node& name) {
   return variable;
 }
 
+void EnvironmentBuilder::BindTypeParameters(const GenericType& type) {
+  for (const auto& parameter : type.parameters())
+    BindAsType(parameter.name(), parameter);
+}
+
 const Type* EnvironmentBuilder::FindType(const ast::Node& name) const {
   DCHECK_EQ(name, ast::SyntaxCode::Name);
   if (environment_) {
@@ -237,22 +242,29 @@ void EnvironmentBuilder::ProcessClass(const ast::Node& node,
   // TODO(eval1749): Report warning for toplevel anonymous class
   // TODO(eval1749): We should check annotation for class to check
   // @interface and @record.
+  const auto& class_name = ast::Class::NameOf(node);
+
   const auto* const class_tag =
       maybe_document ? ProcessClassTag(*maybe_document) : nullptr;
+
+  const auto& type_parameters = maybe_document
+                                    ? ProcessTemplateTag(*maybe_document)
+                                    : std::vector<const TypeParameter*>();
+
   const auto class_kind =
       class_tag ? ClassKindOf(*class_tag) : ClassKind::Class;
+
   auto& class_value = factory().NewClass(node, class_kind);
-  const auto& class_type = type_factory().NewClassType(&class_value);
+  const auto& class_type =
+      type_factory().NewClassType(class_name, type_parameters, &class_value);
   context().RegisterType(node, class_type);
   context().RegisterValue(node, &class_value);
 
   // Class wide template parameters.
   LocalEnvironment environment(this, node);
-  if (maybe_document) {
-    const auto& document = *maybe_document;
-    ProcessTemplateTag(document);
-    Visit(document);
-  }
+  BindTypeParameters(class_type.As<ClassType>());
+  if (maybe_document)
+    Visit(*maybe_document);
 
   for (const auto& child :
        ast::NodeTraversal::ChildNodesOf(ast::Class::BodyOf(node))) {
@@ -290,6 +302,7 @@ void EnvironmentBuilder::ProcessClass(const ast::Node& node,
     Value::Editor().AddMethod(&class_value, &method);
 
     LocalEnvironment environment(this, node);
+    BindTypeParameters(class_type.As<ClassType>());
     VisitDefault(member);
 
     if (!child.Is<ast::Annotation>())
@@ -297,7 +310,6 @@ void EnvironmentBuilder::ProcessClass(const ast::Node& node,
     VisitDefault(ast::Annotation::DocumentOf(child));
   }
 
-  const auto& class_name = ast::Class::NameOf(node);
   if (class_name != ast::SyntaxCode::Name)
     return;
 
@@ -354,6 +366,26 @@ void EnvironmentBuilder::ProcessFunction(const ast::Node& node,
   // TODO(eval1749): Report warning for toplevel anonymous class
   const auto& name = ast::Function::NameOf(node);
   auto& function = factory().NewFunction(node);
+
+  const auto* const class_tag =
+      maybe_document ? ProcessClassTag(*maybe_document) : nullptr;
+
+  const auto& type_parameters = maybe_document
+                                    ? ProcessTemplateTag(*maybe_document)
+                                    : std::vector<const TypeParameter*>();
+
+  if (class_tag) {
+    auto& class_value = factory().NewClass(node, ClassKindOf(*class_tag));
+    auto& class_type =
+        type_factory().NewClassType(name, type_parameters, &class_value);
+    context().RegisterType(node, class_type);
+    context().RegisterValue(node, &class_value);
+    if (name == ast::SyntaxCode::Name)
+      BindAsType(name, class_type);
+  } else {
+    context().RegisterValue(node, &function);
+  }
+
   if (name == ast::SyntaxCode::Name) {
     auto& variable = BindToVariable(name);
     if (!variable.assignments().empty()) {
@@ -361,31 +393,20 @@ void EnvironmentBuilder::ProcessFunction(const ast::Node& node,
                *variable.assignments().front());
     }
     Value::Editor().AddAssignment(&variable, node);
-    const auto* const class_tag =
-        maybe_document ? ProcessClassTag(*maybe_document) : nullptr;
-    if (class_tag) {
-      auto& class_value = factory().NewClass(node, ClassKindOf(*class_tag));
-      auto& class_type = type_factory().NewClassType(&class_value);
-      context().RegisterType(node, class_type);
-      context().RegisterValue(node, &class_value);
-      BindAsType(name, class_type);
-    } else {
-      context().RegisterValue(node, &function);
-    }
-  } else {
-    context().RegisterValue(node, &function);
   }
 
   LocalEnvironment environment(this, node);
   if (!maybe_document)
     return VisitChildNodes(node);
+  for (const auto& type_parameter : type_parameters)
+    BindAsType(type_parameter->name(), *type_parameter);
   VisitChildNodes(node);
-  const auto& document = *maybe_document;
-  ProcessTemplateTag(document);
-  Visit(document);
+  Visit(*maybe_document);
 }
 
-void EnvironmentBuilder::ProcessTemplateTag(const ast::Node& document) {
+std::vector<const TypeParameter*> EnvironmentBuilder::ProcessTemplateTag(
+    const ast::Node& document) {
+  std::vector<const TypeParameter*> type_parameters;
   const ast::Node* template_tag = nullptr;
   for (const auto& node : ast::NodeTraversal::ChildNodesOf(document)) {
     if (!node.Is<ast::JsDocTag>())
@@ -405,9 +426,10 @@ void EnvironmentBuilder::ProcessTemplateTag(const ast::Node& document) {
       }
       const auto& name = ast::TypeName::NameOf(type_name);
       const auto& type = type_factory().NewTypeParameter(name);
-      BindAsType(name, type);
+      type_parameters.push_back(&type.As<TypeParameter>());
     }
   }
+  return type_parameters;
 }
 
 // AST node handlers

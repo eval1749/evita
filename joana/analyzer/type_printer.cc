@@ -51,13 +51,29 @@ std::ostream& operator<<(std::ostream& ostream,
   ostream << "class";
   if (name.Is<ast::Name>())
     ostream << ' ' << ast::AsSourceCode(name);
+  if (type.has_parameters()) {
+    auto delimiter = "<";
+    for (const auto& parameter : type.parameters()) {
+      ostream << delimiter << AsSourceCode(parameter.name());
+      delimiter = ",";
+    }
+    ostream << '>';
+  }
   return ostream << '@' << type.id();
 }
 
 std::ostream& operator<<(std::ostream& ostream,
                          const Printable<FunctionType>& printable) {
   const auto& type = *printable.type;
-  ostream << "function(";
+  ostream << "function";
+  if (type.has_parameters()) {
+    auto delimiter = "<";
+    for (const auto& parameter : type.parameters()) {
+      ostream << delimiter << AsSourceCode(parameter.name());
+      delimiter = ",";
+    }
+    ostream << '>';
+  }
   auto delimiter = "";
   if (type.kind() == FunctionTypeKind::Constructor) {
     ostream << "new:" << AsPrintable(type.this_type());
@@ -76,18 +92,6 @@ std::ostream& operator<<(std::ostream& ostream,
 }
 
 std::ostream& operator<<(std::ostream& ostream,
-                         const Printable<GenericType>& printable) {
-  const auto& type = *printable.type;
-  ostream << ast::AsSourceCode(type.name()) << '@' << type.id() << '<';
-  auto delimiter = "";
-  for (const auto& parameter : type.parameters()) {
-    ostream << delimiter << AsPrintable(parameter);
-    delimiter = ",";
-  }
-  return ostream << '>';
-}
-
-std::ostream& operator<<(std::ostream& ostream,
                          const Printable<InvalidType>& printable) {
   return ostream << "%invalid%";
 }
@@ -102,7 +106,11 @@ std::ostream& operator<<(std::ostream& ostream,
                          const Printable<TypeApplication>& printable) {
   const auto& type = *printable.type;
   const auto& generic_type = type.generic_type();
-  ostream << ast::AsSourceCode(generic_type.name()) << '<';
+  if (generic_type.is_anonymous())
+    ostream << generic_type.class_name();
+  else
+    ostream << generic_type.name();
+  ostream << '@' << generic_type.id() << '<';
   auto delimiter = "";
   for (const auto& argument : type.arguments()) {
     ostream << delimiter;

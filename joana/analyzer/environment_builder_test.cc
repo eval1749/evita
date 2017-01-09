@@ -242,6 +242,21 @@ TEST_F(EnvironmentBuilderTest, ComputedMemberExpression) {
             "/** @const */ Foo[Symbol.iterator]\n"));
 }
 
+TEST_F(EnvironmentBuilderTest, ConstError) {
+  EXPECT_EQ(
+      "Module\n"
+      "+--ConstStatement\n"
+      "|  +--BindingNameElement $foo@1001\n"
+      "|  |  +--Name |foo|\n"
+      "|  |  +--NumericLiteral |1|\n"
+      "|  +--BindingNameElement $foo@1001\n"
+      "|  |  +--Name |foo|\n"
+      "|  |  +--NumericLiteral |2|\n"
+      "ANALYZER_ERROR_ENVIRONMENT_MULTIPLE_OCCURRENCES@6:18\n"
+      "ANALYZER_ERROR_ENVIRONMENT_MULTIPLE_OCCURRENCES@6:22\n",
+      RunOn("const foo = 1, foo = 2;"));
+}
+
 TEST_F(EnvironmentBuilderTest, Function) {
   EXPECT_EQ(
       "Module\n"
@@ -343,6 +358,21 @@ TEST_F(EnvironmentBuilderTest, Let) {
       "|  |  +--Name |b|\n"
       "|  |  +--NumericLiteral |2|\n",
       RunOn("let a = 1, b = 2;"));
+}
+
+TEST_F(EnvironmentBuilderTest, LetError) {
+  EXPECT_EQ(
+      "Module\n"
+      "+--LetStatement\n"
+      "|  +--BindingNameElement $foo@1001\n"
+      "|  |  +--Name |foo|\n"
+      "|  |  +--NumericLiteral |1|\n"
+      "|  +--BindingNameElement $foo@1001\n"
+      "|  |  +--Name |foo|\n"
+      "|  |  +--NumericLiteral |2|\n"
+      "ANALYZER_ERROR_ENVIRONMENT_MULTIPLE_OCCURRENCES@4:16\n"
+      "ANALYZER_ERROR_ENVIRONMENT_MULTIPLE_OCCURRENCES@4:20\n",
+      RunOn("let foo = 1, foo = 2;"));
 }
 
 TEST_F(EnvironmentBuilderTest, MemberExpression) {
@@ -517,6 +547,23 @@ TEST_F(EnvironmentBuilderTest, Type) {
       "|  |  |  +--ElisionExpression ||\n",
       RunOn("/** @type {Array<T>} @template T */ const foo;"))
       << "Later pass will report @template is unexpected for const.";
+}
+
+TEST_F(EnvironmentBuilderTest, VarError) {
+  EXPECT_EQ(
+      "Module\n"
+      "+--VarStatement\n"
+      "|  +--BindingNameElement $foo@1001\n"
+      "|  |  +--Name |foo|\n"
+      "|  |  +--NumericLiteral |1|\n"
+      "|  +--BindingNameElement $foo@1001\n"
+      "|  |  +--Name |foo|\n"
+      "|  |  +--NumericLiteral |2|\n"
+      "ANALYZER_ERROR_ENVIRONMENT_MULTIPLE_OCCURRENCES@4:16\n"
+      "ANALYZER_ERROR_ENVIRONMENT_MULTIPLE_OCCURRENCES@4:20\n",
+      RunOn("var foo = 1, foo = 2;"))
+      << "It is legal to bind same variable multiple times with 'var', but we "
+         "report error.";
 }
 
 }  // namespace analyzer

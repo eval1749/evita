@@ -204,17 +204,19 @@ const Type* EnvironmentBuilder::FindType(const ast::Node& name) const {
 Variable& EnvironmentBuilder::BindVariable(const ast::Node& name) {
   DCHECK_EQ(name, ast::SyntaxCode::Name);
   if (environment_) {
-    for (auto* runner = environment_; runner; runner = runner->outer()) {
-      if (auto* present = runner->FindVariable(name))
-        return *present;
+    if (auto* present = environment_->FindVariable(name)) {
+      AddError(name, ErrorCode::ENVIRONMENT_MULTIPLE_OCCURRENCES,
+               present->node());
+      return *present;
     }
     auto& variable = factory().NewVariable(name);
     environment_->BindVariable(name, &variable);
     return variable;
   }
-  for (auto* runner = toplevel_environment_; runner; runner = runner->outer()) {
-    if (auto* present = runner->FindVariable(name))
-      return *present;
+  if (auto* present = toplevel_environment_->FindVariable(name)) {
+    AddError(name, ErrorCode::ENVIRONMENT_MULTIPLE_OCCURRENCES,
+             present->node());
+    return *present;
   }
   // TODO(eval1749): Expose global "var" binding to global object.
   auto& variable = factory().NewVariable(name);

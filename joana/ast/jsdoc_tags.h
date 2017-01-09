@@ -38,7 +38,7 @@ namespace ast {
   V(nosideeffects, NoSideeffects, None)      \
   V(override, Override, None)                \
   V(package, Package, None)                  \
-  V(param, Param, TypeNameDescription)       \
+  V(param, Param, TypeParameterDescription)  \
   V(preserve, Preserve, Description)         \
   V(private, Private, None)                  \
   V(protected, Protected, None)              \
@@ -66,7 +66,7 @@ namespace ast {
   V(OptionalType, "@const {type}")                 \
   V(Type, "@enum {type}")                          \
   V(TypeDescription, "@define {type} description") \
-  V(TypeNameDescription, "@param {type} name description")
+  V(TypeParameterDescription, "@param {type} parameter description")
 
 }  // namespace ast
 }  // namespace joana

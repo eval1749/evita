@@ -283,9 +283,9 @@ const ast::Node& JsDocParser::ParseTag(const ast::Node& tag_name) {
       auto& description = ParseDescription();
       return NewTag(tag_name, type, description);
     }
-    case TagSyntax::TypeNameDescription: {
+    case TagSyntax::TypeParameterDescription: {
       auto& type = ParseType();
-      auto& name = ParseName();
+      auto& name = node_factory().NewReferenceExpression(ParseName());
       auto& description = ParseDescription();
       return NewTag(tag_name, type, name, description);
     }

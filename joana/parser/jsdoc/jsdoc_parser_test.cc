@@ -231,14 +231,15 @@ TEST_F(JsDocParserTest, SyntaxTypeDescription) {
       Parse("@define {{age:number, sex:string}} human"));
 }
 
-TEST_F(JsDocParserTest, SyntaxTypeNameDescription) {
+TEST_F(JsDocParserTest, SyntaxTypeVarDescription) {
   EXPECT_EQ(
       "JsDocDocument\n"
       "+--JsDocTag\n"
       "|  +--Name |@param|\n"
       "|  +--TypeName\n"
       "|  |  +--Name |string|\n"
-      "|  +--Name |foo|\n"
+      "|  +--ReferenceExpression\n"
+      "|  |  +--Name |foo|\n"
       "|  +--JsDocText ||\n",
       Parse("@param {string} foo"));
   EXPECT_EQ(
@@ -247,13 +248,15 @@ TEST_F(JsDocParserTest, SyntaxTypeNameDescription) {
       "|  +--Name |@param|\n"
       "|  +--TypeName\n"
       "|  |  +--Name |string|\n"
-      "|  +--Name |foo|\n"
+      "|  +--ReferenceExpression\n"
+      "|  |  +--Name |foo|\n"
       "|  +--JsDocText |desc1|\n"
       "+--JsDocTag\n"
       "|  +--Name |@param|\n"
       "|  +--TypeName\n"
       "|  |  +--Name |number|\n"
-      "|  +--Name |bar|\n"
+      "|  +--ReferenceExpression\n"
+      "|  |  +--Name |bar|\n"
       "|  +--JsDocText ||\n",
       Parse("@param {string} foo desc1\n"
             "@param {number} bar\n"));

@@ -47,7 +47,7 @@ std::ostream& operator<<(std::ostream& ostream,
                          const Printable<ClassType>& printable) {
   const auto& type = *printable.type;
   const auto& class_value = type.value();
-  const auto& name = ast::Class::NameOf(class_value.node());
+  const auto& name = class_value.node().child_at(0);
   ostream << "class";
   if (name.Is<ast::Name>())
     ostream << ' ' << ast::AsSourceCode(name);

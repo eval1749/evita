@@ -36,6 +36,28 @@ namespace analyzer {
 
 namespace {
 
+ClassKind ClassKindOf(const ast::Node& node) {
+  DCHECK_EQ(node, ast::SyntaxCode::JsDocTag);
+  const auto& name = ast::JsDocTag::NameOf(node);
+  if (name == ast::TokenKind::JsDocConstructor)
+    return ClassKind::Normal;
+  if (name == ast::TokenKind::JsDocInterface)
+    return ClassKind::Interface;
+  if (name == ast::TokenKind::JsDocRecord)
+    return ClassKind::Record;
+  NOTREACHED() << "Expect @constructor, @Interface or @record " << node;
+  return ClassKind::Normal;
+}
+
+bool IsClassTag(const ast::Node& node) {
+  if (!node.Is<ast::JsDocTag>())
+    return false;
+  const auto& name = ast::JsDocTag::NameOf(node);
+  return name == ast::TokenKind::JsDocConstructor ||
+         name == ast::TokenKind::JsDocInterface ||
+         name == ast::TokenKind::JsDocRecord;
+}
+
 bool IsMemberExpression(const ast::Node& node) {
   return node == ast::SyntaxCode::MemberExpression ||
          node == ast::SyntaxCode::ComputedMemberExpression;
@@ -210,6 +232,56 @@ Variable* EnvironmentBuilder::FindVariable(const ast::Node& name) const {
   return nullptr;
 }
 
+void EnvironmentBuilder::ProcessFunction(const ast::Node& node,
+                                         const ast::Node* maybe_document) {
+  DCHECK_EQ(node, ast::SyntaxCode::Function);
+  // TODO(eval1749): Report warning for toplevel anonymous class
+  const auto& name = ast::Function::NameOf(node);
+  auto& function = factory().NewFunction(node);
+  if (name == ast::SyntaxCode::Name) {
+    auto& variable = BindToVariable(name);
+    if (!variable.assignments().empty()) {
+      AddError(node, ErrorCode::ENVIRONMENT_MULTIPLE_OCCURRENCES,
+               *variable.assignments().front());
+    }
+    Value::Editor().AddAssignment(&variable, node);
+    if (!maybe_document || !RegisterConstructorIfNeeded(node, *maybe_document))
+      context().RegisterValue(node, &function);
+  } else {
+    context().RegisterValue(node, &function);
+  }
+
+  LocalEnvironment environment(this, node);
+  VisitChildNodes(node);
+
+  if (!maybe_document)
+    return;
+  Visit(*maybe_document);
+}
+
+bool EnvironmentBuilder::RegisterConstructorIfNeeded(
+    const ast::Node& node,
+    const ast::Node& document) {
+  const ast::Node* class_tag = nullptr;
+  for (const auto& child : ast::NodeTraversal::ChildNodesOf(document)) {
+    if (!IsClassTag(child))
+      continue;
+    if (!class_tag) {
+      class_tag = &child;
+      continue;
+    }
+    AddError(child, ErrorCode::ENVIRONMENT_MULTIPLE_OCCURRENCES, *class_tag);
+  }
+  if (!class_tag)
+    return false;
+  auto& class_value = factory().NewClass(node, ClassKindOf(*class_tag));
+  auto& class_type = type_factory().NewClassType(&class_value);
+  context().RegisterType(node, class_type);
+  context().RegisterValue(node, &class_value);
+  BindAsType(ast::Function::NameOf(node), class_type);
+  return true;
+}
+
 // AST node handlers
 Variable& EnvironmentBuilder::ResolveVariableName(const ast::Node& name) {
   DCHECK_EQ(name, ast::SyntaxCode::Name);
@@ -221,14 +293,19 @@ Variable& EnvironmentBuilder::ResolveVariableName(const ast::Node& name) {
   return variable;
 }
 
-//
-// ast::NodeVisitor members
-//
-void EnvironmentBuilder::VisitDefault(const ast::Node& node) {
+void EnvironmentBuilder::VisitChildNodes(const ast::Node& node) {
   ancestors_.push_back(&node);
   for (const auto& child : ast::NodeTraversal::ChildNodesOf(node))
     Visit(child);
   ancestors_.pop_back();
+}
+
+//
+// ast::NodeVisitor members
+//
+
+void EnvironmentBuilder::VisitDefault(const ast::Node& node) {
+  VisitChildNodes(node);
 }
 
 // Binding elements
@@ -256,9 +333,59 @@ void EnvironmentBuilder::VisitInternal(const ast::Annotation& syntax,
   //   * @param {number} x
   //   */
   //  function Foo(x) {}
-  ancestors_.push_back(&node);
-  Visit(ast::Annotation::AnnotatedOf(node));
-  ancestors_.pop_back();
+  const auto& annotated = ast::Annotation::AnnotatedOf(node);
+  const auto& document = ast::Annotation::AnnotationOf(node);
+  if (annotated.Is<ast::Class>()) {
+    Visit(annotated);
+    Visit(document);
+    return;
+  }
+  if (annotated.Is<ast::Function>())
+    return ProcessFunction(annotated, &document);
+  if (annotated.syntax().Is<ast::VariableDeclaration>()) {
+    VisitChildNodes(node);
+    return;
+  }
+  if (!annotated.Is<ast::ExpressionStatement>()) {
+    AddError(node, ErrorCode::ENVIRONMENT_UNEXPECT_ANNOTATION);
+    return;
+  }
+  const auto& expression = ast::ExpressionStatement::ExpressionOf(annotated);
+  if (expression.Is<ast::AssignmentExpression>()) {
+    const auto& lhs = ast::AssignmentExpression::LeftHandSideOf(expression);
+    const auto& rhs = ast::AssignmentExpression::RightHandSideOf(expression);
+    if (!IsMemberExpression(lhs)) {
+      AddError(node, ErrorCode::ENVIRONMENT_UNEXPECT_ANNOTATION);
+      Visit(annotated);
+      return;
+    }
+    if (rhs.Is<ast::Class>()) {
+      Visit(rhs);
+      Visit(document);
+      return;
+    }
+    if (rhs.Is<ast::Function>()) {
+      ProcessFunction(rhs, &document);
+      Visit(lhs);
+      return;
+    }
+    Visit(annotated);
+    Visit(document);
+    return;
+  }
+
+  if (expression.Is<ast::MemberExpression>()) {
+    Visit(expression);
+    Visit(document);
+    return;
+  }
+  if (expression.Is<ast::ComputedMemberExpression>()) {
+    Visit(expression);
+    Visit(document);
+    return;
+  }
+  VisitDefault(node);
+  AddError(node, ErrorCode::ENVIRONMENT_UNEXPECT_ANNOTATION);
 }
 
 void EnvironmentBuilder::VisitInternal(const ast::Class& syntax,
@@ -353,23 +480,7 @@ void EnvironmentBuilder::VisitInternal(const ast::Class& syntax,
 
 void EnvironmentBuilder::VisitInternal(const ast::Function& syntax,
                                        const ast::Node& node) {
-  // TODO(eval1749): Report warning for toplevel anonymous class
-  const auto& name = ast::Function::NameOf(node);
-  auto& function = factory().NewFunction(node);
-  if (name == ast::SyntaxCode::Name) {
-    auto& variable = BindToVariable(name);
-    if (!variable.assignments().empty()) {
-      AddError(node, ErrorCode::ENVIRONMENT_MULTIPLE_OCCURRENCES,
-               *variable.assignments().front());
-    }
-    Value::Editor().AddAssignment(&variable, node);
-    context().RegisterValue(node, &variable);
-  } else {
-    context().RegisterValue(node, &function);
-  }
-
-  LocalEnvironment environment(this, node);
-  VisitDefault(node);
+  ProcessFunction(node, nullptr);
 }
 
 void EnvironmentBuilder::VisitInternal(const ast::Method& syntax,

@@ -80,12 +80,12 @@ struct Printable {
 const ast::Node* ValueNameOf(const Value& value) {
   const auto& node = value.node();
   if (value.Is<Class>()) {
-    const auto& name = ast::Class::NameOf(node);
+    const auto& name = node.child_at(0);
     return name.Is<ast::Name>() ? &name : nullptr;
   }
   if (value.Is<Function>()) {
     if (node.Is<ast::Function>()) {
-      const auto& name = node.child_at(1);
+      const auto& name = ast::Function::NameOf(node);
       return name.Is<ast::Name>() ? &name : nullptr;
     }
     if (node.Is<ast::Method>()) {
@@ -129,7 +129,7 @@ std::ostream& operator<<(std::ostream& ostream,
   if (const auto* type = context.TryTypeOf(node))
     ostream << " {" << *type << '}';
   if (node.arity() == 0)
-    return ostream << " |" << ast::AsSourceCode(node) << '|';
+    return ostream << ' ' << ast::AsSourceCode(node, '|');
   IndentScope scope(&print_context);
   for (const auto& child : ast::NodeTraversal::ChildNodesOf(node))
     ostream << Indent(print_context)

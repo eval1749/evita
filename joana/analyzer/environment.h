@@ -5,6 +5,8 @@
 #ifndef JOANA_ANALYZER_ENVIRONMENT_H_
 #define JOANA_ANALYZER_ENVIRONMENT_H_
 
+#include <utility>
+
 #include "base/macros.h"
 #include "joana/base/memory/zone_allocated.h"
 #include "joana/base/memory/zone_unordered_map.h"
@@ -39,6 +41,8 @@ class Environment final : public ZoneAllocated {
   // Return the AST node which associated to this Environment.
   const ast::Node& owner() const { return owner_; }
 
+  std::pair<const ast::Node*, const Type*> FindNameAndType(
+      const ast::Node& name) const;
   const Type* FindType(const ast::Node& name) const;
   Variable* FindVariable(const ast::Node& name) const;
 
@@ -56,7 +60,7 @@ class Environment final : public ZoneAllocated {
   ZoneUnorderedMap<int, const ast::Node*> name_map_;
   Environment* const outer_;
   const ast::Node& owner_;
-  ZoneUnorderedMap<int, const Type*> type_map_;
+  ZoneUnorderedMap<int, std::pair<const ast::Node*, const Type*>> type_map_;
   ZoneUnorderedMap<int, Variable*> value_map_;
 
   DISALLOW_COPY_AND_ASSIGN(Environment);

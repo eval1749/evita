@@ -9,6 +9,7 @@
 
 #include "joana/analyzer/analyzer_test_base.h"
 #include "joana/analyzer/context.h"
+#include "joana/analyzer/print_as_tree.h"
 #include "joana/analyzer/type.h"
 #include "joana/analyzer/value.h"
 #include "joana/ast/node.h"
@@ -21,41 +22,6 @@
 namespace joana {
 namespace analyzer {
 
-namespace {
-
-template <typename T>
-struct Printable {
-  const T* thing;
-};
-
-Printable<Type> AsPrintable(const Type& type) {
-  return Printable<Type>{&type};
-}
-
-std::ostream& operator<<(std::ostream& ostream,
-                         const Printable<Type>& printable) {
-  const auto& type = *printable.thing;
-  const auto& range = type.node().range();
-  return ostream << type.class_name() << '@' << type.id() << '['
-                 << range.start() << '-' << range.end() << "] "
-                 << EscapedStringPiece16(range.GetString(), '|', 20);
-}
-
-Printable<Value> AsPrintable(const Value& value) {
-  return Printable<Value>{&value};
-}
-
-std::ostream& operator<<(std::ostream& ostream,
-                         const Printable<Value>& printable) {
-  const auto& value = *printable.thing;
-  const auto& range = value.node().range();
-  return ostream << value.class_name() << '@' << value.id() << '['
-                 << range.start() << '-' << range.end() << "] "
-                 << EscapedStringPiece16(range.GetString(), '|', 20);
-}
-
-}  // namespace
-
 //
 // EnvironmentBuilderTest
 //
@@ -64,27 +30,19 @@ class EnvironmentBuilderTest : public AnalyzerTestBase {
   EnvironmentBuilderTest() = default;
   ~EnvironmentBuilderTest() override = default;
 
-  std::string ListValues(base::StringPiece script_text);
+  std::string RunOn(base::StringPiece script_text);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(EnvironmentBuilderTest);
 };
 
-std::string EnvironmentBuilderTest::ListValues(base::StringPiece script_text) {
+std::string EnvironmentBuilderTest::RunOn(base::StringPiece script_text) {
   const auto& module = ParseAsModule(script_text);
-  EnvironmentBuilder builder(&analyzer_context());
+  const auto& context = NewContext();
+  EnvironmentBuilder builder(context.get());
   builder.RunOn(module);
   std::ostringstream ostream;
-  for (const auto& node : ast::NodeTraversal::DescendantsOf(module)) {
-    if (const auto* value = analyzer_context().TryValueOf(node)) {
-      ostream << node.syntax() << '[' << node.range().start() << '-'
-              << node.range().end() << "]=" << AsPrintable(*value) << std::endl;
-    }
-    if (const auto* type = analyzer_context().TryTypeOf(node)) {
-      ostream << node.syntax() << '[' << node.range().start() << '-'
-              << node.range().end() << "]=" << AsPrintable(*type) << std::endl;
-    }
-  }
+  ostream << AsPrintableTree(*context, module) << std::endl;
   for (const auto& error : error_sink().errors())
     ostream << error << std::endl;
   return ostream.str();
@@ -92,113 +50,372 @@ std::string EnvironmentBuilderTest::ListValues(base::StringPiece script_text) {
 
 TEST_F(EnvironmentBuilderTest, Class) {
   EXPECT_EQ(
-      "Class[0-31]=Variable@1002[6-9] |Foo|\n"
-      "Method<NonStatic,Normal>[12-20]=Function@1006[12-20] |bar() {}|\n"
-      "Method<NonStatic,Normal>[21-29]=Function@1008[21-29] |baz() {}|\n",
-      ListValues("class Foo { bar() {} baz() {} }"));
+      "Module\n"
+      "+--Class $Class@1001 {class Foo@1001}\n"
+      "|  +--Name |Foo|\n"
+      "|  +--ElisionExpression ||\n"
+      "|  +--ObjectInitializer\n"
+      "|  |  +--Method<NonStatic,Normal> $Function@1002\n"
+      "|  |  |  +--Name |bar|\n"
+      "|  |  |  +--ParameterList |()|\n"
+      "|  |  |  +--BlockStatement |{}|\n"
+      "|  |  +--Method<NonStatic,Normal> $Function@1003\n"
+      "|  |  |  +--Name |baz|\n"
+      "|  |  |  +--ParameterList |()|\n"
+      "|  |  |  +--BlockStatement |{}|\n",
+      RunOn("class Foo { bar() {} baz() {} }"));
 }
 
 TEST_F(EnvironmentBuilderTest, ClassAnonymous) {
   EXPECT_EQ(
-      "BindingNameElement[4-16]=Variable@1003[4-5] |a|\n"
-      "Class[8-16]=Function@1001[8-16] |class {}|\n",
-      ListValues("var a = class {};"));
+      "Module\n"
+      "+--VarStatement\n"
+      "|  +--BindingNameElement $Variable@1002\n"
+      "|  |  +--Name |a|\n"
+      "|  |  +--Class $Class@1001 {class@1001}\n"
+      "|  |  |  +--Empty ||\n"
+      "|  |  |  +--ElisionExpression ||\n"
+      "|  |  |  +--ObjectInitializer |{}|\n",
+      RunOn("var a = class {};"));
 }
 
 TEST_F(EnvironmentBuilderTest, ClassError) {
   EXPECT_EQ(
-      "Class[0-15]=Variable@1002[6-9] |Foo|\n"
+      "Module\n"
+      "+--Class $Class@1001 {class Foo@1001}\n"
+      "|  +--Name |Foo|\n"
+      "|  +--ElisionExpression ||\n"
+      "|  +--ObjectInitializer\n"
+      "|  |  +--NumericLiteral |1|\n"
       "ANALYZER_ERROR_ENVIRONMENT_EXPECT_METHOD@12:13\n",
-      ListValues("class Foo { 1 }"));
+      RunOn("class Foo { 1 }"));
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--Class $Class@1001 {class Foo@1001}\n"
+      "|  +--Name |Foo|\n"
+      "|  +--ElisionExpression ||\n"
+      "|  +--ObjectInitializer\n"
+      "|  |  +--Method<NonStatic,Normal> $Function@1002\n"
+      "|  |  |  +--Name |bar|\n"
+      "|  |  |  +--ParameterList |()|\n"
+      "|  |  |  +--BlockStatement |{}|\n"
+      "|  |  +--Method<NonStatic,Normal> $Function@1003\n"
+      "|  |  |  +--Name |bar|\n"
+      "|  |  |  +--ParameterList |()|\n"
+      "|  |  |  +--BlockStatement |{}|\n"
+      "ANALYZER_ERROR_ENVIRONMENT_MULTIPLE_OCCURRENCES@12:29\n",
+      RunOn("class Foo { bar() {} bar() {} }"));
+}
+
+TEST_F(EnvironmentBuilderTest, ClassErrorConstructor) {
+  EXPECT_EQ(
+      "Module\n"
+      "+--Class $Class@1001 {class Foo@1001}\n"
+      "|  +--Name |Foo|\n"
+      "|  +--ElisionExpression ||\n"
+      "|  +--ObjectInitializer\n"
+      "|  |  +--Method<NonStatic,Async> $Function@1002\n"
+      "|  |  |  +--Name |constructor|\n"
+      "|  |  |  +--ParameterList |()|\n"
+      "|  |  |  +--BlockStatement |{}|\n"
+      "ANALYZER_ERROR_ENVIRONMENT_INVALID_CONSTRUCTOR@12:34\n",
+      RunOn("class Foo { async constructor() {} }"))
+      << "constructor can not be async.";
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--Class $Class@1001 {class Foo@1001}\n"
+      "|  +--Name |Foo|\n"
+      "|  +--ElisionExpression ||\n"
+      "|  +--ObjectInitializer\n"
+      "|  |  +--Method<NonStatic,Generator> $Function@1002\n"
+      "|  |  |  +--Name |constructor|\n"
+      "|  |  |  +--ParameterList |()|\n"
+      "|  |  |  +--BlockStatement |{}|\n"
+      "ANALYZER_ERROR_ENVIRONMENT_INVALID_CONSTRUCTOR@12:29\n",
+      RunOn("class Foo { *constructor() {} }"))
+      << "constructor can not be generator.";
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--Class $Class@1001 {class Foo@1001}\n"
+      "|  +--Name |Foo|\n"
+      "|  +--ElisionExpression ||\n"
+      "|  +--ObjectInitializer\n"
+      "|  |  +--Method<Static,Normal> $Function@1002\n"
+      "|  |  |  +--Name |constructor|\n"
+      "|  |  |  +--ParameterList |()|\n"
+      "|  |  |  +--BlockStatement |{}|\n"
+      "ANALYZER_ERROR_ENVIRONMENT_INVALID_CONSTRUCTOR@12:35\n",
+      RunOn("class Foo { static constructor() {} }"))
+      << "constructor can not be static.";
 }
 
 TEST_F(EnvironmentBuilderTest, ComputedMemberExpression) {
   EXPECT_EQ(
-      "Function<Normal>[20-37]=Variable@1002[29-32] |Foo|\n"
-      "ComputedMemberExpression[52-72]=Property@1006[56-71] |Symbol.iterator|\n"
-      "ReferenceExpression[52-55]=Variable@1002[29-32] |Foo|\n"
-      "MemberExpression[56-71]=Property@1005[63-71] |iterator|\n"
-      "ReferenceExpression[56-62]=Variable@1004[56-62] |Symbol|\n",
-      ListValues("/** @constructor */ function Foo() {}\n"
-                 "/** @const */ Foo[Symbol.iterator]\n"));
+      "Module\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@constructor|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--Function<Normal> $Variable@1002\n"
+      "|  |  +--Name |Foo|\n"
+      "|  |  +--ParameterList |()|\n"
+      "|  |  +--BlockStatement |{}|\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@const|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--ExpressionStatement\n"
+      "|  |  +--ComputedMemberExpression $Property@1005\n"
+      "|  |  |  +--ReferenceExpression $Variable@1002\n"
+      "|  |  |  |  +--Name |Foo|\n"
+      "|  |  |  +--MemberExpression $Property@1004\n"
+      "|  |  |  |  +--ReferenceExpression $Variable@1003\n"
+      "|  |  |  |  |  +--Name |Symbol|\n"
+      "|  |  |  |  +--Name |iterator|\n",
+      RunOn("/** @constructor */ function Foo() {}\n"
+            "/** @const */ Foo[Symbol.iterator]\n"));
 }
 
 TEST_F(EnvironmentBuilderTest, Function) {
   EXPECT_EQ(
-      "Function<Normal>[0-36]=Variable@1002[9-12] |foo|\n"
-      "BindingNameElement[13-14]=Variable@1003[13-14] |a|\n"
-      "BindingNameElement[16-17]=Variable@1004[16-17] |b|\n"
-      "ReferenceExpression[28-29]=Variable@1003[13-14] |a|\n"
-      "ReferenceExpression[32-33]=Variable@1004[16-17] |b|\n",
-      ListValues("function foo(a, b) { return a + b; }"));
+      "Module\n"
+      "+--Function<Normal> $Variable@1002\n"
+      "|  +--Name |foo|\n"
+      "|  +--ParameterList\n"
+      "|  |  +--BindingNameElement $Variable@1003\n"
+      "|  |  |  +--Name |a|\n"
+      "|  |  |  +--ElisionExpression ||\n"
+      "|  |  +--BindingNameElement $Variable@1004\n"
+      "|  |  |  +--Name |b|\n"
+      "|  |  |  +--ElisionExpression ||\n"
+      "|  +--BlockStatement\n"
+      "|  |  +--ReturnStatement\n"
+      "|  |  |  +--BinaryExpression<+>\n"
+      "|  |  |  |  +--ReferenceExpression $Variable@1003\n"
+      "|  |  |  |  |  +--Name |a|\n"
+      "|  |  |  |  +--Punctuator |+|\n"
+      "|  |  |  |  +--ReferenceExpression $Variable@1004\n"
+      "|  |  |  |  |  +--Name |b|\n",
+      RunOn("function foo(a, b) { return a + b; }"));
 }
 
 TEST_F(EnvironmentBuilderTest, FunctionAnonymous) {
   EXPECT_EQ(
-      "BindingNameElement[4-21]=Variable@1002[4-5] |a|\n"
-      "Function<Normal>[8-21]=Function@1001[8-21] |function() {}|\n",
-      ListValues("var a = function() {};"));
+      "Module\n"
+      "+--VarStatement\n"
+      "|  +--BindingNameElement $Variable@1002\n"
+      "|  |  +--Name |a|\n"
+      "|  |  +--Function<Normal> $Function@1001\n"
+      "|  |  |  +--Empty ||\n"
+      "|  |  |  +--ParameterList |()|\n"
+      "|  |  |  +--BlockStatement |{}|\n",
+      RunOn("var a = function() {};"));
 }
 
 TEST_F(EnvironmentBuilderTest, Global) {
   EXPECT_EQ(
-      "MemberExpression[0-10]=Property@1001[7-10] |foo|\n"
-      "ReferenceExpression[0-6]=Variable@8[8-14] |global|\n",
-      ListValues("global.foo = 1;"));
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--AssignmentExpression<=>\n"
+      "|  |  +--MemberExpression $Property@1001\n"
+      "|  |  |  +--ReferenceExpression $Variable@1\n"
+      "|  |  |  |  +--Name |global|\n"
+      "|  |  |  +--Name |foo|\n"
+      "|  |  +--Punctuator |=|\n"
+      "|  |  +--NumericLiteral |1|\n",
+      RunOn("global.foo = 1;"));
 }
 
 TEST_F(EnvironmentBuilderTest, Let) {
   EXPECT_EQ(
-      "BindingNameElement[4-9]=Variable@1001[4-5] |a|\n"
-      "BindingNameElement[11-16]=Variable@1002[11-12] |b|\n",
-      ListValues("let a = 1, b = 2;"));
+      "Module\n"
+      "+--LetStatement\n"
+      "|  +--BindingNameElement $Variable@1001\n"
+      "|  |  +--Name |a|\n"
+      "|  |  +--NumericLiteral |1|\n"
+      "|  +--BindingNameElement $Variable@1002\n"
+      "|  |  +--Name |b|\n"
+      "|  |  +--NumericLiteral |2|\n",
+      RunOn("let a = 1, b = 2;"));
 }
 
 TEST_F(EnvironmentBuilderTest, MemberExpression) {
   EXPECT_EQ(
-      "Function<Normal>[20-37]=Variable@1002[29-32] |Foo|\n"
-      "MemberExpression[52-69]=Property@1005[66-69] |bar|\n"
-      "MemberExpression[52-65]=Property@1004[56-65] |prototype|\n"
-      "ReferenceExpression[52-55]=Variable@1002[29-32] |Foo|\n",
-      ListValues("/** @constructor */ function Foo() {}\n"
-                 "/** @const */ Foo.prototype.bar\n"))
+      "Module\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@constructor|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--Function<Normal> $Variable@1002\n"
+      "|  |  +--Name |Foo|\n"
+      "|  |  +--ParameterList |()|\n"
+      "|  |  +--BlockStatement |{}|\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@const|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--ExpressionStatement\n"
+      "|  |  +--MemberExpression $Property@1004\n"
+      "|  |  |  +--MemberExpression $Property@1003\n"
+      "|  |  |  |  +--ReferenceExpression $Variable@1002\n"
+      "|  |  |  |  |  +--Name |Foo|\n"
+      "|  |  |  |  +--Name |prototype|\n"
+      "|  |  |  +--Name |bar|\n",
+      RunOn("/** @constructor */ function Foo() {}\n"
+            "/** @const */ Foo.prototype.bar\n"))
       << "Old style class externs";
 }
 
 TEST_F(EnvironmentBuilderTest, Super) {
-  EXPECT_EQ("", ListValues("super.foo = 1;")) << "'super' has no value";
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--AssignmentExpression<=>\n"
+      "|  |  +--MemberExpression\n"
+      "|  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  +--Name |super|\n"
+      "|  |  |  +--Name |foo|\n"
+      "|  |  +--Punctuator |=|\n"
+      "|  |  +--NumericLiteral |1|\n",
+      RunOn("super.foo = 1;"))
+      << "'super' has no value";
 
-  EXPECT_EQ("TypeName[11-17]=PrimitiveType@3[20-26] |number|\n",
-            ListValues("/** @type {number} */ super.foo = 1;"))
+  EXPECT_EQ(
+      "Module\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@type|\n"
+      "|  |  |  +--TypeName\n"
+      "|  |  |  |  +--Name |number|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--ExpressionStatement\n"
+      "|  |  +--AssignmentExpression<=>\n"
+      "|  |  |  +--MemberExpression\n"
+      "|  |  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  |  +--Name |super|\n"
+      "|  |  |  |  +--Name |foo|\n"
+      "|  |  |  +--Punctuator |=|\n"
+      "|  |  |  +--NumericLiteral |1|\n",
+      RunOn("/** @type {number} */ super.foo = 1;"))
       << "'super' has no value";
 }
 
 TEST_F(EnvironmentBuilderTest, This) {
-  EXPECT_EQ("", ListValues("this.foo = 1;")) << "'this' has no value";
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--AssignmentExpression<=>\n"
+      "|  |  +--MemberExpression\n"
+      "|  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  +--Name |this|\n"
+      "|  |  |  +--Name |foo|\n"
+      "|  |  +--Punctuator |=|\n"
+      "|  |  +--NumericLiteral |1|\n",
+      RunOn("this.foo = 1;"))
+      << "'this' has no value";
 
-  EXPECT_EQ("TypeName[11-17]=PrimitiveType@3[20-26] |number|\n",
-            ListValues("/** @type {number} */ this.foo = 1;"))
+  EXPECT_EQ(
+      "Module\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@type|\n"
+      "|  |  |  +--TypeName\n"
+      "|  |  |  |  +--Name |number|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--ExpressionStatement\n"
+      "|  |  +--AssignmentExpression<=>\n"
+      "|  |  |  +--MemberExpression\n"
+      "|  |  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  |  +--Name |this|\n"
+      "|  |  |  |  +--Name |foo|\n"
+      "|  |  |  +--Punctuator |=|\n"
+      "|  |  |  +--NumericLiteral |1|\n",
+      RunOn("/** @type {number} */ this.foo = 1;"))
       << "'this' has no value";
 }
 
 TEST_F(EnvironmentBuilderTest, Type) {
   EXPECT_EQ(
-      "BindingNameElement[22-25]=Variable@1001[22-25] |Foo|\n"
-      "TypeName[39-42]=TypeReference@1003[22-25] |Foo|\n"
-      "BindingNameElement[51-54]=Variable@1002[51-54] |foo|\n",
-      ListValues("/** @interface */ var Foo;\n"
-                 "/** @type {!Foo} */ var foo;\n"));
+      "Module\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@interface|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--VarStatement\n"
+      "|  |  +--BindingNameElement $Variable@1001\n"
+      "|  |  |  +--Name |Foo|\n"
+      "|  |  |  +--ElisionExpression ||\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@type|\n"
+      "|  |  |  +--NonNullableType\n"
+      "|  |  |  |  +--TypeName\n"
+      "|  |  |  |  |  +--Name |Foo|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--VarStatement\n"
+      "|  |  +--BindingNameElement $Variable@1002\n"
+      "|  |  |  +--Name |foo|\n"
+      "|  |  |  +--ElisionExpression ||\n",
+      RunOn("/** @interface */ var Foo;\n"
+            "/** @type {!Foo} */ var foo;\n"));
 
   EXPECT_EQ(
-      "TypeName[11-17]=PrimitiveType@3[20-26] |number|\n"
-      "BindingNameElement[26-27]=Variable@1004[26-27] |x|\n",
-      ListValues("/** @type {number} */ var x;"));
+      "Module\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@type|\n"
+      "|  |  |  +--TypeName\n"
+      "|  |  |  |  +--Name |number|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--VarStatement\n"
+      "|  |  +--BindingNameElement $Variable@1001\n"
+      "|  |  |  +--Name |x|\n"
+      "|  |  |  +--ElisionExpression ||\n",
+      RunOn("/** @type {number} */ var x;"));
 
   EXPECT_EQ(
-      "TypeName[11-16]=TypeReference@1008[11-16] |Array|\n"
-      "TypeName[17-18]=TypeParameter@1006[31-32] |T|\n"
-      "BindingNameElement[42-45]=Variable@1005[42-45] |foo|\n",
-      ListValues("/** @type {Array<T>} @template T */ const foo;"));
+      "Module\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@type|\n"
+      "|  |  |  +--TypeApplication\n"
+      "|  |  |  |  +--TypeName\n"
+      "|  |  |  |  |  +--Name |Array|\n"
+      "|  |  |  |  +--Tuple\n"
+      "|  |  |  |  |  +--TypeName\n"
+      "|  |  |  |  |  |  +--Name |T|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@template|\n"
+      "|  |  |  +--Name |T|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--ConstStatement\n"
+      "|  |  +--BindingNameElement $Variable@1001\n"
+      "|  |  |  +--Name |foo|\n"
+      "|  |  |  +--ElisionExpression ||\n",
+      RunOn("/** @type {Array<T>} @template T */ const foo;"));
 }
 
 }  // namespace analyzer

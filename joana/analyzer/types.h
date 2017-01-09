@@ -20,14 +20,107 @@ class Zone;
 
 namespace analyzer {
 
+class Class;
 class TypeParameter;
+class Value;
 class Variable;
+
+// See "type_forward.h" for list of types.
+
+enum class FunctionTypeKind {
+  Constructor,
+  Normal,
+};
+
+//
+// NamedType
+//
+class NamedType : public Type {
+  DECLARE_ABSTRACT_ANALYZE_TYPE(NamedType, Type)
+
+ public:
+  ~NamedType();
+
+  const ast::Node& name() const { return name_; }
+
+ protected:
+  NamedType(int id, const ast::Node& name);
+
+ private:
+  const ast::Node& name_;
+
+  DISALLOW_COPY_AND_ASSIGN(NamedType);
+};
+
+//
+// AnyType
+//
+class AnyType final : public Type {
+  DECLARE_CONCRETE_ANALYZE_TYPE(AnyType, Type)
+
+ public:
+  ~AnyType() final;
+
+ private:
+  explicit AnyType(int id);
+
+  DISALLOW_COPY_AND_ASSIGN(AnyType);
+};
+
+//
+// ClassType
+//
+class ClassType final : public Type {
+  DECLARE_CONCRETE_ANALYZE_TYPE(ClassType, Type)
+
+ public:
+  ~ClassType() final;
+
+  Class& value() const { return *value_; }
+
+ private:
+  ClassType(int id, Class* value);
+
+  Class* const value_;
+
+  DISALLOW_COPY_AND_ASSIGN(ClassType);
+};
+
+//
+// FunctionType
+//
+class FunctionType final : public Type {
+  DECLARE_CONCRETE_ANALYZE_TYPE(FunctionType, Type)
+
+ public:
+  ~FunctionType() final;
+
+  FunctionTypeKind kind() const { return kind_; }
+  auto parameter_types() const { return ReferenceRangeOf(parameter_types_); }
+  const Type& return_type() const { return return_type_; }
+  const Type& this_type() const { return this_type_; }
+
+ private:
+  FunctionType(Zone* zone,
+               int id,
+               FunctionTypeKind kind,
+               const std::vector<const Type*> parameter_types,
+               const Type& return_type,
+               const Type& this_type);
+
+  const FunctionTypeKind kind_;
+  const ZoneVector<const Type*> parameter_types_;
+  const Type& return_type_;
+  const Type& this_type_;
+
+  DISALLOW_COPY_AND_ASSIGN(FunctionType);
+};
 
 //
 // GenericType
 //
-class GenericType final : public Type {
-  DECLARE_CONCRETE_ANALYZE_TYPE(GenericType, Type)
+class GenericType final : public NamedType {
+  DECLARE_CONCRETE_ANALYZE_TYPE(GenericType, NamedType)
 
  public:
   ~GenericType() final;
@@ -35,9 +128,11 @@ class GenericType final : public Type {
   auto parameters() const { return ReferenceRangeOf(parameters_); }
 
  private:
+  // |name| is |ast::Name|, |ast::ComputedMemberExpression| or
+  // |ast::MemberExpression|.
   GenericType(Zone* zone,
               int id,
-              const ast::Node& node,
+              const ast::Node& name,
               const std::vector<const TypeParameter*>& parameters);
 
   const ZoneVector<const TypeParameter*> parameters_;
@@ -46,16 +141,31 @@ class GenericType final : public Type {
 };
 
 //
+// InvalidType
+//
+class InvalidType final : public Type {
+  DECLARE_CONCRETE_ANALYZE_TYPE(InvalidType, Type)
+
+ public:
+  ~InvalidType() final;
+
+ private:
+  explicit InvalidType(int id);
+
+  DISALLOW_COPY_AND_ASSIGN(InvalidType);
+};
+
+//
 // PrimitiveType
 //
-class PrimitiveType final : public Type {
-  DECLARE_CONCRETE_ANALYZE_TYPE(PrimitiveType, Type)
+class PrimitiveType final : public NamedType {
+  DECLARE_CONCRETE_ANALYZE_TYPE(PrimitiveType, NamedType)
 
  public:
   ~PrimitiveType() final;
 
  private:
-  PrimitiveType(int id, const ast::Node& node);
+  PrimitiveType(int id, const ast::Node& name);
 
   DISALLOW_COPY_AND_ASSIGN(PrimitiveType);
 };
@@ -77,7 +187,6 @@ class TypeApplication final : public Type {
  private:
   TypeApplication(Zone* zone,
                   int id,
-                  const ast::Node& node,
                   const GenericType& generic_type,
                   const std::vector<Argument>& arguments);
 
@@ -90,14 +199,14 @@ class TypeApplication final : public Type {
 //
 // TypeName
 //
-class TypeName final : public Type {
-  DECLARE_CONCRETE_ANALYZE_TYPE(TypeName, Type)
+class TypeName final : public NamedType {
+  DECLARE_CONCRETE_ANALYZE_TYPE(TypeName, NamedType)
 
  public:
   ~TypeName() final;
 
  private:
-  TypeName(int id, const ast::Node& node);
+  TypeName(int id, const ast::Node& name);
 
   DISALLOW_COPY_AND_ASSIGN(TypeName);
 };
@@ -105,14 +214,14 @@ class TypeName final : public Type {
 //
 // TypeParameter
 //
-class TypeParameter final : public Type {
+class TypeParameter final : public NamedType {
   DECLARE_CONCRETE_ANALYZE_TYPE(TypeParameter, Type)
 
  public:
   ~TypeParameter() final;
 
  private:
-  TypeParameter(int id, const ast::Node& node);
+  TypeParameter(int id, const ast::Node& name);
 
   DISALLOW_COPY_AND_ASSIGN(TypeParameter);
 };
@@ -134,6 +243,36 @@ class TypeReference final : public Type {
   Variable& variable_;
 
   DISALLOW_COPY_AND_ASSIGN(TypeReference);
+};
+
+//
+// UnknownType
+//
+class UnknownType final : public Type {
+  DECLARE_CONCRETE_ANALYZE_TYPE(UnknownType, Type)
+
+ public:
+  ~UnknownType() final;
+
+ private:
+  explicit UnknownType(int id);
+
+  DISALLOW_COPY_AND_ASSIGN(UnknownType);
+};
+
+//
+// VoidType
+//
+class VoidType final : public Type {
+  DECLARE_CONCRETE_ANALYZE_TYPE(VoidType, Type)
+
+ public:
+  ~VoidType() final;
+
+ private:
+  explicit VoidType(int id);
+
+  DISALLOW_COPY_AND_ASSIGN(VoidType);
 };
 
 }  // namespace analyzer

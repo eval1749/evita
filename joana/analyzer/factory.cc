@@ -28,6 +28,10 @@ Property& Factory::GetOrNewProperty(Properties* properties,
   return properties->Add(&NewProperty(node));
 }
 
+Class& Factory::NewClass(const ast::Node& node, ClassKind kind) {
+  return *new (&zone_) Class(&zone_, NextValueId(), node, kind);
+}
+
 Function& Factory::NewFunction(const ast::Node& node) {
   auto& properties = NewProperties(node);
   return *new (&zone_) Function(NextValueId(), node, &properties);
@@ -38,11 +42,6 @@ Value& Factory::NewOrdinaryObject(const ast::Node& node) {
   return *new (&zone_) OrdinaryObject(NextValueId(), node, &properties);
 }
 
-const Type& Factory::NewPrimitiveType(const ast::Node& name) {
-  DCHECK_EQ(name, ast::SyntaxCode::Name);
-  return *new (&zone_) PrimitiveType(NextValueId(), name);
-}
-
 Properties& Factory::NewProperties(const ast::Node& owner) {
   return *new (&zone_) Properties(&zone_, owner);
 }
@@ -50,21 +49,6 @@ Properties& Factory::NewProperties(const ast::Node& owner) {
 Property& Factory::NewProperty(const ast::Node& key) {
   auto& properties = NewProperties(key);
   return *new (&zone_) Property(&zone_, NextValueId(), key, &properties);
-}
-
-const Type& Factory::NewTypeName(const ast::Node& name) {
-  DCHECK_EQ(name, ast::SyntaxCode::Name);
-  return *new (&zone_) TypeName(NextValueId(), name);
-}
-
-const Type& Factory::NewTypeParameter(const ast::Node& name) {
-  DCHECK_EQ(name, ast::SyntaxCode::Name);
-  return *new (&zone_) TypeParameter(NextValueId(), name);
-}
-
-const Type& Factory::NewTypeReference(Variable* variable) {
-  DCHECK(variable);
-  return *new (&zone_) TypeReference(NextValueId(), variable);
 }
 
 Value& Factory::NewUndefined(const ast::Node& node) {

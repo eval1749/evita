@@ -5,7 +5,7 @@
 #ifndef JOANA_ANALYZER_PASS_H_
 #define JOANA_ANALYZER_PASS_H_
 
-#include "base/macros.h"
+#include "joana/analyzer/context_user.h"
 
 namespace joana {
 
@@ -24,27 +24,14 @@ class Factory;
 //
 // Pass
 //
-class Pass {
+class Pass : public ContextUser {
  public:
   ~Pass();
 
  protected:
   explicit Pass(Context* context);
 
-  const Context& context() const { return context_; }
-  Context& context() { return context_; }
-  const Factory& factory() const;
-  Factory& factory();
-
-  void AddError(const ast::Node& node,
-                ErrorCode error_code,
-                const ast::Node& related);
-  void AddError(const ast::Node& node, ErrorCode error_code);
-  void AddError(const SourceCodeRange& range, ErrorCode error_code);
-
  private:
-  Context& context_;
-
   DISALLOW_COPY_AND_ASSIGN(Pass);
 };
 

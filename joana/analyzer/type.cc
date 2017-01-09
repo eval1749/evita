@@ -10,8 +10,24 @@ namespace analyzer {
 //
 // Type
 //
-Type::Type(int id, const ast::Node& node) : id_(id), node_(node) {}
+Type::Type(int id) : id_(id) {}
 Type::~Type() = default;
+
+bool Type::operator==(const Type& other) const {
+  return this == &other;
+}
+
+bool Type::operator==(const Type* other) const {
+  return this == other;
+}
+
+bool Type::operator!=(const Type& other) const {
+  return this != &other;
+}
+
+bool Type::operator!=(const Type* other) const {
+  return this != other;
+}
 
 }  // namespace analyzer
 }  // namespace joana

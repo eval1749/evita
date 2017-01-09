@@ -13,6 +13,14 @@ namespace joana {
 namespace analyzer {
 
 //
+// Class
+//
+Class::Class(Zone* zone, int id, const ast::Node& node, ClassKind kind)
+    : Value(id, node), kind_(kind), methods_(zone) {}
+
+Class::~Class() = default;
+
+//
 // Function
 //
 Function::Function(int id, const ast::Node& node, Properties* properties)

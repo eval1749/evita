@@ -12,10 +12,21 @@ namespace joana {
 
 // V(pass, reason)
 #define FOR_EACH_ANALYZER_ERROR_CODE(V)       \
+  V(JSDOC, EXPECT_NAME)                       \
+  V(JSDOC, EXPECT_PARAMETER)                  \
+  V(JSDOC, EXPECT_TYPE)                       \
+  V(JSDOC, MULTIPLE_NAME)                     \
+  V(JSDOC, MULTIPLE_PARAMETER)                \
+  V(JSDOC, MULTIPLE_TAG)                      \
+  V(JSDOC, UNEXPECT_CONSTRUCTOR)              \
+  V(JSDOC, UNEXPECT_PARAMETER)                \
+  V(JSDOC, UNEXPECT_RETURN)                   \
+  V(JSDOC, UNEXPECT_TAG)                      \
   V(ENVIRONMENT, EXPECT_METHOD)               \
   V(ENVIRONMENT, EXPECT_PROPERTY)             \
   V(ENVIRONMENT, EXPECT_VARIABLE_DECLARATION) \
-  V(ENVIRONMENT, MULTIPLE_BINDINGS)           \
+  V(ENVIRONMENT, INVALID_CONSTRUCTOR)         \
+  V(ENVIRONMENT, MULTIPLE_OCCURRENCES)        \
   V(ENVIRONMENT, UNDEFIEND_VARIABLE)          \
   V(ENVIRONMENT, UNEXPECT_ANNOTATION)         \
   V(TYPE_CHECKER, UNDEFIEND_TYPE)             \

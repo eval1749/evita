@@ -29,7 +29,7 @@ Environment::~Environment() = default;
 
 void Environment::BindType(const ast::Node& name, const Type& type) {
   const auto key = ast::Name::IdOf(name);
-  const auto& result = type_map_.emplace(key, &type);
+  const auto& result = type_map_.emplace(key, std::make_pair(&name, &type));
   DCHECK(result.second) << name << " is already bound.";
 }
 
@@ -42,9 +42,17 @@ void Environment::BindVariable(const ast::Node& name, Variable* value) {
   names_.push_back(&name);
 }
 
+std::pair<const ast::Node*, const Type*> Environment::FindNameAndType(
+    const ast::Node& name) const {
+  const auto& it = type_map_.find(ast::Name::IdOf(name));
+  return it == type_map_.end()
+             ? std::pair<const ast::Node*, const Type*>(nullptr, nullptr)
+             : it->second;
+}
+
 const Type* Environment::FindType(const ast::Node& name) const {
   const auto& it = type_map_.find(ast::Name::IdOf(name));
-  return it == type_map_.end() ? nullptr : it->second;
+  return it == type_map_.end() ? nullptr : it->second.second;
 }
 
 Variable* Environment::FindVariable(const ast::Node& name) const {

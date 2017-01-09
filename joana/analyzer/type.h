@@ -26,7 +26,7 @@ namespace analyzer {
 
 #define DECLARE_CONCRETE_ANALYZE_TYPE(name, base) \
   DECLARE_ANALYZE_TYPE(name, base)                \
-  friend class Factory;
+  friend class TypeFactory;
 
 //
 // Type
@@ -40,17 +40,18 @@ class Type : public Castable<Type>, public ZoneAllocated {
   // Returns unique identifier of |Type|.
   int id() const { return id_; }
 
-  // Return the AST node which associated to this type.
-  const ast::Node& node() const { return node_; }
+  bool operator==(const Type& other) const;
+  bool operator==(const Type* other) const;
+  bool operator!=(const Type& other) const;
+  bool operator!=(const Type* other) const;
 
  protected:
-  Type(int id, const ast::Node& node);
+  explicit Type(int id);
 
  private:
   friend class Factory;
 
   const int id_;
-  const ast::Node& node_;
 
   DISALLOW_COPY_AND_ASSIGN(Type);
 };

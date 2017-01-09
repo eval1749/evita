@@ -10,7 +10,6 @@
 
 #include "joana/analyzer/pass.h"
 
-#include "base/logging.h"
 #include "joana/ast/syntax_forward.h"
 #include "joana/ast/syntax_visitor.h"
 
@@ -22,7 +21,6 @@ class Node;
 
 namespace analyzer {
 
-class Class;
 class Context;
 class Environment;
 class Function;
@@ -45,21 +43,12 @@ class EnvironmentBuilder final : public Pass, public ast::SyntaxVisitor {
  private:
   class LocalEnvironment;
 
-  void BindAsType(const ast::Node& name, Variable* variable);
+  void BindAsType(const ast::Node& name, const Type& type);
   Variable& BindToVariable(const ast::Node& name);
 
   const Type* FindType(const ast::Node& name) const;
   Variable* FindVariable(const ast::Node& name) const;
 
-  void ProcessAssignmentExpressionWithAnnotation(const ast::Node& node,
-                                                 const ast::Node& annotation);
-
-  void ProcessMemberExpressionWithAnnotation(const ast::Node& node,
-                                             const ast::Node& annotation);
-
-  std::vector<const Type*> ProcessTypeTemplate(const ast::Node& document);
-
-  const Type& ResolveTypeName(const ast::Node& name);
   Variable& ResolveVariableName(const ast::Node& name);
 
   // ast::NodeVisitor implementations
@@ -91,22 +80,16 @@ class EnvironmentBuilder final : public Pass, public ast::SyntaxVisitor {
   // Statement
   void VisitInternal(const ast::BlockStatement& syntax,
                      const ast::Node& node) final;
-  void VisitInternal(const ast::ExpressionStatement& syntax,
-                     const ast::Node& node) final;
 
   // Types
   void VisitInternal(const ast::TypeName& syntax, const ast::Node& node) final;
 
-  const ast::Node* annotation_ = nullptr;
+  std::vector<const ast::Node*> ancestors_;
 
   LocalEnvironment* environment_ = nullptr;
 
   // The toplevel environment
   Environment* toplevel_environment_ = nullptr;
-
-#if DCHECK_IS_ON()
-  std::unordered_set<const ast::Node*> visited_nodes_;
-#endif
 
   DISALLOW_COPY_AND_ASSIGN(EnvironmentBuilder);
 };

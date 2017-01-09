@@ -6,11 +6,19 @@
 #define JOANA_ANALYZER_VALUES_H_
 
 #include "joana/analyzer/value.h"
+#include "joana/base/iterator_utils.h"
 #include "joana/base/memory/zone_vector.h"
 
 namespace joana {
 namespace analyzer {
 
+enum class ClassKind {
+  Interface,
+  Normal,
+  Record,
+};
+
+class Function;
 class Properties;
 
 //
@@ -60,6 +68,31 @@ class ValueHolder : public Object {
   ZoneVector<const ast::Node*> references_;
 
   DISALLOW_COPY_AND_ASSIGN(ValueHolder);
+};
+
+//
+// Class
+//
+class Class : public Value {
+  DECLARE_CONCRETE_ANALYZE_VALUE(Class, Value);
+
+ public:
+  ~Class() final;
+
+  ClassKind kind() const { return kind_; }
+  auto methods() const { return ReferenceRangeOf(methods_); }
+
+ protected:
+  // TODO(eval1749): move |zone| after |node|.
+  Class(Zone* zone, int id, const ast::Node& node, ClassKind kind);
+
+ private:
+  void AddMethod(Value* method);
+
+  const ClassKind kind_;
+  ZoneVector<Function*> methods_;
+
+  DISALLOW_COPY_AND_ASSIGN(Class);
 };
 
 //

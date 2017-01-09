@@ -8,14 +8,25 @@
 namespace joana {
 namespace analyzer {
 
+#define FOR_EACH_ABSTRACT_ANALYZE_TYPE(name) \
+  V(NamedType)                               \
+  V(Type)
+
 #define FOR_EACH_ANALYZE_TYPE(name) \
+  V(AnyType)                        \
+  V(ClassType)                      \
   V(GenericType)                    \
+  V(FunctionType)                   \
+  V(InvalidType)                    \
   V(TypeApplication)                \
   V(TypeName)                       \
   V(TypeParameter)                  \
-  V(TypeReference)
+  V(TypeReference)                  \
+  V(UnknownType)                    \
+  V(VoidType)
 
 #define V(name) class name;
+FOR_EACH_ABSTRACT_ANALYZE_TYPE(V)
 FOR_EACH_ANALYZE_TYPE(V)
 #undef V
 

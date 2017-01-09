@@ -2,13 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <algorithm>
 #include <ostream>
 #include <type_traits>
 
 #include "base/logging.h"
+#include "base/strings/utf_string_conversions.h"
 #include "joana/analyzer/type_forward.h"
 #include "joana/analyzer/types.h"
+#include "joana/analyzer/values.h"
+#include "joana/ast/declarations.h"
 #include "joana/ast/node.h"
+#include "joana/ast/node_printer.h"
+#include "joana/ast/tokens.h"
 
 namespace joana {
 namespace analyzer {
@@ -29,39 +35,117 @@ Printable<Type> AsPrintable(const Type& type) {
 }
 
 std::ostream& operator<<(std::ostream& ostream,
+                         const Printable<Type>& printable);
+
+// Type printer implementations
+std::ostream& operator<<(std::ostream& ostream,
+                         const Printable<AnyType>& printable) {
+  return ostream << "*";
+}
+
+std::ostream& operator<<(std::ostream& ostream,
+                         const Printable<ClassType>& printable) {
+  const auto& type = *printable.type;
+  const auto& class_value = type.value();
+  const auto& name = ast::Class::NameOf(class_value.node());
+  ostream << "class";
+  if (name.Is<ast::Name>())
+    ostream << ' ' << ast::AsSourceCode(name);
+  return ostream << '@' << type.id();
+}
+
+std::ostream& operator<<(std::ostream& ostream,
+                         const Printable<FunctionType>& printable) {
+  const auto& type = *printable.type;
+  ostream << "function(";
+  auto delimiter = "";
+  if (type.kind() == FunctionTypeKind::Constructor) {
+    ostream << "new:" << AsPrintable(type.this_type());
+    delimiter = ",";
+  } else if (!type.this_type().Is<VoidType>()) {
+    ostream << "this:" << AsPrintable(type.this_type());
+    delimiter = ",";
+  }
+  for (const auto& parameter_type : type.parameter_types()) {
+    ostream << delimiter << AsPrintable(parameter_type);
+    delimiter = ",";
+  }
+  if (!type.return_type().Is<VoidType>())
+    ostream << ':' << AsPrintable(type.return_type());
+  return ostream << ')';
+}
+
+std::ostream& operator<<(std::ostream& ostream,
                          const Printable<GenericType>& printable) {
   const auto& type = *printable.type;
-  return ostream << "$GenericType@" << type.id() << ' ' << type.node();
+  ostream << ast::AsSourceCode(type.name()) << '@' << type.id() << '<';
+  auto delimiter = "";
+  for (const auto& parameter : type.parameters()) {
+    ostream << delimiter << AsPrintable(parameter);
+    delimiter = ",";
+  }
+  return ostream << '>';
+}
+
+std::ostream& operator<<(std::ostream& ostream,
+                         const Printable<InvalidType>& printable) {
+  return ostream << "%invalid%";
 }
 
 std::ostream& operator<<(std::ostream& ostream,
                          const Printable<PrimitiveType>& printable) {
   const auto& type = *printable.type;
-  return ostream << "$PrimitiveType@" << type.id() << ' ' << type.node();
+  return ostream << "%" << ast::AsSourceCode(type.name()) << "%";
 }
 
 std::ostream& operator<<(std::ostream& ostream,
                          const Printable<TypeApplication>& printable) {
   const auto& type = *printable.type;
-  return ostream << "$TypeApplication@" << type.id() << ' ' << type.node();
+  const auto& generic_type = type.generic_type();
+  ostream << ast::AsSourceCode(generic_type.name()) << '<';
+  auto delimiter = "";
+  for (const auto& argument : type.arguments()) {
+    ostream << delimiter;
+    delimiter = ",";
+    const auto& parameter = argument.first;
+    const auto& it = std::find_if(
+        generic_type.parameters().begin(), generic_type.parameters().end(),
+        [&](const auto& present) { return present == parameter; });
+    if (it == generic_type.parameters().end()) {
+      ostream << AsPrintable(*argument.second);
+      continue;
+    }
+    ostream << *it;
+  }
+  return ostream << '>';
 }
 
 std::ostream& operator<<(std::ostream& ostream,
                          const Printable<TypeName>& printable) {
   const auto& type = *printable.type;
-  return ostream << "$TypeName@" << type.id() << ' ' << type.node();
+  return ostream << ast::AsSourceCode(type.name()) << '@' << type.id();
 }
 
 std::ostream& operator<<(std::ostream& ostream,
                          const Printable<TypeParameter>& printable) {
   const auto& type = *printable.type;
-  return ostream << "$TypeParameter@" << type.id() << ' ' << type.node();
+  return ostream << ast::AsSourceCode(type.name()) << '@' << type.id();
 }
 
 std::ostream& operator<<(std::ostream& ostream,
                          const Printable<TypeReference>& printable) {
   const auto& type = *printable.type;
-  return ostream << "$TypeReference@" << type.id() << ' ' << type.node();
+  return ostream << "#TypeReference@" << type.id();
+}
+
+std::ostream& operator<<(std::ostream& ostream,
+                         const Printable<UnknownType>& printable) {
+  return ostream << "?";
+}
+
+std::ostream& operator<<(std::ostream& ostream,
+                         const Printable<VoidType>& printable) {
+  return ostream << "%void%";
 }
 
 // Dispatcher

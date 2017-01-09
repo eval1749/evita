@@ -2,20 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "joana/analyzer/pass.h"
-
-#include "joana/analyzer/context.h"
-#include "joana/ast/node.h"
-#include "joana/base/error_sink.h"
+#include "joana/analyzer/type_name_resolver.h"
 
 namespace joana {
 namespace analyzer {
 
 //
-// Pass
+// TypeNameResolver
 //
-Pass::Pass(Context* context) : ContextUser(context) {}
-Pass::~Pass() = default;
+TypeNameResolver::TypeNameResolver() = default;
+TypeNameResolver::~TypeNameResolver() = default;
 
 }  // namespace analyzer
 }  // namespace joana

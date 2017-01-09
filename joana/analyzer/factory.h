@@ -16,6 +16,8 @@ class Zone;
 
 namespace analyzer {
 
+class Class;
+enum class ClassKind;
 class Function;
 class Environment;
 class Properties;
@@ -39,13 +41,8 @@ class Factory final {
   Property& GetOrNewProperty(Properties* properties, const ast::Node& node);
   Property& NewProperty(const ast::Node& node);
 
-  // Types
-  const Type& NewPrimitiveType(const ast::Node& name);
-  const Type& NewTypeName(const ast::Node& node);
-  const Type& NewTypeParameter(const ast::Node& node);
-  const Type& NewTypeReference(Variable* variable);
-
   // Values
+  Class& NewClass(const ast::Node& node, ClassKind kind);
   Function& NewFunction(const ast::Node& node);
   Value& NewOrdinaryObject(const ast::Node& node);
   Value& NewUndefined(const ast::Node& node);

@@ -23,16 +23,13 @@ class AnalyzerTestBase : public LexerTestBase {
   AnalyzerTestBase();
   ~AnalyzerTestBase() override;
 
-  Context& analyzer_context() { return *context_; }
   AnalyzerSettings& settings() { return *settings_; }
 
+  std::unique_ptr<Context> NewContext();
   const ast::Node& ParseAsModule(base::StringPiece script_text);
 
  private:
   const std::unique_ptr<AnalyzerSettings> settings_;
-
-  // |Context| constructor takes |settings_|.
-  const std::unique_ptr<Context> context_;
 
   DISALLOW_COPY_AND_ASSIGN(AnalyzerTestBase);
 };

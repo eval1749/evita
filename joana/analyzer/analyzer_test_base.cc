@@ -19,10 +19,13 @@ AnalyzerTestBase::AnalyzerTestBase()
     : settings_(AnalyzerSettings::Builder()
                     .set_error_sink(&error_sink())
                     .set_zone(&zone())
-                    .Build()),
-      context_(std::make_unique<Context>(*settings_)) {}
+                    .Build()) {}
 
 AnalyzerTestBase::~AnalyzerTestBase() = default;
+
+std::unique_ptr<Context> AnalyzerTestBase::NewContext() {
+  return std::make_unique<Context>(*settings_);
+}
 
 const ast::Node& AnalyzerTestBase::ParseAsModule(
     base::StringPiece script_text) {

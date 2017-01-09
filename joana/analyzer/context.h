@@ -27,6 +27,7 @@ class Environment;
 enum class ErrorCode;
 class Factory;
 class Type;
+class TypeFactory;
 class TypeMap;
 class Value;
 class ValueMap;
@@ -41,7 +42,14 @@ class Context final {
 
   ErrorSink& error_sink() const;
   Factory& factory() const { return *factory_; }
+  TypeFactory& type_factory() const { return *type_factory_; }
   Environment& global_environment() const;
+
+  void AddError(const ast::Node& node,
+                ErrorCode error_code,
+                const ast::Node& related);
+  void AddError(const ast::Node& node, ErrorCode error_code);
+  void AddError(const SourceCodeRange& range, ErrorCode error_code);
 
   // Query
   Environment& EnvironmentOf(const ast::Node& node) const;
@@ -66,8 +74,9 @@ class Context final {
 
   std::unordered_map<const ast::Node*, Environment*> environment_map_;
   Environment& global_environment_;
-  std::unique_ptr<Factory> factory_;
+  const std::unique_ptr<Factory> factory_;
   const AnalyzerSettings& settings_;
+  const std::unique_ptr<TypeFactory> type_factory_;
   std::unique_ptr<TypeMap> type_map_;
   std::unique_ptr<ValueMap> value_map_;
 

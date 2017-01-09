@@ -26,11 +26,15 @@ namespace analyzer {
   V(ValueHolder)
 
 #define FOR_EACH_ANALYZE_VALUE(V) \
+  V(Class)                        \
   V(Function)                     \
   V(OrdinaryObject)               \
   V(Property)                     \
   V(Undefined)                    \
   V(Variable)
+
+// Forward declarations
+enum class ClassKind;
 
 #define V(name) class name;
 FOR_EACH_ABSTRACT_ANALYZE_VALUE(V)

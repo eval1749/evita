@@ -152,7 +152,8 @@ TEST_F(JsDocParserTest, SyntaxNames) {
       "JsDocDocument\n"
       "+--JsDocTag\n"
       "|  +--Name |@template|\n"
-      "|  +--Name |T|\n"
+      "|  +--TypeName\n"
+      "|  |  +--Name |T|\n"
       "+--JsDocText |desc|\n",
       Parse("@template T desc"));
 
@@ -160,8 +161,10 @@ TEST_F(JsDocParserTest, SyntaxNames) {
       "JsDocDocument\n"
       "+--JsDocTag\n"
       "|  +--Name |@template|\n"
-      "|  +--Name |KEY|\n"
-      "|  +--Name |VALUE|\n"
+      "|  +--TypeName\n"
+      "|  |  +--Name |KEY|\n"
+      "|  +--TypeName\n"
+      "|  |  +--Name |VALUE|\n"
       "+--JsDocText |desc|\n",
       Parse("@template KEY, VALUE desc"));
 }
@@ -187,7 +190,8 @@ TEST_F(JsDocParserTest, SyntaxNamesError) {
       "JsDocDocument\n"
       "+--JsDocTag\n"
       "|  +--Name |@template|\n"
-      "|  +--Name |foo|\n"
+      "|  +--TypeName\n"
+      "|  |  +--Name |foo|\n"
       "+--JsDocText |123|\n"
       "JSDOC_ERROR_TAG_EXPECT_NAME@0:15\n",
       Parse("@template foo, 123"))

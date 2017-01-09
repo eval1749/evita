@@ -48,7 +48,7 @@ namespace ast {
   V(see, See, SingleLine)                    \
   V(struct, Struct, None)                    \
   V(suppress, Suppress, NameList)            \
-  V(template, Template, Names)               \
+  V(template, Template, TypeNames)           \
   V(this, This, Type)                        \
   V(throws, Throws, Type)                    \
   V(type, Type, Type)                        \
@@ -60,12 +60,12 @@ namespace ast {
   V(Description, "@deprecated description")        \
   V(Modifies, "@modifies {arguments|this}")        \
   V(NameList, "@suppress {name1, name2}")          \
-  V(Names, "@template K, V")                       \
   V(None, "@constructor")                          \
   V(SingleLine, "@author ...")                     \
   V(OptionalType, "@const {type}")                 \
   V(Type, "@enum {type}")                          \
   V(TypeDescription, "@define {type} description") \
+  V(TypeNames, "@template K, V")                   \
   V(TypeParameterDescription, "@param {type} parameter description")
 
 }  // namespace ast

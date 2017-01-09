@@ -269,8 +269,6 @@ const ast::Node& JsDocParser::ParseTag(const ast::Node& tag_name) {
       return NewTag(tag_name, ParseModifies());
     case TagSyntax::NameList:
       return NewTagWithVector(tag_name, ParseNameList());
-    case TagSyntax::Names:
-      return NewTagWithVector(tag_name, ParseNames());
     case TagSyntax::None:
       return NewTag(tag_name);
     case TagSyntax::OptionalType:
@@ -286,6 +284,14 @@ const ast::Node& JsDocParser::ParseTag(const ast::Node& tag_name) {
       auto& type = ParseType();
       auto& description = ParseDescription();
       return NewTag(tag_name, type, description);
+    }
+    case TagSyntax::TypeNames: {
+      const auto& names = ParseNames();
+      std::vector<const ast::Node*> type_names(names.size());
+      type_names.resize(0);
+      for (const auto& name : names)
+        type_names.push_back(&node_factory().NewTypeName(*name));
+      return NewTagWithVector(tag_name, type_names);
     }
     case TagSyntax::TypeParameterDescription: {
       auto& type = ParseType();

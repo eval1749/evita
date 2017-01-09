@@ -156,7 +156,28 @@ void EnvironmentBuilder::RunOn(const ast::Node& node) {
   Visit(node);
 }
 
-void EnvironmentBuilder::BindAsType(const ast::Node& name, const Type& type) {
+Variable& EnvironmentBuilder::BindToVariable(const ast::Node& name) {
+  DCHECK_EQ(name, ast::SyntaxCode::Name);
+  if (environment_) {
+    for (auto* runner = environment_; runner; runner = runner->outer()) {
+      if (auto* present = runner->FindVariable(name))
+        return *present;
+    }
+    auto& variable = factory().NewVariable(name);
+    environment_->BindVariable(name, &variable);
+    return variable;
+  }
+  for (auto* runner = toplevel_environment_; runner; runner = runner->outer()) {
+    if (auto* present = runner->FindVariable(name))
+      return *present;
+  }
+  // TODO(eval1749): Expose global "var" binding to global object.
+  auto& variable = factory().NewVariable(name);
+  toplevel_environment_->BindVariable(name, &variable);
+  return variable;
+}
+
+void EnvironmentBuilder::BindType(const ast::Node& name, const Type& type) {
   DCHECK_EQ(name, ast::SyntaxCode::Name);
   if (environment_) {
     const auto& present = environment_->FindNameAndType(name);
@@ -181,30 +202,9 @@ void EnvironmentBuilder::BindAsType(const ast::Node& name, const Type& type) {
   toplevel_environment_->BindType(name, type);
 }
 
-Variable& EnvironmentBuilder::BindToVariable(const ast::Node& name) {
-  DCHECK_EQ(name, ast::SyntaxCode::Name);
-  if (environment_) {
-    for (auto* runner = environment_; runner; runner = runner->outer()) {
-      if (auto* present = runner->FindVariable(name))
-        return *present;
-    }
-    auto& variable = factory().NewVariable(name);
-    environment_->BindVariable(name, &variable);
-    return variable;
-  }
-  for (auto* runner = toplevel_environment_; runner; runner = runner->outer()) {
-    if (auto* present = runner->FindVariable(name))
-      return *present;
-  }
-  // TODO(eval1749): Expose global "var" binding to global object.
-  auto& variable = factory().NewVariable(name);
-  toplevel_environment_->BindVariable(name, &variable);
-  return variable;
-}
-
 void EnvironmentBuilder::BindTypeParameters(const GenericType& type) {
   for (const auto& parameter : type.parameters())
-    BindAsType(parameter.name(), parameter);
+    BindType(parameter.name(), parameter);
 }
 
 const Type* EnvironmentBuilder::FindType(const ast::Node& name) const {
@@ -313,7 +313,7 @@ void EnvironmentBuilder::ProcessClass(const ast::Node& node,
   if (class_name != ast::SyntaxCode::Name)
     return;
 
-  BindAsType(class_name, class_type);
+  BindType(class_name, class_type);
 
   // Set variable
   auto& variable = BindToVariable(class_name);
@@ -381,7 +381,7 @@ void EnvironmentBuilder::ProcessFunction(const ast::Node& node,
     context().RegisterType(node, class_type);
     context().RegisterValue(node, &class_value);
     if (name == ast::SyntaxCode::Name)
-      BindAsType(name, class_type);
+      BindType(name, class_type);
   } else {
     context().RegisterValue(node, &function);
   }
@@ -399,7 +399,7 @@ void EnvironmentBuilder::ProcessFunction(const ast::Node& node,
   if (!maybe_document)
     return VisitChildNodes(node);
   for (const auto& type_parameter : type_parameters)
-    BindAsType(type_parameter->name(), *type_parameter);
+    BindType(type_parameter->name(), *type_parameter);
   VisitChildNodes(node);
   Visit(*maybe_document);
 }

@@ -45,8 +45,12 @@ class EnvironmentBuilder final : public Pass, public ast::SyntaxVisitor {
  private:
   class LocalEnvironment;
 
-  void BindAsType(const ast::Node& name, const Type& type);
   Variable& BindToVariable(const ast::Node& name);
+
+  // Bind |name| to |type| in current environment.
+  void BindType(const ast::Node& name, const Type& type);
+
+  // Bind type parameters of |type| in current environment.
   void BindTypeParameters(const GenericType& type);
 
   const Type* FindType(const ast::Node& name) const;

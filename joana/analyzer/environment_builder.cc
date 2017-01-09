@@ -246,6 +246,14 @@ void EnvironmentBuilder::ProcessClass(const ast::Node& node,
   context().RegisterType(node, class_type);
   context().RegisterValue(node, &class_value);
 
+  // Class wide template parameters.
+  LocalEnvironment environment(this, node);
+  if (maybe_document) {
+    const auto& document = *maybe_document;
+    ProcessTemplateTag(document);
+    Visit(document);
+  }
+
   for (const auto& child :
        ast::NodeTraversal::ChildNodesOf(ast::Class::BodyOf(node))) {
     const auto& member = child.Is<ast::Annotation>()
@@ -369,11 +377,37 @@ void EnvironmentBuilder::ProcessFunction(const ast::Node& node,
   }
 
   LocalEnvironment environment(this, node);
-  VisitChildNodes(node);
-
   if (!maybe_document)
-    return;
-  Visit(*maybe_document);
+    return VisitChildNodes(node);
+  VisitChildNodes(node);
+  const auto& document = *maybe_document;
+  ProcessTemplateTag(document);
+  Visit(document);
+}
+
+void EnvironmentBuilder::ProcessTemplateTag(const ast::Node& document) {
+  const ast::Node* template_tag = nullptr;
+  for (const auto& node : ast::NodeTraversal::ChildNodesOf(document)) {
+    if (!node.Is<ast::JsDocTag>())
+      continue;
+    if (ast::JsDocTag::NameOf(node) != ast::TokenKind::AtTemplate)
+      continue;
+    if (template_tag) {
+      AddError(node, ErrorCode::ENVIRONMENT_MULTIPLE_OCCURRENCES,
+               *template_tag);
+      continue;
+    }
+    template_tag = &node;
+    for (const auto& type_name : ast::JsDocTag::OperandsOf(node)) {
+      if (!type_name.Is<ast::TypeName>()) {
+        AddError(type_name, ErrorCode::ENVIRONMENT_EXPECT_NAME);
+        continue;
+      }
+      const auto& name = ast::TypeName::NameOf(type_name);
+      const auto& type = type_factory().NewTypeParameter(name);
+      BindAsType(name, type);
+    }
+  }
 }
 
 // AST node handlers

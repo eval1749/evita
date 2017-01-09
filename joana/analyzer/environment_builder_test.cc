@@ -118,6 +118,24 @@ TEST_F(EnvironmentBuilderTest, ClassAnnotation) {
       "|  |  +--ElisionExpression ||\n"
       "|  |  +--ObjectInitializer |{}|\n",
       RunOn("/** @interface */ class Foo {}"));
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@template|\n"
+      "|  |  |  +--TypeName {KEY@1002}\n"
+      "|  |  |  |  +--Name |KEY|\n"
+      "|  |  |  +--TypeName {VALUE@1003}\n"
+      "|  |  |  |  +--Name |VALUE|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--Class Class[Map@1001] {class Map@1001}\n"
+      "|  |  +--Name |Map|\n"
+      "|  |  +--ElisionExpression ||\n"
+      "|  |  +--ObjectInitializer |{}|\n",
+      RunOn("/** @template KEY, VALUE */ class Map {}"));
 }
 
 TEST_F(EnvironmentBuilderTest, ClassError) {
@@ -258,6 +276,28 @@ TEST_F(EnvironmentBuilderTest, FunctionAnonymous) {
       "|  |  |  +--ParameterList |()|\n"
       "|  |  |  +--BlockStatement |{}|\n",
       RunOn("var a = function() {};"));
+}
+
+TEST_F(EnvironmentBuilderTest, FunctionAnnotation) {
+  EXPECT_EQ(
+      "Module\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@constructor|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@template|\n"
+      "|  |  |  +--TypeName {KEY@1002}\n"
+      "|  |  |  |  +--Name |KEY|\n"
+      "|  |  |  +--TypeName {VALUE@1003}\n"
+      "|  |  |  |  +--Name |VALUE|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--Function<Normal> Class[Map@1003] {class Map@1001}\n"
+      "|  |  +--Name |Map|\n"
+      "|  |  +--ParameterList |()|\n"
+      "|  |  +--BlockStatement |{}|\n",
+      RunOn("/** @constructor @template KEY, VALUE */ function Map() {}"));
 }
 
 TEST_F(EnvironmentBuilderTest, Global) {
@@ -450,13 +490,15 @@ TEST_F(EnvironmentBuilderTest, Type) {
       "|  |  |  |  |  |  +--Name |T|\n"
       "|  |  +--JsDocTag\n"
       "|  |  |  +--Name |@template|\n"
-      "|  |  |  +--Name |T|\n"
+      "|  |  |  +--TypeName\n"
+      "|  |  |  |  +--Name |T|\n"
       "|  |  +--JsDocText |*/|\n"
       "|  +--ConstStatement\n"
       "|  |  +--BindingNameElement $foo@1001\n"
       "|  |  |  +--Name |foo|\n"
       "|  |  |  +--ElisionExpression ||\n",
-      RunOn("/** @type {Array<T>} @template T */ const foo;"));
+      RunOn("/** @type {Array<T>} @template T */ const foo;"))
+      << "Later pass will report @template is unexpected for const.";
 }
 
 }  // namespace analyzer

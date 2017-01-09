@@ -58,6 +58,8 @@ class EnvironmentBuilder final : public Pass, public ast::SyntaxVisitor {
   // Assign |Function| value to |node|.
   void ProcessFunction(const ast::Node& node, const ast::Node* maybe_document);
 
+  void ProcessTemplateTag(const ast::Node& document);
+
   Variable& ResolveVariableName(const ast::Node& name);
 
   void VisitChildNodes(const ast::Node& node);

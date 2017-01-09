@@ -23,6 +23,7 @@ namespace joana {
   V(JSDOC, UNEXPECT_RETURN)                   \
   V(JSDOC, UNEXPECT_TAG)                      \
   V(ENVIRONMENT, EXPECT_METHOD)               \
+  V(ENVIRONMENT, EXPECT_NAME)                 \
   V(ENVIRONMENT, EXPECT_PROPERTY)             \
   V(ENVIRONMENT, EXPECT_VARIABLE_DECLARATION) \
   V(ENVIRONMENT, INVALID_CONSTRUCTOR)         \

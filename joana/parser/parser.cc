@@ -223,7 +223,7 @@ const ast::Node& Parser::Run() {
       continue;
     }
 
-    if (HasJsDocTag(ast::TokenKind::JsDocFileOverview, token)) {
+    if (HasJsDocTag(ast::TokenKind::AtFileOverview, token)) {
       const auto& document = ConsumeToken();
       if (file_overview_) {
         AddError(
@@ -240,7 +240,7 @@ const ast::Node& Parser::Run() {
   }
   Finish();
   if (file_overview_ &&
-      HasJsDocTag(ast::TokenKind::JsDocExterns, *file_overview_)) {
+      HasJsDocTag(ast::TokenKind::AtExterns, *file_overview_)) {
     return node_factory().NewExterns(source_code().range(), statements);
   }
   return node_factory().NewModule(source_code().range(), statements);

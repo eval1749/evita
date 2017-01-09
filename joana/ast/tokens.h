@@ -37,7 +37,7 @@ enum class TokenKind {
       EndOfKnownWord,
 
   StartOfJsDocTagName,
-#define V(name, camel, syntax) JsDoc##camel,
+#define V(name, camel, syntax) At##camel,
   FOR_EACH_JSDOC_TAG_NAME(V)
 #undef V
       EndOfJsDocTagName,

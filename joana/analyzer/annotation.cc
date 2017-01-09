@@ -116,7 +116,7 @@ const ast::Node* Annotation::Classify() {
       continue;
     const auto& tag_name = ast::JsDocTag::NameOf(node);
     switch (ast::Name::KindOf(tag_name)) {
-      case ast::TokenKind::JsDocConst:
+      case ast::TokenKind::AtConst:
         RememberTag(&const_tag_, node);
         if (node.arity() == 0)
           continue;
@@ -124,47 +124,47 @@ const ast::Node* Annotation::Classify() {
         if (type_node_)
           type_node_ = &node.child_at(1);
         continue;
-      case ast::TokenKind::JsDocConstructor:
-      case ast::TokenKind::JsDocDict:
-      case ast::TokenKind::JsDocEnum:
-      case ast::TokenKind::JsDocInterface:
-      case ast::TokenKind::JsDocRecord:
+      case ast::TokenKind::AtConstructor:
+      case ast::TokenKind::AtDict:
+      case ast::TokenKind::AtEnum:
+      case ast::TokenKind::AtInterface:
+      case ast::TokenKind::AtRecord:
         RememberTag(&kind_tag_, node);
         continue;
-      case ast::TokenKind::JsDocDefine:
-      case ast::TokenKind::JsDocType:
-      case ast::TokenKind::JsDocTypeDef:
+      case ast::TokenKind::AtDefine:
+      case ast::TokenKind::AtType:
+      case ast::TokenKind::AtTypeDef:
         RememberTag(&kind_tag_, node);
         if (!type_node_)
           type_node_ = &node.child_at(1);
         continue;
-      case ast::TokenKind::JsDocExtends:
+      case ast::TokenKind::AtExtends:
         RememberTag(&extends_tag_, node);
         continue;
-      case ast::TokenKind::JsDocFinal:
+      case ast::TokenKind::AtFinal:
         RememberTag(&final_tag_, node);
         continue;
-      case ast::TokenKind::JsDocImplements:
+      case ast::TokenKind::AtImplements:
         RememberTag(&implements_tag_, node);
         continue;
-      case ast::TokenKind::JsDocOverride:
+      case ast::TokenKind::AtOverride:
         RememberTag(&override_tag_, node);
         continue;
-      case ast::TokenKind::JsDocPrivate:
-      case ast::TokenKind::JsDocProtected:
-      case ast::TokenKind::JsDocPublic:
+      case ast::TokenKind::AtPrivate:
+      case ast::TokenKind::AtProtected:
+      case ast::TokenKind::AtPublic:
         RememberTag(&access_tag_, node);
         continue;
-      case ast::TokenKind::JsDocParam:
+      case ast::TokenKind::AtParam:
         parameter_tags_.push_back(&node);
         continue;
-      case ast::TokenKind::JsDocReturn:
+      case ast::TokenKind::AtReturn:
         RememberTag(&return_tag_, node);
         continue;
-      case ast::TokenKind::JsDocThis:
+      case ast::TokenKind::AtThis:
         RememberTag(&this_tag_, node);
         continue;
-      case ast::TokenKind::JsDocTemplate:
+      case ast::TokenKind::AtTemplate:
         if (!template_tag_) {
           for (const auto& name : ast::JsDocTag::OperandsOf(node)) {
             if (!name.Is<ast::Name>()) {
@@ -200,21 +200,21 @@ void Annotation::Compile() {
     }
     return MarkNotTypeAnnotation();
   }
-  if (*kind == ast::TokenKind::JsDocConstructor) {
+  if (*kind == ast::TokenKind::AtConstructor) {
     type_ = &ToGenericTypeIfNeeded(TransformAsFunctionType());
     return;
   }
-  if (*kind == ast::TokenKind::JsDocDict) {
+  if (*kind == ast::TokenKind::AtDict) {
     MarkNotTypeAnnotation();
     return;
   }
-  if (*kind == ast::TokenKind::JsDocEnum) {
+  if (*kind == ast::TokenKind::AtEnum) {
     // TODO(eval1749): NYI: enum type.
     MarkNotTypeAnnotation();
     return;
   }
-  if (*kind == ast::TokenKind::JsDocInterface ||
-      *kind == ast::TokenKind::JsDocRecord) {
+  if (*kind == ast::TokenKind::AtInterface ||
+      *kind == ast::TokenKind::AtRecord) {
     type_ = &ToGenericTypeIfNeeded(TransformAsInterface());
     return;
   }

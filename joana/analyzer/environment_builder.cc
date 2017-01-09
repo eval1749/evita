@@ -39,11 +39,11 @@ namespace {
 ClassKind ClassKindOf(const ast::Node& node) {
   DCHECK_EQ(node, ast::SyntaxCode::JsDocTag);
   const auto& name = ast::JsDocTag::NameOf(node);
-  if (name == ast::TokenKind::JsDocConstructor)
+  if (name == ast::TokenKind::AtConstructor)
     return ClassKind::Class;
-  if (name == ast::TokenKind::JsDocInterface)
+  if (name == ast::TokenKind::AtInterface)
     return ClassKind::Interface;
-  if (name == ast::TokenKind::JsDocRecord)
+  if (name == ast::TokenKind::AtRecord)
     return ClassKind::Record;
   NOTREACHED() << "Expect @constructor, @Interface or @record " << node;
   return ClassKind::Class;
@@ -53,9 +53,9 @@ bool IsClassTag(const ast::Node& node) {
   if (!node.Is<ast::JsDocTag>())
     return false;
   const auto& name = ast::JsDocTag::NameOf(node);
-  return name == ast::TokenKind::JsDocConstructor ||
-         name == ast::TokenKind::JsDocInterface ||
-         name == ast::TokenKind::JsDocRecord;
+  return name == ast::TokenKind::AtConstructor ||
+         name == ast::TokenKind::AtInterface ||
+         name == ast::TokenKind::AtRecord;
 }
 
 bool IsMemberExpression(const ast::Node& node) {

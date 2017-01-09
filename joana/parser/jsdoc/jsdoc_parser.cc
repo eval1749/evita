@@ -39,7 +39,7 @@ enum class TagSyntax {
 
 TagSyntax TagSyntaxOf(const ast::Node& name) {
 #define V(underscore, capital, syntax)        \
-  if (name == ast::TokenKind::JsDoc##capital) \
+  if (name == ast::TokenKind::At##capital) \
     return TagSyntax::syntax;
   FOR_EACH_JSDOC_TAG_NAME(V)
 #undef V

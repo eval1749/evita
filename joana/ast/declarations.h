@@ -60,7 +60,7 @@ class JOANA_AST_EXPORT Annotation final : public SyntaxTemplate<Syntax> {
   ~Annotation() final;
 
   static const Node& AnnotatedOf(const Node& node);
-  static const Node& AnnotationOf(const Node& node);
+  static const Node& DocumentOf(const Node& node);
 
  private:
   Annotation();

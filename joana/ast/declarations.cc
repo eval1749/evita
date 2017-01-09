@@ -24,7 +24,7 @@ const Node& Annotation::AnnotatedOf(const Node& node) {
   return node.child_at(1);
 }
 
-const Node& Annotation::AnnotationOf(const Node& node) {
+const Node& Annotation::DocumentOf(const Node& node) {
   DCHECK_EQ(node, SyntaxCode::Annotation);
   return node.child_at(0);
 }

@@ -111,7 +111,7 @@ const Type& Annotation::type() const {
 
 const ast::Node* Annotation::Classify() {
   for (const auto& node :
-       ast::NodeTraversal::ChildNodesOf(ast::Annotation::AnnotationOf(node_))) {
+       ast::NodeTraversal::ChildNodesOf(ast::Annotation::DocumentOf(node_))) {
     if (node != ast::SyntaxCode::JsDocTag)
       continue;
     const auto& tag_name = ast::JsDocTag::NameOf(node);

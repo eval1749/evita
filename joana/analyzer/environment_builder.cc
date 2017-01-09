@@ -286,7 +286,7 @@ void EnvironmentBuilder::ProcessClass(const ast::Node& node,
 
     if (!child.Is<ast::Annotation>())
       continue;
-    VisitDefault(ast::Annotation::AnnotationOf(child));
+    VisitDefault(ast::Annotation::DocumentOf(child));
   }
 
   const auto& class_name = ast::Class::NameOf(node);
@@ -428,7 +428,7 @@ void EnvironmentBuilder::VisitInternal(const ast::Annotation& syntax,
   //   */
   //  function Foo(x) {}
   const auto& annotated = ast::Annotation::AnnotatedOf(node);
-  const auto& document = ast::Annotation::AnnotationOf(node);
+  const auto& document = ast::Annotation::DocumentOf(node);
   if (annotated.Is<ast::Class>())
     return ProcessClass(annotated, &document);
   if (annotated.Is<ast::Function>())

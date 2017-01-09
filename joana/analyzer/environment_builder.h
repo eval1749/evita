@@ -49,12 +49,14 @@ class EnvironmentBuilder final : public Pass, public ast::SyntaxVisitor {
   const Type* FindType(const ast::Node& name) const;
   Variable* FindVariable(const ast::Node& name) const;
 
-  // Assign |Function| value to |node|.
-  void ProcessFunction(const ast::Node& node, const ast::Node* document);
+  // Assign |Class| value to |node|.
+  void ProcessClass(const ast::Node& node, const ast::Node* maybe_document);
 
-  // Returns true if |node| has @constructor, @interface or @record annotation.
-  bool RegisterConstructorIfNeeded(const ast::Node& node,
-                                   const ast::Node& document);
+  // Returns @constructor, @interface or @record tag.
+  const ast::Node* ProcessClassTag(const ast::Node& document);
+
+  // Assign |Function| value to |node|.
+  void ProcessFunction(const ast::Node& node, const ast::Node* maybe_document);
 
   Variable& ResolveVariableName(const ast::Node& name);
 

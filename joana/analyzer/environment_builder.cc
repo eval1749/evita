@@ -232,168 +232,15 @@ Variable* EnvironmentBuilder::FindVariable(const ast::Node& name) const {
   return nullptr;
 }
 
-void EnvironmentBuilder::ProcessFunction(const ast::Node& node,
-                                         const ast::Node* maybe_document) {
-  DCHECK_EQ(node, ast::SyntaxCode::Function);
-  // TODO(eval1749): Report warning for toplevel anonymous class
-  const auto& name = ast::Function::NameOf(node);
-  auto& function = factory().NewFunction(node);
-  if (name == ast::SyntaxCode::Name) {
-    auto& variable = BindToVariable(name);
-    if (!variable.assignments().empty()) {
-      AddError(node, ErrorCode::ENVIRONMENT_MULTIPLE_OCCURRENCES,
-               *variable.assignments().front());
-    }
-    Value::Editor().AddAssignment(&variable, node);
-    if (!maybe_document || !RegisterConstructorIfNeeded(node, *maybe_document))
-      context().RegisterValue(node, &function);
-  } else {
-    context().RegisterValue(node, &function);
-  }
-
-  LocalEnvironment environment(this, node);
-  VisitChildNodes(node);
-
-  if (!maybe_document)
-    return;
-  Visit(*maybe_document);
-}
-
-bool EnvironmentBuilder::RegisterConstructorIfNeeded(
-    const ast::Node& node,
-    const ast::Node& document) {
-  const ast::Node* class_tag = nullptr;
-  for (const auto& child : ast::NodeTraversal::ChildNodesOf(document)) {
-    if (!IsClassTag(child))
-      continue;
-    if (!class_tag) {
-      class_tag = &child;
-      continue;
-    }
-    AddError(child, ErrorCode::ENVIRONMENT_MULTIPLE_OCCURRENCES, *class_tag);
-  }
-  if (!class_tag)
-    return false;
-  auto& class_value = factory().NewClass(node, ClassKindOf(*class_tag));
-  auto& class_type = type_factory().NewClassType(&class_value);
-  context().RegisterType(node, class_type);
-  context().RegisterValue(node, &class_value);
-  BindAsType(ast::Function::NameOf(node), class_type);
-  return true;
-}
-
-// AST node handlers
-Variable& EnvironmentBuilder::ResolveVariableName(const ast::Node& name) {
-  DCHECK_EQ(name, ast::SyntaxCode::Name);
-  if (auto* present = FindVariable(name))
-    return *present;
-  // TODO(eval1749): Expose global "var" binding to global object.
-  auto& variable = factory().NewVariable(name);
-  toplevel_environment_->BindVariable(name, &variable);
-  return variable;
-}
-
-void EnvironmentBuilder::VisitChildNodes(const ast::Node& node) {
-  ancestors_.push_back(&node);
-  for (const auto& child : ast::NodeTraversal::ChildNodesOf(node))
-    Visit(child);
-  ancestors_.pop_back();
-}
-
-//
-// ast::NodeVisitor members
-//
-
-void EnvironmentBuilder::VisitDefault(const ast::Node& node) {
-  VisitChildNodes(node);
-}
-
-// Binding elements
-void EnvironmentBuilder::VisitInternal(const ast::BindingNameElement& syntax,
-                                       const ast::Node& node) {
-  VisitDefault(node);
-  auto& variable = BindToVariable(ast::BindingNameElement::NameOf(node));
-  Value::Editor().AddAssignment(&variable, node);
-  context().RegisterValue(node, &variable);
-  if (variable.assignments().size() == 1)
-    return;
-  AddError(node, ErrorCode::ENVIRONMENT_MULTIPLE_OCCURRENCES,
-           *variable.assignments().front());
-}
-
-// Declarations
-void EnvironmentBuilder::VisitInternal(const ast::Annotation& syntax,
-                                       const ast::Node& node) {
-  // Process annotated node before annotation to handle reference of class
-  // name in constructor and parameter names for "@param".
-  // Example:
-  //  /**
-  //   * @constructor
-  //   * @return {!Foo} this repugnant though
-  //   * @param {number} x
-  //   */
-  //  function Foo(x) {}
-  const auto& annotated = ast::Annotation::AnnotatedOf(node);
-  const auto& document = ast::Annotation::AnnotationOf(node);
-  if (annotated.Is<ast::Class>()) {
-    Visit(annotated);
-    Visit(document);
-    return;
-  }
-  if (annotated.Is<ast::Function>())
-    return ProcessFunction(annotated, &document);
-  if (annotated.syntax().Is<ast::VariableDeclaration>()) {
-    VisitChildNodes(node);
-    return;
-  }
-  if (!annotated.Is<ast::ExpressionStatement>()) {
-    AddError(node, ErrorCode::ENVIRONMENT_UNEXPECT_ANNOTATION);
-    return;
-  }
-  const auto& expression = ast::ExpressionStatement::ExpressionOf(annotated);
-  if (expression.Is<ast::AssignmentExpression>()) {
-    const auto& lhs = ast::AssignmentExpression::LeftHandSideOf(expression);
-    const auto& rhs = ast::AssignmentExpression::RightHandSideOf(expression);
-    if (!IsMemberExpression(lhs)) {
-      AddError(node, ErrorCode::ENVIRONMENT_UNEXPECT_ANNOTATION);
-      Visit(annotated);
-      return;
-    }
-    if (rhs.Is<ast::Class>()) {
-      Visit(rhs);
-      Visit(document);
-      return;
-    }
-    if (rhs.Is<ast::Function>()) {
-      ProcessFunction(rhs, &document);
-      Visit(lhs);
-      return;
-    }
-    Visit(annotated);
-    Visit(document);
-    return;
-  }
-
-  if (expression.Is<ast::MemberExpression>()) {
-    Visit(expression);
-    Visit(document);
-    return;
-  }
-  if (expression.Is<ast::ComputedMemberExpression>()) {
-    Visit(expression);
-    Visit(document);
-    return;
-  }
-  VisitDefault(node);
-  AddError(node, ErrorCode::ENVIRONMENT_UNEXPECT_ANNOTATION);
-}
-
-void EnvironmentBuilder::VisitInternal(const ast::Class& syntax,
-                                       const ast::Node& node) {
+void EnvironmentBuilder::ProcessClass(const ast::Node& node,
+                                      const ast::Node* maybe_document) {
   // TODO(eval1749): Report warning for toplevel anonymous class
   // TODO(eval1749): We should check annotation for class to check
   // @interface and @record.
-  const auto class_kind = ClassKind::Normal;
+  const auto* const class_tag =
+      maybe_document ? ProcessClassTag(*maybe_document) : nullptr;
+  const auto class_kind =
+      class_tag ? ClassKindOf(*class_tag) : ClassKind::Normal;
   auto& class_value = factory().NewClass(node, class_kind);
   const auto& class_type = type_factory().NewClassType(&class_value);
   context().RegisterType(node, class_type);
@@ -476,6 +323,165 @@ void EnvironmentBuilder::VisitInternal(const ast::Class& syntax,
     }
     Value::Editor().AddAssignment(&property, member);
   }
+}
+
+const ast::Node* EnvironmentBuilder::ProcessClassTag(
+    const ast::Node& document) {
+  const ast::Node* class_tag = nullptr;
+  for (const auto& child : ast::NodeTraversal::ChildNodesOf(document)) {
+    if (!IsClassTag(child))
+      continue;
+    if (!class_tag) {
+      class_tag = &child;
+      continue;
+    }
+    AddError(child, ErrorCode::ENVIRONMENT_MULTIPLE_OCCURRENCES, *class_tag);
+  }
+  return class_tag;
+}
+
+void EnvironmentBuilder::ProcessFunction(const ast::Node& node,
+                                         const ast::Node* maybe_document) {
+  DCHECK_EQ(node, ast::SyntaxCode::Function);
+  // TODO(eval1749): Report warning for toplevel anonymous class
+  const auto& name = ast::Function::NameOf(node);
+  auto& function = factory().NewFunction(node);
+  if (name == ast::SyntaxCode::Name) {
+    auto& variable = BindToVariable(name);
+    if (!variable.assignments().empty()) {
+      AddError(node, ErrorCode::ENVIRONMENT_MULTIPLE_OCCURRENCES,
+               *variable.assignments().front());
+    }
+    Value::Editor().AddAssignment(&variable, node);
+    const auto* const class_tag =
+        maybe_document ? ProcessClassTag(*maybe_document) : nullptr;
+    if (class_tag) {
+      auto& class_value = factory().NewClass(node, ClassKindOf(*class_tag));
+      auto& class_type = type_factory().NewClassType(&class_value);
+      context().RegisterType(node, class_type);
+      context().RegisterValue(node, &class_value);
+      BindAsType(name, class_type);
+    } else {
+      context().RegisterValue(node, &function);
+    }
+  } else {
+    context().RegisterValue(node, &function);
+  }
+
+  LocalEnvironment environment(this, node);
+  VisitChildNodes(node);
+
+  if (!maybe_document)
+    return;
+  Visit(*maybe_document);
+}
+
+// AST node handlers
+Variable& EnvironmentBuilder::ResolveVariableName(const ast::Node& name) {
+  DCHECK_EQ(name, ast::SyntaxCode::Name);
+  if (auto* present = FindVariable(name))
+    return *present;
+  // TODO(eval1749): Expose global "var" binding to global object.
+  auto& variable = factory().NewVariable(name);
+  toplevel_environment_->BindVariable(name, &variable);
+  return variable;
+}
+
+void EnvironmentBuilder::VisitChildNodes(const ast::Node& node) {
+  ancestors_.push_back(&node);
+  for (const auto& child : ast::NodeTraversal::ChildNodesOf(node))
+    Visit(child);
+  ancestors_.pop_back();
+}
+
+//
+// ast::NodeVisitor members
+//
+
+void EnvironmentBuilder::VisitDefault(const ast::Node& node) {
+  VisitChildNodes(node);
+}
+
+// Binding elements
+void EnvironmentBuilder::VisitInternal(const ast::BindingNameElement& syntax,
+                                       const ast::Node& node) {
+  VisitDefault(node);
+  auto& variable = BindToVariable(ast::BindingNameElement::NameOf(node));
+  Value::Editor().AddAssignment(&variable, node);
+  context().RegisterValue(node, &variable);
+  if (variable.assignments().size() == 1)
+    return;
+  AddError(node, ErrorCode::ENVIRONMENT_MULTIPLE_OCCURRENCES,
+           *variable.assignments().front());
+}
+
+// Declarations
+void EnvironmentBuilder::VisitInternal(const ast::Annotation& syntax,
+                                       const ast::Node& node) {
+  // Process annotated node before annotation to handle reference of class
+  // name in constructor and parameter names for "@param".
+  // Example:
+  //  /**
+  //   * @constructor
+  //   * @return {!Foo} this repugnant though
+  //   * @param {number} x
+  //   */
+  //  function Foo(x) {}
+  const auto& annotated = ast::Annotation::AnnotatedOf(node);
+  const auto& document = ast::Annotation::AnnotationOf(node);
+  if (annotated.Is<ast::Class>())
+    return ProcessClass(annotated, &document);
+  if (annotated.Is<ast::Function>())
+    return ProcessFunction(annotated, &document);
+  if (annotated.syntax().Is<ast::VariableDeclaration>()) {
+    VisitChildNodes(node);
+    return;
+  }
+  if (!annotated.Is<ast::ExpressionStatement>()) {
+    AddError(node, ErrorCode::ENVIRONMENT_UNEXPECT_ANNOTATION);
+    return;
+  }
+  const auto& expression = ast::ExpressionStatement::ExpressionOf(annotated);
+  if (expression.Is<ast::AssignmentExpression>()) {
+    const auto& lhs = ast::AssignmentExpression::LeftHandSideOf(expression);
+    const auto& rhs = ast::AssignmentExpression::RightHandSideOf(expression);
+    if (!IsMemberExpression(lhs)) {
+      AddError(node, ErrorCode::ENVIRONMENT_UNEXPECT_ANNOTATION);
+      Visit(annotated);
+      return;
+    }
+    if (rhs.Is<ast::Class>()) {
+      ProcessClass(rhs, &document);
+      Visit(lhs);
+      return;
+    }
+    if (rhs.Is<ast::Function>()) {
+      ProcessFunction(rhs, &document);
+      Visit(lhs);
+      return;
+    }
+    Visit(annotated);
+    Visit(document);
+    return;
+  }
+
+  if (expression.Is<ast::MemberExpression>()) {
+    Visit(expression);
+    Visit(document);
+    return;
+  }
+  if (expression.Is<ast::ComputedMemberExpression>()) {
+    Visit(expression);
+    Visit(document);
+    return;
+  }
+  VisitDefault(node);
+  AddError(node, ErrorCode::ENVIRONMENT_UNEXPECT_ANNOTATION);
+}
+
+void EnvironmentBuilder::VisitInternal(const ast::Class& syntax,
+                                       const ast::Node& node) {
+  ProcessClass(node, nullptr);
 }
 
 void EnvironmentBuilder::VisitInternal(const ast::Function& syntax,

@@ -104,6 +104,22 @@ TEST_F(EnvironmentBuilderTest, ClassAnonymous) {
       RunOn("var a = class {};"));
 }
 
+TEST_F(EnvironmentBuilderTest, ClassAnnotation) {
+  EXPECT_EQ(
+      "Module\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@interface|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--Class Interface[Foo@1001] {class Foo@1001}\n"
+      "|  |  +--Name |Foo|\n"
+      "|  |  +--ElisionExpression ||\n"
+      "|  |  +--ObjectInitializer |{}|\n",
+      RunOn("/** @interface */ class Foo {}"));
+}
+
 TEST_F(EnvironmentBuilderTest, ClassError) {
   EXPECT_EQ(
       "Module\n"

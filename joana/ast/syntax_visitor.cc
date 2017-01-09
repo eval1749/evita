@@ -32,11 +32,6 @@ void SyntaxVisitor::Visit(const ast::Node& node) {
   node.syntax().Accept(this, node);
 }
 
-void SyntaxVisitor::VisitChildNodes(const ast::Node& node) {
-  for (const auto& child : NodeTraversal::ChildNodesOf(node))
-    Visit(child);
-}
-
 void SyntaxVisitor::VisitDefault(const ast::Node& node) {}
 
 #define V(name)                                                            \

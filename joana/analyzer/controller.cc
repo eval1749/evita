@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <algorithm>
 #include <iostream>
 
 #include "joana/analyzer/controller.h"
@@ -79,15 +80,28 @@ Factory& Controller::factory() const {
 }
 
 void Controller::Analyze() {
-  TypeChecker type_checker(context_.get());
-  for (const auto& node : nodes_)
-    type_checker.RunOn(*node);
-
   const auto* const command_line = base::CommandLine::ForCurrentProcess();
-  if (command_line->HasSwitch("dump_after_type"))
-    DumpValues();
-  if (command_line->HasSwitch("print_after_type"))
-    PrintTree();
+  {
+    EnvironmentBuilder builder(context_.get());
+    for (const auto& node : nodes_)
+      builder.RunOn(*node);
+
+    if (command_line->HasSwitch("dump_after_build"))
+      DumpValues();
+    if (command_line->HasSwitch("print_after_build"))
+      PrintTree();
+  }
+
+  {
+    TypeChecker type_checker(context_.get());
+    for (const auto& node : nodes_)
+      type_checker.RunOn(*node);
+
+    if (command_line->HasSwitch("dump_after_type"))
+      DumpValues();
+    if (command_line->HasSwitch("print_after_type"))
+      PrintTree();
+  }
 }
 
 void Controller::DumpValues() {
@@ -107,15 +121,9 @@ void Controller::PrintTree() {
 }
 
 void Controller::Load(const ast::Node& node) {
+  DCHECK(std::find(nodes_.begin(), nodes_.end(), &node) == nodes_.end())
+      << "we should call Load() once for each node: " << node;
   nodes_.push_back(&node);
-  EnvironmentBuilder builder(context_.get());
-  builder.RunOn(node);
-
-  const auto* const command_line = base::CommandLine::ForCurrentProcess();
-  if (command_line->HasSwitch("dump_after_build"))
-    DumpValues();
-  if (command_line->HasSwitch("print_after_build"))
-    PrintTree();
 }
 
 }  // namespace analyzer

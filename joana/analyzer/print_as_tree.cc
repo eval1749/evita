@@ -132,12 +132,14 @@ std::ostream& operator<<(std::ostream& ostream,
   const auto& node = *printable.thing;
   auto& print_context = *printable.print_context;
   ostream << node.syntax();
+  if (node.arity() == 0)
+    ostream << ' ' << ast::AsSourceCode(node, '|');
   if (const auto* value = context.TryValueOf(node))
     ostream << ' ' << Printable<Value>{&print_context, &context, value};
   if (const auto* type = context.TryTypeOf(node))
     ostream << " {" << *type << '}';
   if (node.arity() == 0)
-    return ostream << ' ' << ast::AsSourceCode(node, '|');
+    return ostream;
   IndentScope scope(&print_context);
   for (const auto& child : ast::NodeTraversal::ChildNodesOf(node))
     ostream << Indent(print_context)

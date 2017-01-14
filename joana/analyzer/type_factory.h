@@ -38,8 +38,7 @@ class TypeFactory final {
   ~TypeFactory();
 
   const Type& GetAnyType() { return any_type_; }
-  const Type& NewClassType(const std::vector<const TypeParameter*>& parameters,
-                           Class* class_value);
+  const Type& NewClassType(Class* class_value);
   const Type& NewFunctionType(
       FunctionTypeKind kind,
       const std::vector<const TypeParameter*>& parameters,

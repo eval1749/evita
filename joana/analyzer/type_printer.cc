@@ -50,14 +50,13 @@ std::ostream& operator<<(std::ostream& ostream,
   ostream << "class";
   if (name.Is<ast::Name>())
     ostream << ' ' << ast::AsSourceCode(name);
-  if (type.has_parameters()) {
-    auto delimiter = "<";
-    for (const auto& parameter : type.parameters()) {
-      ostream << delimiter << AsSourceCode(parameter.name());
-      delimiter = ",";
-    }
-    ostream << '>';
+  const auto* delimiter = "<";
+  for (const auto& parameter : type.value().parameters()) {
+    ostream << delimiter << AsSourceCode(parameter.name());
+    delimiter = ",";
   }
+  if (*delimiter == ',')
+    ostream << '>';
   return ostream << '@' << type.id();
 }
 

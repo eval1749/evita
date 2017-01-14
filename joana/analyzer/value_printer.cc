@@ -32,8 +32,15 @@ Printable<Value> AsPrintable(const Value& value) {
 std::ostream& operator<<(std::ostream& ostream,
                          const Printable<Class>& printable) {
   const auto& value = *printable.value;
-  return ostream << '$' << value.kind() << '@' << value.id() << ' '
-                 << value.node();
+  ostream << '$' << value.kind();
+  const auto* delimiter = "<";
+  for (const auto& parameter : value.parameters()) {
+    ostream << delimiter << parameter.name();
+    delimiter = ",";
+  }
+  if (*delimiter == ',')
+    ostream << '>';
+  return ostream << '@' << value.id() << ' ' << value.node();
 }
 
 std::ostream& operator<<(std::ostream& ostream,

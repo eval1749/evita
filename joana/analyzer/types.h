@@ -95,8 +95,8 @@ class AnyType final : public Type {
 //
 // ClassType
 //
-class ClassType final : public GenericType {
-  DECLARE_CONCRETE_ANALYZE_TYPE(ClassType, GenericType)
+class ClassType final : public Type {
+  DECLARE_CONCRETE_ANALYZE_TYPE(ClassType, Type)
 
  public:
   ~ClassType() final;
@@ -105,10 +105,7 @@ class ClassType final : public GenericType {
   Class& value() const { return value_; }
 
  private:
-  ClassType(Zone* zone,
-            int id,
-            const std::vector<const TypeParameter*>& parameters,
-            Class* value);
+  ClassType(int id, Class* value);
 
   Class& value_;
 

@@ -21,6 +21,7 @@ class Node;
 
 namespace analyzer {
 
+class Class;
 class Context;
 class Environment;
 class Function;
@@ -52,7 +53,7 @@ class EnvironmentBuilder final : public Pass, public ast::SyntaxVisitor {
   Variable& BindVariable(const ast::Node& name);
 
   // Bind type parameters of |type| in current environment.
-  void BindTypeParameters(const GenericType& type);
+  void BindTypeParameters(const Class& class_value);
 
   const Type* FindType(const ast::Node& name) const;
   Variable* FindVariable(const ast::Node& name) const;
@@ -74,8 +75,8 @@ class EnvironmentBuilder final : public Pass, public ast::SyntaxVisitor {
 
   Variable& ResolveVariableName(const ast::Node& name);
 
-  // Returns type of |node| if known.
-  const Type* TryTypeOf(const ast::Node& node) const;
+  // Returns class of |node| if known.
+  const Class* TryClassOfPrototype(const ast::Node& node) const;
 
   void VisitChildNodes(const ast::Node& node);
 

@@ -5,6 +5,8 @@
 #ifndef JOANA_ANALYZER_FACTORY_H_
 #define JOANA_ANALYZER_FACTORY_H_
 
+#include <vector>
+
 #include "base/macros.h"
 
 namespace joana {
@@ -23,6 +25,7 @@ class Environment;
 class Properties;
 class Property;
 class Type;
+class TypeParameter;
 class Value;
 class Variable;
 
@@ -42,7 +45,9 @@ class Factory final {
   Property& NewProperty(const ast::Node& node);
 
   // Values
-  Class& NewClass(const ast::Node& node, ClassKind kind);
+  Class& NewClass(const ast::Node& node,
+                  ClassKind kind,
+                  const std::vector<const TypeParameter*>& parameters);
   Function& NewFunction(const ast::Node& node);
   Value& NewOrdinaryObject(const ast::Node& node);
   Value& NewUndefined(const ast::Node& node);

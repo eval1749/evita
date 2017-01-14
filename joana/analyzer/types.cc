@@ -20,11 +20,7 @@ AnyType::~AnyType() = default;
 //
 // ClassType
 //
-ClassType::ClassType(Zone* zone,
-                     int id,
-                     const std::vector<const TypeParameter*>& parameters,
-                     Class* value)
-    : GenericType(zone, id, parameters), value_(*value) {
+ClassType::ClassType(int id, Class* value) : Type(id), value_(*value) {
   DCHECK(value);
 }
 

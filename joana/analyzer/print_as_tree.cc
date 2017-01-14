@@ -9,7 +9,7 @@
 #include "base/auto_reset.h"
 #include "base/macros.h"
 #include "joana/analyzer/context.h"
-#include "joana/analyzer/type.h"
+#include "joana/analyzer/types.h"
 #include "joana/analyzer/values.h"
 #include "joana/ast/declarations.h"
 #include "joana/ast/node.h"
@@ -104,12 +104,19 @@ std::ostream& operator<<(std::ostream& ostream,
                          const Printable<Value>& printable) {
   const auto& value = *printable.thing;
   if (value.Is<Class>()) {
-    ostream << value.As<Class>().kind();
-    const auto& name = ValueNameOf(value);
-    if (!name)
-      return ostream << '@' << value.id();
-    return ostream << '[' << ast::AsSourceCode(*name) << '@' << value.id()
-                   << ']';
+    ostream << value.As<Class>().kind() << '[';
+    if (const auto* name = ValueNameOf(value))
+      ostream << ast::AsSourceCode(*name);
+    else
+      ostream << "%anonymous%";
+    const auto* delimiter = "<";
+    for (const auto& parameter : value.As<Class>().parameters()) {
+      ostream << delimiter << ast::AsSourceCode(parameter.name());
+      delimiter = ",";
+    }
+    if (*delimiter == ',')
+      ostream << '>';
+    return ostream << '@' << value.id() << ']';
   }
   if (value.Is<Property>()) {
     return ostream << '[' << ast::AsSourceCode(value.node()) << '@'

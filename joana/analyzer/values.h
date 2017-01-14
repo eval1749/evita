@@ -6,6 +6,7 @@
 #define JOANA_ANALYZER_VALUES_H_
 
 #include <iosfwd>
+#include <vector>
 
 #include "joana/analyzer/value.h"
 #include "joana/base/iterator_utils.h"
@@ -16,6 +17,7 @@ namespace analyzer {
 
 class Function;
 class Properties;
+class TypeParameter;
 
 //
 // ClassKind
@@ -88,16 +90,22 @@ class Class : public Value {
 
   ClassKind kind() const { return kind_; }
   auto methods() const { return ReferenceRangeOf(methods_); }
+  auto parameters() const { return ReferenceRangeOf(parameters_); }
 
  protected:
   // TODO(eval1749): move |zone| after |node|.
-  Class(Zone* zone, int id, const ast::Node& node, ClassKind kind);
+  Class(Zone* zone,
+        int id,
+        const ast::Node& node,
+        ClassKind kind,
+        const std::vector<const TypeParameter*>& parameters);
 
  private:
   void AddMethod(Value* method);
 
   const ClassKind kind_;
   ZoneVector<Function*> methods_;
+  ZoneVector<const TypeParameter*> parameters_;
 
   DISALLOW_COPY_AND_ASSIGN(Class);
 };

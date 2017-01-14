@@ -15,8 +15,15 @@ namespace analyzer {
 //
 // Class
 //
-Class::Class(Zone* zone, int id, const ast::Node& node, ClassKind kind)
-    : Value(id, node), kind_(kind), methods_(zone) {}
+Class::Class(Zone* zone,
+             int id,
+             const ast::Node& node,
+             ClassKind kind,
+             const std::vector<const TypeParameter*>& parameters)
+    : Value(id, node),
+      kind_(kind),
+      methods_(zone),
+      parameters_(zone, parameters) {}
 
 Class::~Class() = default;
 

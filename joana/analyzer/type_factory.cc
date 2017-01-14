@@ -49,10 +49,8 @@ int TypeFactory::NextTypeId() {
   return ++current_type_id_;
 }
 
-const Type& TypeFactory::NewClassType(
-    const std::vector<const TypeParameter*>& parameters,
-    Class* class_value) {
-  return *new (&zone_) ClassType(&zone_, NextTypeId(), parameters, class_value);
+const Type& TypeFactory::NewClassType(Class* class_value) {
+  return *new (&zone_) ClassType(NextTypeId(), class_value);
 }
 
 const Type& TypeFactory::NewTypeName(const ast::Node& name) {

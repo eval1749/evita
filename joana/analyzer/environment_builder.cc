@@ -181,8 +181,8 @@ void EnvironmentBuilder::BindType(const ast::Node& name, const Type& type) {
   toplevel_environment_->BindType(name, type);
 }
 
-void EnvironmentBuilder::BindTypeParameters(const GenericType& type) {
-  for (const auto& parameter : type.parameters())
+void EnvironmentBuilder::BindTypeParameters(const Class& class_value) {
+  for (const auto& parameter : class_value.parameters())
     BindType(parameter.name(), parameter);
 }
 
@@ -256,15 +256,14 @@ void EnvironmentBuilder::ProcessClass(const ast::Node& node,
   const auto class_kind =
       class_tag ? ClassKindOf(*class_tag) : ClassKind::Class;
 
-  auto& class_value = factory().NewClass(node, class_kind);
-  const auto& class_type =
-      type_factory().NewClassType(type_parameters, &class_value);
+  auto& class_value = factory().NewClass(node, class_kind, type_parameters);
+  const auto& class_type = type_factory().NewClassType(&class_value);
   context().RegisterType(node, class_type);
   context().RegisterValue(node, &class_value);
 
   // Class wide template parameters.
   LocalEnvironment environment(this, node);
-  BindTypeParameters(class_type.As<ClassType>());
+  BindTypeParameters(class_value);
   if (maybe_document)
     Visit(*maybe_document);
 
@@ -304,7 +303,7 @@ void EnvironmentBuilder::ProcessClass(const ast::Node& node,
     Value::Editor().AddMethod(&class_value, &method);
 
     LocalEnvironment environment(this, node);
-    BindTypeParameters(class_type.As<ClassType>());
+    BindTypeParameters(class_value);
     VisitDefault(member);
 
     if (!child.Is<ast::Annotation>())
@@ -377,9 +376,9 @@ void EnvironmentBuilder::ProcessFunction(const ast::Node& node,
                                     : std::vector<const TypeParameter*>();
 
   if (class_tag) {
-    auto& class_value = factory().NewClass(node, ClassKindOf(*class_tag));
-    auto& class_type =
-        type_factory().NewClassType(type_parameters, &class_value);
+    auto& class_value =
+        factory().NewClass(node, ClassKindOf(*class_tag), type_parameters);
+    auto& class_type = type_factory().NewClassType(&class_value);
     context().RegisterType(node, class_type);
     context().RegisterValue(node, &class_value);
     if (name == ast::SyntaxCode::Name)
@@ -446,8 +445,9 @@ void EnvironmentBuilder::ProcessVariableDeclaration(const ast::Node& node,
   }
   const auto& type_parameters = ProcessTemplateTag(document);
   const auto& name = ast::BindingNameElement::NameOf(binding);
-  auto& class_value = factory().NewClass(node, ClassKindOf(*class_tag));
-  auto& class_type = type_factory().NewClassType(type_parameters, &class_value);
+  auto& class_value =
+      factory().NewClass(node, ClassKindOf(*class_tag), type_parameters);
+  auto& class_type = type_factory().NewClassType(&class_value);
   context().RegisterType(name, class_type);
   context().RegisterValue(name, &class_value);
   // Visit(ast::BindingNameElement::InitializerOf(binding));
@@ -466,18 +466,23 @@ Variable& EnvironmentBuilder::ResolveVariableName(const ast::Node& name) {
   return variable;
 }
 
-const Type* EnvironmentBuilder::TryTypeOf(const ast::Node& node) const {
-  if (node.Is<ast::MemberExpression>()) {
-    const auto* type = TryTypeOf(ast::MemberExpression::ExpressionOf(node));
-    if (!type)
-      return nullptr;
-    if (ast::MemberExpression::NameOf(node) != ast::TokenKind::Prototype)
-      return nullptr;
-    return type;
-  }
-  if (node.Is<ast::ReferenceExpression>())
-    return FindType(ast::ReferenceExpression::NameOf(node));
-  return nullptr;
+const Class* EnvironmentBuilder::TryClassOfPrototype(
+    const ast::Node& node) const {
+  if (!node.Is<ast::MemberExpression>())
+    return nullptr;
+  if (ast::MemberExpression::NameOf(node) != ast::TokenKind::Prototype)
+    return nullptr;
+  const auto& container = ast::MemberExpression::ExpressionOf(node);
+  const auto* const holder = context().TryValueOf(container);
+  if (!holder || !holder->Is<ValueHolder>())
+    return nullptr;
+  if (holder->As<ValueHolder>().assignments().size() != 1)
+    return nullptr;
+  const auto* const value =
+      context().TryValueOf(*holder->As<ValueHolder>().assignments().front());
+  if (!value || !value->Is<Class>())
+    return nullptr;
+  return &value->As<Class>();
 }
 
 void EnvironmentBuilder::VisitChildNodes(const ast::Node& node) {
@@ -538,24 +543,21 @@ void EnvironmentBuilder::VisitInternal(const ast::Annotation& syntax,
   if (expression.Is<ast::AssignmentExpression>()) {
     const auto& lhs = ast::AssignmentExpression::LeftHandSideOf(expression);
     const auto& rhs = ast::AssignmentExpression::RightHandSideOf(expression);
+    Visit(lhs);
     if (!IsMemberExpression(lhs)) {
       AddError(node, ErrorCode::ENVIRONMENT_UNEXPECT_ANNOTATION);
-      Visit(annotated);
+      Visit(rhs);
       return;
     }
     LocalEnvironment environment(this, lhs);
-    if (const auto* type = TryTypeOf(lhs.child_at(0))) {
-      if (type->Is<GenericType>())
-        BindTypeParameters(type->As<GenericType>());
-    }
+    if (const auto* class_value = TryClassOfPrototype(lhs.child_at(0)))
+      BindTypeParameters(*class_value);
     if (rhs.Is<ast::Class>()) {
       ProcessClass(rhs, &document);
-      Visit(lhs);
       return;
     }
     if (rhs.Is<ast::Function>()) {
       ProcessFunction(rhs, &document);
-      Visit(lhs);
       return;
     }
     Visit(annotated);
@@ -564,13 +566,11 @@ void EnvironmentBuilder::VisitInternal(const ast::Annotation& syntax,
   }
 
   if (IsMemberExpression(expression)) {
+    Visit(expression);
     const auto& member = expression.child_at(0);
     LocalEnvironment environment(this, expression);
-    if (const auto* type = TryTypeOf(member)) {
-      if (type->Is<GenericType>())
-        BindTypeParameters(type->As<GenericType>());
-    }
-    Visit(expression);
+    if (const auto* class_value = TryClassOfPrototype(member))
+      BindTypeParameters(*class_value);
     Visit(document);
     return;
   }

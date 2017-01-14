@@ -28,8 +28,10 @@ Property& Factory::GetOrNewProperty(Properties* properties,
   return properties->Add(&NewProperty(node));
 }
 
-Class& Factory::NewClass(const ast::Node& node, ClassKind kind) {
-  return *new (&zone_) Class(&zone_, NextValueId(), node, kind);
+Class& Factory::NewClass(const ast::Node& node,
+                         ClassKind kind,
+                         const std::vector<const TypeParameter*>& parameters) {
+  return *new (&zone_) Class(&zone_, NextValueId(), node, kind, parameters);
 }
 
 Function& Factory::NewFunction(const ast::Node& node) {

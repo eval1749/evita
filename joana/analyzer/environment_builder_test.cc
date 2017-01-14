@@ -51,7 +51,7 @@ std::string EnvironmentBuilderTest::RunOn(base::StringPiece script_text) {
 TEST_F(EnvironmentBuilderTest, Class) {
   EXPECT_EQ(
       "Module\n"
-      "+--Class Class[Foo@1001] {class Foo@1001}\n"
+      "+--Class Class[Foo@1001]\n"
       "|  +--Name |Foo|\n"
       "|  +--ElisionExpression ||\n"
       "|  +--ObjectInitializer\n"
@@ -67,7 +67,7 @@ TEST_F(EnvironmentBuilderTest, Class) {
 
   EXPECT_EQ(
       "Module\n"
-      "+--Class Class[Foo@1001] {class Foo@1001}\n"
+      "+--Class Class[Foo@1001]\n"
       "|  +--Name |Foo|\n"
       "|  +--ElisionExpression ||\n"
       "|  +--ObjectInitializer\n"
@@ -97,7 +97,7 @@ TEST_F(EnvironmentBuilderTest, ClassAnonymous) {
       "+--VarStatement\n"
       "|  +--BindingNameElement $a@1002\n"
       "|  |  +--Name |a|\n"
-      "|  |  +--Class Class[%anonymous%@1001] {class@1001}\n"
+      "|  |  +--Class Class[%anonymous%@1001]\n"
       "|  |  |  +--Empty ||\n"
       "|  |  |  +--ElisionExpression ||\n"
       "|  |  |  +--ObjectInitializer |{}|\n",
@@ -113,7 +113,7 @@ TEST_F(EnvironmentBuilderTest, ClassAnnotation) {
       "|  |  +--JsDocTag\n"
       "|  |  |  +--Name |@interface|\n"
       "|  |  +--JsDocText |*/|\n"
-      "|  +--Class Interface[Foo@1001] {class Foo@1001}\n"
+      "|  +--Class Interface[Foo@1001]\n"
       "|  |  +--Name |Foo|\n"
       "|  |  +--ElisionExpression ||\n"
       "|  |  +--ObjectInitializer |{}|\n",
@@ -131,7 +131,7 @@ TEST_F(EnvironmentBuilderTest, ClassAnnotation) {
       "|  |  |  +--TypeName {VALUE@1002}\n"
       "|  |  |  |  +--Name |VALUE|\n"
       "|  |  +--JsDocText |*/|\n"
-      "|  +--Class Class[Map<KEY,VALUE>@1001] {class Map<KEY,VALUE>@1003}\n"
+      "|  +--Class Class[Map<KEY,VALUE>@1001]\n"
       "|  |  +--Name |Map|\n"
       "|  |  +--ElisionExpression ||\n"
       "|  |  +--ObjectInitializer |{}|\n",
@@ -151,7 +151,7 @@ TEST_F(EnvironmentBuilderTest, ClassAnnotation) {
       "|  |  |  +--TypeName {VALUE@1002}\n"
       "|  |  |  |  +--Name |VALUE|\n"
       "|  |  +--JsDocText |*/|\n"
-      "|  +--Class Class[Map<KEY,VALUE>@1001] {class Map<KEY,VALUE>@1003}\n"
+      "|  +--Class Class[Map<KEY,VALUE>@1001]\n"
       "|  |  +--Name |Map|\n"
       "|  |  +--ElisionExpression ||\n"
       "|  |  +--ObjectInitializer |{}|\n",
@@ -161,7 +161,7 @@ TEST_F(EnvironmentBuilderTest, ClassAnnotation) {
 TEST_F(EnvironmentBuilderTest, ClassError) {
   EXPECT_EQ(
       "Module\n"
-      "+--Class Class[Foo@1001] {class Foo@1001}\n"
+      "+--Class Class[Foo@1001]\n"
       "|  +--Name |Foo|\n"
       "|  +--ElisionExpression ||\n"
       "|  +--ObjectInitializer\n"
@@ -171,7 +171,7 @@ TEST_F(EnvironmentBuilderTest, ClassError) {
 
   EXPECT_EQ(
       "Module\n"
-      "+--Class Class[Foo@1001] {class Foo@1001}\n"
+      "+--Class Class[Foo@1001]\n"
       "|  +--Name |Foo|\n"
       "|  +--ElisionExpression ||\n"
       "|  +--ObjectInitializer\n"
@@ -190,7 +190,7 @@ TEST_F(EnvironmentBuilderTest, ClassError) {
 TEST_F(EnvironmentBuilderTest, ClassErrorConstructor) {
   EXPECT_EQ(
       "Module\n"
-      "+--Class Class[Foo@1001] {class Foo@1001}\n"
+      "+--Class Class[Foo@1001]\n"
       "|  +--Name |Foo|\n"
       "|  +--ElisionExpression ||\n"
       "|  +--ObjectInitializer\n"
@@ -204,7 +204,7 @@ TEST_F(EnvironmentBuilderTest, ClassErrorConstructor) {
 
   EXPECT_EQ(
       "Module\n"
-      "+--Class Class[Foo@1001] {class Foo@1001}\n"
+      "+--Class Class[Foo@1001]\n"
       "|  +--Name |Foo|\n"
       "|  +--ElisionExpression ||\n"
       "|  +--ObjectInitializer\n"
@@ -218,7 +218,7 @@ TEST_F(EnvironmentBuilderTest, ClassErrorConstructor) {
 
   EXPECT_EQ(
       "Module\n"
-      "+--Class Class[Foo@1001] {class Foo@1001}\n"
+      "+--Class Class[Foo@1001]\n"
       "|  +--Name |Foo|\n"
       "|  +--ElisionExpression ||\n"
       "|  +--ObjectInitializer\n"
@@ -240,7 +240,7 @@ TEST_F(EnvironmentBuilderTest, ComputedMemberExpression) {
       "|  |  +--JsDocTag\n"
       "|  |  |  +--Name |@constructor|\n"
       "|  |  +--JsDocText |*/|\n"
-      "|  +--Function<Normal> Class[Foo@1002] {class Foo@1001}\n"
+      "|  +--Function<Normal> Class[Foo@1002]\n"
       "|  |  +--Name |Foo|\n"
       "|  |  +--ParameterList |()|\n"
       "|  |  +--BlockStatement |{}|\n"
@@ -328,8 +328,7 @@ TEST_F(EnvironmentBuilderTest, FunctionAnnotation) {
       "|  |  |  +--TypeName {VALUE@1002}\n"
       "|  |  |  |  +--Name |VALUE|\n"
       "|  |  +--JsDocText |*/|\n"
-      "|  +--Function<Normal> Class[Map<KEY,VALUE>@1002] {class "
-      "Map<KEY,VALUE>@1003}\n"
+      "|  +--Function<Normal> Class[Map<KEY,VALUE>@1002]\n"
       "|  |  +--Name |Map|\n"
       "|  |  +--ParameterList |()|\n"
       "|  |  +--BlockStatement |{}|\n",
@@ -405,7 +404,7 @@ TEST_F(EnvironmentBuilderTest, MemberExpression) {
       "|  |  +--JsDocTag\n"
       "|  |  |  +--Name |@constructor|\n"
       "|  |  +--JsDocText |*/|\n"
-      "|  +--Function<Normal> Class[Foo@1002] {class Foo@1001}\n"
+      "|  +--Function<Normal> Class[Foo@1002]\n"
       "|  |  +--Name |Foo|\n"
       "|  |  +--ParameterList |()|\n"
       "|  |  +--BlockStatement |{}|\n"
@@ -436,7 +435,7 @@ TEST_F(EnvironmentBuilderTest, Property) {
       "|  |  +--JsDocTag\n"
       "|  |  |  +--Name |@constructor|\n"
       "|  |  +--JsDocText |*/|\n"
-      "|  +--Function<Normal> Class[Foo@1002] {class Foo@1001}\n"
+      "|  +--Function<Normal> Class[Foo@1002]\n"
       "|  |  +--Name |Foo|\n"
       "|  |  +--ParameterList |()|\n"
       "|  |  +--BlockStatement |{}|\n"
@@ -510,7 +509,7 @@ TEST_F(EnvironmentBuilderTest, Prototype) {
       "|  |  |  +--TypeName {T@1001}\n"
       "|  |  |  |  +--Name |T|\n"
       "|  |  +--JsDocText |*/|\n"
-      "|  +--Function<Normal> Class[Foo<T>@1002] {class Foo<T>@1002}\n"
+      "|  +--Function<Normal> Class[Foo<T>@1002]\n"
       "|  |  +--Name |Foo|\n"
       "|  |  +--ParameterList |()|\n"
       "|  |  +--BlockStatement |{}|\n"
@@ -545,7 +544,7 @@ TEST_F(EnvironmentBuilderTest, Prototype) {
       "|  |  |  +--TypeName {T@1001}\n"
       "|  |  |  |  +--Name |T|\n"
       "|  |  +--JsDocText |*/|\n"
-      "|  +--Function<Normal> Class[Foo<T>@1002] {class Foo<T>@1002}\n"
+      "|  +--Function<Normal> Class[Foo<T>@1002]\n"
       "|  |  +--Name |Foo|\n"
       "|  |  +--ParameterList |()|\n"
       "|  |  +--BlockStatement |{}|\n"
@@ -646,14 +645,14 @@ TEST_F(EnvironmentBuilderTest, Type) {
   EXPECT_EQ(
       "Module\n"
       "+--Annotation\n"
-      "|  +--JsDocDocument\n"
+      "|  +--JsDocDocument Interface[%anonymous%@1002]\n"
       "|  |  +--JsDocText |/**|\n"
       "|  |  +--JsDocTag\n"
       "|  |  |  +--Name |@interface|\n"
       "|  |  +--JsDocText |*/|\n"
       "|  +--VarStatement\n"
-      "|  |  +--BindingNameElement $Foo@1002\n"
-      "|  |  |  +--Name |Foo| Interface[%anonymous%@1001] {class@1001}\n"
+      "|  |  +--BindingNameElement $Foo@1001\n"
+      "|  |  |  +--Name |Foo|\n"
       "|  |  |  +--ElisionExpression ||\n"
       "+--Annotation\n"
       "|  +--JsDocDocument\n"
@@ -717,14 +716,14 @@ TEST_F(EnvironmentBuilderTest, VarConstructor) {
   EXPECT_EQ(
       "Module\n"
       "+--Annotation\n"
-      "|  +--JsDocDocument\n"
+      "|  +--JsDocDocument Class[%anonymous%@1002]\n"
       "|  |  +--JsDocText |/**|\n"
       "|  |  +--JsDocTag\n"
       "|  |  |  +--Name |@constructor|\n"
       "|  |  +--JsDocText |*/|\n"
       "|  +--VarStatement\n"
-      "|  |  +--BindingNameElement $Foo@1002\n"
-      "|  |  |  +--Name |Foo| Class[%anonymous%@1001] {class@1001}\n"
+      "|  |  +--BindingNameElement $Foo@1001\n"
+      "|  |  |  +--Name |Foo|\n"
       "|  |  |  +--ElisionExpression ||\n",
       RunOn("/** @constructor */ var Foo;"));
 }

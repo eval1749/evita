@@ -257,8 +257,6 @@ void EnvironmentBuilder::ProcessClass(const ast::Node& node,
       class_tag ? ClassKindOf(*class_tag) : ClassKind::Class;
 
   auto& class_value = factory().NewClass(node, class_kind, type_parameters);
-  const auto& class_type = type_factory().NewClassType(&class_value);
-  context().RegisterType(node, class_type);
   context().RegisterValue(node, &class_value);
 
   // Class wide template parameters.
@@ -313,8 +311,6 @@ void EnvironmentBuilder::ProcessClass(const ast::Node& node,
 
   if (class_name != ast::SyntaxCode::Name)
     return;
-
-  BindType(class_name, class_type);
 
   // Set variable
   auto& variable = BindVariable(class_name);
@@ -378,11 +374,7 @@ void EnvironmentBuilder::ProcessFunction(const ast::Node& node,
   if (class_tag) {
     auto& class_value =
         factory().NewClass(node, ClassKindOf(*class_tag), type_parameters);
-    auto& class_type = type_factory().NewClassType(&class_value);
-    context().RegisterType(node, class_type);
     context().RegisterValue(node, &class_value);
-    if (name == ast::SyntaxCode::Name)
-      BindType(name, class_type);
   } else {
     context().RegisterValue(node, &function);
   }
@@ -445,14 +437,29 @@ void EnvironmentBuilder::ProcessVariableDeclaration(const ast::Node& node,
   }
   const auto& type_parameters = ProcessTemplateTag(document);
   const auto& name = ast::BindingNameElement::NameOf(binding);
-  auto& class_value =
-      factory().NewClass(node, ClassKindOf(*class_tag), type_parameters);
-  auto& class_type = type_factory().NewClassType(&class_value);
-  context().RegisterType(name, class_type);
-  context().RegisterValue(name, &class_value);
-  // Visit(ast::BindingNameElement::InitializerOf(binding));
+  auto& variable = BindVariable(name);
+  context().RegisterValue(binding, &variable);
+  if (!variable.assignments().empty()) {
+    AddError(node, ErrorCode::ENVIRONMENT_MULTIPLE_OCCURRENCES,
+             *variable.assignments().front());
+    return;
+  }
+  const auto& initializer = ast::BindingNameElement::InitializerOf(binding);
+  if (initializer.Is<ast::ElisionExpression>()) {
+    auto& class_value =
+        factory().NewClass(node, ClassKindOf(*class_tag), type_parameters);
+    context().RegisterValue(document, &class_value);
+    Value::Editor().AddAssignment(&variable, document);
+    Visit(document);
+    return;
+  }
+  Value::Editor().AddAssignment(&variable, binding);
+  if (initializer.Is<ast::Class>())
+    return ProcessClass(initializer, &document);
+  if (initializer.Is<ast::Function>())
+    return ProcessFunction(initializer, &document);
+  Visit(initializer);
   Visit(document);
-  Visit(node);
 }
 
 // AST node handlers
@@ -571,6 +578,15 @@ void EnvironmentBuilder::VisitInternal(const ast::Annotation& syntax,
     LocalEnvironment environment(this, expression);
     if (const auto* class_value = TryClassOfPrototype(member))
       BindTypeParameters(*class_value);
+    if (const auto* class_tag = ProcessClassTag(document)) {
+      const auto& type_parameters = ProcessTemplateTag(document);
+      const auto& class_kind = ClassKindOf(*class_tag);
+      auto& class_value =
+          factory().NewClass(expression, class_kind, type_parameters);
+      auto& property = context().ValueOf(expression).As<Property>();
+      Value::Editor().AddAssignment(&property, document);
+      context().RegisterValue(document, &class_value);
+    }
     Visit(document);
     return;
   }

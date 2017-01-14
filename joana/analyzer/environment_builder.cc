@@ -409,18 +409,11 @@ void EnvironmentBuilder::ProcessFunction(const ast::Node& node,
 std::vector<const TypeParameter*> EnvironmentBuilder::ProcessTemplateTag(
     const ast::Node& document) {
   std::vector<const TypeParameter*> type_parameters;
-  const ast::Node* template_tag = nullptr;
   for (const auto& node : ast::NodeTraversal::ChildNodesOf(document)) {
     if (!node.Is<ast::JsDocTag>())
       continue;
     if (ast::JsDocTag::NameOf(node) != ast::TokenKind::AtTemplate)
       continue;
-    if (template_tag) {
-      AddError(node, ErrorCode::ENVIRONMENT_MULTIPLE_OCCURRENCES,
-               *template_tag);
-      continue;
-    }
-    template_tag = &node;
     for (const auto& type_name : ast::JsDocTag::OperandsOf(node)) {
       if (!type_name.Is<ast::TypeName>()) {
         AddError(type_name, ErrorCode::ENVIRONMENT_EXPECT_NAME);

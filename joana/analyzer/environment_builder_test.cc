@@ -136,6 +136,26 @@ TEST_F(EnvironmentBuilderTest, ClassAnnotation) {
       "|  |  +--ElisionExpression ||\n"
       "|  |  +--ObjectInitializer |{}|\n",
       RunOn("/** @template KEY, VALUE */ class Map {}"));
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@template|\n"
+      "|  |  |  +--TypeName {KEY@1001}\n"
+      "|  |  |  |  +--Name |KEY|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@template|\n"
+      "|  |  |  +--TypeName {VALUE@1002}\n"
+      "|  |  |  |  +--Name |VALUE|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--Class Class[Map@1001] {class Map<KEY,VALUE>@1003}\n"
+      "|  |  +--Name |Map|\n"
+      "|  |  +--ElisionExpression ||\n"
+      "|  |  +--ObjectInitializer |{}|\n",
+      RunOn("/** @template KEY @template VALUE */ class Map {}"));
 }
 
 TEST_F(EnvironmentBuilderTest, ClassError) {

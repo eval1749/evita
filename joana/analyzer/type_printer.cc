@@ -74,6 +74,7 @@ std::ostream& operator<<(std::ostream& ostream,
     }
     ostream << '>';
   }
+  ostream << '(';
   auto delimiter = "";
   if (type.kind() == FunctionTypeKind::Constructor) {
     ostream << "new:" << AsPrintable(type.this_type());
@@ -86,9 +87,10 @@ std::ostream& operator<<(std::ostream& ostream,
     ostream << delimiter << AsPrintable(parameter_type);
     delimiter = ",";
   }
+  ostream << ')';
   if (!type.return_type().Is<VoidType>())
     ostream << ':' << AsPrintable(type.return_type());
-  return ostream << ')';
+  return ostream;
 }
 
 std::ostream& operator<<(std::ostream& ostream,

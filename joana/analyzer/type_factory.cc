@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <tuple>
+#include <unordered_map>
+
 #include "joana/analyzer/type_factory.h"
 
 #include "joana/analyzer/built_in_world.h"
@@ -12,10 +15,49 @@ namespace joana {
 namespace analyzer {
 
 //
+// TypeFactory::Cache
+//
+class TypeFactory::Cache final {
+ public:
+  Cache();
+  ~Cache();
+
+  template <typename Key>
+  const Type* Find(Key key) {
+    const auto& map = MapFor(key);
+    const auto& it = map.find(key);
+    return it == map.end() ? nullptr : it->second;
+  }
+
+  template <typename Key>
+  void Register(Key key, const Type& type) {
+    auto& map = MapFor(key);
+    const auto& result = map.emplace(key, &type);
+    DCHECK(result.second) << "Cache already has " << key;
+  }
+
+ private:
+  using ClassTypeMap = std::unordered_map<Class*, const Type*>;
+  using PrimitiveTypeMap = std::unordered_map<ast::TokenKind, const Type*>;
+
+  ClassTypeMap& MapFor(const Class* class_value) { return class_type_map_; }
+  PrimitiveTypeMap& MapFor(ast::TokenKind kind) { return primitive_type_map_; }
+
+  ClassTypeMap class_type_map_;
+  PrimitiveTypeMap primitive_type_map_;
+
+  DISALLOW_COPY_AND_ASSIGN(Cache);
+};
+
+TypeFactory::Cache::Cache() = default;
+TypeFactory::Cache::~Cache() = default;
+
+//
 // TypeFactory
 //
 TypeFactory::TypeFactory(Zone* zone)
-    : zone_(*zone),
+    : cache_(new Cache()),
+      zone_(*zone),
       any_type_(*new (zone) AnyType(NextTypeId())),
       invalid_type_(*new (zone) InvalidType(NextTypeId())),
       unknown_type_(*new (zone) UnknownType(NextTypeId())),
@@ -27,21 +69,24 @@ TypeFactory::TypeFactory(Zone* zone)
 
 TypeFactory::~TypeFactory() = default;
 
+const Type& TypeFactory::GetOrNewClassType(Class* class_value) {
+  const auto* type = cache_->Find(class_value);
+  if (type)
+    return *type;
+  const auto& new_type = *new (&zone_) ClassType(NextTypeId(), class_value);
+  cache_->Register(class_value, new_type);
+  return new_type;
+}
+
 const Type& TypeFactory::GetPrimitiveType(ast::TokenKind id) {
-  const auto& it = primitive_type_map_.find(id);
-  DCHECK(it != primitive_type_map_.end())
-      << BuiltInWorld::GetInstance()->NameOf(id)
-      << " should be primitive type.";
-  return *it->second;
+  return *cache_->Find(id);
 }
 
 void TypeFactory::InstallPrimitiveTypes() {
   for (const auto id : BuiltInWorld::GetInstance()->primitive_types()) {
     const auto& name = BuiltInWorld::GetInstance()->NameOf(id);
     const auto& type = *new (&zone_) PrimitiveType(NextTypeId(), name);
-    const auto& result =
-        primitive_type_map_.emplace(ast::Name::KindOf(name), &type);
-    DCHECK(result.second) << name << " is realdy installed.";
+    cache_->Register(ast::Name::KindOf(name), type);
   }
 }
 
@@ -51,6 +96,16 @@ int TypeFactory::NextTypeId() {
 
 const Type& TypeFactory::NewClassType(Class* class_value) {
   return *new (&zone_) ClassType(NextTypeId(), class_value);
+}
+
+const Type& TypeFactory::NewFunctionType(
+    FunctionTypeKind kind,
+    const std::vector<const TypeParameter*>& parameters,
+    const std::vector<const Type*>& parameter_types,
+    const Type& return_type,
+    const Type& this_type) {
+  return *new (&zone_) FunctionType(&zone_, NextTypeId(), kind, parameters,
+                                    parameter_types, return_type, this_type);
 }
 
 const Type& TypeFactory::NewTypeName(const ast::Node& name) {

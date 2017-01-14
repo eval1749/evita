@@ -6,7 +6,6 @@
 #define JOANA_ANALYZER_TYPE_FACTORY_H_
 
 #include <memory>
-#include <unordered_map>
 #include <vector>
 
 #include "base/macros.h"
@@ -38,7 +37,7 @@ class TypeFactory final {
   ~TypeFactory();
 
   const Type& GetAnyType() { return any_type_; }
-  const Type& NewClassType(Class* class_value);
+  const Type& GetOrNewClassType(Class* class_value);
   const Type& NewFunctionType(
       FunctionTypeKind kind,
       const std::vector<const TypeParameter*>& parameters,
@@ -53,11 +52,14 @@ class TypeFactory final {
   const Type& GetVoidType() const { return void_type_; }
 
  private:
+  class Cache;
+
   void InstallPrimitiveTypes();
   int NextTypeId();
+  const Type& NewClassType(Class* class_value);
 
+  std::unique_ptr<Cache> cache_;
   int current_type_id_ = 0;
-  std::unordered_map<ast::TokenKind, const Type*> primitive_type_map_;
   Zone& zone_;
 
   const Type& any_type_;

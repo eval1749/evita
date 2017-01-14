@@ -28,6 +28,8 @@ class Pass : public ContextUser {
  public:
   ~Pass();
 
+  virtual void RunOn(const ast::Node& node) = 0;
+
  protected:
   explicit Pass(Context* context);
 

@@ -40,7 +40,7 @@ class EnvironmentBuilder final : public Pass, public ast::SyntaxVisitor {
   explicit EnvironmentBuilder(Context* context);
   ~EnvironmentBuilder();
 
-  void RunOn(const ast::Node& node);
+  void RunOn(const ast::Node& node) final;
 
  private:
   class LocalEnvironment;

@@ -29,7 +29,7 @@ class TypeChecker final : public Pass, public ast::SyntaxVisitor {
   explicit TypeChecker(Context* context);
   ~TypeChecker();
 
-  void RunOn(const ast::Node& node);
+  void RunOn(const ast::Node& node) final;
 
  private:
   const Type* FindType(const ast::Node& name) const;

@@ -3,11 +3,14 @@
 // found in the LICENSE file.
 
 #include <algorithm>
+#include <array>
 #include <iostream>
+#include <utility>
 
 #include "joana/analyzer/controller.h"
 
 #include "base/command_line.h"
+#include "base/strings/string_split.h"
 #include "joana/analyzer/built_in_world.h"
 #include "joana/analyzer/context.h"
 #include "joana/analyzer/environment.h"
@@ -61,6 +64,23 @@ std::ostream& operator<<(std::ostream& ostream, const Dump& dump) {
   return ostream;
 }
 
+typedef std::unique_ptr<Pass> PassConstructor(Context* context);
+
+struct PassEntry {
+  PassConstructor* constructor;
+  const char* key;
+};
+
+template <typename PassName>
+std::unique_ptr<Pass> NewPass(Context* context) {
+  return std::move(std::make_unique<PassName>(context));
+}
+
+const std::array<const PassEntry, 2> kPassList = {
+    PassEntry{&NewPass<EnvironmentBuilder>, "var"},
+    PassEntry{&NewPass<TypeChecker>, "type"},
+};
+
 }  // namespace
 
 //
@@ -81,25 +101,19 @@ Factory& Controller::factory() const {
 
 void Controller::Analyze() {
   const auto* const command_line = base::CommandLine::ForCurrentProcess();
-  {
-    EnvironmentBuilder builder(context_.get());
+  const auto& dump_list =
+      base::SplitString(command_line->GetSwitchValueASCII("dump"), ",",
+                        base::TRIM_WHITESPACE, base::SPLIT_WANT_NONEMPTY);
+  const auto& print_list =
+      base::SplitString(command_line->GetSwitchValueASCII("print"), ",",
+                        base::TRIM_WHITESPACE, base::SPLIT_WANT_NONEMPTY);
+  for (const auto& entry : kPassList) {
+    const auto& pass = entry.constructor(context_.get());
     for (const auto& node : nodes_)
-      builder.RunOn(*node);
-
-    if (command_line->HasSwitch("dump_after_build"))
+      pass->RunOn(*node);
+    if (std::count(dump_list.begin(), dump_list.end(), entry.key) > 0)
       DumpValues();
-    if (command_line->HasSwitch("print_after_build"))
-      PrintTree();
-  }
-
-  {
-    TypeChecker type_checker(context_.get());
-    for (const auto& node : nodes_)
-      type_checker.RunOn(*node);
-
-    if (command_line->HasSwitch("dump_after_type"))
-      DumpValues();
-    if (command_line->HasSwitch("print_after_type"))
+    if (std::count(print_list.begin(), print_list.end(), entry.key) > 0)
       PrintTree();
   }
 }

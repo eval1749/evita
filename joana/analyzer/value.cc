@@ -13,5 +13,21 @@ namespace analyzer {
 Value::Value(int id, const ast::Node& node) : id_(id), node_(node) {}
 Value::~Value() = default;
 
+bool Value::operator==(const Value& other) const {
+  return this == &other;
+}
+
+bool Value::operator==(const Value* other) const {
+  return this == other;
+}
+
+bool Value::operator!=(const Value& other) const {
+  return this != &other;
+}
+
+bool Value::operator!=(const Value* other) const {
+  return this != other;
+}
+
 }  // namespace analyzer
 }  // namespace joana

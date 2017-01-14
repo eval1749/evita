@@ -40,6 +40,11 @@ class Value : public Castable<Value>, public ZoneAllocated {
 
   virtual ~Value();
 
+  bool operator==(const Value& other) const;
+  bool operator==(const Value* other) const;
+  bool operator!=(const Value& other) const;
+  bool operator!=(const Value* other) const;
+
   // Returns unique identifier of |Value|.
   int id() const { return id_; }
 

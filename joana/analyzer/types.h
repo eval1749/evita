@@ -102,7 +102,7 @@ class ClassType final : public GenericType {
   ~ClassType() final;
 
   const ast::Node& name() const;
-  Class& value() const { return *value_; }
+  Class& value() const { return value_; }
 
  private:
   ClassType(Zone* zone,
@@ -110,7 +110,7 @@ class ClassType final : public GenericType {
             const std::vector<const TypeParameter*>& parameters,
             Class* value);
 
-  Class* const value_;
+  Class& value_;
 
   DISALLOW_COPY_AND_ASSIGN(ClassType);
 };

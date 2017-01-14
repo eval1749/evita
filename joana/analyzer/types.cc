@@ -24,12 +24,14 @@ ClassType::ClassType(Zone* zone,
                      int id,
                      const std::vector<const TypeParameter*>& parameters,
                      Class* value)
-    : GenericType(zone, id, parameters), value_(value) {}
+    : GenericType(zone, id, parameters), value_(*value) {
+  DCHECK(value);
+}
 
 ClassType::~ClassType() = default;
 
 const ast::Node& ClassType::name() const {
-  return value_->node().child_at(0);
+  return value_.node().child_at(0);
 }
 
 //

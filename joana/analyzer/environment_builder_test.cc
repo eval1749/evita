@@ -651,8 +651,8 @@ TEST_F(EnvironmentBuilderTest, Type) {
       "|  |  |  +--Name |@interface|\n"
       "|  |  +--JsDocText |*/|\n"
       "|  +--VarStatement\n"
-      "|  |  +--BindingNameElement $Foo@1001\n"
-      "|  |  |  +--Name |Foo|\n"
+      "|  |  +--BindingNameElement $Foo@1002\n"
+      "|  |  |  +--Name |Foo| Interface@1001 {class@1001}\n"
       "|  |  |  +--ElisionExpression ||\n"
       "+--Annotation\n"
       "|  +--JsDocDocument\n"
@@ -664,7 +664,7 @@ TEST_F(EnvironmentBuilderTest, Type) {
       "|  |  |  |  |  +--Name |Foo|\n"
       "|  |  +--JsDocText |*/|\n"
       "|  +--VarStatement\n"
-      "|  |  +--BindingNameElement $foo@1002\n"
+      "|  |  +--BindingNameElement $foo@1003\n"
       "|  |  |  +--Name |foo|\n"
       "|  |  |  +--ElisionExpression ||\n",
       RunOn("/** @interface */ var Foo;\n"
@@ -712,6 +712,22 @@ TEST_F(EnvironmentBuilderTest, Type) {
       << "Later pass will report @template is unexpected for const.";
 }
 
+TEST_F(EnvironmentBuilderTest, VarConstructor) {
+  EXPECT_EQ(
+      "Module\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@constructor|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--VarStatement\n"
+      "|  |  +--BindingNameElement $Foo@1002\n"
+      "|  |  |  +--Name |Foo| Class@1001 {class@1001}\n"
+      "|  |  |  +--ElisionExpression ||\n",
+      RunOn("/** @constructor */ var Foo;"));
+}
+
 TEST_F(EnvironmentBuilderTest, VarError) {
   EXPECT_EQ(
       "Module\n"
@@ -727,6 +743,43 @@ TEST_F(EnvironmentBuilderTest, VarError) {
       RunOn("var foo = 1, foo = 2;"))
       << "It is legal to bind same variable multiple times with 'var', but we "
          "report error.";
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@constructor|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--VarStatement\n"
+      "|  |  +--BindingNameElement $Foo@1001\n"
+      "|  |  |  +--Name |Foo|\n"
+      "|  |  |  +--ElisionExpression ||\n"
+      "|  |  +--BindingNameElement $Bar@1002\n"
+      "|  |  |  +--Name |Bar|\n"
+      "|  |  |  +--ElisionExpression ||\n"
+      "ANALYZER_ERROR_ENVIRONMENT_INVALID_CONSTRUCTOR@20:33\n",
+      RunOn("/** @constructor */ var Foo, Bar;"))
+      << "Constructor should be for single name.";
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@constructor|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--VarStatement\n"
+      "|  |  +--ObjectBindingPattern\n"
+      "|  |  |  +--ElisionExpression ||\n"
+      "|  |  |  +--BindingNameElement $Foo@1001\n"
+      "|  |  |  |  +--Name |Foo|\n"
+      "|  |  |  |  +--ElisionExpression ||\n"
+      "ANALYZER_ERROR_ENVIRONMENT_INVALID_CONSTRUCTOR@20:30\n",
+      RunOn("/** @constructor */ var {Foo};"))
+      << "Constructor should be a simple name.";
 }
 
 }  // namespace analyzer

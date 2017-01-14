@@ -427,6 +427,35 @@ std::vector<const TypeParameter*> EnvironmentBuilder::ProcessTemplateTag(
   return type_parameters;
 }
 
+void EnvironmentBuilder::ProcessVariableDeclaration(const ast::Node& node,
+                                                    const ast::Node& document) {
+  DCHECK(node.syntax().Is<ast::VariableDeclaration>()) << node;
+  DCHECK_EQ(document, ast::SyntaxCode::JsDocDocument);
+  const auto* class_tag = ProcessClassTag(document);
+  if (!class_tag) {
+    Visit(document);
+    Visit(node);
+    return;
+  }
+  const auto& binding = node.child_at(0);
+  if (node.arity() != 1 || !binding.Is<ast::BindingNameElement>()) {
+    AddError(node, ErrorCode::ENVIRONMENT_INVALID_CONSTRUCTOR);
+    Visit(document);
+    Visit(node);
+    return;
+  }
+  const auto& type_parameters = ProcessTemplateTag(document);
+  const auto& name = ast::BindingNameElement::NameOf(binding);
+  auto& class_value = factory().NewClass(node, ClassKindOf(*class_tag));
+  auto& class_type =
+      type_factory().NewClassType(name, type_parameters, &class_value);
+  context().RegisterType(name, class_type);
+  context().RegisterValue(name, &class_value);
+  // Visit(ast::BindingNameElement::InitializerOf(binding));
+  Visit(document);
+  Visit(node);
+}
+
 // AST node handlers
 Variable& EnvironmentBuilder::ResolveVariableName(const ast::Node& name) {
   DCHECK_EQ(name, ast::SyntaxCode::Name);
@@ -499,7 +528,7 @@ void EnvironmentBuilder::VisitInternal(const ast::Annotation& syntax,
   if (annotated.Is<ast::Function>())
     return ProcessFunction(annotated, &document);
   if (annotated.syntax().Is<ast::VariableDeclaration>())
-    return VisitChildNodes(node);
+    return ProcessVariableDeclaration(annotated, document);
   if (annotated.Is<ast::GroupExpression>())
     return VisitChildNodes(node);
   if (!annotated.Is<ast::ExpressionStatement>()) {

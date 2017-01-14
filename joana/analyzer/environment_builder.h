@@ -69,6 +69,9 @@ class EnvironmentBuilder final : public Pass, public ast::SyntaxVisitor {
   std::vector<const TypeParameter*> ProcessTemplateTag(
       const ast::Node& document);
 
+  void ProcessVariableDeclaration(const ast::Node& annotated,
+                                  const ast::Node& document);
+
   Variable& ResolveVariableName(const ast::Node& name);
 
   // Returns type of |node| if known.

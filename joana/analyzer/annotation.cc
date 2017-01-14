@@ -14,6 +14,7 @@
 #include "joana/analyzer/type_factory.h"
 #include "joana/analyzer/type_name_resolver.h"
 #include "joana/analyzer/types.h"
+#include "joana/analyzer/values.h"
 #include "joana/ast/bindings.h"
 #include "joana/ast/declarations.h"
 #include "joana/ast/expressions.h"
@@ -86,32 +87,21 @@ const ast::Node* MemberExpressionOf(const ast::Node& node) {
 // Annotation
 //
 Annotation::Annotation(Context* context,
-                       TypeNameResolver* resolver,
-                       const Type* this_type,
-                       const ast::Node& node)
+                       const ast::Node& document,
+                       const ast::Node& node,
+                       const Type* this_type)
     : ContextUser(context),
+      document_(document),
       node_(node),
-      resolver_(*resolver),
       this_type_(this_type) {
-  DCHECK_EQ(node_, ast::SyntaxCode::Annotation);
-  DCHECK(resolver);
+  DCHECK_EQ(document_, ast::SyntaxCode::JsDocDocument);
+  DCHECK(!this_type || this_type->Is<ClassType>()) << this_type;
 }
 
 Annotation::~Annotation() = default;
 
-const ast::Node& Annotation::kind() const {
-  DCHECK(kind_tag_);
-  return ast::JsDocTag::NameOf(*kind_tag_);
-}
-
-const Type& Annotation::type() const {
-  DCHECK(has_type());
-  return *type_;
-}
-
 const ast::Node* Annotation::Classify() {
-  for (const auto& node :
-       ast::NodeTraversal::ChildNodesOf(ast::Annotation::DocumentOf(node_))) {
+  for (const auto& node : ast::NodeTraversal::ChildNodesOf(document_)) {
     if (node != ast::SyntaxCode::JsDocTag)
       continue;
     const auto& tag_name = ast::JsDocTag::NameOf(node);
@@ -122,7 +112,7 @@ const ast::Node* Annotation::Classify() {
           continue;
         RememberTag(&kind_tag_, node);
         if (type_node_)
-          type_node_ = &node.child_at(1);
+          type_node_ = &node.child_at(0);
         continue;
       case ast::TokenKind::AtConstructor:
       case ast::TokenKind::AtDict:
@@ -173,7 +163,8 @@ const ast::Node* Annotation::Classify() {
             }
             const auto name_id = ast::Name::KindOf(name);
             const auto& result = type_parameter_map_.emplace(
-                name_id, &type_factory().NewTypeParameter(name));
+                name_id,
+                &type_factory().NewTypeParameter(name).As<TypeParameter>());
             if (result.second)
               continue;
             for (const auto& present : ast::JsDocTag::OperandsOf(node)) {
@@ -188,41 +179,36 @@ const ast::Node* Annotation::Classify() {
         continue;
     }
   }
-  return kind_tag_ ? &kind() : nullptr;
+  return kind_tag_ ? &ast::JsDocTag::NameOf(*kind_tag_) : nullptr;
 }
 
-void Annotation::Compile() {
+const Type* Annotation::Compile() {
   const auto* kind = Classify();
   if (kind == nullptr) {
-    if (!parameter_tags_.empty() || return_tag_) {
-      type_ = &ToGenericTypeIfNeeded(TransformAsFunctionType());
-      return;
-    }
-    return MarkNotTypeAnnotation();
+    if (!parameter_tags_.empty() || return_tag_)
+      return &TransformAsFunctionType();
+    MarkNotTypeAnnotation();
+    return nullptr;
   }
-  if (*kind == ast::TokenKind::AtConstructor) {
-    type_ = &ToGenericTypeIfNeeded(TransformAsFunctionType());
-    return;
-  }
+  if (*kind == ast::TokenKind::AtConstructor)
+    return &TransformAsFunctionType();
   if (*kind == ast::TokenKind::AtDict) {
     MarkNotTypeAnnotation();
-    return;
+    return nullptr;
   }
   if (*kind == ast::TokenKind::AtEnum) {
     // TODO(eval1749): NYI: enum type.
     MarkNotTypeAnnotation();
-    return;
+    return nullptr;
   }
   if (*kind == ast::TokenKind::AtInterface ||
       *kind == ast::TokenKind::AtRecord) {
-    type_ = &ToGenericTypeIfNeeded(TransformAsInterface());
-    return;
+    return &TransformAsInterface();
   }
-  if (type_node_) {
-    type_ = &ToGenericTypeIfNeeded(TransformType(*type_node_));
-    return;
-  }
+  if (type_node_)
+    return &TransformType(*type_node_);
   MarkNotTypeAnnotation();
+  return nullptr;
 }
 
 const Type& Annotation::ComputeReturnType() {
@@ -236,24 +222,7 @@ const Type& Annotation::ComputeReturnType() {
 // - Class.prototype.Name;
 // - Class.prototype[Expression];
 const Type& Annotation::ComputeThisType() {
-  const auto& annotated = ast::Annotation::AnnotatedOf(node_);
-  if (this_type_)
-    return *this_type_;
-
-  if (!annotated.Is<ast::ExpressionStatement>())
-    return type_factory().GetVoidType();
-
-  const auto& expression = ast::ExpressionStatement::ExpressionOf(annotated);
-  const auto& node = expression.Is<ast::AssignmentExpression>()
-                         ? ast::AssignmentExpression::LeftHandSideOf(expression)
-                         : expression;
-  if (node.Is<ast::MemberExpression>())
-    return ComputeThisTypeFromMember(ast::MemberExpression::ExpressionOf(node));
-  if (node.Is<ast::ComputedMemberExpression>()) {
-    return ComputeThisTypeFromMember(
-        ast::ComputedMemberExpression::MemberExpressionOf(node));
-  }
-  return type_factory().GetVoidType();
+  return this_type_ ? *this_type_ : type_factory().GetVoidType();
 }
 
 // Returns type of |Expression| where |Expression| '.' 'prototype'.
@@ -266,10 +235,8 @@ const Type& Annotation::ComputeThisTypeFromMember(const ast::Node& node) {
   return type_factory().GetVoidType();
 }
 
-bool Annotation::IsAnnotated(const ast::Node& node) const {
-  return ast::Annotation::AnnotatedOf(node_) == node;
-}
-
+// Note: We can't check whether @override tag is valid or invalid since we
+// don't known class hierarchy yet.
 void Annotation::MarkNotTypeAnnotation() {
   if (access_tag_)
     AddError(*access_tag_, ErrorCode::JSDOC_UNEXPECT_TAG);
@@ -279,8 +246,6 @@ void Annotation::MarkNotTypeAnnotation() {
     AddError(*final_tag_, ErrorCode::JSDOC_UNEXPECT_TAG);
   if (implements_tag_)
     AddError(*implements_tag_, ErrorCode::JSDOC_UNEXPECT_TAG);
-  if (override_tag_ && IsMethod(ast::Annotation::AnnotatedOf(node_)))
-    AddError(*override_tag_, ErrorCode::JSDOC_UNEXPECT_TAG);
   if (!parameter_tags_.empty()) {
     for (const auto& parameter_tag : parameter_tags_)
       AddError(*parameter_tag, ErrorCode::JSDOC_UNEXPECT_TAG);
@@ -311,9 +276,12 @@ void Annotation::ProcessParameter(
 
     // Find associated @param tag.
     for (const auto& parameter_tag : parameter_tags_) {
-      if (parameter_tag->child_at(2) == name_id) {
+      const auto& reference = parameter_tag->child_at(2);
+      if (!reference.Is<ast::ReferenceExpression>())
+        continue;
+      if (ast::ReferenceExpression::NameOf(reference) == name_id) {
         parameter_names->push_back(&name);
-        parameter_types->push_back(&TransformType(parameter_tag->child_at(0)));
+        parameter_types->push_back(&TransformType(parameter_tag->child_at(1)));
         return;
       }
     }
@@ -343,13 +311,30 @@ std::vector<const Type*> Annotation::ProcessParameterList(
     const auto& it = std::find_if(
         parameter_names.begin(), parameter_names.end(),
         [&](const ast::Node* present) {
-          return *present == ast::Name::KindOf(parameter_tag->child_at(2));
+          const auto& reference = parameter_tag->child_at(2);
+          if (!reference.Is<ast::ReferenceExpression>())
+            return false;
+          const auto& name = ast::ReferenceExpression::NameOf(reference);
+          return *present == ast::Name::KindOf(name);
         });
     if (it != parameter_names.end())
       continue;
     AddError(*parameter_tag, ErrorCode::JSDOC_UNEXPECT_PARAMETER);
   }
   return std::move(parameter_types);
+}
+
+std::vector<const Type*> Annotation::ProcessParameterTags() {
+  std::vector<const Type*> parameter_types;
+  for (const auto& parameter_tag : parameter_tags_) {
+    const auto& type = TransformType(parameter_tag->child_at(1));
+    parameter_types.push_back(&type);
+    const auto& name = parameter_tag->child_at(2);
+    if (!name.Is<ast::ReferenceExpression>())
+      continue;
+    context().RegisterType(name, type);
+  }
+  return parameter_types;
 }
 
 void Annotation::RememberTag(const ast::Node** pointer, const ast::Node& node) {
@@ -362,41 +347,38 @@ void Annotation::RememberTag(const ast::Node** pointer, const ast::Node& node) {
 
 const Type& Annotation::ResolveTypeName(const ast::Node& name) {
   DCHECK_EQ(name, ast::SyntaxCode::Name);
-  const auto& it = type_parameter_map_.find(ast::Name::KindOf(name));
-  if (it != type_parameter_map_.end())
-    return *it->second;
-  return resolver_.ResolveTypeName(name);
+  return context().TypeOf(name);
 }
 
 // Transform @param, @return style function type to Type object.
 const Type& Annotation::TransformAsFunctionType() {
-  DCHECK(!parameter_tags_.empty() || !return_tag_);
-
-  const auto& annotated = AnnotatedNodeOf(ast::Annotation::AnnotatedOf(node_));
-
-  if (annotated.Is<ast::Method>()) {
+  if (node_.Is<ast::Method>()) {
     const auto& this_type = ComputeThisType();
     DCHECK(this_type.Is<ClassType>()) << this_type;
     if (kind_tag_)
       AddError(*kind_tag_, ErrorCode::JSDOC_UNEXPECT_TAG);
     const auto& parameter_types =
-        ProcessParameterList(ast::Method::ParametersOf(annotated));
-    const auto method_kind = ast::Method::MethodKindOf(annotated);
+        ProcessParameterList(ast::Method::ParametersOf(node_));
+    const auto method_kind = ast::Method::MethodKindOf(node_);
+    const auto& method_name = ast::Method::NameOf(node_);
     switch (method_kind) {
-      case ast::MethodKind::Constructor:
-        if (return_tag_)
-          AddError(*return_tag_, ErrorCode::JSDOC_UNEXPECT_RETURN);
-        return type_factory().NewFunctionType(FunctionTypeKind::Constructor,
-                                              parameter_types, this_type,
-                                              this_type);
       case ast::MethodKind::NonStatic:
+        if (method_name == ast::TokenKind::Constructor)
+          AddError(node_, ErrorCode::JSDOC_UNEXPECT_CONSTRUCTOR);
         return type_factory().NewFunctionType(FunctionTypeKind::Normal,
-                                              parameter_types,
+                                              type_parameters_, parameter_types,
                                               ComputeReturnType(), this_type);
       case ast::MethodKind::Static:
+        if (method_name == ast::TokenKind::Constructor) {
+          if (return_tag_)
+            AddError(*return_tag_, ErrorCode::JSDOC_UNEXPECT_RETURN);
+          return type_factory().NewFunctionType(
+              FunctionTypeKind::Constructor, type_parameters_, parameter_types,
+              this_type, this_type);
+        }
         return type_factory().NewFunctionType(
-            FunctionTypeKind::Normal, parameter_types, ComputeReturnType(),
-            type_factory().GetVoidType());
+            FunctionTypeKind::Normal, type_parameters_, parameter_types,
+            ComputeReturnType(), type_factory().GetVoidType());
     }
     NOTREACHED() << "Unknown MethodKind " << static_cast<int>(method_kind);
     return type_factory().GetVoidType();
@@ -413,47 +395,67 @@ const Type& Annotation::TransformAsFunctionType() {
   //  * var foo = function(x) {};
   //  */
   const auto& parameter_types =
-      annotated.Is<ast::Function>()
-          ? ProcessParameterList(ast::Function::ParametersOf(annotated))
-          : parameter_tags_.empty()
-                ? std::vector<const Type*>()
-                : std::vector<const Type*>{
-                      &TransformType(parameter_tags_.front()->child_at(1))};
-
-  if (!annotated.Is<ast::Function>()) {
-    auto is_first = true;
-    for (const auto& parameter_tag : parameter_tags_) {
-      if (is_first) {
-        is_first = false;
-        continue;
-      }
-      AddError(*parameter_tag, ErrorCode::JSDOC_UNEXPECT_PARAMETER);
-    }
-  }
+      node_.Is<ast::Function>()
+          ? ProcessParameterList(ast::Function::ParametersOf(node_))
+          : ProcessParameterTags();
 
   if (!kind_tag_) {
-    return type_factory().NewFunctionType(FunctionTypeKind::Normal,
-                                          parameter_types, ComputeReturnType(),
-                                          ComputeThisType());
+    return type_factory().NewFunctionType(
+        FunctionTypeKind::Normal, type_parameters_, parameter_types,
+        ComputeReturnType(), ComputeThisType());
   }
 
-  if (kind() == ast::TokenKind::Constructor) {
+  if (ast::JsDocTag::NameOf(*kind_tag_) == ast::TokenKind::AtConstructor) {
     if (return_tag_)
       AddError(*return_tag_, ErrorCode::JSDOC_UNEXPECT_RETURN);
     const auto& class_type = ComputeThisType();
-    return type_factory().NewFunctionType(
-        FunctionTypeKind::Constructor, parameter_types, class_type, class_type);
+    return type_factory().NewFunctionType(FunctionTypeKind::Constructor,
+                                          type_parameters_, parameter_types,
+                                          class_type, class_type);
   }
 
   AddError(*kind_tag_, ErrorCode::JSDOC_UNEXPECT_TAG);
   return type_factory().GetVoidType();
 }
 
+const Type& Annotation::TransformAsInterface() {
+  auto* const class_value = TryClassValueOf(node_);
+  if (!class_value) {
+    AddError(node_, ErrorCode::JSDOC_UNEXPECT_TAG);
+    return type_factory().GetUnknownType();
+  }
+  return type_factory().GetOrNewClassType(class_value);
+}
+
 const Type& Annotation::TransformType(const ast::Node& node) {
-  if (node.Is<ast::TypeName>())
-    return ResolveTypeName(ast::TypeName::NameOf(node));
+  if (node.Is<ast::TypeName>()) {
+    if (const auto* type = context().TryTypeOf(node))
+      return *type;
+    NOTREACHED() << "We should handle forward type reference.";
+  }
   return type_factory().GetUnknownType();
 }
 
+Class* Annotation::TryClassValueOf(const ast::Node& node) const {
+  if (node.Is<ast::Class>())
+    return &context().ValueOf(node).As<Class>();
+  if (node.Is<ast::Function>())
+    return context().ValueOf(node).TryAs<Class>();
+  if (node.Is<ast::BindingNameElement>())
+    return context().ValueOf(node).TryAs<Class>();
+  if (node.Is<ast::MemberExpression>()) {
+    const auto* const value = context().TryValueOf(node);
+    if (!value || !value->Is<Property>())
+      return nullptr;
+    const auto& property = value->As<Property>();
+    if (property.assignments().size() != 1)
+      return nullptr;
+    auto* const property_value =
+        context().TryValueOf(*property.assignments().front());
+    return property_value ? property_value->TryAs<Class>() : nullptr;
+  }
+  NOTREACHED() << node;
+  return nullptr;
+}
 }  // namespace analyzer
 }  // namespace joana

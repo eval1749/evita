@@ -18,6 +18,7 @@
 #include "joana/analyzer/factory.h"
 #include "joana/analyzer/print_as_tree.h"
 #include "joana/analyzer/type_checker.h"
+#include "joana/analyzer/type_resolver.h"
 #include "joana/analyzer/values.h"
 #include "joana/ast/node.h"
 #include "joana/ast/node_traversal.h"
@@ -76,9 +77,10 @@ std::unique_ptr<Pass> NewPass(Context* context) {
   return std::move(std::make_unique<PassName>(context));
 }
 
-const std::array<const PassEntry, 2> kPassList = {
+const std::array<const PassEntry, 3> kPassList = {
     PassEntry{&NewPass<EnvironmentBuilder>, "var"},
-    PassEntry{&NewPass<TypeChecker>, "type"},
+    PassEntry{&NewPass<TypeResolver>, "type"},
+    PassEntry{&NewPass<TypeChecker>, "check"},
 };
 
 }  // namespace

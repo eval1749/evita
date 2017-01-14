@@ -19,11 +19,11 @@ enum class TokenKind;
 
 namespace analyzer {
 
+class Class;
 class Context;
 enum class ErrorCode;
 class Factory;
 class Type;
-class TypeNameResolver;
 class TypeParameter;
 class Value;
 
@@ -35,20 +35,15 @@ class Annotation final : public ContextUser {
   // |node| is |ast::Annotation|.
   // |this_type| is |nullptr| or |ClassType| for class declaration.
   Annotation(Context* context,
-             TypeNameResolver* resolver,
-             const Type* this_type,
-             const ast::Node& node);
+             const ast::Node& document,
+             const ast::Node& node,
+             const Type* this_type = nullptr);
   ~Annotation();
 
-  bool has_type() const { return type_ != nullptr; }
-  const ast::Node& kind() const;
-  const ast::Node& node() const { return node_; }
-  const Type& type() const;
-
-  void Compile();
-  bool IsAnnotated(const ast::Node& node) const;
+  const Type* Compile();
 
  private:
+  // Returns tag name or nullptr.
   const ast::Node* Classify();
 
   const Type& ComputeReturnType();
@@ -61,24 +56,27 @@ class Annotation final : public ContextUser {
                         std::vector<const Type*>* parameter_types,
                         const ast::Node& parameter_node);
 
-  std::vector<const Type*> Annotation::ProcessParameterList(
+  std::vector<const Type*> ProcessParameterList(
       const ast::Node& parameter_list);
+
+  std::vector<const Type*> ProcessParameterTags();
 
   void RememberTag(const ast::Node** pointer, const ast::Node& node);
 
   const Type& ResolveTypeName(const ast::Node& name);
 
-  const Type& ToGenericTypeIfNeeded(const Type& type);
   const Type& TransformAsFunctionType();
   const Type& TransformAsInterface();
 
   // Transform AST type node to Type object.
   const Type& TransformType(const ast::Node& node);
 
+  // Return |Class| value associated to |node|
+  Class* TryClassValueOf(const ast::Node& node) const;
+
+  const ast::Node& document_;
   const ast::Node& node_;
-  TypeNameResolver& resolver_;
   const Type* this_type_;
-  const Type* type_ = nullptr;
   std::unordered_map<ast::TokenKind, const TypeParameter*> type_parameter_map_;
   std::vector<const TypeParameter*> type_parameters_;
 
@@ -86,7 +84,7 @@ class Annotation final : public ContextUser {
   const ast::Node* access_tag_ = nullptr;
   const ast::Node* const_tag_ = nullptr;
   const ast::Node* extends_tag_ = nullptr;
-  const ast::Node* final_tag_;
+  const ast::Node* final_tag_ = nullptr;
   const ast::Node* implements_tag_ = nullptr;
   const ast::Node* kind_tag_ = nullptr;
   const ast::Node* override_tag_ = nullptr;

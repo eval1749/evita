@@ -258,7 +258,7 @@ void EnvironmentBuilder::ProcessClass(const ast::Node& node,
 
   auto& class_value = factory().NewClass(node, class_kind);
   const auto& class_type =
-      type_factory().NewClassType(class_name, type_parameters, &class_value);
+      type_factory().NewClassType(type_parameters, &class_value);
   context().RegisterType(node, class_type);
   context().RegisterValue(node, &class_value);
 
@@ -379,7 +379,7 @@ void EnvironmentBuilder::ProcessFunction(const ast::Node& node,
   if (class_tag) {
     auto& class_value = factory().NewClass(node, ClassKindOf(*class_tag));
     auto& class_type =
-        type_factory().NewClassType(name, type_parameters, &class_value);
+        type_factory().NewClassType(type_parameters, &class_value);
     context().RegisterType(node, class_type);
     context().RegisterValue(node, &class_value);
     if (name == ast::SyntaxCode::Name)
@@ -447,8 +447,7 @@ void EnvironmentBuilder::ProcessVariableDeclaration(const ast::Node& node,
   const auto& type_parameters = ProcessTemplateTag(document);
   const auto& name = ast::BindingNameElement::NameOf(binding);
   auto& class_value = factory().NewClass(node, ClassKindOf(*class_tag));
-  auto& class_type =
-      type_factory().NewClassType(name, type_parameters, &class_value);
+  auto& class_type = type_factory().NewClassType(type_parameters, &class_value);
   context().RegisterType(name, class_type);
   context().RegisterValue(name, &class_value);
   // Visit(ast::BindingNameElement::InitializerOf(binding));

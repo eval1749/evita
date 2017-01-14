@@ -101,18 +101,15 @@ class ClassType final : public GenericType {
  public:
   ~ClassType() final;
 
-  bool is_anonymous() const;
-  const ast::Node& name() const { return name_; }
+  const ast::Node& name() const;
   Class& value() const { return *value_; }
 
  private:
   ClassType(Zone* zone,
             int id,
-            const ast::Node& name,
             const std::vector<const TypeParameter*>& parameters,
             Class* value);
 
-  const ast::Node& name_;
   Class* const value_;
 
   DISALLOW_COPY_AND_ASSIGN(ClassType);

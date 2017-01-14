@@ -22,11 +22,15 @@ AnyType::~AnyType() = default;
 //
 ClassType::ClassType(Zone* zone,
                      int id,
-                     const ast::Node& name,
                      const std::vector<const TypeParameter*>& parameters,
                      Class* value)
-    : GenericType(zone, id, parameters), name_(name), value_(value) {}
+    : GenericType(zone, id, parameters), value_(value) {}
+
 ClassType::~ClassType() = default;
+
+const ast::Node& ClassType::name() const {
+  return value_->node().child_at(0);
+}
 
 //
 // GenericType

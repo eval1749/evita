@@ -106,10 +106,10 @@ std::ostream& operator<<(std::ostream& ostream,
                          const Printable<TypeApplication>& printable) {
   const auto& type = *printable.type;
   const auto& generic_type = type.generic_type();
-  if (generic_type.is_anonymous())
-    ostream << generic_type.class_name();
+  if (generic_type.Is<ClassType>())
+    ostream << generic_type.As<ClassType>().name();
   else
-    ostream << generic_type.name();
+    ostream << "function";
   ostream << '@' << generic_type.id() << '<';
   auto delimiter = "";
   for (const auto& argument : type.arguments()) {

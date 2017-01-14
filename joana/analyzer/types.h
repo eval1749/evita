@@ -55,8 +55,8 @@ class NamedType : public Type {
 //
 // GenericType
 //
-class GenericType : public NamedType {
-  DECLARE_ABSTRACT_ANALYZE_TYPE(GenericType, NamedType)
+class GenericType : public Type {
+  DECLARE_ABSTRACT_ANALYZE_TYPE(GenericType, Type)
 
  public:
   ~GenericType() override;
@@ -69,7 +69,6 @@ class GenericType : public NamedType {
   // |ast::MemberExpression|.
   GenericType(Zone* zone,
               int id,
-              const ast::Node& name,
               const std::vector<const TypeParameter*>& parameters);
 
  private:
@@ -102,6 +101,8 @@ class ClassType final : public GenericType {
  public:
   ~ClassType() final;
 
+  bool is_anonymous() const;
+  const ast::Node& name() const { return name_; }
   Class& value() const { return *value_; }
 
  private:
@@ -111,6 +112,7 @@ class ClassType final : public GenericType {
             const std::vector<const TypeParameter*>& parameters,
             Class* value);
 
+  const ast::Node& name_;
   Class* const value_;
 
   DISALLOW_COPY_AND_ASSIGN(ClassType);
@@ -134,7 +136,6 @@ class FunctionType final : public GenericType {
   FunctionType(Zone* zone,
                int id,
                FunctionTypeKind kind,
-               const ast::Node& name,
                const std::vector<const TypeParameter*>& parameters,
                const std::vector<const Type*> parameter_types,
                const Type& return_type,

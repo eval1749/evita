@@ -25,7 +25,7 @@ ClassType::ClassType(Zone* zone,
                      const ast::Node& name,
                      const std::vector<const TypeParameter*>& parameters,
                      Class* value)
-    : GenericType(zone, id, name, parameters), value_(value) {}
+    : GenericType(zone, id, parameters), name_(name), value_(value) {}
 ClassType::~ClassType() = default;
 
 //
@@ -33,9 +33,8 @@ ClassType::~ClassType() = default;
 //
 GenericType::GenericType(Zone* zone,
                          int id,
-                         const ast::Node& name,
                          const std::vector<const TypeParameter*>& parameters)
-    : NamedType(id, name), parameters_(zone, parameters) {}
+    : Type(id), parameters_(zone, parameters) {}
 
 GenericType::~GenericType() = default;
 
@@ -45,12 +44,11 @@ GenericType::~GenericType() = default;
 FunctionType::FunctionType(Zone* zone,
                            int id,
                            FunctionTypeKind kind,
-                           const ast::Node& name,
                            const std::vector<const TypeParameter*>& parameters,
                            std::vector<const Type*> parameter_types,
                            const Type& return_type,
                            const Type& this_type)
-    : GenericType(zone, id, name, parameters),
+    : GenericType(zone, id, parameters),
       kind_(kind),
       parameter_types_(zone, parameter_types),
       return_type_(return_type),

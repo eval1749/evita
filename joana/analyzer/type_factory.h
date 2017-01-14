@@ -43,7 +43,6 @@ class TypeFactory final {
                            Class* class_value);
   const Type& NewFunctionType(
       FunctionTypeKind kind,
-      const ast::Node& name,
       const std::vector<const TypeParameter*>& parameters,
       const std::vector<const Type*>& parameter_types,
       const Type& return_type,

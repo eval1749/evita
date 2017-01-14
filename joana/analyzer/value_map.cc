@@ -5,8 +5,8 @@
 #include "joana/analyzer/value_map.h"
 
 #include "base/logging.h"
-#include "joana/analyzer/value.h"
-#include "joana/ast/node.h"
+#include "joana/analyzer/values.h"
+#include "joana/ast/declarations.h"
 
 namespace joana {
 namespace analyzer {
@@ -18,6 +18,15 @@ ValueMap::ValueMap() {}
 ValueMap::~ValueMap() = default;
 
 Value& ValueMap::RegisterValue(const ast::Node& node, Value* value) {
+#if DCHECK_IS_ON()
+  if (node.Is<ast::Class>()) {
+    DCHECK(value->Is<Class>()) << node << ' ' << value;
+  } else if (node.Is<ast::Function>()) {
+    DCHECK(value->Is<Class>() || value->Is<Function>()) << node << ' ' << value;
+  } else if (node.Is<ast::Method>()) {
+    DCHECK(value->Is<Function>()) << node << ' ' << value;
+  }
+#endif
   const auto& result = value_map_.emplace(&node, value);
   DCHECK(result.second) << "Node can have only one value " << node << std::endl
                         << *value << std::endl

@@ -450,6 +450,12 @@ const Type& Annotation::TransformType(const ast::Node& node) {
     NOTREACHED() << "We should handle forward type reference." << node;
     return unspecified_type();
   }
+  if (node.Is<ast::UnionType>()) {
+    std::vector<const Type*> types;
+    for (const auto& member : ast::NodeTraversal::ChildNodesOf(node))
+      types.push_back(&TransformType(member));
+    return type_factory().NewUnionTypeFromVector(types);
+  }
   if (node.Is<ast::UnknownType>()) {
     // Unknown type is the source of bug, we should avoid to use.
     return any_type();

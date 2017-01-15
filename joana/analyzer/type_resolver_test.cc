@@ -211,6 +211,27 @@ TEST_F(TypeResolverTest, OptionalType) {
       RunOn("/** @param {number=} */ var foo"));
 }
 
+TEST_F(TypeResolverTest, UnionType) {
+  EXPECT_EQ(
+      "Module\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@type|\n"
+      "|  |  |  +--UnionType\n"
+      "|  |  |  |  +--TypeName {%number%}\n"
+      "|  |  |  |  |  +--Name |number|\n"
+      "|  |  |  |  +--TypeName {%string%}\n"
+      "|  |  |  |  |  +--Name |string|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--VarStatement\n"
+      "|  |  +--BindingNameElement VarVar[foo@1001] {%number%|%string%}\n"
+      "|  |  |  +--Name |foo|\n"
+      "|  |  |  +--ElisionExpression ||\n",
+      RunOn("/** @type {number|string} */ var foo"));
+}
+
 TEST_F(TypeResolverTest, UnknownType) {
   EXPECT_EQ(
       "Module\n"

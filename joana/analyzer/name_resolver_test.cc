@@ -39,8 +39,10 @@ class NameResolverTest : public AnalyzerTestBase {
 std::string NameResolverTest::RunOn(base::StringPiece script_text) {
   const auto& module = ParseAsModule(script_text);
   const auto& context = NewContext();
-  NameResolver resolver(context.get());
-  resolver.RunOn(module);
+  {
+    NameResolver resolver(context.get());
+    resolver.RunOn(module);
+  }
   std::ostringstream ostream;
   ostream << AsPrintableTree(*context, module) << std::endl;
   for (const auto& error : error_sink().errors())
@@ -240,7 +242,17 @@ TEST_F(NameResolverTest, ComputedMemberExpression) {
       "|  |  +--JsDocTag\n"
       "|  |  |  +--Name |@constructor|\n"
       "|  |  +--JsDocText |*/|\n"
-      "|  +--Function<Normal> Class[Foo@1002]\n"
+      "|  +--Function<Normal> Class[Symbol@1002]\n"
+      "|  |  +--Name |Symbol|\n"
+      "|  |  +--ParameterList |()|\n"
+      "|  |  +--BlockStatement |{}|\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@constructor|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--Function<Normal> Class[Foo@1005]\n"
       "|  |  +--Name |Foo|\n"
       "|  |  +--ParameterList |()|\n"
       "|  |  +--BlockStatement |{}|\n"
@@ -251,14 +263,15 @@ TEST_F(NameResolverTest, ComputedMemberExpression) {
       "|  |  |  +--Name |@const|\n"
       "|  |  +--JsDocText |*/|\n"
       "|  +--ExpressionStatement\n"
-      "|  |  +--ComputedMemberExpression [Symbol.iterator@1006]\n"
-      "|  |  |  +--ReferenceExpression $Foo@1003\n"
+      "|  |  +--ComputedMemberExpression [Symbol.iterator@1008]\n"
+      "|  |  |  +--ReferenceExpression $Foo@1006\n"
       "|  |  |  |  +--Name |Foo|\n"
-      "|  |  |  +--MemberExpression [iterator@1005]\n"
-      "|  |  |  |  +--ReferenceExpression $Symbol@1004\n"
+      "|  |  |  +--MemberExpression [iterator@1007]\n"
+      "|  |  |  |  +--ReferenceExpression $Symbol@1003\n"
       "|  |  |  |  |  +--Name |Symbol|\n"
       "|  |  |  |  +--Name |iterator|\n",
-      RunOn("/** @constructor */ function Foo() {}\n"
+      RunOn("/** @constructor */ function Symbol() {}\n"
+            "/** @constructor */ function Foo() {}\n"
             "/** @const */ Foo[Symbol.iterator]\n"));
 }
 
@@ -275,6 +288,36 @@ TEST_F(NameResolverTest, ConstError) {
       "ANALYZER_ERROR_ENVIRONMENT_MULTIPLE_OCCURRENCES@6:18\n"
       "ANALYZER_ERROR_ENVIRONMENT_MULTIPLE_OCCURRENCES@6:22\n",
       RunOn("const foo = 1, foo = 2;"));
+}
+
+TEST_F(NameResolverTest, ForwardRefernce) {
+  EXPECT_EQ(
+      "Module\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@type|\n"
+      "|  |  |  +--TypeName {class@1001}\n"
+      "|  |  |  |  +--Name |Foo|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--VarStatement\n"
+      "|  |  +--BindingNameElement $foo@1001\n"
+      "|  |  |  +--Name |foo|\n"
+      "|  |  |  +--ElisionExpression ||\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument Class[%anonymous%@1003]\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@constructor|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--VarStatement\n"
+      "|  |  +--BindingNameElement $Foo@1002\n"
+      "|  |  |  +--Name |Foo|\n"
+      "|  |  |  +--ElisionExpression ||\n",
+      RunOn("/** @type {Foo} */ var foo;\n"
+            "/** @constructor */ var Foo;\n"))
+      << "Declarations are handled as if they are top of compilation unit";
 }
 
 TEST_F(NameResolverTest, Function) {
@@ -362,8 +405,9 @@ TEST_F(NameResolverTest, GroupExpression) {
       "|  |  |  |  |  +--Name |number|\n"
       "|  |  |  +--JsDocText |*/|\n"
       "|  |  +--GroupExpression\n"
-      "|  |  |  +--ReferenceExpression $foo@1001\n"
-      "|  |  |  |  +--Name |foo|\n",
+      "|  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  +--Name |foo|\n"
+      "ANALYZER_ERROR_ENVIRONMENT_UNDEFIEND_VARIABLE@29:32\n",
       RunOn("return /** @type {number} */(foo);"));
 }
 
@@ -472,27 +516,27 @@ TEST_F(NameResolverTest, Property) {
       "|  |  +--ElisionExpression ||\n"
       "+--ExpressionStatement\n"
       "|  +--AssignmentExpression<=>\n"
-      "|  |  +--MemberExpression [bar@1004]\n"
-      "|  |  |  +--MemberExpression [prop@1003]\n"
-      "|  |  |  |  +--ReferenceExpression $Foo@1002\n"
-      "|  |  |  |  |  +--Name |Foo|\n"
+      "|  |  +--MemberExpression [bar@1003]\n"
+      "|  |  |  +--MemberExpression [prop@1002]\n"
+      "|  |  |  |  +--ReferenceExpression $foo@1001\n"
+      "|  |  |  |  |  +--Name |foo|\n"
       "|  |  |  |  +--Name |prop|\n"
       "|  |  |  +--Name |bar|\n"
       "|  |  +--Punctuator |=|\n"
       "|  |  +--NumericLiteral |1|\n"
       "+--ExpressionStatement\n"
       "|  +--AssignmentExpression<=>\n"
-      "|  |  +--MemberExpression [baz@1005]\n"
-      "|  |  |  +--MemberExpression [prop@1003]\n"
-      "|  |  |  |  +--ReferenceExpression $Foo@1002\n"
-      "|  |  |  |  |  +--Name |Foo|\n"
+      "|  |  +--MemberExpression [baz@1004]\n"
+      "|  |  |  +--MemberExpression [prop@1002]\n"
+      "|  |  |  |  +--ReferenceExpression $foo@1001\n"
+      "|  |  |  |  |  +--Name |foo|\n"
       "|  |  |  |  +--Name |prop|\n"
       "|  |  |  +--Name |baz|\n"
       "|  |  +--Punctuator |=|\n"
       "|  |  +--NumericLiteral |2|\n",
       RunOn("var foo\n"
-            "Foo.prop.bar = 1;\n"
-            "Foo.prop.baz = 2;\n"))
+            "foo.prop.bar = 1;\n"
+            "foo.prop.baz = 2;\n"))
       << "'foo.prop@1003' should be singleton.";
 }
 
@@ -562,8 +606,9 @@ TEST_F(NameResolverTest, Prototype) {
       "|  |  |  |  +--ReferenceExpression $Foo@1003\n"
       "|  |  |  |  |  +--Name |Foo|\n"
       "|  |  |  |  +--Name |prototype|\n"
-      "|  |  |  +--ReferenceExpression $baz@1005\n"
-      "|  |  |  |  +--Name |baz|\n",
+      "|  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  +--Name |baz|\n"
+      "ANALYZER_ERROR_ENVIRONMENT_UNDEFIEND_VARIABLE@81:84\n",
       RunOn("/** @constructor @template T */ function Foo() {}\n"
             "/** @type {T} */ Foo.prototype[baz];\n"))
       << "Bind template parameter for 'Foo.prototyp[baz]'";
@@ -660,7 +705,7 @@ TEST_F(NameResolverTest, Type) {
       "|  |  +--JsDocTag\n"
       "|  |  |  +--Name |@type|\n"
       "|  |  |  +--NonNullableType\n"
-      "|  |  |  |  +--TypeName\n"
+      "|  |  |  |  +--TypeName {class@1001}\n"
       "|  |  |  |  |  +--Name |Foo|\n"
       "|  |  +--JsDocText |*/|\n"
       "|  +--VarStatement\n"
@@ -707,7 +752,10 @@ TEST_F(NameResolverTest, Type) {
       "|  +--ConstStatement\n"
       "|  |  +--BindingNameElement $foo@1001\n"
       "|  |  |  +--Name |foo|\n"
-      "|  |  |  +--ElisionExpression ||\n",
+      "|  |  |  +--ElisionExpression ||\n"
+      "ANALYZER_ERROR_ENVIRONMENT_UNDEFIEND_TYPE@11:16\n"
+      "ANALYZER_ERROR_ENVIRONMENT_UNDEFIEND_TYPE@17:18\n"
+      "ANALYZER_ERROR_ENVIRONMENT_UNDEFIEND_TYPE@31:32\n",
       RunOn("/** @type {Array<T>} @template T */ const foo;"))
       << "Later pass will report @template is unexpected for const.";
 }

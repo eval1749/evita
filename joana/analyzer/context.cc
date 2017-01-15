@@ -36,11 +36,7 @@ Context::Context(const AnalyzerSettings& settings)
       settings_(settings),
       type_factory_(new TypeFactory(&settings.zone())),
       type_map_(new TypeMap()),
-      value_map_(new ValueMap()) {
-  InstallPrimitiveTypes();
-  InstallGlobalObject();
-  factory().ResetValueId();
-}
+      value_map_(new ValueMap()) {}
 
 Context::~Context() = default;
 

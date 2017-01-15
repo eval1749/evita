@@ -30,6 +30,7 @@
 #include "joana/ast/syntax_forward.h"
 #include "joana/ast/tokens.h"
 #include "joana/ast/types.h"
+#include "joana/base/iterator_utils.h"
 
 namespace joana {
 namespace analyzer {
@@ -76,6 +77,9 @@ class NameResolver::LocalEnvironment final {
   const LocalEnvironment* outer() const { return outer_; }
   LocalEnvironment* outer() { return outer_; }
 
+  void AddForwardReferencedType(const ast::Node& node);
+  void AddForwardReferencedVariable(const ast::Node& node);
+
   void BindType(const ast::Node& name, const Type& type);
   void BindVariable(const ast::Node& name, Variable* value);
   std::pair<const ast::Node*, const Type*> FindNameAndType(
@@ -83,9 +87,16 @@ class NameResolver::LocalEnvironment final {
   const Type* FindType(const ast::Node& name) const;
   Variable* FindVariable(const ast::Node& name) const;
 
+  static std::unique_ptr<LocalEnvironment> NewGlobalEnvironment(
+      NameResolver* resolver);
+
  private:
-  NameResolver& resolver_;
+  void ResolveForwardReferences();
+
+  std::vector<const ast::Node*> forward_referenced_types_;
+  std::vector<const ast::Node*> forward_referenced_variables_;
   LocalEnvironment* const outer_;
+  NameResolver& resolver_;
   std::unordered_map<int, std::pair<const ast::Node*, const Type*>> type_map_;
   std::unordered_map<int, Variable*> value_map_;
 
@@ -93,12 +104,25 @@ class NameResolver::LocalEnvironment final {
 };
 
 NameResolver::LocalEnvironment::LocalEnvironment(NameResolver* resolver)
-    : resolver_(*resolver), outer_(resolver_.environment_) {
+    : outer_(resolver->environment_), resolver_(*resolver) {
   resolver_.environment_ = this;
 }
 
 NameResolver::LocalEnvironment::~LocalEnvironment() {
+  ResolveForwardReferences();
   resolver_.environment_ = outer_;
+}
+
+void NameResolver::LocalEnvironment::AddForwardReferencedType(
+    const ast::Node& node) {
+  DCHECK_EQ(node, ast::SyntaxCode::TypeName);
+  forward_referenced_types_.push_back(&node);
+}
+
+void NameResolver::LocalEnvironment::AddForwardReferencedVariable(
+    const ast::Node& node) {
+  DCHECK_EQ(node, ast::SyntaxCode::ReferenceExpression);
+  forward_referenced_variables_.push_back(&node);
 }
 
 void NameResolver::LocalEnvironment::BindType(const ast::Node& name,
@@ -134,47 +158,89 @@ Variable* NameResolver::LocalEnvironment::FindVariable(
   return it == value_map_.end() ? nullptr : it->second;
 }
 
+// static
+std::unique_ptr<NameResolver::LocalEnvironment>
+NameResolver::LocalEnvironment::NewGlobalEnvironment(NameResolver* resolver) {
+  auto environment = std::make_unique<LocalEnvironment>(resolver);
+  // Initialize primitive types
+  for (const auto id : BuiltInWorld::GetInstance()->primitive_types()) {
+    const auto& name = BuiltInWorld::GetInstance()->NameOf(id);
+    const auto& type = resolver->type_factory().GetPrimitiveType(id);
+    resolver->context().RegisterType(name, type);
+    environment->BindType(name, type);
+  }
+
+  // Install Global Object
+  {
+    const auto& name =
+        BuiltInWorld::GetInstance()->NameOf(ast::TokenKind::Global);
+    auto& variable = resolver->factory().NewVariable(name);
+    Value::Editor().AddAssignment(&variable, name);
+    environment->BindVariable(name, &variable);
+  }
+  return std::move(environment);
+}
+
+void NameResolver::LocalEnvironment::ResolveForwardReferences() {
+  for (const auto& node : ReferenceRangeOf(forward_referenced_variables_)) {
+    auto* const present = FindVariable(ast::ReferenceExpression::NameOf(node));
+    if (present) {
+      resolver_.context().RegisterValue(node, present);
+      continue;
+    }
+    if (outer_) {
+      outer_->AddForwardReferencedVariable(node);
+      continue;
+    }
+    resolver_.AddError(node, ErrorCode::ENVIRONMENT_UNDEFIEND_VARIABLE);
+  }
+  for (const auto& node : ReferenceRangeOf(forward_referenced_types_)) {
+    const auto* const present = FindType(ast::TypeName::NameOf(node));
+    if (present) {
+      resolver_.context().RegisterType(node, *present);
+      continue;
+    }
+    if (outer_) {
+      outer_->AddForwardReferencedType(node);
+      continue;
+    }
+    resolver_.AddError(node, ErrorCode::ENVIRONMENT_UNDEFIEND_TYPE);
+  }
+}
+
 //
 // NameResolver
 //
-NameResolver::NameResolver(Context* context) : Pass(context) {}
+NameResolver::NameResolver(Context* context)
+    : Pass(context),
+      global_environment_(
+          std::move(LocalEnvironment::NewGlobalEnvironment(this))) {
+  factory().ResetValueId();
+}
 
 NameResolver::~NameResolver() = default;
 
 // The entry point. |node| is one of |ast::Externs|, |ast::Module| or
 // |ast::Script|.
 void NameResolver::RunOn(const ast::Node& node) {
-  auto& global_environment = context().global_environment();
-  toplevel_environment_ =
-      node == ast::SyntaxCode::Module
-          ? &context().NewEnvironment(&global_environment, node)
-          : &global_environment;
+  if (node.Is<ast::Module>()) {
+    LocalEnvironment toplevel_environment(this);
+    Visit(node);
+    return;
+  }
   Visit(node);
 }
 
 void NameResolver::BindType(const ast::Node& name, const Type& type) {
   DCHECK_EQ(name, ast::SyntaxCode::Name);
-  if (environment_) {
-    const auto& present = environment_->FindNameAndType(name);
-    const auto* present_name = present.first;
-    const auto* present_type = present.second;
-    if (!present_type) {
-      environment_->BindType(name, type);
-      return;
-    }
-    AddError(name, ErrorCode::ENVIRONMENT_MULTIPLE_OCCURRENCES, *present_name);
+  const auto& present = environment_->FindNameAndType(name);
+  const auto* present_name = present.first;
+  const auto* present_type = present.second;
+  if (!present_type) {
+    environment_->BindType(name, type);
     return;
   }
-  for (auto* runner = toplevel_environment_; runner; runner = runner->outer()) {
-    const auto& present = runner->FindNameAndType(name);
-    const auto* present_name = present.first;
-    const auto* present_type = present.second;
-    if (!present_type)
-      continue;
-    AddError(name, ErrorCode::ENVIRONMENT_MULTIPLE_OCCURRENCES, *present_name);
-    return;
-  }
-  toplevel_environment_->BindType(name, type);
+  AddError(name, ErrorCode::ENVIRONMENT_MULTIPLE_OCCURRENCES, *present_name);
 }
 
 void NameResolver::BindTypeParameters(const Class& class_value) {
@@ -184,13 +250,7 @@ void NameResolver::BindTypeParameters(const Class& class_value) {
 
 const Type* NameResolver::FindType(const ast::Node& name) const {
   DCHECK_EQ(name, ast::SyntaxCode::Name);
-  if (environment_) {
-    for (auto* runner = environment_; runner; runner = runner->outer()) {
-      if (auto* present = runner->FindType(name))
-        return present;
-    }
-  }
-  for (auto* runner = toplevel_environment_; runner; runner = runner->outer()) {
+  for (auto* runner = environment_; runner; runner = runner->outer()) {
     if (auto* present = runner->FindType(name))
       return present;
   }
@@ -199,36 +259,20 @@ const Type* NameResolver::FindType(const ast::Node& name) const {
 
 Variable& NameResolver::BindVariable(const ast::Node& name) {
   DCHECK_EQ(name, ast::SyntaxCode::Name);
-  if (environment_) {
-    if (auto* present = environment_->FindVariable(name)) {
-      AddError(name, ErrorCode::ENVIRONMENT_MULTIPLE_OCCURRENCES,
-               present->node());
-      return *present;
-    }
-    auto& variable = factory().NewVariable(name);
-    environment_->BindVariable(name, &variable);
-    return variable;
-  }
-  if (auto* present = toplevel_environment_->FindVariable(name)) {
+  if (auto* present = environment_->FindVariable(name)) {
     AddError(name, ErrorCode::ENVIRONMENT_MULTIPLE_OCCURRENCES,
              present->node());
     return *present;
   }
   // TODO(eval1749): Expose global "var" binding to global object.
   auto& variable = factory().NewVariable(name);
-  toplevel_environment_->BindVariable(name, &variable);
+  environment_->BindVariable(name, &variable);
   return variable;
 }
 
 Variable* NameResolver::FindVariable(const ast::Node& name) const {
   DCHECK_EQ(name, ast::SyntaxCode::Name);
-  if (environment_) {
-    for (auto* runner = environment_; runner; runner = runner->outer()) {
-      if (auto* present = runner->FindVariable(name))
-        return present;
-    }
-  }
-  for (auto* runner = toplevel_environment_; runner; runner = runner->outer()) {
+  for (auto* runner = environment_; runner; runner = runner->outer()) {
     if (auto* present = runner->FindVariable(name))
       return present;
   }
@@ -254,6 +298,8 @@ void NameResolver::ProcessClass(const ast::Node& node,
 
   auto& class_value = factory().NewClass(node, class_kind, type_parameters);
   context().RegisterValue(node, &class_value);
+  if (class_name.Is<ast::Name>())
+    BindType(class_name, type_factory().GetOrNewClassType(&class_value));
 
   // Class wide template parameters.
   LocalEnvironment environment(this);
@@ -352,6 +398,22 @@ const ast::Node* NameResolver::ProcessClassTag(const ast::Node& document) {
   return class_tag;
 }
 
+void NameResolver::ProcessDocument(const ast::Node& document) {
+  DCHECK_EQ(document, ast::SyntaxCode::JsDocDocument);
+  LocalEnvironment environment(this);
+  for (const auto& child : ast::NodeTraversal::ChildNodesOf(document)) {
+    if (!child.Is<ast::JsDocTag>())
+      continue;
+    if (ast::JsDocTag::NameOf(child) != ast::TokenKind::AtParam)
+      continue;
+    const auto& reference = child.child_at(2);
+    if (!reference.Is<ast::ReferenceExpression>())
+      continue;
+    BindVariable(ast::ReferenceExpression::NameOf(reference));
+  }
+  Visit(document);
+}
+
 void NameResolver::ProcessFunction(const ast::Node& node,
                                    const ast::Node* maybe_document) {
   DCHECK_EQ(node, ast::SyntaxCode::Function);
@@ -370,6 +432,9 @@ void NameResolver::ProcessFunction(const ast::Node& node,
     auto& class_value =
         factory().NewClass(node, ClassKindOf(*class_tag), type_parameters);
     context().RegisterValue(node, &class_value);
+    if (name.Is<ast::Name>())
+      BindType(name, type_factory().GetOrNewClassType(&class_value));
+
   } else {
     context().RegisterValue(node, &function);
   }
@@ -419,7 +484,7 @@ void NameResolver::ProcessVariableDeclaration(const ast::Node& node,
   DCHECK_EQ(document, ast::SyntaxCode::JsDocDocument);
   const auto* class_tag = ProcessClassTag(document);
   if (!class_tag) {
-    Visit(document);
+    ProcessDocument(document);
     Visit(node);
     return;
   }
@@ -444,8 +509,9 @@ void NameResolver::ProcessVariableDeclaration(const ast::Node& node,
     auto& class_value =
         factory().NewClass(node, ClassKindOf(*class_tag), type_parameters);
     context().RegisterValue(document, &class_value);
+    BindType(name, type_factory().GetOrNewClassType(&class_value));
     Value::Editor().AddAssignment(&variable, document);
-    Visit(document);
+    ProcessDocument(document);
     return;
   }
   Value::Editor().AddAssignment(&variable, binding);
@@ -454,20 +520,10 @@ void NameResolver::ProcessVariableDeclaration(const ast::Node& node,
   if (initializer.Is<ast::Function>())
     return ProcessFunction(initializer, &document);
   Visit(initializer);
-  Visit(document);
+  ProcessDocument(document);
 }
 
 // AST node handlers
-Variable& NameResolver::ResolveVariableName(const ast::Node& name) {
-  DCHECK_EQ(name, ast::SyntaxCode::Name);
-  if (auto* present = FindVariable(name))
-    return *present;
-  // TODO(eval1749): Expose global "var" binding to global object.
-  auto& variable = factory().NewVariable(name);
-  toplevel_environment_->BindVariable(name, &variable);
-  return variable;
-}
-
 const Class* NameResolver::TryClassOfPrototype(const ast::Node& node) const {
   if (!node.Is<ast::MemberExpression>())
     return nullptr;
@@ -561,8 +617,8 @@ void NameResolver::VisitInternal(const ast::Annotation& syntax,
       ProcessFunction(rhs, &document);
       return;
     }
+    ProcessDocument(document);
     Visit(annotated);
-    Visit(document);
     return;
   }
 
@@ -581,7 +637,7 @@ void NameResolver::VisitInternal(const ast::Annotation& syntax,
       Value::Editor().AddAssignment(&property, document);
       context().RegisterValue(document, &class_value);
     }
-    Visit(document);
+    ProcessDocument(document);
     return;
   }
 
@@ -651,8 +707,11 @@ void NameResolver::VisitInternal(const ast::ReferenceExpression& syntax,
   const auto& name = ast::ReferenceExpression::NameOf(node);
   if (ast::Name::IsKeyword(name))
     return;
-  auto& variable = ResolveVariableName(name);
-  context().RegisterValue(node, &variable);
+  if (auto* present = FindVariable(name)) {
+    context().RegisterValue(node, present);
+    return;
+  }
+  environment_->AddForwardReferencedVariable(node);
 }
 
 // Statements
@@ -665,10 +724,11 @@ void NameResolver::VisitInternal(const ast::BlockStatement& syntax,
 // Types
 void NameResolver::VisitInternal(const ast::TypeName& syntax,
                                  const ast::Node& node) {
-  const auto* type = FindType(ast::TypeName::NameOf(node));
-  if (!type)
+  if (const auto* present = FindType(ast::TypeName::NameOf(node))) {
+    context().RegisterType(node, *present);
     return;
-  context().RegisterType(node, *type);
+  }
+  environment_->AddForwardReferencedType(node);
 }
 
 }  // namespace analyzer

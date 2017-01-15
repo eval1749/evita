@@ -5,6 +5,7 @@
 #ifndef JOANA_ANALYZER_NAME_RESOLVER_H_
 #define JOANA_ANALYZER_NAME_RESOLVER_H_
 
+#include <memory>
 #include <unordered_set>
 #include <vector>
 
@@ -64,6 +65,9 @@ class NameResolver final : public Pass, public ast::SyntaxVisitor {
   // Returns @constructor, @interface or @record tag.
   const ast::Node* ProcessClassTag(const ast::Node& document);
 
+  // BInd name of @param tags.
+  void ProcessDocument(const ast::Node& document);
+
   // Assign |Function| value to |node|.
   void ProcessFunction(const ast::Node& node, const ast::Node* maybe_document);
 
@@ -72,8 +76,6 @@ class NameResolver final : public Pass, public ast::SyntaxVisitor {
 
   void ProcessVariableDeclaration(const ast::Node& annotated,
                                   const ast::Node& document);
-
-  Variable& ResolveVariableName(const ast::Node& name);
 
   // Returns class of |node| if known.
   const Class* TryClassOfPrototype(const ast::Node& node) const;
@@ -117,8 +119,7 @@ class NameResolver final : public Pass, public ast::SyntaxVisitor {
 
   LocalEnvironment* environment_ = nullptr;
 
-  // The toplevel environment
-  Environment* toplevel_environment_ = nullptr;
+  const std::unique_ptr<LocalEnvironment> global_environment_;
 
   DISALLOW_COPY_AND_ASSIGN(NameResolver);
 };

@@ -431,7 +431,7 @@ const Type& Annotation::TransformType(const ast::Node& node) {
   if (node.Is<ast::TypeName>()) {
     if (const auto* type = context().TryTypeOf(node))
       return *type;
-    NOTREACHED() << "We should handle forward type reference.";
+    NOTREACHED() << "We should handle forward type reference." << node;
   }
   return type_factory().GetUnknownType();
 }

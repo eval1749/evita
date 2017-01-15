@@ -63,6 +63,14 @@ bool IsMemberExpression(const ast::Node& node) {
          node == ast::SyntaxCode::ComputedMemberExpression;
 }
 
+// constructor can not be async/generator.
+bool IsValidConstructor(const ast::Node& method) {
+  DCHECK_EQ(ast::Method::NameOf(method), ast::TokenKind::Constructor);
+  if (ast::Method::MethodKindOf(method) == ast::MethodKind::Static)
+    return true;
+  return ast::Method::FunctionKindOf(method) == ast::FunctionKind::Normal;
+}
+
 }  // namespace
 
 //
@@ -315,13 +323,9 @@ void NameResolver::ProcessClass(const ast::Node& node,
     }
 
     const auto& method_name = ast::Method::NameOf(member);
-
-    // constructor can not be static and async/generator.
-    if (method_name == ast::TokenKind::Constructor) {
-      if (ast::Method::MethodKindOf(member) != ast::MethodKind::NonStatic ||
-          ast::Method::FunctionKindOf(member) != ast::FunctionKind::Normal) {
-        AddError(member, ErrorCode::ENVIRONMENT_INVALID_CONSTRUCTOR);
-      }
+    if (method_name == ast::TokenKind::Constructor &&
+        !IsValidConstructor(member)) {
+      AddError(member, ErrorCode::ENVIRONMENT_INVALID_CONSTRUCTOR);
     }
 
     // Check multiple occurrence

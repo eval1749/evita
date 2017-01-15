@@ -187,6 +187,19 @@ TEST_F(NameResolverTest, ClassError) {
       "|  |  |  +--BlockStatement |{}|\n"
       "ANALYZER_ERROR_ENVIRONMENT_MULTIPLE_OCCURRENCES@12:29\n",
       RunOn("class Foo { bar() {} bar() {} }"));
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--Class Class[Foo@1001]\n"
+      "|  +--Name |Foo|\n"
+      "|  +--ElisionExpression ||\n"
+      "|  +--ObjectInitializer\n"
+      "|  |  +--Method<Static,Normal> Function[constructor@1002]\n"
+      "|  |  |  +--Name |constructor|\n"
+      "|  |  |  +--ParameterList |()|\n"
+      "|  |  |  +--BlockStatement |{}|\n",
+      RunOn("class Foo { static constructor() {} }"))
+      << "We can use constructor as static method.";
 }
 
 TEST_F(NameResolverTest, ClassErrorConstructor) {
@@ -217,20 +230,6 @@ TEST_F(NameResolverTest, ClassErrorConstructor) {
       "ANALYZER_ERROR_ENVIRONMENT_INVALID_CONSTRUCTOR@12:29\n",
       RunOn("class Foo { *constructor() {} }"))
       << "constructor can not be generator.";
-
-  EXPECT_EQ(
-      "Module\n"
-      "+--Class Class[Foo@1001]\n"
-      "|  +--Name |Foo|\n"
-      "|  +--ElisionExpression ||\n"
-      "|  +--ObjectInitializer\n"
-      "|  |  +--Method<Static,Normal> Function[constructor@1002]\n"
-      "|  |  |  +--Name |constructor|\n"
-      "|  |  |  +--ParameterList |()|\n"
-      "|  |  |  +--BlockStatement |{}|\n"
-      "ANALYZER_ERROR_ENVIRONMENT_INVALID_CONSTRUCTOR@12:35\n",
-      RunOn("class Foo { static constructor() {} }"))
-      << "constructor can not be static.";
 }
 
 TEST_F(NameResolverTest, ComputedMemberExpression) {

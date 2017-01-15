@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <algorithm>
 #include <map>
 #include <set>
 #include <tuple>
@@ -16,6 +15,15 @@
 
 namespace joana {
 namespace analyzer {
+
+namespace {
+
+template <typename T>
+size_t SizeOf(size_t number_of_elements) {
+  return sizeof(T) - sizeof(Type*) + sizeof(Type*) * number_of_elements;
+}
+
+}  // namespace
 
 //
 // TypeFactory::Cache
@@ -122,9 +130,7 @@ const Type& TypeFactory::NewTupleTypeFromVector(
   const auto* type = cache_->Find(members);
   if (type)
     return *type;
-  const auto size =
-      sizeof(TupleType) +
-      sizeof(Type*) * (std::max(members.size(), static_cast<size_t>(1)) - 1);
+  const auto size = SizeOf<TupleType>(members.size());
   const auto& new_type =
       *new (zone_.Allocate(size)) TupleType(NextTypeId(), members);
   cache_->Register(members, new_type);
@@ -164,7 +170,7 @@ const Type& TypeFactory::NewUnionTypeFromVector(
   const auto* type = cache_->Find(members);
   if (type)
     return *type;
-  const auto size = sizeof(UnionType) + sizeof(Type*) * (members.size() - 1);
+  const auto size = SizeOf<UnionType>(members.size());
   const auto& new_type =
       *new (zone_.Allocate(size)) UnionType(NextTypeId(), members);
   cache_->Register(members, new_type);

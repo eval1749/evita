@@ -431,6 +431,11 @@ const Type& Annotation::TransformType(const ast::Node& node) {
     return type_factory().GetAnyType();
   if (node.Is<ast::InvalidType>())
     return type_factory().GetUnspecifiedType();
+  if (node.Is<ast::NonNullableType>()) {
+    // TODO(eval1749): We should report non-nullable type with primitive type
+    // and type alias(?).
+    return TransformType(node.child_at(0));
+  }
   if (node.Is<ast::TypeName>()) {
     if (const auto* type = context().TryTypeOf(node))
       return *type;

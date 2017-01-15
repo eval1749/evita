@@ -84,9 +84,9 @@ class Annotation final : public ContextUser {
   // Tags
   const ast::Node* access_tag_ = nullptr;
   const ast::Node* const_tag_ = nullptr;
-  const ast::Node* extends_tag_ = nullptr;
+  std::vector<const ast::Node*> extends_tags_;
   const ast::Node* final_tag_ = nullptr;
-  const ast::Node* implements_tag_ = nullptr;
+  std::vector<const ast::Node*> implements_tags_;
   const ast::Node* kind_tag_ = nullptr;
   const ast::Node* override_tag_ = nullptr;
   std::vector<const ast::Node*> parameter_tags_;

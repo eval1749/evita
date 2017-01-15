@@ -129,13 +129,13 @@ const ast::Node* Annotation::Classify() {
           type_node_ = &node.child_at(1);
         continue;
       case ast::TokenKind::AtExtends:
-        RememberTag(&extends_tag_, node);
+        extends_tags_.push_back(&node);
         continue;
       case ast::TokenKind::AtFinal:
         RememberTag(&final_tag_, node);
         continue;
       case ast::TokenKind::AtImplements:
-        RememberTag(&implements_tag_, node);
+        implements_tags_.push_back(&node);
         continue;
       case ast::TokenKind::AtOverride:
         RememberTag(&override_tag_, node);
@@ -220,12 +220,12 @@ const Type& Annotation::ComputeThisTypeFromMember(const ast::Node& node) {
 void Annotation::MarkNotTypeAnnotation() {
   if (access_tag_)
     AddError(*access_tag_, ErrorCode::JSDOC_UNEXPECT_TAG);
-  if (extends_tag_)
-    AddError(*extends_tag_, ErrorCode::JSDOC_UNEXPECT_TAG);
+  for (const auto& extends_tag : extends_tags_)
+    AddError(*extends_tag, ErrorCode::JSDOC_UNEXPECT_TAG);
   if (final_tag_)
     AddError(*final_tag_, ErrorCode::JSDOC_UNEXPECT_TAG);
-  if (implements_tag_)
-    AddError(*implements_tag_, ErrorCode::JSDOC_UNEXPECT_TAG);
+  for (const auto& implements_tag : implements_tags_)
+    AddError(*implements_tag, ErrorCode::JSDOC_UNEXPECT_TAG);
   for (const auto& parameter_tag : parameter_tags_)
     AddError(*parameter_tag, ErrorCode::JSDOC_UNEXPECT_TAG);
   if (return_tag_)

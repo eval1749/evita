@@ -125,7 +125,7 @@ const Node& ComputedMemberExpression::ExpressionOf(const Node& node) {
   return node.child_at(1);
 }
 
-const Node& ComputedMemberExpression::MemberExpressionOf(const Node& node) {
+const Node& ComputedMemberExpression::ContainerOf(const Node& node) {
   DCHECK_EQ(node, SyntaxCode::ComputedMemberExpression);
   return node.child_at(0);
 }

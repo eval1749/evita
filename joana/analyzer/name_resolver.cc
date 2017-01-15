@@ -673,8 +673,8 @@ void NameResolver::VisitInternal(const ast::AssignmentExpression& syntax,
 void NameResolver::VisitInternal(const ast::ComputedMemberExpression& syntax,
                                  const ast::Node& node) {
   VisitDefault(node);
-  auto* const value = context().TryValueOf(
-      ast::ComputedMemberExpression::MemberExpressionOf(node));
+  auto* const value =
+      context().TryValueOf(ast::ComputedMemberExpression::ContainerOf(node));
   if (!value || !value->Is<Object>())
     return;
   auto& properties = value->As<Object>().properties();

@@ -61,7 +61,7 @@ bool IsMethod(const ast::Node& node) {
   }
   if (node.Is(ast::SyntaxCode::ComputedMemberExpression)) {
     return IsPrototypeProperty(
-        ast::ComputedMemberExpression::MemberExpressionOf(node));
+        ast::ComputedMemberExpression::ContainerOf(node));
   }
   if (node.Is(ast::SyntaxCode::MemberExpression))
     return IsPrototypeProperty(ast::MemberExpression::ExpressionOf(node));
@@ -73,9 +73,9 @@ bool IsMethod(const ast::Node& node) {
 }
 
 // Returns member part of computed member expression or member expression.
-const ast::Node* MemberExpressionOf(const ast::Node& node) {
+const ast::Node* ContainerOf(const ast::Node& node) {
   if (node.Is(ast::SyntaxCode::ComputedMemberExpression))
-    return &ast::ComputedMemberExpression::MemberExpressionOf(node);
+    return &ast::ComputedMemberExpression::ContainerOf(node);
   if (node.Is(ast::SyntaxCode::MemberExpression))
     return &ast::MemberExpression::ExpressionOf(node);
   return nullptr;

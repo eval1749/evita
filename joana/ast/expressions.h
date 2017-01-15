@@ -102,7 +102,7 @@ class JOANA_AST_EXPORT ComputedMemberExpression final
   ~ComputedMemberExpression() final;
 
   static const Node& ExpressionOf(const Node& node);
-  static const Node& MemberExpressionOf(const Node& node);
+  static const Node& ContainerOf(const Node& node);
 
  private:
   ComputedMemberExpression();

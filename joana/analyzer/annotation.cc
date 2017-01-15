@@ -108,11 +108,11 @@ const ast::Node* Annotation::Classify() {
     switch (ast::Name::KindOf(tag_name)) {
       case ast::TokenKind::AtConst:
         RememberTag(&const_tag_, node);
-        if (node.arity() == 0)
+        if (node.arity() == 1)
           continue;
         RememberTag(&kind_tag_, node);
         if (type_node_)
-          type_node_ = &node.child_at(0);
+          type_node_ = &node.child_at(1);
         continue;
       case ast::TokenKind::AtConstructor:
       case ast::TokenKind::AtDict:

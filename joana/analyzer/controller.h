@@ -21,7 +21,6 @@ class AnalyzerSettings;
 namespace analyzer {
 
 class Context;
-class Environment;
 class Factory;
 
 //

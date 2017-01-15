@@ -24,7 +24,6 @@ namespace analyzer {
 
 class Class;
 class Context;
-class Environment;
 class Function;
 class GenericType;
 class Properties;

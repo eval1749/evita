@@ -21,7 +21,6 @@ namespace analyzer {
 class Class;
 enum class ClassKind;
 class Function;
-class Environment;
 class Properties;
 class Property;
 class Type;
@@ -39,8 +38,6 @@ class Factory final {
   ~Factory();
 
   // Factory members
-  Environment& NewEnvironment(Environment* outer, const ast::Node& owner);
-
   Property& GetOrNewProperty(Properties* properties, const ast::Node& node);
   Property& NewProperty(const ast::Node& node);
 

@@ -13,7 +13,6 @@
 #include "base/strings/string_split.h"
 #include "joana/analyzer/built_in_world.h"
 #include "joana/analyzer/context.h"
-#include "joana/analyzer/environment.h"
 #include "joana/analyzer/factory.h"
 #include "joana/analyzer/name_resolver.h"
 #include "joana/analyzer/print_as_tree.h"

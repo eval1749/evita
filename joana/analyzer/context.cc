@@ -7,7 +7,6 @@
 #include "joana/analyzer/context.h"
 
 #include "joana/analyzer/built_in_world.h"
-#include "joana/analyzer/environment.h"
 #include "joana/analyzer/factory.h"
 #include "joana/analyzer/public/analyzer_settings.h"
 #include "joana/analyzer/type_factory.h"
@@ -32,7 +31,6 @@ namespace analyzer {
 //
 Context::Context(const AnalyzerSettings& settings)
     : factory_(new Factory(&settings.zone())),
-      global_environment_(NewGlobalEnvironment(&settings.zone())),
       settings_(settings),
       type_factory_(new TypeFactory(&settings.zone())),
       type_map_(new TypeMap()),
@@ -42,10 +40,6 @@ Context::~Context() = default;
 
 ErrorSink& Context::error_sink() const {
   return settings_.error_sink();
-}
-
-Environment& Context::global_environment() const {
-  return global_environment_;
 }
 
 Zone& Context::zone() const {
@@ -69,45 +63,6 @@ void Context::AddError(const ast::Node& node, ErrorCode error_code) {
 
 void Context::AddError(const SourceCodeRange& range, ErrorCode error_code) {
   error_sink().AddError(range, error_code);
-}
-
-Environment& Context::EnvironmentOf(const ast::Node& node) const {
-  const auto& it = environment_map_.find(&node);
-  if (it != environment_map_.end())
-    return *it->second;
-  DCHECK(node.syntax().Is<ast::CompilationUnit>()) << node;
-  return global_environment();
-}
-
-void Context::InstallGlobalObject() {
-  const auto& name =
-      BuiltInWorld::GetInstance()->NameOf(ast::TokenKind::Global);
-  auto& variable = factory().NewVariable(name);
-  Value::Editor().AddAssignment(&variable, name);
-  global_environment_.BindVariable(name, &variable);
-}
-
-void Context::InstallPrimitiveTypes() {
-  for (const auto id : BuiltInWorld::GetInstance()->primitive_types()) {
-    const auto& name = BuiltInWorld::GetInstance()->NameOf(id);
-    const auto& type = type_factory().GetPrimitiveType(id);
-    RegisterType(name, type);
-    global_environment_.BindType(name, type);
-  }
-}
-
-Environment& Context::NewEnvironment(Environment* outer,
-                                     const ast::Node& owner) {
-  auto& environment = *new (&zone()) Environment(&zone(), outer, owner);
-  const auto& result = environment_map_.emplace(&owner, &environment);
-  DCHECK(result.second) << "Node can have only one environment " << owner;
-  return environment;
-}
-
-// static
-Environment& Context::NewGlobalEnvironment(Zone* zone) {
-  const auto& module = BuiltInWorld::GetInstance()->global_module();
-  return *new (zone) Environment(zone, module);
 }
 
 void Context::RegisterValue(const ast::Node& node, Value* value) {

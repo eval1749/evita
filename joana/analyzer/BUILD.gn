@@ -18,8 +18,6 @@ source_set("analyzer") {
     "context_user.h",
     "controller.cc",
     "controller.h",
-    "environment.cc",
-    "environment.h",
     "error_codes.h",
     "factory.cc",
     "factory.h",

@@ -17,7 +17,6 @@ class ReferenceExpressionSyntax;
 
 namespace analyzer {
 
-class Environment;
 class Type;
 class Variable;
 
@@ -32,9 +31,6 @@ class TypeChecker final : public Pass, public ast::SyntaxVisitor {
   void RunOn(const ast::Node& node) final;
 
  private:
-  const Type* FindType(const ast::Node& name) const;
-  const Variable* FindVariable(const ast::Node& name) const;
-
   // |ast::SyntaxVisitor| members
   // Expressions
   void VisitInternal(const ast::ReferenceExpression& syntax,
@@ -42,8 +38,6 @@ class TypeChecker final : public Pass, public ast::SyntaxVisitor {
 
   // Types
   void VisitInternal(const ast::TypeName& syntax, const ast::Node& node) final;
-
-  Environment* environment_ = nullptr;
 
   DISALLOW_COPY_AND_ASSIGN(TypeChecker);
 };

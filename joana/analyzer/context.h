@@ -23,7 +23,6 @@ class Zone;
 
 namespace analyzer {
 
-class Environment;
 enum class ErrorCode;
 class Factory;
 class Type;
@@ -43,7 +42,6 @@ class Context final {
   ErrorSink& error_sink() const;
   Factory& factory() const { return *factory_; }
   TypeFactory& type_factory() const { return *type_factory_; }
-  Environment& global_environment() const;
 
   void AddError(const ast::Node& node,
                 ErrorCode error_code,
@@ -52,14 +50,10 @@ class Context final {
   void AddError(const SourceCodeRange& range, ErrorCode error_code);
 
   // Query
-  Environment& EnvironmentOf(const ast::Node& node) const;
   const Type* TryTypeOf(const ast::Node& node) const;
   Value* TryValueOf(const ast::Node& node) const;
   const Type& TypeOf(const ast::Node& node) const;
   Value& ValueOf(const ast::Node& node) const;
-
-  // Factory
-  Environment& NewEnvironment(Environment* outer, const ast::Node& node);
 
   // Registration
   void RegisterType(const ast::Node& node, const Type& type);
@@ -68,12 +62,6 @@ class Context final {
  private:
   Zone& zone() const;
 
-  void InstallGlobalObject();
-  void InstallPrimitiveTypes();
-  static Environment& NewGlobalEnvironment(Zone* zone);
-
-  std::unordered_map<const ast::Node*, Environment*> environment_map_;
-  Environment& global_environment_;
   const std::unique_ptr<Factory> factory_;
   const AnalyzerSettings& settings_;
   const std::unique_ptr<TypeFactory> type_factory_;

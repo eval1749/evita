@@ -11,7 +11,6 @@
 #include "base/auto_reset.h"
 #include "joana/analyzer/built_in_world.h"
 #include "joana/analyzer/context.h"
-#include "joana/analyzer/environment.h"
 #include "joana/analyzer/error_codes.h"
 #include "joana/analyzer/factory.h"
 #include "joana/analyzer/properties.h"

@@ -41,6 +41,7 @@ class TypeFactory final {
   const Type& nil_type() { return nil_type_; }
   const Type& null_type() const { return null_type_; }
   const Type& unspecified_type() const { return unspecified_type_; }
+  const Type& void_type() const { return void_type_; }
 
   const Type& GetOrNewClassType(Class* class_value);
   const Type& NewFunctionType(
@@ -53,7 +54,6 @@ class TypeFactory final {
   const Type& NewTypeName(const ast::Node& name);
   const Type& NewTypeParameter(const ast::Node& name);
   const Type& NewUnionTypeFromVector(const std::vector<const Type*>& members);
-  const Type& GetVoidType() const { return void_type_; }
 
   template <typename... Parameters>
   const Type& NewUnionType(const Parameters&... members) {

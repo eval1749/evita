@@ -29,7 +29,7 @@ class TypeTest : public ::testing::Test {
   const Type& number_type() { return GetPrimitiveType(ast::TokenKind::Number); }
   const Type& string_type() { return GetPrimitiveType(ast::TokenKind::String); }
   const Type& unspecified_type() { return type_factory_.unspecified_type(); }
-  const Type& void_type() { return type_factory_.GetVoidType(); }
+  const Type& void_type() { return type_factory_.void_type(); }
 
   const Type& GetPrimitiveType(ast::TokenKind kind) {
     return type_factory_.GetPrimitiveType(kind);

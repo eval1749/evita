@@ -449,6 +449,7 @@ const Type& Annotation::TransformType(const ast::Node& node) {
     // Unknown type is the source of bug, we should avoid to use.
     return type_factory().GetAnyType();
   }
+  DVLOG(0) << "We should handle " << node;
   return type_factory().GetUnspecifiedType();
 }
 

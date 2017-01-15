@@ -226,10 +226,8 @@ void Annotation::MarkNotTypeAnnotation() {
     AddError(*final_tag_, ErrorCode::JSDOC_UNEXPECT_TAG);
   if (implements_tag_)
     AddError(*implements_tag_, ErrorCode::JSDOC_UNEXPECT_TAG);
-  if (!parameter_tags_.empty()) {
-    for (const auto& parameter_tag : parameter_tags_)
-      AddError(*parameter_tag, ErrorCode::JSDOC_UNEXPECT_TAG);
-  }
+  for (const auto& parameter_tag : parameter_tags_)
+    AddError(*parameter_tag, ErrorCode::JSDOC_UNEXPECT_TAG);
   if (return_tag_)
     AddError(*return_tag_, ErrorCode::JSDOC_UNEXPECT_TAG);
   for (const auto& template_tag : template_tags_)

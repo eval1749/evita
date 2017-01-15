@@ -31,16 +31,6 @@ const ast::Node& ClassType::name() const {
 }
 
 //
-// GenericType
-//
-GenericType::GenericType(Zone* zone,
-                         int id,
-                         const std::vector<const TypeParameter*>& parameters)
-    : Type(id), parameters_(zone, parameters) {}
-
-GenericType::~GenericType() = default;
-
-//
 // FunctionType
 //
 FunctionType::FunctionType(

@@ -55,31 +55,6 @@ class NamedType : public Type {
 };
 
 //
-// GenericType
-//
-class GenericType : public Type {
-  DECLARE_ABSTRACT_ANALYZE_TYPE(GenericType, Type)
-
- public:
-  ~GenericType() override;
-
-  bool has_parameters() const { return !parameters_.empty(); }
-  auto parameters() const { return ReferenceRangeOf(parameters_); }
-
- protected:
-  // |name| is |ast::Name|, |ast::ComputedMemberExpression| or
-  // |ast::MemberExpression|.
-  GenericType(Zone* zone,
-              int id,
-              const std::vector<const TypeParameter*>& parameters);
-
- private:
-  const ZoneVector<const TypeParameter*> parameters_;
-
-  DISALLOW_COPY_AND_ASSIGN(GenericType);
-};
-
-//
 // AnyType
 //
 class AnyType final : public Type {

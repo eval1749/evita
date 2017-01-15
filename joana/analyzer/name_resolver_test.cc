@@ -467,6 +467,39 @@ TEST_F(NameResolverTest, MemberExpression) {
       RunOn("/** @constructor */ function Foo() {}\n"
             "/** @const */ Foo.prototype.bar\n"))
       << "Old style class externs";
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@return|\n"
+      "|  |  |  +--TypeName {%symbol%}\n"
+      "|  |  |  |  +--Name |symbol|\n"
+      "|  |  |  +--JsDocText |*/|\n"
+      "|  +--Function<Normal> Function[Foo@1001]\n"
+      "|  |  +--Name |Foo|\n"
+      "|  |  +--ParameterList |()|\n"
+      "|  |  +--BlockStatement |{}|\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@param|\n"
+      "|  |  |  +--TypeName {%number%}\n"
+      "|  |  |  |  +--Name |number|\n"
+      "|  |  |  +--ReferenceExpression $x@1004\n"
+      "|  |  |  |  +--Name |x|\n"
+      "|  |  |  +--JsDocText |*/|\n"
+      "|  +--ExpressionStatement\n"
+      "|  |  +--MemberExpression [bar@1003]\n"
+      "|  |  |  +--ReferenceExpression $Foo@1002\n"
+      "|  |  |  |  +--Name |Foo|\n"
+      "|  |  |  +--Name |bar|\n",
+      RunOn("/** @return {symbol} */ function Foo() {}\n"
+            "/** @param {number} x */ Foo.bar;\n"))
+      << "Function declaration shortcut.";
 }
 
 TEST_F(NameResolverTest, Property) {

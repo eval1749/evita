@@ -228,32 +228,6 @@ class TupleType final : public Type {
 };
 
 //
-// TypeApplication
-//
-class TypeApplication final : public Type {
-  DECLARE_CONCRETE_ANALYZE_TYPE(TypeApplication, Type)
-
- public:
-  using Argument = std::pair<const TypeParameter*, const Type*>;
-
-  ~TypeApplication() final;
-
-  const ZoneVector<Argument>& arguments() const { return arguments_; }
-  const GenericType& generic_type() const { return generic_type_; }
-
- private:
-  TypeApplication(Zone* zone,
-                  int id,
-                  const GenericType& generic_type,
-                  const std::vector<Argument>& arguments);
-
-  const ZoneVector<Argument> arguments_;
-  const GenericType& generic_type_;
-
-  DISALLOW_COPY_AND_ASSIGN(TypeApplication);
-};
-
-//
 // TypeName
 //
 class TypeName final : public NamedType {

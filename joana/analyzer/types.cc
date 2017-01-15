@@ -117,17 +117,6 @@ BlockRange<const Type*> TupleType::members() const {
 }
 
 //
-// TypeApplication
-//
-TypeApplication::TypeApplication(Zone* zone,
-                                 int id,
-                                 const GenericType& generic_type,
-                                 const std::vector<Argument>& arguments)
-    : Type(id), arguments_(zone, arguments), generic_type_(generic_type) {}
-
-TypeApplication::~TypeApplication() = default;
-
-//
 // TypeName
 //
 TypeName::TypeName(int id, const ast::Node& name) : NamedType(id, name) {}

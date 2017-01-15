@@ -125,32 +125,6 @@ std::ostream& operator<<(std::ostream& ostream,
 }
 
 std::ostream& operator<<(std::ostream& ostream,
-                         const Printable<TypeApplication>& printable) {
-  const auto& type = *printable.type;
-  const auto& generic_type = type.generic_type();
-  if (generic_type.Is<ClassType>())
-    ostream << generic_type.As<ClassType>().name();
-  else
-    ostream << "function";
-  ostream << '@' << generic_type.id() << '<';
-  auto delimiter = "";
-  for (const auto& argument : type.arguments()) {
-    ostream << delimiter;
-    delimiter = ",";
-    const auto& parameter = argument.first;
-    const auto& it = std::find_if(
-        generic_type.parameters().begin(), generic_type.parameters().end(),
-        [&](const auto& present) { return present == parameter; });
-    if (it == generic_type.parameters().end()) {
-      ostream << AsPrintable(*argument.second);
-      continue;
-    }
-    ostream << *it;
-  }
-  return ostream << '>';
-}
-
-std::ostream& operator<<(std::ostream& ostream,
                          const Printable<TypeName>& printable) {
   const auto& type = *printable.type;
   return ostream << ast::AsSourceCode(type.name()) << '@' << type.id();

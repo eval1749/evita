@@ -55,6 +55,23 @@ std::string TypeResolverTest::RunOn(base::StringPiece script_text) {
   return ostream.str();
 }
 
+TEST_F(TypeResolverTest, AnyType) {
+  EXPECT_EQ(
+    "Module\n"
+    "+--Annotation\n"
+    "|  +--JsDocDocument\n"
+    "|  |  +--JsDocText |/**|\n"
+    "|  |  +--JsDocTag\n"
+    "|  |  |  +--Name |@type|\n"
+    "|  |  |  +--AnyType |*|\n"
+    "|  |  +--JsDocText |*/|\n"
+    "|  +--VarStatement\n"
+    "|  |  +--BindingNameElement VarVar[foo@1001] {*}\n"
+    "|  |  |  +--Name |foo|\n"
+    "|  |  |  +--ElisionExpression ||\n",
+    RunOn("/** @type {*} */ var foo;"));
+}
+
 TEST_F(TypeResolverTest, Constructor) {
   EXPECT_EQ(
       "Module\n"

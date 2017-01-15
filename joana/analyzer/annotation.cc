@@ -444,6 +444,12 @@ const Type& Annotation::TransformType(const ast::Node& node) {
     // TODO(eval1749): Where do we store optional parameter information?
     return TransformType(node.child_at(0));
   }
+  if (node.Is<ast::TupleType>()) {
+    std::vector<const Type*> types;
+    for (const auto& member : ast::NodeTraversal::ChildNodesOf(node))
+      types.push_back(&TransformType(member));
+    return type_factory().NewTupleTypeFromVector(types);
+  }
   if (node.Is<ast::TypeName>()) {
     if (const auto* type = context().TryTypeOf(node))
       return *type;

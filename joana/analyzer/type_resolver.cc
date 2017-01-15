@@ -177,10 +177,9 @@ void TypeResolver::VisitInternal(const ast::Class& syntax,
     const auto& member = ast::Annotation::AnnotatedOf(child);
     if (!member.Is<ast::Method>())
       continue;
-    ProcessAnnotation(document, member, ast::Method::MethodKindOf(member) ==
-                                                ast::MethodKind::Static
-                                            ? nullptr
-                                            : &class_type);
+    const auto* const this_type =
+        ast::Method::IsStatic(member) ? nullptr : &class_type;
+    ProcessAnnotation(document, member, this_type);
   }
 }
 

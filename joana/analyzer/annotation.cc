@@ -11,6 +11,7 @@
 #include "base/logging.h"
 #include "joana/analyzer/context.h"
 #include "joana/analyzer/error_codes.h"
+#include "joana/analyzer/factory.h"
 #include "joana/analyzer/type_factory.h"
 #include "joana/analyzer/type_name_resolver.h"
 #include "joana/analyzer/types.h"
@@ -450,6 +451,8 @@ const Type& Annotation::TransformType(const ast::Node& node) {
       types.push_back(&TransformType(member));
     return type_factory().NewTupleTypeFromVector(types);
   }
+  if (node.Is<ast::TypeApplication>())
+    return TransformTypeApplication(node);
   if (node.Is<ast::TypeName>()) {
     if (const auto* type = context().TryTypeOf(node))
       return *type;
@@ -468,6 +471,36 @@ const Type& Annotation::TransformType(const ast::Node& node) {
   }
   DVLOG(0) << "We should handle " << node;
   return unspecified_type();
+}
+
+const Type& Annotation::TransformTypeApplication(const ast::Node& node) {
+  const auto& generic_type =
+      context().TypeOf(ast::TypeApplication::NameOf(node));
+  if (!generic_type.Is<ClassType>()) {
+    AddError(node, ErrorCode::JSDOC_EXPECT_GENERIC_CLASS);
+    return unspecified_type();
+  }
+  auto& class_value = generic_type.As<ClassType>().value();
+  if (!class_value.Is<Class>()) {
+    AddError(node, ErrorCode::JSDOC_EXPECT_GENERIC_CLASS);
+    return unspecified_type();
+  }
+  auto& generic_class_value = class_value.As<Class>();
+  if (generic_class_value.parameters().empty()) {
+    AddError(node, ErrorCode::JSDOC_EXPECT_GENERIC_CLASS);
+    return unspecified_type();
+  }
+  const auto& arguments_node = ast::TypeApplication::ArgumentsOf(node);
+  if (arguments_node.arity() != generic_class_value.parameters().size()) {
+    AddError(node, ErrorCode::JSDOC_INVALID_ARGUMENTS);
+    return unspecified_type();
+  }
+  std::vector<const Type*> arguments;
+  for (const auto& argument_node :
+       ast::NodeTraversal::ChildNodesOf(arguments_node))
+    arguments.push_back(&TransformType(argument_node));
+  auto& value = factory().NewConstructedClass(&generic_class_value, arguments);
+  return type_factory().NewClassType(&value);
 }
 
 Class* Annotation::TryClassValueOf(const ast::Node& node) const {

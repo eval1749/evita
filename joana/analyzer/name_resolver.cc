@@ -191,7 +191,7 @@ void NameResolver::LocalEnvironment::ResolveForwardReferences() {
       outer_->AddForwardReferencedVariable(node);
       continue;
     }
-    resolver_.AddError(node, ErrorCode::ENVIRONMENT_UNDEFIEND_VARIABLE);
+    resolver_.AddError(node, ErrorCode::ENVIRONMENT_UNDEFINED_VARIABLE);
   }
   for (const auto& node : ReferenceRangeOf(forward_referenced_types_)) {
     const auto* const present = FindType(ast::TypeName::NameOf(node));
@@ -203,7 +203,7 @@ void NameResolver::LocalEnvironment::ResolveForwardReferences() {
       outer_->AddForwardReferencedType(node);
       continue;
     }
-    resolver_.AddError(node, ErrorCode::ENVIRONMENT_UNDEFIEND_TYPE);
+    resolver_.AddError(node, ErrorCode::ENVIRONMENT_UNDEFINED_TYPE);
   }
 }
 

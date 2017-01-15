@@ -407,7 +407,7 @@ TEST_F(NameResolverTest, GroupExpression) {
       "|  |  +--GroupExpression\n"
       "|  |  |  +--ReferenceExpression\n"
       "|  |  |  |  +--Name |foo|\n"
-      "ANALYZER_ERROR_ENVIRONMENT_UNDEFIEND_VARIABLE@29:32\n",
+      "ANALYZER_ERROR_ENVIRONMENT_UNDEFINED_VARIABLE@29:32\n",
       RunOn("return /** @type {number} */(foo);"));
 }
 
@@ -608,7 +608,7 @@ TEST_F(NameResolverTest, Prototype) {
       "|  |  |  |  +--Name |prototype|\n"
       "|  |  |  +--ReferenceExpression\n"
       "|  |  |  |  +--Name |baz|\n"
-      "ANALYZER_ERROR_ENVIRONMENT_UNDEFIEND_VARIABLE@81:84\n",
+      "ANALYZER_ERROR_ENVIRONMENT_UNDEFINED_VARIABLE@81:84\n",
       RunOn("/** @constructor @template T */ function Foo() {}\n"
             "/** @type {T} */ Foo.prototype[baz];\n"))
       << "Bind template parameter for 'Foo.prototyp[baz]'";
@@ -753,9 +753,9 @@ TEST_F(NameResolverTest, Type) {
       "|  |  +--BindingNameElement $foo@1001\n"
       "|  |  |  +--Name |foo|\n"
       "|  |  |  +--ElisionExpression ||\n"
-      "ANALYZER_ERROR_ENVIRONMENT_UNDEFIEND_TYPE@11:16\n"
-      "ANALYZER_ERROR_ENVIRONMENT_UNDEFIEND_TYPE@17:18\n"
-      "ANALYZER_ERROR_ENVIRONMENT_UNDEFIEND_TYPE@31:32\n",
+      "ANALYZER_ERROR_ENVIRONMENT_UNDEFINED_TYPE@11:16\n"
+      "ANALYZER_ERROR_ENVIRONMENT_UNDEFINED_TYPE@17:18\n"
+      "ANALYZER_ERROR_ENVIRONMENT_UNDEFINED_TYPE@31:32\n",
       RunOn("/** @type {Array<T>} @template T */ const foo;"))
       << "Later pass will report @template is unexpected for const.";
 }

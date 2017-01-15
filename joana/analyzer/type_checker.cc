@@ -38,12 +38,12 @@ void TypeChecker::VisitInternal(const ast::ReferenceExpression& syntax,
                                 const ast::Node& node) {
   const auto* value = context().TryValueOf(node);
   if (!value) {
-    AddError(node, ErrorCode::TYPE_CHECKER_UNDEFIEND_VARIABLE);
+    AddError(node, ErrorCode::TYPE_CHECKER_UNDEFINED_VARIABLE);
     return;
   }
   if (!value->Is<Variable>() || !value->As<Variable>().assignments().empty())
     return;
-  AddError(node, ErrorCode::TYPE_CHECKER_UNDEFIEND_VARIABLE);
+  AddError(node, ErrorCode::TYPE_CHECKER_UNDEFINED_VARIABLE);
 }
 
 // Types
@@ -51,7 +51,7 @@ void TypeChecker::VisitInternal(const ast::TypeName& syntax,
                                 const ast::Node& node) {
   const auto* present = context().TryTypeOf(node);
   if (!present) {
-    AddError(node, ErrorCode::TYPE_CHECKER_UNDEFIEND_TYPE);
+    AddError(node, ErrorCode::TYPE_CHECKER_UNDEFINED_TYPE);
     return;
   }
 }

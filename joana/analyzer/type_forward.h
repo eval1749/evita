@@ -18,6 +18,7 @@ namespace analyzer {
   V(ClassType)                      \
   V(FunctionType)                   \
   V(InvalidType)                    \
+  V(NilType)                        \
   V(PrimitiveType)                  \
   V(TypeApplication)                \
   V(TypeName)                       \

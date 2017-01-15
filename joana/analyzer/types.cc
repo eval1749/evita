@@ -80,6 +80,12 @@ bool NamedType::is_anonymous() const {
 }
 
 //
+// NilType
+//
+NilType::NilType(int id) : Type(id) {}
+NilType::~NilType() = default;
+
+//
 // PrimitiveType
 //
 PrimitiveType::PrimitiveType(int id, const ast::Node& name)

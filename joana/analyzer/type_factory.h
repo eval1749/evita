@@ -38,6 +38,7 @@ class TypeFactory final {
 
   const Type& GetAnyType() { return any_type_; }
   const Type& GetOrNewClassType(Class* class_value);
+  const Type& GetNilType() { return nil_type_; }
   const Type& NewFunctionType(
       FunctionTypeKind kind,
       const std::vector<const TypeParameter*>& parameters,
@@ -64,6 +65,7 @@ class TypeFactory final {
 
   const Type& any_type_;
   const Type& invalid_type_;
+  const Type& nil_type_;
   const Type& unspecified_type_;
   const Type& void_type_;
 

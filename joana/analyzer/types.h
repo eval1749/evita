@@ -159,6 +159,21 @@ class InvalidType final : public Type {
 };
 
 //
+// NilType
+//
+class NilType final : public Type {
+  DECLARE_CONCRETE_ANALYZE_TYPE(NilType, Type)
+
+ public:
+  ~NilType() final;
+
+ private:
+  explicit NilType(int id);
+
+  DISALLOW_COPY_AND_ASSIGN(NilType);
+};
+
+//
 // PrimitiveType
 //
 class PrimitiveType final : public NamedType {

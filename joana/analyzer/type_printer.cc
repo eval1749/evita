@@ -97,6 +97,11 @@ std::ostream& operator<<(std::ostream& ostream,
 }
 
 std::ostream& operator<<(std::ostream& ostream,
+                         const Printable<NilType>& printable) {
+  return ostream << "%nil%";
+}
+
+std::ostream& operator<<(std::ostream& ostream,
                          const Printable<PrimitiveType>& printable) {
   const auto& type = *printable.type;
   return ostream << "%" << ast::AsSourceCode(type.name()) << "%";

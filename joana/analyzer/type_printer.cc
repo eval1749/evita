@@ -64,10 +64,10 @@ std::ostream& operator<<(std::ostream& ostream,
                          const Printable<FunctionType>& printable) {
   const auto& type = *printable.type;
   ostream << "function";
-  if (type.has_parameters()) {
+  if (!type.type_parameters().empty()) {
     auto delimiter = "<";
-    for (const auto& parameter : type.parameters()) {
-      ostream << delimiter << AsSourceCode(parameter.name());
+    for (const auto& type_parameter : type.type_parameters()) {
+      ostream << delimiter << AsSourceCode(type_parameter.name());
       delimiter = ",";
     }
     ostream << '>';
@@ -81,7 +81,7 @@ std::ostream& operator<<(std::ostream& ostream,
     ostream << "this:" << AsPrintable(type.this_type());
     delimiter = ",";
   }
-  for (const auto& parameter_type : type.parameter_types()) {
+  for (const auto& parameter_type : type.parameters()) {
     ostream << delimiter << AsPrintable(parameter_type);
     delimiter = ",";
   }

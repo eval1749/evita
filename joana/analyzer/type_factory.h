@@ -46,8 +46,8 @@ class TypeFactory final {
   const Type& NewClassType(Class* class_value);
   const Type& NewFunctionType(
       FunctionTypeKind kind,
-      const std::vector<const TypeParameter*>& parameters,
-      const std::vector<const Type*>& parameter_types,
+      const std::vector<const TypeParameter*>& type_parameters,
+      const std::vector<const Type*>& parameters,
       const Type& return_type,
       const Type& this_type);
   const Type& NewPrimitiveType(const ast::TokenKind id);

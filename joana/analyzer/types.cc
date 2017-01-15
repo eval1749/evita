@@ -43,20 +43,42 @@ GenericType::~GenericType() = default;
 //
 // FunctionType
 //
-FunctionType::FunctionType(Zone* zone,
-                           int id,
-                           FunctionTypeKind kind,
-                           const std::vector<const TypeParameter*>& parameters,
-                           std::vector<const Type*> parameter_types,
-                           const Type& return_type,
-                           const Type& this_type)
-    : GenericType(zone, id, parameters),
+FunctionType::FunctionType(
+    int id,
+    FunctionTypeKind kind,
+    const std::vector<const TypeParameter*>& type_parameters,
+    const std::vector<const Type*>& parameters,
+    const Type& return_type,
+    const Type& this_type)
+    : Type(id),
       kind_(kind),
-      parameter_types_(zone, parameter_types),
+      number_of_parameters_(parameters.size()),
+      number_of_type_parameters_(type_parameters.size()),
       return_type_(return_type),
-      this_type_(this_type) {}
+      this_type_(this_type) {
+  auto* runner = elements_;
+  for (const auto& parameter : parameters) {
+    *runner = parameter;
+    ++runner;
+  }
+  for (const auto& type_parameter : type_parameters) {
+    *runner = type_parameter;
+    ++runner;
+  }
+}
 
 FunctionType::~FunctionType() = default;
+
+BlockRange<const Type*> FunctionType::parameters() const {
+  return BlockRange<const Type*>(elements_, number_of_parameters_);
+}
+
+BlockRange<const TypeParameter*> FunctionType::type_parameters() const {
+  return BlockRange<const TypeParameter*>(
+      reinterpret_cast<const TypeParameter* const*>(
+          &elements_[number_of_parameters_]),
+      number_of_type_parameters_);
+}
 
 //
 // InvalidType

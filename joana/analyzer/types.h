@@ -117,30 +117,34 @@ class ClassType final : public Type {
 //
 // FunctionType
 //
-class FunctionType final : public GenericType {
-  DECLARE_CONCRETE_ANALYZE_TYPE(FunctionType, GenericType)
+class FunctionType final : public Type {
+  DECLARE_CONCRETE_ANALYZE_TYPE(FunctionType, Type)
 
  public:
+  void* operator new(size_t size, void* pointer) { return pointer; }
+
   ~FunctionType() final;
 
   FunctionTypeKind kind() const { return kind_; }
-  auto parameter_types() const { return ReferenceRangeOf(parameter_types_); }
+  BlockRange<const Type*> parameters() const;
+  BlockRange<const TypeParameter*> type_parameters() const;
   const Type& return_type() const { return return_type_; }
   const Type& this_type() const { return this_type_; }
 
  private:
-  FunctionType(Zone* zone,
-               int id,
+  FunctionType(int id,
                FunctionTypeKind kind,
-               const std::vector<const TypeParameter*>& parameters,
-               const std::vector<const Type*> parameter_types,
+               const std::vector<const TypeParameter*>& type_parameters,
+               const std::vector<const Type*>& parameters,
                const Type& return_type,
                const Type& this_type);
 
   const FunctionTypeKind kind_;
-  const ZoneVector<const Type*> parameter_types_;
+  const size_t number_of_parameters_;
+  const size_t number_of_type_parameters_;
   const Type& return_type_;
   const Type& this_type_;
+  const Type* elements_[1];
 
   DISALLOW_COPY_AND_ASSIGN(FunctionType);
 };

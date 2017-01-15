@@ -117,12 +117,14 @@ const Type& TypeFactory::NewClassType(Class* class_value) {
 
 const Type& TypeFactory::NewFunctionType(
     FunctionTypeKind kind,
-    const std::vector<const TypeParameter*>& parameters,
-    const std::vector<const Type*>& parameter_types,
+    const std::vector<const TypeParameter*>& type_parameters,
+    const std::vector<const Type*>& parameters,
     const Type& return_type,
     const Type& this_type) {
-  return *new (&zone_) FunctionType(&zone_, NextTypeId(), kind, parameters,
-                                    parameter_types, return_type, this_type);
+  const auto size =
+      SizeOf<FunctionType>(type_parameters.size() + parameters.size());
+  return *new (zone_.Allocate(size)) FunctionType(
+      NextTypeId(), kind, type_parameters, parameters, return_type, this_type);
 }
 
 const Type& TypeFactory::NewTupleTypeFromVector(

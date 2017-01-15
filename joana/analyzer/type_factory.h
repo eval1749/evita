@@ -50,7 +50,7 @@ class TypeFactory final {
       const std::vector<const Type*>& parameter_types,
       const Type& return_type,
       const Type& this_type);
-  const Type& GetPrimitiveType(const ast::TokenKind id);
+  const Type& NewPrimitiveType(const ast::TokenKind id);
   const Type& NewTypeName(const ast::Node& name);
   const Type& NewTypeParameter(const ast::Node& name);
   const Type& NewUnionTypeFromVector(const std::vector<const Type*>& members);

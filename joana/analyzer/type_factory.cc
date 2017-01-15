@@ -78,7 +78,7 @@ TypeFactory::TypeFactory(Zone* zone)
 
 TypeFactory::~TypeFactory() = default;
 
-const Type& TypeFactory::GetPrimitiveType(ast::TokenKind id) {
+const Type& TypeFactory::NewPrimitiveType(ast::TokenKind id) {
   return *cache_->Find(id);
 }
 

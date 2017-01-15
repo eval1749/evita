@@ -170,7 +170,7 @@ NameResolver::Environment::NewGlobalEnvironment(NameResolver* resolver) {
   // Initialize primitive types
   for (const auto id : BuiltInWorld::GetInstance()->primitive_types()) {
     const auto& name = BuiltInWorld::GetInstance()->NameOf(id);
-    const auto& type = resolver->type_factory().GetPrimitiveType(id);
+    const auto& type = resolver->type_factory().NewPrimitiveType(id);
     resolver->context().RegisterType(name, type);
     environment->BindType(name, type);
   }

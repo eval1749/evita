@@ -22,17 +22,17 @@ class TypeTest : public ::testing::Test {
 
   const Type& any_type() { return type_factory_.any_type(); }
   const Type& boolean_type() {
-    return GetPrimitiveType(ast::TokenKind::Boolean);
+    return NewPrimitiveType(ast::TokenKind::Boolean);
   }
   const Type& invalid_type() { return type_factory_.invalid_type(); }
   const Type& nil_type() { return type_factory_.nil_type(); }
-  const Type& number_type() { return GetPrimitiveType(ast::TokenKind::Number); }
-  const Type& string_type() { return GetPrimitiveType(ast::TokenKind::String); }
+  const Type& number_type() { return NewPrimitiveType(ast::TokenKind::Number); }
+  const Type& string_type() { return NewPrimitiveType(ast::TokenKind::String); }
   const Type& unspecified_type() { return type_factory_.unspecified_type(); }
   const Type& void_type() { return type_factory_.void_type(); }
 
-  const Type& GetPrimitiveType(ast::TokenKind kind) {
-    return type_factory_.GetPrimitiveType(kind);
+  const Type& NewPrimitiveType(ast::TokenKind kind) {
+    return type_factory_.NewPrimitiveType(kind);
   }
 
   template <typename... Parameters>

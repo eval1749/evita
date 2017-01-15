@@ -50,7 +50,7 @@ class ReferenceRange final {
 
   Iterator begin() const { return Iterator(begin_); }
   Iterator end() const { return Iterator(end_); }
-  typename BaseIterator::difference_type size() const { return end_ - begin_; }
+  size_t size() const { return end_ - begin_; }
 
  private:
   BaseIterator begin_;
@@ -61,7 +61,7 @@ class ReferenceRange final {
 
 template <typename Container>
 internal::ReferenceRange<typename Container::iterator> ReferenceRangeOf(
-    Container& container) { // NOLINT
+    Container& container) {  // NOLINT
   using Iterator = typename Container::iterator;
   return internal::ReferenceRange<Iterator>(container.begin(), container.end());
 }

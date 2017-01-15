@@ -37,6 +37,7 @@ class TypeFactory final {
   ~TypeFactory();
 
   const Type& any_type() { return any_type_; }
+  const Type& invalid_type() const { return invalid_type_; }
   const Type& nil_type() { return nil_type_; }
   const Type& null_type() const { return null_type_; }
 
@@ -47,7 +48,6 @@ class TypeFactory final {
       const std::vector<const Type*>& parameter_types,
       const Type& return_type,
       const Type& this_type);
-  const Type& GetInvalidType() const { return invalid_type_; }
   const Type& GetPrimitiveType(const ast::TokenKind id);
   const Type& NewTypeName(const ast::Node& name);
   const Type& NewTypeParameter(const ast::Node& name);

@@ -525,7 +525,7 @@ const Class* NameResolver::TryClassOfPrototype(const ast::Node& node) const {
     return nullptr;
   if (ast::MemberExpression::NameOf(node) != ast::TokenKind::Prototype)
     return nullptr;
-  const auto& container = ast::MemberExpression::ExpressionOf(node);
+  const auto& container = ast::MemberExpression::ContainerOf(node);
   const auto* const holder = context().TryValueOf(container);
   if (!holder || !holder->Is<ValueHolder>())
     return nullptr;
@@ -674,7 +674,7 @@ void NameResolver::VisitInternal(const ast::ComputedMemberExpression& syntax,
                                  const ast::Node& node) {
   VisitDefault(node);
   auto* const value =
-      context().TryValueOf(ast::ComputedMemberExpression::ContainerOf(node));
+      context().TryValueOf(ast::ComputedMemberExpression::ExpressionOf(node));
   if (!value || !value->Is<Object>())
     return;
   auto& properties = value->As<Object>().properties();
@@ -689,7 +689,7 @@ void NameResolver::VisitInternal(const ast::MemberExpression& syntax,
                                  const ast::Node& node) {
   VisitDefault(node);
   auto* const value =
-      context().TryValueOf(ast::MemberExpression::ExpressionOf(node));
+      context().TryValueOf(ast::MemberExpression::ContainerOf(node));
   if (!value || !value->Is<Object>())
     return;
   auto& properties = value->As<Object>().properties();

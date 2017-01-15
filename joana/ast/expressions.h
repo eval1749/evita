@@ -101,8 +101,8 @@ class JOANA_AST_EXPORT ComputedMemberExpression final
  public:
   ~ComputedMemberExpression() final;
 
-  static const Node& ExpressionOf(const Node& node);
   static const Node& ContainerOf(const Node& node);
+  static const Node& ExpressionOf(const Node& node);
 
  private:
   ComputedMemberExpression();
@@ -119,8 +119,8 @@ class JOANA_AST_EXPORT MemberExpression final : public SyntaxTemplate<Syntax> {
  public:
   ~MemberExpression() final;
 
+  static const Node& ContainerOf(const Node& node);
   static const Node& NameOf(const Node& node);
-  static const Node& ExpressionOf(const Node& node);
 
  private:
   MemberExpression();

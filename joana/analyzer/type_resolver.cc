@@ -35,20 +35,20 @@ void TypeResolver::RunOn(const ast::Node& node) {
 
 const Type* TypeResolver::ComputeClassType(const ast::Node& node) const {
   if (node.Is<ast::ComputedMemberExpression>()) {
-    const auto& member = ast::ComputedMemberExpression::ContainerOf(node);
+    const auto& member = ast::ComputedMemberExpression::ExpressionOf(node);
     if (!member.Is<ast::MemberExpression>())
       return nullptr;
     if (ast::MemberExpression::NameOf(member) != ast::TokenKind::Prototype)
       return nullptr;
-    return context().TryTypeOf(ast::MemberExpression::ExpressionOf(member));
+    return context().TryTypeOf(ast::MemberExpression::ContainerOf(member));
   }
   if (node.Is<ast::MemberExpression>()) {
-    const auto& member = ast::MemberExpression::ExpressionOf(node);
+    const auto& member = ast::MemberExpression::ContainerOf(node);
     if (!member.Is<ast::MemberExpression>())
       return nullptr;
     if (ast::MemberExpression::NameOf(member) != ast::TokenKind::Prototype)
       return nullptr;
-    return context().TryTypeOf(ast::MemberExpression::ExpressionOf(member));
+    return context().TryTypeOf(ast::MemberExpression::ContainerOf(member));
   }
   return nullptr;
 }

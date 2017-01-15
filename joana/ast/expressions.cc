@@ -120,14 +120,14 @@ ComputedMemberExpression::ComputedMemberExpression()
 
 ComputedMemberExpression::~ComputedMemberExpression() = default;
 
-const Node& ComputedMemberExpression::ExpressionOf(const Node& node) {
-  DCHECK_EQ(node, SyntaxCode::ComputedMemberExpression);
-  return node.child_at(1);
-}
-
 const Node& ComputedMemberExpression::ContainerOf(const Node& node) {
   DCHECK_EQ(node, SyntaxCode::ComputedMemberExpression);
   return node.child_at(0);
+}
+
+const Node& ComputedMemberExpression::ExpressionOf(const Node& node) {
+  DCHECK_EQ(node, SyntaxCode::ComputedMemberExpression);
+  return node.child_at(1);
 }
 
 //
@@ -140,7 +140,7 @@ MemberExpression::MemberExpression()
 
 MemberExpression::~MemberExpression() = default;
 
-const Node& MemberExpression::ExpressionOf(const Node& node) {
+const Node& MemberExpression::ContainerOf(const Node& node) {
   DCHECK_EQ(node, SyntaxCode::MemberExpression);
   return node.child_at(0);
 }
@@ -280,7 +280,7 @@ const Node& UnaryExpression::OperatorOf(const Node& node) {
 bool IsKnownSymbol(const ast::Node& node) {
   if (node != SyntaxCode::MemberExpression)
     return false;
-  const auto& member = MemberExpression::ExpressionOf(node);
+  const auto& member = MemberExpression::ContainerOf(node);
   if (member != SyntaxCode::ReferenceExpression)
     return false;
   if (ReferenceExpression::NameOf(member) != TokenKind::SymbolObject)

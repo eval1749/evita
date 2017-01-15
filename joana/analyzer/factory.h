@@ -5,6 +5,7 @@
 #ifndef JOANA_ANALYZER_FACTORY_H_
 #define JOANA_ANALYZER_FACTORY_H_
 
+#include <memory>
 #include <vector>
 
 #include "base/macros.h"
@@ -46,6 +47,10 @@ class Factory final {
   Class& NewClass(const ast::Node& node,
                   ClassKind kind,
                   const std::vector<const TypeParameter*>& parameters);
+
+  Value& Factory::NewConstructedClass(Class* generic_class,
+                                      const std::vector<const Type*> arguments);
+
   Function& NewFunction(const ast::Node& node);
   Value& NewOrdinaryObject(const ast::Node& node);
   Value& NewUndefined(const ast::Node& node);
@@ -54,11 +59,14 @@ class Factory final {
   void ResetValueId();
 
  private:
+  class Cache;
+
   int NextValueId();
 
   // Properties
   Properties& NewProperties(const ast::Node& node);
 
+  const std::unique_ptr<Cache> cache_;
   int current_value_id_ = 0;
   Zone& zone_;
 

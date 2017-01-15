@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <map>
+#include <tuple>
+
 #include "joana/analyzer/factory.h"
 
 #include "joana/analyzer/properties.h"
@@ -13,10 +16,57 @@
 namespace joana {
 namespace analyzer {
 
+namespace {
+
+template <typename T>
+size_t SizeOf(size_t number_of_elements) {
+  return sizeof(T) - sizeof(Type*) + sizeof(Type*) * number_of_elements;
+}
+
+}  // namespace
+
+//
+// Factory::Cache
+//
+class Factory::Cache final {
+ public:
+  Cache();
+  ~Cache();
+
+  template <typename Key>
+  Value* Find(const Key& key) {
+    const auto& map = MapFor(key);
+    const auto& it = map.find(key);
+    return it == map.end() ? nullptr : it->second;
+  }
+
+  template <typename Key>
+  void Register(const Key& key, Value* value) {
+    auto& map = MapFor(key);
+    const auto& result = map.emplace(key, value);
+    DCHECK(result.second);
+  }
+
+ private:
+  using ConstructedClassKey = std::tuple<Class*, std::vector<const Type*>>;
+  using ConstructedClassMap = std::map<ConstructedClassKey, Value*>;
+
+  ConstructedClassMap& MapFor(const ConstructedClassKey&) {
+    return constructed_class_map_;
+  }
+
+  ConstructedClassMap constructed_class_map_;
+
+  DISALLOW_COPY_AND_ASSIGN(Cache);
+};
+
+Factory::Cache::Cache() = default;
+Factory::Cache::~Cache() = default;
+
 //
 // Factory
 //
-Factory::Factory(Zone* zone) : zone_(*zone) {}
+Factory::Factory(Zone* zone) : cache_(new Cache()), zone_(*zone) {}
 
 Factory::~Factory() = default;
 
@@ -32,6 +82,18 @@ Class& Factory::NewClass(const ast::Node& node,
                          ClassKind kind,
                          const std::vector<const TypeParameter*>& parameters) {
   return *new (&zone_) Class(&zone_, NextValueId(), node, kind, parameters);
+}
+
+Value& Factory::NewConstructedClass(Class* generic_class,
+                                    const std::vector<const Type*> arguments) {
+  const auto& key = std::make_tuple(generic_class, arguments);
+  if (auto* present = cache_->Find(key))
+    return *present;
+  const auto size = SizeOf<ConstructedClass>(arguments.size());
+  auto& new_value = *new (zone_.Allocate(size)) ConstructedClass(
+      NextValueId(), generic_class, arguments);
+  cache_->Register(key, &new_value);
+  return new_value;
 }
 
 Function& Factory::NewFunction(const ast::Node& node) {

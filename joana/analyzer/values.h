@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "joana/analyzer/value.h"
+#include "joana/base/block_range.h"
 #include "joana/base/iterator_utils.h"
 #include "joana/base/memory/zone_vector.h"
 
@@ -17,6 +18,7 @@ namespace analyzer {
 
 class Function;
 class Properties;
+class Type;
 class TypeParameter;
 
 //
@@ -127,6 +129,32 @@ class Class : public Value {
   ZoneVector<const TypeParameter*> parameters_;
 
   DISALLOW_COPY_AND_ASSIGN(Class);
+};
+
+//
+// ConstructedClass
+//
+class ConstructedClass : public Value {
+  DECLARE_CONCRETE_ANALYZE_VALUE(Class, Value);
+
+ public:
+  void* operator new(size_t size, void* pointer) { return pointer; }
+
+  ~ConstructedClass() final;
+
+  BlockRange<const Type*> arguments() const;
+  Class& generic_class() const { return generic_class_; }
+
+ private:
+  ConstructedClass(int id,
+                   Class* generic_class,
+                   const std::vector<const Type*>& arguments);
+
+  Class& generic_class_;
+  const size_t number_of_arguments_;
+  const Type* arguments_[1];
+
+  DISALLOW_COPY_AND_ASSIGN(ConstructedClass);
 };
 
 //

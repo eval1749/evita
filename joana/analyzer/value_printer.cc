@@ -45,6 +45,20 @@ std::ostream& operator<<(std::ostream& ostream,
 }
 
 std::ostream& operator<<(std::ostream& ostream,
+                         const Printable<ConstructedClass>& printable) {
+  const auto& value = *printable.value;
+  ostream << '$' << value.generic_class().kind();
+  const auto* delimiter = "<";
+  for (const auto& argument : value.arguments()) {
+    ostream << delimiter << argument;
+    delimiter = ",";
+  }
+  if (*delimiter == ',')
+    ostream << '>';
+  return ostream << '@' << value.id() << ' ' << value.generic_class().node();
+}
+
+std::ostream& operator<<(std::ostream& ostream,
                          const Printable<Function>& printable) {
   const auto& value = *printable.value;
   return ostream << "$Function@" << value.id() << ' ' << value.node();

@@ -28,6 +28,31 @@ Class::Class(Zone* zone,
 Class::~Class() = default;
 
 //
+// ConstructedClass
+//
+ConstructedClass::ConstructedClass(int id,
+                                   Class* generic_class,
+                                   const std::vector<const Type*>& arguments)
+    : Value(id, generic_class->node()),
+      generic_class_(*generic_class),
+      number_of_arguments_(arguments.size()) {
+  DCHECK(generic_class);
+  DCHECK_EQ(arguments.size(), generic_class->parameters().size());
+  DCHECK_GT(arguments.size(), static_cast<size_t>(1));
+  auto* runner = arguments_;
+  for (const auto& argument : arguments) {
+    *runner = argument;
+    ++runner;
+  }
+}
+
+ConstructedClass::~ConstructedClass() = default;
+
+BlockRange<const Type*> ConstructedClass::arguments() const {
+  return BlockRange<const Type*>(arguments_, number_of_arguments_);
+}
+
+//
 // Function
 //
 Function::Function(int id, const ast::Node& node, Properties* properties)

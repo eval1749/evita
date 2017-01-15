@@ -171,6 +171,25 @@ TEST_F(TypeResolverTest, NonNullableType) {
       RunOn("/** @type {!number} */ var foo"));
 }
 
+TEST_F(TypeResolverTest, NullableType) {
+  EXPECT_EQ(
+      "Module\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@type|\n"
+      "|  |  |  +--NullableType\n"
+      "|  |  |  |  +--TypeName {%number%}\n"
+      "|  |  |  |  |  +--Name |number|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--VarStatement\n"
+      "|  |  +--BindingNameElement VarVar[foo@1001] {%null%|%number%}\n"
+      "|  |  |  +--Name |foo|\n"
+      "|  |  |  +--ElisionExpression ||\n",
+      RunOn("/** @type {?number} */ var foo"));
+}
+
 TEST_F(TypeResolverTest, OptionalType) {
   EXPECT_EQ(
       "Module\n"

@@ -70,7 +70,7 @@ bool IsMemberExpression(const ast::Node& node) {
 //
 class NameResolver::LocalEnvironment final {
  public:
-  explicit LocalEnvironment(NameResolver* builder);
+  explicit LocalEnvironment(NameResolver* resolver);
   ~LocalEnvironment();
 
   const LocalEnvironment* outer() const { return outer_; }
@@ -84,7 +84,7 @@ class NameResolver::LocalEnvironment final {
   Variable* FindVariable(const ast::Node& name) const;
 
  private:
-  NameResolver& builder_;
+  NameResolver& resolver_;
   LocalEnvironment* const outer_;
   std::unordered_map<int, std::pair<const ast::Node*, const Type*>> type_map_;
   std::unordered_map<int, Variable*> value_map_;
@@ -92,13 +92,13 @@ class NameResolver::LocalEnvironment final {
   DISALLOW_COPY_AND_ASSIGN(LocalEnvironment);
 };
 
-NameResolver::LocalEnvironment::LocalEnvironment(NameResolver* builder)
-    : builder_(*builder), outer_(builder_.environment_) {
-  builder_.environment_ = this;
+NameResolver::LocalEnvironment::LocalEnvironment(NameResolver* resolver)
+    : resolver_(*resolver), outer_(resolver_.environment_) {
+  resolver_.environment_ = this;
 }
 
 NameResolver::LocalEnvironment::~LocalEnvironment() {
-  builder_.environment_ = outer_;
+  resolver_.environment_ = outer_;
 }
 
 void NameResolver::LocalEnvironment::BindType(const ast::Node& name,

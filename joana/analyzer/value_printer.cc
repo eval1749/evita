@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <iterator>
 #include <ostream>
 #include <type_traits>
 
@@ -70,7 +71,8 @@ std::ostream& operator<<(std::ostream& ostream,
 std::ostream& operator<<(std::ostream& ostream,
                          const Printable<Variable>& printable) {
   const auto& value = *printable.value;
-  return ostream << "$Variable@" << value.id() << ' ' << value.node();
+  return ostream << '$' << value.kind() << '@' << value.id() << ' '
+                 << value.node();
 }
 
 // Dispatcher
@@ -109,6 +111,18 @@ std::ostream& operator<<(std::ostream& ostream, const Value* value) {
   if (!value)
     return ostream << "(null)";
   return ostream << *value;
+}
+
+std::ostream& operator<<(std::ostream& ostream, VariableKind kind) {
+  static const char* kTexts[] = {
+#define V(name) #name,
+      FOR_EACH_VARIABLE_KIND(V)
+#undef V
+  };
+  const auto& it = std::begin(kTexts) + static_cast<size_t>(kind);
+  if (it < std::begin(kTexts) || it >= std::end(kTexts))
+    return ostream << "VariableKind" << static_cast<size_t>(kind);
+  return ostream << *it;
 }
 
 }  // namespace analyzer

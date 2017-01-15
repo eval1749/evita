@@ -179,7 +179,7 @@ NameResolver::Environment::NewGlobalEnvironment(NameResolver* resolver) {
   {
     const auto& name =
         BuiltInWorld::GetInstance()->NameOf(ast::TokenKind::Global);
-    auto& variable = resolver->factory().NewVariable(name);
+    auto& variable = resolver->factory().NewVariable(VariableKind::Const, name);
     Value::Editor().AddAssignment(&variable, name);
     environment->BindVariable(name, &variable);
   }
@@ -218,7 +218,8 @@ void NameResolver::Environment::ResolveForwardReferences() {
 //
 NameResolver::NameResolver(Context* context)
     : Pass(context),
-      global_environment_(std::move(Environment::NewGlobalEnvironment(this))) {
+      global_environment_(std::move(Environment::NewGlobalEnvironment(this))),
+      variable_kind_(VariableKind::Function) {
   factory().ResetValueId();
 }
 
@@ -261,7 +262,7 @@ const Type* NameResolver::FindType(const ast::Node& name) const {
   return nullptr;
 }
 
-Variable& NameResolver::BindVariable(const ast::Node& name) {
+Variable& NameResolver::BindVariable(VariableKind kind, const ast::Node& name) {
   DCHECK_EQ(name, ast::SyntaxCode::Name);
   if (auto* present = environment_->FindVariable(name)) {
     AddError(name, ErrorCode::ENVIRONMENT_MULTIPLE_OCCURRENCES,
@@ -269,7 +270,7 @@ Variable& NameResolver::BindVariable(const ast::Node& name) {
     return *present;
   }
   // TODO(eval1749): Expose global "var" binding to global object.
-  auto& variable = factory().NewVariable(name);
+  auto& variable = factory().NewVariable(kind, name);
   environment_->BindVariable(name, &variable);
   return variable;
 }
@@ -355,7 +356,7 @@ void NameResolver::ProcessClass(const ast::Node& node,
     return;
 
   // Set variable
-  auto& variable = BindVariable(class_name);
+  auto& variable = BindVariable(VariableKind::Class, class_name);
   if (!variable.assignments().empty()) {
     AddError(node, ErrorCode::ENVIRONMENT_MULTIPLE_OCCURRENCES,
              *variable.assignments().front());
@@ -409,7 +410,8 @@ void NameResolver::ProcessDocument(const ast::Node& document) {
     const auto& reference = child.child_at(2);
     if (!reference.Is<ast::ReferenceExpression>())
       continue;
-    BindVariable(ast::ReferenceExpression::NameOf(reference));
+    BindVariable(VariableKind::Parameter,
+                 ast::ReferenceExpression::NameOf(reference));
   }
   Visit(document);
 }
@@ -440,7 +442,7 @@ void NameResolver::ProcessFunction(const ast::Node& node,
   }
 
   if (name == ast::SyntaxCode::Name) {
-    auto& variable = BindVariable(name);
+    auto& variable = BindVariable(VariableKind::Function, name);
     if (!variable.assignments().empty()) {
       AddError(node, ErrorCode::ENVIRONMENT_MULTIPLE_OCCURRENCES,
                *variable.assignments().front());
@@ -478,7 +480,8 @@ std::vector<const TypeParameter*> NameResolver::ProcessTemplateTag(
   return type_parameters;
 }
 
-void NameResolver::ProcessVariableDeclaration(const ast::Node& node,
+void NameResolver::ProcessVariableDeclaration(VariableKind kind,
+                                              const ast::Node& node,
                                               const ast::Node& document) {
   DCHECK(node.syntax().Is<ast::VariableDeclaration>()) << node;
   DCHECK_EQ(document, ast::SyntaxCode::JsDocDocument);
@@ -497,7 +500,7 @@ void NameResolver::ProcessVariableDeclaration(const ast::Node& node,
   }
   const auto& type_parameters = ProcessTemplateTag(document);
   const auto& name = ast::BindingNameElement::NameOf(binding);
-  auto& variable = BindVariable(name);
+  auto& variable = BindVariable(kind, name);
   context().RegisterValue(binding, &variable);
   if (!variable.assignments().empty()) {
     AddError(node, ErrorCode::ENVIRONMENT_MULTIPLE_OCCURRENCES,
@@ -560,8 +563,14 @@ void NameResolver::VisitDefault(const ast::Node& node) {
 // Binding elements
 void NameResolver::VisitInternal(const ast::BindingNameElement& syntax,
                                  const ast::Node& node) {
+  DCHECK(variable_kind_ == VariableKind::Const ||
+         variable_kind_ == VariableKind::Let ||
+         variable_kind_ == VariableKind::Parameter ||
+         variable_kind_ == VariableKind::Var)
+      << variable_kind_;
   VisitDefault(node);
-  auto& variable = BindVariable(ast::BindingNameElement::NameOf(node));
+  auto& variable =
+      BindVariable(variable_kind_, ast::BindingNameElement::NameOf(node));
   Value::Editor().AddAssignment(&variable, node);
   context().RegisterValue(node, &variable);
   if (variable.assignments().size() == 1)
@@ -586,10 +595,14 @@ void NameResolver::VisitInternal(const ast::Annotation& syntax,
   const auto& document = ast::Annotation::DocumentOf(node);
   if (annotated.Is<ast::Class>())
     return ProcessClass(annotated, &document);
+  if (annotated.Is<ast::ConstStatement>())
+    return ProcessVariableDeclaration(VariableKind::Const, annotated, document);
   if (annotated.Is<ast::Function>())
     return ProcessFunction(annotated, &document);
-  if (annotated.syntax().Is<ast::VariableDeclaration>())
-    return ProcessVariableDeclaration(annotated, document);
+  if (annotated.Is<ast::LetStatement>())
+    return ProcessVariableDeclaration(VariableKind::Let, annotated, document);
+  if (annotated.Is<ast::VarStatement>())
+    return ProcessVariableDeclaration(VariableKind::Var, annotated, document);
   if (annotated.Is<ast::GroupExpression>())
     return VisitChildNodes(node);
   if (!annotated.Is<ast::ExpressionStatement>()) {
@@ -702,6 +715,12 @@ void NameResolver::VisitInternal(const ast::MemberExpression& syntax,
   context().RegisterValue(node, &property);
 }
 
+void NameResolver::VisitInternal(const ast::ParameterList& syntax,
+                                 const ast::Node& node) {
+  base::AutoReset<VariableKind> scope(&variable_kind_, VariableKind::Parameter);
+  VisitDefault(node);
+}
+
 void NameResolver::VisitInternal(const ast::ReferenceExpression& syntax,
                                  const ast::Node& node) {
   const auto& name = ast::ReferenceExpression::NameOf(node);
@@ -718,6 +737,24 @@ void NameResolver::VisitInternal(const ast::ReferenceExpression& syntax,
 void NameResolver::VisitInternal(const ast::BlockStatement& syntax,
                                  const ast::Node& node) {
   Environment environment(this);
+  VisitDefault(node);
+}
+
+void NameResolver::VisitInternal(const ast::ConstStatement& syntax,
+                                 const ast::Node& node) {
+  base::AutoReset<VariableKind> scope(&variable_kind_, VariableKind::Const);
+  VisitDefault(node);
+}
+
+void NameResolver::VisitInternal(const ast::LetStatement& syntax,
+                                 const ast::Node& node) {
+  base::AutoReset<VariableKind> scope(&variable_kind_, VariableKind::Let);
+  VisitDefault(node);
+}
+
+void NameResolver::VisitInternal(const ast::VarStatement& syntax,
+                                 const ast::Node& node) {
+  base::AutoReset<VariableKind> scope(&variable_kind_, VariableKind::Var);
   VisitDefault(node);
 }
 

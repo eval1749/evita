@@ -50,7 +50,7 @@ class NameResolver final : public Pass, public ast::SyntaxVisitor {
   void BindType(const ast::Node& name, const Type& type);
 
   // Bind |name| as |variable| in current environment.
-  Variable& BindVariable(const ast::Node& name);
+  Variable& BindVariable(VariableKind kind, const ast::Node& name);
 
   // Bind type parameters of |type| in current environment.
   void BindTypeParameters(const Class& class_value);
@@ -73,7 +73,8 @@ class NameResolver final : public Pass, public ast::SyntaxVisitor {
   std::vector<const TypeParameter*> ProcessTemplateTag(
       const ast::Node& document);
 
-  void ProcessVariableDeclaration(const ast::Node& annotated,
+  void ProcessVariableDeclaration(VariableKind kind,
+                                  const ast::Node& annotated,
                                   const ast::Node& document);
 
   // Returns class of |node| if known.
@@ -100,15 +101,30 @@ class NameResolver final : public Pass, public ast::SyntaxVisitor {
   // Expressions
   void VisitInternal(const ast::AssignmentExpression& syntax,
                      const ast::Node& node) final;
+
   void VisitInternal(const ast::ComputedMemberExpression& syntax,
                      const ast::Node& node) final;
+
   void VisitInternal(const ast::MemberExpression& syntax,
                      const ast::Node& node) final;
+
+  void VisitInternal(const ast::ParameterList& syntax,
+                     const ast::Node& node) final;
+
   void VisitInternal(const ast::ReferenceExpression& syntax,
                      const ast::Node& node) final;
 
   // Statement
   void VisitInternal(const ast::BlockStatement& syntax,
+                     const ast::Node& node) final;
+
+  void VisitInternal(const ast::ConstStatement& syntax,
+                     const ast::Node& node) final;
+
+  void VisitInternal(const ast::LetStatement& syntax,
+                     const ast::Node& node) final;
+
+  void VisitInternal(const ast::VarStatement& syntax,
                      const ast::Node& node) final;
 
   // Types
@@ -119,6 +135,9 @@ class NameResolver final : public Pass, public ast::SyntaxVisitor {
   Environment* environment_ = nullptr;
 
   const std::unique_ptr<Environment> global_environment_;
+
+  // Pass |VariabkeKind| to descendants.
+  VariableKind variable_kind_;
 
   DISALLOW_COPY_AND_ASSIGN(NameResolver);
 };

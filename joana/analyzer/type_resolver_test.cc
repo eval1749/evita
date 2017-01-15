@@ -65,7 +65,7 @@ TEST_F(TypeResolverTest, Constructor) {
       "|  |  |  +--Name |@constructor|\n"
       "|  |  +--JsDocText |*/|\n"
       "|  +--VarStatement\n"
-      "|  |  +--BindingNameElement $Foo@1001 "
+      "|  |  +--BindingNameElement VarVar[Foo@1001] "
       "{function(new:class@1001):class@1001}\n"
       "|  |  |  +--Name |Foo|\n"
       "|  |  |  +--ElisionExpression ||\n",
@@ -79,7 +79,7 @@ TEST_F(TypeResolverTest, Constructor) {
       "|  |  |  +--Name |@constructor|\n"
       "|  |  +--JsDocText |*/|\n"
       "|  +--VarStatement\n"
-      "|  |  +--BindingNameElement $Foo@1001 "
+      "|  |  +--BindingNameElement VarVar[Foo@1001] "
       "{function(new:class@1001):class@1001}\n"
       "|  |  |  +--Name |Foo|\n"
       "|  |  |  +--Function<Normal> Class[%anonymous%@1003]\n"
@@ -99,7 +99,7 @@ TEST_F(TypeResolverTest, Function) {
       "|  |  |  +--Name |@param|\n"
       "|  |  |  +--TypeName {%number%}\n"
       "|  |  |  |  +--Name |number|\n"
-      "|  |  |  +--ReferenceExpression $x@1003\n"
+      "|  |  |  +--ReferenceExpression ParameterVar[x@1003]\n"
       "|  |  |  |  +--Name |x|\n"
       "|  |  |  +--JsDocText ||\n"
       "|  |  +--JsDocTag\n"
@@ -111,7 +111,7 @@ TEST_F(TypeResolverTest, Function) {
       "{function(%number%):%string%}\n"
       "|  |  +--Name |foo|\n"
       "|  |  +--ParameterList\n"
-      "|  |  |  +--BindingNameElement $x@1003\n"
+      "|  |  |  +--BindingNameElement ParameterVar[x@1003]\n"
       "|  |  |  |  +--Name |x|\n"
       "|  |  |  |  +--ElisionExpression ||\n"
       "|  |  +--BlockStatement |{}|\n",
@@ -130,7 +130,7 @@ TEST_F(TypeResolverTest, Var) {
       "|  |  |  |  +--Name |number|\n"
       "|  |  +--JsDocText |*/|\n"
       "|  +--VarStatement\n"
-      "|  |  +--BindingNameElement $foo@1001 {%number%}\n"
+      "|  |  +--BindingNameElement VarVar[foo@1001] {%number%}\n"
       "|  |  |  +--Name |foo|\n"
       "|  |  |  +--ElisionExpression ||\n",
       RunOn("/** @type {number} */ var foo;"));
@@ -146,11 +146,11 @@ TEST_F(TypeResolverTest, VarFunction) {
       "|  |  |  +--Name |@param|\n"
       "|  |  |  +--TypeName {%number%}\n"
       "|  |  |  |  +--Name |number|\n"
-      "|  |  |  +--ReferenceExpression $x@1001 {%number%}\n"
+      "|  |  |  +--ReferenceExpression ParameterVar[x@1001] {%number%}\n"
       "|  |  |  |  +--Name |x|\n"
       "|  |  |  +--JsDocText |*/|\n"
       "|  +--VarStatement\n"
-      "|  |  +--BindingNameElement $foo@1002 {function(%number%)}\n"
+      "|  |  +--BindingNameElement VarVar[foo@1002] {function(%number%)}\n"
       "|  |  |  +--Name |foo|\n"
       "|  |  |  +--ElisionExpression ||\n",
       RunOn("/** @param {number} x */ var foo;"));
@@ -165,7 +165,7 @@ TEST_F(TypeResolverTest, VarFunction) {
       "|  |  |  |  +--Name |number|\n"
       "|  |  |  +--JsDocText |x */|\n"
       "|  +--VarStatement\n"
-      "|  |  +--BindingNameElement $foo@1001 {function():%number%}\n"
+      "|  |  +--BindingNameElement VarVar[foo@1001] {function():%number%}\n"
       "|  |  |  +--Name |foo|\n"
       "|  |  |  +--ElisionExpression ||\n",
       RunOn("/** @return {number} x */ var foo;"));

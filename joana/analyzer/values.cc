@@ -88,9 +88,10 @@ ValueHolder::~ValueHolder() = default;
 //
 Variable::Variable(Zone* zone,
                    int id,
+                   VariableKind kind,
                    const ast::Node& name,
                    Properties* properties)
-    : ValueHolder(zone, id, name, properties) {
+    : ValueHolder(zone, id, name, properties), kind_(kind) {
   DCHECK_EQ(name, ast::SyntaxCode::Name);
 }
 

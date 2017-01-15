@@ -31,6 +31,25 @@ enum class ClassKind {
 std::ostream& operator<<(std::ostream& ostream, ClassKind kind);
 
 //
+// VariableKind
+//
+#define FOR_EACH_VARIABLE_KIND(V) \
+  V(Class)                        \
+  V(Const)                        \
+  V(Function)                     \
+  V(Let)                          \
+  V(Parameter)                    \
+  V(Var)
+
+enum class VariableKind {
+#define V(name) name,
+  FOR_EACH_VARIABLE_KIND(V)
+#undef V
+};
+
+std::ostream& operator<<(std::ostream& ostream, VariableKind kind);
+
+//
 // Object
 //
 class Object : public Value {
@@ -182,9 +201,17 @@ class Variable final : public ValueHolder {
  public:
   ~Variable() final;
 
+  VariableKind kind() const { return kind_; }
+
  private:
   // |name| should be |ast::Name| or |ast::BindingNameElement|.
-  Variable(Zone* zone, int id, const ast::Node& name, Properties* properties);
+  Variable(Zone* zone,
+           int id,
+           VariableKind kind,
+           const ast::Node& name,
+           Properties* properties);
+
+  const VariableKind kind_;
 
   DISALLOW_COPY_AND_ASSIGN(Variable);
 };

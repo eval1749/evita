@@ -57,10 +57,10 @@ Value& Factory::NewUndefined(const ast::Node& node) {
   return *new (&zone_) Undefined(NextValueId(), node);
 }
 
-Variable& Factory::NewVariable(const ast::Node& name) {
+Variable& Factory::NewVariable(VariableKind kind, const ast::Node& name) {
   DCHECK_EQ(name, ast::SyntaxCode::Name);
   auto& properties = NewProperties(name);
-  return *new (&zone_) Variable(&zone_, NextValueId(), name, &properties);
+  return *new (&zone_) Variable(&zone_, NextValueId(), kind, name, &properties);
 }
 
 int Factory::NextValueId() {

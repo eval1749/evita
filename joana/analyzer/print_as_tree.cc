@@ -123,8 +123,9 @@ std::ostream& operator<<(std::ostream& ostream,
                    << value.id() << ']';
   }
   if (value.Is<Variable>()) {
-    return ostream << '$' << ast::AsSourceCode(value.node()) << '@'
-                   << value.id();
+    return ostream << value.As<Variable>().kind() << "Var["
+                   << ast::AsSourceCode(value.node()) << '@' << value.id()
+                   << ']';
   }
   ostream << value.class_name();
   const auto& name = ValueNameOf(value);

@@ -27,6 +27,7 @@ class Type;
 class TypeParameter;
 class Value;
 class Variable;
+enum class VariableKind;
 
 //
 // Factory
@@ -48,7 +49,7 @@ class Factory final {
   Function& NewFunction(const ast::Node& node);
   Value& NewOrdinaryObject(const ast::Node& node);
   Value& NewUndefined(const ast::Node& node);
-  Variable& NewVariable(const ast::Node& name);
+  Variable& NewVariable(VariableKind kind, const ast::Node& name);
 
   void ResetValueId();
 

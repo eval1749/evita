@@ -60,6 +60,7 @@ class Annotation final : public ContextUser {
       const ast::Node& parameter_list);
 
   std::vector<const Type*> ProcessParameterTags();
+  void ProcessTemplateTag(const ast::Node& node);
 
   void RememberTag(const ast::Node** pointer, const ast::Node& node);
 
@@ -90,7 +91,7 @@ class Annotation final : public ContextUser {
   const ast::Node* override_tag_ = nullptr;
   std::vector<const ast::Node*> parameter_tags_;
   const ast::Node* return_tag_ = nullptr;
-  const ast::Node* template_tag_ = nullptr;
+  std::vector<const ast::Node*> template_tags_;
   const ast::Node* this_tag_ = nullptr;
   const ast::Node* type_node_ = nullptr;
 

@@ -155,27 +155,7 @@ const ast::Node* Annotation::Classify() {
         RememberTag(&this_tag_, node);
         continue;
       case ast::TokenKind::AtTemplate:
-        if (!template_tag_) {
-          for (const auto& name : ast::JsDocTag::OperandsOf(node)) {
-            if (!name.Is<ast::Name>()) {
-              AddError(name, ErrorCode::JSDOC_EXPECT_NAME);
-              continue;
-            }
-            const auto name_id = ast::Name::KindOf(name);
-            const auto& result = type_parameter_map_.emplace(
-                name_id,
-                &type_factory().NewTypeParameter(name).As<TypeParameter>());
-            if (result.second)
-              continue;
-            for (const auto& present : ast::JsDocTag::OperandsOf(node)) {
-              if (present != name_id)
-                continue;
-              AddError(name, ErrorCode::JSDOC_MULTIPLE_NAME, present);
-              break;
-            }
-          }
-        }
-        RememberTag(&template_tag_, node);
+        ProcessTemplateTag(node);
         continue;
     }
   }
@@ -252,8 +232,8 @@ void Annotation::MarkNotTypeAnnotation() {
   }
   if (return_tag_)
     AddError(*return_tag_, ErrorCode::JSDOC_UNEXPECT_TAG);
-  if (template_tag_)
-    AddError(*template_tag_, ErrorCode::JSDOC_UNEXPECT_TAG);
+  for (const auto& template_tag : template_tags_)
+    AddError(*template_tag, ErrorCode::JSDOC_UNEXPECT_TAG);
   if (this_tag_)
     AddError(*this_tag_, ErrorCode::JSDOC_UNEXPECT_TAG);
 }
@@ -343,6 +323,31 @@ void Annotation::RememberTag(const ast::Node** pointer, const ast::Node& node) {
     return;
   }
   *pointer = &node;
+}
+
+void Annotation::ProcessTemplateTag(const ast::Node& node) {
+  DCHECK_EQ(ast::JsDocTag::NameOf(node), ast::TokenKind::AtTemplate);
+  template_tags_.push_back(&node);
+  for (const auto& operand : ast::JsDocTag::OperandsOf(node)) {
+    if (!operand.Is<ast::TypeName>())
+      continue;
+    const auto& name = ast::TypeName::NameOf(operand);
+    if (!name.Is<ast::Name>()) {
+      AddError(name, ErrorCode::JSDOC_EXPECT_NAME);
+      continue;
+    }
+    const auto name_id = ast::Name::KindOf(name);
+    const auto& result = type_parameter_map_.emplace(
+        name_id, &type_factory().NewTypeParameter(name).As<TypeParameter>());
+    if (result.second)
+      continue;
+    for (const auto& present : ast::JsDocTag::OperandsOf(node)) {
+      if (present != name_id)
+        continue;
+      AddError(name, ErrorCode::JSDOC_MULTIPLE_NAME, present);
+      break;
+    }
+  }
 }
 
 const Type& Annotation::ResolveTypeName(const ast::Node& name) {

@@ -436,6 +436,10 @@ const Type& Annotation::TransformType(const ast::Node& node) {
     // and type alias(?).
     return TransformType(node.child_at(0));
   }
+  if (node.Is<ast::OptionalType>()) {
+    // TODO(eval1749): Where do we store optional parameter information?
+    return TransformType(node.child_at(0));
+  }
   if (node.Is<ast::TypeName>()) {
     if (const auto* type = context().TryTypeOf(node))
       return *type;

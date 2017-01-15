@@ -9,6 +9,7 @@ config("base_implementation") {
 component("base") {
   output_name = "joana_base"
   sources = [
+    "block_range.h",
     "castable.h",
     "double_linked_list.h",
     "error_sink.cc",

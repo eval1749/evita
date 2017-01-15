@@ -113,6 +113,18 @@ std::ostream& operator<<(std::ostream& ostream,
 }
 
 std::ostream& operator<<(std::ostream& ostream,
+                         const Printable<TupleType>& printable) {
+  const auto& type = *printable.type;
+  ostream << '[';
+  auto* delimiter = "";
+  for (const auto& member : type.members()) {
+    ostream << delimiter << member;
+    delimiter = ",";
+  }
+  return ostream << ']';
+}
+
+std::ostream& operator<<(std::ostream& ostream,
                          const Printable<TypeApplication>& printable) {
   const auto& type = *printable.type;
   const auto& generic_type = type.generic_type();
@@ -195,6 +207,16 @@ std::ostream& operator<<(std::ostream& ostream, const Type* type) {
   if (!type)
     return ostream << "(null)";
   return ostream << *type;
+}
+
+std::ostream& operator<<(std::ostream& ostream, std::set<const Type*>& types) {
+  auto* delimiter = "";
+  ostream << '{';
+  for (const auto& type : types) {
+    ostream << delimiter << type;
+    delimiter = ",";
+  }
+  return ostream << '}';
 }
 
 std::ostream& operator<<(std::ostream& ostream,

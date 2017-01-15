@@ -36,6 +36,11 @@ class TypeTest : public ::testing::Test {
   }
 
   template <typename... Parameters>
+  const Type& NewTupleType(const Parameters&... parameters) {
+    return type_factory_.NewTupleTypeFromVector({&parameters...});
+  }
+
+  template <typename... Parameters>
   const Type& NewUnionType(const Parameters&... parameters) {
     return type_factory_.NewUnionTypeFromVector({&parameters...});
   }
@@ -51,6 +56,16 @@ class TypeTest : public ::testing::Test {
 
 TypeTest::TypeTest() : zone_("TypeTest"), type_factory_(&zone_) {}
 TypeTest::~TypeTest() = default;
+
+TEST_F(TypeTest, TupleType) {
+  EXPECT_EQ(NewTupleType(), NewTupleType());
+  EXPECT_NE(NewTupleType(any_type()), NewTupleType());
+  EXPECT_EQ(NewTupleType(any_type()), NewTupleType(any_type()));
+  EXPECT_EQ(NewTupleType(any_type(), number_type()),
+            NewTupleType(any_type(), number_type()));
+  EXPECT_NE(NewTupleType(number_type(), any_type()),
+            NewTupleType(any_type(), number_type()));
+}
 
 TEST_F(TypeTest, UnionType) {
   EXPECT_EQ(nil_type(), NewUnionType());

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <algorithm>
 #include <map>
 #include <set>
 #include <tuple>
@@ -41,16 +42,19 @@ class TypeFactory::Cache final {
  private:
   using ClassTypeMap = std::unordered_map<Class*, const Type*>;
   using PrimitiveTypeMap = std::unordered_map<ast::TokenKind, const Type*>;
-  using UnionTypeMap = std::map<std::vector<const Type*>, const Type*>;
+  using TupleTypeMap = std::map<std::vector<const Type*>, const Type*>;
+  using UnionTypeMap = std::map<std::set<const Type*>, const Type*>;
 
   ClassTypeMap& MapFor(const Class* class_value) { return class_type_map_; }
   PrimitiveTypeMap& MapFor(ast::TokenKind kind) { return primitive_type_map_; }
-  UnionTypeMap& MapFor(const std::vector<const Type*>&) {
-    return union_type_map_;
+  TupleTypeMap& MapFor(const std::vector<const Type*>&) {
+    return tuple_type_map_;
   }
+  UnionTypeMap& MapFor(const std::set<const Type*>&) { return union_type_map_; }
 
   ClassTypeMap class_type_map_;
   PrimitiveTypeMap primitive_type_map_;
+  TupleTypeMap tuple_type_map_;
   UnionTypeMap union_type_map_;
 
   DISALLOW_COPY_AND_ASSIGN(Cache);
@@ -113,6 +117,20 @@ const Type& TypeFactory::NewFunctionType(
                                     parameter_types, return_type, this_type);
 }
 
+const Type& TypeFactory::NewTupleTypeFromVector(
+    const std::vector<const Type*>& members) {
+  const auto* type = cache_->Find(members);
+  if (type)
+    return *type;
+  const auto size =
+      sizeof(TupleType) +
+      sizeof(Type*) * (std::max(members.size(), static_cast<size_t>(1)) - 1);
+  const auto& new_type =
+      *new (zone_.Allocate(size)) TupleType(NextTypeId(), members);
+  cache_->Register(members, new_type);
+  return new_type;
+}
+
 const Type& TypeFactory::NewTypeName(const ast::Node& name) {
   DCHECK_EQ(name, ast::SyntaxCode::Name);
   return *new (&zone_) TypeName(NextTypeId(), name);
@@ -143,14 +161,13 @@ const Type& TypeFactory::NewUnionTypeFromVector(
     return nil_type();
   if (members.size() == 1)
     return **members.begin();
-  std::vector<const Type*> key(members.begin(), members.end());
-  const auto* type = cache_->Find(key);
+  const auto* type = cache_->Find(members);
   if (type)
     return *type;
-  const auto size = sizeof(UnionType) + sizeof(Type*) * (key.size() - 1);
+  const auto size = sizeof(UnionType) + sizeof(Type*) * (members.size() - 1);
   const auto& new_type =
-      *new (zone_.Allocate(size)) UnionType(NextTypeId(), key);
-  cache_->Register(key, new_type);
+      *new (zone_.Allocate(size)) UnionType(NextTypeId(), members);
+  cache_->Register(members, new_type);
   return new_type;
 }
 

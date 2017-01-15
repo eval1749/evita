@@ -51,9 +51,15 @@ class TypeFactory final {
       const Type& return_type,
       const Type& this_type);
   const Type& NewPrimitiveType(const ast::TokenKind id);
+  const Type& NewTupleTypeFromVector(const std::vector<const Type*>& members);
   const Type& NewTypeName(const ast::Node& name);
   const Type& NewTypeParameter(const ast::Node& name);
   const Type& NewUnionTypeFromVector(const std::vector<const Type*>& members);
+
+  template <typename... Parameters>
+  const Type& NewTupleType(const Parameters&... members) {
+    return NewTupleTypeFromVector({&members...});
+  }
 
   template <typename... Parameters>
   const Type& NewUnionType(const Parameters&... members) {

@@ -21,6 +21,7 @@ namespace analyzer {
   V(NilType)                        \
   V(NullType)                       \
   V(PrimitiveType)                  \
+  V(TupleType)                      \
   V(TypeApplication)                \
   V(TypeName)                       \
   V(TypeParameter)                  \

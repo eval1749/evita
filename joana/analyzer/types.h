@@ -5,6 +5,7 @@
 #ifndef JOANA_ANALYZER_TYPES_H_
 #define JOANA_ANALYZER_TYPES_H_
 
+#include <set>
 #include <utility>
 #include <vector>
 
@@ -205,6 +206,28 @@ class PrimitiveType final : public NamedType {
 };
 
 //
+// TupleType
+//
+class TupleType final : public Type {
+  DECLARE_CONCRETE_ANALYZE_TYPE(TupleType, Type)
+
+ public:
+  void* operator new(size_t size, void* pointer) { return pointer; }
+
+  ~TupleType() final;
+
+  BlockRange<const Type*> members() const;
+
+ private:
+  TupleType(int id, const std::vector<const Type*>& members);
+
+  const size_t number_of_members_;
+  const Type* members_[1];
+
+  DISALLOW_COPY_AND_ASSIGN(TupleType);
+};
+
+//
 // TypeApplication
 //
 class TypeApplication final : public Type {
@@ -274,7 +297,7 @@ class UnionType final : public Type {
   BlockRange<const Type*> members() const;
 
  private:
-  UnionType(int id, const std::vector<const Type*>& members);
+  UnionType(int id, const std::set<const Type*>& members);
 
   const size_t number_of_members_;
   const Type* members_[1];

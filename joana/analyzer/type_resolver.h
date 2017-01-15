@@ -22,7 +22,7 @@ class Value;
 class TypeResolver final : public Pass, public ast::SyntaxVisitor {
  public:
   explicit TypeResolver(Context* context);
-  ~TypeResolver();
+  ~TypeResolver() final;
 
   void RunOn(const ast::Node& node) final;
 

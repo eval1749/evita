@@ -26,7 +26,7 @@ class Factory;
 //
 class Pass : public ContextUser {
  public:
-  ~Pass();
+  virtual ~Pass();
 
   virtual void RunOn(const ast::Node& node) = 0;
 

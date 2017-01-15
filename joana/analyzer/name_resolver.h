@@ -39,7 +39,7 @@ enum class VariableKind;
 class NameResolver final : public Pass, public ast::SyntaxVisitor {
  public:
   explicit NameResolver(Context* context);
-  ~NameResolver();
+  ~NameResolver() final;
 
   void RunOn(const ast::Node& node) final;
 

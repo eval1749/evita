@@ -26,7 +26,7 @@ class Variable;
 class TypeChecker final : public Pass, public ast::SyntaxVisitor {
  public:
   explicit TypeChecker(Context* context);
-  ~TypeChecker();
+  ~TypeChecker() final;
 
   void RunOn(const ast::Node& node) final;
 

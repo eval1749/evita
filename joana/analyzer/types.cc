@@ -86,6 +86,12 @@ NilType::NilType(int id) : Type(id) {}
 NilType::~NilType() = default;
 
 //
+// NullType
+//
+NullType::NullType(int id) : Type(id) {}
+NullType::~NullType() = default;
+
+//
 // PrimitiveType
 //
 PrimitiveType::PrimitiveType(int id, const ast::Node& name)

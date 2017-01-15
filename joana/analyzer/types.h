@@ -175,6 +175,21 @@ class NilType final : public Type {
 };
 
 //
+// NullType
+//
+class NullType final : public Type {
+  DECLARE_CONCRETE_ANALYZE_TYPE(NullType, Type)
+
+ public:
+  ~NullType() final;
+
+ private:
+  explicit NullType(int id);
+
+  DISALLOW_COPY_AND_ASSIGN(NullType);
+};
+
+//
 // PrimitiveType
 //
 class PrimitiveType final : public NamedType {

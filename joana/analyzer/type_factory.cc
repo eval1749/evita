@@ -68,6 +68,7 @@ TypeFactory::TypeFactory(Zone* zone)
       any_type_(*new (zone) AnyType(NextTypeId())),
       invalid_type_(*new (zone) InvalidType(NextTypeId())),
       nil_type_(*new (zone) NilType(NextTypeId())),
+      null_type_(*new (zone) NullType(NextTypeId())),
       unspecified_type_(*new (zone) UnspecifiedType(NextTypeId())),
       void_type_(*new (zone) VoidType(NextTypeId())) {
   current_type_id_ = 100;

@@ -36,6 +36,8 @@ class TypeFactory final {
   explicit TypeFactory(Zone* zone);
   ~TypeFactory();
 
+  const Type& null_type() const { return null_type_; }
+
   const Type& GetAnyType() { return any_type_; }
   const Type& GetOrNewClassType(Class* class_value);
   const Type& GetNilType() { return nil_type_; }
@@ -72,6 +74,7 @@ class TypeFactory final {
   const Type& any_type_;
   const Type& invalid_type_;
   const Type& nil_type_;
+  const Type& null_type_;
   const Type& unspecified_type_;
   const Type& void_type_;
 

@@ -154,6 +154,7 @@ class JOANA_AST_EXPORT Method final
   static const Node& BodyOf(const Node& node);
 
   static FunctionKind FunctionKindOf(const Node& node);
+  static bool IsStatic(const Node& node);
   static MethodKind MethodKindOf(const Node& node);
 
   // Returns either |ArrayInitializer|, e.g. "[Symbol.foo]" or

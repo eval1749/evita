@@ -122,6 +122,10 @@ FunctionKind Method::FunctionKindOf(const Node& node) {
   return node.syntax().As<Method>().kind();
 }
 
+bool Method::IsStatic(const ast::Node& node) {
+  return MethodKindOf(node) == MethodKind::Static;
+}
+
 MethodKind Method::MethodKindOf(const Node& node) {
   DCHECK_EQ(node, SyntaxCode::Method);
   return node.syntax().As<Method>().method_kind();

@@ -43,7 +43,7 @@ class TypeFactory final {
   const Type& unspecified_type() const { return unspecified_type_; }
   const Type& void_type() const { return void_type_; }
 
-  const Type& GetOrNewClassType(Class* class_value);
+  const Type& NewClassType(Class* class_value);
   const Type& NewFunctionType(
       FunctionTypeKind kind,
       const std::vector<const TypeParameter*>& parameters,
@@ -65,7 +65,6 @@ class TypeFactory final {
 
   void InstallPrimitiveTypes();
   int NextTypeId();
-  const Type& NewClassType(Class* class_value);
 
   std::unique_ptr<Cache> cache_;
   int current_type_id_ = 0;

@@ -93,8 +93,7 @@ void TypeResolver::ProcessVariableDeclaration(const ast::Node& node,
   if (node.arity() == 1 && binding.Is<ast::BindingNameElement>()) {
     auto* const value = SingleVariableValueOf(binding);
     if (value && value->Is<Class>()) {
-      const auto& class_type =
-          type_factory().GetOrNewClassType(&value->As<Class>());
+      const auto& class_type = type_factory().NewClassType(&value->As<Class>());
       Annotation annotation(&context(), document, binding, &class_type);
       const auto* type = annotation.Compile();
       if (!type) {
@@ -168,7 +167,7 @@ void TypeResolver::VisitInternal(const ast::Annotation& syntax,
 void TypeResolver::VisitInternal(const ast::Class& syntax,
                                  const ast::Node& node) {
   auto& class_value = context().ValueOf(node).As<Class>();
-  const auto& class_type = type_factory().GetOrNewClassType(&class_value);
+  const auto& class_type = type_factory().NewClassType(&class_value);
   for (const auto& child :
        ast::NodeTraversal::ChildNodesOf(ast::Class::BodyOf(node))) {
     if (!child.Is<ast::Annotation>())

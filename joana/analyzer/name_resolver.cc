@@ -304,7 +304,7 @@ void NameResolver::ProcessClass(const ast::Node& node,
   auto& class_value = factory().NewClass(node, class_kind, type_parameters);
   context().RegisterValue(node, &class_value);
   if (class_name.Is<ast::Name>())
-    BindType(class_name, type_factory().GetOrNewClassType(&class_value));
+    BindType(class_name, type_factory().NewClassType(&class_value));
 
   // Class wide template parameters.
   Environment environment(this);
@@ -437,7 +437,7 @@ void NameResolver::ProcessFunction(const ast::Node& node,
         factory().NewClass(node, ClassKindOf(*class_tag), type_parameters);
     context().RegisterValue(node, &class_value);
     if (name.Is<ast::Name>())
-      BindType(name, type_factory().GetOrNewClassType(&class_value));
+      BindType(name, type_factory().NewClassType(&class_value));
 
   } else {
     context().RegisterValue(node, &function);
@@ -514,7 +514,7 @@ void NameResolver::ProcessVariableDeclaration(VariableKind kind,
     auto& class_value =
         factory().NewClass(node, ClassKindOf(*class_tag), type_parameters);
     context().RegisterValue(document, &class_value);
-    BindType(name, type_factory().GetOrNewClassType(&class_value));
+    BindType(name, type_factory().NewClassType(&class_value));
     Value::Editor().AddAssignment(&variable, document);
     ProcessDocument(document);
     return;

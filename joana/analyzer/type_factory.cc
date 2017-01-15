@@ -78,15 +78,6 @@ TypeFactory::TypeFactory(Zone* zone)
 
 TypeFactory::~TypeFactory() = default;
 
-const Type& TypeFactory::GetOrNewClassType(Class* class_value) {
-  const auto* type = cache_->Find(class_value);
-  if (type)
-    return *type;
-  const auto& new_type = *new (&zone_) ClassType(NextTypeId(), class_value);
-  cache_->Register(class_value, new_type);
-  return new_type;
-}
-
 const Type& TypeFactory::GetPrimitiveType(ast::TokenKind id) {
   return *cache_->Find(id);
 }
@@ -104,7 +95,12 @@ int TypeFactory::NextTypeId() {
 }
 
 const Type& TypeFactory::NewClassType(Class* class_value) {
-  return *new (&zone_) ClassType(NextTypeId(), class_value);
+  const auto* type = cache_->Find(class_value);
+  if (type)
+    return *type;
+  const auto& new_type = *new (&zone_) ClassType(NextTypeId(), class_value);
+  cache_->Register(class_value, new_type);
+  return new_type;
 }
 
 const Type& TypeFactory::NewFunctionType(

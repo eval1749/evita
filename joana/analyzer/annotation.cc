@@ -423,7 +423,7 @@ const Type& Annotation::TransformAsInterface() {
     AddError(node_, ErrorCode::JSDOC_UNEXPECT_TAG);
     return type_factory().unspecified_type();
   }
-  return type_factory().GetOrNewClassType(class_value);
+  return type_factory().NewClassType(class_value);
 }
 
 const Type& Annotation::TransformType(const ast::Node& node) {

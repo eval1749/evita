@@ -48,7 +48,7 @@ class TypeFactory final {
   const Type& GetPrimitiveType(const ast::TokenKind id);
   const Type& NewTypeName(const ast::Node& name);
   const Type& NewTypeParameter(const ast::Node& name);
-  const Type& GetUnknownType() const { return unknown_type_; }
+  const Type& GetUnspecifiedType() const { return unspecified_type_; }
   const Type& GetVoidType() const { return void_type_; }
 
  private:
@@ -64,7 +64,7 @@ class TypeFactory final {
 
   const Type& any_type_;
   const Type& invalid_type_;
-  const Type& unknown_type_;
+  const Type& unspecified_type_;
   const Type& void_type_;
 
   DISALLOW_COPY_AND_ASSIGN(TypeFactory);

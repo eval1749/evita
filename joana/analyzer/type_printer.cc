@@ -141,7 +141,7 @@ std::ostream& operator<<(std::ostream& ostream,
 }
 
 std::ostream& operator<<(std::ostream& ostream,
-                         const Printable<UnknownType>& printable) {
+                         const Printable<UnspecifiedType>& printable) {
   return ostream << "?";
 }
 

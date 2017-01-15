@@ -230,18 +230,18 @@ class TypeParameter final : public NamedType {
 };
 
 //
-// UnknownType
+// UnspecifiedType
 //
-class UnknownType final : public Type {
-  DECLARE_CONCRETE_ANALYZE_TYPE(UnknownType, Type)
+class UnspecifiedType final : public Type {
+  DECLARE_CONCRETE_ANALYZE_TYPE(UnspecifiedType, Type)
 
  public:
-  ~UnknownType() final;
+  ~UnspecifiedType() final;
 
  private:
-  explicit UnknownType(int id);
+  explicit UnspecifiedType(int id);
 
-  DISALLOW_COPY_AND_ASSIGN(UnknownType);
+  DISALLOW_COPY_AND_ASSIGN(UnspecifiedType);
 };
 
 //

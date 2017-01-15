@@ -111,10 +111,10 @@ TypeParameter::TypeParameter(int id, const ast::Node& name)
 TypeParameter::~TypeParameter() = default;
 
 //
-// UnknownType
+// UnspecifiedType
 //
-UnknownType::UnknownType(int id) : Type(id) {}
-UnknownType::~UnknownType() = default;
+UnspecifiedType::UnspecifiedType(int id) : Type(id) {}
+UnspecifiedType::~UnspecifiedType() = default;
 
 //
 // VoidType

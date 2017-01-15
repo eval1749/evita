@@ -266,7 +266,7 @@ void Annotation::ProcessParameter(
 
     AddError(name, ErrorCode::JSDOC_EXPECT_TYPE);
     parameter_names->push_back(&name);
-    parameter_types->push_back(&type_factory().GetUnknownType());
+    parameter_types->push_back(&type_factory().GetUnspecifiedType());
     return;
   }
   NOTREACHED() << "NYI ProcessParameter " << parameter_node;
@@ -421,7 +421,7 @@ const Type& Annotation::TransformAsInterface() {
   auto* const class_value = TryClassValueOf(node_);
   if (!class_value) {
     AddError(node_, ErrorCode::JSDOC_UNEXPECT_TAG);
-    return type_factory().GetUnknownType();
+    return type_factory().GetUnspecifiedType();
   }
   return type_factory().GetOrNewClassType(class_value);
 }
@@ -432,7 +432,7 @@ const Type& Annotation::TransformType(const ast::Node& node) {
       return *type;
     NOTREACHED() << "We should handle forward type reference." << node;
   }
-  return type_factory().GetUnknownType();
+  return type_factory().GetUnspecifiedType();
 }
 
 Class* Annotation::TryClassValueOf(const ast::Node& node) const {

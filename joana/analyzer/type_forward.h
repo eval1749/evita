@@ -22,7 +22,7 @@ namespace analyzer {
   V(TypeApplication)                \
   V(TypeName)                       \
   V(TypeParameter)                  \
-  V(UnknownType)                    \
+  V(UnspecifiedType)                \
   V(VoidType)
 
 #define V(name) class name;

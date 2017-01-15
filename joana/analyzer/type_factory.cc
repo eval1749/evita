@@ -60,7 +60,7 @@ TypeFactory::TypeFactory(Zone* zone)
       zone_(*zone),
       any_type_(*new (zone) AnyType(NextTypeId())),
       invalid_type_(*new (zone) InvalidType(NextTypeId())),
-      unknown_type_(*new (zone) UnknownType(NextTypeId())),
+      unspecified_type_(*new (zone) UnspecifiedType(NextTypeId())),
       void_type_(*new (zone) VoidType(NextTypeId())) {
   current_type_id_ = 100;
   InstallPrimitiveTypes();

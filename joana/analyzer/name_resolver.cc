@@ -70,7 +70,7 @@ bool IsMemberExpression(const ast::Node& node) {
 //
 class NameResolver::LocalEnvironment final {
  public:
-  LocalEnvironment(NameResolver* builder, const ast::Node& owner);
+  explicit LocalEnvironment(NameResolver* builder);
   ~LocalEnvironment();
 
   const LocalEnvironment* outer() const { return outer_; }
@@ -86,17 +86,14 @@ class NameResolver::LocalEnvironment final {
  private:
   NameResolver& builder_;
   LocalEnvironment* const outer_;
-  const ast::Node& owner_;
   std::unordered_map<int, std::pair<const ast::Node*, const Type*>> type_map_;
   std::unordered_map<int, Variable*> value_map_;
 
   DISALLOW_COPY_AND_ASSIGN(LocalEnvironment);
 };
 
-NameResolver::LocalEnvironment::LocalEnvironment(
-    NameResolver* builder,
-    const ast::Node& owner)
-    : builder_(*builder), outer_(builder_.environment_), owner_(owner) {
+NameResolver::LocalEnvironment::LocalEnvironment(NameResolver* builder)
+    : builder_(*builder), outer_(builder_.environment_) {
   builder_.environment_ = this;
 }
 
@@ -105,21 +102,20 @@ NameResolver::LocalEnvironment::~LocalEnvironment() {
 }
 
 void NameResolver::LocalEnvironment::BindType(const ast::Node& name,
-                                                    const Type& type) {
+                                              const Type& type) {
   const auto name_id = ast::Name::IdOf(name);
   const auto& result = type_map_.emplace(name_id, std::make_pair(&name, &type));
   DCHECK(result.second);
 }
 
 void NameResolver::LocalEnvironment::BindVariable(const ast::Node& name,
-                                                        Variable* value) {
+                                                  Variable* value) {
   const auto& result = value_map_.emplace(ast::Name::IdOf(name), value);
   DCHECK(result.second);
 }
 
 std::pair<const ast::Node*, const Type*>
-NameResolver::LocalEnvironment::FindNameAndType(
-    const ast::Node& name) const {
+NameResolver::LocalEnvironment::FindNameAndType(const ast::Node& name) const {
   const auto& it = type_map_.find(ast::Name::IdOf(name));
   return it == type_map_.end()
              ? std::pair<const ast::Node*, const Type*>(nullptr, nullptr)
@@ -240,7 +236,7 @@ Variable* NameResolver::FindVariable(const ast::Node& name) const {
 }
 
 void NameResolver::ProcessClass(const ast::Node& node,
-                                      const ast::Node* maybe_document) {
+                                const ast::Node* maybe_document) {
   // TODO(eval1749): Report warning for toplevel anonymous class
   // TODO(eval1749): We should check annotation for class to check
   // @interface and @record.
@@ -260,7 +256,7 @@ void NameResolver::ProcessClass(const ast::Node& node,
   context().RegisterValue(node, &class_value);
 
   // Class wide template parameters.
-  LocalEnvironment environment(this, node);
+  LocalEnvironment environment(this);
   BindTypeParameters(class_value);
   if (maybe_document)
     Visit(*maybe_document);
@@ -300,7 +296,7 @@ void NameResolver::ProcessClass(const ast::Node& node,
     context().RegisterValue(member, &method);
     Value::Editor().AddMethod(&class_value, &method);
 
-    LocalEnvironment environment(this, node);
+    LocalEnvironment environment(this);
     BindTypeParameters(class_value);
     VisitDefault(member);
 
@@ -342,8 +338,7 @@ void NameResolver::ProcessClass(const ast::Node& node,
   }
 }
 
-const ast::Node* NameResolver::ProcessClassTag(
-    const ast::Node& document) {
+const ast::Node* NameResolver::ProcessClassTag(const ast::Node& document) {
   const ast::Node* class_tag = nullptr;
   for (const auto& child : ast::NodeTraversal::ChildNodesOf(document)) {
     if (!IsClassTag(child))
@@ -358,7 +353,7 @@ const ast::Node* NameResolver::ProcessClassTag(
 }
 
 void NameResolver::ProcessFunction(const ast::Node& node,
-                                         const ast::Node* maybe_document) {
+                                   const ast::Node* maybe_document) {
   DCHECK_EQ(node, ast::SyntaxCode::Function);
   // TODO(eval1749): Report warning for toplevel anonymous class
   const auto& name = ast::Function::NameOf(node);
@@ -388,7 +383,7 @@ void NameResolver::ProcessFunction(const ast::Node& node,
     Value::Editor().AddAssignment(&variable, node);
   }
 
-  LocalEnvironment environment(this, node);
+  LocalEnvironment environment(this);
   if (!maybe_document)
     return VisitChildNodes(node);
   for (const auto& type_parameter : type_parameters)
@@ -419,7 +414,7 @@ std::vector<const TypeParameter*> NameResolver::ProcessTemplateTag(
 }
 
 void NameResolver::ProcessVariableDeclaration(const ast::Node& node,
-                                                    const ast::Node& document) {
+                                              const ast::Node& document) {
   DCHECK(node.syntax().Is<ast::VariableDeclaration>()) << node;
   DCHECK_EQ(document, ast::SyntaxCode::JsDocDocument);
   const auto* class_tag = ProcessClassTag(document);
@@ -473,8 +468,7 @@ Variable& NameResolver::ResolveVariableName(const ast::Node& name) {
   return variable;
 }
 
-const Class* NameResolver::TryClassOfPrototype(
-    const ast::Node& node) const {
+const Class* NameResolver::TryClassOfPrototype(const ast::Node& node) const {
   if (!node.Is<ast::MemberExpression>())
     return nullptr;
   if (ast::MemberExpression::NameOf(node) != ast::TokenKind::Prototype)
@@ -509,7 +503,7 @@ void NameResolver::VisitDefault(const ast::Node& node) {
 
 // Binding elements
 void NameResolver::VisitInternal(const ast::BindingNameElement& syntax,
-                                       const ast::Node& node) {
+                                 const ast::Node& node) {
   VisitDefault(node);
   auto& variable = BindVariable(ast::BindingNameElement::NameOf(node));
   Value::Editor().AddAssignment(&variable, node);
@@ -522,7 +516,7 @@ void NameResolver::VisitInternal(const ast::BindingNameElement& syntax,
 
 // Declarations
 void NameResolver::VisitInternal(const ast::Annotation& syntax,
-                                       const ast::Node& node) {
+                                 const ast::Node& node) {
   // Process annotated node before annotation to handle reference of class
   // name in constructor and parameter names for "@param".
   // Example:
@@ -556,7 +550,7 @@ void NameResolver::VisitInternal(const ast::Annotation& syntax,
       Visit(rhs);
       return;
     }
-    LocalEnvironment environment(this, lhs);
+    LocalEnvironment environment(this);
     if (const auto* class_value = TryClassOfPrototype(lhs.child_at(0)))
       BindTypeParameters(*class_value);
     if (rhs.Is<ast::Class>()) {
@@ -575,7 +569,7 @@ void NameResolver::VisitInternal(const ast::Annotation& syntax,
   if (IsMemberExpression(expression)) {
     Visit(expression);
     const auto& member = expression.child_at(0);
-    LocalEnvironment environment(this, expression);
+    LocalEnvironment environment(this);
     if (const auto* class_value = TryClassOfPrototype(member))
       BindTypeParameters(*class_value);
     if (const auto* class_tag = ProcessClassTag(document)) {
@@ -596,23 +590,23 @@ void NameResolver::VisitInternal(const ast::Annotation& syntax,
 }
 
 void NameResolver::VisitInternal(const ast::Class& syntax,
-                                       const ast::Node& node) {
+                                 const ast::Node& node) {
   ProcessClass(node, nullptr);
 }
 
 void NameResolver::VisitInternal(const ast::Function& syntax,
-                                       const ast::Node& node) {
+                                 const ast::Node& node) {
   ProcessFunction(node, nullptr);
 }
 
 void NameResolver::VisitInternal(const ast::Method& syntax,
-                                       const ast::Node& node) {
+                                 const ast::Node& node) {
   NOTREACHED() << "Method should be processed in Class " << node;
 }
 
 // Expressions
 void NameResolver::VisitInternal(const ast::AssignmentExpression& syntax,
-                                       const ast::Node& node) {
+                                 const ast::Node& node) {
   VisitDefault(node);
   const auto& lhs = ast::AssignmentExpression::LeftHandSideOf(node);
   auto* const value = context().TryValueOf(lhs);
@@ -624,9 +618,8 @@ void NameResolver::VisitInternal(const ast::AssignmentExpression& syntax,
   Value::Editor().AddAssignment(&holder, node);
 }
 
-void NameResolver::VisitInternal(
-    const ast::ComputedMemberExpression& syntax,
-    const ast::Node& node) {
+void NameResolver::VisitInternal(const ast::ComputedMemberExpression& syntax,
+                                 const ast::Node& node) {
   VisitDefault(node);
   auto* const value = context().TryValueOf(
       ast::ComputedMemberExpression::MemberExpressionOf(node));
@@ -641,7 +634,7 @@ void NameResolver::VisitInternal(
 }
 
 void NameResolver::VisitInternal(const ast::MemberExpression& syntax,
-                                       const ast::Node& node) {
+                                 const ast::Node& node) {
   VisitDefault(node);
   auto* const value =
       context().TryValueOf(ast::MemberExpression::ExpressionOf(node));
@@ -654,7 +647,7 @@ void NameResolver::VisitInternal(const ast::MemberExpression& syntax,
 }
 
 void NameResolver::VisitInternal(const ast::ReferenceExpression& syntax,
-                                       const ast::Node& node) {
+                                 const ast::Node& node) {
   const auto& name = ast::ReferenceExpression::NameOf(node);
   if (ast::Name::IsKeyword(name))
     return;
@@ -664,14 +657,14 @@ void NameResolver::VisitInternal(const ast::ReferenceExpression& syntax,
 
 // Statements
 void NameResolver::VisitInternal(const ast::BlockStatement& syntax,
-                                       const ast::Node& node) {
-  LocalEnvironment environment(this, node);
+                                 const ast::Node& node) {
+  LocalEnvironment environment(this);
   VisitDefault(node);
 }
 
 // Types
 void NameResolver::VisitInternal(const ast::TypeName& syntax,
-                                       const ast::Node& node) {
+                                 const ast::Node& node) {
   const auto* type = FindType(ast::TypeName::NameOf(node));
   if (!type)
     return;

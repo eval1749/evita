@@ -444,6 +444,7 @@ const Type& Annotation::TransformType(const ast::Node& node) {
     if (const auto* type = context().TryTypeOf(node))
       return *type;
     NOTREACHED() << "We should handle forward type reference." << node;
+    return type_factory().GetUnspecifiedType();
   }
   if (node.Is<ast::UnknownType>()) {
     // Unknown type is the source of bug, we should avoid to use.

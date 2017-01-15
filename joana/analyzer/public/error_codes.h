@@ -18,9 +18,7 @@ namespace joana {
   V(JSDOC, MULTIPLE_NAME)                     \
   V(JSDOC, MULTIPLE_PARAMETER)                \
   V(JSDOC, MULTIPLE_TAG)                      \
-  V(JSDOC, UNEXPECT_CONSTRUCTOR)              \
   V(JSDOC, UNEXPECT_PARAMETER)                \
-  V(JSDOC, UNEXPECT_RETURN)                   \
   V(JSDOC, UNEXPECT_TAG)                      \
   V(ENVIRONMENT, EXPECT_METHOD)               \
   V(ENVIRONMENT, EXPECT_NAME)                 \

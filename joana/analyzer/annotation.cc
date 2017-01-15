@@ -366,19 +366,17 @@ const Type& Annotation::TransformAsFunctionType() {
     const auto& method_name = ast::Method::NameOf(node_);
     switch (method_kind) {
       case ast::MethodKind::NonStatic:
-        if (method_name == ast::TokenKind::Constructor)
-          AddError(node_, ErrorCode::JSDOC_UNEXPECT_CONSTRUCTOR);
-        return type_factory().NewFunctionType(FunctionTypeKind::Normal,
-                                              type_parameters_, parameter_types,
-                                              ComputeReturnType(), this_type);
-      case ast::MethodKind::Static:
         if (method_name == ast::TokenKind::Constructor) {
-          if (return_tag_)
-            AddError(*return_tag_, ErrorCode::JSDOC_UNEXPECT_RETURN);
           return type_factory().NewFunctionType(
               FunctionTypeKind::Constructor, type_parameters_, parameter_types,
               this_type, this_type);
         }
+        return type_factory().NewFunctionType(FunctionTypeKind::Normal,
+                                              type_parameters_, parameter_types,
+                                              ComputeReturnType(), this_type);
+      case ast::MethodKind::Static:
+        // Note: It is OK to name method to |Constructor|, e.g.
+        // class Foo { static constructor() {} }
         return type_factory().NewFunctionType(
             FunctionTypeKind::Normal, type_parameters_, parameter_types,
             ComputeReturnType(), type_factory().GetVoidType());
@@ -409,8 +407,6 @@ const Type& Annotation::TransformAsFunctionType() {
   }
 
   if (ast::JsDocTag::NameOf(*kind_tag_) == ast::TokenKind::AtConstructor) {
-    if (return_tag_)
-      AddError(*return_tag_, ErrorCode::JSDOC_UNEXPECT_RETURN);
     const auto& class_type = ComputeThisType();
     return type_factory().NewFunctionType(FunctionTypeKind::Constructor,
                                           type_parameters_, parameter_types,

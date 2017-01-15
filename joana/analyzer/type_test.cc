@@ -20,7 +20,7 @@ class TypeTest : public ::testing::Test {
 
   TypeFactory& type_factory() { return type_factory_; }
 
-  const Type& any_type() { return type_factory_.GetAnyType(); }
+  const Type& any_type() { return type_factory_.any_type(); }
   const Type& boolean_type() {
     return GetPrimitiveType(ast::TokenKind::Boolean);
   }

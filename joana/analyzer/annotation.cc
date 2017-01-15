@@ -428,7 +428,7 @@ const Type& Annotation::TransformAsInterface() {
 
 const Type& Annotation::TransformType(const ast::Node& node) {
   if (node.Is<ast::AnyType>())
-    return type_factory().GetAnyType();
+    return type_factory().any_type();
   if (node.Is<ast::InvalidType>())
     return type_factory().GetUnspecifiedType();
   if (node.Is<ast::NonNullableType>()) {
@@ -448,7 +448,7 @@ const Type& Annotation::TransformType(const ast::Node& node) {
   }
   if (node.Is<ast::UnknownType>()) {
     // Unknown type is the source of bug, we should avoid to use.
-    return type_factory().GetAnyType();
+    return type_factory().any_type();
   }
   DVLOG(0) << "We should handle " << node;
   return type_factory().GetUnspecifiedType();

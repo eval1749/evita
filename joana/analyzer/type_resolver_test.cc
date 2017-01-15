@@ -57,19 +57,19 @@ std::string TypeResolverTest::RunOn(base::StringPiece script_text) {
 
 TEST_F(TypeResolverTest, AnyType) {
   EXPECT_EQ(
-    "Module\n"
-    "+--Annotation\n"
-    "|  +--JsDocDocument\n"
-    "|  |  +--JsDocText |/**|\n"
-    "|  |  +--JsDocTag\n"
-    "|  |  |  +--Name |@type|\n"
-    "|  |  |  +--AnyType |*|\n"
-    "|  |  +--JsDocText |*/|\n"
-    "|  +--VarStatement\n"
-    "|  |  +--BindingNameElement VarVar[foo@1001] {*}\n"
-    "|  |  |  +--Name |foo|\n"
-    "|  |  |  +--ElisionExpression ||\n",
-    RunOn("/** @type {*} */ var foo;"));
+      "Module\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@type|\n"
+      "|  |  |  +--AnyType |*|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--VarStatement\n"
+      "|  |  +--BindingNameElement VarVar[foo@1001] {*}\n"
+      "|  |  |  +--Name |foo|\n"
+      "|  |  |  +--ElisionExpression ||\n",
+      RunOn("/** @type {*} */ var foo;"));
 }
 
 TEST_F(TypeResolverTest, Constructor) {
@@ -133,6 +133,23 @@ TEST_F(TypeResolverTest, Function) {
       "|  |  |  |  +--ElisionExpression ||\n"
       "|  |  +--BlockStatement |{}|\n",
       RunOn("/** @param {number} x @return {string} */ function foo(x) {}"));
+}
+
+TEST_F(TypeResolverTest, InvalidType) {
+  EXPECT_EQ(
+      "Module\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@type|\n"
+      "|  |  |  +--InvalidType |+|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--VarStatement\n"
+      "|  |  +--BindingNameElement VarVar[foo@1001] {?}\n"
+      "|  |  |  +--Name |foo|\n"
+      "|  |  |  +--ElisionExpression ||\n",
+      RunOn("/** @type {+} */ var foo"));
 }
 
 TEST_F(TypeResolverTest, Var) {

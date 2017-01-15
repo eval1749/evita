@@ -429,6 +429,8 @@ const Type& Annotation::TransformAsInterface() {
 const Type& Annotation::TransformType(const ast::Node& node) {
   if (node.Is<ast::AnyType>())
     return type_factory().GetAnyType();
+  if (node.Is<ast::InvalidType>())
+    return type_factory().GetUnspecifiedType();
   if (node.Is<ast::TypeName>()) {
     if (const auto* type = context().TryTypeOf(node))
       return *type;

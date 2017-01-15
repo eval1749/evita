@@ -25,7 +25,7 @@ class TypeTest : public ::testing::Test {
     return GetPrimitiveType(ast::TokenKind::Boolean);
   }
   const Type& invalid_type() { return type_factory_.GetInvalidType(); }
-  const Type& nil_type() { return type_factory_.GetNilType(); }
+  const Type& nil_type() { return type_factory_.nil_type(); }
   const Type& number_type() { return GetPrimitiveType(ast::TokenKind::Number); }
   const Type& string_type() { return GetPrimitiveType(ast::TokenKind::String); }
   const Type& unspecified_type() { return type_factory_.GetUnspecifiedType(); }

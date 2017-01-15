@@ -144,7 +144,7 @@ const Type& TypeFactory::NewUnionTypeFromVector(
     members.emplace(member);
   }
   if (members.empty())
-    return GetNilType();
+    return nil_type();
   if (members.size() == 1)
     return **members.begin();
   std::vector<const Type*> key(members.begin(), members.end());

@@ -49,6 +49,7 @@ class ReferenceRange final {
   ~ReferenceRange() = default;
 
   Iterator begin() const { return Iterator(begin_); }
+  bool empty() const { return begin_ == end_; }
   Iterator end() const { return Iterator(end_); }
   size_t size() const { return end_ - begin_; }
 

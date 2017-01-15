@@ -402,6 +402,8 @@ const ast::Node* NameResolver::ProcessClassTag(const ast::Node& document) {
 void NameResolver::ProcessDocument(const ast::Node& document) {
   DCHECK_EQ(document, ast::SyntaxCode::JsDocDocument);
   Environment environment(this);
+  for (const auto& type_parameter : ProcessTemplateTag(document))
+    BindType(type_parameter->name(), *type_parameter);
   for (const auto& child : ast::NodeTraversal::ChildNodesOf(document)) {
     if (!child.Is<ast::JsDocTag>())
       continue;

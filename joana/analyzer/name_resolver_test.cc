@@ -644,6 +644,40 @@ TEST_F(NameResolverTest, Prototype) {
       RunOn("/** @constructor @template T */ function Foo() {}\n"
             "/** @type {T} */ Foo.prototype[baz];\n"))
       << "Bind template parameter for 'Foo.prototyp[baz]'";
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@constructor|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--Function<Normal> Class[Map@1002]\n"
+      "|  |  +--Name |Map|\n"
+      "|  |  +--ParameterList |()|\n"
+      "|  |  +--BlockStatement |{}|\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@template|\n"
+      "|  |  |  +--TypeName {THIS@1002}\n"
+      "|  |  |  |  +--Name |THIS|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@return|\n"
+      "|  |  |  +--TypeName {THIS@1002}\n"
+      "|  |  |  |  +--Name |THIS|\n"
+      "|  |  |  +--JsDocText |*/|\n"
+      "|  +--ExpressionStatement\n"
+      "|  |  +--MemberExpression [set@1005]\n"
+      "|  |  |  +--MemberExpression [prototype@1004]\n"
+      "|  |  |  |  +--ReferenceExpression FunctionVar[Map@1003]\n"
+      "|  |  |  |  |  +--Name |Map|\n"
+      "|  |  |  |  +--Name |prototype|\n"
+      "|  |  |  +--Name |set|\n",
+      RunOn("/** @constructor */ function Map() {}\n"
+            "/** @template THIS @return {THIS} */ Map.prototype.set;"));
 }
 
 TEST_F(NameResolverTest, Super) {
@@ -774,20 +808,18 @@ TEST_F(NameResolverTest, Type) {
       "|  |  |  |  +--TypeName\n"
       "|  |  |  |  |  +--Name |Array|\n"
       "|  |  |  |  +--Tuple\n"
-      "|  |  |  |  |  +--TypeName\n"
+      "|  |  |  |  |  +--TypeName {T@1001}\n"
       "|  |  |  |  |  |  +--Name |T|\n"
       "|  |  +--JsDocTag\n"
       "|  |  |  +--Name |@template|\n"
-      "|  |  |  +--TypeName\n"
+      "|  |  |  +--TypeName {T@1001}\n"
       "|  |  |  |  +--Name |T|\n"
       "|  |  +--JsDocText |*/|\n"
       "|  +--ConstStatement\n"
       "|  |  +--BindingNameElement ConstVar[foo@1001]\n"
       "|  |  |  +--Name |foo|\n"
       "|  |  |  +--ElisionExpression ||\n"
-      "ANALYZER_ERROR_ENVIRONMENT_UNDEFINED_TYPE@11:16\n"
-      "ANALYZER_ERROR_ENVIRONMENT_UNDEFINED_TYPE@17:18\n"
-      "ANALYZER_ERROR_ENVIRONMENT_UNDEFINED_TYPE@31:32\n",
+      "ANALYZER_ERROR_ENVIRONMENT_UNDEFINED_TYPE@11:16\n",
       RunOn("/** @type {Array<T>} @template T */ const foo;"))
       << "Later pass will report @template is unexpected for const.";
 }

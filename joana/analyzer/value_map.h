@@ -32,7 +32,7 @@ class ValueMap final {
   Value& ValueOf(const ast::Node& node) const;
 
  private:
-  friend class EnvironmentBuilder;
+  friend class NameResolver;
 
   std::unordered_map<const ast::Node*, Value*> value_map_;
 

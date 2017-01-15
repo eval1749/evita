@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef JOANA_ANALYZER_ENVIRONMENT_BUILDER_H_
-#define JOANA_ANALYZER_ENVIRONMENT_BUILDER_H_
+#ifndef JOANA_ANALYZER_NAME_RESOLVER_H_
+#define JOANA_ANALYZER_NAME_RESOLVER_H_
 
 #include <unordered_set>
 #include <vector>
@@ -34,12 +34,12 @@ class Variable;
 enum class VariableKind;
 
 //
-// EnvironmentBuilder
+// NameResolver
 //
-class EnvironmentBuilder final : public Pass, public ast::SyntaxVisitor {
+class NameResolver final : public Pass, public ast::SyntaxVisitor {
  public:
-  explicit EnvironmentBuilder(Context* context);
-  ~EnvironmentBuilder();
+  explicit NameResolver(Context* context);
+  ~NameResolver();
 
   void RunOn(const ast::Node& node) final;
 
@@ -120,10 +120,10 @@ class EnvironmentBuilder final : public Pass, public ast::SyntaxVisitor {
   // The toplevel environment
   Environment* toplevel_environment_ = nullptr;
 
-  DISALLOW_COPY_AND_ASSIGN(EnvironmentBuilder);
+  DISALLOW_COPY_AND_ASSIGN(NameResolver);
 };
 
 }  // namespace analyzer
 }  // namespace joana
 
-#endif  // JOANA_ANALYZER_ENVIRONMENT_BUILDER_H_
+#endif  // JOANA_ANALYZER_NAME_RESOLVER_H_

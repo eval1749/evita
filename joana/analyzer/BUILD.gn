@@ -20,11 +20,11 @@ source_set("analyzer") {
     "controller.h",
     "environment.cc",
     "environment.h",
-    "environment_builder.cc",
-    "environment_builder.h",
     "error_codes.h",
     "factory.cc",
     "factory.h",
+    "name_resolver.cc",
+    "name_resolver.h",
     "pass.cc",
     "pass.h",
     "print_as_tree.cc",
@@ -71,7 +71,7 @@ source_set("test_files") {
   sources = [
     "analyzer_test_base.cc",
     "analyzer_test_base.h",
-    "environment_builder_test.cc",
+    "name_resolver_test.cc",
     "type_resolver_test.cc",
   ]
   deps = [

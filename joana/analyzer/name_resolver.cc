@@ -6,7 +6,7 @@
 #include <unordered_map>
 #include <utility>
 
-#include "joana/analyzer/environment_builder.h"
+#include "joana/analyzer/name_resolver.h"
 
 #include "base/auto_reset.h"
 #include "joana/analyzer/built_in_world.h"
@@ -66,11 +66,11 @@ bool IsMemberExpression(const ast::Node& node) {
 }  // namespace
 
 //
-// EnvironmentBuilder::LocalEnvironment
+// NameResolver::LocalEnvironment
 //
-class EnvironmentBuilder::LocalEnvironment final {
+class NameResolver::LocalEnvironment final {
  public:
-  LocalEnvironment(EnvironmentBuilder* builder, const ast::Node& owner);
+  LocalEnvironment(NameResolver* builder, const ast::Node& owner);
   ~LocalEnvironment();
 
   const LocalEnvironment* outer() const { return outer_; }
@@ -84,7 +84,7 @@ class EnvironmentBuilder::LocalEnvironment final {
   Variable* FindVariable(const ast::Node& name) const;
 
  private:
-  EnvironmentBuilder& builder_;
+  NameResolver& builder_;
   LocalEnvironment* const outer_;
   const ast::Node& owner_;
   std::unordered_map<int, std::pair<const ast::Node*, const Type*>> type_map_;
@@ -93,32 +93,32 @@ class EnvironmentBuilder::LocalEnvironment final {
   DISALLOW_COPY_AND_ASSIGN(LocalEnvironment);
 };
 
-EnvironmentBuilder::LocalEnvironment::LocalEnvironment(
-    EnvironmentBuilder* builder,
+NameResolver::LocalEnvironment::LocalEnvironment(
+    NameResolver* builder,
     const ast::Node& owner)
     : builder_(*builder), outer_(builder_.environment_), owner_(owner) {
   builder_.environment_ = this;
 }
 
-EnvironmentBuilder::LocalEnvironment::~LocalEnvironment() {
+NameResolver::LocalEnvironment::~LocalEnvironment() {
   builder_.environment_ = outer_;
 }
 
-void EnvironmentBuilder::LocalEnvironment::BindType(const ast::Node& name,
+void NameResolver::LocalEnvironment::BindType(const ast::Node& name,
                                                     const Type& type) {
   const auto name_id = ast::Name::IdOf(name);
   const auto& result = type_map_.emplace(name_id, std::make_pair(&name, &type));
   DCHECK(result.second);
 }
 
-void EnvironmentBuilder::LocalEnvironment::BindVariable(const ast::Node& name,
+void NameResolver::LocalEnvironment::BindVariable(const ast::Node& name,
                                                         Variable* value) {
   const auto& result = value_map_.emplace(ast::Name::IdOf(name), value);
   DCHECK(result.second);
 }
 
 std::pair<const ast::Node*, const Type*>
-EnvironmentBuilder::LocalEnvironment::FindNameAndType(
+NameResolver::LocalEnvironment::FindNameAndType(
     const ast::Node& name) const {
   const auto& it = type_map_.find(ast::Name::IdOf(name));
   return it == type_map_.end()
@@ -126,28 +126,28 @@ EnvironmentBuilder::LocalEnvironment::FindNameAndType(
              : it->second;
 }
 
-const Type* EnvironmentBuilder::LocalEnvironment::FindType(
+const Type* NameResolver::LocalEnvironment::FindType(
     const ast::Node& name) const {
   const auto& it = type_map_.find(ast::Name::IdOf(name));
   return it == type_map_.end() ? nullptr : it->second.second;
 }
 
-Variable* EnvironmentBuilder::LocalEnvironment::FindVariable(
+Variable* NameResolver::LocalEnvironment::FindVariable(
     const ast::Node& name) const {
   const auto& it = value_map_.find(ast::Name::IdOf(name));
   return it == value_map_.end() ? nullptr : it->second;
 }
 
 //
-// EnvironmentBuilder
+// NameResolver
 //
-EnvironmentBuilder::EnvironmentBuilder(Context* context) : Pass(context) {}
+NameResolver::NameResolver(Context* context) : Pass(context) {}
 
-EnvironmentBuilder::~EnvironmentBuilder() = default;
+NameResolver::~NameResolver() = default;
 
 // The entry point. |node| is one of |ast::Externs|, |ast::Module| or
 // |ast::Script|.
-void EnvironmentBuilder::RunOn(const ast::Node& node) {
+void NameResolver::RunOn(const ast::Node& node) {
   auto& global_environment = context().global_environment();
   toplevel_environment_ =
       node == ast::SyntaxCode::Module
@@ -156,7 +156,7 @@ void EnvironmentBuilder::RunOn(const ast::Node& node) {
   Visit(node);
 }
 
-void EnvironmentBuilder::BindType(const ast::Node& name, const Type& type) {
+void NameResolver::BindType(const ast::Node& name, const Type& type) {
   DCHECK_EQ(name, ast::SyntaxCode::Name);
   if (environment_) {
     const auto& present = environment_->FindNameAndType(name);
@@ -181,12 +181,12 @@ void EnvironmentBuilder::BindType(const ast::Node& name, const Type& type) {
   toplevel_environment_->BindType(name, type);
 }
 
-void EnvironmentBuilder::BindTypeParameters(const Class& class_value) {
+void NameResolver::BindTypeParameters(const Class& class_value) {
   for (const auto& parameter : class_value.parameters())
     BindType(parameter.name(), parameter);
 }
 
-const Type* EnvironmentBuilder::FindType(const ast::Node& name) const {
+const Type* NameResolver::FindType(const ast::Node& name) const {
   DCHECK_EQ(name, ast::SyntaxCode::Name);
   if (environment_) {
     for (auto* runner = environment_; runner; runner = runner->outer()) {
@@ -201,7 +201,7 @@ const Type* EnvironmentBuilder::FindType(const ast::Node& name) const {
   return nullptr;
 }
 
-Variable& EnvironmentBuilder::BindVariable(const ast::Node& name) {
+Variable& NameResolver::BindVariable(const ast::Node& name) {
   DCHECK_EQ(name, ast::SyntaxCode::Name);
   if (environment_) {
     if (auto* present = environment_->FindVariable(name)) {
@@ -224,7 +224,7 @@ Variable& EnvironmentBuilder::BindVariable(const ast::Node& name) {
   return variable;
 }
 
-Variable* EnvironmentBuilder::FindVariable(const ast::Node& name) const {
+Variable* NameResolver::FindVariable(const ast::Node& name) const {
   DCHECK_EQ(name, ast::SyntaxCode::Name);
   if (environment_) {
     for (auto* runner = environment_; runner; runner = runner->outer()) {
@@ -239,7 +239,7 @@ Variable* EnvironmentBuilder::FindVariable(const ast::Node& name) const {
   return nullptr;
 }
 
-void EnvironmentBuilder::ProcessClass(const ast::Node& node,
+void NameResolver::ProcessClass(const ast::Node& node,
                                       const ast::Node* maybe_document) {
   // TODO(eval1749): Report warning for toplevel anonymous class
   // TODO(eval1749): We should check annotation for class to check
@@ -342,7 +342,7 @@ void EnvironmentBuilder::ProcessClass(const ast::Node& node,
   }
 }
 
-const ast::Node* EnvironmentBuilder::ProcessClassTag(
+const ast::Node* NameResolver::ProcessClassTag(
     const ast::Node& document) {
   const ast::Node* class_tag = nullptr;
   for (const auto& child : ast::NodeTraversal::ChildNodesOf(document)) {
@@ -357,7 +357,7 @@ const ast::Node* EnvironmentBuilder::ProcessClassTag(
   return class_tag;
 }
 
-void EnvironmentBuilder::ProcessFunction(const ast::Node& node,
+void NameResolver::ProcessFunction(const ast::Node& node,
                                          const ast::Node* maybe_document) {
   DCHECK_EQ(node, ast::SyntaxCode::Function);
   // TODO(eval1749): Report warning for toplevel anonymous class
@@ -397,7 +397,7 @@ void EnvironmentBuilder::ProcessFunction(const ast::Node& node,
   Visit(*maybe_document);
 }
 
-std::vector<const TypeParameter*> EnvironmentBuilder::ProcessTemplateTag(
+std::vector<const TypeParameter*> NameResolver::ProcessTemplateTag(
     const ast::Node& document) {
   std::vector<const TypeParameter*> type_parameters;
   for (const auto& node : ast::NodeTraversal::ChildNodesOf(document)) {
@@ -418,7 +418,7 @@ std::vector<const TypeParameter*> EnvironmentBuilder::ProcessTemplateTag(
   return type_parameters;
 }
 
-void EnvironmentBuilder::ProcessVariableDeclaration(const ast::Node& node,
+void NameResolver::ProcessVariableDeclaration(const ast::Node& node,
                                                     const ast::Node& document) {
   DCHECK(node.syntax().Is<ast::VariableDeclaration>()) << node;
   DCHECK_EQ(document, ast::SyntaxCode::JsDocDocument);
@@ -463,7 +463,7 @@ void EnvironmentBuilder::ProcessVariableDeclaration(const ast::Node& node,
 }
 
 // AST node handlers
-Variable& EnvironmentBuilder::ResolveVariableName(const ast::Node& name) {
+Variable& NameResolver::ResolveVariableName(const ast::Node& name) {
   DCHECK_EQ(name, ast::SyntaxCode::Name);
   if (auto* present = FindVariable(name))
     return *present;
@@ -473,7 +473,7 @@ Variable& EnvironmentBuilder::ResolveVariableName(const ast::Node& name) {
   return variable;
 }
 
-const Class* EnvironmentBuilder::TryClassOfPrototype(
+const Class* NameResolver::TryClassOfPrototype(
     const ast::Node& node) const {
   if (!node.Is<ast::MemberExpression>())
     return nullptr;
@@ -492,7 +492,7 @@ const Class* EnvironmentBuilder::TryClassOfPrototype(
   return &value->As<Class>();
 }
 
-void EnvironmentBuilder::VisitChildNodes(const ast::Node& node) {
+void NameResolver::VisitChildNodes(const ast::Node& node) {
   ancestors_.push_back(&node);
   for (const auto& child : ast::NodeTraversal::ChildNodesOf(node))
     Visit(child);
@@ -503,12 +503,12 @@ void EnvironmentBuilder::VisitChildNodes(const ast::Node& node) {
 // ast::NodeVisitor members
 //
 
-void EnvironmentBuilder::VisitDefault(const ast::Node& node) {
+void NameResolver::VisitDefault(const ast::Node& node) {
   VisitChildNodes(node);
 }
 
 // Binding elements
-void EnvironmentBuilder::VisitInternal(const ast::BindingNameElement& syntax,
+void NameResolver::VisitInternal(const ast::BindingNameElement& syntax,
                                        const ast::Node& node) {
   VisitDefault(node);
   auto& variable = BindVariable(ast::BindingNameElement::NameOf(node));
@@ -521,7 +521,7 @@ void EnvironmentBuilder::VisitInternal(const ast::BindingNameElement& syntax,
 }
 
 // Declarations
-void EnvironmentBuilder::VisitInternal(const ast::Annotation& syntax,
+void NameResolver::VisitInternal(const ast::Annotation& syntax,
                                        const ast::Node& node) {
   // Process annotated node before annotation to handle reference of class
   // name in constructor and parameter names for "@param".
@@ -595,23 +595,23 @@ void EnvironmentBuilder::VisitInternal(const ast::Annotation& syntax,
   AddError(node, ErrorCode::ENVIRONMENT_UNEXPECT_ANNOTATION);
 }
 
-void EnvironmentBuilder::VisitInternal(const ast::Class& syntax,
+void NameResolver::VisitInternal(const ast::Class& syntax,
                                        const ast::Node& node) {
   ProcessClass(node, nullptr);
 }
 
-void EnvironmentBuilder::VisitInternal(const ast::Function& syntax,
+void NameResolver::VisitInternal(const ast::Function& syntax,
                                        const ast::Node& node) {
   ProcessFunction(node, nullptr);
 }
 
-void EnvironmentBuilder::VisitInternal(const ast::Method& syntax,
+void NameResolver::VisitInternal(const ast::Method& syntax,
                                        const ast::Node& node) {
   NOTREACHED() << "Method should be processed in Class " << node;
 }
 
 // Expressions
-void EnvironmentBuilder::VisitInternal(const ast::AssignmentExpression& syntax,
+void NameResolver::VisitInternal(const ast::AssignmentExpression& syntax,
                                        const ast::Node& node) {
   VisitDefault(node);
   const auto& lhs = ast::AssignmentExpression::LeftHandSideOf(node);
@@ -624,7 +624,7 @@ void EnvironmentBuilder::VisitInternal(const ast::AssignmentExpression& syntax,
   Value::Editor().AddAssignment(&holder, node);
 }
 
-void EnvironmentBuilder::VisitInternal(
+void NameResolver::VisitInternal(
     const ast::ComputedMemberExpression& syntax,
     const ast::Node& node) {
   VisitDefault(node);
@@ -640,7 +640,7 @@ void EnvironmentBuilder::VisitInternal(
   context().RegisterValue(node, &property);
 }
 
-void EnvironmentBuilder::VisitInternal(const ast::MemberExpression& syntax,
+void NameResolver::VisitInternal(const ast::MemberExpression& syntax,
                                        const ast::Node& node) {
   VisitDefault(node);
   auto* const value =
@@ -653,7 +653,7 @@ void EnvironmentBuilder::VisitInternal(const ast::MemberExpression& syntax,
   context().RegisterValue(node, &property);
 }
 
-void EnvironmentBuilder::VisitInternal(const ast::ReferenceExpression& syntax,
+void NameResolver::VisitInternal(const ast::ReferenceExpression& syntax,
                                        const ast::Node& node) {
   const auto& name = ast::ReferenceExpression::NameOf(node);
   if (ast::Name::IsKeyword(name))
@@ -663,14 +663,14 @@ void EnvironmentBuilder::VisitInternal(const ast::ReferenceExpression& syntax,
 }
 
 // Statements
-void EnvironmentBuilder::VisitInternal(const ast::BlockStatement& syntax,
+void NameResolver::VisitInternal(const ast::BlockStatement& syntax,
                                        const ast::Node& node) {
   LocalEnvironment environment(this, node);
   VisitDefault(node);
 }
 
 // Types
-void EnvironmentBuilder::VisitInternal(const ast::TypeName& syntax,
+void NameResolver::VisitInternal(const ast::TypeName& syntax,
                                        const ast::Node& node) {
   const auto* type = FindType(ast::TypeName::NameOf(node));
   if (!type)

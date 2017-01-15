@@ -5,7 +5,7 @@
 #include <sstream>
 #include <string>
 
-#include "joana/analyzer/environment_builder.h"
+#include "joana/analyzer/name_resolver.h"
 
 #include "joana/analyzer/analyzer_test_base.h"
 #include "joana/analyzer/context.h"
@@ -23,24 +23,24 @@ namespace joana {
 namespace analyzer {
 
 //
-// EnvironmentBuilderTest
+// NameResolverTest
 //
-class EnvironmentBuilderTest : public AnalyzerTestBase {
+class NameResolverTest : public AnalyzerTestBase {
  protected:
-  EnvironmentBuilderTest() = default;
-  ~EnvironmentBuilderTest() override = default;
+  NameResolverTest() = default;
+  ~NameResolverTest() override = default;
 
   std::string RunOn(base::StringPiece script_text);
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(EnvironmentBuilderTest);
+  DISALLOW_COPY_AND_ASSIGN(NameResolverTest);
 };
 
-std::string EnvironmentBuilderTest::RunOn(base::StringPiece script_text) {
+std::string NameResolverTest::RunOn(base::StringPiece script_text) {
   const auto& module = ParseAsModule(script_text);
   const auto& context = NewContext();
-  EnvironmentBuilder builder(context.get());
-  builder.RunOn(module);
+  NameResolver resolver(context.get());
+  resolver.RunOn(module);
   std::ostringstream ostream;
   ostream << AsPrintableTree(*context, module) << std::endl;
   for (const auto& error : error_sink().errors())
@@ -48,7 +48,7 @@ std::string EnvironmentBuilderTest::RunOn(base::StringPiece script_text) {
   return ostream.str();
 }
 
-TEST_F(EnvironmentBuilderTest, Class) {
+TEST_F(NameResolverTest, Class) {
   EXPECT_EQ(
       "Module\n"
       "+--Class Class[Foo@1001]\n"
@@ -91,7 +91,7 @@ TEST_F(EnvironmentBuilderTest, Class) {
       RunOn("class Foo { /** @param {number} x */ foo(x) {} }"));
 }
 
-TEST_F(EnvironmentBuilderTest, ClassAnonymous) {
+TEST_F(NameResolverTest, ClassAnonymous) {
   EXPECT_EQ(
       "Module\n"
       "+--VarStatement\n"
@@ -104,7 +104,7 @@ TEST_F(EnvironmentBuilderTest, ClassAnonymous) {
       RunOn("var a = class {};"));
 }
 
-TEST_F(EnvironmentBuilderTest, ClassAnnotation) {
+TEST_F(NameResolverTest, ClassAnnotation) {
   EXPECT_EQ(
       "Module\n"
       "+--Annotation\n"
@@ -158,7 +158,7 @@ TEST_F(EnvironmentBuilderTest, ClassAnnotation) {
       RunOn("/** @template KEY @template VALUE */ class Map {}"));
 }
 
-TEST_F(EnvironmentBuilderTest, ClassError) {
+TEST_F(NameResolverTest, ClassError) {
   EXPECT_EQ(
       "Module\n"
       "+--Class Class[Foo@1001]\n"
@@ -187,7 +187,7 @@ TEST_F(EnvironmentBuilderTest, ClassError) {
       RunOn("class Foo { bar() {} bar() {} }"));
 }
 
-TEST_F(EnvironmentBuilderTest, ClassErrorConstructor) {
+TEST_F(NameResolverTest, ClassErrorConstructor) {
   EXPECT_EQ(
       "Module\n"
       "+--Class Class[Foo@1001]\n"
@@ -231,7 +231,7 @@ TEST_F(EnvironmentBuilderTest, ClassErrorConstructor) {
       << "constructor can not be static.";
 }
 
-TEST_F(EnvironmentBuilderTest, ComputedMemberExpression) {
+TEST_F(NameResolverTest, ComputedMemberExpression) {
   EXPECT_EQ(
       "Module\n"
       "+--Annotation\n"
@@ -262,7 +262,7 @@ TEST_F(EnvironmentBuilderTest, ComputedMemberExpression) {
             "/** @const */ Foo[Symbol.iterator]\n"));
 }
 
-TEST_F(EnvironmentBuilderTest, ConstError) {
+TEST_F(NameResolverTest, ConstError) {
   EXPECT_EQ(
       "Module\n"
       "+--ConstStatement\n"
@@ -277,7 +277,7 @@ TEST_F(EnvironmentBuilderTest, ConstError) {
       RunOn("const foo = 1, foo = 2;"));
 }
 
-TEST_F(EnvironmentBuilderTest, Function) {
+TEST_F(NameResolverTest, Function) {
   EXPECT_EQ(
       "Module\n"
       "+--Function<Normal> Function[foo@1001]\n"
@@ -300,7 +300,7 @@ TEST_F(EnvironmentBuilderTest, Function) {
       RunOn("function foo(a, b) { return a + b; }"));
 }
 
-TEST_F(EnvironmentBuilderTest, FunctionAnonymous) {
+TEST_F(NameResolverTest, FunctionAnonymous) {
   EXPECT_EQ(
       "Module\n"
       "+--VarStatement\n"
@@ -313,7 +313,7 @@ TEST_F(EnvironmentBuilderTest, FunctionAnonymous) {
       RunOn("var a = function() {};"));
 }
 
-TEST_F(EnvironmentBuilderTest, FunctionAnnotation) {
+TEST_F(NameResolverTest, FunctionAnnotation) {
   EXPECT_EQ(
       "Module\n"
       "+--Annotation\n"
@@ -335,7 +335,7 @@ TEST_F(EnvironmentBuilderTest, FunctionAnnotation) {
       RunOn("/** @constructor @template KEY, VALUE */ function Map() {}"));
 }
 
-TEST_F(EnvironmentBuilderTest, Global) {
+TEST_F(NameResolverTest, Global) {
   EXPECT_EQ(
       "Module\n"
       "+--ExpressionStatement\n"
@@ -349,7 +349,7 @@ TEST_F(EnvironmentBuilderTest, Global) {
       RunOn("global.foo = 1;"));
 }
 
-TEST_F(EnvironmentBuilderTest, GroupExpression) {
+TEST_F(NameResolverTest, GroupExpression) {
   EXPECT_EQ(
       "Module\n"
       "+--ReturnStatement\n"
@@ -367,7 +367,7 @@ TEST_F(EnvironmentBuilderTest, GroupExpression) {
       RunOn("return /** @type {number} */(foo);"));
 }
 
-TEST_F(EnvironmentBuilderTest, Let) {
+TEST_F(NameResolverTest, Let) {
   EXPECT_EQ(
       "Module\n"
       "+--LetStatement\n"
@@ -380,7 +380,7 @@ TEST_F(EnvironmentBuilderTest, Let) {
       RunOn("let a = 1, b = 2;"));
 }
 
-TEST_F(EnvironmentBuilderTest, LetError) {
+TEST_F(NameResolverTest, LetError) {
   EXPECT_EQ(
       "Module\n"
       "+--LetStatement\n"
@@ -395,7 +395,7 @@ TEST_F(EnvironmentBuilderTest, LetError) {
       RunOn("let foo = 1, foo = 2;"));
 }
 
-TEST_F(EnvironmentBuilderTest, MemberExpression) {
+TEST_F(NameResolverTest, MemberExpression) {
   EXPECT_EQ(
       "Module\n"
       "+--Annotation\n"
@@ -426,7 +426,7 @@ TEST_F(EnvironmentBuilderTest, MemberExpression) {
       << "Old style class externs";
 }
 
-TEST_F(EnvironmentBuilderTest, Property) {
+TEST_F(NameResolverTest, Property) {
   EXPECT_EQ(
       "Module\n"
       "+--Annotation\n"
@@ -496,7 +496,7 @@ TEST_F(EnvironmentBuilderTest, Property) {
       << "'foo.prop@1003' should be singleton.";
 }
 
-TEST_F(EnvironmentBuilderTest, Prototype) {
+TEST_F(NameResolverTest, Prototype) {
   EXPECT_EQ(
       "Module\n"
       "+--Annotation\n"
@@ -569,7 +569,7 @@ TEST_F(EnvironmentBuilderTest, Prototype) {
       << "Bind template parameter for 'Foo.prototyp[baz]'";
 }
 
-TEST_F(EnvironmentBuilderTest, Super) {
+TEST_F(NameResolverTest, Super) {
   EXPECT_EQ(
       "Module\n"
       "+--ExpressionStatement\n"
@@ -605,7 +605,7 @@ TEST_F(EnvironmentBuilderTest, Super) {
       << "'super' has no value";
 }
 
-TEST_F(EnvironmentBuilderTest, This) {
+TEST_F(NameResolverTest, This) {
   EXPECT_EQ(
       "Module\n"
       "+--ExpressionStatement\n"
@@ -641,7 +641,7 @@ TEST_F(EnvironmentBuilderTest, This) {
       << "'this' has no value";
 }
 
-TEST_F(EnvironmentBuilderTest, Type) {
+TEST_F(NameResolverTest, Type) {
   EXPECT_EQ(
       "Module\n"
       "+--Annotation\n"
@@ -712,7 +712,7 @@ TEST_F(EnvironmentBuilderTest, Type) {
       << "Later pass will report @template is unexpected for const.";
 }
 
-TEST_F(EnvironmentBuilderTest, VarConstructor) {
+TEST_F(NameResolverTest, VarConstructor) {
   EXPECT_EQ(
       "Module\n"
       "+--Annotation\n"
@@ -728,7 +728,7 @@ TEST_F(EnvironmentBuilderTest, VarConstructor) {
       RunOn("/** @constructor */ var Foo;"));
 }
 
-TEST_F(EnvironmentBuilderTest, VarError) {
+TEST_F(NameResolverTest, VarError) {
   EXPECT_EQ(
       "Module\n"
       "+--VarStatement\n"

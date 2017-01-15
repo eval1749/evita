@@ -9,7 +9,7 @@
 
 #include "joana/analyzer/analyzer_test_base.h"
 #include "joana/analyzer/context.h"
-#include "joana/analyzer/environment_builder.h"
+#include "joana/analyzer/name_resolver.h"
 #include "joana/analyzer/print_as_tree.h"
 #include "joana/analyzer/type.h"
 #include "joana/analyzer/value.h"
@@ -41,8 +41,8 @@ std::string TypeResolverTest::RunOn(base::StringPiece script_text) {
   const auto& module = ParseAsModule(script_text);
   const auto& context = NewContext();
   {
-    EnvironmentBuilder builder(context.get());
-    builder.RunOn(module);
+    NameResolver name_resolver(context.get());
+    name_resolver.RunOn(module);
   }
   {
     TypeResolver type_resolver(context.get());

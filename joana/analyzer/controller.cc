@@ -14,8 +14,8 @@
 #include "joana/analyzer/built_in_world.h"
 #include "joana/analyzer/context.h"
 #include "joana/analyzer/environment.h"
-#include "joana/analyzer/environment_builder.h"
 #include "joana/analyzer/factory.h"
+#include "joana/analyzer/name_resolver.h"
 #include "joana/analyzer/print_as_tree.h"
 #include "joana/analyzer/type_checker.h"
 #include "joana/analyzer/type_resolver.h"
@@ -78,7 +78,7 @@ std::unique_ptr<Pass> NewPass(Context* context) {
 }
 
 const std::array<const PassEntry, 3> kPassList = {
-    PassEntry{&NewPass<EnvironmentBuilder>, "var"},
+    PassEntry{&NewPass<NameResolver>, "name"},
     PassEntry{&NewPass<TypeResolver>, "type"},
     PassEntry{&NewPass<TypeChecker>, "check"},
 };

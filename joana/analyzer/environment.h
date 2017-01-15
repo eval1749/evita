@@ -48,7 +48,7 @@ class Environment final : public ZoneAllocated {
 
  private:
   friend class Context;
-  friend class EnvironmentBuilder;
+  friend class NameResolver;
 
   Environment(Zone* zone, Environment* outer, const ast::Node& owner);
   Environment(Zone* zone, const ast::Node& owner);

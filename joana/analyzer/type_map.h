@@ -32,7 +32,7 @@ class TypeMap final {
   const Type& TypeOf(const ast::Node& node) const;
 
  private:
-  friend class EnvironmentBuilder;
+  friend class NameResolver;
 
   std::unordered_map<const ast::Node*, const Type*> type_map_;
 

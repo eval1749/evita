@@ -266,7 +266,7 @@ void Annotation::ProcessParameter(
 
     AddError(name, ErrorCode::JSDOC_EXPECT_TYPE);
     parameter_names->push_back(&name);
-    parameter_types->push_back(&type_factory().GetUnspecifiedType());
+    parameter_types->push_back(&type_factory().unspecified_type());
     return;
   }
   NOTREACHED() << "NYI ProcessParameter " << parameter_node;
@@ -421,7 +421,7 @@ const Type& Annotation::TransformAsInterface() {
   auto* const class_value = TryClassValueOf(node_);
   if (!class_value) {
     AddError(node_, ErrorCode::JSDOC_UNEXPECT_TAG);
-    return type_factory().GetUnspecifiedType();
+    return type_factory().unspecified_type();
   }
   return type_factory().GetOrNewClassType(class_value);
 }
@@ -430,7 +430,7 @@ const Type& Annotation::TransformType(const ast::Node& node) {
   if (node.Is<ast::AnyType>())
     return type_factory().any_type();
   if (node.Is<ast::InvalidType>())
-    return type_factory().GetUnspecifiedType();
+    return type_factory().unspecified_type();
   if (node.Is<ast::NonNullableType>()) {
     // TODO(eval1749): We should report non-nullable type with primitive type
     // and type alias(?).
@@ -444,14 +444,14 @@ const Type& Annotation::TransformType(const ast::Node& node) {
     if (const auto* type = context().TryTypeOf(node))
       return *type;
     NOTREACHED() << "We should handle forward type reference." << node;
-    return type_factory().GetUnspecifiedType();
+    return type_factory().unspecified_type();
   }
   if (node.Is<ast::UnknownType>()) {
     // Unknown type is the source of bug, we should avoid to use.
     return type_factory().any_type();
   }
   DVLOG(0) << "We should handle " << node;
-  return type_factory().GetUnspecifiedType();
+  return type_factory().unspecified_type();
 }
 
 Class* Annotation::TryClassValueOf(const ast::Node& node) const {

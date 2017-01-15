@@ -232,6 +232,45 @@ TEST_F(TypeResolverTest, TupleType) {
       RunOn("/** @type {[number,string]} */ var foo"));
 }
 
+TEST_F(TypeResolverTest, TypeApplication) {
+  EXPECT_EQ(
+      "Module\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument Interface[%anonymous%<T>@1002]\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@interface|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@template|\n"
+      "|  |  |  +--TypeName {T@1003}\n"
+      "|  |  |  |  +--Name |T|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--VarStatement\n"
+      "|  |  +--BindingNameElement VarVar[Foo@1001]\n"
+      "|  |  |  +--Name |Foo|\n"
+      "|  |  |  +--ElisionExpression ||\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument Class[%anonymous%@1004]\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@constructor|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@implements|\n"
+      "|  |  |  +--TypeApplication\n"
+      "|  |  |  |  +--TypeName {class<T>@1002}\n"
+      "|  |  |  |  |  +--Name |Foo|\n"
+      "|  |  |  |  +--Tuple\n"
+      "|  |  |  |  |  +--TypeName {%number%}\n"
+      "|  |  |  |  |  |  +--Name |number|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--VarStatement\n"
+      "|  |  +--BindingNameElement VarVar[Bar@1003]\n"
+      "|  |  |  +--Name |Bar|\n"
+      "|  |  |  +--ElisionExpression ||\n",
+      RunOn("/** @interface @template T */ var Foo;"
+            "/** @constructor @implements {Foo<number>} */ var Bar;"));
+}
+
 TEST_F(TypeResolverTest, UnionType) {
   EXPECT_EQ(
       "Module\n"

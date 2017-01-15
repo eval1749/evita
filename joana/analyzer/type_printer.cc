@@ -51,9 +51,18 @@ std::ostream& operator<<(std::ostream& ostream,
   if (name.Is<ast::Name>())
     ostream << ' ' << ast::AsSourceCode(name);
   const auto* delimiter = "<";
-  for (const auto& parameter : type.value().parameters()) {
-    ostream << delimiter << AsSourceCode(parameter.name());
-    delimiter = ",";
+  if (auto* class_value = type.value().TryAs<Class>()) {
+    for (const auto& parameter : class_value->parameters()) {
+      ostream << delimiter << AsSourceCode(parameter.name());
+      delimiter = ",";
+    }
+  } else if (auto* class_value = type.value().TryAs<ConstructedClass>()) {
+    for (const auto& argument : class_value->arguments()) {
+      ostream << delimiter << argument;
+      delimiter = ",";
+    }
+  } else {
+    NOTREACHED() << "unsupported value " << type.value();
   }
   if (*delimiter == ',')
     ostream << '>';
@@ -183,7 +192,8 @@ std::ostream& operator<<(std::ostream& ostream, const Type* type) {
   return ostream << *type;
 }
 
-std::ostream& operator<<(std::ostream& ostream, std::set<const Type*>& types) {
+std::ostream& operator<<(std::ostream& ostream,
+                         const std::set<const Type*>& types) {
   auto* delimiter = "";
   ostream << '{';
   for (const auto& type : types) {
@@ -194,7 +204,7 @@ std::ostream& operator<<(std::ostream& ostream, std::set<const Type*>& types) {
 }
 
 std::ostream& operator<<(std::ostream& ostream,
-                         std::vector<const Type*>& types) {
+                         const std::vector<const Type*>& types) {
   auto* delimiter = "";
   ostream << '[';
   for (const auto& type : types) {

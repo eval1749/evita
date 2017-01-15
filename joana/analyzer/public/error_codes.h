@@ -12,9 +12,11 @@ namespace joana {
 
 // V(pass, reason)
 #define FOR_EACH_ANALYZER_ERROR_CODE(V)       \
+  V(JSDOC, EXPECT_GENERIC_CLASS)              \
   V(JSDOC, EXPECT_NAME)                       \
   V(JSDOC, EXPECT_PARAMETER)                  \
   V(JSDOC, EXPECT_TYPE)                       \
+  V(JSDOC, INVALID_ARGUMENTS)                 \
   V(JSDOC, MULTIPLE_NAME)                     \
   V(JSDOC, MULTIPLE_PARAMETER)                \
   V(JSDOC, MULTIPLE_TAG)                      \

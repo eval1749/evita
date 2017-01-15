@@ -11,6 +11,7 @@
 
 #include "joana/analyzer/built_in_world.h"
 #include "joana/analyzer/types.h"
+#include "joana/analyzer/values.h"
 #include "joana/ast/tokens.h"
 
 namespace joana {
@@ -34,26 +35,26 @@ class TypeFactory::Cache final {
   ~Cache();
 
   template <typename Key>
-  const Type* Find(Key key) {
+  const Type* Find(const Key& key) {
     const auto& map = MapFor(key);
     const auto& it = map.find(key);
     return it == map.end() ? nullptr : it->second;
   }
 
   template <typename Key>
-  void Register(Key key, const Type& type) {
+  void Register(const Key& key, const Type& type) {
     auto& map = MapFor(key);
     const auto& result = map.emplace(key, &type);
     DCHECK(result.second) << "Cache already has " << key;
   }
 
  private:
-  using ClassTypeMap = std::unordered_map<Class*, const Type*>;
+  using ClassTypeMap = std::unordered_map<Value*, const Type*>;
   using PrimitiveTypeMap = std::unordered_map<ast::TokenKind, const Type*>;
   using TupleTypeMap = std::map<std::vector<const Type*>, const Type*>;
   using UnionTypeMap = std::map<std::set<const Type*>, const Type*>;
 
-  ClassTypeMap& MapFor(const Class* class_value) { return class_type_map_; }
+  ClassTypeMap& MapFor(const Value* class_value) { return class_type_map_; }
   PrimitiveTypeMap& MapFor(ast::TokenKind kind) { return primitive_type_map_; }
   TupleTypeMap& MapFor(const std::vector<const Type*>&) {
     return tuple_type_map_;
@@ -106,7 +107,9 @@ int TypeFactory::NextTypeId() {
   return ++current_type_id_;
 }
 
-const Type& TypeFactory::NewClassType(Class* class_value) {
+const Type& TypeFactory::NewClassType(Value* class_value) {
+  DCHECK(class_value->Is<Class>() || class_value->Is<ConstructedClass>())
+      << class_value;
   const auto* type = cache_->Find(class_value);
   if (type)
     return *type;

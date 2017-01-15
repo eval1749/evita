@@ -61,9 +61,10 @@ class Type : public Castable<Type>, public ZoneAllocated {
 // See "type_printer.cc" for implementation of |Type| printer.
 std::ostream& operator<<(std::ostream& ostream, const Type& type);
 std::ostream& operator<<(std::ostream& ostream, const Type* type);
-std::ostream& operator<<(std::ostream& ostream, std::set<const Type*>& types);
 std::ostream& operator<<(std::ostream& ostream,
-                         std::vector<const Type*>& types);
+                         const std::set<const Type*>& types);
+std::ostream& operator<<(std::ostream& ostream,
+                         const std::vector<const Type*>& types);
 
 }  // namespace analyzer
 }  // namespace joana

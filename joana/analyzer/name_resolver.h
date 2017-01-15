@@ -44,7 +44,7 @@ class NameResolver final : public Pass, public ast::SyntaxVisitor {
   void RunOn(const ast::Node& node) final;
 
  private:
-  class LocalEnvironment;
+  class Environment;
 
   // Bind |name| to |type| in current environment.
   void BindType(const ast::Node& name, const Type& type);
@@ -116,9 +116,9 @@ class NameResolver final : public Pass, public ast::SyntaxVisitor {
 
   std::vector<const ast::Node*> ancestors_;
 
-  LocalEnvironment* environment_ = nullptr;
+  Environment* environment_ = nullptr;
 
-  const std::unique_ptr<LocalEnvironment> global_environment_;
+  const std::unique_ptr<Environment> global_environment_;
 
   DISALLOW_COPY_AND_ASSIGN(NameResolver);
 };

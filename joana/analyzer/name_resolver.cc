@@ -66,15 +66,15 @@ bool IsMemberExpression(const ast::Node& node) {
 }  // namespace
 
 //
-// NameResolver::LocalEnvironment
+// NameResolver::Environment
 //
-class NameResolver::LocalEnvironment final {
+class NameResolver::Environment final {
  public:
-  explicit LocalEnvironment(NameResolver* resolver);
-  ~LocalEnvironment();
+  explicit Environment(NameResolver* resolver);
+  ~Environment();
 
-  const LocalEnvironment* outer() const { return outer_; }
-  LocalEnvironment* outer() { return outer_; }
+  const Environment* outer() const { return outer_; }
+  Environment* outer() { return outer_; }
 
   void AddForwardReferencedType(const ast::Node& node);
   void AddForwardReferencedVariable(const ast::Node& node);
@@ -86,7 +86,7 @@ class NameResolver::LocalEnvironment final {
   const Type* FindType(const ast::Node& name) const;
   Variable* FindVariable(const ast::Node& name) const;
 
-  static std::unique_ptr<LocalEnvironment> NewGlobalEnvironment(
+  static std::unique_ptr<Environment> NewGlobalEnvironment(
       NameResolver* resolver);
 
  private:
@@ -94,73 +94,71 @@ class NameResolver::LocalEnvironment final {
 
   std::vector<const ast::Node*> forward_referenced_types_;
   std::vector<const ast::Node*> forward_referenced_variables_;
-  LocalEnvironment* const outer_;
+  Environment* const outer_;
   NameResolver& resolver_;
   std::unordered_map<int, std::pair<const ast::Node*, const Type*>> type_map_;
   std::unordered_map<int, Variable*> value_map_;
 
-  DISALLOW_COPY_AND_ASSIGN(LocalEnvironment);
+  DISALLOW_COPY_AND_ASSIGN(Environment);
 };
 
-NameResolver::LocalEnvironment::LocalEnvironment(NameResolver* resolver)
+NameResolver::Environment::Environment(NameResolver* resolver)
     : outer_(resolver->environment_), resolver_(*resolver) {
   resolver_.environment_ = this;
 }
 
-NameResolver::LocalEnvironment::~LocalEnvironment() {
+NameResolver::Environment::~Environment() {
   ResolveForwardReferences();
   resolver_.environment_ = outer_;
 }
 
-void NameResolver::LocalEnvironment::AddForwardReferencedType(
+void NameResolver::Environment::AddForwardReferencedType(
     const ast::Node& node) {
   DCHECK_EQ(node, ast::SyntaxCode::TypeName);
   forward_referenced_types_.push_back(&node);
 }
 
-void NameResolver::LocalEnvironment::AddForwardReferencedVariable(
+void NameResolver::Environment::AddForwardReferencedVariable(
     const ast::Node& node) {
   DCHECK_EQ(node, ast::SyntaxCode::ReferenceExpression);
   forward_referenced_variables_.push_back(&node);
 }
 
-void NameResolver::LocalEnvironment::BindType(const ast::Node& name,
-                                              const Type& type) {
+void NameResolver::Environment::BindType(const ast::Node& name,
+                                         const Type& type) {
   const auto name_id = ast::Name::IdOf(name);
   const auto& result = type_map_.emplace(name_id, std::make_pair(&name, &type));
   DCHECK(result.second);
 }
 
-void NameResolver::LocalEnvironment::BindVariable(const ast::Node& name,
-                                                  Variable* value) {
+void NameResolver::Environment::BindVariable(const ast::Node& name,
+                                             Variable* value) {
   const auto& result = value_map_.emplace(ast::Name::IdOf(name), value);
   DCHECK(result.second);
 }
 
 std::pair<const ast::Node*, const Type*>
-NameResolver::LocalEnvironment::FindNameAndType(const ast::Node& name) const {
+NameResolver::Environment::FindNameAndType(const ast::Node& name) const {
   const auto& it = type_map_.find(ast::Name::IdOf(name));
   return it == type_map_.end()
              ? std::pair<const ast::Node*, const Type*>(nullptr, nullptr)
              : it->second;
 }
 
-const Type* NameResolver::LocalEnvironment::FindType(
-    const ast::Node& name) const {
+const Type* NameResolver::Environment::FindType(const ast::Node& name) const {
   const auto& it = type_map_.find(ast::Name::IdOf(name));
   return it == type_map_.end() ? nullptr : it->second.second;
 }
 
-Variable* NameResolver::LocalEnvironment::FindVariable(
-    const ast::Node& name) const {
+Variable* NameResolver::Environment::FindVariable(const ast::Node& name) const {
   const auto& it = value_map_.find(ast::Name::IdOf(name));
   return it == value_map_.end() ? nullptr : it->second;
 }
 
 // static
-std::unique_ptr<NameResolver::LocalEnvironment>
-NameResolver::LocalEnvironment::NewGlobalEnvironment(NameResolver* resolver) {
-  auto environment = std::make_unique<LocalEnvironment>(resolver);
+std::unique_ptr<NameResolver::Environment>
+NameResolver::Environment::NewGlobalEnvironment(NameResolver* resolver) {
+  auto environment = std::make_unique<Environment>(resolver);
   // Initialize primitive types
   for (const auto id : BuiltInWorld::GetInstance()->primitive_types()) {
     const auto& name = BuiltInWorld::GetInstance()->NameOf(id);
@@ -180,7 +178,7 @@ NameResolver::LocalEnvironment::NewGlobalEnvironment(NameResolver* resolver) {
   return std::move(environment);
 }
 
-void NameResolver::LocalEnvironment::ResolveForwardReferences() {
+void NameResolver::Environment::ResolveForwardReferences() {
   for (const auto& node : ReferenceRangeOf(forward_referenced_variables_)) {
     auto* const present = FindVariable(ast::ReferenceExpression::NameOf(node));
     if (present) {
@@ -212,8 +210,7 @@ void NameResolver::LocalEnvironment::ResolveForwardReferences() {
 //
 NameResolver::NameResolver(Context* context)
     : Pass(context),
-      global_environment_(
-          std::move(LocalEnvironment::NewGlobalEnvironment(this))) {
+      global_environment_(std::move(Environment::NewGlobalEnvironment(this))) {
   factory().ResetValueId();
 }
 
@@ -223,7 +220,7 @@ NameResolver::~NameResolver() = default;
 // |ast::Script|.
 void NameResolver::RunOn(const ast::Node& node) {
   if (node.Is<ast::Module>()) {
-    LocalEnvironment toplevel_environment(this);
+    Environment toplevel_environment(this);
     Visit(node);
     return;
   }
@@ -301,7 +298,7 @@ void NameResolver::ProcessClass(const ast::Node& node,
     BindType(class_name, type_factory().GetOrNewClassType(&class_value));
 
   // Class wide template parameters.
-  LocalEnvironment environment(this);
+  Environment environment(this);
   BindTypeParameters(class_value);
   if (maybe_document)
     Visit(*maybe_document);
@@ -341,7 +338,7 @@ void NameResolver::ProcessClass(const ast::Node& node,
     context().RegisterValue(member, &method);
     Value::Editor().AddMethod(&class_value, &method);
 
-    LocalEnvironment environment(this);
+    Environment environment(this);
     BindTypeParameters(class_value);
     VisitDefault(member);
 
@@ -399,7 +396,7 @@ const ast::Node* NameResolver::ProcessClassTag(const ast::Node& document) {
 
 void NameResolver::ProcessDocument(const ast::Node& document) {
   DCHECK_EQ(document, ast::SyntaxCode::JsDocDocument);
-  LocalEnvironment environment(this);
+  Environment environment(this);
   for (const auto& child : ast::NodeTraversal::ChildNodesOf(document)) {
     if (!child.Is<ast::JsDocTag>())
       continue;
@@ -447,7 +444,7 @@ void NameResolver::ProcessFunction(const ast::Node& node,
     Value::Editor().AddAssignment(&variable, node);
   }
 
-  LocalEnvironment environment(this);
+  Environment environment(this);
   if (!maybe_document)
     return VisitChildNodes(node);
   for (const auto& type_parameter : type_parameters)
@@ -605,7 +602,7 @@ void NameResolver::VisitInternal(const ast::Annotation& syntax,
       Visit(rhs);
       return;
     }
-    LocalEnvironment environment(this);
+    Environment environment(this);
     if (const auto* class_value = TryClassOfPrototype(lhs.child_at(0)))
       BindTypeParameters(*class_value);
     if (rhs.Is<ast::Class>()) {
@@ -624,7 +621,7 @@ void NameResolver::VisitInternal(const ast::Annotation& syntax,
   if (IsMemberExpression(expression)) {
     Visit(expression);
     const auto& member = expression.child_at(0);
-    LocalEnvironment environment(this);
+    Environment environment(this);
     if (const auto* class_value = TryClassOfPrototype(member))
       BindTypeParameters(*class_value);
     if (const auto* class_tag = ProcessClassTag(document)) {
@@ -716,7 +713,7 @@ void NameResolver::VisitInternal(const ast::ReferenceExpression& syntax,
 // Statements
 void NameResolver::VisitInternal(const ast::BlockStatement& syntax,
                                  const ast::Node& node) {
-  LocalEnvironment environment(this);
+  Environment environment(this);
   VisitDefault(node);
 }
 

@@ -43,7 +43,7 @@ void TypeChecker::VisitInternal(const ast::ReferenceExpression& syntax,
   }
   if (!value->Is<Variable>() || !value->As<Variable>().assignments().empty())
     return;
-  AddError(node, ErrorCode::TYPE_CHECKER_UNDEFINED_VARIABLE);
+  AddError(node, ErrorCode::TYPE_CHECKER_UNINITIALIZED_VARIABLE);
 }
 
 // Types

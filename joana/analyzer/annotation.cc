@@ -193,7 +193,7 @@ const Type* Annotation::Compile() {
 
 const Type& Annotation::ComputeReturnType() {
   if (!return_tag_)
-    return type_factory().void_type();
+    return void_type();
   return TransformType(return_tag_->child_at(1));
 }
 
@@ -202,17 +202,17 @@ const Type& Annotation::ComputeReturnType() {
 // - Class.prototype.Name;
 // - Class.prototype[Expression];
 const Type& Annotation::ComputeThisType() {
-  return this_type_ ? *this_type_ : type_factory().void_type();
+  return this_type_ ? *this_type_ : void_type();
 }
 
 // Returns type of |Expression| where |Expression| '.' 'prototype'.
 const Type& Annotation::ComputeThisTypeFromMember(const ast::Node& node) {
   if (!IsPrototypeProperty(node))
-    return type_factory().void_type();
+    return void_type();
   if (const auto* type = context().TryTypeOf(node))
     return *type;
   AddError(node, ErrorCode::JSDOC_EXPECT_TYPE);
-  return type_factory().void_type();
+  return void_type();
 }
 
 // Note: We can't check whether @override tag is valid or invalid since we
@@ -266,7 +266,7 @@ void Annotation::ProcessParameter(
 
     AddError(name, ErrorCode::JSDOC_EXPECT_TYPE);
     parameter_names->push_back(&name);
-    parameter_types->push_back(&type_factory().unspecified_type());
+    parameter_types->push_back(&unspecified_type());
     return;
   }
   NOTREACHED() << "NYI ProcessParameter " << parameter_node;
@@ -377,12 +377,12 @@ const Type& Annotation::TransformAsFunctionType() {
       case ast::MethodKind::Static:
         // Note: It is OK to name method to |Constructor|, e.g.
         // class Foo { static constructor() {} }
-        return type_factory().NewFunctionType(
-            FunctionTypeKind::Normal, type_parameters_, parameter_types,
-            ComputeReturnType(), type_factory().void_type());
+        return type_factory().NewFunctionType(FunctionTypeKind::Normal,
+                                              type_parameters_, parameter_types,
+                                              ComputeReturnType(), void_type());
     }
     NOTREACHED() << "Unknown MethodKind " << static_cast<int>(method_kind);
-    return type_factory().void_type();
+    return void_type();
   }
 
   // Short hand of single parameter or no parameter function, e.g.
@@ -414,23 +414,23 @@ const Type& Annotation::TransformAsFunctionType() {
   }
 
   AddError(*kind_tag_, ErrorCode::JSDOC_UNEXPECT_TAG);
-  return type_factory().void_type();
+  return void_type();
 }
 
 const Type& Annotation::TransformAsInterface() {
   auto* const class_value = TryClassValueOf(node_);
   if (!class_value) {
     AddError(node_, ErrorCode::JSDOC_UNEXPECT_TAG);
-    return type_factory().unspecified_type();
+    return unspecified_type();
   }
   return type_factory().NewClassType(class_value);
 }
 
 const Type& Annotation::TransformType(const ast::Node& node) {
   if (node.Is<ast::AnyType>())
-    return type_factory().any_type();
+    return any_type();
   if (node.Is<ast::InvalidType>())
-    return type_factory().unspecified_type();
+    return unspecified_type();
   if (node.Is<ast::NonNullableType>()) {
     // TODO(eval1749): We should report non-nullable type with primitive type
     // and type alias(?).
@@ -444,14 +444,14 @@ const Type& Annotation::TransformType(const ast::Node& node) {
     if (const auto* type = context().TryTypeOf(node))
       return *type;
     NOTREACHED() << "We should handle forward type reference." << node;
-    return type_factory().unspecified_type();
+    return unspecified_type();
   }
   if (node.Is<ast::UnknownType>()) {
     // Unknown type is the source of bug, we should avoid to use.
-    return type_factory().any_type();
+    return any_type();
   }
   DVLOG(0) << "We should handle " << node;
-  return type_factory().unspecified_type();
+  return unspecified_type();
 }
 
 Class* Annotation::TryClassValueOf(const ast::Node& node) const {

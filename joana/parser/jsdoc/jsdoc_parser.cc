@@ -185,6 +185,10 @@ const ast::Node* JsDocParser::Parse() {
 const ast::Node& JsDocParser::ParseDescription() {
   SkipWhitespaces();
   const auto text_start = reader_->location();
+  if (CanPeekChar() && IsLineTerminator(PeekChar())) {
+    ConsumeChar();
+    return NewText(text_start, text_start);
+  }
   auto text_end = SkipToBlockTag();
   return NewText(text_start, text_end);
 }
@@ -409,8 +413,10 @@ int JsDocParser::SkipToBlockTag() {
 }
 
 void JsDocParser::SkipWhitespaces() {
-  while (CanPeekChar() && IsWhitespace(PeekChar()))
+  while (CanPeekChar() && IsWhitespace(PeekChar()) &&
+         !IsLineTerminator(PeekChar())) {
     ConsumeChar();
+  }
 }
 
 }  // namespace parser

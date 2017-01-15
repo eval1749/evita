@@ -272,6 +272,17 @@ TEST_F(JsDocParserTest, SyntaxTypeDescription) {
       "|  |  |  |  +--Name |string|\n"
       "|  +--JsDocText |human|\n",
       Parse("@define {{age:number, sex:string}} human"));
+
+  EXPECT_EQ(
+      "JsDocDocument\n"
+      "+--JsDocText |* \n *|\n"
+      "+--JsDocTag\n"
+      "|  +--Name |@return|\n"
+      "|  +--TypeName\n"
+      "|  |  +--Name |foo|\n"
+      "|  +--JsDocText ||\n"
+      "+--JsDocText |*|\n",
+      Parse(" * \n * @return {foo}  \n  * \n"));
 }
 
 TEST_F(JsDocParserTest, SyntaxTypeVarDescription) {

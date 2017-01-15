@@ -20,6 +20,7 @@ namespace analyzer {
 class Context;
 enum class ErrorCode;
 class Factory;
+class Type;
 class TypeFactory;
 
 //
@@ -36,6 +37,14 @@ class ContextUser {
   Context& context() { return context_; }
   Factory& factory() const;
   TypeFactory& type_factory() const;
+
+  // Shortcut for |TypeFactory|
+  const Type& any_type() const;
+  const Type& invalid_type() const;
+  const Type& nil_type() const;
+  const Type& null_type() const;
+  const Type& unspecified_type() const;
+  const Type& void_type() const;
 
   void AddError(const ast::Node& node, ErrorCode error_code);
   void AddError(const ast::Node& node,

@@ -177,5 +177,18 @@ std::ostream& operator<<(std::ostream& ostream, const Syntax* syntax) {
   return ostream << *syntax;
 }
 
+std::ostream& operator<<(std::ostream& ostream, SyntaxCode syntax_code) {
+  static const char* const kTexts[] = {
+    "None",
+#define V(name) #name,
+    FOR_EACH_AST_SYNTAX(V)
+#undef V
+  };
+  const auto& it = std::begin(kTexts) + static_cast<size_t>(syntax_code);
+  if (it < std::begin(kTexts) || it >= std::end(kTexts))
+    return ostream << "SyntaxCode" << static_cast<size_t>(syntax_code);
+  return ostream << *it;
+}
+
 }  // namespace ast
 }  // namespace joana

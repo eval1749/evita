@@ -235,6 +235,8 @@ class SyntaxTemplate : public Base {
 
 // See "syntax_printer.cc" for implementation
 JOANA_AST_EXPORT std::ostream& operator<<(std::ostream& ostream,
+                                          SyntaxCode syntax_code);
+JOANA_AST_EXPORT std::ostream& operator<<(std::ostream& ostream,
                                           const Syntax& syntax);
 JOANA_AST_EXPORT std::ostream& operator<<(std::ostream& ostream,
                                           const Syntax* syntax);

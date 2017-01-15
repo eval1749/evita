@@ -117,6 +117,25 @@ TypeParameter::TypeParameter(int id, const ast::Node& name)
 TypeParameter::~TypeParameter() = default;
 
 //
+// UnionType
+//
+UnionType::UnionType(int id, const std::vector<const Type*>& members)
+    : Type(id), number_of_members_(members.size()) {
+  DCHECK_GE(number_of_members_, 2);
+  auto* runner = members_;
+  for (const auto& member : members) {
+    *runner = member;
+    runner++;
+  }
+}
+
+UnionType::~UnionType() = default;
+
+BlockRange<const Type*> UnionType::members() const {
+  return BlockRange<const Type*>(&members_[0], number_of_members_);
+}
+
+//
 // UnspecifiedType
 //
 UnspecifiedType::UnspecifiedType(int id) : Type(id) {}

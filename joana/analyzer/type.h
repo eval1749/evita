@@ -6,6 +6,7 @@
 #define JOANA_ANALYZER_TYPE_H_
 
 #include <iosfwd>
+#include <vector>
 
 #include "base/macros.h"
 #include "joana/base/castable.h"
@@ -59,6 +60,8 @@ class Type : public Castable<Type>, public ZoneAllocated {
 // See "type_printer.cc" for implementation of |Type| printer.
 std::ostream& operator<<(std::ostream& ostream, const Type& type);
 std::ostream& operator<<(std::ostream& ostream, const Type* type);
+std::ostream& operator<<(std::ostream& ostream,
+                         std::vector<const Type*>& types);
 
 }  // namespace analyzer
 }  // namespace joana

@@ -71,6 +71,7 @@ source_set("test_files") {
     "analyzer_test_base.h",
     "name_resolver_test.cc",
     "type_resolver_test.cc",
+    "type_test.cc",
   ]
   deps = [
     ":analyzer",

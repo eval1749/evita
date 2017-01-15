@@ -49,8 +49,14 @@ class TypeFactory final {
   const Type& GetPrimitiveType(const ast::TokenKind id);
   const Type& NewTypeName(const ast::Node& name);
   const Type& NewTypeParameter(const ast::Node& name);
+  const Type& NewUnionTypeFromVector(const std::vector<const Type*>& members);
   const Type& GetUnspecifiedType() const { return unspecified_type_; }
   const Type& GetVoidType() const { return void_type_; }
+
+  template <typename... Parameters>
+  const Type& NewUnionType(const Parameters&... members) {
+    return NewUnionTypeFromVector({&members...});
+  }
 
  private:
   class Cache;

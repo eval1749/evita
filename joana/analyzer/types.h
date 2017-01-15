@@ -10,6 +10,7 @@
 
 #include "joana/analyzer/type.h"
 
+#include "joana/base/block_range.h"
 #include "joana/base/iterator_utils.h"
 #include "joana/base/memory/zone_unordered_map.h"
 #include "joana/base/memory/zone_vector.h"
@@ -242,6 +243,28 @@ class TypeParameter final : public NamedType {
   TypeParameter(int id, const ast::Node& name);
 
   DISALLOW_COPY_AND_ASSIGN(TypeParameter);
+};
+
+//
+// UnionType
+//
+class UnionType final : public Type {
+  DECLARE_CONCRETE_ANALYZE_TYPE(UnionType, Type)
+
+ public:
+  void* operator new(size_t size, void* pointer) { return pointer; }
+
+  ~UnionType() final;
+
+  BlockRange<const Type*> members() const;
+
+ private:
+  UnionType(int id, const std::vector<const Type*>& members);
+
+  const size_t number_of_members_;
+  const Type* members_[1];
+
+  DISALLOW_COPY_AND_ASSIGN(UnionType);
 };
 
 //

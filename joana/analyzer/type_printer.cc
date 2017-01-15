@@ -146,6 +146,17 @@ std::ostream& operator<<(std::ostream& ostream,
 }
 
 std::ostream& operator<<(std::ostream& ostream,
+                         const Printable<UnionType>& printable) {
+  const auto& type = *printable.type;
+  auto* delimiter = "";
+  for (const auto& member : type.members()) {
+    ostream << delimiter << member;
+    delimiter = "|";
+  }
+  return ostream;
+}
+
+std::ostream& operator<<(std::ostream& ostream,
                          const Printable<UnspecifiedType>& printable) {
   return ostream << "?";
 }
@@ -179,6 +190,17 @@ std::ostream& operator<<(std::ostream& ostream, const Type* type) {
   if (!type)
     return ostream << "(null)";
   return ostream << *type;
+}
+
+std::ostream& operator<<(std::ostream& ostream,
+                         std::vector<const Type*>& types) {
+  auto* delimiter = "";
+  ostream << '[';
+  for (const auto& type : types) {
+    ostream << delimiter << type;
+    delimiter = ",";
+  }
+  return ostream << ']';
 }
 
 }  // namespace analyzer

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <map>
+#include <set>
 #include <tuple>
 #include <unordered_map>
 
@@ -39,12 +41,17 @@ class TypeFactory::Cache final {
  private:
   using ClassTypeMap = std::unordered_map<Class*, const Type*>;
   using PrimitiveTypeMap = std::unordered_map<ast::TokenKind, const Type*>;
+  using UnionTypeMap = std::map<std::vector<const Type*>, const Type*>;
 
   ClassTypeMap& MapFor(const Class* class_value) { return class_type_map_; }
   PrimitiveTypeMap& MapFor(ast::TokenKind kind) { return primitive_type_map_; }
+  UnionTypeMap& MapFor(const std::vector<const Type*>&) {
+    return union_type_map_;
+  }
 
   ClassTypeMap class_type_map_;
   PrimitiveTypeMap primitive_type_map_;
+  UnionTypeMap union_type_map_;
 
   DISALLOW_COPY_AND_ASSIGN(Cache);
 };
@@ -117,6 +124,37 @@ const Type& TypeFactory::NewTypeName(const ast::Node& name) {
 const Type& TypeFactory::NewTypeParameter(const ast::Node& name) {
   DCHECK_EQ(name, ast::SyntaxCode::Name);
   return *new (&zone_) TypeParameter(NextTypeId(), name);
+}
+
+const Type& TypeFactory::NewUnionTypeFromVector(
+    const std::vector<const Type*>& passed_members) {
+  std::set<const Type*> members;
+  // TODO(eval1749): We should omit subtype members.
+  for (const auto& member : passed_members) {
+    if (member->Is<AnyType>())
+      return *member;
+    if (member->Is<NilType>())
+      continue;
+    if (member->Is<UnionType>()) {
+      for (const auto& member2 : member->As<UnionType>().members())
+        members.emplace(&member2);
+      continue;
+    }
+    members.emplace(member);
+  }
+  if (members.empty())
+    return GetNilType();
+  if (members.size() == 1)
+    return **members.begin();
+  std::vector<const Type*> key(members.begin(), members.end());
+  const auto* type = cache_->Find(key);
+  if (type)
+    return *type;
+  const auto size = sizeof(UnionType) + sizeof(Type*) * (key.size() - 1);
+  const auto& new_type =
+      *new (zone_.Allocate(size)) UnionType(NextTypeId(), key);
+  cache_->Register(key, new_type);
+  return new_type;
 }
 
 }  // namespace analyzer

@@ -453,12 +453,8 @@ const Type& Annotation::TransformType(const ast::Node& node) {
   }
   if (node.Is<ast::TypeApplication>())
     return TransformTypeApplication(node);
-  if (node.Is<ast::TypeName>()) {
-    if (const auto* type = context().TryTypeOf(node))
-      return *type;
-    NOTREACHED() << "We should handle forward type reference." << node;
-    return unspecified_type();
-  }
+  if (node.Is<ast::TypeName>())
+    return TransformTypeName(node);
   if (node.Is<ast::TypeGroup>())
     return TransformType(ast::TypeGroup::TypeOf(node));
   if (node.Is<ast::UnionType>()) {
@@ -503,6 +499,19 @@ const Type& Annotation::TransformTypeApplication(const ast::Node& node) {
     arguments.push_back(&TransformType(argument_node));
   auto& value = factory().NewConstructedClass(&generic_class_value, arguments);
   return type_factory().NewClassType(&value);
+}
+
+const Type& Annotation::TransformTypeName(const ast::Node& node) {
+  DCHECK_EQ(node, ast::SyntaxCode::TypeName);
+  const auto* maybe_type = context().TryTypeOf(node);
+  if (!maybe_type) {
+    NOTREACHED() << "We should handle forward type reference." << node;
+    return unspecified_type();
+  }
+  const auto& type = *maybe_type;
+  if (type.Is<ClassType>() || type.Is<FunctionType>())
+    return type_factory().NewUnionType(type, null_type());
+  return type;
 }
 
 Class* Annotation::TryClassValueOf(const ast::Node& node) const {

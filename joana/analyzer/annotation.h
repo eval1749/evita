@@ -72,6 +72,7 @@ class Annotation final : public ContextUser {
   // Transform AST type node to Type object.
   const Type& TransformType(const ast::Node& node);
   const Type& TransformTypeApplication(const ast::Node& node);
+  const Type& TransformTypeName(const ast::Node& node);
 
   // Return |Class| value associated to |node|
   Class* TryClassValueOf(const ast::Node& node) const;

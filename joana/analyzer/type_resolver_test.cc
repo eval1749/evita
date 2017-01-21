@@ -188,6 +188,34 @@ TEST_F(TypeResolverTest, NullableType) {
       "|  |  |  +--Name |foo|\n"
       "|  |  |  +--ElisionExpression ||\n",
       RunOn("/** @type {?number} */ var foo"));
+  EXPECT_EQ(
+      "Module\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@constructor|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--VarStatement\n"
+      "|  |  +--BindingNameElement VarVar[Foo@1001] "
+      "{function(new:class@1001):class@1001}\n"
+      "|  |  |  +--Name |Foo|\n"
+      "|  |  |  +--ElisionExpression || Class[%anonymous%@1002]\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@type|\n"
+      "|  |  |  +--TypeName {class@1001}\n"
+      "|  |  |  |  +--Name |Foo|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--VarStatement\n"
+      "|  |  +--BindingNameElement VarVar[bar@1003] {%null%|class@1001}\n"
+      "|  |  |  +--Name |bar|\n"
+      "|  |  |  +--ElisionExpression ||\n",
+      RunOn("/** @constructor */ var Foo;\n"
+            "/** @type {Foo} */ var bar;\n"))
+      << "Non-primitive type reference is nullable";
 }
 
 TEST_F(TypeResolverTest, OptionalType) {

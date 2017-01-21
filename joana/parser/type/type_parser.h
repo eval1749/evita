@@ -102,12 +102,13 @@ class TypeParser final {
   const ast::Node& ParseFunctionType(const ast::Node& name);
   const ast::Node& ParseNameAsType(const ast::Node& name);
   std::pair<const ast::Node*, ast::FunctionTypeKind> ParseParameters();
-  const ast::Node& ParseRecordType();
+  const ast::Node& ParseOptionalType();
   const ast::Node& ParseQualifiedName(const ast::Node& name);
+  const ast::Node& ParseRecordType();
   const ast::Node& ParseTupleType();
   const ast::Node& ParseType();
   const ast::Node& ParseTypeArguments();
-  const ast::Node& ParseTypeBeforeEqual();
+  const ast::Node& ParseNonUnionType();
   const ast::Node& ParseTypeGroup();
   const ast::Node& ParseUnionType();
 

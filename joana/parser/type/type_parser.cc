@@ -237,25 +237,27 @@ const ast::Node& TypeParser::NewVoidType(const SourceCodeRange& range) {
   return node_factory().NewVoidType(range);
 }
 
-// Type ::=
-//      | '?'
-//      | '*'
-//      | NullableType
-//      | NonNullableType
-//      | UnionType
-//      | TypeName
-//      | FunctionType
-//      | TypeApplication
-//      | TypeGroup
-//      | RecordType
-//      | TupleType
-// NullableType ::= '?' Type
-// NonNullableType ::= '!' Type
-// RecordType ::= '{' (Name ':' Type ','?)* '}'
-// TupleType ::= '[' (Type ',')* ']'
-// UnionTYpe ::= Type ('|' Type*)
+// Type ::= NonOptionalType '='
+// NonOptionalType ::=
+//    '?'
+//  | '*'
+//  | NullableType
+//  | NonNullableType
+//  | UnionType
+//  | TypeName
+//  | FunctionType
+//  | TypeApplication
+//  | TypeGroup
+//  | RecordType
+//  | TupleType
+//  | UnionType
+// NullableType ::= '?' NonOptionalType
+// NonNullableType ::= '!' NonOptionalType
+// RecordType ::= '{' (Name ':' NonOptionalType ','?)* '}'
+// TupleType ::= '[' (NonOptionalType ',')* ']'
+// UnionType ::= NonOptionalType ('|' NonOptionalType*)
 const ast::Node& TypeParser::Parse() {
-  const auto& type = ParseUnionType();
+  const auto& type = ParseOptionalType();
   bracket_tracker_->Finish();
   if (CanPeekToken())
     AddError(PeekToken(), TypeErrorCode::ERROR_TYPE_UNEXPECT_TOKEN);
@@ -305,6 +307,15 @@ const ast::Node& TypeParser::ParseRecordType() {
   return result;
 }
 
+const ast::Node& TypeParser::ParseOptionalType() {
+  const auto& type = ParseType();
+  if (!CanPeekToken() || PeekToken() != ast::TokenKind::Equal)
+    return type;
+  const auto& optional_type = NewOptionalType(type);
+  ConsumeToken();
+  return optional_type;
+}
+
 std::pair<const ast::Node*, ast::FunctionTypeKind>
 TypeParser::ParseParameters() {
   TypeNodeScope scope(this);
@@ -328,7 +339,7 @@ TypeParser::ParseParameters() {
     expect_type = false;
     if (!CanStartType(PeekToken()))
       break;
-    parameters.push_back(&ParseType());
+    parameters.push_back(&ParseOptionalType());
     if (!CanPeekToken())
       break;
     if (PeekToken() == ast::TokenKind::RightParenthesis)
@@ -387,11 +398,7 @@ const ast::Node& TypeParser::ParseType() {
     AddError(TypeErrorCode::ERROR_TYPE_EXPECT_TYPE);
     return NewInvalidType();
   }
-  TypeNodeScope scope(this);
-  const auto& type = ParseTypeBeforeEqual();
-  if (!ConsumeTokenIf(ast::TokenKind::Equal))
-    return type;
-  return NewOptionalType(type);
+  return ParseUnionType();
 }
 
 const ast::Node& TypeParser::ParseTypeArguments() {
@@ -410,7 +417,7 @@ const ast::Node& TypeParser::ParseTypeArguments() {
   return result;
 }
 
-const ast::Node& TypeParser::ParseTypeBeforeEqual() {
+const ast::Node& TypeParser::ParseNonUnionType() {
   TypeNodeScope scope(this);
   if (ConsumeTokenIf(ast::TokenKind::Times))
     return NewAnyType();
@@ -439,7 +446,7 @@ const ast::Node& TypeParser::ParseTypeBeforeEqual() {
 }
 
 const ast::Node& TypeParser::ParseTypeGroup() {
-  const auto& type = ParseUnionType();
+  const auto& type = ParseType();
   ConsumeTokenIf(ast::TokenKind::RightParenthesis);
   return NewTypeGroup(type);
 }
@@ -451,9 +458,9 @@ const ast::Node& TypeParser::ParseUnionType() {
   }
   TypeNodeScope scope(this);
   std::vector<const ast::Node*> types;
-  types.push_back(&ParseType());
+  types.push_back(&ParseNonUnionType());
   while (CanPeekToken() && ConsumeTokenIf(ast::TokenKind::BitOr))
-    types.push_back(&ParseType());
+    types.push_back(&ParseNonUnionType());
   return NewUnionType(types);
 }
 

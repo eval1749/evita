@@ -79,6 +79,17 @@ TEST_F(TypeParserTest, FunctionType) {
       "+--Tuple\n"
       "|  +--TypeName\n"
       "|  |  +--Name |bar|\n"
+      "|  +--OptionalType\n"
+      "|  |  +--TypeName\n"
+      "|  |  |  +--Name |baz|\n"
+      "+--VoidType ||\n",
+      Parse("function(bar, baz=)"));
+
+  EXPECT_EQ(
+      "FunctionType<Normal>\n"
+      "+--Tuple\n"
+      "|  +--TypeName\n"
+      "|  |  +--Name |bar|\n"
       "|  +--TypeName\n"
       "|  |  +--Name |baz|\n"
       "+--TypeName\n"
@@ -235,6 +246,21 @@ TEST_F(TypeParserTest, OptionalType) {
       "+--TypeName\n"
       "|  +--Name |foo|\n",
       Parse("foo="));
+  EXPECT_EQ(
+      "OptionalType\n"
+      "+--FunctionType<Normal>\n"
+      "|  +--Tuple |()|\n"
+      "|  +--TypeName\n"
+      "|  |  +--Name |number|\n",
+      Parse("function():number="));
+  EXPECT_EQ(
+      "OptionalType\n"
+      "+--UnionType\n"
+      "|  +--TypeName\n"
+      "|  |  +--Name |foo|\n"
+      "|  +--TypeName\n"
+      "|  |  +--Name |bar|\n",
+      Parse("foo|bar="));
 }
 
 TEST_F(TypeParserTest, RecordType) {

@@ -142,7 +142,7 @@ const ast::Node& TypeParser::PeekToken() const {
 }
 
 void TypeParser::SkipTokensTo(ast::TokenKind kind) {
-  while (CanPeekToken() && !ConsumeTokenIf(kind))
+  while (CanPeekToken() && PeekToken() != kind)
     ConsumeToken();
 }
 
@@ -300,7 +300,9 @@ const ast::Node& TypeParser::ParseRecordType() {
       break;
   }
   SkipTokensTo(ast::TokenKind::RightBrace);
-  return NewRecordType(members);
+  const auto& result = NewRecordType(members);
+  ConsumeTokenIf(ast::TokenKind::RightBrace);
+  return result;
 }
 
 std::pair<const ast::Node*, ast::FunctionTypeKind>
@@ -339,8 +341,9 @@ TypeParser::ParseParameters() {
   if (expect_type)
     AddError(TypeErrorCode::ERROR_TYPE_EXPECT_TYPE);
   SkipTokensTo(ast::TokenKind::RightParenthesis);
-  return std::make_pair(
-      &node_factory().NewTuple(ComputeNodeRange(), parameters), kind);
+  const auto& result = node_factory().NewTuple(ComputeNodeRange(), parameters);
+  ConsumeTokenIf(ast::TokenKind::RightParenthesis);
+  return std::make_pair(&result, kind);
 }
 
 const ast::Node& TypeParser::ParseQualifiedName(const ast::Node& name) {
@@ -374,7 +377,9 @@ const ast::Node& TypeParser::ParseTupleType() {
   if (members.empty())
     AddError(TypeErrorCode::ERROR_TYPE_EXPECT_TYPE);
   SkipTokensTo(ast::TokenKind::RightBracket);
-  return NewTupleType(members);
+  const auto& result = NewTupleType(members);
+  ConsumeTokenIf(ast::TokenKind::RightBracket);
+  return result;
 }
 
 const ast::Node& TypeParser::ParseType() {
@@ -400,7 +405,9 @@ const ast::Node& TypeParser::ParseTypeArguments() {
       break;
   }
   SkipTokensTo(ast::TokenKind::GreaterThan);
-  return node_factory().NewTuple(ComputeNodeRange(), arguments);
+  const auto& result = node_factory().NewTuple(ComputeNodeRange(), arguments);
+  ConsumeTokenIf(ast::TokenKind::GreaterThan);
+  return result;
 }
 
 const ast::Node& TypeParser::ParseTypeBeforeEqual() {

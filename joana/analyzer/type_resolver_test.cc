@@ -76,7 +76,7 @@ TEST_F(TypeResolverTest, Constructor) {
   EXPECT_EQ(
       "Module\n"
       "+--Annotation\n"
-      "|  +--JsDocDocument Class[%anonymous%@1002]\n"
+      "|  +--JsDocDocument\n"
       "|  |  +--JsDocText |/**|\n"
       "|  |  +--JsDocTag\n"
       "|  |  |  +--Name |@constructor|\n"
@@ -85,7 +85,7 @@ TEST_F(TypeResolverTest, Constructor) {
       "|  |  +--BindingNameElement VarVar[Foo@1001] "
       "{function(new:class@1001):class@1001}\n"
       "|  |  |  +--Name |Foo|\n"
-      "|  |  |  +--ElisionExpression ||\n",
+      "|  |  |  +--ElisionExpression || Class[%anonymous%@1002]\n",
       RunOn("/** @constructor */ var Foo;"));
   EXPECT_EQ(
       "Module\n"
@@ -236,28 +236,28 @@ TEST_F(TypeResolverTest, TypeApplication) {
   EXPECT_EQ(
       "Module\n"
       "+--Annotation\n"
-      "|  +--JsDocDocument Interface[%anonymous%<T>@1002]\n"
+      "|  +--JsDocDocument\n"
       "|  |  +--JsDocText |/**|\n"
       "|  |  +--JsDocTag\n"
       "|  |  |  +--Name |@interface|\n"
       "|  |  +--JsDocTag\n"
       "|  |  |  +--Name |@template|\n"
-      "|  |  |  +--TypeName {T@1003}\n"
+      "|  |  |  +--TypeName {T@1002}\n"
       "|  |  |  |  +--Name |T|\n"
       "|  |  +--JsDocText |*/|\n"
       "|  +--VarStatement\n"
-      "|  |  +--BindingNameElement VarVar[Foo@1001] {class<T>@1002}\n"
+      "|  |  +--BindingNameElement VarVar[Foo@1001] {class<T>@1003}\n"
       "|  |  |  +--Name |Foo|\n"
-      "|  |  |  +--ElisionExpression ||\n"
+      "|  |  |  +--ElisionExpression || Interface[%anonymous%<T>@1002]\n"
       "+--Annotation\n"
-      "|  +--JsDocDocument Class[%anonymous%@1004]\n"
+      "|  +--JsDocDocument\n"
       "|  |  +--JsDocText |/**|\n"
       "|  |  +--JsDocTag\n"
       "|  |  |  +--Name |@constructor|\n"
       "|  |  +--JsDocTag\n"
       "|  |  |  +--Name |@implements|\n"
       "|  |  |  +--TypeApplication\n"
-      "|  |  |  |  +--TypeName {class<T>@1002}\n"
+      "|  |  |  |  +--TypeName {class<T>@1003}\n"
       "|  |  |  |  |  +--Name |Foo|\n"
       "|  |  |  |  +--Tuple\n"
       "|  |  |  |  |  +--TypeName {%number%}\n"
@@ -267,7 +267,7 @@ TEST_F(TypeResolverTest, TypeApplication) {
       "|  |  +--BindingNameElement VarVar[Bar@1003] "
       "{function(new:class@1004):class@1004}\n"
       "|  |  |  +--Name |Bar|\n"
-      "|  |  |  +--ElisionExpression ||\n",
+      "|  |  |  +--ElisionExpression || Class[%anonymous%@1004]\n",
       RunOn("/** @interface @template T */ var Foo;"
             "/** @constructor @implements {Foo<number>} */ var Bar;"));
 }

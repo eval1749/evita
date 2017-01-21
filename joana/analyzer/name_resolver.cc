@@ -509,23 +509,29 @@ void NameResolver::ProcessVariableDeclaration(VariableKind kind,
              *variable.assignments().front());
     return;
   }
+  Value::Editor().AddAssignment(&variable, binding);
   const auto& initializer = ast::BindingNameElement::InitializerOf(binding);
   if (initializer.Is<ast::ElisionExpression>()) {
     auto& class_value =
         factory().NewClass(node, ClassKindOf(*class_tag), type_parameters);
-    context().RegisterValue(document, &class_value);
-    BindType(name, type_factory().NewClassType(&class_value));
-    Value::Editor().AddAssignment(&variable, document);
+    context().RegisterValue(initializer, &class_value);
     ProcessDocument(document);
+    BindType(name, type_factory().NewClassType(&class_value));
     return;
   }
-  Value::Editor().AddAssignment(&variable, binding);
-  if (initializer.Is<ast::Class>())
-    return ProcessClass(initializer, &document);
-  if (initializer.Is<ast::Function>())
-    return ProcessFunction(initializer, &document);
-  Visit(initializer);
-  ProcessDocument(document);
+  if (initializer.Is<ast::Class>()) {
+    ProcessClass(initializer, &document);
+  }
+  if (initializer.Is<ast::Function>()) {
+    ProcessFunction(initializer, &document);
+  } else {
+    Visit(initializer);
+    ProcessDocument(document);
+  }
+  auto* const class_value = context().ValueOf(initializer).TryAs<Class>();
+  if (!class_value)
+    return;
+  BindType(name, type_factory().NewClassType(class_value));
 }
 
 // AST node handlers

@@ -305,7 +305,7 @@ TEST_F(NameResolverTest, ForwardRefernce) {
       "|  |  |  +--Name |foo|\n"
       "|  |  |  +--ElisionExpression ||\n"
       "+--Annotation\n"
-      "|  +--JsDocDocument Class[%anonymous%@1003]\n"
+      "|  +--JsDocDocument\n"
       "|  |  +--JsDocText |/**|\n"
       "|  |  +--JsDocTag\n"
       "|  |  |  +--Name |@constructor|\n"
@@ -313,7 +313,7 @@ TEST_F(NameResolverTest, ForwardRefernce) {
       "|  +--VarStatement\n"
       "|  |  +--BindingNameElement VarVar[Foo@1002]\n"
       "|  |  |  +--Name |Foo|\n"
-      "|  |  |  +--ElisionExpression ||\n",
+      "|  |  |  +--ElisionExpression || Class[%anonymous%@1003]\n",
       RunOn("/** @type {Foo} */ var foo;\n"
             "/** @constructor */ var Foo;\n"))
       << "Declarations are handled as if they are top of compilation unit";
@@ -756,7 +756,7 @@ TEST_F(NameResolverTest, Type) {
   EXPECT_EQ(
       "Module\n"
       "+--Annotation\n"
-      "|  +--JsDocDocument Interface[%anonymous%@1002]\n"
+      "|  +--JsDocDocument\n"
       "|  |  +--JsDocText |/**|\n"
       "|  |  +--JsDocTag\n"
       "|  |  |  +--Name |@interface|\n"
@@ -764,7 +764,7 @@ TEST_F(NameResolverTest, Type) {
       "|  +--VarStatement\n"
       "|  |  +--BindingNameElement VarVar[Foo@1001]\n"
       "|  |  |  +--Name |Foo|\n"
-      "|  |  |  +--ElisionExpression ||\n"
+      "|  |  |  +--ElisionExpression || Interface[%anonymous%@1002]\n"
       "+--Annotation\n"
       "|  +--JsDocDocument\n"
       "|  |  +--JsDocText |/**|\n"
@@ -828,28 +828,28 @@ TEST_F(NameResolverTest, TypeApplication) {
   EXPECT_EQ(
       "Module\n"
       "+--Annotation\n"
-      "|  +--JsDocDocument Interface[%anonymous%<T>@1002]\n"
+      "|  +--JsDocDocument\n"
       "|  |  +--JsDocText |/**|\n"
       "|  |  +--JsDocTag\n"
       "|  |  |  +--Name |@interface|\n"
       "|  |  +--JsDocTag\n"
       "|  |  |  +--Name |@template|\n"
-      "|  |  |  +--TypeName {T@1003}\n"
+      "|  |  |  +--TypeName {T@1002}\n"
       "|  |  |  |  +--Name |T|\n"
       "|  |  +--JsDocText |*/|\n"
       "|  +--VarStatement\n"
       "|  |  +--BindingNameElement VarVar[Foo@1001]\n"
       "|  |  |  +--Name |Foo|\n"
-      "|  |  |  +--ElisionExpression ||\n"
+      "|  |  |  +--ElisionExpression || Interface[%anonymous%<T>@1002]\n"
       "+--Annotation\n"
-      "|  +--JsDocDocument Class[%anonymous%@1004]\n"
+      "|  +--JsDocDocument\n"
       "|  |  +--JsDocText |/**|\n"
       "|  |  +--JsDocTag\n"
       "|  |  |  +--Name |@constructor|\n"
       "|  |  +--JsDocTag\n"
       "|  |  |  +--Name |@implements|\n"
       "|  |  |  +--TypeApplication\n"
-      "|  |  |  |  +--TypeName {class<T>@1002}\n"
+      "|  |  |  |  +--TypeName {class<T>@1003}\n"
       "|  |  |  |  |  +--Name |Foo|\n"
       "|  |  |  |  +--Tuple\n"
       "|  |  |  |  |  +--TypeName {%number%}\n"
@@ -858,7 +858,7 @@ TEST_F(NameResolverTest, TypeApplication) {
       "|  +--VarStatement\n"
       "|  |  +--BindingNameElement VarVar[Bar@1003]\n"
       "|  |  |  +--Name |Bar|\n"
-      "|  |  |  +--ElisionExpression ||\n",
+      "|  |  |  +--ElisionExpression || Class[%anonymous%@1004]\n",
       RunOn("/** @interface @template T */ var Foo;"
             "/** @constructor @implements {Foo<number>} */ var Bar;"));
 }
@@ -867,7 +867,7 @@ TEST_F(NameResolverTest, VarConstructor) {
   EXPECT_EQ(
       "Module\n"
       "+--Annotation\n"
-      "|  +--JsDocDocument Class[%anonymous%@1002]\n"
+      "|  +--JsDocDocument\n"
       "|  |  +--JsDocText |/**|\n"
       "|  |  +--JsDocTag\n"
       "|  |  |  +--Name |@constructor|\n"
@@ -875,8 +875,46 @@ TEST_F(NameResolverTest, VarConstructor) {
       "|  +--VarStatement\n"
       "|  |  +--BindingNameElement VarVar[Foo@1001]\n"
       "|  |  |  +--Name |Foo|\n"
-      "|  |  |  +--ElisionExpression ||\n",
+      "|  |  |  +--ElisionExpression || Class[%anonymous%@1002]\n",
       RunOn("/** @constructor */ var Foo;"));
+  EXPECT_EQ(
+      "Module\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@constructor|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--VarStatement\n"
+      "|  |  +--BindingNameElement VarVar[Foo@1001]\n"
+      "|  |  |  +--Name |Foo|\n"
+      "|  |  |  +--Function<Normal> Class[%anonymous%@1003]\n"
+      "|  |  |  |  +--Empty ||\n"
+      "|  |  |  |  +--ParameterList |()|\n"
+      "|  |  |  |  +--BlockStatement |{}|\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@param|\n"
+      "|  |  |  +--NonNullableType\n"
+      "|  |  |  |  +--TypeName {class@1001}\n"
+      "|  |  |  |  |  +--Name |Foo|\n"
+      "|  |  |  +--ReferenceExpression ParameterVar[x@1004]\n"
+      "|  |  |  |  +--Name |x|\n"
+      "|  |  |  +--JsDocText |*/|\n"
+      "|  +--VarStatement\n"
+      "|  |  +--BindingNameElement VarVar[foo@1007]\n"
+      "|  |  |  +--Name |foo|\n"
+      "|  |  |  +--Function<Normal> Function@1005\n"
+      "|  |  |  |  +--Empty ||\n"
+      "|  |  |  |  +--ParameterList\n"
+      "|  |  |  |  |  +--BindingNameElement ParameterVar[x@1006]\n"
+      "|  |  |  |  |  |  +--Name |x|\n"
+      "|  |  |  |  |  |  +--ElisionExpression ||\n"
+      "|  |  |  |  +--BlockStatement |{}|\n",
+      RunOn("/** @constructor */ var Foo = function() {};\n"
+            "/** @param {!Foo} x */ var foo = function(x) {};\n"));
 }
 
 TEST_F(NameResolverTest, VarError) {

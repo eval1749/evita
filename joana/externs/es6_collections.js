@@ -22,8 +22,8 @@
 
 /**
  * @constructor @struct
- * @param {Iterable<![KEY, VALUE]>|!Array<![KEY, VALUE]>=} opt_iterable
- * @implements {Iterable<![KEY, VALUE]>}
+ * @param {Iterable<[KEY, VALUE]>|!Array<[KEY, VALUE]>=} opt_iterable
+ * @implements {Iterable<[KEY, VALUE]>}
  * @template KEY, VALUE
  * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map
  */
@@ -39,7 +39,7 @@ Map.prototype.clear;
 Map.prototype.delete;
 
 /**
- * @return {!IteratorIterable<![KEY, VALUE]>}
+ * @return {!IteratorIterable<[KEY, VALUE]>}
  * @nosideeffects
  */
 Map.prototype.entries;
@@ -93,14 +93,14 @@ Map.prototype.size;
 Map.prototype.values;
 
 /**
- * @return {!Iterator<![KEY, VALUE]>>}
+ * @return {!Iterator<[KEY, VALUE]>}
  */
 Map.prototype[Symbol.iterator] = function() {};
 
 
 /**
  * @constructor @struct
- * @param {Iterable<![KEY, VALUE]>|!Array<![KEY, VALUE]>=} opt_iterable
+ * @param {Iterable<[KEY, VALUE]>|!Array<[KEY, VALUE]>=} opt_iterable
  * @template KEY, VALUE
  * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WeakMap
  */

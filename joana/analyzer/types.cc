@@ -27,6 +27,10 @@ ClassType::ClassType(int id, Value* value) : Type(id), value_(*value) {
 
 ClassType::~ClassType() = default;
 
+bool ClassType::is_nullable() const {
+  return true;
+}
+
 const ast::Node& ClassType::name() const {
   return value_.node().child_at(0);
 }
@@ -59,6 +63,10 @@ FunctionType::FunctionType(
 }
 
 FunctionType::~FunctionType() = default;
+
+bool FunctionType::is_nullable() const {
+  return true;
+}
 
 BlockRange<const Type*> FunctionType::parameters() const {
   return BlockRange<const Type*>(elements_, number_of_parameters_);
@@ -110,6 +118,10 @@ NullType::~NullType() = default;
 PrimitiveType::PrimitiveType(int id, const ast::Node& name)
     : NamedType(id, name) {}
 PrimitiveType::~PrimitiveType() = default;
+
+bool PrimitiveType::is_nullable() const {
+  return true;
+}
 
 //
 // TupleType
@@ -166,6 +178,10 @@ UnionType::UnionType(int id, const std::set<const Type*>& members)
 }
 
 UnionType::~UnionType() = default;
+
+bool UnionType::is_nullable() const {
+  return true;
+}
 
 BlockRange<const Type*> UnionType::members() const {
   return BlockRange<const Type*>(&members_[0], number_of_members_);

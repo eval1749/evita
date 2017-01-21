@@ -29,5 +29,9 @@ bool Type::operator!=(const Type* other) const {
   return this != other;
 }
 
+bool Type::is_nullable() const {
+  return false;
+}
+
 }  // namespace analyzer
 }  // namespace joana

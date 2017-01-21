@@ -41,6 +41,7 @@ class Type : public Castable<Type>, public ZoneAllocated {
 
   // Returns unique identifier of |Type|.
   int id() const { return id_; }
+  virtual bool is_nullable() const;
 
   bool operator==(const Type& other) const;
   bool operator==(const Type* other) const;

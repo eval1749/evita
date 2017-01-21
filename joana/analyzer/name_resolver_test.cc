@@ -824,6 +824,37 @@ TEST_F(NameResolverTest, Type) {
       << "Later pass will report @template is unexpected for const.";
 }
 
+TEST_F(NameResolverTest, TypeAlias) {
+  EXPECT_EQ(
+      "Module\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@typedef|\n"
+      "|  |  |  +--TypeName {%number%}\n"
+      "|  |  |  |  +--Name |number|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--VarStatement\n"
+      "|  |  +--BindingNameElement VarVar[Foo@1001]\n"
+      "|  |  |  +--Name |Foo|\n"
+      "|  |  |  +--ElisionExpression ||\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@type|\n"
+      "|  |  |  +--TypeName {Foo@1001}\n"
+      "|  |  |  |  +--Name |Foo|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--VarStatement\n"
+      "|  |  +--BindingNameElement VarVar[bar@1002]\n"
+      "|  |  |  +--Name |bar|\n"
+      "|  |  |  +--ElisionExpression ||\n",
+      RunOn("/** @typedef {number} */ var Foo;\n"
+            "/** @type {Foo} */ var bar;\n"));
+}
+
 TEST_F(NameResolverTest, TypeApplication) {
   EXPECT_EQ(
       "Module\n"

@@ -58,6 +58,15 @@ bool IsClassTag(const ast::Node& node) {
          name == ast::TokenKind::AtRecord;
 }
 
+bool IsKindTag(const ast::Node& node) {
+  if (!node.Is<ast::JsDocTag>())
+    return false;
+  const auto& name = ast::JsDocTag::NameOf(node);
+  return name == ast::TokenKind::AtConstructor ||
+         name == ast::TokenKind::AtInterface ||
+         name == ast::TokenKind::AtRecord || name == ast::TokenKind::AtTypeDef;
+}
+
 bool IsMemberExpression(const ast::Node& node) {
   return node == ast::SyntaxCode::MemberExpression ||
          node == ast::SyntaxCode::ComputedMemberExpression;
@@ -253,6 +262,20 @@ void NameResolver::BindTypeParameters(const Class& class_value) {
     BindType(parameter.name(), parameter);
 }
 
+const ast::Node* NameResolver::ClassifyDocument(const ast::Node& document) {
+  const ast::Node* kind_tag = nullptr;
+  for (const auto& child : ast::NodeTraversal::ChildNodesOf(document)) {
+    if (!IsKindTag(child))
+      continue;
+    if (!kind_tag) {
+      kind_tag = &child;
+      continue;
+    }
+    AddError(child, ErrorCode::ENVIRONMENT_MULTIPLE_OCCURRENCES, *kind_tag);
+  }
+  return kind_tag;
+}
+
 const Type* NameResolver::FindType(const ast::Node& name) const {
   DCHECK_EQ(name, ast::SyntaxCode::Name);
   for (auto* runner = environment_; runner; runner = runner->outer()) {
@@ -386,17 +409,14 @@ void NameResolver::ProcessClass(const ast::Node& node,
 }
 
 const ast::Node* NameResolver::ProcessClassTag(const ast::Node& document) {
-  const ast::Node* class_tag = nullptr;
-  for (const auto& child : ast::NodeTraversal::ChildNodesOf(document)) {
-    if (!IsClassTag(child))
-      continue;
-    if (!class_tag) {
-      class_tag = &child;
-      continue;
-    }
-    AddError(child, ErrorCode::ENVIRONMENT_MULTIPLE_OCCURRENCES, *class_tag);
+  const auto* const kind_tag = ClassifyDocument(document);
+  if (!kind_tag)
+    return kind_tag;
+  if (!IsClassTag(*kind_tag)) {
+    AddError(*kind_tag, ErrorCode::ENVIRONMENT_UNEXPECT_ANNOTATION);
+    return nullptr;
   }
-  return class_tag;
+  return kind_tag;
 }
 
 void NameResolver::ProcessDocument(const ast::Node& document) {
@@ -487,8 +507,8 @@ void NameResolver::ProcessVariableDeclaration(VariableKind kind,
                                               const ast::Node& document) {
   DCHECK(node.syntax().Is<ast::VariableDeclaration>()) << node;
   DCHECK_EQ(document, ast::SyntaxCode::JsDocDocument);
-  const auto* class_tag = ProcessClassTag(document);
-  if (!class_tag) {
+  const auto* kind_tag = ClassifyDocument(document);
+  if (!kind_tag) {
     ProcessDocument(document);
     Visit(node);
     return;
@@ -500,20 +520,29 @@ void NameResolver::ProcessVariableDeclaration(VariableKind kind,
     Visit(node);
     return;
   }
-  const auto& type_parameters = ProcessTemplateTag(document);
   const auto& name = ast::BindingNameElement::NameOf(binding);
   auto& variable = BindVariable(kind, name);
   context().RegisterValue(binding, &variable);
-  if (!variable.assignments().empty()) {
+  Value::Editor().AddAssignment(&variable, binding);
+  if (variable.assignments().size() > 1) {
     AddError(node, ErrorCode::ENVIRONMENT_MULTIPLE_OCCURRENCES,
              *variable.assignments().front());
     return;
   }
-  Value::Editor().AddAssignment(&variable, binding);
   const auto& initializer = ast::BindingNameElement::InitializerOf(binding);
+  if (ast::JsDocTag::NameOf(*kind_tag) == ast::TokenKind::AtTypeDef) {
+    ProcessDocument(document);
+    if (!initializer.Is<ast::ElisionExpression>())
+      AddError(node, ErrorCode::ENVIRONMENT_UNEXPECT_INITIALIZER);
+    BindType(name, type_factory().NewTypeAlias(name, kind_tag->child_at(1)));
+    return;
+  }
+  const auto& class_tag = *kind_tag;
+  DCHECK(IsClassTag(class_tag));
+  const auto& type_parameters = ProcessTemplateTag(document);
   if (initializer.Is<ast::ElisionExpression>()) {
     auto& class_value =
-        factory().NewClass(node, ClassKindOf(*class_tag), type_parameters);
+        factory().NewClass(node, ClassKindOf(class_tag), type_parameters);
     context().RegisterValue(initializer, &class_value);
     ProcessDocument(document);
     BindType(name, type_factory().NewClassType(&class_value));

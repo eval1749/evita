@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <unordered_map>
+#include <unordered_set>
 #include <utility>
 
 #include "joana/analyzer/annotation.h"
@@ -14,6 +15,7 @@
 #include "joana/analyzer/factory.h"
 #include "joana/analyzer/type_factory.h"
 #include "joana/analyzer/type_name_resolver.h"
+#include "joana/analyzer/type_transformer.h"
 #include "joana/analyzer/types.h"
 #include "joana/analyzer/values.h"
 #include "joana/ast/bindings.h"
@@ -83,6 +85,242 @@ const ast::Node* ContainerOf(const ast::Node& node) {
 }
 
 }  // namespace
+
+//
+// Annotation::FunctionParameters
+//
+class Annotation::FunctionParameters final {
+ public:
+  class Builder;
+
+  FunctionParameters(const FunctionTypeArity& arity,
+                     const std::vector<const Type*>& types);
+  FunctionParameters(FunctionParameters&& other);
+  ~FunctionParameters();
+
+  const FunctionTypeArity& arity() const { return arity_; }
+  const std::vector<const Type*>& types() const { return types_; }
+
+ private:
+  FunctionParameters();
+
+  FunctionTypeArity arity_;
+  std::vector<const Type*> types_;
+};
+
+Annotation::FunctionParameters::FunctionParameters(
+    const FunctionTypeArity& arity,
+    const std::vector<const Type*>& types)
+    : arity_(arity), types_(types) {
+  DCHECK_GE(arity.minimum, 0);
+  DCHECK_LE(arity.minimum, arity.maximum);
+  if (arity.has_rest) {
+    DCHECK_EQ(static_cast<size_t>(arity.maximum) + 1, types_.size());
+    return;
+  }
+  DCHECK_EQ(static_cast<size_t>(arity.maximum), types_.size()) << types_;
+}
+
+Annotation::FunctionParameters::FunctionParameters(FunctionParameters&& other)
+    : arity_(other.arity_), types_(std::move(other.types_)) {
+  other.arity_ = FunctionTypeArity();
+}
+
+Annotation::FunctionParameters::FunctionParameters() = default;
+Annotation::FunctionParameters::~FunctionParameters() = default;
+
+//
+// Annotation::FunctionParameters::Builder
+//
+class Annotation::FunctionParameters::Builder final : public ContextUser {
+ public:
+  Builder(Context* context,
+          const ast::Node& parameter_list,
+          const std::vector<const ast::Node*>& parameter_tags);
+  ~Builder();
+
+  FunctionParameters Build();
+
+ private:
+  enum class State {
+    Optional,
+    Required,
+    Rest,
+  };
+
+  const ast::Node* FindTag(const ast::Node& name) const;
+  void ProcessBindingNameElement(const ast::Node& node);
+  void ProcessBindingRestElement(const ast::Node& node);
+  // Returns true if |name| is not appeared so far.
+  bool RecordName(const ast::Node& name);
+  void RecordTag(const ast::Node& tag);
+  const Type& TransformType(const ast::Node& node);
+
+  FunctionTypeArity arity_;
+  const ast::Node& parameter_list_;
+  std::vector<const ast::Node*> parameter_names_;
+  const std::vector<const ast::Node*> parameter_tags_;
+  std::vector<const Type*> parameter_types_;
+  FunctionParameters parameters_;
+  State state_ = State::Required;
+  std::unordered_set<const ast::Node*> used_tags_;
+
+  DISALLOW_COPY_AND_ASSIGN(Builder);
+};
+
+Annotation::FunctionParameters::Builder::Builder(
+    Context* context,
+    const ast::Node& parameter_list,
+    const std::vector<const ast::Node*>& parameter_tags)
+    : ContextUser(context),
+      parameter_list_(parameter_list),
+      parameter_tags_(parameter_tags) {
+  DCHECK_EQ(parameter_list, ast::SyntaxCode::ParameterList);
+}
+
+Annotation::FunctionParameters::Builder::~Builder() = default;
+
+Annotation::FunctionParameters
+Annotation::FunctionParameters::Builder::Build() {
+  for (const auto& parameter_node :
+       ast::NodeTraversal::ChildNodesOf(parameter_list_)) {
+    if (parameter_node.Is<ast::BindingNameElement>()) {
+      ProcessBindingNameElement(parameter_node);
+      continue;
+    }
+    if (parameter_node.Is<ast::BindingRestElement>()) {
+      ProcessBindingRestElement(parameter_node);
+      continue;
+    }
+    NOTREACHED() << "NYI ProcessParameter " << parameter_node;
+  }
+  for (const auto& parameter_tag : parameter_tags_) {
+    if (used_tags_.count(parameter_tag) == 1)
+      continue;
+    AddError(*parameter_tag, ErrorCode::JSDOC_UNEXPECT_PARAMETER);
+  }
+  DCHECK_GE(arity_.minimum, 0);
+  DCHECK_LE(arity_.minimum, arity_.maximum);
+  if (arity_.has_rest)
+    DCHECK_EQ(static_cast<size_t>(arity_.maximum) + 1, parameter_types_.size());
+  else
+    DCHECK_EQ(static_cast<size_t>(arity_.maximum), parameter_types_.size());
+  return FunctionParameters(arity_, parameter_types_);
+}
+
+const ast::Node* Annotation::FunctionParameters::Builder::FindTag(
+    const ast::Node& name) const {
+  DCHECK_EQ(name, ast::SyntaxCode::Name);
+  const auto name_id = ast::Name::KindOf(name);
+  for (const auto& parameter_tag : parameter_tags_) {
+    const auto& reference = parameter_tag->child_at(2);
+    if (!reference.Is<ast::ReferenceExpression>())
+      continue;
+    if (ast::ReferenceExpression::NameOf(reference) == name_id)
+      return parameter_tag;
+  }
+  return nullptr;
+}
+
+void Annotation::FunctionParameters::Builder::ProcessBindingNameElement(
+    const ast::Node& node) {
+  const ast::Node& name = ast::BindingNameElement::NameOf(node);
+  const auto has_initializer = !ast::BindingNameElement::InitializerOf(node)
+                                    .Is<ast::ElisionExpression>();
+  const auto* const tag = FindTag(name);
+  const auto is_optional = tag && tag->child_at(1).Is<ast::OptionalType>();
+  const auto is_rest = tag && tag->child_at(1).Is<ast::RestType>();
+  const auto& type =
+      tag ? TransformType(is_optional || is_rest ? tag->child_at(1).child_at(0)
+                                                 : tag->child_at(1))
+          : unspecified_type();
+  parameter_types_.push_back(&type);
+  if (RecordName(name) && tag)
+    RecordTag(*tag);
+  if (has_initializer && (is_optional || is_rest))
+    AddError(node, ErrorCode::JSDOC_UNEXPECT_INITIALIZER);
+  switch (state_) {
+    case State::Required:
+      if (is_rest) {
+        arity_.has_rest = true;
+        state_ = State::Rest;
+        return;
+      }
+      if (has_initializer || is_optional) {
+        state_ = State::Optional;
+        arity_.maximum = arity_.minimum + 1;
+        return;
+      }
+      ++arity_.maximum;
+      arity_.minimum = arity_.maximum;
+      return;
+    case State::Optional:
+      if (is_rest) {
+        arity_.has_rest = true;
+        state_ = State::Rest;
+        return;
+      }
+      ++arity_.maximum;
+      return;
+    case State::Rest:
+      AddError(node, ErrorCode::JSDOC_UNEXPECT_REST);
+      return;
+  }
+  NOTREACHED() << "Unexpected state " << static_cast<int>(state_);
+}
+
+void Annotation::FunctionParameters::Builder::ProcessBindingRestElement(
+    const ast::Node& node) {
+  if (state_ == State::Rest)
+    AddError(node, ErrorCode::JSDOC_UNEXPECT_REST);
+  arity_.has_rest = true;
+  const auto& binding = node.child_at(0);
+  if (binding.Is<ast::BindingNameElement>()) {
+    const auto& name = ast::BindingNameElement::NameOf(binding);
+    const auto& maybe_tag = FindTag(name);
+    if (!maybe_tag) {
+      RecordName(name);
+      parameter_types_.push_back(&unspecified_type());
+      return;
+    }
+    const auto& tag = *maybe_tag;
+    if (RecordName(name))
+      RecordTag(tag);
+    if (tag.Is<ast::OptionalType>())
+      AddError(tag, ErrorCode::JSDOC_UNEXPECT_OPTIONAL);
+    else if (tag.Is<ast::RestType>())
+      AddError(tag, ErrorCode::JSDOC_UNEXPECT_REST);
+    parameter_types_.push_back(&TransformType(tag.child_at(1)));
+    return;
+  }
+  NOTREACHED() << "NYI parameter binding" << static_cast<int>(state_);
+}
+
+bool Annotation::FunctionParameters::Builder::RecordName(
+    const ast::Node& name) {
+  DCHECK_EQ(name, ast::SyntaxCode::Name);
+  const auto name_id = ast::Name::KindOf(name);
+  const auto& it =
+      std::find_if(parameter_names_.begin(), parameter_names_.end(),
+                   [&](const ast::Node* present) {
+                     return ast::Name::KindOf(*present) == name_id;
+                   });
+  if (it == parameter_names_.end())
+    return true;
+  AddError(name, ErrorCode::JSDOC_MULTIPLE_PARAMETER, **it);
+  return false;
+}
+
+void Annotation::FunctionParameters::Builder::RecordTag(const ast::Node& tag) {
+  DCHECK_EQ(ast::JsDocTag::NameOf(tag), ast::TokenKind::AtParam);
+  const auto& result = used_tags_.emplace(&tag);
+  DCHECK(result.second) << tag;
+}
+
+const Type& Annotation::FunctionParameters::Builder::TransformType(
+    const ast::Node& node) {
+  return TypeTransformer(&context()).Transform(node);
+}
 
 //
 // Annotation
@@ -237,92 +475,76 @@ void Annotation::MarkNotTypeAnnotation() {
     AddError(*this_tag_, ErrorCode::JSDOC_UNEXPECT_TAG);
 }
 
-const Type& Annotation::NewNullableType(const Type& type) {
-  if (type.Is<AnyType>() || type.Is<InvalidType>() ||
-      type.Is<UnspecifiedType>()) {
-    return type;
-  }
-  DCHECK(type.is_nullable()) << type;
-  return type_factory().NewUnionType(type, null_type());
-}
-
-void Annotation::ProcessParameter(
-    std::vector<const ast::Node*>* parameter_names,
-    std::vector<const Type*>* parameter_types,
-    const ast::Node& parameter_node) {
-  if (parameter_node.Is<ast::BindingNameElement>()) {
-    const auto& name = ast::BindingNameElement::NameOf(parameter_node);
-    const auto name_id = ast::Name::KindOf(name);
-
-    // Check multiple occurrence of parameter name
-    for (const auto& present : *parameter_names) {
-      if (name_id == ast::Name::KindOf(*present)) {
-        AddError(name, ErrorCode::JSDOC_MULTIPLE_PARAMETER, *present);
-        return;
-      }
-    }
-
-    // Find associated @param tag.
-    for (const auto& parameter_tag : parameter_tags_) {
-      const auto& reference = parameter_tag->child_at(2);
-      if (!reference.Is<ast::ReferenceExpression>())
-        continue;
-      if (ast::ReferenceExpression::NameOf(reference) == name_id) {
-        parameter_names->push_back(&name);
-        parameter_types->push_back(&TransformType(parameter_tag->child_at(1)));
-        return;
-      }
-    }
-
-    AddError(name, ErrorCode::JSDOC_EXPECT_TYPE);
-    parameter_names->push_back(&name);
-    parameter_types->push_back(&unspecified_type());
-    return;
-  }
-  NOTREACHED() << "NYI ProcessParameter " << parameter_node;
-}
-
-std::vector<const Type*> Annotation::ProcessParameterList(
+Annotation::FunctionParameters Annotation::ProcessParameterList(
     const ast::Node& parameter_list) {
   DCHECK_EQ(parameter_list, ast::SyntaxCode::ParameterList);
-  std::vector<const ast::Node*> parameter_names;
-  std::vector<const Type*> parameter_types;
-
-  // Compute parameter name list and parameter type list
-  for (const auto& parameter_node :
-       ast::NodeTraversal::ChildNodesOf(parameter_list)) {
-    ProcessParameter(&parameter_names, &parameter_types, parameter_node);
-  }
-
-  // Check not associated @param
-  for (const auto& parameter_tag : parameter_tags_) {
-    const auto& it = std::find_if(
-        parameter_names.begin(), parameter_names.end(),
-        [&](const ast::Node* present) {
-          const auto& reference = parameter_tag->child_at(2);
-          if (!reference.Is<ast::ReferenceExpression>())
-            return false;
-          const auto& name = ast::ReferenceExpression::NameOf(reference);
-          return *present == ast::Name::KindOf(name);
-        });
-    if (it != parameter_names.end())
-      continue;
-    AddError(*parameter_tag, ErrorCode::JSDOC_UNEXPECT_PARAMETER);
-  }
-  return std::move(parameter_types);
+  return FunctionParameters::Builder(&context(), parameter_list,
+                                     parameter_tags_)
+      .Build();
 }
 
-std::vector<const Type*> Annotation::ProcessParameterTags() {
+Annotation::FunctionParameters Annotation::ProcessParameterTags() {
+  enum class State {
+    Optional,
+    Required,
+    Rest,
+  } state = State::Required;
+  FunctionTypeArity arity;
   std::vector<const Type*> parameter_types;
+  std::vector<const ast::Node*> parameter_names;
   for (const auto& parameter_tag : parameter_tags_) {
-    const auto& type = TransformType(parameter_tag->child_at(1));
+    const auto& type_node = parameter_tag->child_at(1);
+    const auto is_optional = type_node.Is<ast::OptionalType>();
+    const auto is_rest = type_node.Is<ast::RestType>();
+    const auto& type = TransformType(
+        is_optional || is_rest ? type_node.child_at(0) : type_node);
+    switch (state) {
+      case State::Required:
+        if (is_optional) {
+          state = State::Optional;
+          arity.maximum = arity.minimum + 1;
+          break;
+        }
+        if (is_rest) {
+          arity.has_rest = true;
+          state = State::Rest;
+          break;
+        }
+        ++arity.maximum;
+        arity.minimum = arity.maximum;
+        break;
+      case State::Optional:
+        if (is_rest) {
+          arity.has_rest = true;
+          state = State::Rest;
+          break;
+        }
+        ++arity.maximum;
+        break;
+      case State::Rest:
+        AddError(type_node, ErrorCode::JSDOC_UNEXPECT_REST);
+        break;
+      default:
+        NOTREACHED() << "Invalid state " << static_cast<int>(state);
+        break;
+    }
     parameter_types.push_back(&type);
-    const auto& name = parameter_tag->child_at(2);
-    if (!name.Is<ast::ReferenceExpression>())
+    const auto& reference = parameter_tag->child_at(2);
+    if (!reference.Is<ast::ReferenceExpression>())
       continue;
-    context().RegisterType(name, type);
+    context().RegisterType(reference, type);
+    const auto& name = ast::ReferenceExpression::NameOf(reference);
+    const auto name_id = ast::Name::KindOf(name);
+    const auto& it =
+        std::find_if(parameter_names.begin(), parameter_names.end(),
+                     [&](const ast::Node* present) {
+                       return ast::Name::KindOf(*present) == name_id;
+                     });
+    if (it == parameter_names.end())
+      continue;
+    AddError(name, ErrorCode::JSDOC_MULTIPLE_PARAMETER, **it);
   }
-  return parameter_types;
+  return FunctionParameters(arity, parameter_types);
 }
 
 void Annotation::RememberTag(const ast::Node** pointer, const ast::Node& node) {
@@ -370,26 +592,28 @@ const Type& Annotation::TransformAsFunctionType() {
     DCHECK(this_type.Is<ClassType>()) << this_type;
     if (kind_tag_)
       AddError(*kind_tag_, ErrorCode::JSDOC_UNEXPECT_TAG);
-    const auto& parameter_types =
-        ProcessParameterList(ast::Method::ParametersOf(node_));
+    const auto& parameters =
+        FunctionParameters::Builder(
+            &context(), ast::Method::ParametersOf(node_), parameter_tags_)
+            .Build();
     const auto method_kind = ast::Method::MethodKindOf(node_);
     const auto& method_name = ast::Method::NameOf(node_);
     switch (method_kind) {
       case ast::MethodKind::NonStatic:
         if (method_name == ast::TokenKind::Constructor) {
           return type_factory().NewFunctionType(
-              FunctionTypeKind::Constructor, type_parameters_, parameter_types,
-              this_type, this_type);
+              FunctionTypeKind::Constructor, type_parameters_,
+              parameters.arity(), parameters.types(), this_type, this_type);
         }
-        return type_factory().NewFunctionType(FunctionTypeKind::Normal,
-                                              type_parameters_, parameter_types,
-                                              ComputeReturnType(), this_type);
+        return type_factory().NewFunctionType(
+            FunctionTypeKind::Normal, type_parameters_, parameters.arity(),
+            parameters.types(), ComputeReturnType(), this_type);
       case ast::MethodKind::Static:
         // Note: It is OK to name method to |Constructor|, e.g.
         // class Foo { static constructor() {} }
-        return type_factory().NewFunctionType(FunctionTypeKind::Normal,
-                                              type_parameters_, parameter_types,
-                                              ComputeReturnType(), void_type());
+        return type_factory().NewFunctionType(
+            FunctionTypeKind::Normal, type_parameters_, parameters.arity(),
+            parameters.types(), ComputeReturnType(), void_type());
     }
     NOTREACHED() << "Unknown MethodKind " << static_cast<int>(method_kind);
     return void_type();
@@ -405,22 +629,22 @@ const Type& Annotation::TransformAsFunctionType() {
   //  * @param {number} x
   //  * var foo = function(x) {};
   //  */
-  const auto& parameter_types =
+  auto parameters =
       node_.Is<ast::Function>()
-          ? ProcessParameterList(ast::Function::ParametersOf(node_))
-          : ProcessParameterTags();
+          ? std::move(ProcessParameterList(ast::Function::ParametersOf(node_)))
+          : std::move(ProcessParameterTags());
 
   if (!kind_tag_) {
     return type_factory().NewFunctionType(
-        FunctionTypeKind::Normal, type_parameters_, parameter_types,
-        ComputeReturnType(), ComputeThisType());
+        FunctionTypeKind::Normal, type_parameters_, parameters.arity(),
+        parameters.types(), ComputeReturnType(), ComputeThisType());
   }
 
   if (ast::JsDocTag::NameOf(*kind_tag_) == ast::TokenKind::AtConstructor) {
     const auto& class_type = ComputeThisType();
-    return type_factory().NewFunctionType(FunctionTypeKind::Constructor,
-                                          type_parameters_, parameter_types,
-                                          class_type, class_type);
+    return type_factory().NewFunctionType(
+        FunctionTypeKind::Constructor, type_parameters_, parameters.arity(),
+        parameters.types(), class_type, class_type);
   }
 
   AddError(*kind_tag_, ErrorCode::JSDOC_UNEXPECT_TAG);
@@ -436,110 +660,9 @@ const Type& Annotation::TransformAsInterface() {
   return type_factory().NewClassType(class_value);
 }
 
-const Type& Annotation::TransformNonNullableType(const ast::Node& node) {
-  DCHECK_EQ(node, ast::SyntaxCode::NonNullableType);
-  const auto& type_node = ast::NonNullableType::TypeOf(node);
-  const auto& type = TransformType(type_node);
-  if (!type.Is<UnionType>()) {
-    // TODO(eval1749): We should support "!*" == any type except for null type.
-    AddError(type_node, ErrorCode::JSDOC_EXPECT_NULLABLE_TYPE);
-    return type;
-  }
-  // Remove null type from members in union type.
-  const auto& union_type = type.As<UnionType>();
-  std::vector<const Type*> members;
-  for (const auto& member : union_type.members()) {
-    if (member.Is<NullType>())
-      continue;
-    members.push_back(&member);
-  }
-  if (members.size() == union_type.members().size()) {
-    AddError(type_node, ErrorCode::JSDOC_EXPECT_NULLABLE_TYPE);
-    return type;
-  }
-  return type_factory().NewUnionTypeFromVector(members);
-}
-
 const Type& Annotation::TransformType(const ast::Node& node) {
-  if (node.Is<ast::AnyType>())
-    return any_type();
-  if (node.Is<ast::InvalidType>())
-    return unspecified_type();
-  if (node.Is<ast::NonNullableType>())
-    return TransformNonNullableType(node);
-  if (node.Is<ast::NullableType>())
-    return NewNullableType(TransformType(node.child_at(0)));
-  if (node.Is<ast::OptionalType>()) {
-    // TODO(eval1749): Where do we store optional parameter information?
-    return TransformType(node.child_at(0));
-  }
-  if (node.Is<ast::TupleType>()) {
-    std::vector<const Type*> types;
-    for (const auto& member : ast::NodeTraversal::ChildNodesOf(node))
-      types.push_back(&TransformType(member));
-    return type_factory().NewTupleTypeFromVector(types);
-  }
-  if (node.Is<ast::TypeApplication>())
-    return TransformTypeApplication(node);
-  if (node.Is<ast::TypeName>())
-    return TransformTypeName(node);
-  if (node.Is<ast::TypeGroup>())
-    return TransformType(ast::TypeGroup::TypeOf(node));
-  if (node.Is<ast::UnionType>()) {
-    std::vector<const Type*> types;
-    for (const auto& member : ast::NodeTraversal::ChildNodesOf(node))
-      types.push_back(&TransformType(member));
-    return type_factory().NewUnionTypeFromVector(types);
-  }
-  if (node.Is<ast::UnknownType>()) {
-    // Unknown type is the source of bug, we should avoid to use.
-    return any_type();
-  }
-  DVLOG(0) << "We should handle " << node;
-  return unspecified_type();
-}
-
-const Type& Annotation::TransformTypeApplication(const ast::Node& node) {
-  const auto& generic_type =
-      context().TypeOf(ast::TypeApplication::NameOf(node));
-  if (!generic_type.Is<ClassType>()) {
-    AddError(node, ErrorCode::JSDOC_EXPECT_GENERIC_CLASS);
-    return unspecified_type();
-  }
-  auto& class_value = generic_type.As<ClassType>().value();
-  if (!class_value.Is<Class>()) {
-    AddError(node, ErrorCode::JSDOC_EXPECT_GENERIC_CLASS);
-    return unspecified_type();
-  }
-  auto& generic_class_value = class_value.As<Class>();
-  if (generic_class_value.parameters().empty()) {
-    AddError(node, ErrorCode::JSDOC_EXPECT_GENERIC_CLASS);
-    return unspecified_type();
-  }
-  const auto& arguments_node = ast::TypeApplication::ArgumentsOf(node);
-  if (arguments_node.arity() != generic_class_value.parameters().size()) {
-    AddError(node, ErrorCode::JSDOC_INVALID_ARGUMENTS);
-    return unspecified_type();
-  }
-  std::vector<const Type*> arguments;
-  for (const auto& argument_node :
-       ast::NodeTraversal::ChildNodesOf(arguments_node))
-    arguments.push_back(&TransformType(argument_node));
-  auto& value = factory().NewConstructedClass(&generic_class_value, arguments);
-  return NewNullableType(type_factory().NewClassType(&value));
-}
-
-const Type& Annotation::TransformTypeName(const ast::Node& node) {
-  DCHECK_EQ(node, ast::SyntaxCode::TypeName);
-  const auto* maybe_type = context().TryTypeOf(node);
-  if (!maybe_type) {
-    NOTREACHED() << "We should handle forward type reference." << node;
-    return unspecified_type();
-  }
-  const auto& type = *maybe_type;
-  if (type.Is<ClassType>() || type.Is<FunctionType>())
-    return NewNullableType(type);
-  return type;
+  DCHECK(node.syntax().Is<ast::Type>()) << node;
+  return TypeTransformer(&context()).Transform(node);
 }
 
 Class* Annotation::TryClassValueOf(const ast::Node& node) const {

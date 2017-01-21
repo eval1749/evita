@@ -43,6 +43,8 @@ source_set("analyzer") {
     "type_printer.cc",
     "type_resolver.cc",
     "type_resolver.h",
+    "type_transformer.cc",
+    "type_transformer.h",
     "types.cc",
     "types.h",
     "value.cc",

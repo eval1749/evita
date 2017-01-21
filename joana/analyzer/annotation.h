@@ -43,6 +43,8 @@ class Annotation final : public ContextUser {
   const Type* Compile();
 
  private:
+  class FunctionParameters;
+
   // Returns tag name or nullptr.
   const ast::Node* Classify();
 
@@ -51,16 +53,10 @@ class Annotation final : public ContextUser {
   const Type& ComputeThisTypeFromMember(const ast::Node& node);
 
   void MarkNotTypeAnnotation();
-  const Type& NewNullableType(const Type& type);
 
-  void ProcessParameter(std::vector<const ast::Node*>* parameter_names,
-                        std::vector<const Type*>* parameter_types,
-                        const ast::Node& parameter_node);
+  FunctionParameters ProcessParameterList(const ast::Node& parameter_list);
 
-  std::vector<const Type*> ProcessParameterList(
-      const ast::Node& parameter_list);
-
-  std::vector<const Type*> ProcessParameterTags();
+  FunctionParameters ProcessParameterTags();
   void ProcessTemplateTag(const ast::Node& node);
 
   void RememberTag(const ast::Node** pointer, const ast::Node& node);
@@ -69,12 +65,7 @@ class Annotation final : public ContextUser {
 
   const Type& TransformAsFunctionType();
   const Type& TransformAsInterface();
-
-  const Type& TransformNonNullableType(const ast::Node& node);
-  // Transform AST type node to Type object.
   const Type& TransformType(const ast::Node& node);
-  const Type& TransformTypeApplication(const ast::Node& node);
-  const Type& TransformTypeName(const ast::Node& node);
 
   // Return |Class| value associated to |node|
   Class* TryClassValueOf(const ast::Node& node) const;

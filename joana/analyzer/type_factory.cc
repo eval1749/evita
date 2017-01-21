@@ -46,16 +46,24 @@ class TypeFactory::Cache final {
   void Register(const Key& key, const Type& type) {
     auto& map = MapFor(key);
     const auto& result = map.emplace(key, &type);
-    DCHECK(result.second) << "Cache already has " << key;
+    DCHECK(result.second);
   }
 
  private:
   using ClassTypeMap = std::unordered_map<Value*, const Type*>;
+  using FunctionTypeKey = std::tuple<FunctionTypeKind,
+                                     std::vector<const TypeParameter*>,
+                                     FunctionTypeArity,
+                                     std::vector<const Type*>,
+                                     const Type*,
+                                     const Type*>;
+  using FunctionTypeMap = std::map<FunctionTypeKey, const Type*>;
   using PrimitiveTypeMap = std::unordered_map<ast::TokenKind, const Type*>;
   using TupleTypeMap = std::map<std::vector<const Type*>, const Type*>;
   using UnionTypeMap = std::map<std::set<const Type*>, const Type*>;
 
   ClassTypeMap& MapFor(const Value* class_value) { return class_type_map_; }
+  FunctionTypeMap& MapFor(const FunctionTypeKey&) { return function_type_map_; }
   PrimitiveTypeMap& MapFor(ast::TokenKind kind) { return primitive_type_map_; }
   TupleTypeMap& MapFor(const std::vector<const Type*>&) {
     return tuple_type_map_;
@@ -63,6 +71,7 @@ class TypeFactory::Cache final {
   UnionTypeMap& MapFor(const std::set<const Type*>&) { return union_type_map_; }
 
   ClassTypeMap class_type_map_;
+  FunctionTypeMap function_type_map_;
   PrimitiveTypeMap primitive_type_map_;
   TupleTypeMap tuple_type_map_;
   UnionTypeMap union_type_map_;
@@ -122,13 +131,22 @@ const Type& TypeFactory::NewClassType(Value* class_value) {
 const Type& TypeFactory::NewFunctionType(
     FunctionTypeKind kind,
     const std::vector<const TypeParameter*>& type_parameters,
+    const FunctionTypeArity& arity,
     const std::vector<const Type*>& parameters,
     const Type& return_type,
     const Type& this_type) {
+  const auto& key = std::make_tuple(kind, type_parameters, arity, parameters,
+                                    &return_type, &this_type);
+  const auto* present = cache_->Find(key);
+  if (present)
+    return *present;
   const auto size =
       SizeOf<FunctionType>(type_parameters.size() + parameters.size());
-  return *new (zone_.Allocate(size)) FunctionType(
-      NextTypeId(), kind, type_parameters, parameters, return_type, this_type);
+  const auto& new_type = *new (zone_.Allocate(size)) FunctionType(
+      NextTypeId(), kind, type_parameters, arity, parameters, return_type,
+      this_type);
+  cache_->Register(key, new_type);
+  return new_type;
 }
 
 const Type& TypeFactory::NewTupleTypeFromVector(

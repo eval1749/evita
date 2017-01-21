@@ -22,6 +22,7 @@ class Zone;
 namespace analyzer {
 
 class Class;
+struct FunctionTypeArity;
 enum class FunctionTypeKind;
 class Type;
 class TypeParameter;
@@ -47,6 +48,7 @@ class TypeFactory final {
   const Type& NewFunctionType(
       FunctionTypeKind kind,
       const std::vector<const TypeParameter*>& type_parameters,
+      const FunctionTypeArity& arity,
       const std::vector<const Type*>& parameters,
       const Type& return_type,
       const Type& this_type);

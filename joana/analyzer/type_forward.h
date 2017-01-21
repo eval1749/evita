@@ -33,6 +33,8 @@ FOR_EACH_ABSTRACT_ANALYZE_TYPE(V)
 FOR_EACH_ANALYZE_TYPE(V)
 #undef V
 
+struct FunctionTypeArity;
+
 }  // namespace analyzer
 }  // namespace joana
 

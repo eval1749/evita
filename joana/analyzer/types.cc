@@ -42,15 +42,23 @@ FunctionType::FunctionType(
     int id,
     FunctionTypeKind kind,
     const std::vector<const TypeParameter*>& type_parameters,
+    const FunctionTypeArity& arity,
     const std::vector<const Type*>& parameters,
     const Type& return_type,
     const Type& this_type)
     : Type(id),
+      arity_(arity),
       kind_(kind),
       number_of_parameters_(parameters.size()),
       number_of_type_parameters_(type_parameters.size()),
       return_type_(return_type),
       this_type_(this_type) {
+  DCHECK_GE(arity_.minimum, 0);
+  DCHECK_GE(arity_.maximum, arity_.minimum);
+  if (arity_.has_rest)
+    DCHECK_EQ(static_cast<size_t>(arity_.maximum) + 1, parameters.size());
+  else
+    DCHECK_EQ(static_cast<size_t>(arity_.maximum), parameters.size());
   auto* runner = elements_;
   for (const auto& parameter : parameters) {
     *runner = parameter;
@@ -77,6 +85,20 @@ BlockRange<const TypeParameter*> FunctionType::type_parameters() const {
       reinterpret_cast<const TypeParameter* const*>(
           &elements_[number_of_parameters_]),
       number_of_type_parameters_);
+}
+
+//
+// FunctionTypeArity
+//
+bool operator<(const FunctionTypeArity& arity1,
+               const FunctionTypeArity& arity2) {
+  if (arity1.minimum != arity2.minimum)
+    return arity1.minimum < arity2.minimum;
+  if (arity1.maximum != arity2.maximum)
+    return arity1.maximum < arity2.maximum;
+  if (arity1.has_rest != arity2.has_rest)
+    return arity2.has_rest;
+  return false;
 }
 
 //

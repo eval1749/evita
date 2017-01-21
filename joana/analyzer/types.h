@@ -28,6 +28,21 @@ class Value;
 
 // See "type_forward.h" for list of types.
 
+//
+// FunctionTypeArity
+//
+struct FunctionTypeArity {
+  bool has_rest = false;
+  int maximum = 0;
+  int minimum = 0;
+};
+
+bool operator<(const FunctionTypeArity& arity1,
+               const FunctionTypeArity& arity2);
+
+//
+// FunctionTypeKind
+//
 enum class FunctionTypeKind {
   Constructor,
   Normal,
@@ -103,6 +118,7 @@ class FunctionType final : public Type {
 
   ~FunctionType() final;
 
+  const FunctionTypeArity& arity() const { return arity_; }
   FunctionTypeKind kind() const { return kind_; }
   BlockRange<const Type*> parameters() const;
   BlockRange<const TypeParameter*> type_parameters() const;
@@ -113,6 +129,7 @@ class FunctionType final : public Type {
   FunctionType(int id,
                FunctionTypeKind kind,
                const std::vector<const TypeParameter*>& type_parameters,
+               const FunctionTypeArity& arity,
                const std::vector<const Type*>& parameters,
                const Type& return_type,
                const Type& this_type);
@@ -120,6 +137,7 @@ class FunctionType final : public Type {
   // Implementation of |Type| members.
   bool is_nullable() const final;
 
+  const FunctionTypeArity arity_;
   const FunctionTypeKind kind_;
   const size_t number_of_parameters_;
   const size_t number_of_type_parameters_;

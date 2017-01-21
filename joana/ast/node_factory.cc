@@ -731,6 +731,8 @@ const Node& NodeFactory::NewFunctionType(const SourceCodeRange& range,
                                          FunctionTypeKind kind,
                                          const Node& parameter_list,
                                          const Node& return_type) {
+  DCHECK_EQ(parameter_list, SyntaxCode::Tuple);
+  DCHECK(return_type.syntax().Is<Type>()) << return_type;
   return NewNode2(range, syntax_factory_->NewFunctionType(kind), parameter_list,
                   return_type);
 }
@@ -742,25 +744,26 @@ const Node& NodeFactory::NewInvalidType(const SourceCodeRange& range) {
 const Node& NodeFactory::NewMemberType(const SourceCodeRange& range,
                                        const Node& member,
                                        const Node& name) {
-  DCHECK(member == ast::SyntaxCode::TypeName ||
-         member == ast::SyntaxCode::MemberType)
-      << member;
+  DCHECK(member.syntax().Is<Type>()) << member;
   DCHECK_EQ(name, ast::SyntaxCode::Name);
   return NewNode2(range, syntax_factory_->NewMemberType(), member, name);
 }
 
 const Node& NodeFactory::NewNullableType(const SourceCodeRange& range,
                                          const Node& type) {
+  DCHECK(type.syntax().Is<Type>()) << type;
   return NewNode1(range, syntax_factory_->NewNullableType(), type);
 }
 
 const Node& NodeFactory::NewNonNullableType(const SourceCodeRange& range,
                                             const Node& type) {
+  DCHECK(type.syntax().Is<Type>()) << type;
   return NewNode1(range, syntax_factory_->NewNonNullableType(), type);
 }
 
 const Node& NodeFactory::NewOptionalType(const SourceCodeRange& range,
                                          const Node& type) {
+  DCHECK(type.syntax().Is<Type>()) << type;
   return NewNode1(range, syntax_factory_->NewOptionalType(), type);
 }
 
@@ -777,11 +780,14 @@ const Node& NodeFactory::NewRecordType(
 
 const Node& NodeFactory::NewRestType(const SourceCodeRange& range,
                                      const Node& type) {
+  DCHECK(type.syntax().Is<Type>()) << type;
   return NewNode1(range, syntax_factory_->NewRestType(), type);
 }
 
 const Node& NodeFactory::NewTupleType(const SourceCodeRange& range,
                                       const std::vector<const Node*>& members) {
+  for (const auto& member : members)
+    DCHECK(member->syntax().Is<Type>()) << *member;
   return NewNode(range, syntax_factory_->NewTupleType(), members);
 }
 
@@ -796,6 +802,7 @@ const Node& NodeFactory::NewTypeApplication(const SourceCodeRange& range,
 
 const Node& NodeFactory::NewTypeGroup(const SourceCodeRange& range,
                                       const Node& type) {
+  DCHECK(type.syntax().Is<Type>()) << type;
   return NewNode1(range, syntax_factory_->NewTypeGroup(), type);
 }
 
@@ -806,6 +813,8 @@ const Node& NodeFactory::NewTypeName(const Node& name) {
 
 const Node& NodeFactory::NewUnionType(const SourceCodeRange& range,
                                       const std::vector<const Node*>& members) {
+  for (const auto& member : members)
+    DCHECK(member->syntax().Is<Type>()) << *member;
   return NewNode(range, syntax_factory_->NewUnionType(), members);
 }
 

@@ -14,6 +14,7 @@ namespace joana {
 #define FOR_EACH_ANALYZER_ERROR_CODE(V)       \
   V(JSDOC, EXPECT_GENERIC_CLASS)              \
   V(JSDOC, EXPECT_NAME)                       \
+  V(JSDOC, EXPECT_NULLABLE_TYPE)              \
   V(JSDOC, EXPECT_PARAMETER)                  \
   V(JSDOC, EXPECT_TYPE)                       \
   V(JSDOC, INVALID_ARGUMENTS)                 \

@@ -167,8 +167,37 @@ TEST_F(TypeResolverTest, NonNullableType) {
       "|  +--VarStatement\n"
       "|  |  +--BindingNameElement VarVar[foo@1001] {%number%}\n"
       "|  |  |  +--Name |foo|\n"
-      "|  |  |  +--ElisionExpression ||\n",
+      "|  |  |  +--ElisionExpression ||\n"
+      "ANALYZER_ERROR_JSDOC_EXPECT_NULLABLE_TYPE@12:18\n",
       RunOn("/** @type {!number} */ var foo"));
+  EXPECT_EQ(
+      "Module\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@constructor|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--VarStatement\n"
+      "|  |  +--BindingNameElement VarVar[Foo@1001] "
+      "{function(new:class@1001):class@1001}\n"
+      "|  |  |  +--Name |Foo|\n"
+      "|  |  |  +--ElisionExpression || Class[%anonymous%@1002]\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@type|\n"
+      "|  |  |  +--NonNullableType\n"
+      "|  |  |  |  +--TypeName {class@1001}\n"
+      "|  |  |  |  |  +--Name |Foo|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--VarStatement\n"
+      "|  |  +--BindingNameElement VarVar[bar@1003] {class@1001}\n"
+      "|  |  |  +--Name |bar|\n"
+      "|  |  |  +--ElisionExpression ||\n",
+      RunOn("/** @constructor */ var Foo;\n"
+            "/** @type {!Foo} */ var bar;\n"));
 }
 
 TEST_F(TypeResolverTest, NullableType) {
@@ -331,7 +360,8 @@ TEST_F(TypeResolverTest, TypeGroup) {
       "|  +--VarStatement\n"
       "|  |  +--BindingNameElement VarVar[foo@1001] {%number%|%string%}\n"
       "|  |  |  +--Name |foo|\n"
-      "|  |  |  +--ElisionExpression ||\n",
+      "|  |  |  +--ElisionExpression ||\n"
+      "ANALYZER_ERROR_JSDOC_EXPECT_NULLABLE_TYPE@12:27\n",
       RunOn("/** @type {!(number|string)} */ var foo;"));
 }
 

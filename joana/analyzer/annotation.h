@@ -69,6 +69,7 @@ class Annotation final : public ContextUser {
   const Type& TransformAsFunctionType();
   const Type& TransformAsInterface();
 
+  const Type& TransformNonNullableType(const ast::Node& node);
   // Transform AST type node to Type object.
   const Type& TransformType(const ast::Node& node);
   const Type& TransformTypeApplication(const ast::Node& node);

@@ -427,16 +427,37 @@ const Type& Annotation::TransformAsInterface() {
   return type_factory().NewClassType(class_value);
 }
 
+const Type& Annotation::TransformNonNullableType(const ast::Node& node) {
+  DCHECK_EQ(node, ast::SyntaxCode::NonNullableType);
+  const auto& type_node = ast::NonNullableType::TypeOf(node);
+  const auto& type = TransformType(type_node);
+  if (!type.Is<UnionType>()) {
+    // TODO(eval1749): We should support "!*" == any type except for null type.
+    AddError(type_node, ErrorCode::JSDOC_EXPECT_NULLABLE_TYPE);
+    return type;
+  }
+  // Remove null type from members in union type.
+  const auto& union_type = type.As<UnionType>();
+  std::vector<const Type*> members;
+  for (const auto& member : union_type.members()) {
+    if (member.Is<NullType>())
+      continue;
+    members.push_back(&member);
+  }
+  if (members.size() == union_type.members().size()) {
+    AddError(type_node, ErrorCode::JSDOC_EXPECT_NULLABLE_TYPE);
+    return type;
+  }
+  return type_factory().NewUnionTypeFromVector(members);
+}
+
 const Type& Annotation::TransformType(const ast::Node& node) {
   if (node.Is<ast::AnyType>())
     return any_type();
   if (node.Is<ast::InvalidType>())
     return unspecified_type();
-  if (node.Is<ast::NonNullableType>()) {
-    // TODO(eval1749): We should report non-nullable type with primitive type
-    // and type alias(?).
-    return TransformType(node.child_at(0));
-  }
+  if (node.Is<ast::NonNullableType>())
+    return TransformNonNullableType(node);
   if (node.Is<ast::NullableType>()) {
     return type_factory().NewUnionType(TransformType(node.child_at(0)),
                                        null_type());

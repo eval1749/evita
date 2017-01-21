@@ -13,6 +13,7 @@
 #include "joana/analyzer/types.h"
 #include "joana/analyzer/values.h"
 #include "joana/ast/tokens.h"
+#include "joana/ast/types.h"
 
 namespace joana {
 namespace analyzer {
@@ -140,6 +141,13 @@ const Type& TypeFactory::NewTupleTypeFromVector(
       *new (zone_.Allocate(size)) TupleType(NextTypeId(), members);
   cache_->Register(members, new_type);
   return new_type;
+}
+
+const Type& TypeFactory::NewTypeAlias(const ast::Node& name,
+                                      const ast::Node& type) {
+  DCHECK_EQ(name, ast::SyntaxCode::Name);
+  DCHECK(type.syntax().Is<ast::Type>()) << name << ' ' << type;
+  return *new (&zone_) TypeAlias(NextTypeId(), name, type);
 }
 
 const Type& TypeFactory::NewTypeName(const ast::Node& name) {

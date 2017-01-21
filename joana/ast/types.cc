@@ -9,24 +9,33 @@
 namespace joana {
 namespace ast {
 
-IMPLEMENT_AST_SYNTAX_0(Type, AnyType, 0)
-IMPLEMENT_AST_SYNTAX_1(Type, FunctionType, 2, FunctionTypeKind, kind)
-IMPLEMENT_AST_SYNTAX_0(Type, InvalidType, 0)
-IMPLEMENT_AST_SYNTAX_0(Type, NullableType, 1)
-IMPLEMENT_AST_SYNTAX_0(Type, NonNullableType, 1)
-IMPLEMENT_AST_SYNTAX_0(Type, OptionalType, 1)
-IMPLEMENT_AST_SYNTAX_0(Type, RestType, 1)
-IMPLEMENT_AST_SYNTAX_0(Type, TypeGroup, 1)
-IMPLEMENT_AST_SYNTAX_0(Type, UnknownType, 0)
-IMPLEMENT_AST_SYNTAX_0(Type, VoidType, 0)
+//
+// AnyType
+//
+AnyType::AnyType() : Type(SyntaxCode::AnyType, Format()) {}
+AnyType::~AnyType() = default;
+
+//
+// FunctionType
+//
+FunctionType::FunctionType(FunctionTypeKind kind)
+    : Type(SyntaxCode::FunctionType,
+           Format::Builder().set_arity(2).set_number_of_parameters(1).Build()),
+      kind_(kind) {}
+
+FunctionType::~FunctionType() = default;
+
+//
+// InvalidType
+//
+InvalidType::InvalidType() : Type(SyntaxCode::InvalidType, Format()) {}
+InvalidType::~InvalidType() = default;
 
 //
 // MemberType
 //
 MemberType::MemberType()
-    : SyntaxTemplate(std::tuple<>(),
-                     SyntaxCode::MemberType,
-                     Format::Builder().set_arity(2).Build()) {}
+    : Type(SyntaxCode::MemberType, Format::Builder().set_arity(2).Build()) {}
 
 MemberType::~MemberType() = default;
 
@@ -41,12 +50,45 @@ const Node& MemberType::NameOf(const Node& node) {
 }
 
 //
+// NullableType
+//
+NullableType::NullableType()
+    : Type(SyntaxCode::NullableType, Format::Builder().set_arity(1).Build()) {}
+
+NullableType::~NullableType() = default;
+
+const Node& NullableType::TypeOf(const Node& node) {
+  return node.child_at(0);
+}
+
+//
+// NonNullableType
+//
+NonNullableType::NonNullableType()
+    : Type(SyntaxCode::NonNullableType,
+           Format::Builder().set_arity(1).Build()) {}
+NonNullableType::~NonNullableType() = default;
+
+const Node& NonNullableType::TypeOf(const Node& node) {
+  return node.child_at(0);
+}
+
+//
+// OptionalType
+//
+OptionalType::OptionalType()
+    : Type(SyntaxCode::OptionalType, Format::Builder().set_arity(1).Build()) {}
+OptionalType::~OptionalType() = default;
+
+const Node& OptionalType::TypeOf(const Node& node) {
+  return node.child_at(0);
+}
+
+//
 // PrimitiveType
 //
 PrimitiveType::PrimitiveType()
-    : SyntaxTemplate(std::tuple<>(),
-                     SyntaxCode::PrimitiveType,
-                     Format::Builder().set_arity(1).Build()) {}
+    : Type(SyntaxCode::PrimitiveType, Format::Builder().set_arity(1).Build()) {}
 
 PrimitiveType::~PrimitiveType() = default;
 
@@ -59,29 +101,45 @@ const Node& PrimitiveType::NameOf(const Node& node) {
 // RecordType
 //
 RecordType::RecordType()
-    : SyntaxTemplate(std::tuple<>(),
-                     SyntaxCode::RecordType,
-                     Format::Builder().set_is_variadic(true).Build()) {}
+    : Type(SyntaxCode::RecordType,
+           Format::Builder().set_is_variadic(true).Build()) {}
 
 RecordType::~RecordType() = default;
+
+//
+// RestType
+//
+RestType::RestType()
+    : Type(SyntaxCode::RestType, Format::Builder().set_arity(1).Build()) {}
+RestType::~RestType() = default;
+
+const Node& RestType::TypeOf(const Node& node) {
+  return node.child_at(0);
+}
 
 //
 // TupleType
 //
 TupleType::TupleType()
-    : SyntaxTemplate(std::tuple<>(),
-                     SyntaxCode::TupleType,
-                     Format::Builder().set_is_variadic(true).Build()) {}
+    : Type(SyntaxCode::TupleType,
+           Format::Builder().set_is_variadic(true).Build()) {}
 
 TupleType::~TupleType() = default;
+
+//
+// Type
+//
+Type::Type(SyntaxCode syntax_code, const Format& format)
+    : Syntax(syntax_code, format) {}
+
+Type::~Type() = default;
 
 //
 // TypeApplication
 //
 TypeApplication::TypeApplication()
-    : SyntaxTemplate(std::tuple<>(),
-                     SyntaxCode::TypeApplication,
-                     Format::Builder().set_arity(2).Build()) {}
+    : Type(SyntaxCode::TypeApplication,
+           Format::Builder().set_arity(2).Build()) {}
 
 TypeApplication::~TypeApplication() = default;
 
@@ -96,12 +154,21 @@ const Node& TypeApplication::NameOf(const Node& node) {
 }
 
 //
+// TypeGroup
+//
+TypeGroup::TypeGroup()
+    : Type(SyntaxCode::TypeGroup, Format::Builder().set_arity(1).Build()) {}
+TypeGroup::~TypeGroup() = default;
+
+const Node& TypeGroup::TypeOf(const Node& node) {
+  return node.child_at(0);
+}
+
+//
 // TypeName
 //
 TypeName::TypeName()
-    : SyntaxTemplate(std::tuple<>(),
-                     SyntaxCode::TypeName,
-                     Format::Builder().set_arity(1).Build()) {}
+    : Type(SyntaxCode::TypeName, Format::Builder().set_arity(1).Build()) {}
 
 TypeName::~TypeName() = default;
 
@@ -114,11 +181,22 @@ const Node& TypeName::NameOf(const Node& node) {
 // UnionType
 //
 UnionType::UnionType()
-    : SyntaxTemplate(std::tuple<>(),
-                     SyntaxCode::UnionType,
-                     Format::Builder().set_is_variadic(true).Build()) {}
+    : Type(SyntaxCode::UnionType,
+           Format::Builder().set_is_variadic(true).Build()) {}
 
 UnionType::~UnionType() = default;
+
+//
+// UnknownType
+//
+UnknownType::UnknownType() : Type(SyntaxCode::UnknownType, Format()) {}
+UnknownType::~UnknownType() = default;
+
+//
+// VoidType
+//
+VoidType::VoidType() : Type(SyntaxCode::VoidType, Format()) {}
+VoidType::~VoidType() = default;
 
 }  // namespace ast
 }  // namespace joana

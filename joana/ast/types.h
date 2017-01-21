@@ -34,25 +34,76 @@ enum class FunctionTypeKind {
 JOANA_AST_EXPORT std::ostream& operator<<(std::ostream& ostream,
                                           FunctionTypeKind kind);
 
-DECLARE_AST_SYNTAX_0(AnyType)
-DECLARE_AST_SYNTAX_1(FunctionType, FunctionTypeKind, kind)
-DECLARE_AST_SYNTAX_0(InvalidType)
-DECLARE_AST_SYNTAX_0(NullableType)
-DECLARE_AST_SYNTAX_0(NonNullableType)
-DECLARE_AST_SYNTAX_0(OptionalType)
-DECLARE_AST_SYNTAX_0(RecordType)
-DECLARE_AST_SYNTAX_0(RestType)
-DECLARE_AST_SYNTAX_0(TupleType)
-DECLARE_AST_SYNTAX_0(TypeGroup)
-DECLARE_AST_SYNTAX_0(UnionType)
-DECLARE_AST_SYNTAX_0(UnknownType)
-DECLARE_AST_SYNTAX_0(VoidType)
+//
+// Type
+//
+class JOANA_AST_EXPORT Type : public Syntax {
+  DECLARE_ABSTRACT_AST_SYNTAX(Type, Syntax);
+
+ public:
+  ~Type() override;
+
+ protected:
+  Type(SyntaxCode syntax_code, const Format& format);
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(Type);
+};
+
+//
+// AnyType
+//
+class JOANA_AST_EXPORT AnyType final : public Type {
+  DECLARE_CONCRETE_AST_SYNTAX(AnyType, Type);
+
+ public:
+  ~AnyType() final;
+
+ private:
+  AnyType();
+
+  DISALLOW_COPY_AND_ASSIGN(AnyType);
+};
+
+//
+// FunctionType
+//
+class JOANA_AST_EXPORT FunctionType final : public Type {
+  DECLARE_CONCRETE_AST_SYNTAX(FunctionType, Type);
+
+ public:
+  ~FunctionType() final;
+
+  FunctionTypeKind kind() const { return kind_; }
+
+ private:
+  explicit FunctionType(FunctionTypeKind kind);
+
+  const FunctionTypeKind kind_;
+
+  DISALLOW_COPY_AND_ASSIGN(FunctionType);
+};
+
+//
+// InvalidType
+//
+class JOANA_AST_EXPORT InvalidType final : public Type {
+  DECLARE_CONCRETE_AST_SYNTAX(InvalidType, Type);
+
+ public:
+  ~InvalidType() final;
+
+ private:
+  InvalidType();
+
+  DISALLOW_COPY_AND_ASSIGN(InvalidType);
+};
 
 //
 // MemberType
 //
-class JOANA_AST_EXPORT MemberType final : public SyntaxTemplate<Syntax> {
-  DECLARE_CONCRETE_AST_SYNTAX(MemberType, Syntax);
+class JOANA_AST_EXPORT MemberType final : public Type {
+  DECLARE_CONCRETE_AST_SYNTAX(MemberType, Type);
 
  public:
   ~MemberType() final;
@@ -67,11 +118,62 @@ class JOANA_AST_EXPORT MemberType final : public SyntaxTemplate<Syntax> {
 };
 
 //
+// NullableType
+//
+class JOANA_AST_EXPORT NullableType final : public Type {
+  DECLARE_CONCRETE_AST_SYNTAX(NullableType, Type);
+
+ public:
+  ~NullableType() final;
+
+  static const Node& TypeOf(const ast::Node& node);
+
+ private:
+  NullableType();
+
+  DISALLOW_COPY_AND_ASSIGN(NullableType);
+};
+
+//
+// NonNullableType
+//
+class JOANA_AST_EXPORT NonNullableType final : public Type {
+  DECLARE_CONCRETE_AST_SYNTAX(NonNullableType, Type);
+
+ public:
+  ~NonNullableType() final;
+
+  static const Node& TypeOf(const ast::Node& node);
+
+ private:
+  NonNullableType();
+
+  DISALLOW_COPY_AND_ASSIGN(NonNullableType);
+};
+
+//
+// OptionalType
+//
+class JOANA_AST_EXPORT OptionalType final : public Type {
+  DECLARE_CONCRETE_AST_SYNTAX(OptionalType, Type);
+
+ public:
+  ~OptionalType() final;
+
+  static const Node& TypeOf(const ast::Node& node);
+
+ private:
+  OptionalType();
+
+  DISALLOW_COPY_AND_ASSIGN(OptionalType);
+};
+
+//
 // PrimitiveType is a placeholder of primitive type. The parser does not use
 // this node.
 //
-class JOANA_AST_EXPORT PrimitiveType final : public SyntaxTemplate<Syntax> {
-  DECLARE_CONCRETE_AST_SYNTAX(PrimitiveType, Syntax);
+class JOANA_AST_EXPORT PrimitiveType final : public Type {
+  DECLARE_CONCRETE_AST_SYNTAX(PrimitiveType, Type);
 
  public:
   ~PrimitiveType() final;
@@ -85,10 +187,61 @@ class JOANA_AST_EXPORT PrimitiveType final : public SyntaxTemplate<Syntax> {
 };
 
 //
+// RecordType
+//
+class JOANA_AST_EXPORT RecordType final : public Type {
+  DECLARE_CONCRETE_AST_SYNTAX(RecordType, Type);
+
+ public:
+  ~RecordType() final;
+
+  static const Node& TypeOf(const ast::Node& node);
+
+ private:
+  RecordType();
+
+  DISALLOW_COPY_AND_ASSIGN(RecordType);
+};
+
+//
+// RestType
+//
+class JOANA_AST_EXPORT RestType final : public Type {
+  DECLARE_CONCRETE_AST_SYNTAX(RestType, Type);
+
+ public:
+  ~RestType() final;
+
+  static const Node& TypeOf(const ast::Node& node);
+
+ private:
+  RestType();
+
+  DISALLOW_COPY_AND_ASSIGN(RestType);
+};
+
+//
+// TupleType
+//
+class JOANA_AST_EXPORT TupleType final : public Type {
+  DECLARE_CONCRETE_AST_SYNTAX(TupleType, Type);
+
+ public:
+  ~TupleType() final;
+
+  static const Node& TypeOf(const ast::Node& node);
+
+ private:
+  TupleType();
+
+  DISALLOW_COPY_AND_ASSIGN(TupleType);
+};
+
+//
 // TypeApplication
 //
-class JOANA_AST_EXPORT TypeApplication final : public SyntaxTemplate<Syntax> {
-  DECLARE_CONCRETE_AST_SYNTAX(TypeApplication, Syntax);
+class JOANA_AST_EXPORT TypeApplication final : public Type {
+  DECLARE_CONCRETE_AST_SYNTAX(TypeApplication, Type);
 
  public:
   ~TypeApplication() final;
@@ -103,10 +256,27 @@ class JOANA_AST_EXPORT TypeApplication final : public SyntaxTemplate<Syntax> {
 };
 
 //
+// TypeGroup
+//
+class JOANA_AST_EXPORT TypeGroup final : public Type {
+  DECLARE_CONCRETE_AST_SYNTAX(TypeGroup, Type);
+
+ public:
+  ~TypeGroup() final;
+
+  static const Node& TypeOf(const ast::Node& node);
+
+ private:
+  TypeGroup();
+
+  DISALLOW_COPY_AND_ASSIGN(TypeGroup);
+};
+
+//
 // TypeName
 //
-class JOANA_AST_EXPORT TypeName final : public SyntaxTemplate<Syntax> {
-  DECLARE_CONCRETE_AST_SYNTAX(TypeName, Syntax);
+class JOANA_AST_EXPORT TypeName final : public Type {
+  DECLARE_CONCRETE_AST_SYNTAX(TypeName, Type);
 
  public:
   ~TypeName() final;
@@ -117,6 +287,51 @@ class JOANA_AST_EXPORT TypeName final : public SyntaxTemplate<Syntax> {
   TypeName();
 
   DISALLOW_COPY_AND_ASSIGN(TypeName);
+};
+
+//
+// UnionType
+//
+class JOANA_AST_EXPORT UnionType final : public Type {
+  DECLARE_CONCRETE_AST_SYNTAX(UnionType, Type);
+
+ public:
+  ~UnionType() final;
+
+ private:
+  UnionType();
+
+  DISALLOW_COPY_AND_ASSIGN(UnionType);
+};
+
+//
+// UnknownType
+//
+class JOANA_AST_EXPORT UnknownType final : public Type {
+  DECLARE_CONCRETE_AST_SYNTAX(UnknownType, Type);
+
+ public:
+  ~UnknownType() final;
+
+ private:
+  UnknownType();
+
+  DISALLOW_COPY_AND_ASSIGN(UnknownType);
+};
+
+//
+// VoidType
+//
+class JOANA_AST_EXPORT VoidType final : public Type {
+  DECLARE_CONCRETE_AST_SYNTAX(VoidType, Type);
+
+ public:
+  ~VoidType() final;
+
+ private:
+  VoidType();
+
+  DISALLOW_COPY_AND_ASSIGN(VoidType);
 };
 
 }  // namespace ast

@@ -38,7 +38,7 @@ ConstructedClass::ConstructedClass(int id,
       number_of_arguments_(arguments.size()) {
   DCHECK(generic_class);
   DCHECK_EQ(arguments.size(), generic_class->parameters().size());
-  DCHECK_GT(arguments.size(), static_cast<size_t>(1));
+  DCHECK_GE(arguments.size(), static_cast<size_t>(1));
   auto* runner = arguments_;
   for (const auto& argument : arguments) {
     *runner = argument;

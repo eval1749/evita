@@ -271,7 +271,7 @@ const ast::Node& TypeParser::ParseFunctionType(const ast::Node& name) {
   const auto& parameter_list = *result.first;
   const auto kind = result.second;
   if (ConsumeTokenIf(ast::TokenKind::Colon))
-    return NewFunctionType(kind, parameter_list, ParseType());
+    return NewFunctionType(kind, parameter_list, ParseNonOptionalType());
   const auto& return_type = NewVoidType(lexer_->location());
   return NewFunctionType(kind, parameter_list, return_type);
 }
@@ -285,30 +285,44 @@ const ast::Node& TypeParser::ParseNameAsType(const ast::Node& name) {
   return NewTypeApplication(type_name, arguments);
 }
 
-// RecordType ::= '{' (Name ':' Type ','?)* '}'
-const ast::Node& TypeParser::ParseRecordType() {
-  std::vector<const ast::Node*> members;
-  while (CanPeekToken() && PeekToken() != ast::TokenKind::RightBrace) {
-    if (PeekToken() != ast::SyntaxCode::Name)
-      break;
-    const auto& name = ConsumeToken();
-    if (!ConsumeTokenIf(ast::TokenKind::Colon))
-      AddError(TypeErrorCode::ERROR_TYPE_EXPECT_COLON);
-    if (!CanPeekToken())
-      break;
-    const auto& type = ParseType();
-    members.push_back(&NewProperty(name, type));
-    if (!ConsumeTokenIf(ast::TokenKind::Comma))
-      break;
+const ast::Node& TypeParser::ParseNonOptionalType() {
+  if (!CanPeekToken()) {
+    AddError(TypeErrorCode::ERROR_TYPE_EXPECT_TYPE);
+    return NewInvalidType();
   }
-  SkipTokensTo(ast::TokenKind::RightBrace);
-  const auto& result = NewRecordType(members);
-  ConsumeTokenIf(ast::TokenKind::RightBrace);
-  return result;
+  return ParseUnionType();
+}
+
+const ast::Node& TypeParser::ParseNonUnionType() {
+  TypeNodeScope scope(this);
+  if (ConsumeTokenIf(ast::TokenKind::Times))
+    return NewAnyType();
+  if (PeekToken() == ast::TokenKind::Question) {
+    const auto& question = ConsumeToken();
+    if (CanPeekToken() && CanStartType(PeekToken()))
+      return NewNullableType(ParseNonOptionalType());
+    return node_factory().NewUnknownType(question.range());
+  }
+  if (ConsumeTokenIf(ast::TokenKind::LogicalNot))
+    return NewNonNullableType(ParseNonOptionalType());
+  if (PeekToken() == ast::TokenKind::Function)
+    return ParseFunctionType(ConsumeToken());
+  if (PeekToken() == ast::SyntaxCode::Name)
+    return ParseNameAsType(ConsumeToken());
+  if (ConsumeTokenIf(ast::TokenKind::LeftBrace))
+    return ParseRecordType();
+  if (ConsumeTokenIf(ast::TokenKind::LeftBracket))
+    return ParseTupleType();
+  if (ConsumeTokenIf(ast::TokenKind::LeftParenthesis))
+    return ParseTypeGroup();
+  if (ConsumeTokenIf(ast::TokenKind::DotDotDot))
+    return NewRestType(ParseNonOptionalType());
+  ConsumeToken();
+  return NewInvalidType();
 }
 
 const ast::Node& TypeParser::ParseOptionalType() {
-  const auto& type = ParseType();
+  const auto& type = ParseNonOptionalType();
   if (!CanPeekToken() || PeekToken() != ast::TokenKind::Equal)
     return type;
   const auto& optional_type = NewOptionalType(type);
@@ -370,11 +384,33 @@ const ast::Node& TypeParser::ParseQualifiedName(const ast::Node& name) {
   return *member;
 }
 
+// RecordType ::= '{' (Name ':' Type ','?)* '}'
+const ast::Node& TypeParser::ParseRecordType() {
+  std::vector<const ast::Node*> members;
+  while (CanPeekToken() && PeekToken() != ast::TokenKind::RightBrace) {
+    if (PeekToken() != ast::SyntaxCode::Name)
+      break;
+    const auto& name = ConsumeToken();
+    if (!ConsumeTokenIf(ast::TokenKind::Colon))
+      AddError(TypeErrorCode::ERROR_TYPE_EXPECT_COLON);
+    if (!CanPeekToken())
+      break;
+    const auto& type = ParseNonOptionalType();
+    members.push_back(&NewProperty(name, type));
+    if (!ConsumeTokenIf(ast::TokenKind::Comma))
+      break;
+  }
+  SkipTokensTo(ast::TokenKind::RightBrace);
+  const auto& result = NewRecordType(members);
+  ConsumeTokenIf(ast::TokenKind::RightBrace);
+  return result;
+}
+
 // TupleType ::= '[' (Name ','?)* ']'
 const ast::Node& TypeParser::ParseTupleType() {
   std::vector<const ast::Node*> members;
   while (CanPeekToken() && PeekToken() != ast::TokenKind::RightBracket) {
-    members.push_back(&ParseType());
+    members.push_back(&ParseNonOptionalType());
     if (!CanPeekToken())
       break;
     if (ConsumeTokenIf(ast::TokenKind::Comma))
@@ -393,21 +429,13 @@ const ast::Node& TypeParser::ParseTupleType() {
   return result;
 }
 
-const ast::Node& TypeParser::ParseType() {
-  if (!CanPeekToken()) {
-    AddError(TypeErrorCode::ERROR_TYPE_EXPECT_TYPE);
-    return NewInvalidType();
-  }
-  return ParseUnionType();
-}
-
 const ast::Node& TypeParser::ParseTypeArguments() {
   DCHECK_EQ(PeekToken(), ast::TokenKind::LessThan);
   TypeNodeScope scope(this);
   ConsumeToken();
   std::vector<const ast::Node*> arguments;
   while (CanPeekToken() && PeekToken() != ast::TokenKind::GreaterThan) {
-    arguments.push_back(&ParseType());
+    arguments.push_back(&ParseNonOptionalType());
     if (!ConsumeTokenIf(ast::TokenKind::Comma))
       break;
   }
@@ -417,36 +445,8 @@ const ast::Node& TypeParser::ParseTypeArguments() {
   return result;
 }
 
-const ast::Node& TypeParser::ParseNonUnionType() {
-  TypeNodeScope scope(this);
-  if (ConsumeTokenIf(ast::TokenKind::Times))
-    return NewAnyType();
-  if (PeekToken() == ast::TokenKind::Question) {
-    const auto& question = ConsumeToken();
-    if (CanPeekToken() && CanStartType(PeekToken()))
-      return NewNullableType(ParseType());
-    return node_factory().NewUnknownType(question.range());
-  }
-  if (ConsumeTokenIf(ast::TokenKind::LogicalNot))
-    return NewNonNullableType(ParseType());
-  if (PeekToken() == ast::TokenKind::Function)
-    return ParseFunctionType(ConsumeToken());
-  if (PeekToken() == ast::SyntaxCode::Name)
-    return ParseNameAsType(ConsumeToken());
-  if (ConsumeTokenIf(ast::TokenKind::LeftBrace))
-    return ParseRecordType();
-  if (ConsumeTokenIf(ast::TokenKind::LeftBracket))
-    return ParseTupleType();
-  if (ConsumeTokenIf(ast::TokenKind::LeftParenthesis))
-    return ParseTypeGroup();
-  if (ConsumeTokenIf(ast::TokenKind::DotDotDot))
-    return NewRestType(ParseType());
-  ConsumeToken();
-  return NewInvalidType();
-}
-
 const ast::Node& TypeParser::ParseTypeGroup() {
-  const auto& type = ParseType();
+  const auto& type = ParseNonOptionalType();
   ConsumeTokenIf(ast::TokenKind::RightParenthesis);
   return NewTypeGroup(type);
 }

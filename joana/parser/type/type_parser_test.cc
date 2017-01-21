@@ -204,6 +204,23 @@ TEST_F(TypeParserTest, NullableType) {
       Parse("?foo"));
 }
 
+TEST_F(TypeParserTest, NullableTypeError) {
+  EXPECT_EQ(
+      "TypeName\n"
+      "+--Name |foo|\n"
+      "TYPE_ERROR_TYPE_UNEXPECT_TOKEN@3:4\n",
+      Parse("foo?"));
+  EXPECT_EQ(
+      "TypeGroup\n"
+      "+--UnionType\n"
+      "|  +--TypeName\n"
+      "|  |  +--Name |number|\n"
+      "|  +--TypeName\n"
+      "|  |  +--Name |string|\n"
+      "TYPE_ERROR_TYPE_UNEXPECT_TOKEN@15:16\n",
+      Parse("(number|string)?"));
+}
+
 TEST_F(TypeParserTest, NonNullableType) {
   EXPECT_EQ(
       "NonNullableType\n"

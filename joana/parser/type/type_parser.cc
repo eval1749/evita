@@ -257,6 +257,8 @@ const ast::Node& TypeParser::NewVoidType(const SourceCodeRange& range) {
 const ast::Node& TypeParser::Parse() {
   const auto& type = ParseUnionType();
   bracket_tracker_->Finish();
+  if (CanPeekToken())
+    AddError(PeekToken(), TypeErrorCode::ERROR_TYPE_UNEXPECT_TOKEN);
   return type;
 }
 

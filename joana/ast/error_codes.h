@@ -118,7 +118,8 @@ namespace ast {
   V(TYPE, UNEXPECT_RANGLE)          \
   V(TYPE, UNEXPECT_RBRACE)          \
   V(TYPE, UNEXPECT_RBRACKET)        \
-  V(TYPE, UNEXPECT_RPAREN)
+  V(TYPE, UNEXPECT_RPAREN)          \
+  V(TYPE, UNEXPECT_TOKEN)
 
 const auto kLexerErrorCodeBase = 10000;
 const auto kJsDocErrorCodeBase = 11000;

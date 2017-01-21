@@ -459,6 +459,8 @@ const Type& Annotation::TransformType(const ast::Node& node) {
     NOTREACHED() << "We should handle forward type reference." << node;
     return unspecified_type();
   }
+  if (node.Is<ast::TypeGroup>())
+    return TransformType(ast::TypeGroup::TypeOf(node));
   if (node.Is<ast::UnionType>()) {
     std::vector<const Type*> types;
     for (const auto& member : ast::NodeTraversal::ChildNodesOf(node))

@@ -263,6 +263,50 @@ TEST_F(TypeResolverTest, TypeAlias) {
             "/** @type {Foo} */ var bar;\n"));
 }
 
+TEST_F(TypeResolverTest, TypeGroup) {
+  EXPECT_EQ(
+      "Module\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@type|\n"
+      "|  |  |  +--NullableType\n"
+      "|  |  |  |  +--TypeGroup\n"
+      "|  |  |  |  |  +--UnionType\n"
+      "|  |  |  |  |  |  +--TypeName {%number%}\n"
+      "|  |  |  |  |  |  |  +--Name |number|\n"
+      "|  |  |  |  |  |  +--TypeName {%string%}\n"
+      "|  |  |  |  |  |  |  +--Name |string|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--VarStatement\n"
+      "|  |  +--BindingNameElement VarVar[foo@1001] "
+      "{%null%|%number%|%string%}\n"
+      "|  |  |  +--Name |foo|\n"
+      "|  |  |  +--ElisionExpression ||\n",
+      RunOn("/** @type {?(number|string)} */ var foo;"));
+  EXPECT_EQ(
+      "Module\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@type|\n"
+      "|  |  |  +--NonNullableType\n"
+      "|  |  |  |  +--TypeGroup\n"
+      "|  |  |  |  |  +--UnionType\n"
+      "|  |  |  |  |  |  +--TypeName {%number%}\n"
+      "|  |  |  |  |  |  |  +--Name |number|\n"
+      "|  |  |  |  |  |  +--TypeName {%string%}\n"
+      "|  |  |  |  |  |  |  +--Name |string|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--VarStatement\n"
+      "|  |  +--BindingNameElement VarVar[foo@1001] {%number%|%string%}\n"
+      "|  |  |  +--Name |foo|\n"
+      "|  |  |  +--ElisionExpression ||\n",
+      RunOn("/** @type {!(number|string)} */ var foo;"));
+}
+
 TEST_F(TypeResolverTest, TypeApplication) {
   EXPECT_EQ(
       "Module\n"

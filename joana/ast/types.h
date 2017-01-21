@@ -76,6 +76,10 @@ class JOANA_AST_EXPORT FunctionType final : public Type {
 
   FunctionTypeKind kind() const { return kind_; }
 
+  static FunctionTypeKind KindOf(const Node& node);
+  static const Node& ParameterTypesOf(const Node& node);
+  static const Node& ReturnTypeOf(const Node& node);
+
  private:
   explicit FunctionType(FunctionTypeKind kind);
 

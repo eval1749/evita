@@ -25,6 +25,21 @@ FunctionType::FunctionType(FunctionTypeKind kind)
 
 FunctionType::~FunctionType() = default;
 
+FunctionTypeKind FunctionType::KindOf(const ast::Node& node) {
+  DCHECK_EQ(node, SyntaxCode::FunctionType);
+  return node.syntax().As<FunctionType>().kind();
+}
+
+const Node& FunctionType::ParameterTypesOf(const Node& node) {
+  DCHECK_EQ(node, SyntaxCode::FunctionType);
+  return node.child_at(0);
+}
+
+const Node& FunctionType::ReturnTypeOf(const Node& node) {
+  DCHECK_EQ(node, SyntaxCode::FunctionType);
+  return node.child_at(1);
+}
+
 //
 // InvalidType
 //

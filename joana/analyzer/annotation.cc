@@ -508,8 +508,14 @@ Class* Annotation::TryClassValueOf(const ast::Node& node) const {
     return &context().ValueOf(node).As<Class>();
   if (node.Is<ast::Function>())
     return context().ValueOf(node).TryAs<Class>();
-  if (node.Is<ast::BindingNameElement>())
-    return context().ValueOf(node).TryAs<Class>();
+  if (node.Is<ast::BindingNameElement>()) {
+    const auto& variable = context().ValueOf(node).As<Variable>();
+    if (variable.assignments().size() != 1)
+      return nullptr;
+    auto* const variable_value =
+        context().TryValueOf(*variable.assignments().front());
+    return variable_value ? variable_value->TryAs<Class>() : nullptr;
+  }
   if (node.Is<ast::MemberExpression>()) {
     const auto* const value = context().TryValueOf(node);
     if (!value || !value->Is<Property>())

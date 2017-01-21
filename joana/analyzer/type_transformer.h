@@ -24,6 +24,7 @@ class TypeTransformer final : public ContextUser {
  private:
   const Type& NewNullableType(const Type& type);
 
+  const Type& TransformFunctionType(const ast::Node& node);
   const Type& TransformNonNullableType(const ast::Node& node);
   const Type& TransformTypeApplication(const ast::Node& node);
   const Type& TransformTypeName(const ast::Node& node);

@@ -234,27 +234,28 @@ void Annotation::FunctionParameters::Builder::ProcessBindingNameElement(
       tag ? TransformType(is_optional || is_rest ? tag->child_at(1).child_at(0)
                                                  : tag->child_at(1))
           : unspecified_type();
-  parameter_types_.push_back(&type);
   if (RecordName(name) && tag)
     RecordTag(*tag);
   if (has_initializer && (is_optional || is_rest))
     AddError(node, ErrorCode::JSDOC_UNEXPECT_INITIALIZER);
   switch (state_) {
     case State::Required:
+      parameter_types_.push_back(&type);
       if (is_rest) {
         arity_.has_rest = true;
         state_ = State::Rest;
         return;
       }
+      ++arity_.maximum;
       if (has_initializer || is_optional) {
         state_ = State::Optional;
         arity_.maximum = arity_.minimum + 1;
         return;
       }
-      ++arity_.maximum;
       arity_.minimum = arity_.maximum;
       return;
     case State::Optional:
+      parameter_types_.push_back(&type);
       if (is_rest) {
         arity_.has_rest = true;
         state_ = State::Rest;

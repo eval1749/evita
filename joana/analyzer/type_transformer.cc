@@ -37,6 +37,8 @@ const Type& TypeTransformer::Transform(const ast::Node& node) {
   DCHECK(node.syntax().Is<ast::Type>()) << node;
   if (node.Is<ast::AnyType>())
     return any_type();
+  if (node.Is<ast::FunctionType>())
+    return TransformFunctionType(node);
   if (node.Is<ast::InvalidType>())
     return unspecified_type();
   if (node.Is<ast::NonNullableType>())
@@ -44,7 +46,11 @@ const Type& TypeTransformer::Transform(const ast::Node& node) {
   if (node.Is<ast::NullableType>())
     return NewNullableType(Transform(node.child_at(0)));
   if (node.Is<ast::OptionalType>()) {
-    // TODO(eval1749): Where do we store optional parameter information?
+    AddError(node, ErrorCode::JSDOC_UNEXPECT_OPTIONAL);
+    return Transform(node.child_at(0));
+  }
+  if (node.Is<ast::RestType>()) {
+    AddError(node, ErrorCode::JSDOC_UNEXPECT_REST);
     return Transform(node.child_at(0));
   }
   if (node.Is<ast::TupleType>()) {
@@ -69,8 +75,68 @@ const Type& TypeTransformer::Transform(const ast::Node& node) {
     // Unknown type is the source of bug, we should avoid to use.
     return any_type();
   }
+  if (node.Is<ast::VoidType>())
+    return void_type();
   DVLOG(0) << "We should handle " << node;
   return unspecified_type();
+}
+
+const Type& TypeTransformer::TransformFunctionType(const ast::Node& node) {
+  DCHECK_EQ(node, ast::SyntaxCode::FunctionType);
+  FunctionTypeArity arity;
+  std::vector<const Type*> parameter_types;
+  const Type* this_type = &unspecified_type();
+  const auto kind = ast::FunctionType::KindOf(node);
+  enum class State {
+    Optional,
+    Required,
+    Rest,
+    This,
+  } state = kind == ast::FunctionTypeKind::This ? State::This : State::Required;
+  for (const auto& parameter : ast::NodeTraversal::ChildNodesOf(
+           ast::FunctionType::ParameterTypesOf(node))) {
+    const auto is_optional = parameter.Is<ast::OptionalType>();
+    const auto is_rest = parameter.Is<ast::RestType>();
+    const auto& type =
+        Transform(is_optional || is_rest ? parameter.child_at(0) : parameter);
+    switch (state) {
+      case State::Optional:
+        parameter_types.push_back(&type);
+        if (is_rest) {
+          state = State::Rest;
+          continue;
+        }
+        ++arity.maximum;
+        continue;
+      case State::Required:
+        parameter_types.push_back(&type);
+        if (is_rest) {
+          state = State::Rest;
+          continue;
+        }
+        ++arity.maximum;
+        if (is_optional) {
+          state = State::Optional;
+          continue;
+        }
+        arity.minimum = arity.maximum;
+        continue;
+      case State::Rest:
+        AddError(node, ErrorCode::JSDOC_UNEXPECT_REST);
+        continue;
+      case State::This:
+        this_type = &type;
+        state = State::Required;
+        continue;
+    }
+    NOTREACHED() << "Invalid state " << static_cast<int>(state) << parameter;
+  }
+  DCHECK_NE(state, State::This);
+  return NewNullableType(type_factory().NewFunctionType(
+      kind == ast::FunctionTypeKind::New ? FunctionTypeKind::Constructor
+                                         : FunctionTypeKind::Normal,
+      std::vector<const TypeParameter*>(), arity, parameter_types,
+      Transform(ast::FunctionType::ReturnTypeOf(node)), *this_type));
 }
 
 const Type& TypeTransformer::TransformNonNullableType(const ast::Node& node) {

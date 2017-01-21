@@ -51,6 +51,7 @@ class Annotation final : public ContextUser {
   const Type& ComputeThisTypeFromMember(const ast::Node& node);
 
   void MarkNotTypeAnnotation();
+  const Type& NewNullableType(const Type& type);
 
   void ProcessParameter(std::vector<const ast::Node*>* parameter_names,
                         std::vector<const Type*>* parameter_types,

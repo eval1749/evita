@@ -237,6 +237,15 @@ void Annotation::MarkNotTypeAnnotation() {
     AddError(*this_tag_, ErrorCode::JSDOC_UNEXPECT_TAG);
 }
 
+const Type& Annotation::NewNullableType(const Type& type) {
+  if (type.Is<AnyType>() || type.Is<InvalidType>() ||
+      type.Is<UnspecifiedType>()) {
+    return type;
+  }
+  DCHECK(type.is_nullable()) << type;
+  return type_factory().NewUnionType(type, null_type());
+}
+
 void Annotation::ProcessParameter(
     std::vector<const ast::Node*>* parameter_names,
     std::vector<const Type*>* parameter_types,
@@ -458,10 +467,8 @@ const Type& Annotation::TransformType(const ast::Node& node) {
     return unspecified_type();
   if (node.Is<ast::NonNullableType>())
     return TransformNonNullableType(node);
-  if (node.Is<ast::NullableType>()) {
-    return type_factory().NewUnionType(TransformType(node.child_at(0)),
-                                       null_type());
-  }
+  if (node.Is<ast::NullableType>())
+    return NewNullableType(TransformType(node.child_at(0)));
   if (node.Is<ast::OptionalType>()) {
     // TODO(eval1749): Where do we store optional parameter information?
     return TransformType(node.child_at(0));
@@ -519,7 +526,7 @@ const Type& Annotation::TransformTypeApplication(const ast::Node& node) {
        ast::NodeTraversal::ChildNodesOf(arguments_node))
     arguments.push_back(&TransformType(argument_node));
   auto& value = factory().NewConstructedClass(&generic_class_value, arguments);
-  return type_factory().NewClassType(&value);
+  return NewNullableType(type_factory().NewClassType(&value));
 }
 
 const Type& Annotation::TransformTypeName(const ast::Node& node) {
@@ -531,7 +538,7 @@ const Type& Annotation::TransformTypeName(const ast::Node& node) {
   }
   const auto& type = *maybe_type;
   if (type.Is<ClassType>() || type.Is<FunctionType>())
-    return type_factory().NewUnionType(type, null_type());
+    return NewNullableType(type);
   return type;
 }
 

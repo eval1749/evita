@@ -126,7 +126,7 @@ class JOANA_AST_EXPORT NullableType final : public Type {
  public:
   ~NullableType() final;
 
-  static const Node& TypeOf(const ast::Node& node);
+  static const Node& TypeOf(const Node& node);
 
  private:
   NullableType();
@@ -143,7 +143,7 @@ class JOANA_AST_EXPORT NonNullableType final : public Type {
  public:
   ~NonNullableType() final;
 
-  static const Node& TypeOf(const ast::Node& node);
+  static const Node& TypeOf(const Node& node);
 
  private:
   NonNullableType();
@@ -160,7 +160,7 @@ class JOANA_AST_EXPORT OptionalType final : public Type {
  public:
   ~OptionalType() final;
 
-  static const Node& TypeOf(const ast::Node& node);
+  static const Node& TypeOf(const Node& node);
 
  private:
   OptionalType();
@@ -195,7 +195,7 @@ class JOANA_AST_EXPORT RecordType final : public Type {
  public:
   ~RecordType() final;
 
-  static const Node& TypeOf(const ast::Node& node);
+  static const Node& TypeOf(const Node& node);
 
  private:
   RecordType();
@@ -212,7 +212,7 @@ class JOANA_AST_EXPORT RestType final : public Type {
  public:
   ~RestType() final;
 
-  static const Node& TypeOf(const ast::Node& node);
+  static const Node& TypeOf(const Node& node);
 
  private:
   RestType();
@@ -229,7 +229,7 @@ class JOANA_AST_EXPORT TupleType final : public Type {
  public:
   ~TupleType() final;
 
-  static const Node& TypeOf(const ast::Node& node);
+  static const Node& TypeOf(const Node& node);
 
  private:
   TupleType();
@@ -264,7 +264,7 @@ class JOANA_AST_EXPORT TypeGroup final : public Type {
  public:
   ~TypeGroup() final;
 
-  static const Node& TypeOf(const ast::Node& node);
+  static const Node& TypeOf(const Node& node);
 
  private:
   TypeGroup();

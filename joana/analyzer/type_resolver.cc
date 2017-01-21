@@ -97,10 +97,12 @@ void TypeResolver::ProcessVariableDeclaration(const ast::Node& node,
       Annotation annotation(&context(), document, binding, &class_type);
       const auto* type = annotation.Compile();
       if (!type) {
+        AddError(binding, ErrorCode::TYPE_RESOLVER_EXPECT_CLASS_TYPE);
         Visit(node);
         return;
       }
-      DCHECK(type->Is<FunctionType>()) << type;
+      if (!type->Is<ClassType>() && !type->Is<FunctionType>())
+        AddError(binding, ErrorCode::TYPE_RESOLVER_EXPECT_CLASS_TYPE);
       RegisterType(binding, *type);
       Visit(ast::BindingNameElement::InitializerOf(binding));
       return;

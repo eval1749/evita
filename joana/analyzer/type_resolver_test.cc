@@ -246,7 +246,7 @@ TEST_F(TypeResolverTest, TypeApplication) {
       "|  |  |  |  +--Name |T|\n"
       "|  |  +--JsDocText |*/|\n"
       "|  +--VarStatement\n"
-      "|  |  +--BindingNameElement VarVar[Foo@1001]\n"
+      "|  |  +--BindingNameElement VarVar[Foo@1001] {class<T>@1002}\n"
       "|  |  |  +--Name |Foo|\n"
       "|  |  |  +--ElisionExpression ||\n"
       "+--Annotation\n"
@@ -264,7 +264,8 @@ TEST_F(TypeResolverTest, TypeApplication) {
       "|  |  |  |  |  |  +--Name |number|\n"
       "|  |  +--JsDocText |*/|\n"
       "|  +--VarStatement\n"
-      "|  |  +--BindingNameElement VarVar[Bar@1003]\n"
+      "|  |  +--BindingNameElement VarVar[Bar@1003] "
+      "{function(new:class@1004):class@1004}\n"
       "|  |  |  +--Name |Bar|\n"
       "|  |  |  +--ElisionExpression ||\n",
       RunOn("/** @interface @template T */ var Foo;"

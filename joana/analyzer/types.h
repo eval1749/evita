@@ -207,6 +207,23 @@ class TupleType final : public Type {
 };
 
 //
+// TypeAlias
+//
+class TypeAlias final : public NamedType {
+  DECLARE_CONCRETE_ANALYZE_TYPE(TypeAlias, NamedType)
+
+ public:
+  ~TypeAlias() final;
+
+ private:
+  TypeAlias(int id, const ast::Node& name, const ast::Node& type);
+
+  const ast::Node& type_;
+
+  DISALLOW_COPY_AND_ASSIGN(TypeAlias);
+};
+
+//
 // TypeName
 //
 class TypeName final : public NamedType {

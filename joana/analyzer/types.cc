@@ -7,6 +7,7 @@
 #include "joana/analyzer/values.h"
 #include "joana/ast/expressions.h"
 #include "joana/ast/tokens.h"
+#include "joana/ast/types.h"
 
 namespace joana {
 namespace analyzer {
@@ -127,6 +128,16 @@ TupleType::~TupleType() = default;
 BlockRange<const Type*> TupleType::members() const {
   return BlockRange<const Type*>(&members_[0], number_of_members_);
 }
+
+//
+// TypeAlias
+//
+TypeAlias::TypeAlias(int id, const ast::Node& name, const ast::Node& type)
+    : NamedType(id, name), type_(type) {
+  DCHECK(type.syntax().Is<ast::Type>()) << name << ' ' << type;
+}
+
+TypeAlias::~TypeAlias() = default;
 
 //
 // TypeName

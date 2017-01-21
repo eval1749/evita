@@ -134,6 +134,12 @@ std::ostream& operator<<(std::ostream& ostream,
 }
 
 std::ostream& operator<<(std::ostream& ostream,
+                         const Printable<TypeAlias>& printable) {
+  const auto& type = *printable.type;
+  return ostream << ast::AsSourceCode(type.name()) << '@' << type.id();
+}
+
+std::ostream& operator<<(std::ostream& ostream,
                          const Printable<TypeName>& printable) {
   const auto& type = *printable.type;
   return ostream << ast::AsSourceCode(type.name()) << '@' << type.id();

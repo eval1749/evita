@@ -21,6 +21,7 @@ namespace analyzer {
   V(NullType)                       \
   V(PrimitiveType)                  \
   V(TupleType)                      \
+  V(TypeAlias)                      \
   V(TypeName)                       \
   V(TypeParameter)                  \
   V(UnionType)                      \

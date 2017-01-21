@@ -775,6 +775,8 @@ const Node& NodeFactory::NewPrimitiveType(const Node& name) {
 const Node& NodeFactory::NewRecordType(
     const SourceCodeRange& range,
     const std::vector<const Node*>& members) {
+  for (const auto& member : members)
+    DCHECK_EQ(*member, ast::SyntaxCode::Property);
   return NewNode(range, syntax_factory_->NewRecordType(), members);
 }
 

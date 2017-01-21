@@ -69,6 +69,25 @@ void TypeResolver::ProcessAnnotation(const ast::Node& document,
   RegisterType(node, *type);
 }
 
+void TypeResolver::ProcessAssignment(const ast::Node& node,
+                                     const ast::Node& document) {
+  DCHECK_EQ(node, ast::SyntaxCode::AssignmentExpression);
+  DCHECK_EQ(document, ast::SyntaxCode::JsDocDocument);
+  const auto& lhs = ast::AssignmentExpression::LeftHandSideOf(node);
+  const auto* const class_type = ComputeClassType(lhs);
+  const auto& rhs = ast::AssignmentExpression::RightHandSideOf(node);
+  Annotation annotation(&context(), document, node, class_type);
+  const auto* const type = annotation.Compile();
+  if (!type)
+    return;
+  RegisterType(lhs, *type);
+  if (!node.Is<ast::Function>())
+    return;
+  if (!type->Is<FunctionType>() && !type->Is<ClassType>())
+    return;
+  RegisterType(rhs, *type);
+}
+
 void TypeResolver::ProcessBinding(const ast::Node& node, const Type& type) {
   if (node.Is<ast::BindingNameElement>()) {
     Visit(ast::BindingNameElement::InitializerOf(node));
@@ -156,12 +175,8 @@ void TypeResolver::VisitInternal(const ast::Annotation& syntax,
   if (!annotated.Is<ast::ExpressionStatement>())
     return;
   const auto& expression = ast::ExpressionStatement::ExpressionOf(annotated);
-  if (expression.Is<ast::AssignmentExpression>()) {
-    const auto& lhs = ast::AssignmentExpression::LeftHandSideOf(expression);
-    const auto* const class_type = ComputeClassType(lhs);
-    const auto& rhs = ast::AssignmentExpression::RightHandSideOf(expression);
-    return ProcessAnnotation(document, rhs, class_type);
-  }
+  if (expression.Is<ast::AssignmentExpression>())
+    return ProcessAssignment(expression, document);
   const auto* const class_type = ComputeClassType(expression);
   return ProcessAnnotation(document, expression, class_type);
 }

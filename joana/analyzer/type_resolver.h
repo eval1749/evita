@@ -33,6 +33,7 @@ class TypeResolver final : public Pass, public ast::SyntaxVisitor {
                          const ast::Node& node,
                          const Type* this_type = nullptr);
   void ProcessArrayBinding(const ast::Node& node, const Type& type);
+  void ProcessAssignment(const ast::Node& node, const ast::Node& document);
   void ProcessBinding(const ast::Node& node, const Type& type);
   void ProcessObjectBinding(const ast::Node& node, const Type& type);
   void ProcessVariableDeclaration(const ast::Node& node,

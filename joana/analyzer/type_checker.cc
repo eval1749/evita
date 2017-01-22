@@ -37,10 +37,8 @@ void TypeChecker::RunOn(const ast::Node& toplevel_node) {
 void TypeChecker::VisitInternal(const ast::ReferenceExpression& syntax,
                                 const ast::Node& node) {
   const auto* value = context().TryValueOf(node);
-  if (!value) {
-    AddError(node, ErrorCode::TYPE_CHECKER_UNDEFINED_VARIABLE);
+  if (!value)
     return;
-  }
   const auto& variable = value->As<Variable>();
   if (variable.kind() == VariableKind::Parameter ||
       !variable.assignments().empty()) {
@@ -53,10 +51,8 @@ void TypeChecker::VisitInternal(const ast::ReferenceExpression& syntax,
 void TypeChecker::VisitInternal(const ast::TypeName& syntax,
                                 const ast::Node& node) {
   const auto* present = context().TryTypeOf(node);
-  if (!present) {
-    AddError(node, ErrorCode::TYPE_CHECKER_UNDEFINED_TYPE);
+  if (!present)
     return;
-  }
 }
 
 }  // namespace analyzer

@@ -47,6 +47,17 @@ class TypeTest : public ::testing::Test {
     return type_factory_.NewRecordType({&member1});
   }
 
+  const Type& NewRecordType(const ast::Node& name1,
+                            const Type& type1,
+                            const ast::Node& name2,
+                            const Type& type2) {
+    const auto& member1 =
+        type_factory_.NewLabeledType(name1, type1).As<LabeledType>();
+    const auto& member2 =
+        type_factory_.NewLabeledType(name2, type2).As<LabeledType>();
+    return type_factory_.NewRecordType({&member1, &member2});
+  }
+
   template <typename... Parameters>
   const Type& NewTupleType(const Parameters&... parameters) {
     return type_factory_.NewTupleTypeFromVector({&parameters...});
@@ -71,7 +82,7 @@ TypeTest::~TypeTest() = default;
 
 TEST_F(TypeTest, RecordType) {
   SourceCode::Factory source_code_factory(&zone());
-  const auto& text16 = base::UTF8ToUTF16("foofoo");
+  const auto& text16 = base::UTF8ToUTF16("foofoobarbar");
   const auto size = text16.size() * sizeof(base::char16);
   auto* data = static_cast<base::char16*>(zone().Allocate(size));
   ::memcpy(data, text16.data(), size);
@@ -80,11 +91,20 @@ TEST_F(TypeTest, RecordType) {
   ast::NodeFactory node_factory(&zone());
   const auto& foo1 = node_factory.NewName(source_code.Slice(0, 3));
   const auto& foo2 = node_factory.NewName(source_code.Slice(3, 6));
+  const auto& bar1 = node_factory.NewName(source_code.Slice(6, 9));
+  const auto& bar2 = node_factory.NewName(source_code.Slice(9, 12));
 
   EXPECT_EQ(NewRecordType(foo1, any_type()), NewRecordType(foo1, any_type()));
   EXPECT_EQ(NewRecordType(foo2, any_type()), NewRecordType(foo1, any_type()));
   EXPECT_NE(NewRecordType(foo1, any_type()),
             NewRecordType(foo1, number_type()));
+
+  EXPECT_EQ(NewRecordType(foo1, any_type(), bar1, any_type()),
+            NewRecordType(foo1, any_type(), bar1, any_type()));
+  EXPECT_EQ(NewRecordType(foo1, any_type(), bar1, any_type()),
+            NewRecordType(foo2, any_type(), bar2, any_type()));
+  EXPECT_EQ(NewRecordType(bar1, any_type(), foo1, any_type()),
+            NewRecordType(foo2, any_type(), bar2, any_type()));
 }
 
 TEST_F(TypeTest, TupleType) {

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <algorithm>
 #include <map>
 #include <set>
 #include <tuple>
@@ -183,7 +184,20 @@ const Type& TypeFactory::NewPrimitiveType(ast::TokenKind id) {
 }
 
 const Type& TypeFactory::NewRecordType(
-    const std::vector<const LabeledType*>& members) {
+    const std::vector<const LabeledType*>& passed_members) {
+#if DCHECK_IS_ON()
+  std::set<ast::TokenKind> names;
+  for (const auto& type : passed_members) {
+    const auto& result = names.emplace(ast::Name::KindOf(type->name()));
+    DCHECK(result.second) << *type;
+  }
+#endif
+  std::vector<const LabeledType*> members(passed_members.begin(),
+                                          passed_members.end());
+  std::sort(members.begin(), members.end(),
+            [](const LabeledType* type1, const LabeledType* type2) {
+              return LabelName{&type1->name()} < LabelName{&type2->name()};
+            });
   const auto* present = cache_->Find(members);
   if (present)
     return *present;

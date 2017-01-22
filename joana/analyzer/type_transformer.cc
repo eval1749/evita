@@ -135,11 +135,11 @@ const Type& TypeTransformer::TransformFunctionType(const ast::Node& node) {
     NOTREACHED() << "Invalid state " << static_cast<int>(state) << parameter;
   }
   DCHECK_NE(state, State::This);
-  return NewNullableType(type_factory().NewFunctionType(
+  return type_factory().NewFunctionType(
       kind == ast::FunctionTypeKind::New ? FunctionTypeKind::Constructor
                                          : FunctionTypeKind::Normal,
       std::vector<const TypeParameter*>(), arity, parameter_types,
-      Transform(ast::FunctionType::ReturnTypeOf(node)), *this_type));
+      Transform(ast::FunctionType::ReturnTypeOf(node)), *this_type);
 }
 
 const Type& TypeTransformer::TransformNonNullableType(const ast::Node& node) {

@@ -72,10 +72,6 @@ FunctionType::FunctionType(
 
 FunctionType::~FunctionType() = default;
 
-bool FunctionType::is_nullable() const {
-  return true;
-}
-
 BlockRange<const Type*> FunctionType::parameters() const {
   return BlockRange<const Type*>(elements_, number_of_parameters_);
 }

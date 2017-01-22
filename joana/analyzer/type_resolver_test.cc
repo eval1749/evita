@@ -198,6 +198,24 @@ TEST_F(TypeResolverTest, NonNullableType) {
       "|  |  |  +--ElisionExpression ||\n",
       RunOn("/** @constructor */ var Foo;\n"
             "/** @type {!Foo} */ var bar;\n"));
+  EXPECT_EQ(
+      "Module\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@type|\n"
+      "|  |  |  +--NonNullableType\n"
+      "|  |  |  |  +--FunctionType<Normal>\n"
+      "|  |  |  |  |  +--Tuple |()|\n"
+      "|  |  |  |  |  +--VoidType ||\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--VarStatement\n"
+      "|  |  +--BindingNameElement VarVar[foo@1001] {function(this:?)}\n"
+      "|  |  |  +--Name |foo|\n"
+      "|  |  |  +--ElisionExpression ||\n"
+      "ANALYZER_ERROR_JSDOC_EXPECT_NULLABLE_TYPE@12:22\n",
+      RunOn("/** @type {!function()} */ var foo"));
 }
 
 TEST_F(TypeResolverTest, NullableType) {

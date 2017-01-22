@@ -134,9 +134,6 @@ class FunctionType final : public Type {
                const Type& return_type,
                const Type& this_type);
 
-  // Implementation of |Type| members.
-  bool is_nullable() const final;
-
   const FunctionTypeArity arity_;
   const FunctionTypeKind kind_;
   const size_t number_of_parameters_;

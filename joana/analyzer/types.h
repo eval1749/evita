@@ -99,9 +99,6 @@ class ClassType final : public Type {
  private:
   ClassType(int id, Value* value);
 
-  // Implementation of |Type| members.
-  bool is_nullable() const final;
-
   Value& value_;
 
   DISALLOW_COPY_AND_ASSIGN(ClassType);
@@ -175,9 +172,6 @@ class LabeledType final : public Type {
  private:
   LabeledType(int id, const ast::Node& name, const Type& type);
 
-  // Implementation of |Type| members.
-  bool is_nullable() const final;
-
   const ast::Node& name_;
   const Type& type_;
 
@@ -226,9 +220,6 @@ class PrimitiveType final : public NamedType {
  private:
   PrimitiveType(int id, const ast::Node& name);
 
-  // Implementation of |Type| members.
-  bool is_nullable() const final;
-
   DISALLOW_COPY_AND_ASSIGN(PrimitiveType);
 };
 
@@ -247,9 +238,6 @@ class RecordType final : public Type {
 
  private:
   RecordType(int id, const std::vector<const LabeledType*>& members);
-
-  // Implementation of |Type| members.
-  bool is_nullable() const final;
 
   const size_t number_of_members_;
   const LabeledType* members_[1];
@@ -341,9 +329,6 @@ class UnionType final : public Type {
 
  private:
   UnionType(int id, const std::set<const Type*>& members);
-
-  // Implementation of |Type| members.
-  bool is_nullable() const final;
 
   const size_t number_of_members_;
   const Type* members_[1];

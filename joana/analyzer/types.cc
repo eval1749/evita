@@ -27,10 +27,6 @@ ClassType::ClassType(int id, Value* value) : Type(id), value_(*value) {
 
 ClassType::~ClassType() = default;
 
-bool ClassType::is_nullable() const {
-  return true;
-}
-
 const ast::Node& ClassType::name() const {
   return value_.node().child_at(0);
 }
@@ -126,10 +122,6 @@ LabeledType::LabeledType(int id, const ast::Node& name, const Type& type)
 
 LabeledType::~LabeledType() = default;
 
-bool LabeledType::is_nullable() const {
-  return type_.is_nullable();
-}
-
 //
 // NilType
 //
@@ -149,10 +141,6 @@ PrimitiveType::PrimitiveType(int id, const ast::Node& name)
     : NamedType(id, name) {}
 PrimitiveType::~PrimitiveType() = default;
 
-bool PrimitiveType::is_nullable() const {
-  return true;
-}
-
 //
 // RecordType
 //
@@ -166,10 +154,6 @@ RecordType::RecordType(int id, const std::vector<const LabeledType*>& members)
 }
 
 RecordType::~RecordType() = default;
-
-bool RecordType::is_nullable() const {
-  return true;
-}
 
 BlockRange<const LabeledType*> RecordType::members() const {
   return BlockRange<const LabeledType*>(&members_[0], number_of_members_);
@@ -230,10 +214,6 @@ UnionType::UnionType(int id, const std::set<const Type*>& members)
 }
 
 UnionType::~UnionType() = default;
-
-bool UnionType::is_nullable() const {
-  return true;
-}
 
 BlockRange<const Type*> UnionType::members() const {
   return BlockRange<const Type*>(&members_[0], number_of_members_);

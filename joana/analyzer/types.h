@@ -276,6 +276,8 @@ class TypeAlias final : public NamedType {
  public:
   ~TypeAlias() final;
 
+  const ast::Node& type() const { return type_; }
+
  private:
   TypeAlias(int id, const ast::Node& name, const ast::Node& type);
 

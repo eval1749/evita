@@ -384,19 +384,22 @@ const ast::Node& TypeParser::ParseQualifiedName(const ast::Node& name) {
   return *member;
 }
 
-// RecordType ::= '{' (Name ':' Type ','?)* '}'
+// RecordType ::= '{' (RecordTypeMember','?)* '}'
+// RecordTypeMember ::= Name ':' Type | Name
 const ast::Node& TypeParser::ParseRecordType() {
   std::vector<const ast::Node*> members;
   while (CanPeekToken() && PeekToken() != ast::TokenKind::RightBrace) {
     if (PeekToken() != ast::SyntaxCode::Name)
       break;
     const auto& name = ConsumeToken();
-    if (!ConsumeTokenIf(ast::TokenKind::Colon))
-      AddError(TypeErrorCode::ERROR_TYPE_EXPECT_COLON);
-    if (!CanPeekToken())
-      break;
-    const auto& type = ParseNonOptionalType();
-    members.push_back(&NewProperty(name, type));
+    if (!ConsumeTokenIf(ast::TokenKind::Colon)) {
+      members.push_back(&name);
+    } else {
+      if (!CanPeekToken())
+        break;
+      const auto& type = ParseNonOptionalType();
+      members.push_back(&NewProperty(name, type));
+    }
     if (!ConsumeTokenIf(ast::TokenKind::Comma))
       break;
   }

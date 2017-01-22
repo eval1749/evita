@@ -275,6 +275,15 @@ TEST_F(TypeParserTest, RecordType) {
       "|  +--TypeName\n"
       "|  |  +--Name |T|\n",
       Parse("{done: boolean, next: T}"));
+
+  EXPECT_EQ(
+      "RecordType\n"
+      "+--Name |foo|\n"
+      "+--Property\n"
+      "|  +--Name |bar|\n"
+      "|  +--TypeName\n"
+      "|  |  +--Name |baz|\n",
+      Parse("{foo, bar: baz}"));
 }
 
 TEST_F(TypeParserTest, RecordTypeError) {
@@ -284,8 +293,8 @@ TEST_F(TypeParserTest, RecordTypeError) {
       Parse("{"));
 
   EXPECT_EQ(
-      "RecordType |{foo|\n"
-      "TYPE_ERROR_TYPE_EXPECT_COLON@4:4\n"
+      "RecordType\n"
+      "+--Name |foo|\n"
       "TYPE_ERROR_TYPE_EXPECT_RBRACE@0:4\n",
       Parse("{foo"));
 

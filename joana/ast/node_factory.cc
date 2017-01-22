@@ -778,7 +778,7 @@ const Node& NodeFactory::NewRecordType(
     const SourceCodeRange& range,
     const std::vector<const Node*>& members) {
   for (const auto& member : members)
-    DCHECK_EQ(*member, ast::SyntaxCode::Property);
+    DCHECK(member->Is<Name>() || member->Is<Property>()) << member;
   return NewNode(range, syntax_factory_->NewRecordType(), members);
 }
 

@@ -590,7 +590,6 @@ const Type& Annotation::ResolveTypeName(const ast::Node& name) {
 const Type& Annotation::TransformAsFunctionType() {
   if (node_.Is<ast::Method>()) {
     const auto& this_type = ComputeThisType();
-    DCHECK(this_type.Is<ClassType>()) << this_type;
     if (kind_tag_)
       AddError(*kind_tag_, ErrorCode::JSDOC_UNEXPECT_TAG);
     const auto& parameters =
@@ -601,6 +600,7 @@ const Type& Annotation::TransformAsFunctionType() {
     const auto& method_name = ast::Method::NameOf(node_);
     switch (method_kind) {
       case ast::MethodKind::NonStatic:
+        DCHECK(this_type.Is<ClassType>()) << node_ << ':' << this_type;
         if (method_name == ast::TokenKind::Constructor) {
           return type_factory().NewFunctionType(
               FunctionTypeKind::Constructor, type_parameters_,
@@ -610,6 +610,7 @@ const Type& Annotation::TransformAsFunctionType() {
             FunctionTypeKind::Normal, type_parameters_, parameters.arity(),
             parameters.types(), ComputeReturnType(), this_type);
       case ast::MethodKind::Static:
+        DCHECK_EQ(this_type, void_type()) << node_;
         // Note: It is OK to name method to |Constructor|, e.g.
         // class Foo { static constructor() {} }
         return type_factory().NewFunctionType(

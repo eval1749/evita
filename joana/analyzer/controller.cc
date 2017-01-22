@@ -112,6 +112,7 @@ void Controller::Analyze() {
     const auto& pass = entry.constructor(context_.get());
     for (const auto& node : nodes_)
       pass->RunOn(*node);
+    pass->RunOnAll();
     if (std::count(dump_list.begin(), dump_list.end(), entry.key) > 0)
       DumpValues();
     if (std::count(print_list.begin(), print_list.end(), entry.key) > 0)

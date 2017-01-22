@@ -24,6 +24,7 @@ namespace joana {
   V(JSDOC, MULTIPLE_PARAMETER)                \
   V(JSDOC, MULTIPLE_PROPERTY)                 \
   V(JSDOC, MULTIPLE_TAG)                      \
+  V(JSDOC, UNDEFINED_TYPE)                    \
   V(JSDOC, UNEXPECT_INITIALIZER)              \
   V(JSDOC, UNEXPECT_OPTIONAL)                 \
   V(JSDOC, UNEXPECT_PARAMETER)                \

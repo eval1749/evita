@@ -269,7 +269,8 @@ const Type& TypeTransformer::TransformTypeName(const ast::Node& node) {
   DCHECK_EQ(node, ast::SyntaxCode::TypeName);
   const auto* maybe_type = context().TryTypeOf(node);
   if (!maybe_type) {
-    NOTREACHED() << "We should handle forward type reference." << node;
+    // TODO(eval1749): How do we handle undefined type?
+    AddError(node, ErrorCode::JSDOC_UNDEFINED_TYPE);
     return unspecified_type();
   }
   const auto& type = *maybe_type;

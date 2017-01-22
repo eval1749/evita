@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef JOANA_ANALYZER_ANNOTATION_H_
-#define JOANA_ANALYZER_ANNOTATION_H_
+#ifndef JOANA_ANALYZER_TYPE_ANNOTATION_TRANSFORMER_H_
+#define JOANA_ANALYZER_TYPE_ANNOTATION_TRANSFORMER_H_
 
 #include <unordered_map>
 #include <vector>
@@ -28,17 +28,17 @@ class TypeParameter;
 class Value;
 
 //
-// Annotation represents compiled annotation.
+// TypeAnnotationTransformer represents compiled annotation.
 //
-class Annotation final : public ContextUser {
+class TypeAnnotationTransformer final : public ContextUser {
  public:
-  // |node| is |ast::Annotation|.
+  // |node| is |ast::TypeAnnotationTransformer|.
   // |this_type| is |nullptr| or |ClassType| for class declaration.
-  Annotation(Context* context,
-             const ast::Node& document,
-             const ast::Node& node,
-             const Type* this_type = nullptr);
-  ~Annotation();
+  TypeAnnotationTransformer(Context* context,
+                            const ast::Node& document,
+                            const ast::Node& node,
+                            const Type* this_type = nullptr);
+  ~TypeAnnotationTransformer();
 
   const Type* Compile();
 
@@ -52,7 +52,7 @@ class Annotation final : public ContextUser {
   const Type& ComputeThisType();
   const Type& ComputeThisTypeFromMember(const ast::Node& node);
 
-  void MarkNotTypeAnnotation();
+  void MarkNotTypeTypeAnnotationTransformer();
 
   FunctionParameters ProcessParameterList(const ast::Node& parameter_list);
 
@@ -90,10 +90,10 @@ class Annotation final : public ContextUser {
   const ast::Node* this_tag_ = nullptr;
   const ast::Node* type_node_ = nullptr;
 
-  DISALLOW_COPY_AND_ASSIGN(Annotation);
+  DISALLOW_COPY_AND_ASSIGN(TypeAnnotationTransformer);
 };
 
 }  // namespace analyzer
 }  // namespace joana
 
-#endif  // JOANA_ANALYZER_ANNOTATION_H_
+#endif  // JOANA_ANALYZER_TYPE_ANNOTATION_TRANSFORMER_H_

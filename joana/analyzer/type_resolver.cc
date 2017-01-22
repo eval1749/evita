@@ -5,9 +5,9 @@
 #include "joana/analyzer/type_resolver.h"
 
 #include "base/logging.h"
-#include "joana/analyzer/annotation.h"
 #include "joana/analyzer/context.h"
 #include "joana/analyzer/error_codes.h"
+#include "joana/analyzer/type_annotation_transformer.h"
 #include "joana/analyzer/type_factory.h"
 #include "joana/analyzer/types.h"
 #include "joana/analyzer/values.h"
@@ -62,7 +62,7 @@ void TypeResolver::ProcessAnnotation(const ast::Node& document,
                                      const ast::Node& node,
                                      const Type* this_type) {
   DCHECK_EQ(document, ast::SyntaxCode::JsDocDocument);
-  Annotation annotation(&context(), document, node, this_type);
+  TypeAnnotationTransformer annotation(&context(), document, node, this_type);
   const auto* const type = annotation.Compile();
   if (!type)
     return;
@@ -75,7 +75,7 @@ void TypeResolver::ProcessAssignment(const ast::Node& node,
   DCHECK_EQ(document, ast::SyntaxCode::JsDocDocument);
   const auto& lhs = ast::AssignmentExpression::LeftHandSideOf(node);
   const auto* const class_type = ComputeClassType(lhs);
-  Annotation annotation(&context(), document, node, class_type);
+  TypeAnnotationTransformer annotation(&context(), document, node, class_type);
   const auto* const type = annotation.Compile();
   if (!type)
     return;
@@ -105,7 +105,8 @@ void TypeResolver::ProcessVariableDeclaration(const ast::Node& node,
     auto* const value = SingleVariableValueOf(binding);
     if (value && value->Is<Class>()) {
       const auto& class_type = type_factory().NewClassType(&value->As<Class>());
-      Annotation annotation(&context(), document, binding, &class_type);
+      TypeAnnotationTransformer annotation(&context(), document, binding,
+                                           &class_type);
       const auto* type = annotation.Compile();
       if (!type)
         return AddError(binding, ErrorCode::TYPE_RESOLVER_EXPECT_CLASS_TYPE);
@@ -115,7 +116,7 @@ void TypeResolver::ProcessVariableDeclaration(const ast::Node& node,
       return;
     }
   }
-  Annotation annotation(&context(), document, node);
+  TypeAnnotationTransformer annotation(&context(), document, node);
   const auto* type = annotation.Compile();
   if (!type)
     return;

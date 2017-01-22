@@ -7,7 +7,7 @@
 #include <unordered_set>
 #include <utility>
 
-#include "joana/analyzer/annotation.h"
+#include "joana/analyzer/type_annotation_transformer.h"
 
 #include "base/logging.h"
 #include "joana/analyzer/context.h"
@@ -87,9 +87,9 @@ const ast::Node* ContainerOf(const ast::Node& node) {
 }  // namespace
 
 //
-// Annotation::FunctionParameters
+// TypeAnnotationTransformer::FunctionParameters
 //
-class Annotation::FunctionParameters final {
+class TypeAnnotationTransformer::FunctionParameters final {
  public:
   class Builder;
 
@@ -108,7 +108,7 @@ class Annotation::FunctionParameters final {
   std::vector<const Type*> types_;
 };
 
-Annotation::FunctionParameters::FunctionParameters(
+TypeAnnotationTransformer::FunctionParameters::FunctionParameters(
     const FunctionTypeArity& arity,
     const std::vector<const Type*>& types)
     : arity_(arity), types_(types) {
@@ -121,18 +121,20 @@ Annotation::FunctionParameters::FunctionParameters(
   DCHECK_EQ(static_cast<size_t>(arity.maximum), types_.size()) << types_;
 }
 
-Annotation::FunctionParameters::FunctionParameters(FunctionParameters&& other)
+TypeAnnotationTransformer::FunctionParameters::FunctionParameters(
+    FunctionParameters&& other)
     : arity_(other.arity_), types_(std::move(other.types_)) {
   other.arity_ = FunctionTypeArity();
 }
 
-Annotation::FunctionParameters::FunctionParameters() = default;
-Annotation::FunctionParameters::~FunctionParameters() = default;
+TypeAnnotationTransformer::FunctionParameters::FunctionParameters() = default;
+TypeAnnotationTransformer::FunctionParameters::~FunctionParameters() = default;
 
 //
-// Annotation::FunctionParameters::Builder
+// TypeAnnotationTransformer::FunctionParameters::Builder
 //
-class Annotation::FunctionParameters::Builder final : public ContextUser {
+class TypeAnnotationTransformer::FunctionParameters::Builder final
+    : public ContextUser {
  public:
   Builder(Context* context,
           const ast::Node& parameter_list,
@@ -168,7 +170,7 @@ class Annotation::FunctionParameters::Builder final : public ContextUser {
   DISALLOW_COPY_AND_ASSIGN(Builder);
 };
 
-Annotation::FunctionParameters::Builder::Builder(
+TypeAnnotationTransformer::FunctionParameters::Builder::Builder(
     Context* context,
     const ast::Node& parameter_list,
     const std::vector<const ast::Node*>& parameter_tags)
@@ -178,10 +180,10 @@ Annotation::FunctionParameters::Builder::Builder(
   DCHECK_EQ(parameter_list, ast::SyntaxCode::ParameterList);
 }
 
-Annotation::FunctionParameters::Builder::~Builder() = default;
+TypeAnnotationTransformer::FunctionParameters::Builder::~Builder() = default;
 
-Annotation::FunctionParameters
-Annotation::FunctionParameters::Builder::Build() {
+TypeAnnotationTransformer::FunctionParameters
+TypeAnnotationTransformer::FunctionParameters::Builder::Build() {
   for (const auto& parameter_node :
        ast::NodeTraversal::ChildNodesOf(parameter_list_)) {
     if (parameter_node.Is<ast::BindingNameElement>()) {
@@ -208,7 +210,8 @@ Annotation::FunctionParameters::Builder::Build() {
   return FunctionParameters(arity_, parameter_types_);
 }
 
-const ast::Node* Annotation::FunctionParameters::Builder::FindTag(
+const ast::Node*
+TypeAnnotationTransformer::FunctionParameters::Builder::FindTag(
     const ast::Node& name) const {
   DCHECK_EQ(name, ast::SyntaxCode::Name);
   const auto name_id = ast::Name::KindOf(name);
@@ -222,8 +225,8 @@ const ast::Node* Annotation::FunctionParameters::Builder::FindTag(
   return nullptr;
 }
 
-void Annotation::FunctionParameters::Builder::ProcessBindingNameElement(
-    const ast::Node& node) {
+void TypeAnnotationTransformer::FunctionParameters::Builder::
+    ProcessBindingNameElement(const ast::Node& node) {
   const ast::Node& name = ast::BindingNameElement::NameOf(node);
   const auto has_initializer = !ast::BindingNameElement::InitializerOf(node)
                                     .Is<ast::ElisionExpression>();
@@ -270,8 +273,8 @@ void Annotation::FunctionParameters::Builder::ProcessBindingNameElement(
   NOTREACHED() << "Unexpected state " << static_cast<int>(state_);
 }
 
-void Annotation::FunctionParameters::Builder::ProcessBindingRestElement(
-    const ast::Node& node) {
+void TypeAnnotationTransformer::FunctionParameters::Builder::
+    ProcessBindingRestElement(const ast::Node& node) {
   if (state_ == State::Rest)
     AddError(node, ErrorCode::JSDOC_UNEXPECT_REST);
   arity_.has_rest = true;
@@ -297,7 +300,7 @@ void Annotation::FunctionParameters::Builder::ProcessBindingRestElement(
   NOTREACHED() << "NYI parameter binding" << static_cast<int>(state_);
 }
 
-bool Annotation::FunctionParameters::Builder::RecordName(
+bool TypeAnnotationTransformer::FunctionParameters::Builder::RecordName(
     const ast::Node& name) {
   DCHECK_EQ(name, ast::SyntaxCode::Name);
   const auto name_id = ast::Name::KindOf(name);
@@ -312,24 +315,26 @@ bool Annotation::FunctionParameters::Builder::RecordName(
   return false;
 }
 
-void Annotation::FunctionParameters::Builder::RecordTag(const ast::Node& tag) {
+void TypeAnnotationTransformer::FunctionParameters::Builder::RecordTag(
+    const ast::Node& tag) {
   DCHECK_EQ(ast::JsDocTag::NameOf(tag), ast::TokenKind::AtParam);
   const auto& result = used_tags_.emplace(&tag);
   DCHECK(result.second) << tag;
 }
 
-const Type& Annotation::FunctionParameters::Builder::TransformType(
+const Type&
+TypeAnnotationTransformer::FunctionParameters::Builder::TransformType(
     const ast::Node& node) {
   return TypeTransformer(&context()).Transform(node);
 }
 
 //
-// Annotation
+// TypeAnnotationTransformer
 //
-Annotation::Annotation(Context* context,
-                       const ast::Node& document,
-                       const ast::Node& node,
-                       const Type* this_type)
+TypeAnnotationTransformer::TypeAnnotationTransformer(Context* context,
+                                                     const ast::Node& document,
+                                                     const ast::Node& node,
+                                                     const Type* this_type)
     : ContextUser(context),
       document_(document),
       node_(node),
@@ -338,9 +343,9 @@ Annotation::Annotation(Context* context,
   DCHECK(!this_type || this_type->Is<ClassType>()) << this_type;
 }
 
-Annotation::~Annotation() = default;
+TypeAnnotationTransformer::~TypeAnnotationTransformer() = default;
 
-const ast::Node* Annotation::Classify() {
+const ast::Node* TypeAnnotationTransformer::Classify() {
   for (const auto& node : ast::NodeTraversal::ChildNodesOf(document_)) {
     if (node != ast::SyntaxCode::JsDocTag)
       continue;
@@ -402,23 +407,23 @@ const ast::Node* Annotation::Classify() {
   return kind_tag_ ? &ast::JsDocTag::NameOf(*kind_tag_) : nullptr;
 }
 
-const Type* Annotation::Compile() {
+const Type* TypeAnnotationTransformer::Compile() {
   const auto* kind = Classify();
   if (kind == nullptr) {
     if (!parameter_tags_.empty() || return_tag_)
       return &TransformAsFunctionType();
-    MarkNotTypeAnnotation();
+    MarkNotTypeTypeAnnotationTransformer();
     return nullptr;
   }
   if (*kind == ast::TokenKind::AtConstructor)
     return &TransformAsFunctionType();
   if (*kind == ast::TokenKind::AtDict) {
-    MarkNotTypeAnnotation();
+    MarkNotTypeTypeAnnotationTransformer();
     return nullptr;
   }
   if (*kind == ast::TokenKind::AtEnum) {
     // TODO(eval1749): NYI: enum type.
-    MarkNotTypeAnnotation();
+    MarkNotTypeTypeAnnotationTransformer();
     return nullptr;
   }
   if (*kind == ast::TokenKind::AtInterface ||
@@ -427,11 +432,11 @@ const Type* Annotation::Compile() {
   }
   if (type_node_)
     return &TransformType(*type_node_);
-  MarkNotTypeAnnotation();
+  MarkNotTypeTypeAnnotationTransformer();
   return nullptr;
 }
 
-const Type& Annotation::ComputeReturnType() {
+const Type& TypeAnnotationTransformer::ComputeReturnType() {
   if (!return_tag_)
     return void_type();
   return TransformType(return_tag_->child_at(1));
@@ -441,12 +446,13 @@ const Type& Annotation::ComputeReturnType() {
 // - Class passed by caller during processing class declaration.
 // - Class.prototype.Name;
 // - Class.prototype[Expression];
-const Type& Annotation::ComputeThisType() {
+const Type& TypeAnnotationTransformer::ComputeThisType() {
   return this_type_ ? *this_type_ : void_type();
 }
 
 // Returns type of |Expression| where |Expression| '.' 'prototype'.
-const Type& Annotation::ComputeThisTypeFromMember(const ast::Node& node) {
+const Type& TypeAnnotationTransformer::ComputeThisTypeFromMember(
+    const ast::Node& node) {
   if (!IsPrototypeProperty(node))
     return void_type();
   if (const auto* type = context().TryTypeOf(node))
@@ -457,7 +463,7 @@ const Type& Annotation::ComputeThisTypeFromMember(const ast::Node& node) {
 
 // Note: We can't check whether @override tag is valid or invalid since we
 // don't known class hierarchy yet.
-void Annotation::MarkNotTypeAnnotation() {
+void TypeAnnotationTransformer::MarkNotTypeTypeAnnotationTransformer() {
   if (access_tag_)
     AddError(*access_tag_, ErrorCode::JSDOC_UNEXPECT_TAG);
   for (const auto& extends_tag : extends_tags_)
@@ -476,7 +482,8 @@ void Annotation::MarkNotTypeAnnotation() {
     AddError(*this_tag_, ErrorCode::JSDOC_UNEXPECT_TAG);
 }
 
-Annotation::FunctionParameters Annotation::ProcessParameterList(
+TypeAnnotationTransformer::FunctionParameters
+TypeAnnotationTransformer::ProcessParameterList(
     const ast::Node& parameter_list) {
   DCHECK_EQ(parameter_list, ast::SyntaxCode::ParameterList);
   return FunctionParameters::Builder(&context(), parameter_list,
@@ -484,7 +491,8 @@ Annotation::FunctionParameters Annotation::ProcessParameterList(
       .Build();
 }
 
-Annotation::FunctionParameters Annotation::ProcessParameterTags() {
+TypeAnnotationTransformer::FunctionParameters
+TypeAnnotationTransformer::ProcessParameterTags() {
   enum class State {
     Optional,
     Required,
@@ -548,7 +556,8 @@ Annotation::FunctionParameters Annotation::ProcessParameterTags() {
   return FunctionParameters(arity, parameter_types);
 }
 
-void Annotation::RememberTag(const ast::Node** pointer, const ast::Node& node) {
+void TypeAnnotationTransformer::RememberTag(const ast::Node** pointer,
+                                            const ast::Node& node) {
   if (*pointer) {
     AddError(node, ErrorCode::JSDOC_MULTIPLE_TAG, **pointer);
     return;
@@ -556,7 +565,7 @@ void Annotation::RememberTag(const ast::Node** pointer, const ast::Node& node) {
   *pointer = &node;
 }
 
-void Annotation::ProcessTemplateTag(const ast::Node& node) {
+void TypeAnnotationTransformer::ProcessTemplateTag(const ast::Node& node) {
   DCHECK_EQ(ast::JsDocTag::NameOf(node), ast::TokenKind::AtTemplate);
   template_tags_.push_back(&node);
   for (const auto& operand : ast::JsDocTag::OperandsOf(node)) {
@@ -581,13 +590,13 @@ void Annotation::ProcessTemplateTag(const ast::Node& node) {
   }
 }
 
-const Type& Annotation::ResolveTypeName(const ast::Node& name) {
+const Type& TypeAnnotationTransformer::ResolveTypeName(const ast::Node& name) {
   DCHECK_EQ(name, ast::SyntaxCode::Name);
   return context().TypeOf(name);
 }
 
 // Transform @param, @return style function type to Type object.
-const Type& Annotation::TransformAsFunctionType() {
+const Type& TypeAnnotationTransformer::TransformAsFunctionType() {
   if (node_.Is<ast::Method>()) {
     const auto& this_type = ComputeThisType();
     if (kind_tag_)
@@ -653,7 +662,7 @@ const Type& Annotation::TransformAsFunctionType() {
   return void_type();
 }
 
-const Type& Annotation::TransformAsInterface() {
+const Type& TypeAnnotationTransformer::TransformAsInterface() {
   auto* const class_value = TryClassValueOf(node_);
   if (!class_value) {
     AddError(node_, ErrorCode::JSDOC_UNEXPECT_TAG);
@@ -662,12 +671,12 @@ const Type& Annotation::TransformAsInterface() {
   return type_factory().NewClassType(class_value);
 }
 
-const Type& Annotation::TransformType(const ast::Node& node) {
+const Type& TypeAnnotationTransformer::TransformType(const ast::Node& node) {
   DCHECK(node.syntax().Is<ast::Type>()) << node;
   return TypeTransformer(&context()).Transform(node);
 }
 
-Class* Annotation::TryClassValueOf(const ast::Node& node) const {
+Class* TypeAnnotationTransformer::TryClassValueOf(const ast::Node& node) const {
   if (node.Is<ast::Class>())
     return &context().ValueOf(node).As<Class>();
   if (node.Is<ast::Function>())

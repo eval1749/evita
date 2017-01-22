@@ -26,6 +26,7 @@ class Class;
 class Context;
 class Function;
 class Properties;
+class Property;
 class Type;
 class TypeParameter;
 class Value;
@@ -59,6 +60,8 @@ class NameResolver final : public Pass, public ast::SyntaxVisitor {
 
   const Type* FindType(const ast::Node& name) const;
   Variable* FindVariable(const ast::Node& name) const;
+
+  Property& GetOrNewProperty(Properties* properties, const ast::Node& node);
 
   // Assign |Class| value to |node|.
   void ProcessClass(const ast::Node& node, const ast::Node* maybe_document);

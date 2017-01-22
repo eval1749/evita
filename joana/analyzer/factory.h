@@ -41,7 +41,6 @@ class Factory final {
   ~Factory();
 
   // Factory members
-  Property& GetOrNewProperty(Properties* properties, const ast::Node& node);
   Property& NewProperty(Visibility visibility, const ast::Node& node);
 
   // Values

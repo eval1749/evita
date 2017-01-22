@@ -307,6 +307,13 @@ Variable* NameResolver::FindVariable(const ast::Node& name) const {
   return nullptr;
 }
 
+Property& NameResolver::GetOrNewProperty(Properties* properties,
+                                         const ast::Node& node) {
+  if (auto* present = properties->TryGet(node))
+    return *present;
+  return properties->Add(&factory().NewProperty(Visibility::Public, node));
+}
+
 void NameResolver::ProcessClass(const ast::Node& node,
                                 const ast::Node* maybe_document) {
   // TODO(eval1749): Report warning for toplevel anonymous class
@@ -399,8 +406,7 @@ void NameResolver::ProcessClass(const ast::Node& node,
         ast::Method::MethodKindOf(member) == ast::MethodKind::Static
             ? variable.properties()
             : prototype_property.properties();
-    auto& property =
-        factory().GetOrNewProperty(&properties, ast::Method::NameOf(member));
+    auto& property = GetOrNewProperty(&properties, ast::Method::NameOf(member));
     if (!property.assignments().empty()) {
       AddError(member, ErrorCode::ENVIRONMENT_MULTIPLE_OCCURRENCES,
                *property.assignments().front());
@@ -740,7 +746,7 @@ void NameResolver::VisitInternal(const ast::ComputedMemberExpression& syntax,
   const auto& key = ast::ComputedMemberExpression::ExpressionOf(node);
   if (!ast::IsKnownSymbol(key))
     return;
-  auto& property = factory().GetOrNewProperty(&properties, key);
+  auto& property = GetOrNewProperty(&properties, key);
   context().RegisterValue(node, &property);
 }
 
@@ -753,7 +759,7 @@ void NameResolver::VisitInternal(const ast::MemberExpression& syntax,
     return;
   auto& properties = value->As<Object>().properties();
   const auto& name = ast::MemberExpression::NameOf(node);
-  auto& property = factory().GetOrNewProperty(&properties, name);
+  auto& property = GetOrNewProperty(&properties, name);
   context().RegisterValue(node, &property);
 }
 

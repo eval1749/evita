@@ -71,13 +71,6 @@ Factory::Factory(Zone* zone) : cache_(new Cache()), zone_(*zone) {}
 Factory::~Factory() = default;
 
 // Factory members
-Property& Factory::GetOrNewProperty(Properties* properties,
-                                    const ast::Node& node) {
-  if (auto* present = properties->TryGet(node))
-    return *present;
-  return properties->Add(&NewProperty(Visibility::Public, node));
-}
-
 Class& Factory::NewClass(const ast::Node& node,
                          ClassKind kind,
                          const std::vector<const TypeParameter*>& parameters) {

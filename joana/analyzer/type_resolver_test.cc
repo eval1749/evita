@@ -268,6 +268,29 @@ TEST_F(TypeResolverTest, OptionalType) {
       RunOn("/** @param {number=} */ var foo"));
 }
 
+TEST_F(TypeResolverTest, RecordType) {
+  EXPECT_EQ(
+      "Module\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@type|\n"
+      "|  |  |  +--RecordType\n"
+      "|  |  |  |  +--Property\n"
+      "|  |  |  |  |  +--Name |foo|\n"
+      "|  |  |  |  |  +--TypeName {%number%}\n"
+      "|  |  |  |  |  |  +--Name |number|\n"
+      "|  |  |  |  +--Name |baz|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--VarStatement\n"
+      "|  |  +--BindingNameElement VarVar[quux@1001] "
+      "{%null%|{foo:%number%,baz:*}}\n"
+      "|  |  |  +--Name |quux|\n"
+      "|  |  |  +--ElisionExpression ||\n",
+      RunOn("/** @type {{foo: number, baz}} */ var quux;"));
+}
+
 TEST_F(TypeResolverTest, TupleType) {
   EXPECT_EQ(
       "Module\n"

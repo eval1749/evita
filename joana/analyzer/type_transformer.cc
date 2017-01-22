@@ -12,6 +12,7 @@
 #include "joana/analyzer/type_factory.h"
 #include "joana/analyzer/types.h"
 #include "joana/analyzer/values.h"
+#include "joana/ast/expressions.h"
 #include "joana/ast/node_traversal.h"
 #include "joana/ast/types.h"
 
@@ -53,6 +54,8 @@ const Type& TypeTransformer::Transform(const ast::Node& node) {
     AddError(node, ErrorCode::JSDOC_UNEXPECT_REST);
     return Transform(node.child_at(0));
   }
+  if (node.Is<ast::RecordType>())
+    return TransformRecordType(node);
   if (node.Is<ast::TupleType>()) {
     std::vector<const Type*> types;
     for (const auto& member : ast::NodeTraversal::ChildNodesOf(node))
@@ -161,6 +164,30 @@ const Type& TypeTransformer::TransformNonNullableType(const ast::Node& node) {
     return type;
   }
   return type_factory().NewUnionTypeFromVector(members);
+}
+
+const Type& TypeTransformer::TransformRecordType(const ast::Node& node) {
+  DCHECK_EQ(node, ast::SyntaxCode::RecordType);
+  std::vector<const LabeledType*> members;
+  for (const auto& member : ast::NodeTraversal::ChildNodesOf(node)) {
+    if (member.Is<ast::Name>()) {
+      members.push_back(
+          &type_factory().NewLabeledType(member, any_type()).As<LabeledType>());
+      continue;
+    }
+    if (!member.Is<ast::Property>()) {
+      AddError(member, ErrorCode::JSDOC_EXPECT_PROPERTY);
+      continue;
+    }
+    members.push_back(
+        &type_factory()
+             .NewLabeledType(ast::Property::NameOf(member),
+                             Transform(ast::Property::ValueOf(member)))
+             .As<LabeledType>());
+  }
+  if (members.empty())
+    AddError(node, ErrorCode::JSDOC_EMPTY_RECORD_TYPE);
+  return NewNullableType(type_factory().NewRecordType(members));
 }
 
 const Type& TypeTransformer::TransformTypeApplication(const ast::Node& node) {

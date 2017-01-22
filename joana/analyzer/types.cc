@@ -203,7 +203,7 @@ TypeParameter::~TypeParameter() = default;
 //
 // UnionType
 //
-UnionType::UnionType(int id, const std::set<const Type*>& members)
+UnionType::UnionType(int id, const std::vector<const Type*>& members)
     : Type(id), number_of_members_(members.size()) {
   DCHECK_GE(number_of_members_, 2);
   auto* runner = members_;

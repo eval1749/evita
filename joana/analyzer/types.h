@@ -5,7 +5,6 @@
 #ifndef JOANA_ANALYZER_TYPES_H_
 #define JOANA_ANALYZER_TYPES_H_
 
-#include <set>
 #include <utility>
 #include <vector>
 
@@ -330,7 +329,7 @@ class UnionType final : public Type {
   BlockRange<const Type*> members() const;
 
  private:
-  UnionType(int id, const std::set<const Type*>& members);
+  UnionType(int id, const std::vector<const Type*>& members);
 
   const size_t number_of_members_;
   const Type* members_[1];

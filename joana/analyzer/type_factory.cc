@@ -30,6 +30,33 @@ struct LabelName {
   }
 };
 
+struct TypeKey {
+  const Type* type;
+
+  bool operator<(const TypeKey& other) const {
+    return type->id() < other.type->id();
+  }
+};
+
+std::vector<TypeKey> ComputeUnionTypeKey(
+    const std::vector<const Type*>& passed_members) {
+  std::set<TypeKey> key_set;
+  // TODO(eval1749): We should omit subtype members.
+  for (const auto& member : passed_members) {
+    if (member->Is<AnyType>())
+      return std::vector<TypeKey>{TypeKey{member}};
+    if (member->Is<NilType>())
+      continue;
+    if (member->Is<UnionType>()) {
+      for (const auto& member2 : member->As<UnionType>().members())
+        key_set.emplace(TypeKey{&member2});
+      continue;
+    }
+    key_set.emplace(TypeKey{member});
+  }
+  return std::vector<TypeKey>(key_set.begin(), key_set.end());
+}
+
 template <typename T>
 size_t SizeOf(size_t number_of_elements) {
   return sizeof(T) - sizeof(Type*) + sizeof(Type*) * number_of_elements;
@@ -76,7 +103,7 @@ class TypeFactory::Cache final {
   using RecordTypeMap = std::map<RecordTypeKey, const Type*>;
   using TupleTypeKey = std::vector<const Type*>;
   using TupleTypeMap = std::map<TupleTypeKey, const Type*>;
-  using UnionTypeKey = std::set<const Type*>;
+  using UnionTypeKey = std::vector<TypeKey>;
   using UnionTypeMap = std::map<UnionTypeKey, const Type*>;
 
   ClassTypeMap& MapFor(const ClassTypeKey& class_value) {
@@ -239,31 +266,22 @@ const Type& TypeFactory::NewTypeParameter(const ast::Node& name) {
 
 const Type& TypeFactory::NewUnionTypeFromVector(
     const std::vector<const Type*>& passed_members) {
-  std::set<const Type*> members;
-  // TODO(eval1749): We should omit subtype members.
-  for (const auto& member : passed_members) {
-    if (member->Is<AnyType>())
-      return *member;
-    if (member->Is<NilType>())
-      continue;
-    if (member->Is<UnionType>()) {
-      for (const auto& member2 : member->As<UnionType>().members())
-        members.emplace(&member2);
-      continue;
-    }
-    members.emplace(member);
-  }
-  if (members.empty())
+  const auto& key = ComputeUnionTypeKey(passed_members);
+  if (key.empty())
     return nil_type();
-  if (members.size() == 1)
-    return **members.begin();
-  const auto* type = cache_->Find(members);
+  if (key.size() == 1)
+    return *key.begin()->type;
+  const auto* type = cache_->Find(key);
   if (type)
     return *type;
+  std::vector<const Type*> members(key.size());
+  members.resize(0);
+  for (const auto& member : key)
+    members.push_back(member.type);
   const auto size = SizeOf<UnionType>(members.size());
   const auto& new_type =
       *new (zone_.Allocate(size)) UnionType(NextTypeId(), members);
-  cache_->Register(members, new_type);
+  cache_->Register(key, new_type);
   return new_type;
 }
 

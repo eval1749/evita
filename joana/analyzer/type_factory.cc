@@ -164,9 +164,9 @@ int TypeFactory::NextTypeId() {
 const Type& TypeFactory::NewClassType(Value* class_value) {
   DCHECK(class_value->Is<Class>() || class_value->Is<ConstructedClass>())
       << class_value;
-  const auto* type = cache_->Find(class_value);
-  if (type)
-    return *type;
+  const auto* present = cache_->Find(class_value);
+  if (present)
+    return *present;
   const auto& new_type = *new (&zone_) ClassType(NextTypeId(), class_value);
   cache_->Register(class_value, new_type);
   return new_type;
@@ -237,9 +237,9 @@ const Type& TypeFactory::NewRecordType(
 
 const Type& TypeFactory::NewTupleTypeFromVector(
     const std::vector<const Type*>& members) {
-  const auto* type = cache_->Find(members);
-  if (type)
-    return *type;
+  const auto* present = cache_->Find(members);
+  if (present)
+    return *present;
   const auto size = SizeOf<TupleType>(members.size());
   const auto& new_type =
       *new (zone_.Allocate(size)) TupleType(NextTypeId(), members);
@@ -271,9 +271,9 @@ const Type& TypeFactory::NewUnionTypeFromVector(
     return nil_type();
   if (key.size() == 1)
     return *key.begin()->type;
-  const auto* type = cache_->Find(key);
-  if (type)
-    return *type;
+  const auto* present = cache_->Find(key);
+  if (present)
+    return *present;
   std::vector<const Type*> members(key.size());
   members.resize(0);
   for (const auto& member : key)

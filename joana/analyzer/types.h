@@ -164,6 +164,30 @@ class InvalidType final : public Type {
 };
 
 //
+// LabeledType
+//
+class LabeledType final : public Type {
+  DECLARE_CONCRETE_ANALYZE_TYPE(LabeledType, Type)
+
+ public:
+  ~LabeledType() final;
+
+  const ast::Node& name() const { return name_; }
+  const Type& type() const { return type_; }
+
+ private:
+  LabeledType(int id, const ast::Node& name, const Type& type);
+
+  // Implementation of |Type| members.
+  bool is_nullable() const final;
+
+  const ast::Node& name_;
+  const Type& type_;
+
+  DISALLOW_COPY_AND_ASSIGN(LabeledType);
+};
+
+//
 // NilType
 //
 class NilType final : public Type {
@@ -209,6 +233,31 @@ class PrimitiveType final : public NamedType {
   bool is_nullable() const final;
 
   DISALLOW_COPY_AND_ASSIGN(PrimitiveType);
+};
+
+//
+// RecordType
+//
+class RecordType final : public Type {
+  DECLARE_CONCRETE_ANALYZE_TYPE(RecordType, Type)
+
+ public:
+  void* operator new(size_t size, void* pointer) { return pointer; }
+
+  ~RecordType() final;
+
+  BlockRange<const LabeledType*> members() const;
+
+ private:
+  RecordType(int id, const std::vector<const LabeledType*>& members);
+
+  // Implementation of |Type| members.
+  bool is_nullable() const final;
+
+  const size_t number_of_members_;
+  const LabeledType* members_[1];
+
+  DISALLOW_COPY_AND_ASSIGN(RecordType);
 };
 
 //

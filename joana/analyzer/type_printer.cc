@@ -106,6 +106,12 @@ std::ostream& operator<<(std::ostream& ostream,
 }
 
 std::ostream& operator<<(std::ostream& ostream,
+                         const Printable<LabeledType>& printable) {
+  const auto& type = *printable.type;
+  return ostream << ast::AsSourceCode(type.name()) << ':' << type.type();
+}
+
+std::ostream& operator<<(std::ostream& ostream,
                          const Printable<NilType>& printable) {
   return ostream << "%nil%";
 }
@@ -119,6 +125,18 @@ std::ostream& operator<<(std::ostream& ostream,
                          const Printable<PrimitiveType>& printable) {
   const auto& type = *printable.type;
   return ostream << "%" << ast::AsSourceCode(type.name()) << "%";
+}
+
+std::ostream& operator<<(std::ostream& ostream,
+                         const Printable<RecordType>& printable) {
+  const auto& type = *printable.type;
+  ostream << '{';
+  auto* delimiter = "";
+  for (const auto& member : type.members()) {
+    ostream << delimiter << member;
+    delimiter = ",";
+  }
+  return ostream << '}';
 }
 
 std::ostream& operator<<(std::ostream& ostream,

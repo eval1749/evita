@@ -17,9 +17,11 @@ namespace analyzer {
   V(ClassType)                      \
   V(FunctionType)                   \
   V(InvalidType)                    \
+  V(LabeledType)                    \
   V(NilType)                        \
   V(NullType)                       \
   V(PrimitiveType)                  \
+  V(RecordType)                     \
   V(TupleType)                      \
   V(TypeAlias)                      \
   V(TypeName)                       \

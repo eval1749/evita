@@ -123,6 +123,18 @@ bool NamedType::is_anonymous() const {
 }
 
 //
+// LabeledType
+//
+LabeledType::LabeledType(int id, const ast::Node& name, const Type& type)
+    : Type(id), name_(name), type_(type) {}
+
+LabeledType::~LabeledType() = default;
+
+bool LabeledType::is_nullable() const {
+  return type_.is_nullable();
+}
+
+//
 // NilType
 //
 NilType::NilType(int id) : Type(id) {}
@@ -143,6 +155,28 @@ PrimitiveType::~PrimitiveType() = default;
 
 bool PrimitiveType::is_nullable() const {
   return true;
+}
+
+//
+// RecordType
+//
+RecordType::RecordType(int id, const std::vector<const LabeledType*>& members)
+    : Type(id), number_of_members_(members.size()) {
+  auto* runner = members_;
+  for (const auto& member : members) {
+    *runner = member;
+    runner++;
+  }
+}
+
+RecordType::~RecordType() = default;
+
+bool RecordType::is_nullable() const {
+  return true;
+}
+
+BlockRange<const LabeledType*> RecordType::members() const {
+  return BlockRange<const LabeledType*>(&members_[0], number_of_members_);
 }
 
 //

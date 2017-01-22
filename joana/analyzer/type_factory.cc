@@ -6,6 +6,7 @@
 #include <set>
 #include <tuple>
 #include <unordered_map>
+#include <utility>
 
 #include "joana/analyzer/type_factory.h"
 
@@ -19,6 +20,14 @@ namespace joana {
 namespace analyzer {
 
 namespace {
+
+struct LabelName {
+  const ast::Node* name;
+
+  bool operator<(const LabelName& other) const {
+    return ast::Name::KindOf(*name) < ast::Name::KindOf(*other.name);
+  }
+};
 
 template <typename T>
 size_t SizeOf(size_t number_of_elements) {
@@ -50,7 +59,8 @@ class TypeFactory::Cache final {
   }
 
  private:
-  using ClassTypeMap = std::unordered_map<Value*, const Type*>;
+  using ClassTypeKey = Value*;
+  using ClassTypeMap = std::unordered_map<ClassTypeKey, const Type*>;
   using FunctionTypeKey = std::tuple<FunctionTypeKind,
                                      std::vector<const TypeParameter*>,
                                      FunctionTypeArity,
@@ -58,21 +68,31 @@ class TypeFactory::Cache final {
                                      const Type*,
                                      const Type*>;
   using FunctionTypeMap = std::map<FunctionTypeKey, const Type*>;
+  using LabeledTypeKey = std::pair<LabelName, const Type*>;
+  using LabeledTypeMap = std::map<LabeledTypeKey, const Type*>;
   using PrimitiveTypeMap = std::unordered_map<ast::TokenKind, const Type*>;
-  using TupleTypeMap = std::map<std::vector<const Type*>, const Type*>;
-  using UnionTypeMap = std::map<std::set<const Type*>, const Type*>;
+  using RecordTypeKey = std::vector<const LabeledType*>;
+  using RecordTypeMap = std::map<RecordTypeKey, const Type*>;
+  using TupleTypeKey = std::vector<const Type*>;
+  using TupleTypeMap = std::map<TupleTypeKey, const Type*>;
+  using UnionTypeKey = std::set<const Type*>;
+  using UnionTypeMap = std::map<UnionTypeKey, const Type*>;
 
-  ClassTypeMap& MapFor(const Value* class_value) { return class_type_map_; }
-  FunctionTypeMap& MapFor(const FunctionTypeKey&) { return function_type_map_; }
-  PrimitiveTypeMap& MapFor(ast::TokenKind kind) { return primitive_type_map_; }
-  TupleTypeMap& MapFor(const std::vector<const Type*>&) {
-    return tuple_type_map_;
+  ClassTypeMap& MapFor(const ClassTypeKey& class_value) {
+    return class_type_map_;
   }
-  UnionTypeMap& MapFor(const std::set<const Type*>&) { return union_type_map_; }
+  FunctionTypeMap& MapFor(const FunctionTypeKey&) { return function_type_map_; }
+  LabeledTypeMap& MapFor(const LabeledTypeKey&) { return labeled_type_map_; }
+  PrimitiveTypeMap& MapFor(ast::TokenKind kind) { return primitive_type_map_; }
+  RecordTypeMap& MapFor(const RecordTypeKey&) { return record_type_map_; }
+  TupleTypeMap& MapFor(const TupleTypeKey&) { return tuple_type_map_; }
+  UnionTypeMap& MapFor(const UnionTypeKey&) { return union_type_map_; }
 
   ClassTypeMap class_type_map_;
   FunctionTypeMap function_type_map_;
+  LabeledTypeMap labeled_type_map_;
   PrimitiveTypeMap primitive_type_map_;
+  RecordTypeMap record_type_map_;
   TupleTypeMap tuple_type_map_;
   UnionTypeMap union_type_map_;
 
@@ -146,6 +166,31 @@ const Type& TypeFactory::NewFunctionType(
       NextTypeId(), kind, type_parameters, arity, parameters, return_type,
       this_type);
   cache_->Register(key, new_type);
+  return new_type;
+}
+
+const Type& TypeFactory::NewLabeledType(const ast::Node& name,
+                                        const Type& type) {
+  DCHECK_EQ(name, ast::SyntaxCode::Name);
+  DCHECK(!type.Is<LabeledType>()) << name << ':' << type;
+  const auto& key = std::make_pair(LabelName{&name}, &type);
+  const auto* present = cache_->Find(key);
+  if (present)
+    return *present;
+  const auto& new_type = *new (&zone_) LabeledType(NextTypeId(), name, type);
+  cache_->Register(key, new_type);
+  return new_type;
+}
+
+const Type& TypeFactory::NewRecordType(
+    const std::vector<const LabeledType*>& members) {
+  const auto* present = cache_->Find(members);
+  if (present)
+    return *present;
+  const auto size = SizeOf<RecordType>(members.size());
+  const auto& new_type =
+      *new (zone_.Allocate(size)) RecordType(NextTypeId(), members);
+  cache_->Register(members, new_type);
   return new_type;
 }
 

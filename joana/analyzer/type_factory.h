@@ -24,6 +24,7 @@ namespace analyzer {
 class Class;
 struct FunctionTypeArity;
 enum class FunctionTypeKind;
+class LabeledType;
 class Type;
 class TypeParameter;
 class Value;
@@ -52,7 +53,9 @@ class TypeFactory final {
       const std::vector<const Type*>& parameters,
       const Type& return_type,
       const Type& this_type);
+  const Type& NewLabeledType(const ast::Node& name, const Type& type);
   const Type& NewPrimitiveType(const ast::TokenKind id);
+  const Type& NewRecordType(const std::vector<const LabeledType*>& members);
   const Type& NewTupleTypeFromVector(const std::vector<const Type*>& members);
   const Type& NewTypeAlias(const ast::Node& name, const ast::Node& type);
   const Type& NewTypeName(const ast::Node& name);

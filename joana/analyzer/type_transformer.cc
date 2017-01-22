@@ -22,6 +22,28 @@ namespace analyzer {
 
 namespace {
 
+bool CanBeNullable(const Type& type) {
+  if (type.Is<AnyType>())
+    return false;
+  if (type.Is<LabeledType>()) {
+    NOTREACHED() << type;
+    return false;
+  }
+  if (type.Is<NilType>())
+    return false;
+  if (type.Is<NullType>())
+    return false;
+  if (type.Is<TypeAlias>()) {
+    NOTREACHED() << type;
+    return false;
+  }
+  if (type.Is<UnspecifiedType>())
+    return false;
+  if (type.Is<VoidType>())
+    return false;
+  return true;
+}
+
 const ast::Node* FindName(const ast::Node& name,
                           const std::vector<const LabeledType*>& members) {
   DCHECK_EQ(name, ast::SyntaxCode::Name);

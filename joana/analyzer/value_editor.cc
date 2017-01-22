@@ -37,9 +37,5 @@ void Value::Editor::AddAssignment(ValueHolder* binding, const ast::Node& node) {
   binding->assignments_.push_back(&node);
 }
 
-void Value::Editor::AddMethod(Class* class_value, Function* method) {
-  class_value->methods_.push_back(method);
-}
-
 }  // namespace analyzer
 }  // namespace joana

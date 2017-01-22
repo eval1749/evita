@@ -46,13 +46,15 @@ class Factory final {
   // Values
   Class& NewClass(const ast::Node& node,
                   ClassKind kind,
-                  const std::vector<const TypeParameter*>& parameters);
+                  const std::vector<const TypeParameter*>& parameters,
+                  Properties* properties);
 
   Value& Factory::NewConstructedClass(Class* generic_class,
                                       const std::vector<const Type*> arguments);
 
   Function& NewFunction(const ast::Node& node);
   Value& NewOrdinaryObject(const ast::Node& node);
+  Properties& NewProperties(const ast::Node& node);
   Value& NewUndefined(const ast::Node& node);
   Variable& NewVariable(VariableKind kind, const ast::Node& name);
 
@@ -62,9 +64,6 @@ class Factory final {
   class Cache;
 
   int NextValueId();
-
-  // Properties
-  Properties& NewProperties(const ast::Node& node);
 
   const std::unique_ptr<Cache> cache_;
   int current_value_id_ = 0;

@@ -23,7 +23,6 @@ class Value::Editor final {
   ~Editor();
 
   void AddAssignment(ValueHolder* binding, const ast::Node& node);
-  void AddMethod(Class* class_value, Function* method);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(Editor);

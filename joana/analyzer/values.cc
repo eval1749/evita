@@ -19,10 +19,10 @@ Class::Class(Zone* zone,
              int id,
              const ast::Node& node,
              ClassKind kind,
-             const std::vector<const TypeParameter*>& parameters)
-    : Value(id, node),
+             const std::vector<const TypeParameter*>& parameters,
+             Properties* properties)
+    : Object(id, node, properties),
       kind_(kind),
-      methods_(zone),
       parameters_(zone, parameters) {}
 
 Class::~Class() = default;

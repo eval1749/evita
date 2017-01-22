@@ -119,14 +119,13 @@ class ValueHolder : public Object {
 //
 // Class
 //
-class Class : public Value {
-  DECLARE_CONCRETE_ANALYZE_VALUE(Class, Value);
+class Class : public Object {
+  DECLARE_CONCRETE_ANALYZE_VALUE(Class, Object);
 
  public:
   ~Class() final;
 
   ClassKind kind() const { return kind_; }
-  auto methods() const { return ReferenceRangeOf(methods_); }
   auto parameters() const { return ReferenceRangeOf(parameters_); }
 
  protected:
@@ -135,13 +134,11 @@ class Class : public Value {
         int id,
         const ast::Node& node,
         ClassKind kind,
-        const std::vector<const TypeParameter*>& parameters);
+        const std::vector<const TypeParameter*>& parameters,
+        Properties* properties);
 
  private:
-  void AddMethod(Value* method);
-
   const ClassKind kind_;
-  ZoneVector<Function*> methods_;
   ZoneVector<const TypeParameter*> parameters_;
 
   DISALLOW_COPY_AND_ASSIGN(Class);

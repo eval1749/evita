@@ -73,8 +73,10 @@ Factory::~Factory() = default;
 // Factory members
 Class& Factory::NewClass(const ast::Node& node,
                          ClassKind kind,
-                         const std::vector<const TypeParameter*>& parameters) {
-  return *new (&zone_) Class(&zone_, NextValueId(), node, kind, parameters);
+                         const std::vector<const TypeParameter*>& parameters,
+                         Properties* properties) {
+  return *new (&zone_)
+      Class(&zone_, NextValueId(), node, kind, parameters, properties);
 }
 
 Value& Factory::NewConstructedClass(Class* generic_class,

@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <algorithm>
 #include <unordered_map>
 #include <utility>
 
@@ -314,6 +313,25 @@ Property& NameResolver::GetOrNewProperty(Properties* properties,
   return properties->Add(&factory().NewProperty(Visibility::Public, node));
 }
 
+Class& NameResolver::NewClass(
+    const ast::Node& node,
+    ClassKind kind,
+    const std::vector<const TypeParameter*>& parameters,
+    Properties* passed_properties) {
+  auto& properties =
+      passed_properties ? *passed_properties : factory().NewProperties(node);
+  auto& class_value = factory().NewClass(node, kind, parameters, &properties);
+  const auto& prototype_name =
+      BuiltInWorld::GetInstance()->NameOf(ast::TokenKind::Prototype);
+  if (properties.TryGet(prototype_name))
+    return class_value;
+  auto& prototype_property =
+      factory().NewProperty(Visibility::Public, prototype_name);
+  Value::Editor().AddAssignment(&prototype_property, node);
+  class_value.properties().Add(&prototype_property);
+  return class_value;
+}
+
 void NameResolver::ProcessClass(const ast::Node& node,
                                 const ast::Node* maybe_document) {
   // TODO(eval1749): Report warning for toplevel anonymous class
@@ -331,10 +349,24 @@ void NameResolver::ProcessClass(const ast::Node& node,
   const auto class_kind =
       class_tag ? ClassKindOf(*class_tag) : ClassKind::Class;
 
-  auto& class_value = factory().NewClass(node, class_kind, type_parameters);
+  auto* const variable = class_name.Is<ast::Name>()
+                             ? &BindVariable(VariableKind::Class, class_name)
+                             : nullptr;
+  auto& class_properties =
+      variable ? variable->properties() : factory().NewProperties(node);
+
+  auto& class_value =
+      NewClass(node, class_kind, type_parameters, &class_properties);
   context().RegisterValue(node, &class_value);
-  if (class_name.Is<ast::Name>())
-    BindType(class_name, type_factory().NewClassType(&class_value));
+  if (variable) {
+    if (variable->assignments().empty()) {
+      BindType(class_name, type_factory().NewClassType(&class_value));
+    } else {
+      AddError(node, ErrorCode::ENVIRONMENT_MULTIPLE_OCCURRENCES,
+               *variable->assignments().front());
+    }
+    Value::Editor().AddAssignment(variable, node);
+  }
 
   // Class wide template parameters.
   Environment environment(this);
@@ -342,6 +374,9 @@ void NameResolver::ProcessClass(const ast::Node& node,
   if (maybe_document)
     Visit(*maybe_document);
 
+  // Populate class properties and prototype properties with methods.
+  auto& prototype_property = class_value.properties().Get(
+      BuiltInWorld::GetInstance()->NameOf(ast::TokenKind::Prototype));
   for (const auto& child :
        ast::NodeTraversal::ChildNodesOf(ast::Class::BodyOf(node))) {
     const auto& member = child.Is<ast::Annotation>()
@@ -360,19 +395,21 @@ void NameResolver::ProcessClass(const ast::Node& node,
     }
 
     // Check multiple occurrence
-    const auto& it =
-        std::find_if(class_value.methods().begin(), class_value.methods().end(),
-                     [&](const Function& present) {
-                       return present.node() == ast::Name::KindOf(method_name);
-                     });
-    if (it != class_value.methods().end()) {
-      AddError(member, ErrorCode::ENVIRONMENT_MULTIPLE_OCCURRENCES,
-               (*it).node());
-    }
+    Properties& properties = ast::Method::IsStatic(member)
+                                 ? class_value.properties()
+                                 : prototype_property.properties();
 
     auto& method = factory().NewFunction(member);
     context().RegisterValue(member, &method);
-    Value::Editor().AddMethod(&class_value, &method);
+    if (auto* present = properties.TryGet(method_name)) {
+      AddError(member, ErrorCode::ENVIRONMENT_MULTIPLE_OCCURRENCES,
+               present->node());
+      Value::Editor().AddAssignment(present, member);
+    } else {
+      auto& property = factory().NewProperty(Visibility::Public, method_name);
+      properties.Add(&property);
+      Value::Editor().AddAssignment(&property, member);
+    }
 
     Environment environment(this);
     BindTypeParameters(class_value);
@@ -381,38 +418,6 @@ void NameResolver::ProcessClass(const ast::Node& node,
     if (!child.Is<ast::Annotation>())
       continue;
     VisitDefault(ast::Annotation::DocumentOf(child));
-  }
-
-  if (class_name != ast::SyntaxCode::Name)
-    return;
-
-  // Set variable
-  auto& variable = BindVariable(VariableKind::Class, class_name);
-  if (!variable.assignments().empty()) {
-    AddError(node, ErrorCode::ENVIRONMENT_MULTIPLE_OCCURRENCES,
-             *variable.assignments().front());
-  }
-  Value::Editor().AddAssignment(&variable, node);
-
-  // Populate class properties and prototype properties with methods.
-  auto& prototype_property = factory().NewProperty(
-      Visibility::Public,
-      BuiltInWorld::GetInstance()->NameOf(ast::TokenKind::Prototype));
-  Value::Editor().AddAssignment(&prototype_property, node);
-
-  for (const auto& method : class_value.methods()) {
-    const auto& member = method.node();
-    auto& properties =
-        ast::Method::MethodKindOf(member) == ast::MethodKind::Static
-            ? variable.properties()
-            : prototype_property.properties();
-    auto& property = GetOrNewProperty(&properties, ast::Method::NameOf(member));
-    if (!property.assignments().empty()) {
-      AddError(member, ErrorCode::ENVIRONMENT_MULTIPLE_OCCURRENCES,
-               *property.assignments().front());
-      continue;
-    }
-    Value::Editor().AddAssignment(&property, member);
   }
 }
 
@@ -460,24 +465,28 @@ void NameResolver::ProcessFunction(const ast::Node& node,
                                     ? ProcessTemplateTag(*maybe_document)
                                     : std::vector<const TypeParameter*>();
 
-  if (class_tag) {
-    auto& class_value =
-        factory().NewClass(node, ClassKindOf(*class_tag), type_parameters);
-    context().RegisterValue(node, &class_value);
-    if (name.Is<ast::Name>())
-      BindType(name, type_factory().NewClassType(&class_value));
+  auto* const variable = name.Is<ast::Name>()
+                             ? &BindVariable(VariableKind::Function, name)
+                             : nullptr;
 
+  if (class_tag) {
+    auto& class_value = NewClass(node, ClassKindOf(*class_tag), type_parameters,
+                                 variable ? &variable->properties() : nullptr);
+    context().RegisterValue(node, &class_value);
   } else {
     context().RegisterValue(node, &function);
   }
 
-  if (name == ast::SyntaxCode::Name) {
-    auto& variable = BindVariable(VariableKind::Function, name);
-    if (!variable.assignments().empty()) {
+  if (variable) {
+    if (variable->assignments().empty()) {
+      auto* class_value = context().TryValueOf(node);
+      if (class_value && class_value->Is<Class>())
+        BindType(name, type_factory().NewClassType(&class_value->As<Class>()));
+    } else {
       AddError(node, ErrorCode::ENVIRONMENT_MULTIPLE_OCCURRENCES,
-               *variable.assignments().front());
+               *variable->assignments().front());
     }
-    Value::Editor().AddAssignment(&variable, node);
+    Value::Editor().AddAssignment(variable, node);
   }
 
   Environment environment(this);
@@ -550,7 +559,7 @@ void NameResolver::ProcessVariableDeclaration(VariableKind kind,
   const auto& type_parameters = ProcessTemplateTag(document);
   if (initializer.Is<ast::ElisionExpression>()) {
     auto& class_value =
-        factory().NewClass(node, ClassKindOf(class_tag), type_parameters);
+        NewClass(binding, ClassKindOf(class_tag), type_parameters);
     context().RegisterValue(initializer, &class_value);
     ProcessDocument(document);
     BindType(name, type_factory().NewClassType(&class_value));
@@ -692,8 +701,7 @@ void NameResolver::VisitInternal(const ast::Annotation& syntax,
     if (const auto* class_tag = ProcessClassTag(document)) {
       const auto& type_parameters = ProcessTemplateTag(document);
       const auto& class_kind = ClassKindOf(*class_tag);
-      auto& class_value =
-          factory().NewClass(expression, class_kind, type_parameters);
+      auto& class_value = NewClass(expression, class_kind, type_parameters);
       auto& property = context().ValueOf(expression).As<Property>();
       Value::Editor().AddAssignment(&property, document);
       context().RegisterValue(document, &class_value);

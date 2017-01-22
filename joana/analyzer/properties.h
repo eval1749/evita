@@ -28,6 +28,8 @@ class Properties final : public ZoneAllocated {
  public:
   ~Properties();
 
+  Property& Get(const ast::Node& key) const;
+
   // Returns associated property of |key| or null if there is no associated
   // property.
   Property* TryGet(const ast::Node& key) const;

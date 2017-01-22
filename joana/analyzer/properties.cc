@@ -33,6 +33,12 @@ Property& Properties::Add(Property* property) {
   return *property;
 }
 
+Property& Properties::Get(const ast::Node& key) const {
+  auto* property = TryGet(key);
+  DCHECK(property) << key;
+  return *property;
+}
+
 Property* Properties::TryGet(const ast::Node& key) const {
   if (key == ast::SyntaxCode::Name) {
     const auto& it = name_map_.find(ast::Name::IdOf(key));

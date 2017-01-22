@@ -23,6 +23,7 @@ class Node;
 namespace analyzer {
 
 class Class;
+enum class ClassKind;
 class Context;
 class Function;
 class Properties;
@@ -62,6 +63,11 @@ class NameResolver final : public Pass, public ast::SyntaxVisitor {
   Variable* FindVariable(const ast::Node& name) const;
 
   Property& GetOrNewProperty(Properties* properties, const ast::Node& node);
+
+  Class& NewClass(const ast::Node& node,
+                  ClassKind kind,
+                  const std::vector<const TypeParameter*>& parameters,
+                  Properties* properties = nullptr);
 
   // Assign |Class| value to |node|.
   void ProcessClass(const ast::Node& node, const ast::Node* maybe_document);

@@ -28,6 +28,7 @@ class Pass : public ContextUser {
  public:
   virtual ~Pass();
 
+  virtual void RunOnAll();
   virtual void RunOn(const ast::Node& node) = 0;
 
  protected:

@@ -17,5 +17,7 @@ namespace analyzer {
 Pass::Pass(Context* context) : ContextUser(context) {}
 Pass::~Pass() = default;
 
+void Pass::RunOnAll() {}
+
 }  // namespace analyzer
 }  // namespace joana

@@ -32,11 +32,15 @@
 #include "joana/base/source_code_line.h"
 #include "joana/base/source_code_line_cache.h"
 #include "joana/base/source_code_range.h"
+#include "joana/checker/externs_module.h"
 #include "joana/parser/public/parse.h"
 #include "joana/parser/public/parser_context_builder.h"
 #include "joana/parser/public/parser_options_builder.h"
 
 namespace joana {
+
+ExternsModule GetEcmascriptExtens();
+
 namespace internal {
 
 class ErrorRecord final : public ZoneAllocated {
@@ -269,6 +273,19 @@ int Checker::Main() {
           .Build();
 
   Checker checker(options);
+
+  if (!command_line->HasSwitch("no-standard-externs")) {
+    const auto& externs_module = GetEcmascriptExtens();
+    for (const auto& externs_file : externs_module.files) {
+      const auto& contents16 = base::UTF8ToUTF16(
+          base::StringPiece(externs_file.content, externs_file.content_size));
+      DVLOG(0) << "Standard externs " << externs_file.name;
+      checker.AddSourceCode(
+          base::FilePath(base::UTF8ToUTF16(externs_file.name)),
+          base::StringPiece16(contents16));
+    }
+  }
+
   for (const auto& file_name : command_line->GetArgs()) {
     const auto& file_path =
         base::MakeAbsoluteFilePath(base::FilePath(file_name));

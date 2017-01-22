@@ -75,17 +75,11 @@ void TypeResolver::ProcessAssignment(const ast::Node& node,
   DCHECK_EQ(document, ast::SyntaxCode::JsDocDocument);
   const auto& lhs = ast::AssignmentExpression::LeftHandSideOf(node);
   const auto* const class_type = ComputeClassType(lhs);
-  const auto& rhs = ast::AssignmentExpression::RightHandSideOf(node);
   Annotation annotation(&context(), document, node, class_type);
   const auto* const type = annotation.Compile();
   if (!type)
     return;
   RegisterType(lhs, *type);
-  if (!node.Is<ast::Function>())
-    return;
-  if (!type->Is<FunctionType>() && !type->Is<ClassType>())
-    return;
-  RegisterType(rhs, *type);
 }
 
 void TypeResolver::ProcessBinding(const ast::Node& node, const Type& type) {

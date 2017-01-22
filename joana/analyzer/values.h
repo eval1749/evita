@@ -52,6 +52,22 @@ enum class VariableKind {
 std::ostream& operator<<(std::ostream& ostream, VariableKind kind);
 
 //
+// Visibility
+//
+#define FOR_EACH_VISIBILITY(V) \
+  V(Private)                   \
+  V(Protected)                 \
+  V(Public)
+
+enum class Visibility {
+#define V(name) name,
+  FOR_EACH_VISIBILITY(V)
+#undef V
+};
+
+std::ostream& operator<<(std::ostream& ostream, Visibility visibility);
+
+//
 // Object
 //
 class Object : public Value {
@@ -198,9 +214,16 @@ class Property final : public ValueHolder {
   ~Property();
 
   const ast::Node& key() const { return node(); }
+  Visibility visibility() const { return visibility_; }
 
  private:
-  Property(Zone* zone, int id, const ast::Node& key, Properties* properties);
+  Property(Zone* zone,
+           int id,
+           Visibility visibility,
+           const ast::Node& key,
+           Properties* properties);
+
+  const Visibility visibility_;
 
   DISALLOW_COPY_AND_ASSIGN(Property);
 };

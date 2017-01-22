@@ -75,7 +75,7 @@ Property& Factory::GetOrNewProperty(Properties* properties,
                                     const ast::Node& node) {
   if (auto* present = properties->TryGet(node))
     return *present;
-  return properties->Add(&NewProperty(node));
+  return properties->Add(&NewProperty(Visibility::Public, node));
 }
 
 Class& Factory::NewClass(const ast::Node& node,
@@ -110,9 +110,10 @@ Properties& Factory::NewProperties(const ast::Node& owner) {
   return *new (&zone_) Properties(&zone_, owner);
 }
 
-Property& Factory::NewProperty(const ast::Node& key) {
+Property& Factory::NewProperty(Visibility visibility, const ast::Node& key) {
   auto& properties = NewProperties(key);
-  return *new (&zone_) Property(&zone_, NextValueId(), key, &properties);
+  return *new (&zone_)
+      Property(&zone_, NextValueId(), visibility, key, &properties);
 }
 
 Value& Factory::NewUndefined(const ast::Node& node) {

@@ -83,9 +83,10 @@ OrdinaryObject::~OrdinaryObject() = default;
 //
 Property::Property(Zone* zone,
                    int id,
+                   Visibility visibility,
                    const ast::Node& key,
                    Properties* properties)
-    : ValueHolder(zone, id, key, properties) {
+    : ValueHolder(zone, id, key, properties), visibility_(visibility) {
   DCHECK(key == ast::SyntaxCode::Name || ast::IsKnownSymbol(key)) << key;
 }
 

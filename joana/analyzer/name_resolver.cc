@@ -389,6 +389,7 @@ void NameResolver::ProcessClass(const ast::Node& node,
 
   // Populate class properties and prototype properties with methods.
   auto& prototype_property = factory().NewProperty(
+      Visibility::Public,
       BuiltInWorld::GetInstance()->NameOf(ast::TokenKind::Prototype));
   Value::Editor().AddAssignment(&prototype_property, node);
 

@@ -29,6 +29,7 @@ class TypeParameter;
 class Value;
 class Variable;
 enum class VariableKind;
+enum class Visibility;
 
 //
 // Factory
@@ -41,7 +42,7 @@ class Factory final {
 
   // Factory members
   Property& GetOrNewProperty(Properties* properties, const ast::Node& node);
-  Property& NewProperty(const ast::Node& node);
+  Property& NewProperty(Visibility visibility, const ast::Node& node);
 
   // Values
   Class& NewClass(const ast::Node& node,

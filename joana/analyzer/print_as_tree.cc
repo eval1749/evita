@@ -119,8 +119,9 @@ std::ostream& operator<<(std::ostream& ostream,
     return ostream << '@' << value.id() << ']';
   }
   if (value.Is<Property>()) {
-    return ostream << '[' << ast::AsSourceCode(value.node()) << '@'
-                   << value.id() << ']';
+    return ostream << value.As<Property>().visibility() << "Property" << '['
+                   << ast::AsSourceCode(value.node()) << '@' << value.id()
+                   << ']';
   }
   if (value.Is<Variable>()) {
     return ostream << value.As<Variable>().kind() << "Var["

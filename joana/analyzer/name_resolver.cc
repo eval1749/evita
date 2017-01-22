@@ -557,7 +557,10 @@ void NameResolver::ProcessVariableDeclaration(VariableKind kind,
     Visit(initializer);
     ProcessDocument(document);
   }
-  auto* const class_value = context().ValueOf(initializer).TryAs<Class>();
+  auto* const value = context().TryValueOf(initializer);
+  if (!value)
+    return;
+  auto* const class_value = value->TryAs<Class>();
   if (!class_value)
     return;
   BindType(name, type_factory().NewClassType(class_value));

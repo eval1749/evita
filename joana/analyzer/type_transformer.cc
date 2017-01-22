@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <algorithm>
 #include <vector>
 
 #include "joana/analyzer/type_transformer.h"
@@ -19,6 +20,20 @@
 namespace joana {
 namespace analyzer {
 
+namespace {
+
+const ast::Node* FindName(const ast::Node& name,
+                          const std::vector<const LabeledType*>& members) {
+  DCHECK_EQ(name, ast::SyntaxCode::Name);
+  const auto& it = std::find_if(
+      members.begin(), members.end(), [&](const LabeledType* type) {
+        return ast::Name::KindOf(type->name()) == ast::Name::KindOf(name);
+      });
+  return it == members.end() ? nullptr : &(*it)->name();
+}
+
+}  // namespace
+
 //
 // TypeTransformer
 //
@@ -30,7 +45,7 @@ const Type& TypeTransformer::NewNullableType(const Type& type) {
       type.Is<UnspecifiedType>()) {
     return type;
   }
-  DCHECK(type.is_nullable()) << type;
+  DCHECK(CanBeNullable(type)) << type;
   return type_factory().NewUnionType(type, null_type());
 }
 
@@ -171,19 +186,27 @@ const Type& TypeTransformer::TransformRecordType(const ast::Node& node) {
   std::vector<const LabeledType*> members;
   for (const auto& member : ast::NodeTraversal::ChildNodesOf(node)) {
     if (member.Is<ast::Name>()) {
+      const auto& name = member;
+      if (const auto* present = FindName(name, members)) {
+        AddError(name, ErrorCode::JSDOC_MULTIPLE_PROPERTY, *present);
+        continue;
+      }
       members.push_back(
-          &type_factory().NewLabeledType(member, any_type()).As<LabeledType>());
+          &type_factory().NewLabeledType(name, any_type()).As<LabeledType>());
       continue;
     }
     if (!member.Is<ast::Property>()) {
       AddError(member, ErrorCode::JSDOC_EXPECT_PROPERTY);
       continue;
     }
+    const auto& name = ast::Property::NameOf(member);
+    if (const auto* present = FindName(name, members)) {
+      AddError(name, ErrorCode::JSDOC_MULTIPLE_PROPERTY, *present);
+      continue;
+    }
+    const auto& type = Transform(ast::Property::ValueOf(member));
     members.push_back(
-        &type_factory()
-             .NewLabeledType(ast::Property::NameOf(member),
-                             Transform(ast::Property::ValueOf(member)))
-             .As<LabeledType>());
+        &type_factory().NewLabeledType(name, type).As<LabeledType>());
   }
   if (members.empty())
     AddError(node, ErrorCode::JSDOC_EMPTY_RECORD_TYPE);

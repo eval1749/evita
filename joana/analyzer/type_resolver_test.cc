@@ -309,6 +309,32 @@ TEST_F(TypeResolverTest, RecordType) {
       RunOn("/** @type {{foo: number, baz}} */ var quux;"));
 }
 
+TEST_F(TypeResolverTest, RecordTypeError) {
+  EXPECT_EQ(
+      "Module\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@type|\n"
+      "|  |  |  +--RecordType\n"
+      "|  |  |  |  +--Property\n"
+      "|  |  |  |  |  +--Name |foo|\n"
+      "|  |  |  |  |  +--TypeName {%number%}\n"
+      "|  |  |  |  |  |  +--Name |number|\n"
+      "|  |  |  |  +--Property\n"
+      "|  |  |  |  |  +--Name |foo|\n"
+      "|  |  |  |  |  +--TypeName {%string%}\n"
+      "|  |  |  |  |  |  +--Name |string|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--VarStatement\n"
+      "|  |  +--BindingNameElement VarVar[quux@1001] {%null%|{foo:%number%}}\n"
+      "|  |  |  +--Name |quux|\n"
+      "|  |  |  +--ElisionExpression ||\n"
+      "ANALYZER_ERROR_JSDOC_MULTIPLE_PROPERTY@12:28\n",
+      RunOn("/** @type {{foo: number, foo: string}} */ var quux;"));
+}
+
 TEST_F(TypeResolverTest, TupleType) {
   EXPECT_EQ(
       "Module\n"

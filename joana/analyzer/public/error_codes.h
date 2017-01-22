@@ -22,6 +22,7 @@ namespace joana {
   V(JSDOC, INVALID_ARGUMENTS)                 \
   V(JSDOC, MULTIPLE_NAME)                     \
   V(JSDOC, MULTIPLE_PARAMETER)                \
+  V(JSDOC, MULTIPLE_PROPERTY)                 \
   V(JSDOC, MULTIPLE_TAG)                      \
   V(JSDOC, UNEXPECT_INITIALIZER)              \
   V(JSDOC, UNEXPECT_OPTIONAL)                 \

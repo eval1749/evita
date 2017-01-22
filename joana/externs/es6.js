@@ -1220,7 +1220,7 @@ Array.prototype.entries;
 
 
 /**
- * @param {!function(this:S, T, number, !Array<T>): boolean} predicate
+ * @param {function(this:S, T, number, !Array<T>): boolean} predicate
  * @param {S=} opt_this
  * @return {T|undefined}
  * @this {IArrayLike<T>|string}
@@ -1231,7 +1231,7 @@ Array.prototype.find = function(predicate, opt_this) {};
 
 
 /**
- * @param {!function(this:S, T, number, !Array<T>): boolean} predicate
+ * @param {function(this:S, T, number, !Array<T>): boolean} predicate
  * @param {S=} opt_this
  * @return {number}
  * @this {IArrayLike<T>|string}

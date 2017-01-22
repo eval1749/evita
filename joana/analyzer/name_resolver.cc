@@ -358,9 +358,10 @@ void NameResolver::ProcessClass(const ast::Node& node,
                      [&](const Function& present) {
                        return present.node() == ast::Name::KindOf(method_name);
                      });
-    if (it != class_value.methods().end())
+    if (it != class_value.methods().end()) {
       AddError(member, ErrorCode::ENVIRONMENT_MULTIPLE_OCCURRENCES,
                (*it).node());
+    }
 
     auto& method = factory().NewFunction(member);
     context().RegisterValue(member, &method);

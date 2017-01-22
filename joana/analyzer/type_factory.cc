@@ -121,10 +121,6 @@ TypeFactory::TypeFactory(Zone* zone)
 
 TypeFactory::~TypeFactory() = default;
 
-const Type& TypeFactory::NewPrimitiveType(ast::TokenKind id) {
-  return *cache_->Find(id);
-}
-
 void TypeFactory::InstallPrimitiveTypes() {
   for (const auto id : BuiltInWorld::GetInstance()->primitive_types()) {
     const auto& name = BuiltInWorld::GetInstance()->NameOf(id);
@@ -180,6 +176,10 @@ const Type& TypeFactory::NewLabeledType(const ast::Node& name,
   const auto& new_type = *new (&zone_) LabeledType(NextTypeId(), name, type);
   cache_->Register(key, new_type);
   return new_type;
+}
+
+const Type& TypeFactory::NewPrimitiveType(ast::TokenKind id) {
+  return *cache_->Find(id);
 }
 
 const Type& TypeFactory::NewRecordType(

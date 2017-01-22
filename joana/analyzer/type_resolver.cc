@@ -83,10 +83,8 @@ void TypeResolver::ProcessAssignment(const ast::Node& node,
 }
 
 void TypeResolver::ProcessBinding(const ast::Node& node, const Type& type) {
-  if (node.Is<ast::BindingNameElement>()) {
-    Visit(ast::BindingNameElement::InitializerOf(node));
+  if (node.Is<ast::BindingNameElement>())
     return RegisterType(node, type);
-  }
   if (node.Is<ast::ArrayBindingPattern>())
     return ProcessArrayBinding(node, type);
   if (node.Is<ast::ObjectBindingPattern>())
@@ -109,24 +107,18 @@ void TypeResolver::ProcessVariableDeclaration(const ast::Node& node,
       const auto& class_type = type_factory().NewClassType(&value->As<Class>());
       Annotation annotation(&context(), document, binding, &class_type);
       const auto* type = annotation.Compile();
-      if (!type) {
-        AddError(binding, ErrorCode::TYPE_RESOLVER_EXPECT_CLASS_TYPE);
-        Visit(node);
-        return;
-      }
+      if (!type)
+        return AddError(binding, ErrorCode::TYPE_RESOLVER_EXPECT_CLASS_TYPE);
       if (!type->Is<ClassType>() && !type->Is<FunctionType>())
         AddError(binding, ErrorCode::TYPE_RESOLVER_EXPECT_CLASS_TYPE);
       RegisterType(binding, *type);
-      Visit(ast::BindingNameElement::InitializerOf(binding));
       return;
     }
   }
   Annotation annotation(&context(), document, node);
   const auto* type = annotation.Compile();
-  if (!type) {
-    Visit(node);
+  if (!type)
     return;
-  }
   for (const auto& binding : ast::NodeTraversal::ChildNodesOf(node))
     ProcessBinding(binding, *type);
 }

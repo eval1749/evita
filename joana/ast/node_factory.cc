@@ -744,7 +744,9 @@ const Node& NodeFactory::NewInvalidType(const SourceCodeRange& range) {
 const Node& NodeFactory::NewMemberType(const SourceCodeRange& range,
                                        const Node& member,
                                        const Node& name) {
-  DCHECK(member.syntax().Is<Type>()) << member;
+  DCHECK(member == ast::SyntaxCode::MemberType ||
+         member == ast::SyntaxCode::TypeName)
+      << member;
   DCHECK_EQ(name, ast::SyntaxCode::Name);
   return NewNode2(range, syntax_factory_->NewMemberType(), member, name);
 }

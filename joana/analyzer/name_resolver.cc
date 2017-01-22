@@ -8,6 +8,7 @@
 #include "joana/analyzer/name_resolver.h"
 
 #include "base/auto_reset.h"
+#include "joana/analyzer/annotation_compiler.h"
 #include "joana/analyzer/built_in_world.h"
 #include "joana/analyzer/context.h"
 #include "joana/analyzer/error_codes.h"
@@ -333,31 +334,35 @@ Class& NameResolver::NewClass(
 }
 
 void NameResolver::ProcessClass(const ast::Node& node,
-                                const ast::Node* maybe_document) {
+                                const ast::Node& document) {
+  DCHECK_EQ(node, ast::SyntaxCode::Class);
+  DCHECK_EQ(document, ast::SyntaxCode::JsDocDocument);
+  const auto& annotation =
+      Annotation::Compiler(&context()).Compile(document, node);
+  ProcessClass(node, annotation, nullptr);
+}
+
+void NameResolver::ProcessClass(const ast::Node& node,
+                                const Annotation& annotation,
+                                const ast::Node* maybe_alias) {
   // TODO(eval1749): Report warning for toplevel anonymous class
   // TODO(eval1749): We should check annotation for class to check
   // @interface and @record.
+  const auto& type_parameters =
+      ProcessTypeParameterNames(annotation.type_parameter_names());
+
   const auto& class_name = ast::Class::NameOf(node);
-
-  const auto* const class_tag =
-      maybe_document ? ProcessClassTag(*maybe_document) : nullptr;
-
-  const auto& type_parameters = maybe_document
-                                    ? ProcessTemplateTag(*maybe_document)
-                                    : std::vector<const TypeParameter*>();
-
-  const auto class_kind =
-      class_tag ? ClassKindOf(*class_tag) : ClassKind::Class;
-
   auto* const variable = class_name.Is<ast::Name>()
                              ? &BindVariable(VariableKind::Class, class_name)
                              : nullptr;
   auto& class_properties =
       variable ? variable->properties() : factory().NewProperties(node);
 
-  auto& class_value =
-      NewClass(node, class_kind, type_parameters, &class_properties);
+  auto& class_value = NewClass(node, annotation.class_kind(), type_parameters,
+                               &class_properties);
   context().RegisterValue(node, &class_value);
+  if (maybe_alias)
+    BindType(*maybe_alias, type_factory().NewClassType(&class_value));
   if (variable) {
     if (variable->assignments().empty()) {
       BindType(class_name, type_factory().NewClassType(&class_value));
@@ -371,8 +376,8 @@ void NameResolver::ProcessClass(const ast::Node& node,
   // Class wide template parameters.
   Environment environment(this);
   BindTypeParameters(class_value);
-  if (maybe_document)
-    Visit(*maybe_document);
+  if (annotation.has_document())
+    Visit(annotation.document());
 
   // Populate class properties and prototype properties with methods.
   auto& prototype_property = class_value.properties().Get(
@@ -452,27 +457,32 @@ void NameResolver::ProcessDocument(const ast::Node& document) {
 }
 
 void NameResolver::ProcessFunction(const ast::Node& node,
-                                   const ast::Node* maybe_document) {
+                                   const ast::Node& document) {
   DCHECK_EQ(node, ast::SyntaxCode::Function);
+  DCHECK_EQ(document, ast::SyntaxCode::JsDocDocument);
+  const auto annotation =
+      Annotation::Compiler(&context()).Compile(document, node);
+  ProcessFunction(node, annotation, nullptr);
+}
+
+void NameResolver::ProcessFunction(const ast::Node& node,
+                                   const Annotation& annotation,
+                                   const ast::Node* maybe_alias) {
   // TODO(eval1749): Report warning for toplevel anonymous class
   const auto& name = ast::Function::NameOf(node);
+  const auto& type_parameters =
+      ProcessTypeParameterNames(annotation.type_parameter_names());
   auto& function = factory().NewFunction(node);
-
-  const auto* const class_tag =
-      maybe_document ? ProcessClassTag(*maybe_document) : nullptr;
-
-  const auto& type_parameters = maybe_document
-                                    ? ProcessTemplateTag(*maybe_document)
-                                    : std::vector<const TypeParameter*>();
-
   auto* const variable = name.Is<ast::Name>()
                              ? &BindVariable(VariableKind::Function, name)
                              : nullptr;
 
-  if (class_tag) {
-    auto& class_value = NewClass(node, ClassKindOf(*class_tag), type_parameters,
+  if (annotation.is_constructor() || annotation.is_interface()) {
+    auto& class_value = NewClass(node, annotation.class_kind(), type_parameters,
                                  variable ? &variable->properties() : nullptr);
     context().RegisterValue(node, &class_value);
+    if (maybe_alias)
+      BindType(*maybe_alias, type_factory().NewClassType(&class_value));
   } else {
     context().RegisterValue(node, &function);
   }
@@ -488,14 +498,12 @@ void NameResolver::ProcessFunction(const ast::Node& node,
     }
     Value::Editor().AddAssignment(variable, node);
   }
-
   Environment environment(this);
-  if (!maybe_document)
-    return VisitChildNodes(node);
   for (const auto& type_parameter : type_parameters)
     BindType(type_parameter->name(), *type_parameter);
+  if (annotation.has_document())
+    Visit(annotation.document());
   VisitChildNodes(node);
-  Visit(*maybe_document);
 }
 
 std::vector<const TypeParameter*> NameResolver::ProcessTemplateTag(
@@ -519,68 +527,94 @@ std::vector<const TypeParameter*> NameResolver::ProcessTemplateTag(
   return type_parameters;
 }
 
-void NameResolver::ProcessVariableDeclaration(VariableKind kind,
+std::vector<const TypeParameter*> NameResolver::ProcessTypeParameterNames(
+    const std::vector<const ast::Node*>& type_names) {
+  std::vector<const TypeParameter*> type_parameters;
+  for (const auto& type_name : type_names) {
+    const auto& name = ast::TypeName::NameOf(*type_name);
+    const auto& type = type_factory().NewTypeParameter(name);
+    type_parameters.push_back(&type.As<TypeParameter>());
+  }
+  return type_parameters;
+}
+
+void NameResolver::ProcessVariableDeclaration(VariableKind variable_kind,
                                               const ast::Node& node,
                                               const ast::Node& document) {
   DCHECK(node.syntax().Is<ast::VariableDeclaration>()) << node;
   DCHECK_EQ(document, ast::SyntaxCode::JsDocDocument);
-  const auto* kind_tag = ClassifyDocument(document);
-  if (!kind_tag) {
-    ProcessDocument(document);
-    Visit(node);
-    return;
-  }
-  const auto& binding = node.child_at(0);
-  if (node.arity() != 1 || !binding.Is<ast::BindingNameElement>()) {
-    AddError(node, ErrorCode::ENVIRONMENT_INVALID_CONSTRUCTOR);
-    Visit(document);
-    Visit(node);
-    return;
-  }
-  const auto& name = ast::BindingNameElement::NameOf(binding);
-  auto& variable = BindVariable(kind, name);
-  context().RegisterValue(binding, &variable);
-  Value::Editor().AddAssignment(&variable, binding);
-  if (variable.assignments().size() > 1) {
-    AddError(node, ErrorCode::ENVIRONMENT_MULTIPLE_OCCURRENCES,
-             *variable.assignments().front());
-    return;
-  }
-  const auto& initializer = ast::BindingNameElement::InitializerOf(binding);
-  if (ast::JsDocTag::NameOf(*kind_tag) == ast::TokenKind::AtTypeDef) {
-    ProcessDocument(document);
-    if (!initializer.Is<ast::ElisionExpression>())
-      AddError(node, ErrorCode::ENVIRONMENT_UNEXPECT_INITIALIZER);
-    BindType(name, type_factory().NewTypeAlias(name, kind_tag->child_at(1)));
-    return;
-  }
-  const auto& class_tag = *kind_tag;
-  DCHECK(IsClassTag(class_tag));
-  const auto& type_parameters = ProcessTemplateTag(document);
-  if (initializer.Is<ast::ElisionExpression>()) {
-    auto& class_value =
-        NewClass(binding, ClassKindOf(class_tag), type_parameters);
-    context().RegisterValue(initializer, &class_value);
-    ProcessDocument(document);
-    BindType(name, type_factory().NewClassType(&class_value));
-    return;
-  }
-  if (initializer.Is<ast::Class>()) {
-    ProcessClass(initializer, &document);
-  }
-  if (initializer.Is<ast::Function>()) {
-    ProcessFunction(initializer, &document);
-  } else {
+  base::AutoReset<VariableKind> scope(&variable_kind_, variable_kind);
+  const auto annotation =
+      Annotation::Compiler(&context()).Compile(document, node);
+  const auto& type_parameters =
+      ProcessTypeParameterNames(annotation.type_parameter_names());
+  for (const auto& binding : ast::NodeTraversal::ChildNodesOf(node)) {
+    if (annotation.is_type() || annotation.is_none()) {
+      ProcessDocument(document);
+      Visit(binding);
+      continue;
+    }
+    if (!binding.Is<ast::BindingNameElement>()) {
+      if (!annotation.is_type() && !annotation.is_none()) {
+        AddError(*annotation.kind_tag(),
+                 ErrorCode::ENVIRONMENT_UNEXPECT_ANNOTATION, binding);
+      }
+      ProcessDocument(document);
+      Visit(binding);
+      continue;
+    }
+    const auto& name = ast::BindingNameElement::NameOf(binding);
+    auto& variable = BindVariable(variable_kind, name);
+    context().RegisterValue(binding, &variable);
+    Value::Editor().AddAssignment(&variable, binding);
+    if (variable.assignments().size() > 1) {
+      AddError(node, ErrorCode::ENVIRONMENT_MULTIPLE_OCCURRENCES,
+               *variable.assignments().front());
+      return;
+    }
+    const auto& initializer = ast::BindingNameElement::InitializerOf(binding);
+    if (initializer.Is<ast::Class>()) {
+      ProcessClass(initializer, annotation, &name);
+      continue;
+    }
+    if (initializer.Is<ast::Function>()) {
+      ProcessFunction(initializer, annotation, &name);
+      continue;
+    }
+
     Visit(initializer);
     ProcessDocument(document);
+    switch (annotation.kind()) {
+      case Annotation::Kind::Constructor:
+      case Annotation::Kind::Interface: {
+        if (!initializer.Is<ast::ElisionExpression>())
+          AddError(node, ErrorCode::ENVIRONMENT_INVALID_CONSTRUCTOR);
+        auto& class_value =
+            NewClass(binding, annotation.class_kind(), type_parameters);
+        context().RegisterValue(initializer, &class_value);
+        BindType(name, type_factory().NewClassType(&class_value));
+        continue;
+      }
+      case Annotation::Kind::Define:
+      case Annotation::Kind::Dict:
+      case Annotation::Kind::Function:
+      case Annotation::Kind::None:
+      case Annotation::Kind::Type:
+        continue;
+      case Annotation::Kind::Enum:
+        DVLOG(0) << "NYI @enum";
+        continue;
+      case Annotation::Kind::TypeDef: {
+        if (!initializer.Is<ast::ElisionExpression>())
+          AddError(node, ErrorCode::ENVIRONMENT_UNEXPECT_INITIALIZER);
+        const auto& type = type_factory().NewTypeAlias(
+            name, annotation.kind_tag()->child_at(1));
+        BindType(name, type);
+        continue;
+      }
+    }
+    NOTREACHED() << "We should handle annotation " << *annotation.kind_tag();
   }
-  auto* const value = context().TryValueOf(initializer);
-  if (!value)
-    return;
-  auto* const class_value = value->TryAs<Class>();
-  if (!class_value)
-    return;
-  BindType(name, type_factory().NewClassType(class_value));
 }
 
 // AST node handlers
@@ -651,11 +685,11 @@ void NameResolver::VisitInternal(const ast::Annotation& syntax,
   const auto& annotated = ast::Annotation::AnnotatedOf(node);
   const auto& document = ast::Annotation::DocumentOf(node);
   if (annotated.Is<ast::Class>())
-    return ProcessClass(annotated, &document);
+    return ProcessClass(annotated, document);
   if (annotated.Is<ast::ConstStatement>())
     return ProcessVariableDeclaration(VariableKind::Const, annotated, document);
   if (annotated.Is<ast::Function>())
-    return ProcessFunction(annotated, &document);
+    return ProcessFunction(annotated, document);
   if (annotated.Is<ast::LetStatement>())
     return ProcessVariableDeclaration(VariableKind::Let, annotated, document);
   if (annotated.Is<ast::VarStatement>())
@@ -680,11 +714,11 @@ void NameResolver::VisitInternal(const ast::Annotation& syntax,
     if (const auto* class_value = TryClassOfPrototype(lhs.child_at(0)))
       BindTypeParameters(*class_value);
     if (rhs.Is<ast::Class>()) {
-      ProcessClass(rhs, &document);
+      ProcessClass(rhs, document);
       return;
     }
     if (rhs.Is<ast::Function>()) {
-      ProcessFunction(rhs, &document);
+      ProcessFunction(rhs, document);
       return;
     }
     ProcessDocument(document);
@@ -716,12 +750,12 @@ void NameResolver::VisitInternal(const ast::Annotation& syntax,
 
 void NameResolver::VisitInternal(const ast::Class& syntax,
                                  const ast::Node& node) {
-  ProcessClass(node, nullptr);
+  ProcessClass(node, Annotation(), nullptr);
 }
 
 void NameResolver::VisitInternal(const ast::Function& syntax,
                                  const ast::Node& node) {
-  ProcessFunction(node, nullptr);
+  ProcessFunction(node, Annotation(), nullptr);
 }
 
 void NameResolver::VisitInternal(const ast::Method& syntax,

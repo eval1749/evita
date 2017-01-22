@@ -808,11 +808,11 @@ TEST_F(NameResolverTest, Type) {
       "|  |  |  |  +--TypeName\n"
       "|  |  |  |  |  +--Name |Array|\n"
       "|  |  |  |  +--Tuple\n"
-      "|  |  |  |  |  +--TypeName {T@1001}\n"
+      "|  |  |  |  |  +--TypeName {T@1002}\n"
       "|  |  |  |  |  |  +--Name |T|\n"
       "|  |  +--JsDocTag\n"
       "|  |  |  +--Name |@template|\n"
-      "|  |  |  +--TypeName {T@1001}\n"
+      "|  |  |  +--TypeName {T@1002}\n"
       "|  |  |  |  +--Name |T|\n"
       "|  |  +--JsDocText |*/|\n"
       "|  +--ConstStatement\n"
@@ -948,6 +948,26 @@ TEST_F(NameResolverTest, VarConstructor) {
             "/** @param {!Foo} x */ var foo = function(x) {};\n"));
 }
 
+TEST_F(NameResolverTest, VarConstructorMultiple) {
+  EXPECT_EQ(
+      "Module\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@constructor|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--VarStatement\n"
+      "|  |  +--BindingNameElement VarVar[Foo@1001]\n"
+      "|  |  |  +--Name |Foo|\n"
+      "|  |  |  +--ElisionExpression || Class[Foo@1002]\n"
+      "|  |  +--BindingNameElement VarVar[Bar@1004]\n"
+      "|  |  |  +--Name |Bar|\n"
+      "|  |  |  +--ElisionExpression || Class[Bar@1005]\n",
+      RunOn("/** @constructor */ var Foo, Bar;"))
+      << "It is OK to define multiple constructors once.";
+}
+
 TEST_F(NameResolverTest, VarError) {
   EXPECT_EQ(
       "Module\n"
@@ -963,26 +983,6 @@ TEST_F(NameResolverTest, VarError) {
       RunOn("var foo = 1, foo = 2;"))
       << "It is legal to bind same variable multiple times with 'var', but we "
          "report error.";
-
-  EXPECT_EQ(
-      "Module\n"
-      "+--Annotation\n"
-      "|  +--JsDocDocument\n"
-      "|  |  +--JsDocText |/**|\n"
-      "|  |  +--JsDocTag\n"
-      "|  |  |  +--Name |@constructor|\n"
-      "|  |  +--JsDocText |*/|\n"
-      "|  +--VarStatement\n"
-      "|  |  +--BindingNameElement VarVar[Foo@1001]\n"
-      "|  |  |  +--Name |Foo|\n"
-      "|  |  |  +--ElisionExpression ||\n"
-      "|  |  +--BindingNameElement VarVar[Bar@1002]\n"
-      "|  |  |  +--Name |Bar|\n"
-      "|  |  |  +--ElisionExpression ||\n"
-      "ANALYZER_ERROR_ENVIRONMENT_INVALID_CONSTRUCTOR@20:33\n",
-      RunOn("/** @constructor */ var Foo, Bar;"))
-      << "Constructor should be for single name.";
-
   EXPECT_EQ(
       "Module\n"
       "+--Annotation\n"
@@ -997,9 +997,28 @@ TEST_F(NameResolverTest, VarError) {
       "|  |  |  +--BindingNameElement VarVar[Foo@1001]\n"
       "|  |  |  |  +--Name |Foo|\n"
       "|  |  |  |  +--ElisionExpression ||\n"
-      "ANALYZER_ERROR_ENVIRONMENT_INVALID_CONSTRUCTOR@20:30\n",
+      "ANALYZER_ERROR_ENVIRONMENT_UNEXPECT_ANNOTATION@4:29\n",
       RunOn("/** @constructor */ var {Foo};"))
       << "Constructor should be a simple name.";
+  EXPECT_EQ(
+      "Module\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@private|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@type|\n"
+      "|  |  |  +--TypeName {%number%}\n"
+      "|  |  |  |  +--Name |number|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--VarStatement\n"
+      "|  |  +--BindingNameElement VarVar[Foo@1001]\n"
+      "|  |  |  +--Name |Foo|\n"
+      "|  |  |  +--ElisionExpression ||\n"
+      "ANALYZER_ERROR_JSDOC_UNEXPECT_VISIBILITY@4:39\n",
+      RunOn("/** @private @type {number} */ var Foo;"))
+      << "Can not apply visibility";
 }
 
 }  // namespace analyzer

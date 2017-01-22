@@ -22,6 +22,7 @@ class Node;
 
 namespace analyzer {
 
+class Annotation;
 class Class;
 enum class ClassKind;
 class Context;
@@ -70,7 +71,11 @@ class NameResolver final : public Pass, public ast::SyntaxVisitor {
                   Properties* properties = nullptr);
 
   // Assign |Class| value to |node|.
-  void ProcessClass(const ast::Node& node, const ast::Node* maybe_document);
+  void ProcessClass(const ast::Node& node, const ast::Node& document);
+
+  void ProcessClass(const ast::Node& node,
+                    const Annotation& annotation,
+                    const ast::Node* alias);
 
   // Returns @constructor, @interface or @record tag.
   const ast::Node* ProcessClassTag(const ast::Node& document);
@@ -79,10 +84,17 @@ class NameResolver final : public Pass, public ast::SyntaxVisitor {
   void ProcessDocument(const ast::Node& document);
 
   // Assign |Function| value to |node|.
-  void ProcessFunction(const ast::Node& node, const ast::Node* maybe_document);
+  void ProcessFunction(const ast::Node& node, const ast::Node& document);
+
+  void ProcessFunction(const ast::Node& node,
+                       const Annotation& annotation,
+                       const ast::Node* alias);
 
   std::vector<const TypeParameter*> ProcessTemplateTag(
       const ast::Node& document);
+
+  std::vector<const TypeParameter*> ProcessTypeParameterNames(
+      const std::vector<const ast::Node*>& type_names);
 
   void ProcessVariableDeclaration(VariableKind kind,
                                   const ast::Node& annotated,

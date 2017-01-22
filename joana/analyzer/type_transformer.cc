@@ -46,10 +46,10 @@ bool CanBeNullable(const Type& type) {
 
 const ast::Node* FindName(const ast::Node& name,
                           const std::vector<const LabeledType*>& members) {
-  DCHECK_EQ(name, ast::SyntaxCode::Name);
+  const auto name_id = ast::Name::KindOf(name);
   const auto& it = std::find_if(
       members.begin(), members.end(), [&](const LabeledType* type) {
-        return ast::Name::KindOf(type->name()) == ast::Name::KindOf(name);
+        return ast::Name::KindOf(type->name()) == name_id;
       });
   return it == members.end() ? nullptr : &(*it)->name();
 }

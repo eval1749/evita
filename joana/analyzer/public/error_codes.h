@@ -30,6 +30,7 @@ namespace joana {
   V(JSDOC, UNEXPECT_PARAMETER)                \
   V(JSDOC, UNEXPECT_REST)                     \
   V(JSDOC, UNEXPECT_TAG)                      \
+  V(JSDOC, UNEXPECT_VISIBILITY)               \
   V(ENVIRONMENT, EXPECT_METHOD)               \
   V(ENVIRONMENT, EXPECT_NAME)                 \
   V(ENVIRONMENT, EXPECT_PROPERTY)             \

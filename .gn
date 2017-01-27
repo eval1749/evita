@@ -15,3 +15,18 @@ secondary_source = "//build/secondary/"
 # their includes checked for proper dependencies when you run either
 # "gn check" or "gn gen --check".
 check_targets = [ "//base" ]
+
+default_args = {
+  v8_use_external_startup_data = false
+
+  # V8 extras
+  # Adding V8 extras files requires API owners review
+  # Be sure to synchronize with build/common.gypi
+
+  v8_extra_library_files = []
+  v8_experimental_extra_library_files = []
+
+  v8_enable_inspector = false
+  v8_enable_gdbjit = false
+  v8_imminent_deprecation_warnings = false
+}

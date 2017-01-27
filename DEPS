@@ -7,8 +7,8 @@ vars = {
   'github.git': 'https://github.com',
 
   'base_revision': 'd23c26e09462ad657a8c351e6d10bbff7a043f6e',
-  'build_revision': 'c94e6d2c61a3ab7b77afa13eda40d57ba8c05dd1',
-  'buildtools_revision': 'cb12d6e8641f0c9b0fbbfa4bf17c55c6c0d3c38f',
+  'build_revision': 'c3da4579f12ff1d26d60baa8643c86f77fad81b9',
+  'buildtools_revision': 'a7cc7a3e21a061975b33dcdcd81a9716ba614c3c',
   'ced_revision': '368a9cc09ad868a3d28f0b5ad4a733f263c46409',
   'cygwin_revision': 'c89e446b273697fadf3a10ff1007a97c0b7de6df',
   'gmock_revision': '0421b6f358139f02e102c9c332ce19a33faf75be', # from svn revision 566
@@ -23,7 +23,7 @@ vars = {
   'modp_b64_revision': '28e3fbba4cb4ec3ffd85b53d0a3904525d08f5a6',
   'ply_revision': '4a6baf95860033d4c69d3e3087696b30c687622c',
   'testing_revision': '52fa36461526b974b8a1f5c476a5bc33921f10a3',
-  'v8_revision': '133b5e7e3117b9eb1a699aa4591b04394c67aa07', # 5.7.514
+  'v8_revision': 'b481bccc84783445e123b8b4e3ff9ecfdac2bd90', # 5.8.57
   'zlib_revision': '8086cc8849617783f1b05be03cb893bb23977186',
 
   # github

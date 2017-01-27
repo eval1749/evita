@@ -162,7 +162,19 @@ NativeScriptModule* NativeScriptModule::Compile(
   auto* const runner = script_host->runner();
   ginx::Runner::Scope runner_scope(runner);
   v8::TryCatch try_catch(isolate);
-  v8::ScriptOrigin script_origin(gin::StringToV8(isolate, specifier));
+  const auto kLineNumber = 0;
+  const auto kColumnNumber = 0;
+  v8::ScriptOrigin script_origin(gin::StringToV8(isolate, specifier),
+                                 v8::Integer::New(isolate, kLineNumber),
+                                 v8::Integer::New(isolate, kColumnNumber),
+                                 v8::False(isolate),  // is_shared_cross_origin
+                                 v8::Local<v8::Integer>(),  // script_id
+                                 v8::Local<v8::Value>(),    // source_map_url
+                                 v8::False(isolate),        // is_opaque
+                                 v8::False(isolate),        // is_wasm
+                                 v8::True(isolate));        // is_module
+  DCHECK(script_origin.Options().IsModule());
+
   v8::ScriptCompiler::Source source(gin::StringToV8(isolate, script_text),
                                     script_origin);
   auto module = v8::ScriptCompiler::CompileModule(isolate, &source)

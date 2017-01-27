@@ -232,7 +232,14 @@ void AbstractDomTest::RunFile(const base::FilePath& path) {
   auto* const isolate = runner_->isolate();
   v8::ScriptOrigin script_origin(gin::StringToV8(isolate, file_name),
                                  v8::Integer::New(isolate, kLineNumber),
-                                 v8::Integer::New(isolate, kColumnNumber));
+                                 v8::Integer::New(isolate, kColumnNumber),
+                                 v8::False(isolate),  // is_shared_cross_origin
+                                 v8::Local<v8::Integer>(),  // script_id
+                                 v8::Local<v8::Value>(),    // source_map_url
+                                 v8::False(isolate),        // is_opaque
+                                 v8::False(isolate),        // is_wasm
+                                 v8::True(isolate));        // is_module
+  DCHECK(script_origin.Options().IsModule());
   v8::ScriptCompiler::Source source(gin::StringToV8(isolate, script_text),
                                     script_origin);
   auto module = v8::ScriptCompiler::CompileModule(isolate, &source)

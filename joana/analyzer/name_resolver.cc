@@ -479,13 +479,46 @@ void NameResolver::ProcessPropertyAssignment(const ast::Node& lhs,
                                              const ast::Node* maybe_rhs,
                                              const Annotation& annotation) {
   DCHECK(IsMemberExpression(lhs)) << lhs;
-  Visit(lhs);
-  Environment environment(this);
   const auto& container = lhs.child_at(0);
-  const auto& name = lhs.child_at(1);
+  const auto& key = lhs.child_at(1);
+  Visit(container);
+  auto* const value = context().TryValueOf(container);
+  if (!value || !value->Is<Object>()) {
+    ProcessTemplateTags(annotation);
+    ProcessParamTags(annotation);
+    if (maybe_rhs)
+      Visit(*maybe_rhs);
+    return;
+  }
+  if (key.Is<ast::Name>()) {
+    auto& properties = value->As<Object>().properties();
+    if (auto* present = properties.TryGet(key)) {
+      AddError(lhs, ErrorCode::ENVIRONMENT_MULTIPLE_OCCURRENCES,
+               present->node());
+    } else {
+      auto& property = factory().NewProperty(annotation.visibility(), key);
+      properties.Add(&property);
+      context().RegisterValue(lhs, &property);
+    }
+  } else if (ast::IsKnownSymbol(key)) {
+    Visit(key);
+    auto& properties = value->As<Object>().properties();
+    if (auto* present = properties.TryGet(key)) {
+      AddError(lhs, ErrorCode::ENVIRONMENT_MULTIPLE_OCCURRENCES,
+               present->node());
+    } else {
+      auto& property = factory().NewProperty(annotation.visibility(), key);
+      properties.Add(&property);
+      context().RegisterValue(lhs, &property);
+    }
+  } else {
+    AddError(lhs, ErrorCode::ENVIRONMENT_UNEXPECT_ANNOTATION);
+    Visit(key);
+  }
+  Environment environment(this);
   if (const auto* class_value = TryClassOfPrototype(container))
     BindTypeParameters(*class_value);
-  ProcessAssignment(lhs, maybe_rhs, name, annotation);
+  ProcessAssignment(lhs, maybe_rhs, key, annotation);
 }
 
 // Bind name of @template tags
@@ -683,7 +716,7 @@ void NameResolver::VisitInternal(const ast::ComputedMemberExpression& syntax,
                                  const ast::Node& node) {
   VisitDefault(node);
   auto* const value =
-      context().TryValueOf(ast::ComputedMemberExpression::ExpressionOf(node));
+      context().TryValueOf(ast::ComputedMemberExpression::ContainerOf(node));
   if (!value || !value->Is<Object>())
     return;
   auto& properties = value->As<Object>().properties();

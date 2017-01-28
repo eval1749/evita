@@ -274,6 +274,52 @@ TEST_F(NameResolverTest, ComputedMemberExpression) {
             "/** @const */ Foo[Symbol.iterator]\n"));
 }
 
+TEST_F(NameResolverTest, ComputedMemberExpressionPrototype) {
+  EXPECT_EQ(
+      "Module\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@constructor|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--Function<Normal> Class[Symbol@1003]\n"
+      "|  |  +--Name |Symbol|\n"
+      "|  |  +--ParameterList |()|\n"
+      "|  |  +--BlockStatement |{}|\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@constructor|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--Function<Normal> Class[Foo@1007]\n"
+      "|  |  +--Name |Foo|\n"
+      "|  |  +--ParameterList |()|\n"
+      "|  |  +--BlockStatement |{}|\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@return|\n"
+      "|  |  |  +--TypeName {%number%}\n"
+      "|  |  |  |  +--Name |number|\n"
+      "|  |  |  +--JsDocText |*/|\n"
+      "|  +--ExpressionStatement\n"
+      "|  |  +--ComputedMemberExpression PublicProperty[Symbol.iterator@1010]\n"
+      "|  |  |  +--MemberExpression PublicProperty[prototype@1008]\n"
+      "|  |  |  |  +--ReferenceExpression FunctionVar[Foo@1006]\n"
+      "|  |  |  |  |  +--Name |Foo|\n"
+      "|  |  |  |  +--Name |prototype|\n"
+      "|  |  |  +--MemberExpression PublicProperty[iterator@1009]\n"
+      "|  |  |  |  +--ReferenceExpression FunctionVar[Symbol@1002]\n"
+      "|  |  |  |  |  +--Name |Symbol|\n"
+      "|  |  |  |  +--Name |iterator|\n",
+      RunOn("/** @constructor */ function Symbol() {}\n"
+            "/** @constructor */ function Foo() {}\n"
+            "/** @return {number} */ Foo.prototype[Symbol.iterator]\n"));
+}
+
 TEST_F(NameResolverTest, ConstError) {
   EXPECT_EQ(
       "Module\n"
@@ -640,6 +686,7 @@ TEST_F(NameResolverTest, Prototype) {
       "|  |  |  |  +--Name |prototype|\n"
       "|  |  |  +--ReferenceExpression\n"
       "|  |  |  |  +--Name |baz|\n"
+      "ANALYZER_ERROR_ENVIRONMENT_UNEXPECT_ANNOTATION@67:85\n"
       "ANALYZER_ERROR_ENVIRONMENT_UNDEFINED_VARIABLE@81:84\n",
       RunOn("/** @constructor @template T */ function Foo() {}\n"
             "/** @type {T} */ Foo.prototype[baz];\n"))

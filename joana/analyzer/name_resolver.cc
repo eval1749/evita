@@ -500,9 +500,12 @@ void NameResolver::ProcessFunction(const ast::Node& node,
   VisitChildNodes(node);
 }
 
-std::vector<const TypeParameter*> NameResolver::ProcessTemplateTag(
-    const Annotation& annotation) {
-  return ProcessTypeParameterNames(annotation.type_parameter_names());
+// Bind name of @template tags
+void NameResolver::ProcessTemplateTags(const Annotation& annotation) {
+  for (const auto& type_parameter :
+       ProcessTypeParameterNames(annotation.type_parameter_names())) {
+    BindType(type_parameter->name(), *type_parameter);
+  }
 }
 
 std::vector<const TypeParameter*> NameResolver::ProcessTypeParameterNames(
@@ -528,8 +531,7 @@ void NameResolver::ProcessVariableDeclaration(VariableKind variable_kind,
       ProcessTypeParameterNames(annotation.type_parameter_names());
   for (const auto& binding : ast::NodeTraversal::ChildNodesOf(node)) {
     if (annotation.is_type() || annotation.is_none()) {
-      for (const auto& type_parameter : ProcessTemplateTag(annotation))
-        BindType(type_parameter->name(), *type_parameter);
+      ProcessTemplateTags(annotation);
       ProcessParamTags(annotation);
       Visit(binding);
       continue;
@@ -539,8 +541,7 @@ void NameResolver::ProcessVariableDeclaration(VariableKind variable_kind,
         AddError(*annotation.kind_tag(),
                  ErrorCode::ENVIRONMENT_UNEXPECT_ANNOTATION, binding);
       }
-      for (const auto& type_parameter : ProcessTemplateTag(annotation))
-        BindType(type_parameter->name(), *type_parameter);
+      ProcessTemplateTags(annotation);
       ProcessParamTags(annotation);
       Visit(binding);
       continue;
@@ -565,8 +566,7 @@ void NameResolver::ProcessVariableDeclaration(VariableKind variable_kind,
     }
 
     Visit(initializer);
-    for (const auto& type_parameter : ProcessTemplateTag(annotation))
-      BindType(type_parameter->name(), *type_parameter);
+    ProcessTemplateTags(annotation);
     ProcessParamTags(annotation);
     switch (annotation.kind()) {
       case Annotation::Kind::Constructor:
@@ -707,8 +707,7 @@ void NameResolver::VisitInternal(const ast::Annotation& syntax,
     }
     const auto& annotation =
         Annotation::Compiler(&context()).Compile(document, node);
-    for (const auto& type_parameter : ProcessTemplateTag(annotation))
-      BindType(type_parameter->name(), *type_parameter);
+    ProcessTemplateTags(annotation);
     ProcessParamTags(annotation);
     Visit(annotated);
     return;
@@ -723,15 +722,15 @@ void NameResolver::VisitInternal(const ast::Annotation& syntax,
     const auto& annotation =
         Annotation::Compiler(&context()).Compile(document, node);
     if (const auto* class_tag = ProcessClassTag(document)) {
-      const auto& type_parameters = ProcessTemplateTag(annotation);
+      const auto& type_parameters =
+          ProcessTypeParameterNames(annotation.type_parameter_names());
       const auto& class_kind = ClassKindOf(*class_tag);
       auto& class_value = NewClass(expression, class_kind, type_parameters);
       auto& property = context().ValueOf(expression).As<Property>();
       Value::Editor().AddAssignment(&property, document);
       context().RegisterValue(document, &class_value);
     }
-    for (const auto& type_parameter : ProcessTemplateTag(annotation))
-      BindType(type_parameter->name(), *type_parameter);
+    ProcessTemplateTags(annotation);
     ProcessParamTags(annotation);
     return;
   }

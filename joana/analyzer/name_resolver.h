@@ -90,8 +90,8 @@ class NameResolver final : public Pass, public ast::SyntaxVisitor {
                        const Annotation& annotation,
                        const ast::Node* alias);
 
-  std::vector<const TypeParameter*> ProcessTemplateTag(
-      const Annotation& annotation);
+  // Bind name of @template tags.
+  void ProcessTemplateTags(const Annotation& annotation);
 
   std::vector<const TypeParameter*> ProcessTypeParameterNames(
       const std::vector<const ast::Node*>& type_names);

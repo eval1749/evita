@@ -499,6 +499,8 @@ void NameResolver::ProcessPropertyAssignment(const ast::Node& lhs,
       auto& property = factory().NewProperty(annotation.visibility(), key);
       properties.Add(&property);
       context().RegisterValue(lhs, &property);
+      Value::Editor().AddAssignment(
+          &property, maybe_rhs ? *maybe_rhs : annotation.document());
     }
   } else if (ast::IsKnownSymbol(key)) {
     Visit(key);
@@ -510,6 +512,8 @@ void NameResolver::ProcessPropertyAssignment(const ast::Node& lhs,
       auto& property = factory().NewProperty(annotation.visibility(), key);
       properties.Add(&property);
       context().RegisterValue(lhs, &property);
+      Value::Editor().AddAssignment(
+          &property, maybe_rhs ? *maybe_rhs : annotation.document());
     }
   } else {
     AddError(lhs, ErrorCode::ENVIRONMENT_UNEXPECT_ANNOTATION);

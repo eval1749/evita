@@ -225,6 +225,10 @@ const ast::Node& JsDocParser::ParseName() {
   NodeRangeScope scope(this);
   while (CanPeekChar() && IsIdentifierPart(PeekChar()))
     ConsumeChar();
+  if (node_start_ == location()) {
+    AddError(JsDocErrorCode::ERROR_TAG_EXPECT_NAME);
+    return node_factory().NewEmpty(ComputeNodeRange());
+  }
   return NewName();
 }
 

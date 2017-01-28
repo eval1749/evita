@@ -112,8 +112,9 @@ TEST_F(JsDocParserTest, SyntaxModifiesError) {
       "JsDocDocument\n"
       "+--JsDocTag\n"
       "|  +--Name |@modifies|\n"
-      "|  +--Name ||\n"
+      "|  +--Empty ||\n"
       "JSDOC_ERROR_TAG_EXPECT_LBRACE@0:9\n"
+      "JSDOC_ERROR_TAG_EXPECT_NAME@9:9\n"
       "JSDOC_ERROR_TAG_EXPECT_ARGUMENTS_OR_THIS@0:9\n"
       "JSDOC_ERROR_TAG_EXPECT_RBRACE@0:9\n",
       Parse("@modifies"));
@@ -314,6 +315,20 @@ TEST_F(JsDocParserTest, SyntaxTypeVarDescription) {
       "|  +--JsDocText ||\n",
       Parse("@param {string} foo desc1\n"
             "@param {number} bar\n"));
+}
+
+TEST_F(JsDocParserTest, SyntaxTypeVarDescriptionError) {
+  EXPECT_EQ(
+      "JsDocDocument\n"
+      "+--JsDocTag\n"
+      "|  +--Name |@param|\n"
+      "|  +--TypeName\n"
+      "|  |  +--Name |string|\n"
+      "|  +--ReferenceExpression\n"
+      "|  |  +--Empty ||\n"
+      "|  +--JsDocText ||\n"
+      "JSDOC_ERROR_TAG_EXPECT_NAME@15:15\n",
+      Parse("@param {string}"));
 }
 
 }  // namespace parser

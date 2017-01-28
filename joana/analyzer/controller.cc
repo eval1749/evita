@@ -22,6 +22,8 @@
 #include "joana/ast/node.h"
 #include "joana/ast/node_traversal.h"
 #include "joana/ast/syntax.h"
+#include "joana/base/source_code.h"
+#include "joana/base/source_code_range.h"
 
 namespace joana {
 namespace analyzer {
@@ -82,6 +84,12 @@ const std::array<const PassEntry, 3> kPassList = {
     PassEntry{&NewPass<TypeChecker>, "check"},
 };
 
+bool ShouldSkip(const ast::Node& toplevel) {
+  const auto& source_code = toplevel.range().source_code();
+  return base::StringPiece16(source_code.file_path().value())
+      .starts_with(L"//externs/");
+}
+
 }  // namespace
 
 //
@@ -122,6 +130,8 @@ void Controller::Analyze() {
 
 void Controller::DumpValues() {
   for (const auto& toplevel : nodes_) {
+    if (ShouldSkip(*toplevel))
+      continue;
     for (const auto& node : ast::NodeTraversal::DescendantsOf(*toplevel)) {
       const auto* const value = context_->TryValueOf(node);
       if (!value)
@@ -132,8 +142,11 @@ void Controller::DumpValues() {
 }
 
 void Controller::PrintTree() {
-  for (const auto& toplevel : nodes_)
+  for (const auto& toplevel : nodes_) {
+    if (ShouldSkip(*toplevel))
+      continue;
     std::cout << AsPrintableTree(*context_, *toplevel) << std::endl;
+  }
 }
 
 void Controller::Load(const ast::Node& node) {

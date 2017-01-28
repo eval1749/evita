@@ -501,24 +501,8 @@ void NameResolver::ProcessFunction(const ast::Node& node,
 }
 
 std::vector<const TypeParameter*> NameResolver::ProcessTemplateTag(
-    const ast::Node& document) {
-  std::vector<const TypeParameter*> type_parameters;
-  for (const auto& node : ast::NodeTraversal::ChildNodesOf(document)) {
-    if (!node.Is<ast::JsDocTag>())
-      continue;
-    if (ast::JsDocTag::NameOf(node) != ast::TokenKind::AtTemplate)
-      continue;
-    for (const auto& type_name : ast::JsDocTag::OperandsOf(node)) {
-      if (!type_name.Is<ast::TypeName>()) {
-        AddError(type_name, ErrorCode::ENVIRONMENT_EXPECT_NAME);
-        continue;
-      }
-      const auto& name = ast::TypeName::NameOf(type_name);
-      const auto& type = type_factory().NewTypeParameter(name);
-      type_parameters.push_back(&type.As<TypeParameter>());
-    }
-  }
-  return type_parameters;
+    const Annotation& annotation) {
+  return ProcessTypeParameterNames(annotation.type_parameter_names());
 }
 
 std::vector<const TypeParameter*> NameResolver::ProcessTypeParameterNames(
@@ -544,7 +528,7 @@ void NameResolver::ProcessVariableDeclaration(VariableKind variable_kind,
       ProcessTypeParameterNames(annotation.type_parameter_names());
   for (const auto& binding : ast::NodeTraversal::ChildNodesOf(node)) {
     if (annotation.is_type() || annotation.is_none()) {
-      for (const auto& type_parameter : ProcessTemplateTag(document))
+      for (const auto& type_parameter : ProcessTemplateTag(annotation))
         BindType(type_parameter->name(), *type_parameter);
       ProcessParamTags(annotation);
       Visit(binding);
@@ -555,7 +539,7 @@ void NameResolver::ProcessVariableDeclaration(VariableKind variable_kind,
         AddError(*annotation.kind_tag(),
                  ErrorCode::ENVIRONMENT_UNEXPECT_ANNOTATION, binding);
       }
-      for (const auto& type_parameter : ProcessTemplateTag(document))
+      for (const auto& type_parameter : ProcessTemplateTag(annotation))
         BindType(type_parameter->name(), *type_parameter);
       ProcessParamTags(annotation);
       Visit(binding);
@@ -581,7 +565,7 @@ void NameResolver::ProcessVariableDeclaration(VariableKind variable_kind,
     }
 
     Visit(initializer);
-    for (const auto& type_parameter : ProcessTemplateTag(document))
+    for (const auto& type_parameter : ProcessTemplateTag(annotation))
       BindType(type_parameter->name(), *type_parameter);
     ProcessParamTags(annotation);
     switch (annotation.kind()) {
@@ -721,10 +705,10 @@ void NameResolver::VisitInternal(const ast::Annotation& syntax,
       ProcessFunction(rhs, document);
       return;
     }
-    for (const auto& type_parameter : ProcessTemplateTag(document))
-      BindType(type_parameter->name(), *type_parameter);
     const auto& annotation =
         Annotation::Compiler(&context()).Compile(document, node);
+    for (const auto& type_parameter : ProcessTemplateTag(annotation))
+      BindType(type_parameter->name(), *type_parameter);
     ProcessParamTags(annotation);
     Visit(annotated);
     return;
@@ -736,18 +720,18 @@ void NameResolver::VisitInternal(const ast::Annotation& syntax,
     Environment environment(this);
     if (const auto* class_value = TryClassOfPrototype(member))
       BindTypeParameters(*class_value);
+    const auto& annotation =
+        Annotation::Compiler(&context()).Compile(document, node);
     if (const auto* class_tag = ProcessClassTag(document)) {
-      const auto& type_parameters = ProcessTemplateTag(document);
+      const auto& type_parameters = ProcessTemplateTag(annotation);
       const auto& class_kind = ClassKindOf(*class_tag);
       auto& class_value = NewClass(expression, class_kind, type_parameters);
       auto& property = context().ValueOf(expression).As<Property>();
       Value::Editor().AddAssignment(&property, document);
       context().RegisterValue(document, &class_value);
     }
-    for (const auto& type_parameter : ProcessTemplateTag(document))
+    for (const auto& type_parameter : ProcessTemplateTag(annotation))
       BindType(type_parameter->name(), *type_parameter);
-    const auto& annotation =
-        Annotation::Compiler(&context()).Compile(document, node);
     ProcessParamTags(annotation);
     return;
   }

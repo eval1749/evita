@@ -36,15 +36,6 @@ namespace analyzer {
 
 namespace {
 
-bool IsKindTag(const ast::Node& node) {
-  if (!node.Is<ast::JsDocTag>())
-    return false;
-  const auto& name = ast::JsDocTag::NameOf(node);
-  return name == ast::TokenKind::AtConstructor ||
-         name == ast::TokenKind::AtInterface ||
-         name == ast::TokenKind::AtRecord || name == ast::TokenKind::AtTypeDef;
-}
-
 bool IsMemberExpression(const ast::Node& node) {
   return node == ast::SyntaxCode::MemberExpression ||
          node == ast::SyntaxCode::ComputedMemberExpression;
@@ -238,20 +229,6 @@ void NameResolver::BindType(const ast::Node& name, const Type& type) {
 void NameResolver::BindTypeParameters(const Class& class_value) {
   for (const auto& parameter : class_value.parameters())
     BindType(parameter.name(), parameter);
-}
-
-const ast::Node* NameResolver::ClassifyDocument(const ast::Node& document) {
-  const ast::Node* kind_tag = nullptr;
-  for (const auto& child : ast::NodeTraversal::ChildNodesOf(document)) {
-    if (!IsKindTag(child))
-      continue;
-    if (!kind_tag) {
-      kind_tag = &child;
-      continue;
-    }
-    AddError(child, ErrorCode::ENVIRONMENT_MULTIPLE_OCCURRENCES, *kind_tag);
-  }
-  return kind_tag;
 }
 
 const Type* NameResolver::FindType(const ast::Node& name) const {

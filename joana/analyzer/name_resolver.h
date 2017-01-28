@@ -57,9 +57,6 @@ class NameResolver final : public Pass, public ast::SyntaxVisitor {
   // Bind type parameters of |type| in current environment.
   void BindTypeParameters(const Class& class_value);
 
-  // Returns @constructor, @interface, @record, @tag or nullptr in |document|.
-  const ast::Node* ClassifyDocument(const ast::Node& document);
-
   const Type* FindType(const ast::Node& name) const;
   Variable* FindVariable(const ast::Node& name) const;
 

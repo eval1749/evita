@@ -459,18 +459,26 @@ const ast::Node& Parser::ParseTryStatement() {
     return node_factory().NewTryFinallyStatement(GetSourceCodeRange(),
                                                  try_block, finally_block);
   }
+  if (!CanPeekToken())
+    return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_EXPECT_CATCH);
+  const auto& catch_token = PeekToken();
   if (!ConsumeTokenIf(ast::TokenKind::Catch))
     return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_EXPECT_CATCH);
-  auto& catch_parameter = ParseExpression();
-  auto& catch_block = ParseStatement();
+  ExpectPunctuator(ast::TokenKind::LeftParenthesis,
+                   ErrorCode::ERROR_STATEMENT_EXPECT_LPAREN);
+  const auto& catch_parameter = ParseBindingElement();
+  ConsumeTokenIf(ast::TokenKind::RightParenthesis);
+  const auto& catch_block = ParseStatement();
+  const auto& catch_clause = node_factory().NewCatchClause(
+      SourceCodeRange::Merge(catch_token.range(), catch_block.range()),
+      catch_parameter, catch_block);
   if (!ConsumeTokenIf(ast::TokenKind::Finally)) {
     return node_factory().NewTryCatchStatement(GetSourceCodeRange(), try_block,
-                                               catch_parameter, catch_block);
+                                               catch_clause);
   }
   auto& finally_block = ParseStatement();
-  return node_factory().NewTryCatchFinallyStatement(GetSourceCodeRange(),
-                                                    try_block, catch_parameter,
-                                                    catch_block, finally_block);
+  return node_factory().NewTryCatchFinallyStatement(
+      GetSourceCodeRange(), try_block, catch_clause, finally_block);
 }
 
 const ast::Node& Parser::ParseVarStatement() {

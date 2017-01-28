@@ -334,15 +334,6 @@ Class& NameResolver::NewClass(
 }
 
 void NameResolver::ProcessClass(const ast::Node& node,
-                                const ast::Node& document) {
-  DCHECK_EQ(node, ast::SyntaxCode::Class);
-  DCHECK_EQ(document, ast::SyntaxCode::JsDocDocument);
-  const auto& annotation =
-      Annotation::Compiler(&context()).Compile(document, node);
-  ProcessClass(node, annotation, nullptr);
-}
-
-void NameResolver::ProcessClass(const ast::Node& node,
                                 const Annotation& annotation,
                                 const ast::Node* maybe_alias) {
   // TODO(eval1749): Report warning for toplevel anonymous class
@@ -451,15 +442,6 @@ void NameResolver::ProcessParamTags(const Annotation& annotation) {
 }
 
 void NameResolver::ProcessFunction(const ast::Node& node,
-                                   const ast::Node& document) {
-  DCHECK_EQ(node, ast::SyntaxCode::Function);
-  DCHECK_EQ(document, ast::SyntaxCode::JsDocDocument);
-  const auto annotation =
-      Annotation::Compiler(&context()).Compile(document, node);
-  ProcessFunction(node, annotation, nullptr);
-}
-
-void NameResolver::ProcessFunction(const ast::Node& node,
                                    const Annotation& annotation,
                                    const ast::Node* maybe_alias) {
   // TODO(eval1749): Report warning for toplevel anonymous class
@@ -521,12 +503,9 @@ std::vector<const TypeParameter*> NameResolver::ProcessTypeParameterNames(
 
 void NameResolver::ProcessVariableDeclaration(VariableKind variable_kind,
                                               const ast::Node& node,
-                                              const ast::Node& document) {
+                                              const Annotation& annotation) {
   DCHECK(node.syntax().Is<ast::VariableDeclaration>()) << node;
-  DCHECK_EQ(document, ast::SyntaxCode::JsDocDocument);
   base::AutoReset<VariableKind> scope(&variable_kind_, variable_kind);
-  const auto annotation =
-      Annotation::Compiler(&context()).Compile(document, node);
   const auto& type_parameters =
       ProcessTypeParameterNames(annotation.type_parameter_names());
   for (const auto& binding : ast::NodeTraversal::ChildNodesOf(node)) {
@@ -668,16 +647,20 @@ void NameResolver::VisitInternal(const ast::Annotation& syntax,
   //  function Foo(x) {}
   const auto& annotated = ast::Annotation::AnnotatedOf(node);
   const auto& document = ast::Annotation::DocumentOf(node);
+  const auto& annotation =
+      Annotation::Compiler(&context()).Compile(document, annotated);
   if (annotated.Is<ast::Class>())
-    return ProcessClass(annotated, document);
-  if (annotated.Is<ast::ConstStatement>())
-    return ProcessVariableDeclaration(VariableKind::Const, annotated, document);
+    return ProcessClass(annotated, annotation, nullptr);
+  if (annotated.Is<ast::ConstStatement>()) {
+    ProcessVariableDeclaration(VariableKind::Const, annotated, annotation);
+    return;
+  }
   if (annotated.Is<ast::Function>())
-    return ProcessFunction(annotated, document);
+    return ProcessFunction(annotated, annotation, nullptr);
   if (annotated.Is<ast::LetStatement>())
-    return ProcessVariableDeclaration(VariableKind::Let, annotated, document);
+    return ProcessVariableDeclaration(VariableKind::Let, annotated, annotation);
   if (annotated.Is<ast::VarStatement>())
-    return ProcessVariableDeclaration(VariableKind::Var, annotated, document);
+    return ProcessVariableDeclaration(VariableKind::Var, annotated, annotation);
   if (annotated.Is<ast::GroupExpression>())
     return VisitChildNodes(node);
   if (!annotated.Is<ast::ExpressionStatement>()) {
@@ -698,15 +681,13 @@ void NameResolver::VisitInternal(const ast::Annotation& syntax,
     if (const auto* class_value = TryClassOfPrototype(lhs.child_at(0)))
       BindTypeParameters(*class_value);
     if (rhs.Is<ast::Class>()) {
-      ProcessClass(rhs, document);
+      ProcessClass(rhs, annotation, nullptr);
       return;
     }
     if (rhs.Is<ast::Function>()) {
-      ProcessFunction(rhs, document);
+      ProcessFunction(rhs, annotation, nullptr);
       return;
     }
-    const auto& annotation =
-        Annotation::Compiler(&context()).Compile(document, node);
     ProcessTemplateTags(annotation);
     ProcessParamTags(annotation);
     Visit(annotated);
@@ -719,8 +700,6 @@ void NameResolver::VisitInternal(const ast::Annotation& syntax,
     Environment environment(this);
     if (const auto* class_value = TryClassOfPrototype(member))
       BindTypeParameters(*class_value);
-    const auto& annotation =
-        Annotation::Compiler(&context()).Compile(document, node);
     if (const auto* class_tag = ProcessClassTag(document)) {
       const auto& type_parameters =
           ProcessTypeParameterNames(annotation.type_parameter_names());

@@ -71,8 +71,6 @@ class NameResolver final : public Pass, public ast::SyntaxVisitor {
                   Properties* properties = nullptr);
 
   // Assign |Class| value to |node|.
-  void ProcessClass(const ast::Node& node, const ast::Node& document);
-
   void ProcessClass(const ast::Node& node,
                     const Annotation& annotation,
                     const ast::Node* alias);
@@ -84,8 +82,6 @@ class NameResolver final : public Pass, public ast::SyntaxVisitor {
   void ProcessParamTags(const Annotation& annotation);
 
   // Assign |Function| value to |node|.
-  void ProcessFunction(const ast::Node& node, const ast::Node& document);
-
   void ProcessFunction(const ast::Node& node,
                        const Annotation& annotation,
                        const ast::Node* alias);
@@ -97,8 +93,8 @@ class NameResolver final : public Pass, public ast::SyntaxVisitor {
       const std::vector<const ast::Node*>& type_names);
 
   void ProcessVariableDeclaration(VariableKind kind,
-                                  const ast::Node& annotated,
-                                  const ast::Node& document);
+                                  const ast::Node& node,
+                                  const Annotation& annotated);
 
   // Returns class of |node| if known.
   const Class* TryClassOfPrototype(const ast::Node& node) const;

@@ -437,7 +437,7 @@ const ast::Node* NameResolver::ProcessClassTag(const ast::Node& document) {
   return kind_tag;
 }
 
-void NameResolver::ProcessDocument(const ast::Node& document) {
+void NameResolver::ProcessParamTags(const ast::Node& document) {
   DCHECK_EQ(document, ast::SyntaxCode::JsDocDocument);
   Environment environment(this);
   for (const auto& child : ast::NodeTraversal::ChildNodesOf(document)) {
@@ -550,7 +550,7 @@ void NameResolver::ProcessVariableDeclaration(VariableKind variable_kind,
     if (annotation.is_type() || annotation.is_none()) {
       for (const auto& type_parameter : ProcessTemplateTag(document))
         BindType(type_parameter->name(), *type_parameter);
-      ProcessDocument(document);
+      ProcessParamTags(document);
       Visit(binding);
       continue;
     }
@@ -561,7 +561,7 @@ void NameResolver::ProcessVariableDeclaration(VariableKind variable_kind,
       }
       for (const auto& type_parameter : ProcessTemplateTag(document))
         BindType(type_parameter->name(), *type_parameter);
-      ProcessDocument(document);
+      ProcessParamTags(document);
       Visit(binding);
       continue;
     }
@@ -587,7 +587,7 @@ void NameResolver::ProcessVariableDeclaration(VariableKind variable_kind,
     Visit(initializer);
     for (const auto& type_parameter : ProcessTemplateTag(document))
       BindType(type_parameter->name(), *type_parameter);
-    ProcessDocument(document);
+    ProcessParamTags(document);
     switch (annotation.kind()) {
       case Annotation::Kind::Constructor:
       case Annotation::Kind::Interface: {
@@ -727,7 +727,7 @@ void NameResolver::VisitInternal(const ast::Annotation& syntax,
     }
     for (const auto& type_parameter : ProcessTemplateTag(document))
       BindType(type_parameter->name(), *type_parameter);
-    ProcessDocument(document);
+    ProcessParamTags(document);
     Visit(annotated);
     return;
   }
@@ -748,7 +748,7 @@ void NameResolver::VisitInternal(const ast::Annotation& syntax,
     }
     for (const auto& type_parameter : ProcessTemplateTag(document))
       BindType(type_parameter->name(), *type_parameter);
-    ProcessDocument(document);
+    ProcessParamTags(document);
     return;
   }
 

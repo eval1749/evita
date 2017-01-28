@@ -81,7 +81,7 @@ class NameResolver final : public Pass, public ast::SyntaxVisitor {
   const ast::Node* ProcessClassTag(const ast::Node& document);
 
   // BInd name of @param tags.
-  void ProcessDocument(const ast::Node& document);
+  void ProcessParamTags(const ast::Node& document);
 
   // Assign |Function| value to |node|.
   void ProcessFunction(const ast::Node& node, const ast::Node& document);

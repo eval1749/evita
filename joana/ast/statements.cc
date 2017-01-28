@@ -26,8 +26,8 @@ IMPLEMENT_AST_SYNTAX_0(Statement, InvalidStatement, 0)
 IMPLEMENT_AST_SYNTAX_0(Statement, LabeledStatement, 1)
 IMPLEMENT_AST_SYNTAX_0(Statement, ReturnStatement, 1)
 IMPLEMENT_AST_SYNTAX_0(Statement, ThrowStatement, 1)
-IMPLEMENT_AST_SYNTAX_0(Statement, TryCatchStatement, 3)
-IMPLEMENT_AST_SYNTAX_0(Statement, TryCatchFinallyStatement, 4)
+IMPLEMENT_AST_SYNTAX_0(Statement, TryCatchStatement, 2)
+IMPLEMENT_AST_SYNTAX_0(Statement, TryCatchFinallyStatement, 3)
 IMPLEMENT_AST_SYNTAX_0(Statement, TryFinallyStatement, 2)
 IMPLEMENT_AST_SYNTAX_0(Statement, WhileStatement, 2)
 IMPLEMENT_AST_SYNTAX_0(Statement, WithStatement, 2)
@@ -41,6 +41,26 @@ BlockStatement::BlockStatement()
                      Format::Builder().set_is_variadic(true).Build()) {}
 
 BlockStatement::~BlockStatement() = default;
+
+//
+// CatchClause
+//
+CatchClause::CatchClause()
+    : SyntaxTemplate(std::tuple<>(),
+                     SyntaxCode::CatchClause,
+                     Format::Builder().set_arity(2).Build()) {}
+
+CatchClause::~CatchClause() = default;
+
+const Node& CatchClause::ParameterOf(const Node& node) {
+  DCHECK_EQ(node, SyntaxCode::CatchClause);
+  return node.child_at(0);
+}
+
+const Node& CatchClause::StatementOf(const Node& node) {
+  DCHECK_EQ(node, SyntaxCode::CatchClause);
+  return node.child_at(1);
+}
 
 //
 // ConstStatement

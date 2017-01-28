@@ -573,6 +573,12 @@ const Node& NodeFactory::NewCaseClause(const SourceCodeRange& range,
                   statement);
 }
 
+const Node& NodeFactory::NewCatchClause(const SourceCodeRange& range,
+                                        const Node& binding,
+                                        const Node& statement) {
+  return NewNode2(range, syntax_factory_->NewCatchClause(), binding, statement);
+}
+
 const Node& NodeFactory::NewConstStatement(
     const SourceCodeRange& range,
     const std::vector<const Node*>& elements) {
@@ -680,19 +686,17 @@ const Node& NodeFactory::NewThrowStatement(const SourceCodeRange& range,
 const Node& NodeFactory::NewTryCatchFinallyStatement(
     const SourceCodeRange& range,
     const Node& try_block,
-    const Node& catch_parameter,
-    const Node& catch_block,
+    const Node& catch_clause,
     const Node& finally_block) {
-  return NewNode4(range, syntax_factory_->NewTryCatchFinallyStatement(),
-                  try_block, catch_parameter, catch_block, finally_block);
+  return NewNode3(range, syntax_factory_->NewTryCatchFinallyStatement(),
+                  try_block, catch_clause, finally_block);
 }
 
 const Node& NodeFactory::NewTryCatchStatement(const SourceCodeRange& range,
                                               const Node& try_block,
-                                              const Node& catch_parameter,
-                                              const Node& catch_block) {
-  return NewNode3(range, syntax_factory_->NewTryCatchStatement(), try_block,
-                  catch_parameter, catch_block);
+                                              const Node& catch_clause) {
+  return NewNode2(range, syntax_factory_->NewTryCatchStatement(), try_block,
+                  catch_clause);
 }
 
 const Node& NodeFactory::NewTryFinallyStatement(const SourceCodeRange& range,

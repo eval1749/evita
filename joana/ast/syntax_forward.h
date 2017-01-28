@@ -82,6 +82,7 @@ namespace ast {
   V(BlockStatement)               \
   V(BreakStatement)               \
   V(CaseClause)                   \
+  V(CatchClause)                  \
   V(ConstStatement)               \
   V(ContinueStatement)            \
   V(DoStatement)                  \

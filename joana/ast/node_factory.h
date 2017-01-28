@@ -250,6 +250,10 @@ class JOANA_AST_EXPORT NodeFactory final {
                             const Node& expression,
                             const Node& statement);
 
+  const Node& NewCatchClause(const SourceCodeRange& range,
+                             const Node& binding,
+                             const Node& statement);
+
   const Node& NewConstStatement(const SourceCodeRange& range,
                                 const std::vector<const Node*>& elements);
 
@@ -313,14 +317,12 @@ class JOANA_AST_EXPORT NodeFactory final {
 
   const Node& NewTryCatchFinallyStatement(const SourceCodeRange& range,
                                           const Node& try_block,
-                                          const Node& catch_parameter,
-                                          const Node& catch_block,
+                                          const Node& catch_clause,
                                           const Node& finally_block);
 
   const Node& NewTryCatchStatement(const SourceCodeRange& range,
                                    const Node& try_block,
-                                   const Node& catch_parameter,
-                                   const Node& catch_block);
+                                   const Node& catch_clause);
 
   const Node& NewTryFinallyStatement(const SourceCodeRange& range,
                                      const Node& try_block,

@@ -51,6 +51,24 @@ class JOANA_AST_EXPORT VariableDeclaration : public SyntaxTemplate<Syntax> {
 };
 
 //
+// CatchClause
+//
+class JOANA_AST_EXPORT CatchClause final : public SyntaxTemplate<Syntax> {
+  DECLARE_CONCRETE_AST_SYNTAX(CatchClause, Syntax);
+
+ public:
+  ~CatchClause() final;
+
+  static const ast::Node& ParameterOf(const ast::Node& node);
+  static const ast::Node& StatementOf(const ast::Node& node);
+
+ private:
+  CatchClause();
+
+  DISALLOW_COPY_AND_ASSIGN(CatchClause);
+};
+
+//
 // ConstStatement
 //
 class JOANA_AST_EXPORT ConstStatement final : public VariableDeclaration {

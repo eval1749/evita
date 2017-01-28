@@ -102,6 +102,7 @@ namespace ast {
   V(STATEMENT, INVALID)                      \
   V(STATEMENT, RESERVED_WORD)                \
   V(STATEMENT, UNEXPECT_ANNOTATION)          \
+  V(STATEMENT, UNEXPECT_INITIALIZER)         \
   V(STATEMENT, UNEXPECT_NEWLINE)             \
   V(STATEMENT, SWITCH_INVALID_CLAUSE)
 

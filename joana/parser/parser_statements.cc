@@ -7,6 +7,7 @@
 
 #include "joana/parser/parser.h"
 
+#include "joana/ast/bindings.h"
 #include "joana/ast/declarations.h"
 #include "joana/ast/expressions.h"
 #include "joana/ast/node.h"
@@ -20,6 +21,22 @@ namespace joana {
 namespace parser {
 
 namespace {
+
+bool HasInitializer(const ast::Node& node) {
+  if (node.Is<ast::BindingNameElement>()) {
+    const auto& initializer = ast::BindingNameElement::InitializerOf(node);
+    return !initializer.Is<ast::ElisionExpression>();
+  }
+  if (node.Is<ast::ArrayBindingPattern>()) {
+    const auto& initializer = ast::ArrayBindingPattern::InitializerOf(node);
+    return !initializer.Is<ast::ElisionExpression>();
+  }
+  if (node.Is<ast::ObjectBindingPattern>()) {
+    const auto& initializer = ast::ObjectBindingPattern::InitializerOf(node);
+    return !initializer.Is<ast::ElisionExpression>();
+  }
+  return false;
+}
 
 bool IsDeclarationKeyword(const ast::Node& name) {
   if (name != ast::SyntaxCode::Name)
@@ -467,6 +484,8 @@ const ast::Node& Parser::ParseTryStatement() {
   ExpectPunctuator(ast::TokenKind::LeftParenthesis,
                    ErrorCode::ERROR_STATEMENT_EXPECT_LPAREN);
   const auto& catch_parameter = ParseBindingElement();
+  if (HasInitializer(catch_parameter))
+    AddError(catch_parameter, ErrorCode::ERROR_STATEMENT_UNEXPECT_INITIALIZER);
   ConsumeTokenIf(ast::TokenKind::RightParenthesis);
   const auto& catch_block = ParseStatement();
   const auto& catch_clause = node_factory().NewCatchClause(

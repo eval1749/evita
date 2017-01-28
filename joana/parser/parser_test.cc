@@ -1963,6 +1963,20 @@ TEST_F(ParserTest, TryStatement) {
             "}\n"));
 }
 
+TEST_F(ParserTest, TryStatementError) {
+  EXPECT_EQ(
+      "Module\n"
+      "+--TryCatchStatement\n"
+      "|  +--BlockStatement |{}|\n"
+      "|  +--CatchClause\n"
+      "|  |  +--BindingNameElement\n"
+      "|  |  |  +--Name |foo|\n"
+      "|  |  |  +--NumericLiteral |1|\n"
+      "|  |  +--BlockStatement |{}|\n"
+      "PASER_ERROR_STATEMENT_UNEXPECT_INITIALIZER@14:21\n",
+      Parse("try {} catch (foo = 1) {}"));
+}
+
 TEST_F(ParserTest, VarStatement) {
   EXPECT_EQ(
       "Module\n"

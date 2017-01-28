@@ -475,6 +475,19 @@ void NameResolver::ProcessFunction(const ast::Node& node,
   VisitChildNodes(node);
 }
 
+void NameResolver::ProcessPropertyAssignment(const ast::Node& lhs,
+                                             const ast::Node* maybe_rhs,
+                                             const Annotation& annotation) {
+  DCHECK(IsMemberExpression(lhs)) << lhs;
+  Visit(lhs);
+  Environment environment(this);
+  const auto& container = lhs.child_at(0);
+  const auto& name = lhs.child_at(1);
+  if (const auto* class_value = TryClassOfPrototype(container))
+    BindTypeParameters(*class_value);
+  ProcessAssignment(lhs, maybe_rhs, name, annotation);
+}
+
 // Bind name of @template tags
 void NameResolver::ProcessTemplateTags(const Annotation& annotation) {
   for (const auto& type_parameter :
@@ -626,26 +639,12 @@ void NameResolver::VisitInternal(const ast::Annotation& syntax,
       VisitChildNodes(node);
       return;
     }
-    Visit(lhs);
-    Environment environment(this);
-    const auto& container = lhs.child_at(0);
-    const auto& name = lhs.child_at(1);
-    if (const auto* class_value = TryClassOfPrototype(container))
-      BindTypeParameters(*class_value);
-    ProcessAssignment(lhs, &rhs, name, annotation);
+    ProcessPropertyAssignment(lhs, &rhs, annotation);
     return;
   }
 
-  if (IsMemberExpression(expression)) {
-    Visit(expression);
-    Environment environment(this);
-    const auto& container = expression.child_at(0);
-    const auto& name = expression.child_at(1);
-    if (const auto* class_value = TryClassOfPrototype(container))
-      BindTypeParameters(*class_value);
-    ProcessAssignment(expression, nullptr, name, annotation);
-    return;
-  }
+  if (IsMemberExpression(expression))
+    return ProcessPropertyAssignment(expression, nullptr, annotation);
 
   VisitDefault(node);
   AddError(node, ErrorCode::ENVIRONMENT_UNEXPECT_ANNOTATION);

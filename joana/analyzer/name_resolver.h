@@ -85,6 +85,10 @@ class NameResolver final : public Pass, public ast::SyntaxVisitor {
                        const Annotation& annotation,
                        const ast::Node* alias);
 
+  void ProcessPropertyAssignment(const ast::Node& lhs,
+                                 const ast::Node* maybe_rhs,
+                                 const Annotation& annotation);
+
   // Bind name of @template tags.
   void ProcessTemplateTags(const Annotation& annotation);
 

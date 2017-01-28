@@ -617,7 +617,8 @@ void NameResolver::VisitDefault(const ast::Node& node) {
 // Binding elements
 void NameResolver::VisitInternal(const ast::BindingNameElement& syntax,
                                  const ast::Node& node) {
-  DCHECK(variable_kind_ == VariableKind::Const ||
+  DCHECK(variable_kind_ == VariableKind::Catch ||
+         variable_kind_ == VariableKind::Const ||
          variable_kind_ == VariableKind::Let ||
          variable_kind_ == VariableKind::Parameter ||
          variable_kind_ == VariableKind::Var)
@@ -767,6 +768,16 @@ void NameResolver::VisitInternal(const ast::BlockStatement& syntax,
                                  const ast::Node& node) {
   Environment environment(this);
   VisitDefault(node);
+}
+
+void NameResolver::VisitInternal(const ast::CatchClause& syntax,
+                                 const ast::Node& node) {
+  Environment environment(this);
+  {
+    base::AutoReset<VariableKind> scope(&variable_kind_, VariableKind::Catch);
+    Visit(ast::CatchClause::ParameterOf(node));
+  }
+  Visit(ast::CatchClause::StatementOf(node));
 }
 
 void NameResolver::VisitInternal(const ast::ConstStatement& syntax,

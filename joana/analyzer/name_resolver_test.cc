@@ -50,6 +50,27 @@ std::string NameResolverTest::RunOn(base::StringPiece script_text) {
   return ostream.str();
 }
 
+TEST_F(NameResolverTest, Catch) {
+  EXPECT_EQ(
+      "Module\n"
+      "+--TryCatchStatement\n"
+      "|  +--BlockStatement\n"
+      "|  |  +--ExpressionStatement\n"
+      "|  |  |  +--CallExpression\n"
+      "|  |  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  |  +--Name |foo|\n"
+      "|  +--CatchClause\n"
+      "|  |  +--BindingNameElement CatchVar[bar@1001]\n"
+      "|  |  |  +--Name |bar|\n"
+      "|  |  |  +--ElisionExpression ||\n"
+      "|  |  +--BlockStatement\n"
+      "|  |  |  +--ThrowStatement\n"
+      "|  |  |  |  +--ReferenceExpression CatchVar[bar@1001]\n"
+      "|  |  |  |  |  +--Name |bar|\n"
+      "ANALYZER_ERROR_ENVIRONMENT_UNDEFINED_VARIABLE@6:9\n",
+      RunOn("try { foo(); } catch (bar) { throw bar; }"));
+}
+
 TEST_F(NameResolverTest, Class) {
   EXPECT_EQ(
       "Module\n"

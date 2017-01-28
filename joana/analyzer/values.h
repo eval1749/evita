@@ -36,6 +36,7 @@ std::ostream& operator<<(std::ostream& ostream, ClassKind kind);
 // VariableKind
 //
 #define FOR_EACH_VARIABLE_KIND(V) \
+  V(Catch)                        \
   V(Class)                        \
   V(Const)                        \
   V(Function)                     \

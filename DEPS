@@ -23,7 +23,7 @@ vars = {
   'modp_b64_revision': '28e3fbba4cb4ec3ffd85b53d0a3904525d08f5a6',
   'ply_revision': '4a6baf95860033d4c69d3e3087696b30c687622c',
   'testing_revision': '52fa36461526b974b8a1f5c476a5bc33921f10a3',
-  'v8_revision': 'b481bccc84783445e123b8b4e3ff9ecfdac2bd90', # 5.8.57
+  'v8_revision': '007511a499ad81200ac4104bdcc4e12c6135c223', # 5.8.60
   'zlib_revision': '8086cc8849617783f1b05be03cb893bb23977186',
 
   # github

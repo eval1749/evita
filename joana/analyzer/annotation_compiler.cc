@@ -15,6 +15,7 @@
 #include "joana/ast/jsdoc_syntaxes.h"
 #include "joana/ast/node.h"
 #include "joana/ast/node_traversal.h"
+#include "joana/ast/statements.h"
 #include "joana/ast/tokens.h"
 #include "joana/ast/types.h"
 
@@ -26,21 +27,11 @@ namespace {
 bool CanHaveVisibility(const ast::Node& node) {
   if (node.Is<ast::Method>())
     return true;
-  if (node.Is<ast::ComputedMemberExpression>()) {
-    const auto& container = ast::ComputedMemberExpression::ContainerOf(node);
-    if (!container.Is<ast::MemberExpression>())
-      return false;
-    return ast::MemberExpression::NameOf(container) ==
-           ast::TokenKind::Prototype;
-  }
-  if (node.Is<ast::MemberExpression>()) {
-    const auto& container = ast::ComputedMemberExpression::ContainerOf(node);
-    if (!container.Is<ast::MemberExpression>())
-      return false;
-    return ast::MemberExpression::NameOf(container) ==
-           ast::TokenKind::Prototype;
-  }
-  return false;
+  if (!node.Is<ast::ExpressionStatement>())
+    return false;
+  const auto& expression = ast::ExpressionStatement::ExpressionOf(node);
+  return expression.Is<ast::ComputedMemberExpression>() ||
+         expression.Is<ast::MemberExpression>();
 }
 
 const ast::Node* FindName(const ast::Node& name,

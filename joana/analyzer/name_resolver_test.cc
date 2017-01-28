@@ -727,6 +727,38 @@ TEST_F(NameResolverTest, Prototype) {
             "/** @template THIS @return {THIS} */ Map.prototype.set;"));
 }
 
+TEST_F(NameResolverTest, StaticMember) {
+  EXPECT_EQ(
+      "Module\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@constructor|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--VarStatement\n"
+      "|  |  +--BindingNameElement VarVar[Foo@1001]\n"
+      "|  |  |  +--Name |Foo|\n"
+      "|  |  |  +--ElisionExpression || Class[Foo@1002]\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@private|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@return|\n"
+      "|  |  |  +--TypeName {%number%}\n"
+      "|  |  |  |  +--Name |number|\n"
+      "|  |  |  +--JsDocText |*/|\n"
+      "|  +--ExpressionStatement\n"
+      "|  |  +--MemberExpression PrivateProperty[bar@1004]\n"
+      "|  |  |  +--ReferenceExpression VarVar[Foo@1001]\n"
+      "|  |  |  |  +--Name |Foo|\n"
+      "|  |  |  +--Name |bar|\n",
+      RunOn("/** @constructor */ var Foo;\n"
+            "/** @private @return {number} */ Foo.bar;"));
+}
+
 TEST_F(NameResolverTest, Super) {
   EXPECT_EQ(
       "Module\n"

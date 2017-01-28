@@ -65,7 +65,7 @@ const Node& Class::BodyOf(const Node& node) {
   return node.child_at(2);
 }
 
-const Node& Class::HerisyntaxeOf(const Node& node) {
+const Node& Class::HeritageOf(const Node& node) {
   DCHECK_EQ(node, SyntaxCode::Class);
   return node.child_at(1);
 }

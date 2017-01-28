@@ -101,7 +101,7 @@ class JOANA_AST_EXPORT Class final : public SyntaxTemplate<Syntax> {
   ~Class() final;
 
   static const Node& BodyOf(const Node& node);
-  static const Node& HerisyntaxeOf(const Node& node);
+  static const Node& HeritageOf(const Node& node);
   static const Node& NameOf(const Node& node);
 
  private:

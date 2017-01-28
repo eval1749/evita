@@ -36,28 +36,6 @@ namespace analyzer {
 
 namespace {
 
-ClassKind ClassKindOf(const ast::Node& node) {
-  DCHECK_EQ(node, ast::SyntaxCode::JsDocTag);
-  const auto& name = ast::JsDocTag::NameOf(node);
-  if (name == ast::TokenKind::AtConstructor)
-    return ClassKind::Class;
-  if (name == ast::TokenKind::AtInterface)
-    return ClassKind::Interface;
-  if (name == ast::TokenKind::AtRecord)
-    return ClassKind::Record;
-  NOTREACHED() << "Expect @constructor, @Interface or @record " << node;
-  return ClassKind::Class;
-}
-
-bool IsClassTag(const ast::Node& node) {
-  if (!node.Is<ast::JsDocTag>())
-    return false;
-  const auto& name = ast::JsDocTag::NameOf(node);
-  return name == ast::TokenKind::AtConstructor ||
-         name == ast::TokenKind::AtInterface ||
-         name == ast::TokenKind::AtRecord;
-}
-
 bool IsKindTag(const ast::Node& node) {
   if (!node.Is<ast::JsDocTag>())
     return false;
@@ -464,17 +442,6 @@ void NameResolver::ProcessClass(const ast::Node& node,
       continue;
     VisitDefault(ast::Annotation::DocumentOf(child));
   }
-}
-
-const ast::Node* NameResolver::ProcessClassTag(const ast::Node& document) {
-  const auto* const kind_tag = ClassifyDocument(document);
-  if (!kind_tag)
-    return kind_tag;
-  if (!IsClassTag(*kind_tag)) {
-    AddError(*kind_tag, ErrorCode::ENVIRONMENT_UNEXPECT_ANNOTATION);
-    return nullptr;
-  }
-  return kind_tag;
 }
 
 // Bind name in "@param {type} name" tags.

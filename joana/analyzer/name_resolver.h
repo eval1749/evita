@@ -80,9 +80,6 @@ class NameResolver final : public Pass, public ast::SyntaxVisitor {
                     const Annotation& annotation,
                     const ast::Node* alias);
 
-  // Returns @constructor, @interface or @record tag.
-  const ast::Node* ProcessClassTag(const ast::Node& document);
-
   // BInd name of @param tags.
   void ProcessParamTags(const Annotation& annotation);
 

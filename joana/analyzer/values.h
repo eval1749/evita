@@ -149,7 +149,7 @@ class Class : public Object {
 // ConstructedClass
 //
 class ConstructedClass : public Value {
-  DECLARE_CONCRETE_ANALYZE_VALUE(Class, Value);
+  DECLARE_CONCRETE_ANALYZE_VALUE(ConstructedClass, Value);
 
  public:
   void* operator new(size_t size, void* pointer) { return pointer; }

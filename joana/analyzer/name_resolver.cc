@@ -437,21 +437,17 @@ const ast::Node* NameResolver::ProcessClassTag(const ast::Node& document) {
   return kind_tag;
 }
 
-void NameResolver::ProcessParamTags(const ast::Node& document) {
-  DCHECK_EQ(document, ast::SyntaxCode::JsDocDocument);
+// Bind name in "@param {type} name" tags.
+void NameResolver::ProcessParamTags(const Annotation& annotation) {
   Environment environment(this);
-  for (const auto& child : ast::NodeTraversal::ChildNodesOf(document)) {
-    if (!child.Is<ast::JsDocTag>())
-      continue;
-    if (ast::JsDocTag::NameOf(child) != ast::TokenKind::AtParam)
-      continue;
-    const auto& reference = child.child_at(2);
+  for (const auto& parameter_tag : annotation.parameter_tags()) {
+    const auto& reference = parameter_tag->child_at(2);
     if (!reference.Is<ast::ReferenceExpression>())
       continue;
     BindVariable(VariableKind::Parameter,
                  ast::ReferenceExpression::NameOf(reference));
   }
-  Visit(document);
+  Visit(annotation.document());
 }
 
 void NameResolver::ProcessFunction(const ast::Node& node,
@@ -550,7 +546,7 @@ void NameResolver::ProcessVariableDeclaration(VariableKind variable_kind,
     if (annotation.is_type() || annotation.is_none()) {
       for (const auto& type_parameter : ProcessTemplateTag(document))
         BindType(type_parameter->name(), *type_parameter);
-      ProcessParamTags(document);
+      ProcessParamTags(annotation);
       Visit(binding);
       continue;
     }
@@ -561,7 +557,7 @@ void NameResolver::ProcessVariableDeclaration(VariableKind variable_kind,
       }
       for (const auto& type_parameter : ProcessTemplateTag(document))
         BindType(type_parameter->name(), *type_parameter);
-      ProcessParamTags(document);
+      ProcessParamTags(annotation);
       Visit(binding);
       continue;
     }
@@ -587,7 +583,7 @@ void NameResolver::ProcessVariableDeclaration(VariableKind variable_kind,
     Visit(initializer);
     for (const auto& type_parameter : ProcessTemplateTag(document))
       BindType(type_parameter->name(), *type_parameter);
-    ProcessParamTags(document);
+    ProcessParamTags(annotation);
     switch (annotation.kind()) {
       case Annotation::Kind::Constructor:
       case Annotation::Kind::Interface: {
@@ -727,7 +723,9 @@ void NameResolver::VisitInternal(const ast::Annotation& syntax,
     }
     for (const auto& type_parameter : ProcessTemplateTag(document))
       BindType(type_parameter->name(), *type_parameter);
-    ProcessParamTags(document);
+    const auto& annotation =
+        Annotation::Compiler(&context()).Compile(document, node);
+    ProcessParamTags(annotation);
     Visit(annotated);
     return;
   }
@@ -748,7 +746,9 @@ void NameResolver::VisitInternal(const ast::Annotation& syntax,
     }
     for (const auto& type_parameter : ProcessTemplateTag(document))
       BindType(type_parameter->name(), *type_parameter);
-    ProcessParamTags(document);
+    const auto& annotation =
+        Annotation::Compiler(&context()).Compile(document, node);
+    ProcessParamTags(annotation);
     return;
   }
 

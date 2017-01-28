@@ -136,9 +136,11 @@ class Class : public Object {
         const ast::Node& node,
         ClassKind kind,
         const std::vector<const TypeParameter*>& parameters,
+        const std::vector<const ast::Node*>& class_heritage,
         Properties* properties);
 
  private:
+  ZoneVector<const ast::Node*> class_heritage_;
   const ClassKind kind_;
   ZoneVector<const TypeParameter*> parameters_;
 

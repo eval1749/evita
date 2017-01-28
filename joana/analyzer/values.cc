@@ -20,8 +20,10 @@ Class::Class(Zone* zone,
              const ast::Node& node,
              ClassKind kind,
              const std::vector<const TypeParameter*>& parameters,
+             const std::vector<const ast::Node*>& class_heritage,
              Properties* properties)
     : Object(id, node, properties),
+      class_heritage_(zone, class_heritage),
       kind_(kind),
       parameters_(zone, parameters) {}
 

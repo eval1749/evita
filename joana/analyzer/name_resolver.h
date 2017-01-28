@@ -57,6 +57,11 @@ class NameResolver final : public Pass, public ast::SyntaxVisitor {
   // Bind type parameters of |type| in current environment.
   void BindTypeParameters(const Class& class_value);
 
+  std::vector<const ast::Node*> ComputeClassHeritage(
+      ClassKind class_kind,
+      const ast::Node& node,
+      const Annotation& annotation);
+
   const Type* FindType(const ast::Node& name) const;
   Variable* FindVariable(const ast::Node& name) const;
 
@@ -65,6 +70,7 @@ class NameResolver final : public Pass, public ast::SyntaxVisitor {
   Class& NewClass(const ast::Node& node,
                   ClassKind kind,
                   const std::vector<const TypeParameter*>& parameters,
+                  const std::vector<const ast::Node*>& class_heritage,
                   Properties* properties = nullptr);
 
   void ProcessAssignment(const ast::Node& lhs,

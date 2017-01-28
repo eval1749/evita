@@ -253,6 +253,69 @@ TEST_F(NameResolverTest, ClassErrorConstructor) {
       << "constructor can not be generator.";
 }
 
+TEST_F(NameResolverTest, ComputedErrorExtends) {
+  EXPECT_EQ(
+      "Module\n"
+      "+--Class Class[%anonymous%@1001]\n"
+      "|  +--Empty ||\n"
+      "|  +--NumericLiteral |1|\n"
+      "|  +--ObjectInitializer |{}|\n"
+      "ANALYZER_ERROR_ENVIRONMENT_EXPECT_CLASS@14:15\n",
+      RunOn("class extends 1 {}"));
+
+  EXPECT_EQ(
+      "Module\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@constructor|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--VarStatement\n"
+      "|  |  +--BindingNameElement VarVar[Foo@1001]\n"
+      "|  |  |  +--Name |Foo|\n"
+      "|  |  |  +--ElisionExpression || Class[Foo@1002]\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@constructor|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@extends|\n"
+      "|  |  |  +--TypeName {class Foo@1001}\n"
+      "|  |  |  |  +--Name |Foo|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@extends|\n"
+      "|  |  |  +--TypeName {class Foo@1001}\n"
+      "|  |  |  |  +--Name |Foo|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--VarStatement\n"
+      "|  |  +--BindingNameElement VarVar[Bar@1004]\n"
+      "|  |  |  +--Name |Bar|\n"
+      "|  |  |  +--ElisionExpression || Class[Bar@1005]\n"
+      "ANALYZER_ERROR_JSDOC_UNEXPECT_TAG@61:75\n",
+      RunOn("/** @constructor */ var Foo;\n"
+            "/** @constructor @extends {Foo} @extends {Foo} */ var Bar;"));
+}
+
+TEST_F(NameResolverTest, ComputedErrorImplements) {
+  EXPECT_EQ(
+      "Module\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@implements|\n"
+      "|  |  |  +--InvalidType |1|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--Class Class[%anonymous%@1001]\n"
+      "|  |  +--Empty ||\n"
+      "|  |  +--ElisionExpression ||\n"
+      "|  |  +--ObjectInitializer |{}|\n"
+      "ANALYZER_ERROR_ENVIRONMENT_EXPECT_CLASS@17:18\n",
+      RunOn("/** @implements {1} */ class {}"));
+}
+
 TEST_F(NameResolverTest, ComputedMemberExpression) {
   EXPECT_EQ(
       "Module\n"

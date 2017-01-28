@@ -442,7 +442,7 @@ TEST_F(TypeResolverTest, TypeApplication) {
       "|  |  |  +--Name |@interface|\n"
       "|  |  +--JsDocTag\n"
       "|  |  |  +--Name |@template|\n"
-      "|  |  |  +--TypeName {T@1002}\n"
+      "|  |  |  +--TypeName {T@1001}\n"
       "|  |  |  |  +--Name |T|\n"
       "|  |  +--JsDocText |*/|\n"
       "|  +--VarStatement\n"

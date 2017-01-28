@@ -70,6 +70,11 @@ class NameResolver final : public Pass, public ast::SyntaxVisitor {
                   const std::vector<const TypeParameter*>& parameters,
                   Properties* properties = nullptr);
 
+  void ProcessAssignment(const ast::Node& lhs,
+                         const ast::Node* maybe_rhs,
+                         const ast::Node& name,
+                         const Annotation& annotation);
+
   // Assign |Class| value to |node|.
   void ProcessClass(const ast::Node& node,
                     const Annotation& annotation,

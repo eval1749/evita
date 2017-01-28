@@ -333,6 +333,55 @@ Class& NameResolver::NewClass(
   return class_value;
 }
 
+void NameResolver::ProcessAssignment(const ast::Node& lhs,
+                                     const ast::Node* maybe_rhs,
+                                     const ast::Node& name,
+                                     const Annotation& annotation) {
+  if (maybe_rhs) {
+    const auto& rhs = *maybe_rhs;
+    if (rhs.Is<ast::Class>())
+      return ProcessClass(rhs, annotation, &name);
+    if (rhs.Is<ast::Function>())
+      return ProcessFunction(rhs, annotation, &name);
+    Visit(rhs);
+  }
+  ProcessTemplateTags(annotation);
+  ProcessParamTags(annotation);
+  switch (annotation.kind()) {
+    case Annotation::Kind::Constructor:
+    case Annotation::Kind::Interface: {
+      const auto& type_parameters =
+          ProcessTypeParameterNames(annotation.type_parameter_names());
+      auto& class_value =
+          NewClass(lhs, annotation.class_kind(), type_parameters);
+      if (!maybe_rhs && maybe_rhs->Is<ast::ElisionExpression>())
+        AddError(lhs, ErrorCode::ENVIRONMENT_INVALID_CONSTRUCTOR);
+      if (maybe_rhs)
+        context().RegisterValue(*maybe_rhs, &class_value);
+      BindType(name, type_factory().NewClassType(&class_value));
+      return;
+    }
+    case Annotation::Kind::Define:
+    case Annotation::Kind::Dict:
+    case Annotation::Kind::Function:
+    case Annotation::Kind::None:
+    case Annotation::Kind::Type:
+      return;
+    case Annotation::Kind::Enum:
+      DVLOG(0) << "NYI @enum";
+      return;
+    case Annotation::Kind::TypeDef: {
+      if (maybe_rhs && !maybe_rhs->Is<ast::ElisionExpression>())
+        AddError(lhs, ErrorCode::ENVIRONMENT_UNEXPECT_INITIALIZER);
+      const auto& type =
+          type_factory().NewTypeAlias(name, annotation.kind_tag()->child_at(1));
+      BindType(name, type);
+      return;
+    }
+  }
+  NOTREACHED() << "We should handle annotation " << *annotation.kind_tag();
+}
+
 void NameResolver::ProcessClass(const ast::Node& node,
                                 const Annotation& annotation,
                                 const ast::Node* maybe_alias) {
@@ -506,8 +555,6 @@ void NameResolver::ProcessVariableDeclaration(VariableKind variable_kind,
                                               const Annotation& annotation) {
   DCHECK(node.syntax().Is<ast::VariableDeclaration>()) << node;
   base::AutoReset<VariableKind> scope(&variable_kind_, variable_kind);
-  const auto& type_parameters =
-      ProcessTypeParameterNames(annotation.type_parameter_names());
   for (const auto& binding : ast::NodeTraversal::ChildNodesOf(node)) {
     if (annotation.is_type() || annotation.is_none()) {
       ProcessTemplateTags(annotation);
@@ -535,48 +582,7 @@ void NameResolver::ProcessVariableDeclaration(VariableKind variable_kind,
       return;
     }
     const auto& initializer = ast::BindingNameElement::InitializerOf(binding);
-    if (initializer.Is<ast::Class>()) {
-      ProcessClass(initializer, annotation, &name);
-      continue;
-    }
-    if (initializer.Is<ast::Function>()) {
-      ProcessFunction(initializer, annotation, &name);
-      continue;
-    }
-
-    Visit(initializer);
-    ProcessTemplateTags(annotation);
-    ProcessParamTags(annotation);
-    switch (annotation.kind()) {
-      case Annotation::Kind::Constructor:
-      case Annotation::Kind::Interface: {
-        if (!initializer.Is<ast::ElisionExpression>())
-          AddError(node, ErrorCode::ENVIRONMENT_INVALID_CONSTRUCTOR);
-        auto& class_value =
-            NewClass(binding, annotation.class_kind(), type_parameters);
-        context().RegisterValue(initializer, &class_value);
-        BindType(name, type_factory().NewClassType(&class_value));
-        continue;
-      }
-      case Annotation::Kind::Define:
-      case Annotation::Kind::Dict:
-      case Annotation::Kind::Function:
-      case Annotation::Kind::None:
-      case Annotation::Kind::Type:
-        continue;
-      case Annotation::Kind::Enum:
-        DVLOG(0) << "NYI @enum";
-        continue;
-      case Annotation::Kind::TypeDef: {
-        if (!initializer.Is<ast::ElisionExpression>())
-          AddError(node, ErrorCode::ENVIRONMENT_UNEXPECT_INITIALIZER);
-        const auto& type = type_factory().NewTypeAlias(
-            name, annotation.kind_tag()->child_at(1));
-        BindType(name, type);
-        continue;
-      }
-    }
-    NOTREACHED() << "We should handle annotation " << *annotation.kind_tag();
+    ProcessAssignment(binding, &initializer, name, annotation);
   }
 }
 
@@ -671,46 +677,29 @@ void NameResolver::VisitInternal(const ast::Annotation& syntax,
   if (expression.Is<ast::AssignmentExpression>()) {
     const auto& lhs = ast::AssignmentExpression::LeftHandSideOf(expression);
     const auto& rhs = ast::AssignmentExpression::RightHandSideOf(expression);
-    Visit(lhs);
     if (!IsMemberExpression(lhs)) {
       AddError(node, ErrorCode::ENVIRONMENT_UNEXPECT_ANNOTATION);
-      Visit(rhs);
+      VisitChildNodes(node);
       return;
     }
+    Visit(lhs);
     Environment environment(this);
-    if (const auto* class_value = TryClassOfPrototype(lhs.child_at(0)))
+    const auto& container = lhs.child_at(0);
+    const auto& name = lhs.child_at(1);
+    if (const auto* class_value = TryClassOfPrototype(container))
       BindTypeParameters(*class_value);
-    if (rhs.Is<ast::Class>()) {
-      ProcessClass(rhs, annotation, nullptr);
-      return;
-    }
-    if (rhs.Is<ast::Function>()) {
-      ProcessFunction(rhs, annotation, nullptr);
-      return;
-    }
-    ProcessTemplateTags(annotation);
-    ProcessParamTags(annotation);
-    Visit(annotated);
+    ProcessAssignment(lhs, &rhs, name, annotation);
     return;
   }
 
   if (IsMemberExpression(expression)) {
     Visit(expression);
-    const auto& member = expression.child_at(0);
     Environment environment(this);
-    if (const auto* class_value = TryClassOfPrototype(member))
+    const auto& container = expression.child_at(0);
+    const auto& name = expression.child_at(1);
+    if (const auto* class_value = TryClassOfPrototype(container))
       BindTypeParameters(*class_value);
-    if (const auto* class_tag = ProcessClassTag(document)) {
-      const auto& type_parameters =
-          ProcessTypeParameterNames(annotation.type_parameter_names());
-      const auto& class_kind = ClassKindOf(*class_tag);
-      auto& class_value = NewClass(expression, class_kind, type_parameters);
-      auto& property = context().ValueOf(expression).As<Property>();
-      Value::Editor().AddAssignment(&property, document);
-      context().RegisterValue(document, &class_value);
-    }
-    ProcessTemplateTags(annotation);
-    ProcessParamTags(annotation);
+    ProcessAssignment(expression, nullptr, name, annotation);
     return;
   }
 

@@ -276,14 +276,14 @@ TEST_F(TypeResolverTest, OptionalType) {
       "|  |  |  +--OptionalType\n"
       "|  |  |  |  +--TypeName {%number%}\n"
       "|  |  |  |  |  +--Name |number|\n"
-      "|  |  |  +--ReferenceExpression ParameterVar[@1001] {%number%}\n"
-      "|  |  |  |  +--Name ||\n"
+      "|  |  |  +--ReferenceExpression ParameterVar[opt_x@1002] {%number%}\n"
+      "|  |  |  |  +--Name |opt_x|\n"
       "|  |  |  +--JsDocText |*/|\n"
       "|  +--VarStatement\n"
-      "|  |  +--BindingNameElement VarVar[foo@1002] {function(%number%)}\n"
+      "|  |  +--BindingNameElement VarVar[foo@1001] {function(%number%)}\n"
       "|  |  |  +--Name |foo|\n"
       "|  |  |  +--ElisionExpression ||\n",
-      RunOn("/** @param {number=} */ var foo"));
+      RunOn("/** @param {number=} opt_x */ var foo"));
 }
 
 TEST_F(TypeResolverTest, RecordType) {
@@ -538,11 +538,11 @@ TEST_F(TypeResolverTest, VarFunction) {
       "|  |  |  +--Name |@param|\n"
       "|  |  |  +--TypeName {%number%}\n"
       "|  |  |  |  +--Name |number|\n"
-      "|  |  |  +--ReferenceExpression ParameterVar[x@1001] {%number%}\n"
+      "|  |  |  +--ReferenceExpression ParameterVar[x@1002] {%number%}\n"
       "|  |  |  |  +--Name |x|\n"
       "|  |  |  +--JsDocText |*/|\n"
       "|  +--VarStatement\n"
-      "|  |  +--BindingNameElement VarVar[foo@1002] {function(%number%)}\n"
+      "|  |  +--BindingNameElement VarVar[foo@1001] {function(%number%)}\n"
       "|  |  |  +--Name |foo|\n"
       "|  |  |  +--ElisionExpression ||\n",
       RunOn("/** @param {number} x */ var foo;"));

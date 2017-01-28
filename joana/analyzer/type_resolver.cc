@@ -5,6 +5,7 @@
 #include "joana/analyzer/type_resolver.h"
 
 #include "base/logging.h"
+#include "joana/analyzer/annotation_compiler.h"
 #include "joana/analyzer/context.h"
 #include "joana/analyzer/error_codes.h"
 #include "joana/analyzer/type_annotation_transformer.h"
@@ -53,6 +54,16 @@ const Type* TypeResolver::ComputeClassType(const ast::Node& node) const {
   return nullptr;
 }
 
+const Type* TypeResolver::ComputeType(const ast::Node& document,
+                                      const ast::Node& node,
+                                      const Type* maybe_this_type) {
+  DCHECK_EQ(document, ast::SyntaxCode::JsDocDocument);
+  const auto annotation = Annotation::Compiler().Compile(document, node);
+  TypeAnnotationTransformer transformer(&context(), annotation, node,
+                                        maybe_this_type);
+  return transformer.Compile();
+}
+
 void TypeResolver::ProcessArrayBinding(const ast::Node& node,
                                        const Type& type) {
   NOTREACHED() << "NYI ProcessArrayBinding" << node << ' ' << type;
@@ -60,10 +71,9 @@ void TypeResolver::ProcessArrayBinding(const ast::Node& node,
 
 void TypeResolver::ProcessAnnotation(const ast::Node& document,
                                      const ast::Node& node,
-                                     const Type* this_type) {
+                                     const Type* maybe_this_type) {
   DCHECK_EQ(document, ast::SyntaxCode::JsDocDocument);
-  TypeAnnotationTransformer annotation(&context(), document, node, this_type);
-  const auto* const type = annotation.Compile();
+  const auto* const type = ComputeType(document, node, maybe_this_type);
   if (!type)
     return;
   RegisterType(node, *type);
@@ -75,8 +85,7 @@ void TypeResolver::ProcessAssignment(const ast::Node& node,
   DCHECK_EQ(document, ast::SyntaxCode::JsDocDocument);
   const auto& lhs = ast::AssignmentExpression::LeftHandSideOf(node);
   const auto* const class_type = ComputeClassType(lhs);
-  TypeAnnotationTransformer annotation(&context(), document, node, class_type);
-  const auto* const type = annotation.Compile();
+  const auto* const type = ComputeType(document, node, class_type);
   if (!type)
     return;
   RegisterType(lhs, *type);
@@ -100,14 +109,11 @@ void TypeResolver::ProcessObjectBinding(const ast::Node& node,
 void TypeResolver::ProcessVariableDeclaration(const ast::Node& node,
                                               const ast::Node& document) {
   DCHECK_EQ(document, ast::SyntaxCode::JsDocDocument);
-  const auto& binding = node.child_at(0);
-  if (node.arity() == 1 && binding.Is<ast::BindingNameElement>()) {
+  for (const auto& binding : ast::NodeTraversal::ChildNodesOf(node)) {
     auto* const value = SingleVariableValueOf(binding);
     if (value && value->Is<Class>()) {
       const auto& class_type = type_factory().NewClassType(&value->As<Class>());
-      TypeAnnotationTransformer annotation(&context(), document, binding,
-                                           &class_type);
-      const auto* type = annotation.Compile();
+      const auto* type = ComputeType(document, binding, &class_type);
       if (!type)
         return AddError(binding, ErrorCode::TYPE_RESOLVER_EXPECT_CLASS_TYPE);
       if (!type->Is<ClassType>() && !type->Is<FunctionType>())
@@ -116,8 +122,7 @@ void TypeResolver::ProcessVariableDeclaration(const ast::Node& node,
       return;
     }
   }
-  TypeAnnotationTransformer annotation(&context(), document, node);
-  const auto* type = annotation.Compile();
+  const auto* type = ComputeType(document, node, nullptr);
   if (!type)
     return;
   for (const auto& binding : ast::NodeTraversal::ChildNodesOf(node))
@@ -154,9 +159,9 @@ void TypeResolver::VisitInternal(const ast::Annotation& syntax,
   Visit(annotated);
   const auto& document = ast::Annotation::DocumentOf(node);
   if (annotated.Is<ast::Function>())
-    return ProcessAnnotation(document, annotated);
+    return ProcessAnnotation(document, annotated, nullptr);
   if (annotated.Is<ast::GroupExpression>())
-    return ProcessAnnotation(document, annotated);
+    return ProcessAnnotation(document, annotated, nullptr);
   if (annotated.syntax().Is<ast::VariableDeclaration>())
     return ProcessVariableDeclaration(annotated, document);
   if (!annotated.Is<ast::ExpressionStatement>())

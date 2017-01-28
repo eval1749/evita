@@ -10,7 +10,6 @@
 #include "joana/analyzer/annotation.h"
 
 #include "base/macros.h"
-#include "base/optional.h"
 
 namespace joana {
 namespace analyzer {
@@ -24,7 +23,7 @@ enum class ErrorCode;
 class Annotation::Compiler final {
  public:
   // When |context| is |nullptr|, error is not reported.
-  explicit Compiler(const base::Optional<Context*>& maybe_context = {});
+  explicit Compiler(Context* maybe_context);
   Compiler();
   ~Compiler();
 
@@ -57,7 +56,7 @@ class Annotation::Compiler final {
   void ValidateForType(const ast::Node& target);
 
   Annotation annotation_;
-  const base::Optional<Context*> maybe_context_;
+  Context* const maybe_context_;
 
   DISALLOW_COPY_AND_ASSIGN(Compiler);
 };

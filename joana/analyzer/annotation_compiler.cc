@@ -52,9 +52,9 @@ using Compiler = Annotation::Compiler;
 //
 // Annotation::Compiler
 //
-Compiler::Compiler(const base::Optional<Context*>& maybe_context)
-    : maybe_context_(maybe_context) {}
+Compiler::Compiler(Context* maybe_context) : maybe_context_(maybe_context) {}
 
+Compiler::Compiler() : Compiler(nullptr) {}
 Compiler::~Compiler() = default;
 
 // The entry point
@@ -75,13 +75,13 @@ void Compiler::AddError(const ast::Node& node,
                         const ast::Node& related) {
   if (!maybe_context_)
     return;
-  (*maybe_context_)->AddError(node, error_code, related);
+  maybe_context_->AddError(node, error_code, related);
 }
 
 void Compiler::AddError(const ast::Node& node, ErrorCode error_code) {
   if (!maybe_context_)
     return;
-  (*maybe_context_)->AddError(node, error_code);
+  maybe_context_->AddError(node, error_code);
 }
 
 void Compiler::Classify(const ast::Node& document) {
@@ -149,12 +149,18 @@ void Compiler::Classify(const ast::Node& document) {
         RememberTag(&annotation_.access_tag_, node);
         continue;
       case ast::TokenKind::AtParam:
+        if (annotation_.kind_ == Kind::None)
+          annotation_.kind_ = Kind::Function;
         annotation_.parameter_tags_.push_back(&node);
         continue;
       case ast::TokenKind::AtReturn:
+        if (annotation_.kind_ == Kind::None)
+          annotation_.kind_ = Kind::Function;
         RememberTag(&annotation_.return_tag_, node);
         continue;
       case ast::TokenKind::AtThis:
+        if (annotation_.kind_ == Kind::None)
+          annotation_.kind_ = Kind::Function;
         RememberTag(&annotation_.this_tag_, node);
         continue;
       case ast::TokenKind::AtTemplate:

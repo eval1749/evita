@@ -27,11 +27,14 @@ class TypeResolver final : public Pass, public ast::SyntaxVisitor {
   void RunOn(const ast::Node& node) final;
 
  private:
-  const Type* TypeResolver::ComputeClassType(const ast::Node& node) const;
+  const Type* ComputeClassType(const ast::Node& node) const;
+  const Type* ComputeType(const ast::Node& document,
+                          const ast::Node& node,
+                          const Type* maybe_this_type);
 
   void ProcessAnnotation(const ast::Node& document,
                          const ast::Node& node,
-                         const Type* this_type = nullptr);
+                         const Type* maybe_this_type);
   void ProcessArrayBinding(const ast::Node& node, const Type& type);
   void ProcessAssignment(const ast::Node& node, const ast::Node& document);
   void ProcessBinding(const ast::Node& node, const Type& type);

@@ -56,7 +56,7 @@ class Annotation final {
   }
   const ast::Node* return_tag() const { return return_tag_; }
   const ast::Node* this_tag() const { return this_tag_; }
-  const ast::Node* type_node() const { return type_node_; }
+  const ast::Node& type_node() const;
   const std::vector<const ast::Node*>& type_parameter_names() const {
     return type_parameter_names_;
   }

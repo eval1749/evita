@@ -10,6 +10,7 @@
 #include "joana/analyzer/type_annotation_transformer.h"
 
 #include "base/logging.h"
+#include "joana/analyzer/annotation.h"
 #include "joana/analyzer/context.h"
 #include "joana/analyzer/error_codes.h"
 #include "joana/analyzer/factory.h"
@@ -331,115 +332,41 @@ TypeAnnotationTransformer::FunctionParameters::Builder::TransformType(
 //
 // TypeAnnotationTransformer
 //
-TypeAnnotationTransformer::TypeAnnotationTransformer(Context* context,
-                                                     const ast::Node& document,
-                                                     const ast::Node& node,
-                                                     const Type* this_type)
+TypeAnnotationTransformer::TypeAnnotationTransformer(
+    Context* context,
+    const Annotation& annotation,
+    const ast::Node& node,
+    const Type* this_type)
     : ContextUser(context),
-      document_(document),
+      annotation_(annotation),
       node_(node),
       this_type_(this_type) {
-  DCHECK_EQ(document_, ast::SyntaxCode::JsDocDocument);
   DCHECK(!this_type || this_type->Is<ClassType>()) << this_type;
 }
 
 TypeAnnotationTransformer::~TypeAnnotationTransformer() = default;
 
-const ast::Node* TypeAnnotationTransformer::Classify() {
-  for (const auto& node : ast::NodeTraversal::ChildNodesOf(document_)) {
-    if (node != ast::SyntaxCode::JsDocTag)
-      continue;
-    const auto& tag_name = ast::JsDocTag::NameOf(node);
-    switch (ast::Name::KindOf(tag_name)) {
-      case ast::TokenKind::AtConst:
-        RememberTag(&const_tag_, node);
-        if (node.arity() == 1)
-          continue;
-        RememberTag(&kind_tag_, node);
-        if (type_node_)
-          type_node_ = &node.child_at(1);
-        continue;
-      case ast::TokenKind::AtConstructor:
-      case ast::TokenKind::AtDict:
-      case ast::TokenKind::AtEnum:
-      case ast::TokenKind::AtInterface:
-      case ast::TokenKind::AtRecord:
-        RememberTag(&kind_tag_, node);
-        continue;
-      case ast::TokenKind::AtDefine:
-      case ast::TokenKind::AtType:
-      case ast::TokenKind::AtTypeDef:
-        RememberTag(&kind_tag_, node);
-        if (!type_node_)
-          type_node_ = &node.child_at(1);
-        continue;
-      case ast::TokenKind::AtExtends:
-        extends_tags_.push_back(&node);
-        continue;
-      case ast::TokenKind::AtFinal:
-        RememberTag(&final_tag_, node);
-        continue;
-      case ast::TokenKind::AtImplements:
-        implements_tags_.push_back(&node);
-        continue;
-      case ast::TokenKind::AtOverride:
-        RememberTag(&override_tag_, node);
-        continue;
-      case ast::TokenKind::AtPrivate:
-      case ast::TokenKind::AtProtected:
-      case ast::TokenKind::AtPublic:
-        RememberTag(&access_tag_, node);
-        continue;
-      case ast::TokenKind::AtParam:
-        parameter_tags_.push_back(&node);
-        continue;
-      case ast::TokenKind::AtReturn:
-        RememberTag(&return_tag_, node);
-        continue;
-      case ast::TokenKind::AtThis:
-        RememberTag(&this_tag_, node);
-        continue;
-      case ast::TokenKind::AtTemplate:
-        ProcessTemplateTag(node);
-        continue;
-    }
-  }
-  return kind_tag_ ? &ast::JsDocTag::NameOf(*kind_tag_) : nullptr;
-}
-
 const Type* TypeAnnotationTransformer::Compile() {
-  const auto* kind = Classify();
-  if (kind == nullptr) {
-    if (!parameter_tags_.empty() || return_tag_)
+  switch (annotation_.kind()) {
+    case Annotation::Kind::Constructor:
+    case Annotation::Kind::Function:
       return &TransformAsFunctionType();
-    MarkNotTypeTypeAnnotationTransformer();
-    return nullptr;
+    case Annotation::Kind::Enum:
+      DVLOG(0) << "NYI enum type" << annotation_.document() << ' ' << node_;
+      return nullptr;
+    case Annotation::Kind::Interface:
+      return &TransformAsInterface();
+    case Annotation::Kind::Type:
+    case Annotation::Kind::TypeDef:
+      return &TransformType(annotation_.type_node());
   }
-  if (*kind == ast::TokenKind::AtConstructor)
-    return &TransformAsFunctionType();
-  if (*kind == ast::TokenKind::AtDict) {
-    MarkNotTypeTypeAnnotationTransformer();
-    return nullptr;
-  }
-  if (*kind == ast::TokenKind::AtEnum) {
-    // TODO(eval1749): NYI: enum type.
-    MarkNotTypeTypeAnnotationTransformer();
-    return nullptr;
-  }
-  if (*kind == ast::TokenKind::AtInterface ||
-      *kind == ast::TokenKind::AtRecord) {
-    return &TransformAsInterface();
-  }
-  if (type_node_)
-    return &TransformType(*type_node_);
-  MarkNotTypeTypeAnnotationTransformer();
   return nullptr;
 }
 
 const Type& TypeAnnotationTransformer::ComputeReturnType() {
-  if (!return_tag_)
+  if (!annotation_.return_tag())
     return void_type();
-  return TransformType(return_tag_->child_at(1));
+  return TransformType(annotation_.return_tag()->child_at(1));
 }
 
 // Type of "this" is determined by:
@@ -461,25 +388,13 @@ const Type& TypeAnnotationTransformer::ComputeThisTypeFromMember(
   return void_type();
 }
 
-// Note: We can't check whether @override tag is valid or invalid since we
-// don't known class hierarchy yet.
-void TypeAnnotationTransformer::MarkNotTypeTypeAnnotationTransformer() {
-  if (access_tag_)
-    AddError(*access_tag_, ErrorCode::JSDOC_UNEXPECT_TAG);
-  for (const auto& extends_tag : extends_tags_)
-    AddError(*extends_tag, ErrorCode::JSDOC_UNEXPECT_TAG);
-  if (final_tag_)
-    AddError(*final_tag_, ErrorCode::JSDOC_UNEXPECT_TAG);
-  for (const auto& implements_tag : implements_tags_)
-    AddError(*implements_tag, ErrorCode::JSDOC_UNEXPECT_TAG);
-  for (const auto& parameter_tag : parameter_tags_)
-    AddError(*parameter_tag, ErrorCode::JSDOC_UNEXPECT_TAG);
-  if (return_tag_)
-    AddError(*return_tag_, ErrorCode::JSDOC_UNEXPECT_TAG);
-  for (const auto& template_tag : template_tags_)
-    AddError(*template_tag, ErrorCode::JSDOC_UNEXPECT_TAG);
-  if (this_tag_)
-    AddError(*this_tag_, ErrorCode::JSDOC_UNEXPECT_TAG);
+std::vector<const TypeParameter*>
+TypeAnnotationTransformer::ComputeTypeParameters() {
+  std::vector<const TypeParameter*> type_parameters;
+  for (const auto& type_name : annotation_.type_parameter_names())
+    type_parameters.push_back(
+        &context().TypeOf(*type_name).As<TypeParameter>());
+  return std::move(type_parameters);
 }
 
 TypeAnnotationTransformer::FunctionParameters
@@ -487,7 +402,7 @@ TypeAnnotationTransformer::ProcessParameterList(
     const ast::Node& parameter_list) {
   DCHECK_EQ(parameter_list, ast::SyntaxCode::ParameterList);
   return FunctionParameters::Builder(&context(), parameter_list,
-                                     parameter_tags_)
+                                     annotation_.parameter_tags())
       .Build();
 }
 
@@ -501,7 +416,7 @@ TypeAnnotationTransformer::ProcessParameterTags() {
   FunctionTypeArity arity;
   std::vector<const Type*> parameter_types;
   std::vector<const ast::Node*> parameter_names;
-  for (const auto& parameter_tag : parameter_tags_) {
+  for (const auto& parameter_tag : annotation_.parameter_tags()) {
     const auto& type_node = parameter_tag->child_at(1);
     const auto is_optional = type_node.Is<ast::OptionalType>();
     const auto is_rest = type_node.Is<ast::RestType>();
@@ -556,40 +471,6 @@ TypeAnnotationTransformer::ProcessParameterTags() {
   return FunctionParameters(arity, parameter_types);
 }
 
-void TypeAnnotationTransformer::RememberTag(const ast::Node** pointer,
-                                            const ast::Node& node) {
-  if (*pointer) {
-    AddError(node, ErrorCode::JSDOC_MULTIPLE_TAG, **pointer);
-    return;
-  }
-  *pointer = &node;
-}
-
-void TypeAnnotationTransformer::ProcessTemplateTag(const ast::Node& node) {
-  DCHECK_EQ(ast::JsDocTag::NameOf(node), ast::TokenKind::AtTemplate);
-  template_tags_.push_back(&node);
-  for (const auto& operand : ast::JsDocTag::OperandsOf(node)) {
-    if (!operand.Is<ast::TypeName>())
-      continue;
-    const auto& name = ast::TypeName::NameOf(operand);
-    if (!name.Is<ast::Name>()) {
-      AddError(name, ErrorCode::JSDOC_EXPECT_NAME);
-      continue;
-    }
-    const auto name_id = ast::Name::KindOf(name);
-    const auto& result = type_parameter_map_.emplace(
-        name_id, &type_factory().NewTypeParameter(name).As<TypeParameter>());
-    if (result.second)
-      continue;
-    for (const auto& present : ast::JsDocTag::OperandsOf(node)) {
-      if (present != name_id)
-        continue;
-      AddError(name, ErrorCode::JSDOC_MULTIPLE_NAME, present);
-      break;
-    }
-  }
-}
-
 const Type& TypeAnnotationTransformer::ResolveTypeName(const ast::Node& name) {
   DCHECK_EQ(name, ast::SyntaxCode::Name);
   return context().TypeOf(name);
@@ -599,12 +480,10 @@ const Type& TypeAnnotationTransformer::ResolveTypeName(const ast::Node& name) {
 const Type& TypeAnnotationTransformer::TransformAsFunctionType() {
   if (node_.Is<ast::Method>()) {
     const auto& this_type = ComputeThisType();
-    if (kind_tag_)
-      AddError(*kind_tag_, ErrorCode::JSDOC_UNEXPECT_TAG);
-    const auto& parameters =
-        FunctionParameters::Builder(
-            &context(), ast::Method::ParametersOf(node_), parameter_tags_)
-            .Build();
+    const auto& parameters = FunctionParameters::Builder(
+                                 &context(), ast::Method::ParametersOf(node_),
+                                 annotation_.parameter_tags())
+                                 .Build();
     const auto method_kind = ast::Method::MethodKindOf(node_);
     const auto& method_name = ast::Method::NameOf(node_);
     switch (method_kind) {
@@ -612,19 +491,21 @@ const Type& TypeAnnotationTransformer::TransformAsFunctionType() {
         DCHECK(this_type.Is<ClassType>()) << node_ << ':' << this_type;
         if (method_name == ast::TokenKind::Constructor) {
           return type_factory().NewFunctionType(
-              FunctionTypeKind::Constructor, type_parameters_,
+              FunctionTypeKind::Constructor, ComputeTypeParameters(),
               parameters.arity(), parameters.types(), this_type, this_type);
         }
         return type_factory().NewFunctionType(
-            FunctionTypeKind::Normal, type_parameters_, parameters.arity(),
-            parameters.types(), ComputeReturnType(), this_type);
+            FunctionTypeKind::Normal, ComputeTypeParameters(),
+            parameters.arity(), parameters.types(), ComputeReturnType(),
+            this_type);
       case ast::MethodKind::Static:
         DCHECK_EQ(this_type, void_type()) << node_;
         // Note: It is OK to name method to |Constructor|, e.g.
         // class Foo { static constructor() {} }
         return type_factory().NewFunctionType(
-            FunctionTypeKind::Normal, type_parameters_, parameters.arity(),
-            parameters.types(), ComputeReturnType(), void_type());
+            FunctionTypeKind::Normal, ComputeTypeParameters(),
+            parameters.arity(), parameters.types(), ComputeReturnType(),
+            void_type());
     }
     NOTREACHED() << "Unknown MethodKind " << static_cast<int>(method_kind);
     return void_type();
@@ -645,20 +526,19 @@ const Type& TypeAnnotationTransformer::TransformAsFunctionType() {
           ? std::move(ProcessParameterList(ast::Function::ParametersOf(node_)))
           : std::move(ProcessParameterTags());
 
-  if (!kind_tag_) {
+  if (annotation_.is_function()) {
     return type_factory().NewFunctionType(
-        FunctionTypeKind::Normal, type_parameters_, parameters.arity(),
+        FunctionTypeKind::Normal, ComputeTypeParameters(), parameters.arity(),
         parameters.types(), ComputeReturnType(), ComputeThisType());
   }
 
-  if (ast::JsDocTag::NameOf(*kind_tag_) == ast::TokenKind::AtConstructor) {
+  if (annotation_.is_constructor()) {
     const auto& class_type = ComputeThisType();
     return type_factory().NewFunctionType(
-        FunctionTypeKind::Constructor, type_parameters_, parameters.arity(),
-        parameters.types(), class_type, class_type);
+        FunctionTypeKind::Constructor, ComputeTypeParameters(),
+        parameters.arity(), parameters.types(), class_type, class_type);
   }
 
-  AddError(*kind_tag_, ErrorCode::JSDOC_UNEXPECT_TAG);
   return void_type();
 }
 

@@ -62,6 +62,11 @@ const ast::Node& Annotation::document() const {
   return *document_;
 }
 
+const ast::Node& Annotation::type_node() const {
+  DCHECK(type_node_);
+  return *type_node_;
+}
+
 Visibility Annotation::visibility() const {
   if (!access_tag_)
     return Visibility::Public;

@@ -103,36 +103,7 @@ const ast::Node* ValueNameOf(const Value& value) {
 std::ostream& operator<<(std::ostream& ostream,
                          const Printable<Value>& printable) {
   const auto& value = *printable.thing;
-  if (value.Is<Class>()) {
-    ostream << value.As<Class>().kind() << '[';
-    if (const auto* name = ValueNameOf(value))
-      ostream << ast::AsSourceCode(*name);
-    else
-      ostream << "%anonymous%";
-    const auto* delimiter = "<";
-    for (const auto& parameter : value.As<Class>().parameters()) {
-      ostream << delimiter << ast::AsSourceCode(parameter.name());
-      delimiter = ",";
-    }
-    if (*delimiter == ',')
-      ostream << '>';
-    return ostream << '@' << value.id() << ']';
-  }
-  if (value.Is<Property>()) {
-    return ostream << value.As<Property>().visibility() << "Property" << '['
-                   << ast::AsSourceCode(value.node()) << '@' << value.id()
-                   << ']';
-  }
-  if (value.Is<Variable>()) {
-    return ostream << value.As<Variable>().kind() << "Var["
-                   << ast::AsSourceCode(value.node()) << '@' << value.id()
-                   << ']';
-  }
-  ostream << value.class_name();
-  const auto& name = ValueNameOf(value);
-  if (!name)
-    return ostream << '@' << value.id();
-  return ostream << '[' << ast::AsSourceCode(*name) << '@' << value.id() << ']';
+  return ostream << value;
 }
 
 std::ostream& operator<<(std::ostream& ostream,

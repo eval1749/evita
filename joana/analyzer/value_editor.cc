@@ -38,7 +38,7 @@ void Value::Editor::AddAssignment(ValueHolder* binding, const ast::Node& node) {
 }
 
 void Value::Editor::SetClassHeritage(Class* class_value,
-                                     const std::vector<Value*>& classes) {
+                                     const std::vector<Class*>& classes) {
   auto& base_classes = class_value->base_classes_;
   DCHECK(base_classes.empty()) << *class_value;
   base_classes.reserve(classes.size());

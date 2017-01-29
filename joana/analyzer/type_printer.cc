@@ -51,7 +51,7 @@ std::ostream& operator<<(std::ostream& ostream,
   if (name.Is<ast::Name>())
     ostream << ' ' << ast::AsSourceCode(name);
   const auto* delimiter = "<";
-  if (auto* class_value = type.value().TryAs<Class>()) {
+  if (auto* class_value = type.value().TryAs<GenericClass>()) {
     for (const auto& parameter : class_value->parameters()) {
       ostream << delimiter << AsSourceCode(parameter.name());
       delimiter = ",";
@@ -61,8 +61,6 @@ std::ostream& operator<<(std::ostream& ostream,
       ostream << delimiter << argument;
       delimiter = ",";
     }
-  } else {
-    NOTREACHED() << "unsupported value " << type.value();
   }
   if (*delimiter == ',')
     ostream << '>';

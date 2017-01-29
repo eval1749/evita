@@ -71,22 +71,14 @@ Factory::Factory(Zone* zone) : cache_(new Cache()), zone_(*zone) {}
 Factory::~Factory() = default;
 
 // Factory members
-Class& Factory::NewClass(const ast::Node& node,
-                         ClassKind kind,
-                         const std::vector<const TypeParameter*>& parameters,
-                         Properties* properties) {
-  return *new (&zone_)
-      Class(&zone_, NextValueId(), node, kind, parameters, properties);
-}
-
-Value& Factory::NewConstructedClass(Class* generic_class,
-                                    const std::vector<const Type*> arguments) {
+Class& Factory::NewConstructedClass(GenericClass* generic_class,
+                                    const std::vector<const Type*>& arguments) {
   const auto& key = std::make_tuple(generic_class, arguments);
   if (auto* present = cache_->Find(key))
-    return *present;
+    return present->As<ConstructedClass>();
   const auto size = SizeOf<ConstructedClass>(arguments.size());
   auto& new_value = *new (zone_.Allocate(size)) ConstructedClass(
-      NextValueId(), generic_class, arguments);
+      &zone_, NextValueId(), generic_class, arguments);
   cache_->Register(key, &new_value);
   return new_value;
 }
@@ -94,6 +86,23 @@ Value& Factory::NewConstructedClass(Class* generic_class,
 Function& Factory::NewFunction(const ast::Node& node) {
   auto& properties = NewProperties(node);
   return *new (&zone_) Function(NextValueId(), node, &properties);
+}
+
+Class& Factory::NewGenericClass(
+    const ast::Node& node,
+    ClassKind kind,
+    const std::vector<const TypeParameter*>& parameters,
+    Properties* properties) {
+  const auto size = SizeOf<GenericClass>(parameters.size());
+  return *new (zone_.Allocate(size))
+      GenericClass(&zone_, NextValueId(), node, kind, parameters, properties);
+}
+
+Class& Factory::NewNormalClass(const ast::Node& node,
+                               ClassKind kind,
+                               Properties* properties) {
+  return *new (&zone_)
+      NormalClass(&zone_, NextValueId(), node, kind, properties);
 }
 
 Value& Factory::NewOrdinaryObject(const ast::Node& node) {

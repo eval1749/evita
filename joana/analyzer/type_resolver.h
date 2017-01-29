@@ -31,7 +31,7 @@ class TypeResolver final : public Pass, public ast::SyntaxVisitor {
   void RunOn(const ast::Node& node) final;
 
  private:
-  std::vector<Value*> ComputeClassHeritage(const Annotation& annotation,
+  std::vector<Class*> ComputeClassHeritage(const Annotation& annotation,
                                            const ast::Node& node);
   const Type* ComputeClassType(const ast::Node& node) const;
   const Type* ComputeType(const Annotation& annotation,
@@ -49,7 +49,7 @@ class TypeResolver final : public Pass, public ast::SyntaxVisitor {
   void ProcessVariableDeclaration(const ast::Node& node,
                                   const Annotation& annotation);
   void RegisterType(const ast::Node& node, const Type& type);
-  Value* ResolveClass(const ast::Node& node);
+  Class* ResolveClass(const ast::Node& node);
   Value* SingleVariableValueOf(const ast::Node& node) const;
 
   // |ast::SyntaxVisitor| members

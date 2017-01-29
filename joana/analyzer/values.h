@@ -17,6 +17,7 @@ namespace joana {
 namespace analyzer {
 
 class Function;
+class GenericClass;
 class Properties;
 class Type;
 class TypeParameter;
@@ -90,6 +91,33 @@ class Object : public Value {
 };
 
 //
+// Class
+//
+class Class : public Object {
+  DECLARE_ABSTRACT_ANALYZE_VALUE(Class, Object);
+
+ public:
+  ~Class() override;
+
+  auto base_classes() const { return ReferenceRangeOf(base_classes_); }
+  bool is_class() const { return kind_ == ClassKind::Class; }
+  ClassKind kind() const { return kind_; }
+
+ protected:
+  Class(Zone* zone,
+        int id,
+        const ast::Node& node,
+        ClassKind kind,
+        Properties* properties);
+
+ private:
+  ZoneVector<Value*> base_classes_;
+  const ClassKind kind_;
+
+  DISALLOW_COPY_AND_ASSIGN(Class);
+};
+
+//
 // ValueHolder
 //
 class ValueHolder : public Object {
@@ -118,40 +146,10 @@ class ValueHolder : public Object {
 };
 
 //
-// Class
-//
-class Class : public Object {
-  DECLARE_CONCRETE_ANALYZE_VALUE(Class, Object);
-
- public:
-  ~Class() final;
-
-  auto base_classes() const { return ReferenceRangeOf(base_classes_); }
-  ClassKind kind() const { return kind_; }
-  auto parameters() const { return ReferenceRangeOf(parameters_); }
-
- protected:
-  // TODO(eval1749): move |zone| after |node|.
-  Class(Zone* zone,
-        int id,
-        const ast::Node& node,
-        ClassKind kind,
-        const std::vector<const TypeParameter*>& parameters,
-        Properties* properties);
-
- private:
-  ZoneVector<Value*> base_classes_;
-  const ClassKind kind_;
-  ZoneVector<const TypeParameter*> parameters_;
-
-  DISALLOW_COPY_AND_ASSIGN(Class);
-};
-
-//
 // ConstructedClass
 //
-class ConstructedClass : public Value {
-  DECLARE_CONCRETE_ANALYZE_VALUE(ConstructedClass, Value);
+class ConstructedClass : public Class {
+  DECLARE_CONCRETE_ANALYZE_VALUE(ConstructedClass, Class);
 
  public:
   void* operator new(size_t size, void* pointer) { return pointer; }
@@ -159,14 +157,15 @@ class ConstructedClass : public Value {
   ~ConstructedClass() final;
 
   BlockRange<const Type*> arguments() const;
-  Class& generic_class() const { return generic_class_; }
+  GenericClass& generic_class() const { return generic_class_; }
 
  private:
-  ConstructedClass(int id,
-                   Class* generic_class,
+  ConstructedClass(Zone* zone,
+                   int id,
+                   GenericClass* generic_class,
                    const std::vector<const Type*>& arguments);
 
-  Class& generic_class_;
+  GenericClass& generic_class_;
   const size_t number_of_arguments_;
   const Type* arguments_[1];
 
@@ -187,6 +186,53 @@ class Function final : public Object {
   Function(int id, const ast::Node& node, Properties* properties);
 
   DISALLOW_COPY_AND_ASSIGN(Function);
+};
+
+//
+// GenericClass
+//
+class GenericClass : public Class {
+  DECLARE_CONCRETE_ANALYZE_VALUE(GenericClass, Class);
+
+ public:
+  void* operator new(size_t size, void* pointer) { return pointer; }
+
+  ~GenericClass() final;
+
+  BlockRange<const TypeParameter*> parameters() const;
+
+ private:
+  GenericClass(Zone* zone,
+               int id,
+               const ast::Node& node,
+               ClassKind kind,
+               const std::vector<const TypeParameter*>& parameters,
+               Properties* properties);
+
+ private:
+  const size_t number_of_parameters_;
+  const TypeParameter* parameters_[1];
+
+  DISALLOW_COPY_AND_ASSIGN(GenericClass);
+};
+
+//
+// NormalClass
+//
+class NormalClass : public Class {
+  DECLARE_CONCRETE_ANALYZE_VALUE(NormalClass, Class);
+
+ public:
+  ~NormalClass() final;
+
+ private:
+  NormalClass(Zone* zone,
+              int id,
+              const ast::Node& node,
+              ClassKind kind,
+              Properties* properties);
+
+  DISALLOW_COPY_AND_ASSIGN(NormalClass);
 };
 
 //

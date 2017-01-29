@@ -21,14 +21,16 @@ namespace analyzer {
   V(void)
 
 #define FOR_EACH_ABSTRACT_ANALYZE_VALUE(V) \
+  V(Class)                                 \
   V(Object)                                \
   V(Value)                                 \
   V(ValueHolder)
 
 #define FOR_EACH_ANALYZE_VALUE(V) \
-  V(Class)                        \
   V(ConstructedClass)             \
   V(Function)                     \
+  V(GenericClass)                 \
+  V(NormalClass)                  \
   V(OrdinaryObject)               \
   V(Property)                     \
   V(Undefined)                    \

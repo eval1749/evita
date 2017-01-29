@@ -227,7 +227,9 @@ void NameResolver::BindType(const ast::Node& name, const Type& type) {
 }
 
 void NameResolver::BindTypeParameters(const Class& class_value) {
-  for (const auto& parameter : class_value.parameters())
+  if (!class_value.Is<GenericClass>())
+    return;
+  for (const auto& parameter : class_value.As<GenericClass>().parameters())
     BindType(parameter.name(), parameter);
 }
 
@@ -276,7 +278,10 @@ Class& NameResolver::NewClass(
     Properties* passed_properties) {
   auto& properties =
       passed_properties ? *passed_properties : factory().NewProperties(node);
-  auto& class_value = factory().NewClass(node, kind, parameters, &properties);
+  auto& class_value =
+      parameters.empty()
+          ? factory().NewNormalClass(node, kind, &properties)
+          : factory().NewGenericClass(node, kind, parameters, &properties);
   const auto& prototype_name =
       BuiltInWorld::GetInstance()->NameOf(ast::TokenKind::Prototype);
   if (properties.TryGet(prototype_name))

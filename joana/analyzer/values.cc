@@ -19,22 +19,23 @@ Class::Class(Zone* zone,
              int id,
              const ast::Node& node,
              ClassKind kind,
-             const std::vector<const TypeParameter*>& parameters,
              Properties* properties)
-    : Object(id, node, properties),
-      base_classes_(zone),
-      kind_(kind),
-      parameters_(zone, parameters) {}
+    : Object(id, node, properties), base_classes_(zone), kind_(kind) {}
 
 Class::~Class() = default;
 
 //
 // ConstructedClass
 //
-ConstructedClass::ConstructedClass(int id,
-                                   Class* generic_class,
+ConstructedClass::ConstructedClass(Zone* zone,
+                                   int id,
+                                   GenericClass* generic_class,
                                    const std::vector<const Type*>& arguments)
-    : Value(id, generic_class->node()),
+    : Class(zone,
+            id,
+            generic_class->node(),
+            generic_class->kind(),
+            &generic_class->properties()),
       generic_class_(*generic_class),
       number_of_arguments_(arguments.size()) {
   DCHECK(generic_class);
@@ -60,6 +61,43 @@ Function::Function(int id, const ast::Node& node, Properties* properties)
     : Object(id, node, properties) {}
 
 Function::~Function() = default;
+
+//
+// GenericClass
+//
+GenericClass::GenericClass(Zone* zone,
+                           int id,
+                           const ast::Node& node,
+                           ClassKind kind,
+                           const std::vector<const TypeParameter*>& parameters,
+                           Properties* properties)
+    : Class(zone, id, node, kind, properties),
+      number_of_parameters_(parameters.size()) {
+  DCHECK_GE(parameters.size(), static_cast<size_t>(1));
+  auto* runner = parameters_;
+  for (const auto& parameter : parameters) {
+    *runner = parameter;
+    ++runner;
+  }
+}
+
+GenericClass::~GenericClass() = default;
+
+BlockRange<const TypeParameter*> GenericClass::parameters() const {
+  return BlockRange<const TypeParameter*>(parameters_, number_of_parameters_);
+}
+
+//
+// NormalClass
+//
+NormalClass::NormalClass(Zone* zone,
+                         int id,
+                         const ast::Node& node,
+                         ClassKind kind,
+                         Properties* properties)
+    : Class(zone, id, node, kind, properties) {}
+
+NormalClass::~NormalClass() = default;
 
 //
 // Object

@@ -247,7 +247,7 @@ const Type& TypeTransformer::TransformTypeApplication(const ast::Node& node) {
     AddError(node, ErrorCode::JSDOC_EXPECT_GENERIC_CLASS);
     return unspecified_type();
   }
-  auto& generic_class_value = class_value.As<Class>();
+  auto& generic_class_value = class_value.As<GenericClass>();
   if (generic_class_value.parameters().empty()) {
     AddError(node, ErrorCode::JSDOC_EXPECT_GENERIC_CLASS);
     return unspecified_type();

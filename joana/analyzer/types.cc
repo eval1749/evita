@@ -21,10 +21,7 @@ AnyType::~AnyType() = default;
 //
 // ClassType
 //
-ClassType::ClassType(int id, Value* value) : Type(id), value_(*value) {
-  DCHECK(value->Is<Class>() || value->Is<ConstructedClass>()) << value;
-}
-
+ClassType::ClassType(int id, Class* value) : Type(id), value_(*value) {}
 ClassType::~ClassType() = default;
 
 const ast::Node& ClassType::name() const {

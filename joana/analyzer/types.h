@@ -93,12 +93,12 @@ class ClassType final : public Type {
   ~ClassType() final;
 
   const ast::Node& name() const;
-  Value& value() const { return value_; }
+  Class& value() const { return value_; }
 
  private:
-  ClassType(int id, Value* value);
+  ClassType(int id, Class* value);
 
-  Value& value_;
+  Class& value_;
 
   DISALLOW_COPY_AND_ASSIGN(ClassType);
 };

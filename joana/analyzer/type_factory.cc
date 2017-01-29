@@ -87,7 +87,7 @@ class TypeFactory::Cache final {
   }
 
  private:
-  using ClassTypeKey = Value*;
+  using ClassTypeKey = Class*;
   using ClassTypeMap = std::unordered_map<ClassTypeKey, const Type*>;
   using FunctionTypeKey = std::tuple<FunctionTypeKind,
                                      std::vector<const TypeParameter*>,
@@ -161,9 +161,7 @@ int TypeFactory::NextTypeId() {
   return ++current_type_id_;
 }
 
-const Type& TypeFactory::NewClassType(Value* class_value) {
-  DCHECK(class_value->Is<Class>() || class_value->Is<ConstructedClass>())
-      << class_value;
+const Type& TypeFactory::NewClassType(Class* class_value) {
   const auto* present = cache_->Find(class_value);
   if (present)
     return *present;

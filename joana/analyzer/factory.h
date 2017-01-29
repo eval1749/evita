@@ -22,6 +22,7 @@ namespace analyzer {
 class Class;
 enum class ClassKind;
 class Function;
+class GenericClass;
 class Properties;
 class Property;
 class Type;
@@ -44,15 +45,20 @@ class Factory final {
   Property& NewProperty(Visibility visibility, const ast::Node& node);
 
   // Values
-  Class& NewClass(const ast::Node& node,
-                  ClassKind kind,
-                  const std::vector<const TypeParameter*>& parameters,
-                  Properties* properties);
-
-  Value& Factory::NewConstructedClass(Class* generic_class,
-                                      const std::vector<const Type*> arguments);
+  Class& NewConstructedClass(GenericClass* generic_class,
+                             const std::vector<const Type*>& arguments);
 
   Function& NewFunction(const ast::Node& node);
+
+  Class& NewGenericClass(const ast::Node& node,
+                         ClassKind kind,
+                         const std::vector<const TypeParameter*>& parameters,
+                         Properties* properties);
+
+  Class& NewNormalClass(const ast::Node& node,
+                        ClassKind kind,
+                        Properties* properties);
+
   Value& NewOrdinaryObject(const ast::Node& node);
   Properties& NewProperties(const ast::Node& node);
   Value& NewUndefined(const ast::Node& node);

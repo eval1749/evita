@@ -28,19 +28,6 @@
 namespace joana {
 namespace analyzer {
 
-namespace {
-
-bool IsClass(const Value& value) {
-  if (value.Is<Class>())
-    return value.As<Class>().kind() == ClassKind::Class;
-  if (value.Is<ConstructedClass>())
-    return IsClass(value.As<ConstructedClass>());
-  NOTREACHED() << "Expect Class or ConstructedClass " << value;
-  return false;
-}
-
-}  // namespace
-
 //
 // TypeResolver
 //
@@ -53,17 +40,17 @@ void TypeResolver::RunOn(const ast::Node& node) {
 }
 
 // private
-std::vector<Value*> TypeResolver::ComputeClassHeritage(
+std::vector<Class*> TypeResolver::ComputeClassHeritage(
     const Annotation& annotation,
     const ast::Node& node) {
-  const auto is_class = IsClass(context().ValueOf(node));
-  std::vector<std::pair<const ast::Node*, Value*>> references;
-  std::vector<Value*> class_list;
+  const auto is_class = context().ValueOf(node).As<Class>().is_class();
+  std::vector<std::pair<const ast::Node*, Class*>> references;
+  std::vector<Class*> class_list;
   if (node.Is<ast::Class>()) {
     const auto& reference = ast::Class::HeritageOf(node);
     if (!reference.Is<ast::ElisionExpression>()) {
       auto* class_value = ResolveClass(reference);
-      if (class_value && IsClass(*class_value)) {
+      if (class_value && class_value->is_class()) {
         references.emplace_back(&reference, class_value);
         class_list.emplace_back(class_value);
       } else {
@@ -74,13 +61,13 @@ std::vector<Value*> TypeResolver::ComputeClassHeritage(
   for (const auto& extends_tag : annotation.extends_tags()) {
     const auto& reference = extends_tag->child_at(1);
     auto* const class_value = ResolveClass(reference);
-    if (!class_value || is_class != IsClass(*class_value)) {
+    if (!class_value || is_class != class_value->is_class()) {
       AddError(reference, ErrorCode::TYPE_RESOLVER_EXPECT_CLASS);
       continue;
     }
     const auto& it =
         std::find_if(references.begin(), references.end(),
-                     [&](const std::pair<const ast::Node*, Value*>& present) {
+                     [&](const std::pair<const ast::Node*, Class*>& present) {
                        return present.second == class_value;
                      });
     if (it != references.end()) {
@@ -102,13 +89,13 @@ std::vector<Value*> TypeResolver::ComputeClassHeritage(
   for (const auto& implements_tag : annotation.implements_tags()) {
     const auto& reference = implements_tag->child_at(1);
     auto* const class_value = ResolveClass(reference);
-    if (!class_value || IsClass(*class_value)) {
+    if (!class_value || class_value->is_class()) {
       AddError(*implements_tag, ErrorCode::TYPE_RESOLVER_EXPECT_INTERFACE);
       continue;
     }
     const auto& it =
         std::find_if(references.begin(), references.end(),
-                     [&](const std::pair<const ast::Node*, Value*>& present) {
+                     [&](const std::pair<const ast::Node*, Class*>& present) {
                        return present.second == class_value;
                      });
     if (it != references.end()) {
@@ -237,7 +224,7 @@ void TypeResolver::RegisterType(const ast::Node& node, const Type& type) {
   context().RegisterType(node, type);
 }
 
-Value* TypeResolver::ResolveClass(const ast::Node& node) {
+Class* TypeResolver::ResolveClass(const ast::Node& node) {
   if (node.Is<ast::TypeName>()) {
     const auto* type = context().TryTypeOf(node);
     if (!type || !type->Is<ClassType>())
@@ -247,8 +234,8 @@ Value* TypeResolver::ResolveClass(const ast::Node& node) {
   auto* value = context().TryValueOf(node);
   if (!value)
     return nullptr;
-  if (value->Is<Class>() || value->Is<ConstructedClass>())
-    return value;
+  if (value->Is<Class>())
+    return &value->As<Class>();
   if (!value->Is<Variable>())
     return nullptr;
   const auto& variable = value->As<Variable>();
@@ -256,13 +243,9 @@ Value* TypeResolver::ResolveClass(const ast::Node& node) {
     return nullptr;
   const auto& assignment = *variable.assignments().front();
   auto* assignment_value = context().TryValueOf(assignment);
-  if (!assignment_value)
+  if (!assignment_value || !assignment_value->Is<Class>())
     return nullptr;
-  if (assignment_value->Is<Class>())
-    return assignment_value;
-  if (assignment_value->Is<ConstructedClass>())
-    return assignment_value;
-  return nullptr;
+  return &assignment_value->As<Class>();
 }
 
 Value* TypeResolver::SingleVariableValueOf(const ast::Node& node) const {

@@ -29,6 +29,15 @@
 namespace joana {
 namespace analyzer {
 
+namespace {
+
+bool IsMemberExpression(const ast::Node& node) {
+  return node == ast::SyntaxCode::MemberExpression ||
+         node == ast::SyntaxCode::ComputedMemberExpression;
+}
+
+}  // namespace
+
 //
 // TypeResolver
 //
@@ -152,21 +161,21 @@ void TypeResolver::ProcessArrayBinding(const ast::Node& node,
 void TypeResolver::ProcessAnnotation(const ast::Node& node,
                                      const Annotation& annotation,
                                      const Type* maybe_this_type) {
-  const auto* const type = ComputeType(annotation, node, maybe_this_type);
-  if (!type)
-    return;
-  RegisterType(node, *type);
+  RegisterTypeIfPossible(node, annotation, maybe_this_type);
 }
 
-void TypeResolver::ProcessAssignment(const ast::Node& node,
+void TypeResolver::ProcessAssignment(const ast::Node& lhs,
+                                     const ast::Node* maybe_rhs,
                                      const Annotation& annotation) {
-  DCHECK_EQ(node, ast::SyntaxCode::AssignmentExpression);
-  const auto& lhs = ast::AssignmentExpression::LeftHandSideOf(node);
-  const auto* const class_type = ComputeClassType(lhs);
-  const auto* const type = ComputeType(annotation, node, class_type);
-  if (!type)
+  auto* const value = SingleValueOf(lhs);
+  if (value && value->Is<Class>()) {
+    auto& class_value = value->As<Class>();
+    SetClassHeritage(&class_value, annotation, lhs);
+    const auto& class_type = type_factory().NewClassType(&class_value);
+    RegisterTypeIfPossible(lhs, annotation, &class_type);
     return;
-  RegisterType(lhs, *type);
+  }
+  RegisterTypeIfPossible(lhs, annotation, nullptr);
 }
 
 void TypeResolver::ProcessBinding(const ast::Node& node, const Type& type) {
@@ -212,29 +221,36 @@ void TypeResolver::ProcessObjectBinding(const ast::Node& node,
   NOTREACHED() << "NYI ProcessObjectBinding" << node << ' ' << type;
 }
 
+void TypeResolver::ProcessPropertyAssignment(const ast::Node& lhs,
+                                             const ast::Node* maybe_rhs,
+                                             const Annotation& annotation) {
+  DCHECK(IsMemberExpression(lhs));
+  ProcessAssignment(lhs, maybe_rhs, annotation);
+}
+
 void TypeResolver::ProcessVariableDeclaration(const ast::Node& node,
                                               const Annotation& annotation) {
   for (const auto& binding : ast::NodeTraversal::ChildNodesOf(node)) {
-    auto* const value = SingleVariableValueOf(binding);
-    if (value && value->Is<Class>()) {
-      auto& class_value = value->As<Class>();
-      SetClassHeritage(&class_value, annotation, binding);
-      const auto& class_type = type_factory().NewClassType(&class_value);
-      const auto* type = ComputeType(annotation, binding, &class_type);
-      if (!type)
-        continue;
-      RegisterType(binding, *type);
+    if (binding.Is<ast::BindingNameElement>()) {
+      const auto& initializer = ast::BindingNameElement::InitializerOf(binding);
+      ProcessAssignment(binding, &initializer, annotation);
       continue;
     }
-    const auto* type = ComputeType(annotation, binding, nullptr);
-    if (!type)
-      continue;
-    RegisterType(binding, *type);
+    RegisterTypeIfPossible(node, annotation, nullptr);
   }
 }
 
 void TypeResolver::RegisterType(const ast::Node& node, const Type& type) {
   context().RegisterType(node, type);
+}
+
+void TypeResolver::RegisterTypeIfPossible(const ast::Node& node,
+                                          const Annotation& annotation,
+                                          const Type* maybe_this_type) {
+  const auto* type = ComputeType(annotation, node, maybe_this_type);
+  if (!type)
+    return;
+  RegisterType(node, *type);
 }
 
 Class* TypeResolver::ResolveClass(const ast::Node& node) {
@@ -268,13 +284,19 @@ Class* TypeResolver::ResolveClass(const ast::Node& node) {
   return &assignment_value->As<Class>();
 }
 
-Value* TypeResolver::SingleVariableValueOf(const ast::Node& node) const {
-  const auto& variable = context().ValueOf(node).As<Variable>();
-  if (variable.assignments().size() != 1)
+// Returns value associated to |node|.
+Value* TypeResolver::SingleValueOf(const ast::Node& node) const {
+  DCHECK(IsMemberExpression(node) || node.Is<ast::BindingNameElement>())
+      << node;
+  auto* value = context().TryValueOf(node);
+  if (!value || !value->Is<ValueHolder>())
     return nullptr;
-  const auto& assignment = *variable.assignments().front();
+  const auto& holder = value->As<ValueHolder>();
+  if (holder.assignments().size() != 1)
+    return nullptr;
+  const auto& assignment = *holder.assignments().front();
   if (assignment.Is<ast::JsDocDocument>())
-    return &context().ValueOf(assignment);
+    return context().TryValueOf(assignment);
   if (assignment.Is<ast::BindingNameElement>()) {
     return context().TryValueOf(
         ast::BindingNameElement::InitializerOf(assignment));
@@ -305,8 +327,15 @@ void TypeResolver::VisitInternal(const ast::Annotation& syntax,
   if (!annotated.Is<ast::ExpressionStatement>())
     return;
   const auto& expression = ast::ExpressionStatement::ExpressionOf(annotated);
-  if (expression.Is<ast::AssignmentExpression>())
-    return ProcessAssignment(expression, annotation);
+  if (expression.Is<ast::AssignmentExpression>()) {
+    const auto& lhs = ast::AssignmentExpression::LeftHandSideOf(expression);
+    const auto& rhs = ast::AssignmentExpression::RightHandSideOf(expression);
+    if (!IsMemberExpression(lhs))
+      return;
+    ProcessPropertyAssignment(lhs, &rhs, annotation);
+  }
+  if (IsMemberExpression(expression))
+    return ProcessPropertyAssignment(expression, nullptr, annotation);
   const auto* const class_type = ComputeClassType(expression);
   return ProcessAnnotation(expression, annotation, class_type);
 }

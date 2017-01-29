@@ -148,6 +148,40 @@ TEST_F(TypeResolverTest, BaseClass) {
       RunOn("/** @interface */ var Foo;\n"
             "/** @interface */ var Bar;\n"
             "/** @implements {Foo} @implements {Bar} */ class Baz {}"));
+  EXPECT_EQ(
+      "Module\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@constructor|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--VarStatement\n"
+      "|  |  +--BindingNameElement VarVar[Foo@1001] "
+      "{function(new:Foo@1001):Foo@1001}\n"
+      "|  |  |  +--Name |Foo|\n"
+      "|  |  |  +--ElisionExpression || Class[Foo@1002]\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument Class@1005\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@constructor|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@extends|\n"
+      "|  |  |  +--TypeName {Foo@1001}\n"
+      "|  |  |  |  +--Name |Foo|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--ExpressionStatement\n"
+      "|  |  +--MemberExpression PublicProperty[Bar@1004] "
+      "{function(new:Foo@1002):Foo@1002}\n"
+      "|  |  |  +--ReferenceExpression VarVar[Foo@1001]\n"
+      "|  |  |  |  +--Name |Foo|\n"
+      "|  |  |  +--Name |Bar|\n"
+      "Class@1005\n"
+      "+--BaseClasses\n"
+      "|   +--Class[Foo@1002]\n",
+      RunOn("/** @constructor */ var Foo;\n"
+            "/** @constructor @extends {Foo} */ Foo.Bar;"));
 }
 
 TEST_F(TypeResolverTest, BaseClassError) {

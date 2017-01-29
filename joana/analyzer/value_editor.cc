@@ -19,8 +19,9 @@ namespace {
 bool IsValidAssignment(const ast::Node& node) {
   return node.Is<ast::AssignmentExpression>() ||
          node.Is<ast::BindingNameElement>() || node.Is<ast::Class>() ||
+         node.Is<ast::ComputedMemberExpression>() ||
          node.Is<ast::JsDocDocument>() || node.Is<ast::Function>() ||
-         node.Is<ast::Method>() ||
+         node.Is<ast::Method>() || node.Is<ast::MemberExpression>() ||
          node == BuiltInWorld::GetInstance()->NameOf(ast::TokenKind::Global);
 }
 

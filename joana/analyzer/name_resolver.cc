@@ -314,11 +314,14 @@ void NameResolver::ProcessAssignment(const ast::Node& lhs,
           ProcessTypeParameterNames(annotation.type_parameter_names());
       auto& class_value =
           NewClass(lhs, annotation.class_kind(), type_parameters);
-      if (!maybe_rhs && maybe_rhs->Is<ast::ElisionExpression>())
+      if (maybe_rhs && !maybe_rhs->Is<ast::ElisionExpression>())
         AddError(lhs, ErrorCode::ENVIRONMENT_INVALID_CONSTRUCTOR);
-      if (maybe_rhs)
-        context().RegisterValue(*maybe_rhs, &class_value);
-      BindType(name, type_factory().NewClassType(&class_value));
+      context().RegisterValue(maybe_rhs ? *maybe_rhs : annotation.document(),
+                              &class_value);
+      const auto& class_type = type_factory().NewClassType(&class_value);
+      if (!lhs.Is<ast::BindingNameElement>())
+        return;
+      BindType(name, class_type);
       return;
     }
     case Annotation::Kind::Define:
@@ -335,6 +338,8 @@ void NameResolver::ProcessAssignment(const ast::Node& lhs,
         AddError(lhs, ErrorCode::ENVIRONMENT_UNEXPECT_INITIALIZER);
       const auto& type =
           type_factory().NewTypeAlias(name, annotation.kind_tag()->child_at(1));
+      if (!lhs.Is<ast::BindingNameElement>())
+        return;
       BindType(name, type);
       return;
     }

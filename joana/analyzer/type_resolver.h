@@ -43,16 +43,30 @@ class TypeResolver final : public Pass, public ast::SyntaxVisitor {
                          const Annotation& annotation,
                          const Type* maybe_this_type);
   void ProcessArrayBinding(const ast::Node& node, const Type& type);
-  void ProcessAssignment(const ast::Node& node, const Annotation& annotation);
+
+  void ProcessAssignment(const ast::Node& lhs,
+                         const ast::Node* maybe_rhs,
+                         const Annotation& annotation);
+
   void ProcessBinding(const ast::Node& node, const Type& type);
   void ProcessClass(const ast::Node& node, const Annotation& annotation);
   void ProcessFunction(const ast::Node& node, const Annotation& annotation);
   void ProcessObjectBinding(const ast::Node& node, const Type& type);
+
+  void ProcessPropertyAssignment(const ast::Node& lhs,
+                                 const ast::Node* maybe_rhs,
+                                 const Annotation& annotation);
+
   void ProcessVariableDeclaration(const ast::Node& node,
                                   const Annotation& annotation);
   void RegisterType(const ast::Node& node, const Type& type);
+
+  void RegisterTypeIfPossible(const ast::Node& node,
+                              const Annotation& annotation,
+                              const Type* maybe_this_type);
+
   Class* ResolveClass(const ast::Node& node);
-  Value* SingleVariableValueOf(const ast::Node& node) const;
+  Value* SingleValueOf(const ast::Node& node) const;
 
   // |ast::SyntaxVisitor| members
   void VisitDefault(const ast::Node& node) final;

@@ -62,8 +62,9 @@ class NameResolver final : public Pass, public ast::SyntaxVisitor {
 
   Property& GetOrNewProperty(Properties* properties, const ast::Node& node);
 
-  Class& NewClass(const ast::Node& node,
-                  ClassKind kind,
+  Class& NewClass(ClassKind kind,
+                  const ast::Node& name,
+                  const ast::Node& node,
                   const std::vector<const TypeParameter*>& parameters,
                   Properties* properties = nullptr);
 

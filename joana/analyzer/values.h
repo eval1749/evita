@@ -102,17 +102,20 @@ class Class : public Object {
   auto base_classes() const { return ReferenceRangeOf(base_classes_); }
   bool is_class() const { return kind_ == ClassKind::Class; }
   ClassKind kind() const { return kind_; }
+  const ast::Node& name() const { return name_; }
 
  protected:
   Class(Zone* zone,
         int id,
-        const ast::Node& node,
         ClassKind kind,
+        const ast::Node& name,
+        const ast::Node& node,
         Properties* properties);
 
  private:
   ZoneVector<Value*> base_classes_;
   const ClassKind kind_;
+  const ast::Node& name_;
 
   DISALLOW_COPY_AND_ASSIGN(Class);
 };
@@ -181,9 +184,16 @@ class Function final : public Object {
  public:
   ~Function() final;
 
+  const ast::Node& name() const { return name_; }
+
  private:
   // |properties| is used for holding members of anonymous class
-  Function(int id, const ast::Node& node, Properties* properties);
+  Function(int id,
+           const ast::Node& name,
+           const ast::Node& node,
+           Properties* properties);
+
+  const ast::Node& name_;
 
   DISALLOW_COPY_AND_ASSIGN(Function);
 };
@@ -204,8 +214,9 @@ class GenericClass : public Class {
  private:
   GenericClass(Zone* zone,
                int id,
-               const ast::Node& node,
                ClassKind kind,
+               const ast::Node& name,
+               const ast::Node& node,
                const std::vector<const TypeParameter*>& parameters,
                Properties* properties);
 
@@ -228,8 +239,9 @@ class NormalClass : public Class {
  private:
   NormalClass(Zone* zone,
               int id,
-              const ast::Node& node,
               ClassKind kind,
+              const ast::Node& name,
+              const ast::Node& node,
               Properties* properties);
 
   DISALLOW_COPY_AND_ASSIGN(NormalClass);
@@ -312,6 +324,8 @@ class Variable final : public ValueHolder {
 
   DISALLOW_COPY_AND_ASSIGN(Variable);
 };
+
+bool CanBeValueName(const ast::Node& node);
 
 }  // namespace analyzer
 }  // namespace joana

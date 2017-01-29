@@ -17,10 +17,16 @@ namespace analyzer {
 //
 Class::Class(Zone* zone,
              int id,
-             const ast::Node& node,
              ClassKind kind,
+             const ast::Node& name,
+             const ast::Node& node,
              Properties* properties)
-    : Object(id, node, properties), base_classes_(zone), kind_(kind) {}
+    : Object(id, node, properties),
+      base_classes_(zone),
+      kind_(kind),
+      name_(name) {
+  DCHECK(CanBeValueName(name));
+}
 
 Class::~Class() = default;
 
@@ -33,8 +39,9 @@ ConstructedClass::ConstructedClass(Zone* zone,
                                    const std::vector<const Type*>& arguments)
     : Class(zone,
             id,
-            generic_class->node(),
             generic_class->kind(),
+            generic_class->name(),
+            generic_class->node(),
             &generic_class->properties()),
       generic_class_(*generic_class),
       number_of_arguments_(arguments.size()) {
@@ -57,8 +64,13 @@ BlockRange<const Type*> ConstructedClass::arguments() const {
 //
 // Function
 //
-Function::Function(int id, const ast::Node& node, Properties* properties)
-    : Object(id, node, properties) {}
+Function::Function(int id,
+                   const ast::Node& name,
+                   const ast::Node& node,
+                   Properties* properties)
+    : Object(id, node, properties), name_(name) {
+  DCHECK(CanBeValueName(name)) << name;
+}
 
 Function::~Function() = default;
 
@@ -67,11 +79,12 @@ Function::~Function() = default;
 //
 GenericClass::GenericClass(Zone* zone,
                            int id,
-                           const ast::Node& node,
                            ClassKind kind,
+                           const ast::Node& name,
+                           const ast::Node& node,
                            const std::vector<const TypeParameter*>& parameters,
                            Properties* properties)
-    : Class(zone, id, node, kind, properties),
+    : Class(zone, id, kind, name, node, properties),
       number_of_parameters_(parameters.size()) {
   DCHECK_GE(parameters.size(), static_cast<size_t>(1));
   auto* runner = parameters_;
@@ -92,10 +105,11 @@ BlockRange<const TypeParameter*> GenericClass::parameters() const {
 //
 NormalClass::NormalClass(Zone* zone,
                          int id,
-                         const ast::Node& node,
                          ClassKind kind,
+                         const ast::Node& name,
+                         const ast::Node& node,
                          Properties* properties)
-    : Class(zone, id, node, kind, properties) {}
+    : Class(zone, id, kind, name, node, properties) {}
 
 NormalClass::~NormalClass() = default;
 
@@ -161,6 +175,12 @@ Variable::Variable(Zone* zone,
 }
 
 Variable::~Variable() = default;
+
+bool CanBeValueName(const ast::Node& node) {
+  return node.Is<ast::Name>() || node.Is<ast::Empty>() ||
+         node.Is<ast::MemberExpression>() ||
+         node.Is<ast::ComputedMemberExpression>();
+}
 
 }  // namespace analyzer
 }  // namespace joana

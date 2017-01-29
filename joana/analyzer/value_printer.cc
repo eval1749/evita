@@ -20,21 +20,11 @@ namespace analyzer {
 namespace {
 
 const ast::Node* ValueNameOf(const Value& value) {
+  if (value.Is<Function>())
+    return &value.As<Function>().name();
   const auto& node = value.node();
-  if (value.Is<Class>()) {
-    const auto& name = node.child_at(0);
-    return name.Is<ast::Name>() ? &name : nullptr;
-  }
-  if (value.Is<Function>()) {
-    if (node.Is<ast::Function>()) {
-      const auto& name = ast::Function::NameOf(node);
-      return name.Is<ast::Name>() ? &name : nullptr;
-    }
-    if (node.Is<ast::Method>()) {
-      return &ast::Method::NameOf(node);
-    }
-    return nullptr;
-  }
+  if (value.Is<Class>())
+    return &value.As<Class>().name();
   if (value.Is<Property>())
     return &node;
   if (value.Is<Variable>())
@@ -52,7 +42,7 @@ struct NamedValue {
 std::ostream& operator<<(std::ostream& ostream, const NamedValue& named) {
   const auto& value = *named.value;
   const auto* name = ValueNameOf(value);
-  if (!name)
+  if (!name || !CanBeValueName(*name))
     return ostream << '@' << value.id();
   return ostream << '[' << ast::AsSourceCode(*name) << '@' << value.id() << ']';
 }

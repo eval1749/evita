@@ -83,26 +83,29 @@ Class& Factory::NewConstructedClass(GenericClass* generic_class,
   return new_value;
 }
 
-Function& Factory::NewFunction(const ast::Node& node) {
+Function& Factory::NewFunction(const ast::Node& name, const ast::Node& node) {
+  DCHECK(CanBeValueName(name)) << name;
   auto& properties = NewProperties(node);
-  return *new (&zone_) Function(NextValueId(), node, &properties);
+  return *new (&zone_) Function(NextValueId(), name, node, &properties);
 }
 
 Class& Factory::NewGenericClass(
-    const ast::Node& node,
     ClassKind kind,
+    const ast::Node& name,
+    const ast::Node& node,
     const std::vector<const TypeParameter*>& parameters,
     Properties* properties) {
   const auto size = SizeOf<GenericClass>(parameters.size());
-  return *new (zone_.Allocate(size))
-      GenericClass(&zone_, NextValueId(), node, kind, parameters, properties);
+  return *new (zone_.Allocate(size)) GenericClass(
+      &zone_, NextValueId(), kind, name, node, parameters, properties);
 }
 
-Class& Factory::NewNormalClass(const ast::Node& node,
-                               ClassKind kind,
+Class& Factory::NewNormalClass(ClassKind kind,
+                               const ast::Node& name,
+                               const ast::Node& node,
                                Properties* properties) {
   return *new (&zone_)
-      NormalClass(&zone_, NextValueId(), node, kind, properties);
+      NormalClass(&zone_, NextValueId(), kind, name, node, properties);
 }
 
 Value& Factory::NewOrdinaryObject(const ast::Node& node) {

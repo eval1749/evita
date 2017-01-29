@@ -48,15 +48,17 @@ class Factory final {
   Class& NewConstructedClass(GenericClass* generic_class,
                              const std::vector<const Type*>& arguments);
 
-  Function& NewFunction(const ast::Node& node);
+  Function& NewFunction(const ast::Node& name, const ast::Node& node);
 
-  Class& NewGenericClass(const ast::Node& node,
-                         ClassKind kind,
+  Class& NewGenericClass(ClassKind kind,
+                         const ast::Node& name,
+                         const ast::Node& node,
                          const std::vector<const TypeParameter*>& parameters,
                          Properties* properties);
 
-  Class& NewNormalClass(const ast::Node& node,
-                        ClassKind kind,
+  Class& NewNormalClass(ClassKind kind,
+                        const ast::Node& name,
+                        const ast::Node& node,
                         Properties* properties);
 
   Value& NewOrdinaryObject(const ast::Node& node);

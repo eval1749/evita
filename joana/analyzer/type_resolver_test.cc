@@ -162,7 +162,7 @@ TEST_F(TypeResolverTest, BaseClass) {
       "|  |  |  +--Name |Foo|\n"
       "|  |  |  +--ElisionExpression || Class[Foo@1002]\n"
       "+--Annotation\n"
-      "|  +--JsDocDocument Class@1005\n"
+      "|  +--JsDocDocument Class[Bar@1005]\n"
       "|  |  +--JsDocText |/**|\n"
       "|  |  +--JsDocTag\n"
       "|  |  |  +--Name |@constructor|\n"
@@ -177,7 +177,7 @@ TEST_F(TypeResolverTest, BaseClass) {
       "|  |  |  +--ReferenceExpression VarVar[Foo@1001]\n"
       "|  |  |  |  +--Name |Foo|\n"
       "|  |  |  +--Name |Bar|\n"
-      "Class@1005\n"
+      "Class[Bar@1005]\n"
       "+--BaseClasses\n"
       "|   +--Class[Foo@1002]\n",
       RunOn("/** @constructor */ var Foo;\n"
@@ -285,7 +285,7 @@ TEST_F(TypeResolverTest, Constructor) {
       "|  |  +--BindingNameElement VarVar[Foo@1001] "
       "{function(new:%anonymous%@1001):%anonymous%@1001}\n"
       "|  |  |  +--Name |Foo|\n"
-      "|  |  |  +--Function<Normal> Class@1003\n"
+      "|  |  |  +--Function<Normal> Class[Foo@1003]\n"
       "|  |  |  |  +--Empty ||\n"
       "|  |  |  |  +--ParameterList |()|\n"
       "|  |  |  |  +--BlockStatement |{}|\n",
@@ -536,7 +536,7 @@ TEST_F(TypeResolverTest, OptionalType) {
       "|  +--VarStatement\n"
       "|  |  +--BindingNameElement VarVar[foo@1001] {function(%number%)}\n"
       "|  |  |  +--Name |foo|\n"
-      "|  |  |  +--ElisionExpression || Function@1003\n",
+      "|  |  |  +--ElisionExpression || Function[foo@1003]\n",
       RunOn("/** @param {number=} opt_x */ var foo"));
 }
 
@@ -801,7 +801,7 @@ TEST_F(TypeResolverTest, VarFunction) {
       "|  +--VarStatement\n"
       "|  |  +--BindingNameElement VarVar[foo@1001] {function(%number%)}\n"
       "|  |  |  +--Name |foo|\n"
-      "|  |  |  +--ElisionExpression || Function@1003\n",
+      "|  |  |  +--ElisionExpression || Function[foo@1003]\n",
       RunOn("/** @param {number} x */ var foo;"));
   EXPECT_EQ(
       "Module\n"
@@ -816,7 +816,7 @@ TEST_F(TypeResolverTest, VarFunction) {
       "|  +--VarStatement\n"
       "|  |  +--BindingNameElement VarVar[foo@1001] {function():%number%}\n"
       "|  |  |  +--Name |foo|\n"
-      "|  |  |  +--ElisionExpression || Function@1002\n",
+      "|  |  |  +--ElisionExpression || Function[foo@1002]\n",
       RunOn("/** @return {number} x */ var foo;"));
 }
 

@@ -35,8 +35,9 @@ class Properties final : public ZoneAllocated {
   Property* TryGet(const ast::Node& key) const;
 
  private:
-  friend class NameResolver;
   friend class Factory;
+  friend class NameResolver;
+  friend class TypeResolverTest;
 
   Properties(Zone* zone, const ast::Node& node);
 

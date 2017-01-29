@@ -13,6 +13,7 @@
 namespace joana {
 namespace analyzer {
 
+class Annotation;
 class Type;
 class Value;
 
@@ -28,19 +29,19 @@ class TypeResolver final : public Pass, public ast::SyntaxVisitor {
 
  private:
   const Type* ComputeClassType(const ast::Node& node) const;
-  const Type* ComputeType(const ast::Node& document,
+  const Type* ComputeType(const Annotation& annotation,
                           const ast::Node& node,
                           const Type* maybe_this_type);
 
-  void ProcessAnnotation(const ast::Node& document,
-                         const ast::Node& node,
+  void ProcessAnnotation(const ast::Node& node,
+                         const Annotation& annotation,
                          const Type* maybe_this_type);
   void ProcessArrayBinding(const ast::Node& node, const Type& type);
-  void ProcessAssignment(const ast::Node& node, const ast::Node& document);
+  void ProcessAssignment(const ast::Node& node, const Annotation& annotation);
   void ProcessBinding(const ast::Node& node, const Type& type);
   void ProcessObjectBinding(const ast::Node& node, const Type& type);
   void ProcessVariableDeclaration(const ast::Node& node,
-                                  const ast::Node& document);
+                                  const Annotation& annotation);
   void RegisterType(const ast::Node& node, const Type& type);
   Value* SingleVariableValueOf(const ast::Node& node) const;
 

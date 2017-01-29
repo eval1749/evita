@@ -5,6 +5,7 @@
 #include "joana/analyzer/types.h"
 
 #include "joana/analyzer/values.h"
+#include "joana/ast/bindings.h"
 #include "joana/ast/expressions.h"
 #include "joana/ast/tokens.h"
 #include "joana/ast/types.h"
@@ -25,7 +26,14 @@ ClassType::ClassType(int id, Class* value) : Type(id), value_(*value) {}
 ClassType::~ClassType() = default;
 
 const ast::Node& ClassType::name() const {
-  return value_.node().child_at(0);
+  const auto& node = value_.node().child_at(0);
+  if (node.Is<ast::Name>())
+    return node;
+  if (node.Is<ast::ReferenceExpression>())
+    return ast::ReferenceExpression::NameOf(node);
+  if (node.Is<ast::BindingNameElement>())
+    return ast::BindingNameElement::NameOf(node);
+  return node;
 }
 
 //

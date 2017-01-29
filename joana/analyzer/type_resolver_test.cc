@@ -291,6 +291,39 @@ TEST_F(TypeResolverTest, ConstructorBaseClass) {
       "|   +--Class[Foo@1002]\n",
       RunOn("/** @constructor */ var Foo;\n"
             "/** @constructor @extends {Foo} */ function Bar() {}"));
+  EXPECT_EQ(
+      "Module\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@constructor|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--VarStatement\n"
+      "|  |  +--BindingNameElement VarVar[Foo@1001] {function(new:class "
+      "Foo@1001):class Foo@1001}\n"
+      "|  |  |  +--Name |Foo|\n"
+      "|  |  |  +--ElisionExpression || Class[Foo@1002]\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@constructor|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@extends|\n"
+      "|  |  |  +--TypeName {class Foo@1001}\n"
+      "|  |  |  |  +--Name |Foo|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--VarStatement\n"
+      "|  |  +--BindingNameElement VarVar[Bar@1004] {function(new:class "
+      "Bar@1002):class Bar@1002}\n"
+      "|  |  |  +--Name |Bar|\n"
+      "|  |  |  +--ElisionExpression || Class[Bar@1005]\n"
+      "Class[Bar@1005]\n"
+      "+--BaseClasses\n"
+      "|   +--Class[Foo@1002]\n",
+      RunOn("/** @constructor */ var Foo;\n"
+            "/** @constructor @extends {Foo} */ var Bar;"));
 }
 
 TEST_F(TypeResolverTest, Function) {
@@ -654,7 +687,10 @@ TEST_F(TypeResolverTest, TypeApplication) {
       "|  |  +--BindingNameElement VarVar[Bar@1004] "
       "{function(new:class Bar@1004):class Bar@1004}\n"
       "|  |  |  +--Name |Bar|\n"
-      "|  |  |  +--ElisionExpression || Class[Bar@1005]\n",
+      "|  |  |  +--ElisionExpression || Class[Bar@1005]\n"
+      "Class[Bar@1005]\n"
+      "+--BaseClasses\n"
+      "|   +--ConstructedInterface<%number%>[Foo@1007]\n",
       RunOn("/** @interface @template T */ var Foo;"
             "/** @constructor @implements {Foo<number>} */ var Bar;"));
 }

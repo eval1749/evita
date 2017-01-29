@@ -13,6 +13,7 @@
 #include "joana/analyzer/error_codes.h"
 #include "joana/analyzer/type_annotation_transformer.h"
 #include "joana/analyzer/type_factory.h"
+#include "joana/analyzer/type_transformer.h"
 #include "joana/analyzer/types.h"
 #include "joana/analyzer/value_editor.h"
 #include "joana/analyzer/values.h"
@@ -40,10 +41,10 @@ void TypeResolver::RunOn(const ast::Node& node) {
 }
 
 // private
-std::vector<Class*> TypeResolver::ComputeClassHeritage(
-    const Annotation& annotation,
-    const ast::Node& node) {
-  const auto is_class = context().ValueOf(node).As<Class>().is_class();
+void TypeResolver::SetClassHeritage(Class* class_value,
+                                    const Annotation& annotation,
+                                    const ast::Node& node) {
+  const auto is_class = class_value->is_class();
   std::vector<std::pair<const ast::Node*, Class*>> references;
   std::vector<Class*> class_list;
   if (node.Is<ast::Class>()) {
@@ -112,7 +113,7 @@ std::vector<Class*> TypeResolver::ComputeClassHeritage(
     class_list.emplace_back(class_value);
   }
   DCHECK_EQ(class_list.size(), references.size());
-  return class_list;
+  Value::Editor().SetClassHeritage(class_value, class_list);
 }
 
 const Type* TypeResolver::ComputeClassType(const ast::Node& node) const {
@@ -181,8 +182,7 @@ void TypeResolver::ProcessBinding(const ast::Node& node, const Type& type) {
 void TypeResolver::ProcessClass(const ast::Node& node,
                                 const Annotation& annotation) {
   auto& class_value = context().ValueOf(node).As<Class>();
-  Value::Editor().SetClassHeritage(&class_value,
-                                   ComputeClassHeritage(annotation, node));
+  SetClassHeritage(&class_value, annotation, node);
   const auto& class_type = type_factory().NewClassType(&class_value);
   for (const auto& child :
        ast::NodeTraversal::ChildNodesOf(ast::Class::BodyOf(node))) {
@@ -204,8 +204,7 @@ void TypeResolver::ProcessFunction(const ast::Node& node,
   auto* const class_value = context().ValueOf(node).TryAs<Class>();
   if (!class_value)
     return ProcessAnnotation(node, annotation, nullptr);
-  Value::Editor().SetClassHeritage(class_value,
-                                   ComputeClassHeritage(annotation, node));
+  SetClassHeritage(class_value, annotation, node);
 }
 
 void TypeResolver::ProcessObjectBinding(const ast::Node& node,
@@ -217,11 +216,17 @@ void TypeResolver::ProcessVariableDeclaration(const ast::Node& node,
                                               const Annotation& annotation) {
   for (const auto& binding : ast::NodeTraversal::ChildNodesOf(node)) {
     auto* const value = SingleVariableValueOf(binding);
-    const auto* class_type =
-        value && value->Is<Class>()
-            ? &type_factory().NewClassType(&value->As<Class>())
-            : nullptr;
-    const auto* type = ComputeType(annotation, binding, class_type);
+    if (value && value->Is<Class>()) {
+      auto& class_value = value->As<Class>();
+      SetClassHeritage(&class_value, annotation, binding);
+      const auto& class_type = type_factory().NewClassType(&class_value);
+      const auto* type = ComputeType(annotation, binding, &class_type);
+      if (!type)
+        continue;
+      RegisterType(binding, *type);
+      continue;
+    }
+    const auto* type = ComputeType(annotation, binding, nullptr);
     if (!type)
       continue;
     RegisterType(binding, *type);
@@ -234,10 +239,17 @@ void TypeResolver::RegisterType(const ast::Node& node, const Type& type) {
 
 Class* TypeResolver::ResolveClass(const ast::Node& node) {
   if (node.Is<ast::TypeName>()) {
-    const auto* type = context().TryTypeOf(node);
+    auto* type = context().TryTypeOf(node);
     if (!type || !type->Is<ClassType>())
       return nullptr;
     return &type->As<ClassType>().value();
+  }
+  if (node.Is<ast::TypeApplication>()) {
+    const auto& type =
+        TypeTransformer(&context()).TransformTypeApplication(node);
+    if (!type.Is<ClassType>())
+      return nullptr;
+    return &type.As<ClassType>().value();
   }
   auto* value = context().TryValueOf(node);
   if (!value)

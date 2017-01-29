@@ -31,8 +31,9 @@ class TypeResolver final : public Pass, public ast::SyntaxVisitor {
   void RunOn(const ast::Node& node) final;
 
  private:
-  std::vector<Class*> ComputeClassHeritage(const Annotation& annotation,
-                                           const ast::Node& node);
+  void SetClassHeritage(Class* class_value,
+                        const Annotation& annotation,
+                        const ast::Node& node);
   const Type* ComputeClassType(const ast::Node& node) const;
   const Type* ComputeType(const Annotation& annotation,
                           const ast::Node& node,

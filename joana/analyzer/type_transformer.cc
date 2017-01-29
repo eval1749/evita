@@ -99,8 +99,12 @@ const Type& TypeTransformer::Transform(const ast::Node& node) {
       types.push_back(&Transform(member));
     return type_factory().NewTupleTypeFromVector(types);
   }
-  if (node.Is<ast::TypeApplication>())
-    return TransformTypeApplication(node);
+  if (node.Is<ast::TypeApplication>()) {
+    const auto& type = TransformTypeApplication(node);
+    if (!type.Is<ClassType>())
+      return type;
+    return NewNullableType(type);
+  }
   if (node.Is<ast::TypeName>())
     return TransformTypeName(node);
   if (node.Is<ast::TypeGroup>())
@@ -242,18 +246,14 @@ const Type& TypeTransformer::TransformTypeApplication(const ast::Node& node) {
     AddError(node, ErrorCode::JSDOC_EXPECT_GENERIC_CLASS);
     return unspecified_type();
   }
-  auto& class_value = generic_type.As<ClassType>().value();
-  if (!class_value.Is<Class>()) {
-    AddError(node, ErrorCode::JSDOC_EXPECT_GENERIC_CLASS);
-    return unspecified_type();
-  }
-  auto& generic_class_value = class_value.As<GenericClass>();
-  if (generic_class_value.parameters().empty()) {
+  auto* const generic_class_value =
+      generic_type.As<ClassType>().value().TryAs<GenericClass>();
+  if (!generic_class_value) {
     AddError(node, ErrorCode::JSDOC_EXPECT_GENERIC_CLASS);
     return unspecified_type();
   }
   const auto& arguments_node = ast::TypeApplication::ArgumentsOf(node);
-  if (arguments_node.arity() != generic_class_value.parameters().size()) {
+  if (arguments_node.arity() != generic_class_value->parameters().size()) {
     AddError(node, ErrorCode::JSDOC_INVALID_ARGUMENTS);
     return unspecified_type();
   }
@@ -261,8 +261,8 @@ const Type& TypeTransformer::TransformTypeApplication(const ast::Node& node) {
   for (const auto& argument_node :
        ast::NodeTraversal::ChildNodesOf(arguments_node))
     arguments.push_back(&Transform(argument_node));
-  auto& value = factory().NewConstructedClass(&generic_class_value, arguments);
-  return NewNullableType(type_factory().NewClassType(&value));
+  auto& value = factory().NewConstructedClass(generic_class_value, arguments);
+  return type_factory().NewClassType(&value);
 }
 
 const Type& TypeTransformer::TransformTypeName(const ast::Node& node) {

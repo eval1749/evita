@@ -36,25 +36,6 @@ namespace analyzer {
 
 namespace {
 
-bool IsValidClassReference(const ast::Node& reference) {
-  return reference.Is<ast::ReferenceExpression>() ||
-         reference.Is<ast::TypeApplication>() || reference.Is<ast::TypeName>();
-}
-
-const ast::Node* FindHeritage(const Context& context,
-                              const ast::Node& reference,
-                              const std::vector<const ast::Node*> presents) {
-  DCHECK(IsValidClassReference(reference)) << reference;
-  auto* value = context.TryValueOf(reference);
-  if (!value)
-    return nullptr;
-  for (const auto& present : presents) {
-    if (value == context.TryValueOf(*present))
-      return present;
-  }
-  return nullptr;
-}
-
 bool IsMemberExpression(const ast::Node& node) {
   return node == ast::SyntaxCode::MemberExpression ||
          node == ast::SyntaxCode::ComputedMemberExpression;
@@ -272,51 +253,6 @@ Variable& NameResolver::BindVariable(VariableKind kind, const ast::Node& name) {
   return variable;
 }
 
-std::vector<const ast::Node*> NameResolver::ComputeClassHeritage(
-    ClassKind class_kind,
-    const ast::Node& node,
-    const Annotation& annotation) {
-  std::vector<const ast::Node*> base_classes;
-  if (node.Is<ast::Class>()) {
-    const auto& heritage = ast::Class::HeritageOf(node);
-    if (!heritage.Is<ast::ElisionExpression>()) {
-      if (IsValidClassReference(heritage))
-        base_classes.push_back(&heritage);
-      else
-        AddError(heritage, ErrorCode::ENVIRONMENT_EXPECT_CLASS);
-    }
-  }
-  for (const auto& extends_tag : annotation.extends_tags()) {
-    const auto& reference = extends_tag->child_at(1);
-    if (!IsValidClassReference(reference)) {
-      AddError(reference, ErrorCode::ENVIRONMENT_EXPECT_CLASS);
-      continue;
-    }
-    if (const auto* present =
-            FindHeritage(context(), reference, base_classes)) {
-      AddError(reference, ErrorCode::ENVIRONMENT_MULTIPLE_OCCURRENCES,
-               *present);
-      continue;
-    }
-    base_classes.push_back(&reference);
-  }
-  for (const auto& implements_tag : annotation.implements_tags()) {
-    const auto& reference = implements_tag->child_at(1);
-    if (!IsValidClassReference(reference)) {
-      AddError(reference, ErrorCode::ENVIRONMENT_EXPECT_CLASS);
-      continue;
-    }
-    if (const auto* present =
-            FindHeritage(context(), reference, base_classes)) {
-      AddError(reference, ErrorCode::ENVIRONMENT_MULTIPLE_OCCURRENCES,
-               *present);
-      continue;
-    }
-    base_classes.push_back(&reference);
-  }
-  return std::move(base_classes);
-}
-
 Variable* NameResolver::FindVariable(const ast::Node& name) const {
   DCHECK_EQ(name, ast::SyntaxCode::Name);
   for (auto* runner = environment_; runner; runner = runner->outer()) {
@@ -337,12 +273,10 @@ Class& NameResolver::NewClass(
     const ast::Node& node,
     ClassKind kind,
     const std::vector<const TypeParameter*>& parameters,
-    const std::vector<const ast::Node*>& class_heritage,
     Properties* passed_properties) {
   auto& properties =
       passed_properties ? *passed_properties : factory().NewProperties(node);
-  auto& class_value =
-      factory().NewClass(node, kind, parameters, class_heritage, &properties);
+  auto& class_value = factory().NewClass(node, kind, parameters, &properties);
   const auto& prototype_name =
       BuiltInWorld::GetInstance()->NameOf(ast::TokenKind::Prototype);
   if (properties.TryGet(prototype_name))
@@ -373,11 +307,8 @@ void NameResolver::ProcessAssignment(const ast::Node& lhs,
     case Annotation::Kind::Interface: {
       const auto& type_parameters =
           ProcessTypeParameterNames(annotation.type_parameter_names());
-      const auto class_kind = annotation.class_kind();
-      const auto& class_heritage =
-          ComputeClassHeritage(class_kind, lhs, annotation);
       auto& class_value =
-          NewClass(lhs, class_kind, type_parameters, class_heritage);
+          NewClass(lhs, annotation.class_kind(), type_parameters);
       if (!maybe_rhs && maybe_rhs->Is<ast::ElisionExpression>())
         AddError(lhs, ErrorCode::ENVIRONMENT_INVALID_CONSTRUCTOR);
       if (maybe_rhs)
@@ -419,13 +350,11 @@ void NameResolver::ProcessClass(const ast::Node& node,
   auto* const variable = class_name.Is<ast::Name>()
                              ? &BindVariable(VariableKind::Class, class_name)
                              : nullptr;
-  const auto class_kind = annotation.class_kind();
-  const auto& class_heritage =
-      ComputeClassHeritage(class_kind, node, annotation);
   auto& class_properties =
       variable ? variable->properties() : factory().NewProperties(node);
-  auto& class_value = NewClass(node, class_kind, type_parameters,
-                               class_heritage, &class_properties);
+
+  auto& class_value = NewClass(node, annotation.class_kind(), type_parameters,
+                               &class_properties);
   context().RegisterValue(node, &class_value);
   if (maybe_alias)
     BindType(*maybe_alias, type_factory().NewClassType(&class_value));
@@ -518,12 +447,8 @@ void NameResolver::ProcessFunction(const ast::Node& node,
                              : nullptr;
 
   if (annotation.is_constructor() || annotation.is_interface()) {
-    const auto class_kind = annotation.class_kind();
-    const auto& class_heritage =
-        ComputeClassHeritage(class_kind, node, annotation);
-    auto& class_value =
-        NewClass(node, class_kind, type_parameters, class_heritage,
-                 variable ? &variable->properties() : nullptr);
+    auto& class_value = NewClass(node, annotation.class_kind(), type_parameters,
+                                 variable ? &variable->properties() : nullptr);
     context().RegisterValue(node, &class_value);
     if (maybe_alias)
       BindType(*maybe_alias, type_factory().NewClassType(&class_value));

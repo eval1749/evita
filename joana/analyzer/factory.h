@@ -47,7 +47,6 @@ class Factory final {
   Class& NewClass(const ast::Node& node,
                   ClassKind kind,
                   const std::vector<const TypeParameter*>& parameters,
-                  const std::vector<const ast::Node*>& class_heritage,
                   Properties* properties);
 
   Value& Factory::NewConstructedClass(Class* generic_class,

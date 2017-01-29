@@ -180,7 +180,6 @@ void TypeResolver::ProcessBinding(const ast::Node& node, const Type& type) {
 
 void TypeResolver::ProcessClass(const ast::Node& node,
                                 const Annotation& annotation) {
-  Visit(ast::Class::HeritageOf(node));
   auto& class_value = context().ValueOf(node).As<Class>();
   Value::Editor().SetClassHeritage(&class_value,
                                    ComputeClassHeritage(annotation, node));

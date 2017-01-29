@@ -200,6 +200,15 @@ void TypeResolver::ProcessClass(const ast::Node& node,
   }
 }
 
+void TypeResolver::ProcessFunction(const ast::Node& node,
+                                   const Annotation& annotation) {
+  auto* const class_value = context().ValueOf(node).TryAs<Class>();
+  if (!class_value)
+    return ProcessAnnotation(node, annotation, nullptr);
+  Value::Editor().SetClassHeritage(class_value,
+                                   ComputeClassHeritage(annotation, node));
+}
+
 void TypeResolver::ProcessObjectBinding(const ast::Node& node,
                                         const Type& type) {
   NOTREACHED() << "NYI ProcessObjectBinding" << node << ' ' << type;
@@ -277,7 +286,7 @@ void TypeResolver::VisitInternal(const ast::Annotation& syntax,
   if (annotated.Is<ast::Class>())
     return ProcessClass(annotated, annotation);
   if (annotated.Is<ast::Function>())
-    return ProcessAnnotation(annotated, annotation, nullptr);
+    return ProcessFunction(annotated, annotation);
   if (annotated.Is<ast::GroupExpression>())
     return ProcessAnnotation(annotated, annotation, nullptr);
   if (annotated.syntax().Is<ast::VariableDeclaration>())

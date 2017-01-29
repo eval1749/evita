@@ -45,6 +45,7 @@ class TypeResolver final : public Pass, public ast::SyntaxVisitor {
   void ProcessAssignment(const ast::Node& node, const Annotation& annotation);
   void ProcessBinding(const ast::Node& node, const Type& type);
   void ProcessClass(const ast::Node& node, const Annotation& annotation);
+  void ProcessFunction(const ast::Node& node, const Annotation& annotation);
   void ProcessObjectBinding(const ast::Node& node, const Type& type);
   void ProcessVariableDeclaration(const ast::Node& node,
                                   const Annotation& annotation);

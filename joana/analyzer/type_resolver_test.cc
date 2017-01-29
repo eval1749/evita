@@ -258,6 +258,41 @@ TEST_F(TypeResolverTest, Constructor) {
       RunOn("/** @constructor */ var Foo = function() {};"));
 }
 
+TEST_F(TypeResolverTest, ConstructorBaseClass) {
+  EXPECT_EQ(
+      "Module\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@constructor|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--VarStatement\n"
+      "|  |  +--BindingNameElement VarVar[Foo@1001] {function(new:class "
+      "Foo@1001):class Foo@1001}\n"
+      "|  |  |  +--Name |Foo|\n"
+      "|  |  |  +--ElisionExpression || Class[Foo@1002]\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@constructor|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@extends|\n"
+      "|  |  |  +--TypeName {class Foo@1001}\n"
+      "|  |  |  |  +--Name |Foo|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--Function<Normal> Class[Bar@1006]\n"
+      "|  |  +--Name |Bar|\n"
+      "|  |  +--ParameterList |()|\n"
+      "|  |  +--BlockStatement |{}|\n"
+      "Class[Bar@1006]\n"
+      "+--BaseClasses\n"
+      "|   +--Class[Foo@1002]\n",
+      RunOn("/** @constructor */ var Foo;\n"
+            "/** @constructor @extends {Foo} */ function Bar() {}"));
+}
+
 TEST_F(TypeResolverTest, Function) {
   EXPECT_EQ(
       "Module\n"

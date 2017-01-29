@@ -106,22 +106,15 @@ void TypeResolver::ProcessVariableDeclaration(const ast::Node& node,
                                               const Annotation& annotation) {
   for (const auto& binding : ast::NodeTraversal::ChildNodesOf(node)) {
     auto* const value = SingleVariableValueOf(binding);
-    if (value && value->Is<Class>()) {
-      const auto& class_type = type_factory().NewClassType(&value->As<Class>());
-      const auto* type = ComputeType(annotation, binding, &class_type);
-      if (!type)
-        return AddError(binding, ErrorCode::TYPE_RESOLVER_EXPECT_CLASS_TYPE);
-      if (!type->Is<ClassType>() && !type->Is<FunctionType>())
-        AddError(binding, ErrorCode::TYPE_RESOLVER_EXPECT_CLASS_TYPE);
-      RegisterType(binding, *type);
-      return;
-    }
+    const auto* class_type =
+        value && value->Is<Class>()
+            ? &type_factory().NewClassType(&value->As<Class>())
+            : nullptr;
+    const auto* type = ComputeType(annotation, binding, class_type);
+    if (!type)
+      continue;
+    RegisterType(binding, *type);
   }
-  const auto* type = ComputeType(annotation, node, nullptr);
-  if (!type)
-    return;
-  for (const auto& binding : ast::NodeTraversal::ChildNodesOf(node))
-    ProcessBinding(binding, *type);
 }
 
 void TypeResolver::RegisterType(const ast::Node& node, const Type& type) {

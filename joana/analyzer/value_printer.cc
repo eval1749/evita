@@ -43,6 +43,21 @@ const ast::Node* ValueNameOf(const Value& value) {
 }
 
 //
+// NamedValue
+//
+struct NamedValue {
+  const Value* value;
+};
+
+std::ostream& operator<<(std::ostream& ostream, const NamedValue& named) {
+  const auto& value = *named.value;
+  const auto* name = ValueNameOf(value);
+  if (!name)
+    return ostream << '@' << value.id();
+  return ostream << '[' << ast::AsSourceCode(*name) << '@' << value.id() << ']';
+}
+
+//
 // Printable
 //
 template <typename T>
@@ -58,7 +73,7 @@ Printable<Value> AsPrintable(const Value& value) {
 std::ostream& operator<<(std::ostream& ostream,
                          const Printable<ConstructedClass>& printable) {
   const auto& value = *printable.value;
-  ostream << value.kind();
+  ostream << "Constructed" << value.kind();
   const auto* delimiter = "<";
   for (const auto& argument : value.arguments()) {
     ostream << delimiter << argument;
@@ -66,25 +81,19 @@ std::ostream& operator<<(std::ostream& ostream,
   }
   if (*delimiter == ',')
     ostream << '>';
-  return ostream << '@' << value.id() << ']';
+  return ostream << NamedValue{&value};
 }
 
 std::ostream& operator<<(std::ostream& ostream,
                          const Printable<Function>& printable) {
   const auto& value = *printable.value;
-  ostream << "Function";
-  const auto* name = ValueNameOf(value);
-  if (!name)
-    return ostream << '@' << value.id();
-  return ostream << '[' << ast::AsSourceCode(*name) << '@' << value.id() << ']';
+  return ostream << "Function" << NamedValue{&value};
 }
 
 std::ostream& operator<<(std::ostream& ostream,
                          const Printable<GenericClass>& printable) {
   const auto& value = *printable.value;
-  ostream << value.kind() << '[';
-  if (const auto* name = ValueNameOf(value))
-    ostream << ast::AsSourceCode(*name);
+  ostream << "Generic" << value.kind();
   const auto* delimiter = "<";
   for (const auto& parameter : value.parameters()) {
     ostream << delimiter << ast::AsSourceCode(parameter.name());
@@ -92,30 +101,26 @@ std::ostream& operator<<(std::ostream& ostream,
   }
   if (*delimiter == ',')
     ostream << '>';
-  return ostream << '@' << value.id() << ']';
+  return ostream << NamedValue{&value};
 }
 
 std::ostream& operator<<(std::ostream& ostream,
                          const Printable<NormalClass>& printable) {
   const auto& value = *printable.value;
-  ostream << value.kind() << '[';
-  if (const auto* name = ValueNameOf(value))
-    ostream << ast::AsSourceCode(*name);
-  else
-    ostream << "%anonymous%";
-  return ostream << '@' << value.id() << ']';
+  return ostream << value.kind() << NamedValue{&value};
 }
 
 std::ostream& operator<<(std::ostream& ostream,
                          const Printable<OrdinaryObject>& printable) {
   const auto& value = *printable.value;
-  return ostream << "$OrdinaryObject@" << value.id() << ' ' << value.node();
+  return ostream << value.class_name() << '@' << value.id() << ' '
+                 << value.node();
 }
 
 std::ostream& operator<<(std::ostream& ostream,
                          const Printable<Property>& printable) {
   const auto& value = *printable.value;
-  return ostream << value.visibility() << "Property["
+  return ostream << value.visibility() << value.class_name() << '['
                  << ast::AsSourceCode(value.key()) << '@' << value.id() << ']';
 }
 

@@ -251,7 +251,7 @@ TEST_F(TypeResolverTest, Constructor) {
       "|  |  +--BindingNameElement VarVar[Foo@1001] "
       "{function(new:class@1001):class@1001}\n"
       "|  |  |  +--Name |Foo|\n"
-      "|  |  |  +--Function<Normal> Class[%anonymous%@1003]\n"
+      "|  |  |  +--Function<Normal> Class@1003\n"
       "|  |  |  |  +--Empty ||\n"
       "|  |  |  |  +--ParameterList |()|\n"
       "|  |  |  |  +--BlockStatement |{}|\n",
@@ -600,7 +600,7 @@ TEST_F(TypeResolverTest, TypeApplication) {
       "|  +--VarStatement\n"
       "|  |  +--BindingNameElement VarVar[Foo@1001] {class Foo<T>@1003}\n"
       "|  |  |  +--Name |Foo|\n"
-      "|  |  |  +--ElisionExpression || Interface[Foo<T>@1002]\n"
+      "|  |  |  +--ElisionExpression || GenericInterface<T>[Foo@1002]\n"
       "+--Annotation\n"
       "|  +--JsDocDocument\n"
       "|  |  +--JsDocText |/**|\n"

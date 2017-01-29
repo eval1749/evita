@@ -316,8 +316,10 @@ void NameResolver::ProcessAssignment(const ast::Node& lhs,
           NewClass(lhs, annotation.class_kind(), type_parameters);
       if (maybe_rhs && !maybe_rhs->Is<ast::ElisionExpression>())
         AddError(lhs, ErrorCode::ENVIRONMENT_INVALID_CONSTRUCTOR);
-      context().RegisterValue(maybe_rhs ? *maybe_rhs : annotation.document(),
-                              &class_value);
+      if (!maybe_rhs)
+        context().RegisterValue(annotation.document(), &class_value);
+      else if (maybe_rhs->Is<ast::ElisionExpression>())
+        context().RegisterValue(*maybe_rhs, &class_value);
       const auto& class_type = type_factory().NewClassType(&class_value);
       if (!lhs.Is<ast::BindingNameElement>())
         return;
@@ -326,13 +328,25 @@ void NameResolver::ProcessAssignment(const ast::Node& lhs,
     }
     case Annotation::Kind::Define:
     case Annotation::Kind::Dict:
-    case Annotation::Kind::Function:
     case Annotation::Kind::None:
     case Annotation::Kind::Type:
       return;
     case Annotation::Kind::Enum:
       DVLOG(0) << "NYI @enum";
       return;
+    case Annotation::Kind::Function: {
+      if (!maybe_rhs) {
+        auto& function = factory().NewFunction(annotation.document());
+        context().RegisterValue(annotation.document(), &function);
+        return;
+      }
+      if (maybe_rhs->Is<ast::ElisionExpression>()) {
+        auto& function = factory().NewFunction(annotation.document());
+        context().RegisterValue(*maybe_rhs, &function);
+        return;
+      }
+      return;
+    }
     case Annotation::Kind::TypeDef: {
       if (maybe_rhs && !maybe_rhs->Is<ast::ElisionExpression>())
         AddError(lhs, ErrorCode::ENVIRONMENT_UNEXPECT_INITIALIZER);
@@ -587,8 +601,8 @@ void NameResolver::ProcessVariableDeclaration(VariableKind variable_kind,
                *variable.assignments().front());
       return;
     }
-    const auto& initializer = ast::BindingNameElement::InitializerOf(binding);
-    ProcessAssignment(binding, &initializer, name, annotation);
+    ProcessAssignment(binding, &ast::BindingNameElement::InitializerOf(binding),
+                      name, annotation);
   }
 }
 

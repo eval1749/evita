@@ -530,13 +530,13 @@ TEST_F(TypeResolverTest, OptionalType) {
       "|  |  |  +--OptionalType\n"
       "|  |  |  |  +--TypeName {%number%}\n"
       "|  |  |  |  |  +--Name |number|\n"
-      "|  |  |  +--ReferenceExpression ParameterVar[opt_x@1002] {%number%}\n"
+      "|  |  |  +--ReferenceExpression ParameterVar[opt_x@1002]\n"
       "|  |  |  |  +--Name |opt_x|\n"
       "|  |  |  +--JsDocText |*/|\n"
       "|  +--VarStatement\n"
       "|  |  +--BindingNameElement VarVar[foo@1001] {function(%number%)}\n"
       "|  |  |  +--Name |foo|\n"
-      "|  |  |  +--ElisionExpression ||\n",
+      "|  |  |  +--ElisionExpression || Function@1003\n",
       RunOn("/** @param {number=} opt_x */ var foo"));
 }
 
@@ -795,13 +795,13 @@ TEST_F(TypeResolverTest, VarFunction) {
       "|  |  |  +--Name |@param|\n"
       "|  |  |  +--TypeName {%number%}\n"
       "|  |  |  |  +--Name |number|\n"
-      "|  |  |  +--ReferenceExpression ParameterVar[x@1002] {%number%}\n"
+      "|  |  |  +--ReferenceExpression ParameterVar[x@1002]\n"
       "|  |  |  |  +--Name |x|\n"
       "|  |  |  +--JsDocText |*/|\n"
       "|  +--VarStatement\n"
       "|  |  +--BindingNameElement VarVar[foo@1001] {function(%number%)}\n"
       "|  |  |  +--Name |foo|\n"
-      "|  |  |  +--ElisionExpression ||\n",
+      "|  |  |  +--ElisionExpression || Function@1003\n",
       RunOn("/** @param {number} x */ var foo;"));
   EXPECT_EQ(
       "Module\n"
@@ -816,7 +816,7 @@ TEST_F(TypeResolverTest, VarFunction) {
       "|  +--VarStatement\n"
       "|  |  +--BindingNameElement VarVar[foo@1001] {function():%number%}\n"
       "|  |  |  +--Name |foo|\n"
-      "|  |  |  +--ElisionExpression ||\n",
+      "|  |  |  +--ElisionExpression || Function@1002\n",
       RunOn("/** @return {number} x */ var foo;"));
 }
 

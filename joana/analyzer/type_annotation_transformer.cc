@@ -456,7 +456,6 @@ TypeAnnotationTransformer::ProcessParameterTags() {
     const auto& reference = parameter_tag->child_at(2);
     if (!reference.Is<ast::ReferenceExpression>())
       continue;
-    context().RegisterType(reference, type);
     const auto& name = ast::ReferenceExpression::NameOf(reference);
     const auto name_id = ast::Name::KindOf(name);
     const auto& it =

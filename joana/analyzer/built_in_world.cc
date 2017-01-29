@@ -28,6 +28,7 @@ const char* const kSourceCode =
     "global\n"
     "null\n"
     "number\n"
+    "Object\n"
     "prototype\n"
     "string\n"
     "symbol\n"

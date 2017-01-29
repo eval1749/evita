@@ -9,8 +9,10 @@
 
 #include "base/logging.h"
 #include "joana/analyzer/annotation_compiler.h"
+#include "joana/analyzer/built_in_world.h"
 #include "joana/analyzer/context.h"
 #include "joana/analyzer/error_codes.h"
+#include "joana/analyzer/properties.h"
 #include "joana/analyzer/type_annotation_transformer.h"
 #include "joana/analyzer/type_factory.h"
 #include "joana/analyzer/type_transformer.h"
@@ -30,6 +32,18 @@ namespace joana {
 namespace analyzer {
 
 namespace {
+
+Class* GetObjectClass(const Context& context) {
+  const auto& object_name =
+      BuiltInWorld::GetInstance()->NameOf(ast::TokenKind::Object);
+  auto* object_property = context.global_properties().TryGet(object_name);
+  if (object_property->assignments().size() != 1)
+    return nullptr;
+  const auto& assignment = *object_property->assignments().front();
+  auto* object_value = context.TryValueOf(assignment);
+  return object_value && object_value->Is<Class>() ? &object_value->As<Class>()
+                                                   : nullptr;
+}
 
 bool IsMemberExpression(const ast::Node& node) {
   return node == ast::SyntaxCode::MemberExpression ||
@@ -68,6 +82,8 @@ void TypeResolver::SetClassHeritage(Class* class_value,
       }
     }
   }
+
+  // Process @extends tags
   for (const auto& extends_tag : annotation.extends_tags()) {
     const auto& reference = extends_tag->child_at(1);
     auto* const class_value = ResolveClass(reference);
@@ -96,6 +112,22 @@ void TypeResolver::SetClassHeritage(Class* class_value,
     references.emplace_back(&reference, class_value);
     class_list.emplace_back(class_value);
   }
+
+  // Install default base class |Object|.
+  if (class_value->is_class() && class_list.empty()) {
+    auto* object_class = GetObjectClass(context());
+    if (object_class) {
+      if (object_class != class_value) {
+        references.emplace_back(&object_class->name(), object_class);
+        class_list.emplace_back(object_class);
+      }
+    } else {
+      AddError(BuiltInWorld::GetInstance()->NameOf(ast::TokenKind::Object),
+               ErrorCode::TYPE_RESOLVER_EXPECT_OBJECT_CLASS);
+    }
+  }
+
+  // Process @implements tags
   for (const auto& implements_tag : annotation.implements_tags()) {
     const auto& reference = implements_tag->child_at(1);
     auto* const class_value = ResolveClass(reference);
@@ -313,7 +345,6 @@ void TypeResolver::VisitDefault(const ast::Node& node) {
 void TypeResolver::VisitInternal(const ast::Annotation& syntax,
                                  const ast::Node& node) {
   const auto& annotated = ast::Annotation::AnnotatedOf(node);
-  Visit(annotated);
   const auto& document = ast::Annotation::DocumentOf(node);
   const auto annotation = Annotation::Compiler().Compile(document, node);
   if (annotated.Is<ast::Class>())
@@ -324,8 +355,10 @@ void TypeResolver::VisitInternal(const ast::Annotation& syntax,
     return ProcessAnnotation(annotated, annotation, nullptr);
   if (annotated.syntax().Is<ast::VariableDeclaration>())
     return ProcessVariableDeclaration(annotated, annotation);
-  if (!annotated.Is<ast::ExpressionStatement>())
+  if (!annotated.Is<ast::ExpressionStatement>()) {
+    Visit(annotated);
     return;
+  }
   const auto& expression = ast::ExpressionStatement::ExpressionOf(annotated);
   if (expression.Is<ast::AssignmentExpression>()) {
     const auto& lhs = ast::AssignmentExpression::LeftHandSideOf(expression);

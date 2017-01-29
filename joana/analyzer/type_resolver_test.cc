@@ -8,20 +8,40 @@
 #include "joana/analyzer/type_resolver.h"
 
 #include "joana/analyzer/analyzer_test_base.h"
+#include "joana/analyzer/built_in_world.h"
 #include "joana/analyzer/context.h"
+#include "joana/analyzer/factory.h"
 #include "joana/analyzer/name_resolver.h"
 #include "joana/analyzer/print_as_tree.h"
+#include "joana/analyzer/properties.h"
 #include "joana/analyzer/type.h"
+#include "joana/analyzer/value_editor.h"
 #include "joana/analyzer/values.h"
 #include "joana/ast/node.h"
 #include "joana/ast/node_traversal.h"
 #include "joana/ast/syntax.h"
+#include "joana/ast/tokens.h"
 #include "joana/base/escaped_string_piece.h"
 #include "joana/parser/public/parse.h"
 #include "joana/testing/simple_error_sink.h"
 
 namespace joana {
 namespace analyzer {
+
+namespace {
+
+bool ShouldPrintBaseClasses(const Class& class_value) {
+  if (class_value.base_classes().empty())
+    return false;
+  if (!class_value.is_class())
+    return true;
+  if (class_value.base_classes().size() != 1)
+    return true;
+  const auto& base_class = *class_value.base_classes().begin();
+  return !base_class.base_classes().empty();
+}
+
+}  // namespace
 
 //
 // TypeResolverTest
@@ -41,6 +61,23 @@ std::string TypeResolverTest::RunOn(base::StringPiece script_text) {
   const auto& module = ParseAsModule(script_text);
   const auto& context = NewContext();
   {
+    const auto& object_name =
+        BuiltInWorld::GetInstance()->NameOf(ast::TokenKind::Object);
+    auto& object_class = context->factory().NewNormalClass(
+        ClassKind::Class, object_name, object_name,
+        &context->factory().NewProperties(object_name));
+    auto& object_variable = context->factory().NewVariable(
+        VariableKind::Const, object_name,
+        &context->factory().NewValueHolderData(),
+        &context->factory().NewProperties(object_name));
+    auto& object_property = context->factory().NewProperty(
+        Visibility::Public, object_name, &object_variable.data(),
+        &object_variable.properties());
+    context->RegisterValue(object_name, &object_class);
+    Value::Editor().AddAssignment(&object_property, object_name);
+    context->global_properties().Add(&object_property);
+  }
+  {
     NameResolver name_resolver(context.get());
     name_resolver.RunOn(module);
   }
@@ -56,7 +93,7 @@ std::string TypeResolverTest::RunOn(base::StringPiece script_text) {
     if (!value || !value->Is<Class>())
       continue;
     const auto& class_value = value->As<Class>();
-    if (class_value.base_classes().empty())
+    if (!ShouldPrintBaseClasses(class_value))
       continue;
     ostream << class_value << std::endl;
     ostream << "+--BaseClasses" << std::endl;
@@ -143,6 +180,7 @@ TEST_F(TypeResolverTest, BaseClass) {
       "|  |  +--ObjectInitializer |{}|\n"
       "Class[Baz@1008]\n"
       "+--BaseClasses\n"
+      "|   +--Class[Object@1]\n"
       "|   +--Interface[Foo@1002]\n"
       "|   +--Interface[Bar@1005]\n",
       RunOn("/** @interface */ var Foo;\n"
@@ -223,6 +261,7 @@ TEST_F(TypeResolverTest, BaseClassError) {
       "|  |  +--ObjectInitializer |{}|\n"
       "Class[Bar@1005]\n"
       "+--BaseClasses\n"
+      "|   +--Class[Object@1]\n"
       "|   +--Interface[A@1002]\n"
       "ANALYZER_ERROR_TYPE_RESOLVER_MULTIPLE_OCCURRENCES@42:60\n",
       RunOn("/** @interface */ var A;\n"
@@ -724,6 +763,7 @@ TEST_F(TypeResolverTest, TypeApplication) {
       "|  |  |  +--ElisionExpression || Class[Bar@1005]\n"
       "Class[Bar@1005]\n"
       "+--BaseClasses\n"
+      "|   +--Class[Object@1]\n"
       "|   +--ConstructedInterface<%number%>[Foo@1007]\n",
       RunOn("/** @interface @template T */ var Foo;"
             "/** @constructor @implements {Foo<number>} */ var Bar;"));

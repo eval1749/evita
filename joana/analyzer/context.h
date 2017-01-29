@@ -25,6 +25,7 @@ namespace analyzer {
 
 enum class ErrorCode;
 class Factory;
+class Properties;
 class Type;
 class TypeFactory;
 class TypeMap;
@@ -41,6 +42,7 @@ class Context final {
 
   ErrorSink& error_sink() const;
   Factory& factory() const { return *factory_; }
+  Properties& global_properties() const { return global_properties_; }
   TypeFactory& type_factory() const { return *type_factory_; }
 
   void AddError(const ast::Node& node,
@@ -63,6 +65,7 @@ class Context final {
   Zone& zone() const;
 
   const std::unique_ptr<Factory> factory_;
+  Properties& global_properties_;
   const AnalyzerSettings& settings_;
   const std::unique_ptr<TypeFactory> type_factory_;
   std::unique_ptr<TypeMap> type_map_;

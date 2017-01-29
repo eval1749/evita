@@ -31,6 +31,8 @@ namespace analyzer {
 //
 Context::Context(const AnalyzerSettings& settings)
     : factory_(new Factory(&settings.zone())),
+      global_properties_(factory_->NewProperties(
+          BuiltInWorld::GetInstance()->NameOf(ast::TokenKind::Global))),
       settings_(settings),
       type_factory_(new TypeFactory(&settings.zone())),
       type_map_(new TypeMap()),

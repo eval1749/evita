@@ -117,20 +117,28 @@ Properties& Factory::NewProperties(const ast::Node& owner) {
   return *new (&zone_) Properties(&zone_, owner);
 }
 
-Property& Factory::NewProperty(Visibility visibility, const ast::Node& key) {
-  auto& properties = NewProperties(key);
+Property& Factory::NewProperty(Visibility visibility,
+                               const ast::Node& key,
+                               ValueHolderData* data,
+                               Properties* properties) {
   return *new (&zone_)
-      Property(&zone_, NextValueId(), visibility, key, &properties);
+      Property(NextValueId(), visibility, key, data, properties);
 }
 
 Value& Factory::NewUndefined(const ast::Node& node) {
   return *new (&zone_) Undefined(NextValueId(), node);
 }
 
-Variable& Factory::NewVariable(VariableKind kind, const ast::Node& name) {
+ValueHolderData& Factory::NewValueHolderData() {
+  return *new (&zone_) ValueHolderData(&zone_);
+}
+
+Variable& Factory::NewVariable(VariableKind kind,
+                               const ast::Node& name,
+                               ValueHolderData* data,
+                               Properties* properties) {
   DCHECK_EQ(name, ast::SyntaxCode::Name);
-  auto& properties = NewProperties(name);
-  return *new (&zone_) Variable(&zone_, NextValueId(), kind, name, &properties);
+  return *new (&zone_) Variable(NextValueId(), kind, name, data, properties);
 }
 
 int Factory::NextValueId() {

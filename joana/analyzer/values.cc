@@ -134,12 +134,12 @@ OrdinaryObject::~OrdinaryObject() = default;
 //
 // Property
 //
-Property::Property(Zone* zone,
-                   int id,
+Property::Property(int id,
                    Visibility visibility,
                    const ast::Node& key,
+                   ValueHolderData* data,
                    Properties* properties)
-    : ValueHolder(zone, id, key, properties), visibility_(visibility) {
+    : ValueHolder(id, key, data, properties), visibility_(visibility) {
   DCHECK(key == ast::SyntaxCode::Name || ast::IsKnownSymbol(key)) << key;
 }
 
@@ -154,23 +154,33 @@ Undefined::~Undefined() = default;
 //
 // ValueHolder
 //
-ValueHolder::ValueHolder(Zone* zone,
-                         int id,
+ValueHolder::ValueHolder(int id,
                          const ast::Node& node,
+                         ValueHolderData* data,
                          Properties* properties)
-    : Object(id, node, properties), assignments_(zone), references_(zone) {}
+    : Object(id, node, properties), data_(*data) {
+  DCHECK(data);
+}
 
 ValueHolder::~ValueHolder() = default;
 
 //
+// ValueHolderData
+//
+ValueHolderData::ValueHolderData(Zone* zone)
+    : assignments_(zone), references_(zone) {}
+
+ValueHolderData::~ValueHolderData() = default;
+
+//
 // Variable
 //
-Variable::Variable(Zone* zone,
-                   int id,
+Variable::Variable(int id,
                    VariableKind kind,
                    const ast::Node& name,
+                   ValueHolderData* data,
                    Properties* properties)
-    : ValueHolder(zone, id, name, properties), kind_(kind) {
+    : ValueHolder(id, name, data, properties), kind_(kind) {
   DCHECK_EQ(name, ast::SyntaxCode::Name);
 }
 

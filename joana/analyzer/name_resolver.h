@@ -34,6 +34,7 @@ class TypeParameter;
 class Value;
 class Variable;
 enum class VariableKind;
+enum class Visibility;
 
 //
 // NameResolver
@@ -67,6 +68,8 @@ class NameResolver final : public Pass, public ast::SyntaxVisitor {
                   const ast::Node& node,
                   const std::vector<const TypeParameter*>& parameters,
                   Properties* properties = nullptr);
+
+  Property& NewProperty(Visibility visibility, const ast::Node& node);
 
   void ProcessAssignment(const ast::Node& lhs,
                          const ast::Node* maybe_rhs,

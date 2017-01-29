@@ -59,6 +59,7 @@ class NameResolver::Environment final {
   explicit Environment(NameResolver* resolver);
   ~Environment();
 
+  bool is_global() const { return !outer_; }
   const Environment* outer() const { return outer_; }
   Environment* outer() { return outer_; }
 
@@ -157,8 +158,14 @@ NameResolver::Environment::NewGlobalEnvironment(NameResolver* resolver) {
   {
     const auto& name =
         BuiltInWorld::GetInstance()->NameOf(ast::TokenKind::Global);
-    auto& variable = resolver->factory().NewVariable(VariableKind::Const, name);
+    auto& data = resolver->factory().NewValueHolderData();
+    auto& properties = resolver->context().global_properties();
+    auto& variable = resolver->factory().NewVariable(VariableKind::Const, name,
+                                                     &data, &properties);
     Value::Editor().AddAssignment(&variable, name);
+    auto& property = resolver->factory().NewProperty(Visibility::Public, name,
+                                                     &data, &properties);
+    properties.Add(&property);
     environment->BindVariable(name, &variable);
   }
   return std::move(environment);
@@ -249,9 +256,16 @@ Variable& NameResolver::BindVariable(VariableKind kind, const ast::Node& name) {
              present->node());
     return *present;
   }
-  // TODO(eval1749): Expose global "var" binding to global object.
-  auto& variable = factory().NewVariable(kind, name);
+  auto& data = factory().NewValueHolderData();
+  auto& properties = factory().NewProperties(name);
+  auto& variable = factory().NewVariable(kind, name, &data, &properties);
   environment_->BindVariable(name, &variable);
+  // TODO(eval1749): Expose global "var" binding to global object.
+  if (!environment_->is_global())
+    return variable;
+  auto& property =
+      factory().NewProperty(Visibility::Public, name, &data, &properties);
+  context().global_properties().Add(&property);
   return variable;
 }
 
@@ -268,7 +282,7 @@ Property& NameResolver::GetOrNewProperty(Properties* properties,
                                          const ast::Node& node) {
   if (auto* present = properties->TryGet(node))
     return *present;
-  return properties->Add(&factory().NewProperty(Visibility::Public, node));
+  return properties->Add(&NewProperty(Visibility::Public, node));
 }
 
 Class& NameResolver::NewClass(
@@ -288,11 +302,17 @@ Class& NameResolver::NewClass(
       BuiltInWorld::GetInstance()->NameOf(ast::TokenKind::Prototype);
   if (properties.TryGet(prototype_name))
     return class_value;
-  auto& prototype_property =
-      factory().NewProperty(Visibility::Public, prototype_name);
+  auto& prototype_property = NewProperty(Visibility::Public, prototype_name);
   Value::Editor().AddAssignment(&prototype_property, node);
   class_value.properties().Add(&prototype_property);
   return class_value;
+}
+
+Property& NameResolver::NewProperty(Visibility visibility,
+                                    const ast::Node& node) {
+  return factory().NewProperty(visibility, node,
+                               &factory().NewValueHolderData(),
+                               &factory().NewProperties(node));
 }
 
 void NameResolver::ProcessAssignment(const ast::Node& lhs,
@@ -436,7 +456,7 @@ void NameResolver::ProcessClass(const ast::Node& node,
                present->node());
       Value::Editor().AddAssignment(present, member);
     } else {
-      auto& property = factory().NewProperty(Visibility::Public, method_name);
+      auto& property = NewProperty(Visibility::Public, method_name);
       properties.Add(&property);
       Value::Editor().AddAssignment(&property, member);
     }
@@ -530,7 +550,7 @@ void NameResolver::ProcessPropertyAssignment(const ast::Node& lhs,
       AddError(lhs, ErrorCode::ENVIRONMENT_MULTIPLE_OCCURRENCES,
                present->node());
     } else {
-      auto& property = factory().NewProperty(annotation.visibility(), key);
+      auto& property = NewProperty(annotation.visibility(), key);
       properties.Add(&property);
       context().RegisterValue(lhs, &property);
       Value::Editor().AddAssignment(
@@ -543,7 +563,7 @@ void NameResolver::ProcessPropertyAssignment(const ast::Node& lhs,
       AddError(lhs, ErrorCode::ENVIRONMENT_MULTIPLE_OCCURRENCES,
                present->node());
     } else {
-      auto& property = factory().NewProperty(annotation.visibility(), key);
+      auto& property = NewProperty(annotation.visibility(), key);
       properties.Add(&property);
       context().RegisterValue(lhs, &property);
       Value::Editor().AddAssignment(

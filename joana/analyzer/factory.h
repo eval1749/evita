@@ -28,6 +28,7 @@ class Property;
 class Type;
 class TypeParameter;
 class Value;
+class ValueHolderData;
 class Variable;
 enum class VariableKind;
 enum class Visibility;
@@ -42,9 +43,6 @@ class Factory final {
   ~Factory();
 
   // Factory members
-  Property& NewProperty(Visibility visibility, const ast::Node& node);
-
-  // Values
   Class& NewConstructedClass(GenericClass* generic_class,
                              const std::vector<const Type*>& arguments);
 
@@ -62,9 +60,22 @@ class Factory final {
                         Properties* properties);
 
   Value& NewOrdinaryObject(const ast::Node& node);
+
   Properties& NewProperties(const ast::Node& node);
+
+  Property& NewProperty(Visibility visibility,
+                        const ast::Node& node,
+                        ValueHolderData* data,
+                        Properties* properties);
+
   Value& NewUndefined(const ast::Node& node);
-  Variable& NewVariable(VariableKind kind, const ast::Node& name);
+
+  ValueHolderData& NewValueHolderData();
+
+  Variable& NewVariable(VariableKind kind,
+                        const ast::Node& name,
+                        ValueHolderData* data,
+                        Properties* properties);
 
   void ResetValueId();
 

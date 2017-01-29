@@ -22,7 +22,8 @@ bool IsValidAssignment(const ast::Node& node) {
          node.Is<ast::ComputedMemberExpression>() ||
          node.Is<ast::JsDocDocument>() || node.Is<ast::Function>() ||
          node.Is<ast::Method>() || node.Is<ast::MemberExpression>() ||
-         node == BuiltInWorld::GetInstance()->NameOf(ast::TokenKind::Global);
+         node == BuiltInWorld::GetInstance()->NameOf(ast::TokenKind::Global) ||
+         node == BuiltInWorld::GetInstance()->NameOf(ast::TokenKind::Object);
 }
 
 }  // namespace
@@ -35,7 +36,7 @@ Value::Editor::~Editor() = default;
 
 void Value::Editor::AddAssignment(ValueHolder* binding, const ast::Node& node) {
   DCHECK(IsValidAssignment(node)) << *binding << ' ' << node;
-  binding->assignments_.push_back(&node);
+  binding->data_.assignments_.push_back(&node);
 }
 
 void Value::Editor::SetClassHeritage(Class* class_value,

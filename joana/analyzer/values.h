@@ -113,11 +113,36 @@ class Class : public Object {
         Properties* properties);
 
  private:
-  ZoneVector<Value*> base_classes_;
+  ZoneVector<Class*> base_classes_;
   const ClassKind kind_;
   const ast::Node& name_;
 
   DISALLOW_COPY_AND_ASSIGN(Class);
+};
+
+//
+// ValueHolderData
+//
+class ValueHolderData final : public ZoneAllocated {
+ public:
+  ~ValueHolderData();
+
+  const ZoneVector<const ast::Node*>& assignments() const {
+    return assignments_;
+  }
+
+  const ZoneVector<const ast::Node*>& references() const { return references_; }
+
+ private:
+  friend class Factory;
+  friend class Value::Editor;
+
+  explicit ValueHolderData(Zone* zone);
+
+  ZoneVector<const ast::Node*> assignments_;
+  ZoneVector<const ast::Node*> references_;
+
+  DISALLOW_COPY_AND_ASSIGN(ValueHolderData);
 };
 
 //
@@ -130,20 +155,24 @@ class ValueHolder : public Object {
   ~ValueHolder() override;
 
   const ZoneVector<const ast::Node*>& assignments() const {
-    return assignments_;
+    return data_.assignments();
   }
 
-  const ZoneVector<const ast::Node*>& references() const { return references_; }
+  const ValueHolderData& data() const { return data_; }
+  ValueHolderData& data() { return data_; }
+
+  const ZoneVector<const ast::Node*>& references() const {
+    return data_.references();
+  }
 
  protected:
-  ValueHolder(Zone* zone,
-              int id,
+  ValueHolder(int id,
               const ast::Node& node,
+              ValueHolderData* data,
               Properties* properties);
 
  private:
-  ZoneVector<const ast::Node*> assignments_;
-  ZoneVector<const ast::Node*> references_;
+  ValueHolderData& data_;
 
   DISALLOW_COPY_AND_ASSIGN(ValueHolder);
 };
@@ -275,10 +304,10 @@ class Property final : public ValueHolder {
   Visibility visibility() const { return visibility_; }
 
  private:
-  Property(Zone* zone,
-           int id,
+  Property(int id,
            Visibility visibility,
            const ast::Node& key,
+           ValueHolderData* data,
            Properties* properties);
 
   const Visibility visibility_;
@@ -314,10 +343,10 @@ class Variable final : public ValueHolder {
 
  private:
   // |name| should be |ast::Name| or |ast::BindingNameElement|.
-  Variable(Zone* zone,
-           int id,
+  Variable(int id,
            VariableKind kind,
            const ast::Node& name,
+           ValueHolderData* data,
            Properties* properties);
 
   const VariableKind kind_;

@@ -10,12 +10,37 @@
 #include "joana/analyzer/types.h"
 #include "joana/analyzer/value_forward.h"
 #include "joana/analyzer/values.h"
-#include "joana/ast/node.h"
+#include "joana/ast/declarations.h"
+#include "joana/ast/node_printer.h"
+#include "joana/ast/tokens.h"
 
 namespace joana {
 namespace analyzer {
 
 namespace {
+
+const ast::Node* ValueNameOf(const Value& value) {
+  const auto& node = value.node();
+  if (value.Is<Class>()) {
+    const auto& name = node.child_at(0);
+    return name.Is<ast::Name>() ? &name : nullptr;
+  }
+  if (value.Is<Function>()) {
+    if (node.Is<ast::Function>()) {
+      const auto& name = ast::Function::NameOf(node);
+      return name.Is<ast::Name>() ? &name : nullptr;
+    }
+    if (node.Is<ast::Method>()) {
+      return &ast::Method::NameOf(node);
+    }
+    return nullptr;
+  }
+  if (value.Is<Property>())
+    return &node;
+  if (value.Is<Variable>())
+    return &node;
+  return nullptr;
+}
 
 //
 // Printable
@@ -33,7 +58,9 @@ Printable<Value> AsPrintable(const Value& value) {
 std::ostream& operator<<(std::ostream& ostream,
                          const Printable<Class>& printable) {
   const auto& value = *printable.value;
-  ostream << '$' << value.kind();
+  ostream << value.kind() << '[';
+  if (const auto* name = ValueNameOf(value))
+    ostream << ast::AsSourceCode(*name);
   const auto* delimiter = "<";
   for (const auto& parameter : value.parameters()) {
     ostream << delimiter << parameter.name();
@@ -41,7 +68,7 @@ std::ostream& operator<<(std::ostream& ostream,
   }
   if (*delimiter == ',')
     ostream << '>';
-  return ostream << '@' << value.id() << ' ' << value.node();
+  return ostream << '@' << value.id() << ']';
 }
 
 std::ostream& operator<<(std::ostream& ostream,

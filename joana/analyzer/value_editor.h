@@ -5,6 +5,8 @@
 #ifndef JOANA_ANALYZER_VALUE_EDITOR_H_
 #define JOANA_ANALYZER_VALUE_EDITOR_H_
 
+#include <vector>
+
 #include "joana/analyzer/value.h"
 
 namespace joana {
@@ -23,6 +25,7 @@ class Value::Editor final {
   ~Editor();
 
   void AddAssignment(ValueHolder* binding, const ast::Node& node);
+  void SetClassHeritage(Class* class_value, const std::vector<Value*>& classes);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(Editor);

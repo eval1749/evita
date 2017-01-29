@@ -126,6 +126,7 @@ class Class : public Object {
  public:
   ~Class() final;
 
+  auto base_classes() const { return ReferenceRangeOf(base_classes_); }
   ClassKind kind() const { return kind_; }
   auto parameters() const { return ReferenceRangeOf(parameters_); }
 
@@ -139,6 +140,7 @@ class Class : public Object {
         Properties* properties);
 
  private:
+  ZoneVector<Value*> base_classes_;
   const ClassKind kind_;
   ZoneVector<const TypeParameter*> parameters_;
 

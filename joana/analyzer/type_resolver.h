@@ -5,6 +5,8 @@
 #ifndef JOANA_ANALYZER_TYPE_RESOLVER_H_
 #define JOANA_ANALYZER_TYPE_RESOLVER_H_
 
+#include <vector>
+
 #include "joana/analyzer/pass.h"
 
 #include "joana/ast/syntax_forward.h"
@@ -14,6 +16,7 @@ namespace joana {
 namespace analyzer {
 
 class Annotation;
+class Class;
 class Type;
 class Value;
 
@@ -28,6 +31,8 @@ class TypeResolver final : public Pass, public ast::SyntaxVisitor {
   void RunOn(const ast::Node& node) final;
 
  private:
+  std::vector<Value*> ComputeClassHeritage(const Annotation& annotation,
+                                           const ast::Node& node);
   const Type* ComputeClassType(const ast::Node& node) const;
   const Type* ComputeType(const Annotation& annotation,
                           const ast::Node& node,
@@ -39,10 +44,12 @@ class TypeResolver final : public Pass, public ast::SyntaxVisitor {
   void ProcessArrayBinding(const ast::Node& node, const Type& type);
   void ProcessAssignment(const ast::Node& node, const Annotation& annotation);
   void ProcessBinding(const ast::Node& node, const Type& type);
+  void ProcessClass(const ast::Node& node, const Annotation& annotation);
   void ProcessObjectBinding(const ast::Node& node, const Type& type);
   void ProcessVariableDeclaration(const ast::Node& node,
                                   const Annotation& annotation);
   void RegisterType(const ast::Node& node, const Type& type);
+  Value* ResolveClass(const ast::Node& node);
   Value* SingleVariableValueOf(const ast::Node& node) const;
 
   // |ast::SyntaxVisitor| members

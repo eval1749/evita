@@ -22,6 +22,7 @@ Class::Class(Zone* zone,
              const std::vector<const TypeParameter*>& parameters,
              Properties* properties)
     : Object(id, node, properties),
+      base_classes_(zone),
       kind_(kind),
       parameters_(zone, parameters) {}
 

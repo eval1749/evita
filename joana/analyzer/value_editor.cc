@@ -37,5 +37,13 @@ void Value::Editor::AddAssignment(ValueHolder* binding, const ast::Node& node) {
   binding->assignments_.push_back(&node);
 }
 
+void Value::Editor::SetClassHeritage(Class* class_value,
+                                     const std::vector<Value*>& classes) {
+  auto& base_classes = class_value->base_classes_;
+  DCHECK(base_classes.empty()) << *class_value;
+  base_classes.reserve(classes.size());
+  base_classes.insert(base_classes.begin(), classes.begin(), classes.end());
+}
+
 }  // namespace analyzer
 }  // namespace joana

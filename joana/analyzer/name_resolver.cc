@@ -374,6 +374,8 @@ void NameResolver::ProcessClass(const ast::Node& node,
   if (annotation.has_document())
     Visit(annotation.document());
 
+  Visit(ast::Class::HeritageOf(node));
+
   // Populate class properties and prototype properties with methods.
   auto& prototype_property = class_value.properties().Get(
       BuiltInWorld::GetInstance()->NameOf(ast::TokenKind::Prototype));

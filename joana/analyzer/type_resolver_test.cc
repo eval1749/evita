@@ -12,7 +12,7 @@
 #include "joana/analyzer/name_resolver.h"
 #include "joana/analyzer/print_as_tree.h"
 #include "joana/analyzer/type.h"
-#include "joana/analyzer/value.h"
+#include "joana/analyzer/values.h"
 #include "joana/ast/node.h"
 #include "joana/ast/node_traversal.h"
 #include "joana/ast/syntax.h"
@@ -50,6 +50,20 @@ std::string TypeResolverTest::RunOn(base::StringPiece script_text) {
   }
   std::ostringstream ostream;
   ostream << AsPrintableTree(*context, module) << std::endl;
+  // Dump class base classes
+  for (const auto& node : ast::NodeTraversal::DescendantsOf(module)) {
+    const auto* value = context->TryValueOf(node);
+    if (!value || !value->Is<Class>())
+      continue;
+    const auto& class_value = value->As<Class>();
+    if (class_value.base_classes().empty())
+      continue;
+    ostream << class_value << std::endl;
+    ostream << "+--BaseClasses" << std::endl;
+    for (const auto& base_class : class_value.base_classes())
+      ostream << "|   +--" << base_class << std::endl;
+  }
+  // Dump errors
   for (const auto& error : error_sink().errors())
     ostream << error << std::endl;
   return ostream.str();
@@ -70,6 +84,144 @@ TEST_F(TypeResolverTest, AnyType) {
       "|  |  |  +--Name |foo|\n"
       "|  |  |  +--ElisionExpression ||\n",
       RunOn("/** @type {*} */ var foo;"));
+}
+
+TEST_F(TypeResolverTest, BaseClass) {
+  EXPECT_EQ(
+      "Module\n"
+      "+--Class Class[Base@1002]\n"
+      "|  +--Name |Base|\n"
+      "|  +--ElisionExpression ||\n"
+      "|  +--ObjectInitializer |{}|\n"
+      "+--Class Class[Derived@1005]\n"
+      "|  +--Name |Derived|\n"
+      "|  +--ReferenceExpression ClassVar[Base@1001]\n"
+      "|  |  +--Name |Base|\n"
+      "|  +--ObjectInitializer |{}|\n"
+      "Class[Derived@1005]\n"
+      "+--BaseClasses\n"
+      "|   +--Class[Base@1002]\n",
+      RunOn("class Base {}\n"
+            "class Derived extends Base {}"));
+  EXPECT_EQ(
+      "Module\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@interface|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--VarStatement\n"
+      "|  |  +--BindingNameElement VarVar[Foo@1001] {class Foo@1001}\n"
+      "|  |  |  +--Name |Foo|\n"
+      "|  |  |  +--ElisionExpression || Interface[Foo@1002]\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@interface|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--VarStatement\n"
+      "|  |  +--BindingNameElement VarVar[Bar@1004] {class Bar@1002}\n"
+      "|  |  |  +--Name |Bar|\n"
+      "|  |  |  +--ElisionExpression || Interface[Bar@1005]\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@implements|\n"
+      "|  |  |  +--TypeName {class Foo@1001}\n"
+      "|  |  |  |  +--Name |Foo|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@implements|\n"
+      "|  |  |  +--TypeName {class Bar@1002}\n"
+      "|  |  |  |  +--Name |Bar|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--Class Class[Baz@1008]\n"
+      "|  |  +--Name |Baz|\n"
+      "|  |  +--ElisionExpression ||\n"
+      "|  |  +--ObjectInitializer |{}|\n"
+      "Class[Baz@1008]\n"
+      "+--BaseClasses\n"
+      "|   +--Interface[Foo@1002]\n"
+      "|   +--Interface[Bar@1005]\n",
+      RunOn("/** @interface */ var Foo;\n"
+            "/** @interface */ var Bar;\n"
+            "/** @implements {Foo} @implements {Bar} */ class Baz {}"));
+}
+
+TEST_F(TypeResolverTest, BaseClassError) {
+  EXPECT_EQ(
+      "Module\n"
+      "+--Class Class[Foo@1002]\n"
+      "|  +--Name |Foo|\n"
+      "|  +--NumericLiteral |1|\n"
+      "|  +--ObjectInitializer |{}|\n"
+      "ANALYZER_ERROR_TYPE_RESOLVER_EXPECT_CLASS@18:19\n",
+      RunOn("class Foo extends 1 {}"));
+  EXPECT_EQ(
+      "Module\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@interface|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--VarStatement\n"
+      "|  |  +--BindingNameElement VarVar[A@1001] {class A@1001}\n"
+      "|  |  |  +--Name |A|\n"
+      "|  |  |  +--ElisionExpression || Interface[A@1002]\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@implements|\n"
+      "|  |  |  +--TypeName {class A@1001}\n"
+      "|  |  |  |  +--Name |A|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@implements|\n"
+      "|  |  |  +--TypeName {class A@1001}\n"
+      "|  |  |  |  +--Name |A|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--Class Class[Bar@1005]\n"
+      "|  |  +--Name |Bar|\n"
+      "|  |  +--ElisionExpression ||\n"
+      "|  |  +--ObjectInitializer |{}|\n"
+      "Class[Bar@1005]\n"
+      "+--BaseClasses\n"
+      "|   +--Interface[A@1002]\n"
+      "ANALYZER_ERROR_TYPE_RESOLVER_MULTIPLE_OCCURRENCES@42:60\n",
+      RunOn("/** @interface */ var A;\n"
+            "/** @implements {A} @implements {A} */ class Bar {}"));
+  EXPECT_EQ(
+      "Module\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@constructor|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--VarStatement\n"
+      "|  |  +--BindingNameElement VarVar[A@1001] {function(new:class "
+      "A@1001):class A@1001}\n"
+      "|  |  |  +--Name |A|\n"
+      "|  |  |  +--ElisionExpression || Class[A@1002]\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@extends|\n"
+      "|  |  |  +--TypeName {class A@1001}\n"
+      "|  |  |  |  +--Name |A|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--Class Class[B@1005]\n"
+      "|  |  +--Name |B|\n"
+      "|  |  +--ElisionExpression ||\n"
+      "|  |  +--ObjectInitializer |{}|\n"
+      "ANALYZER_ERROR_TYPE_RESOLVER_UNEXPECT_EXTENDS@31:57\n",
+      RunOn("/** @constructor */ var A;\n"
+            "/** @extends {A} */ class B {}"))
+      << "class declaration can not have @extends";
 }
 
 TEST_F(TypeResolverTest, Constructor) {

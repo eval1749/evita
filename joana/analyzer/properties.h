@@ -26,6 +26,8 @@ class Property;
 //
 class Properties final : public ZoneAllocated {
  public:
+  class Editor;
+
   ~Properties();
 
   Property& Get(const ast::Node& key) const;
@@ -36,12 +38,8 @@ class Properties final : public ZoneAllocated {
 
  private:
   friend class Factory;
-  friend class NameResolver;
-  friend class TypeResolverTest;
 
   Properties(Zone* zone, const ast::Node& node);
-
-  Property& Add(Property* property);
 
   // TODO(eval1749): We should use another way to handle computed property
   // name.

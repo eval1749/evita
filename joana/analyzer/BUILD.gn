@@ -31,6 +31,8 @@ source_set("analyzer") {
     "print_as_tree.h",
     "properties.cc",
     "properties.h",
+    "properties_editor.cc",
+    "properties_editor.h",
     "type.cc",
     "type.h",
     "type_annotation_transformer.cc",

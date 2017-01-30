@@ -20,19 +20,6 @@ Properties::Properties(Zone* zone, const ast::Node& owner)
 
 Properties::~Properties() = default;
 
-Property& Properties::Add(Property* property) {
-  if (property->key() == ast::SyntaxCode::Name) {
-    const auto& result =
-        name_map_.emplace(ast::Name::IdOf(property->key()), property);
-    DCHECK(result.second);
-    return *property;
-  }
-  const auto& string_key = property->key().range().GetString();
-  const auto& result = computed_name_map_.emplace(string_key, property);
-  DCHECK(result.second);
-  return *property;
-}
-
 Property& Properties::Get(const ast::Node& key) const {
   auto* property = TryGet(key);
   DCHECK(property) << key;

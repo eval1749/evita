@@ -13,7 +13,7 @@
 #include "joana/analyzer/context.h"
 #include "joana/analyzer/error_codes.h"
 #include "joana/analyzer/factory.h"
-#include "joana/analyzer/properties.h"
+#include "joana/analyzer/properties_editor.h"
 #include "joana/analyzer/type_factory.h"
 #include "joana/analyzer/types.h"
 #include "joana/analyzer/value_editor.h"
@@ -165,7 +165,7 @@ NameResolver::Environment::NewGlobalEnvironment(NameResolver* resolver) {
     Value::Editor().AddAssignment(&variable, name);
     auto& property = resolver->factory().NewProperty(Visibility::Public, name,
                                                      &data, &properties);
-    properties.Add(&property);
+    Properties::Editor().Add(&properties, &property);
     environment->BindVariable(name, &variable);
   }
   return std::move(environment);
@@ -265,7 +265,7 @@ Variable& NameResolver::BindVariable(VariableKind kind, const ast::Node& name) {
     return variable;
   auto& property =
       factory().NewProperty(Visibility::Public, name, &data, &properties);
-  context().global_properties().Add(&property);
+  Properties::Editor().Add(&context().global_properties(), &property);
   return variable;
 }
 
@@ -282,7 +282,9 @@ Property& NameResolver::GetOrNewProperty(Properties* properties,
                                          const ast::Node& node) {
   if (auto* present = properties->TryGet(node))
     return *present;
-  return properties->Add(&NewProperty(Visibility::Public, node));
+  auto& property = NewProperty(Visibility::Public, node);
+  Properties::Editor().Add(properties, &property);
+  return property;
 }
 
 Class& NameResolver::NewClass(
@@ -304,7 +306,7 @@ Class& NameResolver::NewClass(
     return class_value;
   auto& prototype_property = NewProperty(Visibility::Public, prototype_name);
   Value::Editor().AddAssignment(&prototype_property, node);
-  class_value.properties().Add(&prototype_property);
+  Properties::Editor().Add(&class_value.properties(), &prototype_property);
   return class_value;
 }
 
@@ -457,7 +459,7 @@ void NameResolver::ProcessClass(const ast::Node& node,
       Value::Editor().AddAssignment(present, member);
     } else {
       auto& property = NewProperty(Visibility::Public, method_name);
-      properties.Add(&property);
+      Properties::Editor().Add(&properties, &property);
       Value::Editor().AddAssignment(&property, member);
     }
 
@@ -551,7 +553,7 @@ void NameResolver::ProcessPropertyAssignment(const ast::Node& lhs,
                present->node());
     } else {
       auto& property = NewProperty(annotation.visibility(), key);
-      properties.Add(&property);
+      Properties::Editor().Add(&properties, &property);
       context().RegisterValue(lhs, &property);
       Value::Editor().AddAssignment(
           &property, maybe_rhs ? *maybe_rhs : annotation.document());
@@ -564,7 +566,7 @@ void NameResolver::ProcessPropertyAssignment(const ast::Node& lhs,
                present->node());
     } else {
       auto& property = NewProperty(annotation.visibility(), key);
-      properties.Add(&property);
+      Properties::Editor().Add(&properties, &property);
       context().RegisterValue(lhs, &property);
       Value::Editor().AddAssignment(
           &property, maybe_rhs ? *maybe_rhs : annotation.document());

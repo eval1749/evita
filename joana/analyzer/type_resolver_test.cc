@@ -13,7 +13,7 @@
 #include "joana/analyzer/factory.h"
 #include "joana/analyzer/name_resolver.h"
 #include "joana/analyzer/print_as_tree.h"
-#include "joana/analyzer/properties.h"
+#include "joana/analyzer/properties_editor.h"
 #include "joana/analyzer/type.h"
 #include "joana/analyzer/value_editor.h"
 #include "joana/analyzer/values.h"
@@ -75,7 +75,7 @@ std::string TypeResolverTest::RunOn(base::StringPiece script_text) {
         &object_variable.properties());
     context->RegisterValue(object_name, &object_class);
     Value::Editor().AddAssignment(&object_property, object_name);
-    context->global_properties().Add(&object_property);
+    Properties::Editor().Add(&context->global_properties(), &object_property);
   }
   {
     NameResolver name_resolver(context.get());

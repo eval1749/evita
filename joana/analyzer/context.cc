@@ -8,6 +8,7 @@
 
 #include "joana/analyzer/built_in_world.h"
 #include "joana/analyzer/factory.h"
+#include "joana/analyzer/properties_editor.h"
 #include "joana/analyzer/public/analyzer_settings.h"
 #include "joana/analyzer/type_factory.h"
 #include "joana/analyzer/type_map.h"
@@ -89,6 +90,35 @@ const Type* Context::TryTypeOf(const ast::Node& node) const {
 
 const Type& Context::TypeOf(const ast::Node& node) const {
   return type_map_->TypeOf(node);
+}
+
+// Global class
+Class& Context::InstallClass(ast::TokenKind name_id) {
+  const auto& object_name = BuiltInWorld::GetInstance()->NameOf(name_id);
+  auto& object_class =
+      factory().NewNormalClass(ClassKind::Class, object_name, object_name,
+                               &factory().NewProperties(object_name));
+  auto& object_variable = factory().NewVariable(
+      VariableKind::Const, object_name, &factory().NewValueHolderData(),
+      &factory().NewProperties(object_name));
+  auto& object_property = factory().NewProperty(Visibility::Public, object_name,
+                                                &object_variable.data(),
+                                                &object_variable.properties());
+  RegisterValue(object_name, &object_class);
+  Value::Editor().AddAssignment(&object_property, object_name);
+  Properties::Editor().Add(&global_properties(), &object_property);
+  return object_class;
+}
+
+Class* Context::TryClassOf(ast::TokenKind name_id) const {
+  const auto& object_name = BuiltInWorld::GetInstance()->NameOf(name_id);
+  auto* object_property = global_properties().TryGet(object_name);
+  if (object_property->assignments().size() != 1)
+    return nullptr;
+  const auto& assignment = *object_property->assignments().front();
+  auto* object_value = TryValueOf(assignment);
+  return object_value && object_value->Is<Class>() ? &object_value->As<Class>()
+                                                   : nullptr;
 }
 
 }  // namespace analyzer

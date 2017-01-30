@@ -75,6 +75,8 @@ class TypeResolver final : public Pass, public ast::SyntaxVisitor {
 
   void VisitInternal(const ast::Class& syntax, const ast::Node& node) final;
 
+  Class* m_object_class = nullptr;
+
   DISALLOW_COPY_AND_ASSIGN(TypeResolver);
 };
 

@@ -33,18 +33,6 @@ namespace analyzer {
 
 namespace {
 
-Class* GetObjectClass(const Context& context) {
-  const auto& object_name =
-      BuiltInWorld::GetInstance()->NameOf(ast::TokenKind::Object);
-  auto* object_property = context.global_properties().TryGet(object_name);
-  if (object_property->assignments().size() != 1)
-    return nullptr;
-  const auto& assignment = *object_property->assignments().front();
-  auto* object_value = context.TryValueOf(assignment);
-  return object_value && object_value->Is<Class>() ? &object_value->As<Class>()
-                                                   : nullptr;
-}
-
 bool IsMemberExpression(const ast::Node& node) {
   return node == ast::SyntaxCode::MemberExpression ||
          node == ast::SyntaxCode::ComputedMemberExpression;
@@ -60,6 +48,15 @@ TypeResolver::~TypeResolver() = default;
 
 // The entry point
 void TypeResolver::RunOn(const ast::Node& node) {
+  if (!m_object_class) {
+    m_object_class = context().TryClassOf(ast::TokenKind::Object);
+    if (!m_object_class) {
+      AddError(BuiltInWorld::GetInstance()->NameOf(ast::TokenKind::Object),
+               ErrorCode::TYPE_RESOLVER_EXPECT_OBJECT_CLASS);
+      m_object_class = &context().InstallClass(ast::TokenKind::Object);
+    }
+  }
+  DCHECK(m_object_class);
   Visit(node);
 }
 
@@ -114,17 +111,10 @@ void TypeResolver::SetClassHeritage(Class* class_value,
   }
 
   // Install default base class |Object|.
-  if (class_value->is_class() && class_list.empty()) {
-    auto* object_class = GetObjectClass(context());
-    if (object_class) {
-      if (object_class != class_value) {
-        references.emplace_back(&object_class->name(), object_class);
-        class_list.emplace_back(object_class);
-      }
-    } else {
-      AddError(BuiltInWorld::GetInstance()->NameOf(ast::TokenKind::Object),
-               ErrorCode::TYPE_RESOLVER_EXPECT_OBJECT_CLASS);
-    }
+  if (class_value->is_class() && class_list.empty() &&
+      class_value != m_object_class) {
+    references.emplace_back(&m_object_class->name(), m_object_class);
+    class_list.emplace_back(m_object_class);
   }
 
   // Process @implements tags

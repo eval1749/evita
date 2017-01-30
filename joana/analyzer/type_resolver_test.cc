@@ -8,7 +8,6 @@
 #include "joana/analyzer/type_resolver.h"
 
 #include "joana/analyzer/analyzer_test_base.h"
-#include "joana/analyzer/built_in_world.h"
 #include "joana/analyzer/context.h"
 #include "joana/analyzer/factory.h"
 #include "joana/analyzer/name_resolver.h"
@@ -60,23 +59,7 @@ class TypeResolverTest : public AnalyzerTestBase {
 std::string TypeResolverTest::RunOn(base::StringPiece script_text) {
   const auto& module = ParseAsModule(script_text);
   const auto& context = NewContext();
-  {
-    const auto& object_name =
-        BuiltInWorld::GetInstance()->NameOf(ast::TokenKind::Object);
-    auto& object_class = context->factory().NewNormalClass(
-        ClassKind::Class, object_name, object_name,
-        &context->factory().NewProperties(object_name));
-    auto& object_variable = context->factory().NewVariable(
-        VariableKind::Const, object_name,
-        &context->factory().NewValueHolderData(),
-        &context->factory().NewProperties(object_name));
-    auto& object_property = context->factory().NewProperty(
-        Visibility::Public, object_name, &object_variable.data(),
-        &object_variable.properties());
-    context->RegisterValue(object_name, &object_class);
-    Value::Editor().AddAssignment(&object_property, object_name);
-    Properties::Editor().Add(&context->global_properties(), &object_property);
-  }
+  context->InstallClass(ast::TokenKind::Object);
   {
     NameResolver name_resolver(context.get());
     name_resolver.RunOn(module);

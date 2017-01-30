@@ -14,6 +14,7 @@ namespace joana {
 
 namespace ast {
 class Node;
+enum class TokenKind;
 }
 
 class AnalyzerSettings;
@@ -23,6 +24,7 @@ class Zone;
 
 namespace analyzer {
 
+class Class;
 enum class ErrorCode;
 class Factory;
 class Properties;
@@ -60,6 +62,10 @@ class Context final {
   // Registration
   void RegisterType(const ast::Node& node, const Type& type);
   void RegisterValue(const ast::Node& node, Value* value);
+
+  // Global object
+  Class& InstallClass(ast::TokenKind name_id);
+  Class* TryClassOf(ast::TokenKind name_id) const;
 
  private:
   Zone& zone() const;

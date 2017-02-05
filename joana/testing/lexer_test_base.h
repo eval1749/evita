@@ -30,6 +30,7 @@ class LexerTestBase : public ::testing::Test {
 
   ast::NodeFactory& node_factory() { return node_factory_; }
   ParserContext& context() { return *context_; }
+  const SimpleErrorSink& error_sink() const { return error_sink_; }
   SimpleErrorSink& error_sink() { return error_sink_; }
   const SourceCode& source_code() const;
   Zone& zone() { return zone_; }

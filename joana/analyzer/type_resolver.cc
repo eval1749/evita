@@ -10,6 +10,7 @@
 #include "base/logging.h"
 #include "joana/analyzer/annotation_compiler.h"
 #include "joana/analyzer/built_in_world.h"
+#include "joana/analyzer/class_tree_builder.h"
 #include "joana/analyzer/context.h"
 #include "joana/analyzer/error_codes.h"
 #include "joana/analyzer/properties.h"
@@ -43,10 +44,21 @@ bool IsMemberExpression(const ast::Node& node) {
 //
 // TypeResolver
 //
-TypeResolver::TypeResolver(Context* context) : Pass(context) {}
+TypeResolver::TypeResolver(Context* context)
+    : Pass(context), class_tree_builder_(new ClassTreeBuilder(context)) {}
+
 TypeResolver::~TypeResolver() = default;
 
 // The entry point
+void TypeResolver::PrepareForTesting() {
+  m_object_class = context().TryClassOf(ast::TokenKind::Object);
+  class_tree_builder_->Process(m_object_class);
+}
+
+void TypeResolver::RunOnAll() {
+  class_tree_builder_->Build();
+}
+
 void TypeResolver::RunOn(const ast::Node& node) {
   if (!m_object_class) {
     m_object_class = context().TryClassOf(ast::TokenKind::Object);
@@ -145,6 +157,7 @@ void TypeResolver::SetClassHeritage(Class* class_value,
   }
   DCHECK_EQ(class_list.size(), references.size());
   Value::Editor().SetClassHeritage(class_value, class_list);
+  class_tree_builder_->Process(class_value);
 }
 
 const Type* TypeResolver::ComputeClassType(const ast::Node& node) const {

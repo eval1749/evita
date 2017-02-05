@@ -5,6 +5,7 @@
 #ifndef JOANA_ANALYZER_TYPE_RESOLVER_H_
 #define JOANA_ANALYZER_TYPE_RESOLVER_H_
 
+#include <memory>
 #include <vector>
 
 #include "joana/analyzer/pass.h"
@@ -17,6 +18,7 @@ namespace analyzer {
 
 class Annotation;
 class Class;
+class ClassTreeBuilder;
 class Type;
 class Value;
 
@@ -28,7 +30,7 @@ class TypeResolver final : public Pass, public ast::SyntaxVisitor {
   explicit TypeResolver(Context* context);
   ~TypeResolver() final;
 
-  void RunOn(const ast::Node& node) final;
+  void PrepareForTesting();
 
  private:
   void SetClassHeritage(Class* class_value,
@@ -68,6 +70,10 @@ class TypeResolver final : public Pass, public ast::SyntaxVisitor {
   Class* ResolveClass(const ast::Node& node);
   Value* SingleValueOf(const ast::Node& node) const;
 
+  // |Pass| members
+  void RunOnAll() final;
+  void RunOn(const ast::Node& node) final;
+
   // |ast::SyntaxVisitor| members
   void VisitDefault(const ast::Node& node) final;
   void VisitInternal(const ast::Annotation& syntax,
@@ -75,6 +81,7 @@ class TypeResolver final : public Pass, public ast::SyntaxVisitor {
 
   void VisitInternal(const ast::Class& syntax, const ast::Node& node) final;
 
+  const std::unique_ptr<ClassTreeBuilder> class_tree_builder_;
   Class* m_object_class = nullptr;
 
   DISALLOW_COPY_AND_ASSIGN(TypeResolver);

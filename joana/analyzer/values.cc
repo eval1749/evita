@@ -31,6 +31,12 @@ Class::Class(Zone* zone,
 
 Class::~Class() = default;
 
+internal::ReferenceRange<ZoneVector<Class*>::const_iterator> Class::class_list()
+    const {
+  DCHECK(is_finalized()) << *this;
+  return ReferenceRangeOf(class_list_);
+}
+
 //
 // ConstructedClass
 //

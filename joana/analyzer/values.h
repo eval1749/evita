@@ -100,7 +100,8 @@ class Class : public Object {
   ~Class() override;
 
   auto base_classes() const { return ReferenceRangeOf(base_classes_); }
-  auto class_list() const { return ReferenceRangeOf(class_list_); }
+  internal::ReferenceRange<ZoneVector<Class*>::const_iterator> class_list()
+      const;
   bool is_class() const { return kind_ == ClassKind::Class; }
   bool is_finalized() const { return !class_list_.empty(); }
   ClassKind kind() const { return kind_; }

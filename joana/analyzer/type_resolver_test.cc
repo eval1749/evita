@@ -66,7 +66,9 @@ std::string TypeResolverTest::RunOn(base::StringPiece script_text) {
   }
   {
     TypeResolver type_resolver(context.get());
-    type_resolver.RunOn(module);
+    type_resolver.PrepareForTesting();
+    static_cast<Pass&>(type_resolver).RunOn(module);
+    static_cast<Pass&>(type_resolver).RunOnAll();
   }
   std::ostringstream ostream;
   ostream << AsPrintableTree(*context, module) << std::endl;
@@ -194,7 +196,7 @@ TEST_F(TypeResolverTest, BaseClass) {
       "|  |  +--JsDocText |*/|\n"
       "|  +--ExpressionStatement\n"
       "|  |  +--MemberExpression PublicProperty[Bar@1004] "
-      "{function(new:Foo@1002):Foo@1002}\n"
+      "{function(new:Bar@1002):Bar@1002}\n"
       "|  |  |  +--ReferenceExpression VarVar[Foo@1001]\n"
       "|  |  |  |  +--Name |Foo|\n"
       "|  |  |  +--Name |Bar|\n"
@@ -305,7 +307,7 @@ TEST_F(TypeResolverTest, Constructor) {
       "|  |  +--JsDocText |*/|\n"
       "|  +--VarStatement\n"
       "|  |  +--BindingNameElement VarVar[Foo@1001] "
-      "{function(new:%anonymous%@1001):%anonymous%@1001}\n"
+      "{function(new:Foo@1001):Foo@1001}\n"
       "|  |  |  +--Name |Foo|\n"
       "|  |  |  +--Function<Normal> Class[Foo@1003]\n"
       "|  |  |  |  +--Empty ||\n"

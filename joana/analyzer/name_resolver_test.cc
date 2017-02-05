@@ -1029,7 +1029,7 @@ TEST_F(NameResolverTest, VarConstructor) {
       "|  |  +--JsDocTag\n"
       "|  |  |  +--Name |@param|\n"
       "|  |  |  +--NonNullableType\n"
-      "|  |  |  |  +--TypeName {%anonymous%@1001}\n"
+      "|  |  |  |  +--TypeName {Foo@1001}\n"
       "|  |  |  |  |  +--Name |Foo|\n"
       "|  |  |  +--ReferenceExpression ParameterVar[x@1007]\n"
       "|  |  |  |  +--Name |x|\n"

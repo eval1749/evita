@@ -18,6 +18,7 @@
 #include "joana/analyzer/types.h"
 #include "joana/analyzer/value_editor.h"
 #include "joana/analyzer/values.h"
+#include "joana/ast/tokens.h"
 #include "joana/base/memory/zone.h"
 #include "joana/base/source_code_factory.h"
 
@@ -26,7 +27,7 @@ namespace analyzer {
 
 namespace {
 
-const char* const kSourceCode = "A B C D E F G T";
+const char* const kSourceCode = "A B C D E F G T U V W X Y Z";
 
 std::vector<Class*> ClassListOf(const Class& clazz) {
   std::vector<Class*> class_list;
@@ -140,9 +141,9 @@ TEST_F(ClassTreeBuilderTest, Basic) {
   Value::Editor().SetClassHeritage(&class_c, {&class_b});
 
   ClassTreeBuilder builder(&analyze_context());
-  builder.Process(&class_a);
-  builder.Process(&class_b);
-  builder.Process(&class_c);
+  builder.ProcessClassDefinition(&class_a);
+  builder.ProcessClassDefinition(&class_b);
+  builder.ProcessClassDefinition(&class_c);
   builder.Build();
 
   EXPECT_EQ("", GetErrors());
@@ -158,9 +159,9 @@ TEST_F(ClassTreeBuilderTest, Basic2) {
   Value::Editor().SetClassHeritage(&class_c, {&class_a, &class_b});
 
   ClassTreeBuilder builder(&analyze_context());
-  builder.Process(&class_a);
-  builder.Process(&class_b);
-  builder.Process(&class_c);
+  builder.ProcessClassDefinition(&class_a);
+  builder.ProcessClassDefinition(&class_b);
+  builder.ProcessClassDefinition(&class_c);
   builder.Build();
 
   EXPECT_EQ("", GetErrors());
@@ -178,14 +179,43 @@ TEST_F(ClassTreeBuilderTest, ConstructedClass) {
   Value::Editor().SetClassHeritage(&class_b, {&constructed_class});
 
   ClassTreeBuilder builder(&analyze_context());
-  builder.Process(&class_a);
-  builder.Process(&class_b);
-  builder.Process(&generic_class);
+  builder.ProcessClassDefinition(&class_a);
+  builder.ProcessClassDefinition(&class_b);
+  builder.ProcessClassDefinition(&generic_class);
   builder.Build();
 
   EXPECT_EQ("", GetErrors());
   EXPECT_EQ(ClassListFrom(class_a), ClassListOf(class_a));
   EXPECT_EQ(ClassListFrom(class_b, constructed_class), ClassListOf(class_b));
+}
+
+TEST_F(ClassTreeBuilderTest, ConstructedClass2) {
+  auto& class_a = NewGenericClass("A", {&NewTypeParameter("T")});
+  auto& class_b = NewGenericClass("B", {&NewTypeParameter("U")});
+  const auto& number_type =
+      type_factory().NewPrimitiveType(ast::TokenKind::Number);
+  const auto& string_type =
+      type_factory().NewPrimitiveType(ast::TokenKind::String);
+  const auto& parameter_x = NewTypeParameter("X");
+  const auto& parameter_y = NewTypeParameter("Y");
+  auto& class_c = NewGenericClass("C", {&parameter_x, &parameter_y});
+  auto& class_d = NewConstructedClass(&class_c, {&number_type, &string_type});
+  Value::Editor().SetClassHeritage(
+      &class_c, {&NewConstructedClass(&class_a, {&parameter_x}),
+                 &NewConstructedClass(&class_b, {&parameter_y})});
+
+  ClassTreeBuilder builder(&analyze_context());
+  builder.ProcessClassDefinition(&class_a);
+  builder.ProcessClassDefinition(&class_b);
+  builder.ProcessClassDefinition(&class_c);
+  builder.ProcessClassReference(&class_d);
+  builder.Build();
+
+  EXPECT_EQ("", GetErrors());
+  EXPECT_EQ(
+      ClassListFrom(class_d, NewConstructedClass(&class_a, {&number_type}),
+                    NewConstructedClass(&class_b, {&string_type})),
+      ClassListOf(class_d));
 }
 
 TEST_F(ClassTreeBuilderTest, Diamond) {
@@ -198,10 +228,10 @@ TEST_F(ClassTreeBuilderTest, Diamond) {
   Value::Editor().SetClassHeritage(&class_d, {&class_b, &class_c});
 
   ClassTreeBuilder builder(&analyze_context());
-  builder.Process(&class_a);
-  builder.Process(&class_b);
-  builder.Process(&class_c);
-  builder.Process(&class_d);
+  builder.ProcessClassDefinition(&class_a);
+  builder.ProcessClassDefinition(&class_b);
+  builder.ProcessClassDefinition(&class_c);
+  builder.ProcessClassDefinition(&class_d);
   builder.Build();
 
   EXPECT_EQ("", GetErrors());
@@ -221,9 +251,9 @@ TEST_F(ClassTreeBuilderTest, ErrorCycle) {
   Value::Editor().SetClassHeritage(&class_c, {&class_b});
 
   ClassTreeBuilder builder(&analyze_context());
-  builder.Process(&class_a);
-  builder.Process(&class_b);
-  builder.Process(&class_c);
+  builder.ProcessClassDefinition(&class_a);
+  builder.ProcessClassDefinition(&class_b);
+  builder.ProcessClassDefinition(&class_c);
   builder.Build();
 
   EXPECT_EQ(
@@ -239,7 +269,7 @@ TEST_F(ClassTreeBuilderTest, ErrorSelf) {
   Value::Editor().SetClassHeritage(&class_a, {&class_a});
 
   ClassTreeBuilder builder(&analyze_context());
-  builder.Process(&class_a);
+  builder.ProcessClassDefinition(&class_a);
   builder.Build();
 
   EXPECT_EQ("ANALYZER_ERROR_CLASS_TREE_CYCLE@0:1\n", GetErrors())
@@ -252,7 +282,7 @@ TEST_F(ClassTreeBuilderTest, ErrorUndefined) {
   Value::Editor().SetClassHeritage(&class_b, {&class_a});
 
   ClassTreeBuilder builder(&analyze_context());
-  builder.Process(&class_b);
+  builder.ProcessClassDefinition(&class_b);
   builder.Build();
 
   EXPECT_EQ("ANALYZER_ERROR_CLASS_TREE_UNDEFINED_CLASS@0:1\n", GetErrors())
@@ -267,9 +297,9 @@ TEST_F(ClassTreeBuilderTest, ForwardRefernce) {
   Value::Editor().SetClassHeritage(&class_c, {&class_b});
 
   ClassTreeBuilder builder(&analyze_context());
-  builder.Process(&class_b);
-  builder.Process(&class_c);
-  builder.Process(&class_a);
+  builder.ProcessClassDefinition(&class_b);
+  builder.ProcessClassDefinition(&class_c);
+  builder.ProcessClassDefinition(&class_a);
   builder.Build();
 
   EXPECT_EQ("", GetErrors());

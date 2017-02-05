@@ -18,6 +18,9 @@ namespace joana {
 namespace analyzer {
 
 class Class;
+class ConstructedClass;
+class Type;
+class TypeParameter;
 
 //
 // ClassTreeBuilder
@@ -28,7 +31,10 @@ class ClassTreeBuilder final : public ContextUser {
   ~ClassTreeBuilder();
 
   void Build();
-  void Process(Class* clazz);
+  void ProcessClassDefinition(Class* clazz);
+
+  // Returns true if |clazz| is finalized.
+  bool ProcessClassReference(Class* clazz);
 
  private:
   class ClassNode;
@@ -55,10 +61,17 @@ class ClassTreeBuilder final : public ContextUser {
     DISALLOW_COPY_AND_ASSIGN(ClassNode);
   };
 
+  using ArgumentMap = std::unordered_map<const TypeParameter*, const Type*>;
+
+  bool CanFinalize(const Class& clazz) const;
+  Class& ConstructClass(Class* base_class, const ArgumentMap& argument_map);
+  void FinalizeClass(Class* clazz);
+  void FinalizeConstructedClass(ConstructedClass* clazz);
   ClassNode& GetOrNewNode(Class* clazz);
   bool IsProcessed(const Class& clazz) const;
-  void TryFinalizeClass(Class* clazz);
   void ValidateClassTree();
+
+  std::unordered_set<ConstructedClass*> pending_constructed_classes_;
 
   // A set of classes passed in |Process()|.
   std::unordered_set<const Class*> processed_classes_;

@@ -52,7 +52,7 @@ TypeResolver::~TypeResolver() = default;
 // The entry point
 void TypeResolver::PrepareForTesting() {
   m_object_class = context().TryClassOf(ast::TokenKind::Object);
-  class_tree_builder_->Process(m_object_class);
+  class_tree_builder_->ProcessClassDefinition(m_object_class);
 }
 
 void TypeResolver::RunOnAll() {
@@ -157,7 +157,7 @@ void TypeResolver::SetClassHeritage(Class* class_value,
   }
   DCHECK_EQ(class_list.size(), references.size());
   Value::Editor().SetClassHeritage(class_value, class_list);
-  class_tree_builder_->Process(class_value);
+  class_tree_builder_->ProcessClassDefinition(class_value);
 }
 
 const Type* TypeResolver::ComputeClassType(const ast::Node& node) const {

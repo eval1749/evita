@@ -10,9 +10,9 @@ namespace joana {
 // BackwardFlowGraph is used for computing post-dominator tree
 template <typename Graph>
 struct BackwardFlowGraph {
-  typedef typename Graph::GraphNode GraphNode;
+  using GraphNode = typename Graph::GraphNode;
 
-  static GraphNode* EntryOf(const Graph* graph) { return graph->last_node(); }
+  static GraphNode* EntryOf(const Graph& graph) { return graph.last_node(); }
 
   static bool HasMoreThanOnePredecessor(const GraphNode* node) {
     return node->HasMoreThanOneSuccessor();
@@ -34,9 +34,9 @@ struct BackwardFlowGraph {
 // ForwardFlowGraph is used for computing dominator tree
 template <typename Graph>
 struct ForwardFlowGraph {
-  typedef typename Graph::GraphNode GraphNode;
+  using GraphNode = typename Graph::GraphNode;
 
-  static GraphNode* EntryOf(const Graph* graph) { return graph->first_node(); }
+  static GraphNode* EntryOf(const Graph& graph) { return graph.first_node(); }
 
   static bool HasMoreThanOnePredecessor(const GraphNode* node) {
     return node->HasMoreThanOnePredecessor();

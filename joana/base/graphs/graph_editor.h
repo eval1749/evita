@@ -22,44 +22,54 @@ class Graph<G, N>::Editor {
   using Node = typename Graph::GraphNode;
   using NodeList = typename Graph::NodeList;
 
-  explicit Editor(Graph* graph) : graph_(graph) {}
+  Editor() = default;
   ~Editor() = default;
 
-  void AppendNode(Node* new_node);
-  void AddEdge(Node* from, Node* to);
-  void InsertNode(Node* new_node, Node* ref_node);
-  void RemoveEdge(Node* from, Node* to);
-  void RemoveNode(Node* ref_node);
+  Editor& AppendNode(Graph* graph, Node* new_node);
+  Editor& AddEdge(Graph* graph, Node* from, Node* to);
+  Editor& InsertNode(Graph* graph, Node* new_node, Node* ref_node);
+  Editor& RemoveEdge(Graph* graph, Node* from, Node* to);
+  Editor& RemoveNode(Graph* graph, Node* ref_node);
 
  private:
   static void RemoveFromList(NodeList* nodes, Node* node);
-
-  Graph* const graph_;
 
   DISALLOW_COPY_AND_ASSIGN(Editor);
 };
 
 template <typename G, typename N>
-void Graph<G, N>::Editor::AppendNode(Node* new_node) {
-  graph_->nodes_.AppendNode(new_node);
+typename Graph<G, N>::Editor& Graph<G, N>::Editor::AppendNode(Graph* graph,
+                                                              Node* new_node) {
+  graph->nodes_.AppendNode(new_node);
+  return *this;
 }
 
 template <typename G, typename N>
-void Graph<G, N>::Editor::AddEdge(Node* from, Node* to) {
-  DCHECK(!graph_->HasEdge(from, to));
+typename Graph<G, N>::Editor& Graph<G, N>::Editor::AddEdge(Graph* graph,
+                                                           Node* from,
+                                                           Node* to) {
+  DCHECK(!graph->HasEdge(from, to));
   from->successors_.push_back(to);
   to->predecessors_.push_back(from);
+  return *this;
 }
 
 template <typename G, typename N>
-void Graph<G, N>::Editor::InsertNode(Node* new_node, Node* ref_node) {
-  graph_->nodes_.InsertBefore(new_node, ref_node);
+typename Graph<G, N>::Editor& Graph<G, N>::Editor::InsertNode(Graph* graph,
+                                                              Node* new_node,
+                                                              Node* ref_node) {
+  graph->nodes_.InsertBefore(new_node, ref_node);
+  return *this;
 }
 
 template <typename G, typename N>
-void Graph<G, N>::Editor::RemoveEdge(Node* from, Node* to) {
+typename Graph<G, N>::Editor& Graph<G, N>::Editor::RemoveEdge(Graph* graph,
+                                                              Node* from,
+                                                              Node* to) {
+  DCHECK(graph->HasEdge(from, to));
   RemoveFromList(&from->successors_, to);
   RemoveFromList(&to->predecessors_, from);
+  return *this;
 }
 
 template <typename G, typename N>
@@ -70,8 +80,10 @@ void Graph<G, N>::Editor::RemoveFromList(NodeList* nodes, Node* node) {
 }
 
 template <typename G, typename N>
-void Graph<G, N>::Editor::RemoveNode(Node* old_node) {
-  graph_->nodes_.RemoveNode(old_node);
+typename Graph<G, N>::Editor& Graph<G, N>::Editor::RemoveNode(Graph* graph,
+                                                              Node* old_node) {
+  graph->nodes_.RemoveNode(old_node);
+  return *this;
 }
 
 }  // namespace joana

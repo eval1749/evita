@@ -46,60 +46,61 @@ void GraphTest::SetUp() {
 
 TEST_F(GraphTest, AddEdge) {
   std::ostringstream ostream;
-  ostream << *function();
+  ostream << function();
   EXPECT_EQ(
       "{id: 1, predecessors: {}, successors: {B2, B3}}\n"
       "{id: 2, predecessors: {B1}, successors: {B4}}\n"
       "{id: 3, predecessors: {B1}, successors: {B4}}\n"
       "{id: 4, predecessors: {B2, B3}, successors: {}}\n",
-      function()->ToString());
-  auto const block1 = block_at(0);
-  auto const block2 = block_at(1);
-  auto const block3 = block_at(2);
-  auto const block4 = block_at(3);
+      function().ToString());
+  auto& block1 = block_at(0);
+  auto& block2 = block_at(1);
+  auto& block3 = block_at(2);
+  auto& block4 = block_at(3);
 
-  EXPECT_TRUE(function()->HasEdge(block1, block2));
-  EXPECT_TRUE(function()->HasEdge(block1, block3));
-  EXPECT_TRUE(function()->HasEdge(block2, block4));
-  EXPECT_TRUE(function()->HasEdge(block3, block4));
+  EXPECT_TRUE(function().HasEdge(&block1, &block2));
+  EXPECT_TRUE(function().HasEdge(&block1, &block3));
+  EXPECT_TRUE(function().HasEdge(&block2, &block4));
+  EXPECT_TRUE(function().HasEdge(&block3, &block4));
 
-  EXPECT_FALSE(function()->HasEdge(block2, block1));
-  EXPECT_FALSE(function()->HasEdge(block3, block1));
+  EXPECT_FALSE(function().HasEdge(&block2, &block1));
+  EXPECT_FALSE(function().HasEdge(&block3, &block1));
 
-  EXPECT_FALSE(block1->HasPredecessor());
-  EXPECT_TRUE(block1->HasSuccessor());
-  EXPECT_FALSE(block1->HasMoreThanOnePredecessor());
-  EXPECT_TRUE(block1->HasMoreThanOneSuccessor());
-  EXPECT_TRUE(block2->HasPredecessor());
-  EXPECT_TRUE(block2->HasSuccessor());
-  EXPECT_FALSE(block2->HasMoreThanOnePredecessor());
-  EXPECT_FALSE(block2->HasMoreThanOneSuccessor());
+  EXPECT_FALSE(block1.HasPredecessor());
+  EXPECT_TRUE(block1.HasSuccessor());
+  EXPECT_FALSE(block1.HasMoreThanOnePredecessor());
+  EXPECT_TRUE(block1.HasMoreThanOneSuccessor());
+  EXPECT_TRUE(block2.HasPredecessor());
+  EXPECT_TRUE(block2.HasSuccessor());
+  EXPECT_FALSE(block2.HasMoreThanOnePredecessor());
+  EXPECT_FALSE(block2.HasMoreThanOneSuccessor());
 
-  EXPECT_TRUE(block3->HasPredecessor());
-  EXPECT_TRUE(block3->HasSuccessor());
-  EXPECT_FALSE(block3->HasMoreThanOnePredecessor());
-  EXPECT_FALSE(block3->HasMoreThanOneSuccessor());
+  EXPECT_TRUE(block3.HasPredecessor());
+  EXPECT_TRUE(block3.HasSuccessor());
+  EXPECT_FALSE(block3.HasMoreThanOnePredecessor());
+  EXPECT_FALSE(block3.HasMoreThanOneSuccessor());
 
-  EXPECT_TRUE(block4->HasPredecessor());
-  EXPECT_FALSE(block4->HasSuccessor());
-  EXPECT_TRUE(block4->HasMoreThanOnePredecessor());
-  EXPECT_FALSE(block4->HasMoreThanOneSuccessor());
+  EXPECT_TRUE(block4.HasPredecessor());
+  EXPECT_FALSE(block4.HasSuccessor());
+  EXPECT_TRUE(block4.HasMoreThanOnePredecessor());
+  EXPECT_FALSE(block4.HasMoreThanOneSuccessor());
 }
 
 TEST_F(GraphTest, InsertNode) {
-  Function::Editor editor(function());
-  auto const block2 = block_at(1);
-  auto const block4 = block_at(3);
+  Function::Editor editor;
+
+  auto& block2 = block_at(1);
+  auto& block4 = block_at(3);
 
   // Move |block2| before |block4|.
-  editor.RemoveNode(block2);
-  editor.InsertNode(block2, block4);
+  editor.RemoveNode(&function(), &block2);
+  editor.InsertNode(&function(), &block2, &block4);
   EXPECT_EQ(
       "{id: 1, predecessors: {}, successors: {B2, B3}}\n"
       "{id: 3, predecessors: {B1}, successors: {B4}}\n"
       "{id: 2, predecessors: {B1}, successors: {B4}}\n"
       "{id: 4, predecessors: {B2, B3}, successors: {}}\n",
-      function()->ToString());
+      function().ToString());
 }
 
 TEST_F(GraphTest, OrderedList) {
@@ -114,35 +115,36 @@ TEST_F(GraphTest, OrderedList) {
 }
 
 TEST_F(GraphTest, RemoveEdge) {
-  Function::Editor editor(function());
-  auto const block1 = block_at(0);
-  auto const block2 = block_at(1);
-  auto const block3 = block_at(2);
-  auto const block4 = block_at(3);
-  editor.RemoveEdge(block1, block2);
-  editor.RemoveEdge(block2, block4);
+  Function::Editor editor;
+
+  auto& block1 = block_at(0);
+  auto& block2 = block_at(1);
+  auto& block3 = block_at(2);
+  auto& block4 = block_at(3);
+  editor.RemoveEdge(&function(), &block1, &block2);
+  editor.RemoveEdge(&function(), &block2, &block4);
   EXPECT_EQ(
       "{id: 1, predecessors: {}, successors: {B3}}\n"
       "{id: 2, predecessors: {}, successors: {}}\n"
       "{id: 3, predecessors: {B1}, successors: {B4}}\n"
       "{id: 4, predecessors: {B3}, successors: {}}\n",
-      function()->ToString());
+      function().ToString());
 
-  EXPECT_FALSE(block1->HasPredecessor());
-  EXPECT_TRUE(block1->HasSuccessor());
-  EXPECT_FALSE(block1->HasMoreThanOnePredecessor());
+  EXPECT_FALSE(block1.HasPredecessor());
+  EXPECT_TRUE(block1.HasSuccessor());
+  EXPECT_FALSE(block1.HasMoreThanOnePredecessor());
 
-  EXPECT_FALSE(block2->HasPredecessor());
-  EXPECT_FALSE(block2->HasSuccessor());
-  EXPECT_FALSE(block2->HasMoreThanOnePredecessor());
+  EXPECT_FALSE(block2.HasPredecessor());
+  EXPECT_FALSE(block2.HasSuccessor());
+  EXPECT_FALSE(block2.HasMoreThanOnePredecessor());
 
-  EXPECT_TRUE(block3->HasPredecessor());
-  EXPECT_TRUE(block3->HasSuccessor());
-  EXPECT_FALSE(block3->HasMoreThanOnePredecessor());
+  EXPECT_TRUE(block3.HasPredecessor());
+  EXPECT_TRUE(block3.HasSuccessor());
+  EXPECT_FALSE(block3.HasMoreThanOnePredecessor());
 
-  EXPECT_TRUE(block4->HasPredecessor());
-  EXPECT_FALSE(block4->HasSuccessor());
-  EXPECT_FALSE(block4->HasMoreThanOnePredecessor());
+  EXPECT_TRUE(block4.HasPredecessor());
+  EXPECT_FALSE(block4.HasSuccessor());
+  EXPECT_FALSE(block4.HasMoreThanOnePredecessor());
 }
 
 }  // namespace joana

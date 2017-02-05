@@ -76,8 +76,8 @@ class GraphTestBase : public ::testing::Test, public ZoneOwner {
   GraphTestBase();
   ~GraphTestBase() override;
 
-  Block* block_at(int index) { return blocks_[index]; }
-  Function* function() { return &function_; }
+  Block& block_at(int index) { return *blocks_[index]; }
+  Function& function() { return function_; }
 
   void MakeDiamondGraph();
   void MakeSampleGraph1();

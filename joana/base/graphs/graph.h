@@ -9,6 +9,7 @@
 
 #include "base/logging.h"
 #include "joana/base/double_linked.h"
+#include "joana/base/iterator_utils.h"
 #include "joana/base/memory/zone_unordered_set.h"
 #include "joana/base/memory/zone_vector.h"
 #include "joana/base/ordered_list.h"

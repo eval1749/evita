@@ -47,5 +47,13 @@ void Value::Editor::SetClassHeritage(Class* class_value,
   base_classes.insert(base_classes.begin(), classes.begin(), classes.end());
 }
 
+void Value::Editor::SetClassList(Class* class_value,
+                                 const std::vector<Class*>& classes) {
+  auto& class_list = class_value->class_list_;
+  DCHECK(class_list.empty()) << *class_value;
+  class_list.reserve(classes.size());
+  class_list.insert(class_list.begin(), classes.begin(), classes.end());
+}
+
 }  // namespace analyzer
 }  // namespace joana

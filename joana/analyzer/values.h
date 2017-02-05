@@ -100,7 +100,9 @@ class Class : public Object {
   ~Class() override;
 
   auto base_classes() const { return ReferenceRangeOf(base_classes_); }
+  auto class_list() const { return ReferenceRangeOf(class_list_); }
   bool is_class() const { return kind_ == ClassKind::Class; }
+  bool is_finalized() const { return !class_list_.empty(); }
   ClassKind kind() const { return kind_; }
   const ast::Node& name() const { return name_; }
 
@@ -114,6 +116,7 @@ class Class : public Object {
 
  private:
   ZoneVector<Class*> base_classes_;
+  ZoneVector<Class*> class_list_;
   const ClassKind kind_;
   const ast::Node& name_;
 

@@ -23,6 +23,7 @@ Class::Class(Zone* zone,
              Properties* properties)
     : Object(id, node, properties),
       base_classes_(zone),
+      class_list_(zone),
       kind_(kind),
       name_(name) {
   DCHECK(CanBeValueName(name));

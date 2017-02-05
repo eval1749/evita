@@ -26,6 +26,7 @@ class Value::Editor final {
 
   void AddAssignment(ValueHolder* binding, const ast::Node& node);
   void SetClassHeritage(Class* class_value, const std::vector<Class*>& classes);
+  void SetClassList(Class* class_value, const std::vector<Class*>& classes);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(Editor);

@@ -14,6 +14,8 @@ source_set("analyzer") {
     "annotation_compiler.h",
     "built_in_world.cc",
     "built_in_world.h",
+    "class_tree_builder.cc",
+    "class_tree_builder.h",
     "context.cc",
     "context.h",
     "context_user.cc",
@@ -77,6 +79,7 @@ source_set("test_files") {
   sources = [
     "analyzer_test_base.cc",
     "analyzer_test_base.h",
+    "class_tree_builder_test.cc",
     "name_resolver_test.cc",
     "type_resolver_test.cc",
     "type_test.cc",

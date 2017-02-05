@@ -12,6 +12,8 @@ namespace joana {
 
 // V(pass, reason)
 #define FOR_EACH_ANALYZER_ERROR_CODE(V)       \
+  V(CLASS_TREE, CYCLE)                        \
+  V(CLASS_TREE, UNDEFINED_CLASS)              \
   V(JSDOC, EMPTY_RECORD_TYPE)                 \
   V(JSDOC, EXPECT_GENERIC_CLASS)              \
   V(JSDOC, EXPECT_NAME)                       \

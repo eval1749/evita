@@ -430,22 +430,19 @@ function evalSelectionCommand() {
       (new TextRange(this.document, 0, this.document.length)).text :
       selection.range.text;
   $0 = this;
-  const result = Editor.runScript(scriptText, this.document.name);
-  if (!result.exception) {
-    if (result.value !== undefined)
-      console.log(result.value);
+  try {
+    const result = Editor.runScript(scriptText, this.document.name);
+    if (result === undefined)
+      return;
+    $0 = result;
+    console.log(result);
     return;
+  } catch (error) {
+    Editor.messageBox(
+        this, error.stack, MessageBox.ICONERROR, 'Evaluate Selection Command');
   }
-  Editor
-      .messageBox(
-          this, result.stackTraceString, MessageBox.ICONERROR,
-          'Evaluate Selection Command')
-      .then((x) => {
-        const offset = isWhole ? 0 : this.selection.range.start;
-        selection.range.collapseTo(offset + result.start)
-            .moveEnd(Unit.CHARACTER, result.end - result.start);
-      });
 }
+
 Editor.bindKey(
     TextWindow, 'Ctrl+Shift+E', evalSelectionCommand,
     'Evaluate script in selection');

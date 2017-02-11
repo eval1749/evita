@@ -82,7 +82,7 @@ class TypeResolver final : public Pass, public ast::SyntaxVisitor {
   void VisitInternal(const ast::Class& syntax, const ast::Node& node) final;
 
   const std::unique_ptr<ClassTreeBuilder> class_tree_builder_;
-  Class* m_object_class = nullptr;
+  Class* object_class_ = nullptr;
 
   DISALLOW_COPY_AND_ASSIGN(TypeResolver);
 };

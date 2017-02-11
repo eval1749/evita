@@ -51,8 +51,8 @@ TypeResolver::~TypeResolver() = default;
 
 // The entry point
 void TypeResolver::PrepareForTesting() {
-  m_object_class = context().TryClassOf(ast::TokenKind::Object);
-  class_tree_builder_->ProcessClassDefinition(m_object_class);
+  object_class_ = context().TryClassOf(ast::TokenKind::Object);
+  class_tree_builder_->ProcessClassDefinition(object_class_);
 }
 
 void TypeResolver::RunOnAll() {
@@ -60,15 +60,15 @@ void TypeResolver::RunOnAll() {
 }
 
 void TypeResolver::RunOn(const ast::Node& node) {
-  if (!m_object_class) {
-    m_object_class = context().TryClassOf(ast::TokenKind::Object);
-    if (!m_object_class) {
+  if (!object_class_) {
+    object_class_ = context().TryClassOf(ast::TokenKind::Object);
+    if (!object_class_) {
       AddError(BuiltInWorld::GetInstance()->NameOf(ast::TokenKind::Object),
                ErrorCode::TYPE_RESOLVER_EXPECT_OBJECT_CLASS);
-      m_object_class = &context().InstallClass(ast::TokenKind::Object);
+      object_class_ = &context().InstallClass(ast::TokenKind::Object);
     }
   }
-  DCHECK(m_object_class);
+  DCHECK(object_class_);
   Visit(node);
 }
 
@@ -124,9 +124,9 @@ void TypeResolver::SetClassHeritage(Class* class_value,
 
   // Install default base class |Object|.
   if (class_value->is_class() && class_list.empty() &&
-      class_value != m_object_class) {
-    references.emplace_back(&m_object_class->name(), m_object_class);
-    class_list.emplace_back(m_object_class);
+      class_value != object_class_) {
+    references.emplace_back(&object_class_->name(), object_class_);
+    class_list.emplace_back(object_class_);
   }
 
   // Process @implements tags

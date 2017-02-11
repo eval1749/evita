@@ -47,8 +47,10 @@ v8.log
 /build/
 /buildtools/
 /build/win_toolchain.json
+/crypto/
 /testing/
 /third_party/autopep8/
+/third/boringssl/src
 /third_party/ced/src
 /third_party/cygwin/
 /third_party/icu
@@ -59,6 +61,8 @@ v8.log
 /third_party/pep8/
 /third_party/ply/
 /third_party/v8
+/third_party/yasm/source/patched-yasm/
+/third_party/yasm/binaries/
 /third_party/zlib/
 /tools/grit/
 /tools/gyp/

@@ -69,6 +69,15 @@ void TypeResolver::RunOn(const ast::Node& node) {
     }
   }
   DCHECK(object_class_);
+  if (!array_class_) {
+    array_class_ = context().TryClassOf(ast::TokenKind::Array);
+    if (!array_class_) {
+      AddError(BuiltInWorld::GetInstance()->NameOf(ast::TokenKind::Array),
+               ErrorCode::TYPE_RESOLVER_EXPECT_ARRAY_CLASS);
+      array_class_ = &context().InstallClass(ast::TokenKind::Array);
+    }
+  }
+  DCHECK(array_class_);
   Visit(node);
 }
 

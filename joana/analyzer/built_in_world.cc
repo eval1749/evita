@@ -24,6 +24,7 @@ namespace analyzer {
 namespace {
 
 const char* const kSourceCode =
+    "Array\n"
     "boolean\n"
     "global\n"
     "null\n"

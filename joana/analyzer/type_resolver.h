@@ -81,6 +81,7 @@ class TypeResolver final : public Pass, public ast::SyntaxVisitor {
 
   void VisitInternal(const ast::Class& syntax, const ast::Node& node) final;
 
+  const Class* array_class_ = nullptr;
   const std::unique_ptr<ClassTreeBuilder> class_tree_builder_;
   const Class* object_class_ = nullptr;
 

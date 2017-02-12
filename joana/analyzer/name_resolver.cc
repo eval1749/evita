@@ -49,6 +49,21 @@ bool IsValidConstructor(const ast::Node& method) {
   return ast::Method::FunctionKindOf(method) == ast::FunctionKind::Normal;
 }
 
+VariableKind VariableKindOf(const ast::Node& keyword) {
+  if (keyword == ast::TokenKind::Const)
+    return VariableKind::Const;
+  if (keyword == ast::TokenKind::Let)
+    return VariableKind::Let;
+  if (keyword == ast::TokenKind::Var)
+    return VariableKind::Var;
+  if (keyword == ast::TokenKind::Var)
+    return VariableKind::Var;
+  if (keyword.Is<ast::Empty>())
+    return VariableKind::Function;
+  NOTREACHED() << keyword;
+  return VariableKind::Function;
+}
+
 }  // namespace
 
 //
@@ -864,6 +879,64 @@ void NameResolver::VisitInternal(const ast::ConstStatement& syntax,
                                  const ast::Node& node) {
   base::AutoReset<VariableKind> scope(&variable_kind_, VariableKind::Const);
   VisitDefault(node);
+}
+
+void NameResolver::VisitInternal(const ast::ForInStatement& syntax,
+                                 const ast::Node& node) {
+  const auto variable_kind =
+      VariableKindOf(ast::ForInStatement::KeywordOf(node));
+  if (variable_kind == VariableKind::Function) {
+    Visit(ast::ForInStatement::BindingOf(node));
+    Visit(ast::ForInStatement::ExpressionOf(node));
+    Visit(ast::ForInStatement::StatementOf(node));
+    return;
+  }
+  Environment environment(this);
+  {
+    base::AutoReset<VariableKind> scope(&variable_kind_, variable_kind);
+    Visit(ast::ForInStatement::BindingOf(node));
+  }
+  Visit(ast::ForInStatement::ExpressionOf(node));
+  Visit(ast::ForInStatement::StatementOf(node));
+}
+
+void NameResolver::VisitInternal(const ast::ForOfStatement& syntax,
+                                 const ast::Node& node) {
+  const auto variable_kind =
+      VariableKindOf(ast::ForOfStatement::KeywordOf(node));
+  if (variable_kind == VariableKind::Function) {
+    Visit(ast::ForOfStatement::BindingOf(node));
+    Visit(ast::ForOfStatement::ExpressionOf(node));
+    Visit(ast::ForOfStatement::StatementOf(node));
+    return;
+  }
+  Environment environment(this);
+  {
+    base::AutoReset<VariableKind> scope(&variable_kind_, variable_kind);
+    Visit(ast::ForOfStatement::BindingOf(node));
+  }
+  Visit(ast::ForOfStatement::ExpressionOf(node));
+  Visit(ast::ForOfStatement::StatementOf(node));
+}
+
+void NameResolver::VisitInternal(const ast::ForStatement& syntax,
+                                 const ast::Node& node) {
+  const auto variable_kind = VariableKindOf(ast::ForStatement::KeywordOf(node));
+  if (variable_kind == VariableKind::Function) {
+    Visit(ast::ForStatement::InitializeOf(node));
+    Visit(ast::ForStatement::ConditionOf(node));
+    Visit(ast::ForStatement::StepOf(node));
+    Visit(ast::ForStatement::StatementOf(node));
+    return;
+  }
+  Environment environment(this);
+  {
+    base::AutoReset<VariableKind> scope(&variable_kind_, variable_kind);
+    Visit(ast::ForStatement::InitializeOf(node));
+  }
+  Visit(ast::ForStatement::ConditionOf(node));
+  Visit(ast::ForStatement::StepOf(node));
+  Visit(ast::ForStatement::StatementOf(node));
 }
 
 void NameResolver::VisitInternal(const ast::LetStatement& syntax,

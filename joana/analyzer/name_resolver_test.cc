@@ -356,6 +356,123 @@ TEST_F(NameResolverTest, ConstError) {
       RunOn("const foo = 1, foo = 2;"));
 }
 
+TEST_F(NameResolverTest, For) {
+  EXPECT_EQ(
+      "Module\n"
+      "+--ForStatement\n"
+      "|  +--Name |let|\n"
+      "|  +--BindingNameElement LetVar[x@1001]\n"
+      "|  |  +--Name |x|\n"
+      "|  |  +--NumericLiteral |1|\n"
+      "|  +--BinaryExpression<<>\n"
+      "|  |  +--ReferenceExpression LetVar[x@1001]\n"
+      "|  |  |  +--Name |x|\n"
+      "|  |  +--Punctuator |<|\n"
+      "|  |  +--NumericLiteral |10|\n"
+      "|  +--UnaryExpression<++>\n"
+      "|  |  +--Punctuator |++|\n"
+      "|  |  +--ReferenceExpression LetVar[x@1001]\n"
+      "|  |  |  +--Name |x|\n"
+      "|  +--ExpressionStatement\n"
+      "|  |  +--ReferenceExpression LetVar[x@1001]\n"
+      "|  |  |  +--Name |x|\n",
+      RunOn("for (let x = 1; x < 10; ++x) x;"));
+  EXPECT_EQ(
+      "Module\n"
+      "+--LetStatement\n"
+      "|  +--BindingNameElement LetVar[x@1001]\n"
+      "|  |  +--Name |x|\n"
+      "|  |  +--ElisionExpression ||\n"
+      "+--ForStatement\n"
+      "|  +--Empty ||\n"
+      "|  +--AssignmentExpression<=>\n"
+      "|  |  +--ReferenceExpression LetVar[x@1001]\n"
+      "|  |  |  +--Name |x|\n"
+      "|  |  +--Punctuator |=|\n"
+      "|  |  +--NumericLiteral |1|\n"
+      "|  +--BinaryExpression<<>\n"
+      "|  |  +--ReferenceExpression LetVar[x@1001]\n"
+      "|  |  |  +--Name |x|\n"
+      "|  |  +--Punctuator |<|\n"
+      "|  |  +--NumericLiteral |10|\n"
+      "|  +--UnaryExpression<++>\n"
+      "|  |  +--Punctuator |++|\n"
+      "|  |  +--ReferenceExpression LetVar[x@1001]\n"
+      "|  |  |  +--Name |x|\n"
+      "|  +--ExpressionStatement\n"
+      "|  |  +--ReferenceExpression LetVar[x@1001]\n"
+      "|  |  |  +--Name |x|\n",
+      RunOn("let x; for (x = 1; x < 10; ++x) x;"));
+}
+
+TEST_F(NameResolverTest, ForIn) {
+  EXPECT_EQ(
+      "Module\n"
+      "+--ForInStatement\n"
+      "|  +--Name |const|\n"
+      "|  +--BindingNameElement ConstVar[x@1001]\n"
+      "|  |  +--Name |x|\n"
+      "|  |  +--ElisionExpression ||\n"
+      "|  +--ArrayInitializer\n"
+      "|  |  +--NumericLiteral |1|\n"
+      "|  |  +--NumericLiteral |2|\n"
+      "|  +--ExpressionStatement\n"
+      "|  |  +--ReferenceExpression ConstVar[x@1001]\n"
+      "|  |  |  +--Name |x|\n",
+      RunOn("for (const x in [1, 2]) x;"));
+  EXPECT_EQ(
+      "Module\n"
+      "+--VarStatement\n"
+      "|  +--BindingNameElement VarVar[x@1001]\n"
+      "|  |  +--Name |x|\n"
+      "|  |  +--ElisionExpression ||\n"
+      "+--ForInStatement\n"
+      "|  +--Empty ||\n"
+      "|  +--ReferenceExpression VarVar[x@1001]\n"
+      "|  |  +--Name |x|\n"
+      "|  +--ArrayInitializer\n"
+      "|  |  +--NumericLiteral |1|\n"
+      "|  |  +--NumericLiteral |2|\n"
+      "|  +--ExpressionStatement\n"
+      "|  |  +--ReferenceExpression VarVar[x@1001]\n"
+      "|  |  |  +--Name |x|\n",
+      RunOn("var x; for (x in [1, 2]) x;"));
+}
+
+TEST_F(NameResolverTest, ForOf) {
+  EXPECT_EQ(
+      "Module\n"
+      "+--ForOfStatement\n"
+      "|  +--Name |const|\n"
+      "|  +--BindingNameElement ConstVar[x@1001]\n"
+      "|  |  +--Name |x|\n"
+      "|  |  +--ElisionExpression ||\n"
+      "|  +--ArrayInitializer\n"
+      "|  |  +--NumericLiteral |1|\n"
+      "|  |  +--NumericLiteral |2|\n"
+      "|  +--ExpressionStatement\n"
+      "|  |  +--ReferenceExpression ConstVar[x@1001]\n"
+      "|  |  |  +--Name |x|\n",
+      RunOn("for (const x of [1, 2]) x;"));
+  EXPECT_EQ(
+      "Module\n"
+      "+--LetStatement\n"
+      "|  +--BindingNameElement LetVar[x@1001]\n"
+      "|  |  +--Name |x|\n"
+      "|  |  +--ElisionExpression ||\n"
+      "+--ForOfStatement\n"
+      "|  +--Empty ||\n"
+      "|  +--ReferenceExpression LetVar[x@1001]\n"
+      "|  |  +--Name |x|\n"
+      "|  +--ArrayInitializer\n"
+      "|  |  +--NumericLiteral |1|\n"
+      "|  |  +--NumericLiteral |2|\n"
+      "|  +--ExpressionStatement\n"
+      "|  |  +--ReferenceExpression LetVar[x@1001]\n"
+      "|  |  |  +--Name |x|\n",
+      RunOn("let x; for (x of [1, 2]) x;"));
+}
+
 TEST_F(NameResolverTest, ForwardRefernce) {
   EXPECT_EQ(
       "Module\n"

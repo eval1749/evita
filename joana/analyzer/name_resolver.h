@@ -155,6 +155,15 @@ class NameResolver final : public Pass, public ast::SyntaxVisitor {
   void VisitInternal(const ast::ConstStatement& syntax,
                      const ast::Node& node) final;
 
+  void VisitInternal(const ast::ForInStatement& syntax,
+                     const ast::Node& node) final;
+
+  void VisitInternal(const ast::ForOfStatement& syntax,
+                     const ast::Node& node) final;
+
+  void VisitInternal(const ast::ForStatement& syntax,
+                     const ast::Node& node) final;
+
   void VisitInternal(const ast::LetStatement& syntax,
                      const ast::Node& node) final;
 

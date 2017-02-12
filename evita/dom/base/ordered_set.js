@@ -77,7 +77,7 @@ class OrderedSetNode {
 
 /**
  * @template T
- * @param {!base.OrderedSetNode<T>} node
+ * @param {!OrderedSetNode<T>} node
  * @return {OrderedSetNode<T>}
  */
 function removeNodeInternal(node) {
@@ -101,8 +101,8 @@ function removeNodeInternal(node) {
 
 /**
  * @template T
- * @param {!base.OrderedSetNode<T>} node
- * @return {!base.OrderedSetNode<T>}
+ * @param {!OrderedSetNode<T>} node
+ * @return {!OrderedSetNode<T>}
  */
 function rotateLeft(node) {
   if (!node.right_)
@@ -118,8 +118,8 @@ function rotateLeft(node) {
 
 /**
  * @template T
- * @param {!base.OrderedSetNode<T>} node
- * @return {!base.OrderedSetNode<T>}
+ * @param {!OrderedSetNode<T>} node
+ * @return {!OrderedSetNode<T>}
  */
 function rotateRight(node) {
   if (!node.left_)
@@ -159,8 +159,8 @@ class OrderedSet {
   /**
    * @private
    * @param {OrderedSetNode<T>} parent
-   * @param {!base.OrderedSetNode<T>} node
-   * @return {!base.OrderedSetNode<T>}
+   * @param {!OrderedSetNode<T>} node
+   * @return {!OrderedSetNode<T>}
    */
   addImpl(parent, node) {
     if (!parent)
@@ -263,7 +263,7 @@ class OrderedSet {
 
   /**
    * @public
-   * @param {!base.OrderedSetNode<T>} node
+   * @param {!OrderedSetNode<T>} node
    */
   removeNode(node) {
     const parent = node.parent_;
@@ -281,7 +281,7 @@ class OrderedSet {
     --this.size_;
   }
 
-  /** @return {!Generator<!base.OrderedSetNode<T>>} */
+  /** @return {!Generator<!OrderedSetNode<T>>} */
   * values() {
     let node = this.root_;
     while (node) {

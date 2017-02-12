@@ -389,14 +389,14 @@ class JOANA_AST_EXPORT NodeFactory final {
  private:
   class NameIdMap;
 
-  const Node& NewNode(const SourceCodeRange& range,
-                      const Syntax& tag,
-                      const std::vector<const Node*>& nodes);
+  const Node& NewVariadicNode(const SourceCodeRange& range,
+                              const Syntax& tag,
+                              const std::vector<const Node*>& nodes);
 
-  const Node& NewNode(const SourceCodeRange& range,
-                      const Syntax& tag,
-                      const Node& node0,
-                      const std::vector<const Node*>& nodes);
+  const Node& NewVariadicNode(const SourceCodeRange& range,
+                              const Syntax& tag,
+                              const Node& node0,
+                              const std::vector<const Node*>& nodes);
 
   const Node& NewNode0(const SourceCodeRange& range, const Syntax& tag);
 

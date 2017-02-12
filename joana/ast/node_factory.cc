@@ -90,9 +90,10 @@ NodeFactory::NodeFactory(Zone* zone)
 
 NodeFactory::~NodeFactory() = default;
 
-const Node& NodeFactory::NewNode(const SourceCodeRange& range,
-                                 const Syntax& tag,
-                                 const std::vector<const Node*>& nodes) {
+const Node& NodeFactory::NewVariadicNode(
+    const SourceCodeRange& range,
+    const Syntax& tag,
+    const std::vector<const Node*>& nodes) {
   const auto size = nodes.size();
   auto* const node = new (AllocateNode(&zone_, size)) Node(range, tag, size);
   auto* runner = &node->nodes_[0];
@@ -103,10 +104,11 @@ const Node& NodeFactory::NewNode(const SourceCodeRange& range,
   return *node;
 }
 
-const Node& NodeFactory::NewNode(const SourceCodeRange& range,
-                                 const Syntax& tag,
-                                 const Node& node0,
-                                 const std::vector<const Node*>& nodes) {
+const Node& NodeFactory::NewVariadicNode(
+    const SourceCodeRange& range,
+    const Syntax& tag,
+    const Node& node0,
+    const std::vector<const Node*>& nodes) {
   const auto size = nodes.size() + 1;
   auto* const node = new (AllocateNode(&zone_, size)) Node(range, tag, size);
   auto* runner = &node->nodes_[0];
@@ -188,24 +190,24 @@ const Node& NodeFactory::NewNode5(const SourceCodeRange& range,
 
 const Node& NodeFactory::NewTuple(const SourceCodeRange& range,
                                   const std::vector<const Node*>& nodes) {
-  return NewNode(range, syntax_factory_->NewTuple(), nodes);
+  return NewVariadicNode(range, syntax_factory_->NewTuple(), nodes);
 }
 
 // Compilation units
 const Node& NodeFactory::NewExterns(
     const SourceCodeRange& range,
     const std::vector<const Node*>& statements) {
-  return NewNode(range, syntax_factory_->NewExterns(), statements);
+  return NewVariadicNode(range, syntax_factory_->NewExterns(), statements);
 }
 
 const Node& NodeFactory::NewModule(const SourceCodeRange& range,
                                    const std::vector<const Node*>& statements) {
-  return NewNode(range, syntax_factory_->NewModule(), statements);
+  return NewVariadicNode(range, syntax_factory_->NewModule(), statements);
 }
 
 const Node& NodeFactory::NewScript(const SourceCodeRange& range,
                                    const std::vector<const Node*>& statements) {
-  return NewNode(range, syntax_factory_->NewScript(), statements);
+  return NewVariadicNode(range, syntax_factory_->NewScript(), statements);
 }
 
 // Tokens
@@ -247,8 +249,8 @@ const Node& NodeFactory::NewArrayBindingPattern(
     const SourceCodeRange& range,
     const std::vector<const Node*>& elements,
     const Node& initializer) {
-  return NewNode(range, syntax_factory_->NewArrayBindingPattern(), initializer,
-                 elements);
+  return NewVariadicNode(range, syntax_factory_->NewArrayBindingPattern(),
+                         initializer, elements);
 }
 
 const Node& NodeFactory::NewBindingCommaElement(const SourceCodeRange& range) {
@@ -282,8 +284,8 @@ const Node& NodeFactory::NewObjectBindingPattern(
     const SourceCodeRange& range,
     const std::vector<const Node*>& elements,
     const Node& initializer) {
-  return NewNode(range, syntax_factory_->NewObjectBindingPattern(), initializer,
-                 elements);
+  return NewVariadicNode(range, syntax_factory_->NewObjectBindingPattern(),
+                         initializer, elements);
 }
 
 // Declarations
@@ -338,7 +340,8 @@ const Node& NodeFactory::NewMethod(const SourceCodeRange& range,
 const Node& NodeFactory::NewArrayInitializer(
     const SourceCodeRange& range,
     const std::vector<const Node*>& elements) {
-  return NewNode(range, syntax_factory_->NewArrayInitializer(), elements);
+  return NewVariadicNode(range, syntax_factory_->NewArrayInitializer(),
+                         elements);
 }
 
 const Node& NodeFactory::NewAssignmentExpression(const SourceCodeRange& range,
@@ -363,14 +366,15 @@ const Node& NodeFactory::NewCallExpression(
     const SourceCodeRange& range,
     const Node& callee,
     const std::vector<const Node*>& argument_list) {
-  return NewNode(range, syntax_factory_->NewCallExpression(), callee,
-                 argument_list);
+  return NewVariadicNode(range, syntax_factory_->NewCallExpression(), callee,
+                         argument_list);
 }
 
 const Node& NodeFactory::NewCommaExpression(
     const SourceCodeRange& range,
     const std::vector<const Node*>& expressions) {
-  return NewNode(range, syntax_factory_->NewCommaExpression(), expressions);
+  return NewVariadicNode(range, syntax_factory_->NewCommaExpression(),
+                         expressions);
 }
 
 const Node& NodeFactory::NewComputedMemberExpression(
@@ -416,20 +420,22 @@ const Node& NodeFactory::NewNewExpression(
     const SourceCodeRange& range,
     const Node& callee,
     const std::vector<const Node*>& argument_list) {
-  return NewNode(range, syntax_factory_->NewNewExpression(), callee,
-                 argument_list);
+  return NewVariadicNode(range, syntax_factory_->NewNewExpression(), callee,
+                         argument_list);
 }
 
 const Node& NodeFactory::NewObjectInitializer(
     const SourceCodeRange& range,
     const std::vector<const Node*>& properties) {
-  return NewNode(range, syntax_factory_->NewObjectInitializer(), properties);
+  return NewVariadicNode(range, syntax_factory_->NewObjectInitializer(),
+                         properties);
 }
 
 const Node& NodeFactory::NewParameterList(
     const SourceCodeRange& range,
     const std::vector<const Node*>& parameters) {
-  return NewNode(range, syntax_factory_->NewParameterList(), parameters);
+  return NewVariadicNode(range, syntax_factory_->NewParameterList(),
+                         parameters);
 }
 
 const Node& NodeFactory::NewProperty(const SourceCodeRange& range,
@@ -462,14 +468,14 @@ const Node& NodeFactory::NewUnaryExpression(const SourceCodeRange& range,
 const Node& NodeFactory::NewJsDocDocument(
     const SourceCodeRange& range,
     const std::vector<const Node*>& nodes) {
-  return NewNode(range, syntax_factory_->NewJsDocDocument(), nodes);
+  return NewVariadicNode(range, syntax_factory_->NewJsDocDocument(), nodes);
 }
 
 const Node& NodeFactory::NewJsDocTag(const SourceCodeRange& range,
                                      const Node& name,
                                      const std::vector<const Node*>& operands) {
   DCHECK_EQ(name, SyntaxCode::Name);
-  return NewNode(range, syntax_factory_->NewJsDocTag(), name, operands);
+  return NewVariadicNode(range, syntax_factory_->NewJsDocTag(), name, operands);
 }
 
 const Node& NodeFactory::NewJsDocText(const SourceCodeRange& range) {
@@ -547,7 +553,7 @@ const Node& NodeFactory::NewLookAheadNotRegExp(const SourceCodeRange& range,
 
 const Node& NodeFactory::NewOrRegExp(const SourceCodeRange& range,
                                      const std::vector<const Node*> patterns) {
-  return NewNode(range, syntax_factory_->NewOrRegExp(), patterns);
+  return NewVariadicNode(range, syntax_factory_->NewOrRegExp(), patterns);
 }
 
 const Node& NodeFactory::NewRegExpRepeat(const SourceCodeRange& range,
@@ -567,14 +573,15 @@ const Node& NodeFactory::NewRepeatRegExp(const SourceCodeRange& range,
 const Node& NodeFactory::NewSequenceRegExp(
     const SourceCodeRange& range,
     const std::vector<const Node*> patterns) {
-  return NewNode(range, syntax_factory_->NewSequenceRegExp(), patterns);
+  return NewVariadicNode(range, syntax_factory_->NewSequenceRegExp(), patterns);
 }
 
 // Statements factory members
 const Node& NodeFactory::NewBlockStatement(
     const SourceCodeRange& range,
     const std::vector<const Node*>& statements) {
-  return NewNode(range, syntax_factory_->NewBlockStatement(), statements);
+  return NewVariadicNode(range, syntax_factory_->NewBlockStatement(),
+                         statements);
 }
 
 const Node& NodeFactory::NewBreakStatement(const SourceCodeRange& range,
@@ -598,7 +605,7 @@ const Node& NodeFactory::NewCatchClause(const SourceCodeRange& range,
 const Node& NodeFactory::NewConstStatement(
     const SourceCodeRange& range,
     const std::vector<const Node*>& elements) {
-  return NewNode(range, syntax_factory_->NewConstStatement(), elements);
+  return NewVariadicNode(range, syntax_factory_->NewConstStatement(), elements);
 }
 
 const Node& NodeFactory::NewContinueStatement(const SourceCodeRange& range,
@@ -679,7 +686,7 @@ const Node& NodeFactory::NewLabeledStatement(const SourceCodeRange& range,
 const Node& NodeFactory::NewLetStatement(
     const SourceCodeRange& range,
     const std::vector<const Node*>& elements) {
-  return NewNode(range, syntax_factory_->NewLetStatement(), elements);
+  return NewVariadicNode(range, syntax_factory_->NewLetStatement(), elements);
 }
 
 const Node& NodeFactory::NewReturnStatement(const SourceCodeRange& range,
@@ -691,8 +698,8 @@ const Node& NodeFactory::NewSwitchStatement(
     const SourceCodeRange& range,
     const Node& expression,
     const std::vector<const Node*>& clauses) {
-  return NewNode(range, syntax_factory_->NewSwitchStatement(), expression,
-                 clauses);
+  return NewVariadicNode(range, syntax_factory_->NewSwitchStatement(),
+                         expression, clauses);
 }
 
 const Node& NodeFactory::NewThrowStatement(const SourceCodeRange& range,
@@ -726,7 +733,7 @@ const Node& NodeFactory::NewTryFinallyStatement(const SourceCodeRange& range,
 const Node& NodeFactory::NewVarStatement(
     const SourceCodeRange& range,
     const std::vector<const Node*>& elements) {
-  return NewNode(range, syntax_factory_->NewVarStatement(), elements);
+  return NewVariadicNode(range, syntax_factory_->NewVarStatement(), elements);
 }
 
 const Node& NodeFactory::NewWhileStatement(const SourceCodeRange& range,
@@ -800,7 +807,7 @@ const Node& NodeFactory::NewRecordType(
     const std::vector<const Node*>& members) {
   for (const auto& member : members)
     DCHECK(member->Is<Name>() || member->Is<Property>()) << member;
-  return NewNode(range, syntax_factory_->NewRecordType(), members);
+  return NewVariadicNode(range, syntax_factory_->NewRecordType(), members);
 }
 
 const Node& NodeFactory::NewRestType(const SourceCodeRange& range,
@@ -813,7 +820,7 @@ const Node& NodeFactory::NewTupleType(const SourceCodeRange& range,
                                       const std::vector<const Node*>& members) {
   for (const auto& member : members)
     DCHECK(member->syntax().Is<Type>()) << *member;
-  return NewNode(range, syntax_factory_->NewTupleType(), members);
+  return NewVariadicNode(range, syntax_factory_->NewTupleType(), members);
 }
 
 const Node& NodeFactory::NewTypeApplication(const SourceCodeRange& range,
@@ -840,7 +847,7 @@ const Node& NodeFactory::NewUnionType(const SourceCodeRange& range,
                                       const std::vector<const Node*>& members) {
   for (const auto& member : members)
     DCHECK(member->syntax().Is<Type>()) << *member;
-  return NewNode(range, syntax_factory_->NewUnionType(), members);
+  return NewVariadicNode(range, syntax_factory_->NewUnionType(), members);
 }
 
 const Node& NodeFactory::NewUnknownType(const SourceCodeRange& range) {

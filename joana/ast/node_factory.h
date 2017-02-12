@@ -398,37 +398,10 @@ class JOANA_AST_EXPORT NodeFactory final {
                               const Node& node0,
                               const std::vector<const Node*>& nodes);
 
-  const Node& NewNode0(const SourceCodeRange& range, const Syntax& tag);
-
-  const Node& NewNode1(const SourceCodeRange& range,
-                       const Syntax& tag,
-                       const Node& node0);
-
-  const Node& NewNode2(const SourceCodeRange& range,
-                       const Syntax& tag,
-                       const Node& node0,
-                       const Node& node1);
-
-  const Node& NewNode3(const SourceCodeRange& range,
-                       const Syntax& tag,
-                       const Node& node0,
-                       const Node& node1,
-                       const Node& node2);
-
-  const Node& NewNode4(const SourceCodeRange& range,
-                       const Syntax& tag,
-                       const Node& node0,
-                       const Node& node1,
-                       const Node& node2,
-                       const Node& node3);
-
-  const Node& NewNode5(const SourceCodeRange& range,
-                       const Syntax& tag,
-                       const Node& node0,
-                       const Node& node1,
-                       const Node& node2,
-                       const Node& node3,
-                       const Node& node4);
+  template <typename... Types>
+  const Node& NewNode(const SourceCodeRange& range,
+                      const Syntax& tag,
+                      const Types&... operands);
 
   std::unique_ptr<NameIdMap> name_id_map_;
   std::unique_ptr<SyntaxFactory> syntax_factory_;

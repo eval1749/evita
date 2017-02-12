@@ -4,6 +4,8 @@
 
 #include "joana/analyzer/values.h"
 
+#include "joana/analyzer/built_in_world.h"
+#include "joana/analyzer/properties.h"
 #include "joana/ast/bindings.h"
 #include "joana/ast/expressions.h"
 #include "joana/ast/syntax_forward.h"
@@ -35,6 +37,12 @@ internal::ReferenceRange<ZoneVector<const Class*>::const_iterator>
 Class::class_list() const {
   DCHECK(is_finalized()) << *this;
   return ReferenceRangeOf(class_list_);
+}
+
+Properties& Class::prototype_properties() const {
+  return properties()
+      .Get(BuiltInWorld::GetInstance()->NameOf(ast::TokenKind::Prototype))
+      .properties();
 }
 
 //

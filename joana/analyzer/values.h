@@ -105,6 +105,7 @@ class Class : public Object {
   bool is_finalized() const { return !class_list_.empty(); }
   ClassKind kind() const { return kind_; }
   const ast::Node& name() const { return name_; }
+  Properties& prototype_properties() const;
 
  protected:
   Class(Zone* zone,

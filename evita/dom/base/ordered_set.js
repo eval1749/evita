@@ -136,10 +136,10 @@ function rotateRight(node) {
 class OrderedSet {
   /**
    * @template T
-   * @param {!function(!T, !T): boolean} less
+   * @param {function(!T, !T): boolean} less
    */
   constructor(less) {
-    /** @const @type {!function(!T, !T): boolean} */
+    /** @const @type {function(!T, !T): boolean} */
     this.less_ = less;
     /** @type {OrderedSetNode<T>} */
     this.root_ = null;
@@ -151,7 +151,7 @@ class OrderedSet {
    * @param {T} data
    */
   add(data) {
-    this.root_ = this.addImpl(this.root_, new base.OrderedSetNode(data));
+    this.root_ = this.addImpl(this.root_, new OrderedSetNode(data));
     this.root_.parent_ = null;
     ++this.size_;
   }
@@ -199,7 +199,7 @@ class OrderedSet {
   }
 
   /**
-   * @param {!function(T)} callback
+   * @param {function(T)} callback
    */
   forEach(callback) {
     for (const data of this.values())

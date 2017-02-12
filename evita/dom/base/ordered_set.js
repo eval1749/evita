@@ -7,9 +7,9 @@ goog.provide('base.OrderedSetNode');
 
 goog.scope(function() {
 
+/** @template T */
 class OrderedSetNode {
   /**
-   * @template T
    * @param {T} data
    */
   constructor(data) {
@@ -133,9 +133,9 @@ function rotateRight(node) {
   return temp;
 }
 
+/** @template T */
 class OrderedSet {
   /**
-   * @template T
    * @param {function(!T, !T): boolean} less
    */
   constructor(less) {

@@ -148,10 +148,15 @@ int Factory::NextValueId() {
   return ++current_value_id_;
 }
 
-void Factory::ResetValueId() {
+void Factory::ResetCurrentId() {
   const auto kValueIdStart = 1000;
   DCHECK_LT(current_value_id_, kValueIdStart);
   current_value_id_ = kValueIdStart;
+}
+
+void Factory::ResetCurrentIdForTesting(int current_id) {
+  DCHECK_GT(current_id, current_value_id_);
+  current_value_id_ = current_id;
 }
 
 }  // namespace analyzer

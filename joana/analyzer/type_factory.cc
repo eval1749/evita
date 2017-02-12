@@ -144,7 +144,6 @@ TypeFactory::TypeFactory(Zone* zone)
       void_type_(*new (zone) VoidType(NextTypeId())) {
   current_type_id_ = 100;
   InstallPrimitiveTypes();
-  current_type_id_ = 1000;
 }
 
 TypeFactory::~TypeFactory() = default;
@@ -281,6 +280,17 @@ const Type& TypeFactory::NewUnionTypeFromVector(
       *new (zone_.Allocate(size)) UnionType(NextTypeId(), members);
   cache_->Register(key, new_type);
   return new_type;
+}
+
+void TypeFactory::ResetCurrentId() {
+  const auto kTypeIdStart = 1000;
+  DCHECK_LT(current_type_id_, kTypeIdStart);
+  current_type_id_ = kTypeIdStart;
+}
+
+void TypeFactory::ResetCurrentIdForTesting(int current_id) {
+  DCHECK_GT(current_id, current_type_id_);
+  current_type_id_ = current_id;
 }
 
 }  // namespace analyzer

@@ -78,7 +78,8 @@ class Factory final {
                               ValueHolderData* data,
                               Properties* properties);
 
-  void ResetValueId();
+  void ResetCurrentId();
+  void ResetCurrentIdForTesting(int current_id);
 
  private:
   class Cache;

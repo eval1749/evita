@@ -67,6 +67,8 @@ class Context final {
   const Class& InstallClass(ast::TokenKind name_id);
   const Class* TryClassOf(ast::TokenKind name_id) const;
 
+  void ResetCurrentIdForTesting(int current_id);
+
  private:
   Zone& zone() const;
 

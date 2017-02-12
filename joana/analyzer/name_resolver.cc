@@ -207,7 +207,8 @@ NameResolver::NameResolver(Context* context)
     : Pass(context),
       global_environment_(std::move(Environment::NewGlobalEnvironment(this))),
       variable_kind_(VariableKind::Function) {
-  factory().ResetValueId();
+  factory().ResetCurrentId();
+  type_factory().ResetCurrentId();
 }
 
 NameResolver::~NameResolver() = default;

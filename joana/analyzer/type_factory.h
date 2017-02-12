@@ -72,6 +72,9 @@ class TypeFactory final {
     return NewUnionTypeFromVector({&members...});
   }
 
+  void ResetCurrentId();
+  void ResetCurrentIdForTesting(int next_id);
+
  private:
   class Cache;
 

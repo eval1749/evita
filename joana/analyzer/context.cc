@@ -94,18 +94,27 @@ const Type& Context::TypeOf(const ast::Node& node) const {
 
 // Global class
 const Class& Context::InstallClass(ast::TokenKind name_id) {
-  const auto& object_name = BuiltInWorld::GetInstance()->NameOf(name_id);
+  const auto& class_name = BuiltInWorld::GetInstance()->NameOf(name_id);
+  auto& properties = factory().NewProperties(class_name);
   const auto& object_class =
-      factory().NewNormalClass(ClassKind::Class, object_name, object_name,
-                               &factory().NewProperties(object_name));
+      name_id == ast::TokenKind::Array
+          ? factory().NewGenericClass(
+                ClassKind::Class, class_name, class_name,
+                {&type_factory()
+                      .NewTypeParameter(BuiltInWorld::GetInstance()->NameOf(
+                          ast::TokenKind::Object))
+                      .As<TypeParameter>()},
+                &properties)
+          : factory().NewNormalClass(ClassKind::Class, class_name, class_name,
+                                     &properties);
   const auto& object_variable = factory().NewVariable(
-      VariableKind::Const, object_name, &factory().NewValueHolderData(),
-      &factory().NewProperties(object_name));
+      VariableKind::Const, class_name, &factory().NewValueHolderData(),
+      &factory().NewProperties(class_name));
   const auto& object_property = factory().NewProperty(
-      Visibility::Public, object_name, &object_variable.data(),
+      Visibility::Public, class_name, &object_variable.data(),
       &object_variable.properties());
-  RegisterValue(object_name, object_class);
-  Value::Editor().AddAssignment(object_property, object_name);
+  RegisterValue(class_name, object_class);
+  Value::Editor().AddAssignment(object_property, class_name);
   Properties::Editor().Add(&global_properties(), object_property);
   return object_class;
 }
@@ -119,6 +128,11 @@ const Class* Context::TryClassOf(ast::TokenKind name_id) const {
   auto* object_value = TryValueOf(assignment);
   return object_value && object_value->Is<Class>() ? &object_value->As<Class>()
                                                    : nullptr;
+}
+
+void Context::ResetCurrentIdForTesting(int current_id) {
+  factory().ResetCurrentIdForTesting(current_id);
+  type_factory().ResetCurrentIdForTesting(current_id);
 }
 
 }  // namespace analyzer

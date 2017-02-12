@@ -151,7 +151,8 @@ class TypeAnnotationTransformer::FunctionParameters::Builder final
     Rest,
   };
 
-  const ast::Node* FindTag(const ast::Node& name) const;
+  // Returns @param tag for |name|.
+  const ast::Node* FindParameterTag(const ast::Node& name) const;
   void ProcessBindingNameElement(const ast::Node& node);
   void ProcessBindingRestElement(const ast::Node& node);
   // Returns true if |name| is not appeared so far.
@@ -212,18 +213,21 @@ TypeAnnotationTransformer::FunctionParameters::Builder::Build() {
 }
 
 const ast::Node*
-TypeAnnotationTransformer::FunctionParameters::Builder::FindTag(
+TypeAnnotationTransformer::FunctionParameters::Builder::FindParameterTag(
     const ast::Node& name) const {
   DCHECK_EQ(name, ast::SyntaxCode::Name);
   const auto name_id = ast::Name::KindOf(name);
-  for (const auto& parameter_tag : parameter_tags_) {
-    const auto& reference = parameter_tag->child_at(2);
-    if (!reference.Is<ast::ReferenceExpression>())
-      continue;
-    if (ast::ReferenceExpression::NameOf(reference) == name_id)
-      return parameter_tag;
-  }
-  return nullptr;
+  const auto& it = std::find_if(
+      parameter_tags_.begin(), parameter_tags_.end(),
+      [&](const ast::Node* parameter_tag) {
+        if (parameter_tag->arity() < 2)
+          return false;
+        const auto& reference = parameter_tag->child_at(2);
+        if (!reference.Is<ast::ReferenceExpression>())
+          return false;
+        return ast::ReferenceExpression::NameOf(reference) == name_id;
+      });
+  return it == parameter_tags_.end() ? nullptr : *it;
 }
 
 void TypeAnnotationTransformer::FunctionParameters::Builder::
@@ -231,7 +235,7 @@ void TypeAnnotationTransformer::FunctionParameters::Builder::
   const ast::Node& name = ast::BindingNameElement::NameOf(node);
   const auto has_initializer = !ast::BindingNameElement::InitializerOf(node)
                                     .Is<ast::ElisionExpression>();
-  const auto* const tag = FindTag(name);
+  const auto* const tag = FindParameterTag(name);
   const auto is_optional = tag && tag->child_at(1).Is<ast::OptionalType>();
   const auto is_rest = tag && tag->child_at(1).Is<ast::RestType>();
   const auto& type =
@@ -282,7 +286,7 @@ void TypeAnnotationTransformer::FunctionParameters::Builder::
   const auto& binding = node.child_at(0);
   if (binding.Is<ast::BindingNameElement>()) {
     const auto& name = ast::BindingNameElement::NameOf(binding);
-    const auto& maybe_tag = FindTag(name);
+    const auto& maybe_tag = FindParameterTag(name);
     if (!maybe_tag) {
       RecordName(name);
       parameter_types_.push_back(&unspecified_type());

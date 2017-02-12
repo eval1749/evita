@@ -59,7 +59,10 @@ class TypeResolverTest : public AnalyzerTestBase {
 std::string TypeResolverTest::RunOn(base::StringPiece script_text) {
   const auto& module = ParseAsModule(script_text);
   const auto& context = NewContext();
+  context->ResetCurrentIdForTesting(500);
+  context->InstallClass(ast::TokenKind::Array);
   context->InstallClass(ast::TokenKind::Object);
+  context->ResetCurrentIdForTesting(600);
   {
     NameResolver name_resolver(context.get());
     name_resolver.RunOn(module);
@@ -165,7 +168,7 @@ TEST_F(TypeResolverTest, BaseClass) {
       "|  |  +--ObjectInitializer |{}|\n"
       "Class[Baz@1008]\n"
       "+--BaseClasses\n"
-      "|   +--Class[Object@1]\n"
+      "|   +--Class[Object@504]\n"
       "|   +--Interface[Foo@1002]\n"
       "|   +--Interface[Bar@1005]\n",
       RunOn("/** @interface */ var Foo;\n"
@@ -246,7 +249,7 @@ TEST_F(TypeResolverTest, BaseClassError) {
       "|  |  +--ObjectInitializer |{}|\n"
       "Class[Bar@1005]\n"
       "+--BaseClasses\n"
-      "|   +--Class[Object@1]\n"
+      "|   +--Class[Object@504]\n"
       "|   +--Interface[A@1002]\n"
       "ANALYZER_ERROR_TYPE_RESOLVER_MULTIPLE_OCCURRENCES@42:60\n",
       RunOn("/** @interface */ var A;\n"
@@ -697,6 +700,43 @@ TEST_F(TypeResolverTest, RecordTypeError) {
       RunOn("/** @type {{foo: number, foo: string}} */ var quux;"));
 }
 
+TEST_F(TypeResolverTest, RestType) {
+  EXPECT_EQ(
+      "Module\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@param|\n"
+      "|  |  |  +--TypeName {%number%}\n"
+      "|  |  |  |  +--Name |number|\n"
+      "|  |  |  +--ReferenceExpression ParameterVar[level@1003]\n"
+      "|  |  |  |  +--Name |level|\n"
+      "|  |  |  +--JsDocText ||\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@param|\n"
+      "|  |  |  +--RestType\n"
+      "|  |  |  |  +--TypeName {%string%}\n"
+      "|  |  |  |  |  +--Name |string|\n"
+      "|  |  |  +--ReferenceExpression ParameterVar[args@1004]\n"
+      "|  |  |  |  +--Name |args|\n"
+      "|  |  |  +--JsDocText |*/|\n"
+      "|  +--Function<Normal> Function[foo@1001] "
+      "{function(%number%,Array<%string%>@1001)}\n"
+      "|  |  +--Name |foo|\n"
+      "|  |  +--ParameterList\n"
+      "|  |  |  +--BindingNameElement ParameterVar[level@1003]\n"
+      "|  |  |  |  +--Name |level|\n"
+      "|  |  |  |  +--ElisionExpression ||\n"
+      "|  |  |  +--BindingRestElement\n"
+      "|  |  |  |  +--BindingNameElement ParameterVar[args@1004]\n"
+      "|  |  |  |  |  +--Name |args|\n"
+      "|  |  |  |  |  +--ElisionExpression ||\n"
+      "|  |  +--BlockStatement |{}|\n",
+      RunOn("/** @param {number} level @param {...string} args */\n"
+            "function foo(level, ...args) {}"));
+}
+
 TEST_F(TypeResolverTest, TupleType) {
   EXPECT_EQ(
       "Module\n"
@@ -832,7 +872,7 @@ TEST_F(TypeResolverTest, TypeApplication) {
       "|  |  |  +--ElisionExpression || Class[Bar@1005]\n"
       "Class[Bar@1005]\n"
       "+--BaseClasses\n"
-      "|   +--Class[Object@1]\n"
+      "|   +--Class[Object@504]\n"
       "|   +--ConstructedInterface<%number%>[Foo@1007]\n",
       RunOn("/** @interface @template T */ var Foo;"
             "/** @constructor @implements {Foo<number>} */ var Bar;"));

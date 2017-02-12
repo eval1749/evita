@@ -295,11 +295,18 @@ void TypeAnnotationTransformer::FunctionParameters::Builder::
     const auto& tag = *maybe_tag;
     if (RecordName(name))
       RecordTag(tag);
-    if (tag.Is<ast::OptionalType>())
-      AddError(tag, ErrorCode::JSDOC_UNEXPECT_OPTIONAL);
-    else if (tag.Is<ast::RestType>())
-      AddError(tag, ErrorCode::JSDOC_UNEXPECT_REST);
-    parameter_types_.push_back(&TransformType(tag.child_at(1)));
+    const auto& type_node = tag.child_at(1);
+    if (!type_node.Is<ast::RestType>()) {
+      AddError(tag, ErrorCode::JSDOC_EXPECT_REST);
+      parameter_types_.push_back(&unspecified_type());
+      return;
+    }
+    const auto& element_type = TransformType(type_node.child_at(0));
+    const auto& array_class = context().factory().NewConstructedClass(
+        context().TryClassOf(ast::TokenKind::Array)->As<GenericClass>(),
+        {&element_type});
+    parameter_types_.push_back(
+        &context().type_factory().NewClassType(array_class));
     return;
   }
   NOTREACHED() << "NYI parameter binding" << static_cast<int>(state_);

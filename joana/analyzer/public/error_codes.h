@@ -20,6 +20,7 @@ namespace joana {
   V(JSDOC, EXPECT_NULLABLE_TYPE)              \
   V(JSDOC, EXPECT_PARAMETER)                  \
   V(JSDOC, EXPECT_PROPERTY)                   \
+  V(JSDOC, EXPECT_REST)                       \
   V(JSDOC, EXPECT_TYPE)                       \
   V(JSDOC, INVALID_ARGUMENTS)                 \
   V(JSDOC, MULTIPLE_NAME)                     \
@@ -44,6 +45,7 @@ namespace joana {
   V(ENVIRONMENT, UNEXPECT_INITIALIZER)        \
   V(ENVIRONMENT, UNEXPECT_ANNOTATION)         \
   V(TYPE_CHECKER, UNINITIALIZED_VARIABLE)     \
+  V(TYPE_RESOLVER, EXPECT_ARRAY_CLASS)        \
   V(TYPE_RESOLVER, EXPECT_CLASS)              \
   V(TYPE_RESOLVER, EXPECT_CLASS_TYPE)         \
   V(TYPE_RESOLVER, EXPECT_INTERFACE)          \

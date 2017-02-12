@@ -6,8 +6,10 @@
 
 #include "joana/ast/statements.h"
 
+#include "joana/ast/bindings.h"
 #include "joana/ast/node.h"
 #include "joana/ast/node_traversal.h"
+#include "joana/ast/tokens.h"
 
 namespace joana {
 namespace ast {
@@ -17,9 +19,6 @@ IMPLEMENT_AST_SYNTAX_0(Statement, CaseClause, 2)
 IMPLEMENT_AST_SYNTAX_0(Statement, ContinueStatement, 1)
 IMPLEMENT_AST_SYNTAX_0(Statement, DoStatement, 2)
 IMPLEMENT_AST_SYNTAX_0(Statement, EmptyStatement, 0)
-IMPLEMENT_AST_SYNTAX_0(Statement, ForStatement, 5)
-IMPLEMENT_AST_SYNTAX_0(Statement, ForInStatement, 4)
-IMPLEMENT_AST_SYNTAX_0(Statement, ForOfStatement, 4)
 IMPLEMENT_AST_SYNTAX_0(Statement, IfElseStatement, 3)
 IMPLEMENT_AST_SYNTAX_0(Statement, IfStatement, 2)
 IMPLEMENT_AST_SYNTAX_0(Statement, InvalidStatement, 0)
@@ -86,6 +85,101 @@ const Node& ExpressionStatement::ExpressionOf(const Node& node) {
 }
 
 //
+// ForStatement
+//
+ForStatement::ForStatement()
+    : SyntaxTemplate(std::tuple<>(),
+                     SyntaxCode::ForStatement,
+                     Format::Builder().set_arity(5).Build()) {}
+
+ForStatement::~ForStatement() = default;
+
+const Node& ForStatement::InitializeOf(const Node& node) {
+  DCHECK_EQ(node, SyntaxCode::ForStatement);
+  return node.child_at(1);
+}
+
+const Node& ForStatement::ConditionOf(const Node& node) {
+  DCHECK_EQ(node, SyntaxCode::ForStatement);
+  return node.child_at(2);
+}
+
+const Node& ForStatement::KeywordOf(const Node& node) {
+  DCHECK_EQ(node, SyntaxCode::ForStatement);
+  return node.child_at(0);
+}
+
+const Node& ForStatement::StatementOf(const Node& node) {
+  DCHECK_EQ(node, SyntaxCode::ForStatement);
+  return node.child_at(4);
+}
+
+const Node& ForStatement::StepOf(const Node& node) {
+  DCHECK_EQ(node, SyntaxCode::ForStatement);
+  return node.child_at(3);
+}
+
+//
+// ForInStatement
+//
+ForInStatement::ForInStatement()
+    : SyntaxTemplate(std::tuple<>(),
+                     SyntaxCode::ForInStatement,
+                     Format::Builder().set_arity(4).Build()) {}
+
+ForInStatement::~ForInStatement() = default;
+
+const Node& ForInStatement::BindingOf(const Node& node) {
+  DCHECK_EQ(node, SyntaxCode::ForInStatement);
+  return node.child_at(1);
+}
+
+const Node& ForInStatement::ExpressionOf(const Node& node) {
+  DCHECK_EQ(node, SyntaxCode::ForInStatement);
+  return node.child_at(2);
+}
+
+const Node& ForInStatement::KeywordOf(const Node& node) {
+  DCHECK_EQ(node, SyntaxCode::ForInStatement);
+  return node.child_at(0);
+}
+
+const Node& ForInStatement::StatementOf(const Node& node) {
+  DCHECK_EQ(node, SyntaxCode::ForInStatement);
+  return node.child_at(3);
+}
+
+//
+// ForOfStatement
+//
+ForOfStatement::ForOfStatement()
+    : SyntaxTemplate(std::tuple<>(),
+                     SyntaxCode::ForOfStatement,
+                     Format::Builder().set_arity(4).Build()) {}
+
+ForOfStatement::~ForOfStatement() = default;
+
+const Node& ForOfStatement::BindingOf(const Node& node) {
+  DCHECK_EQ(node, SyntaxCode::ForOfStatement);
+  return node.child_at(1);
+}
+
+const Node& ForOfStatement::ExpressionOf(const Node& node) {
+  DCHECK_EQ(node, SyntaxCode::ForOfStatement);
+  return node.child_at(2);
+}
+
+const Node& ForOfStatement::KeywordOf(const Node& node) {
+  DCHECK_EQ(node, SyntaxCode::ForOfStatement);
+  return node.child_at(0);
+}
+
+const Node& ForOfStatement::StatementOf(const Node& node) {
+  DCHECK_EQ(node, SyntaxCode::ForOfStatement);
+  return node.child_at(3);
+}
+
+//
 // LetStatement
 //
 LetStatement::LetStatement() : VariableDeclaration(SyntaxCode::LetStatement) {}
@@ -129,6 +223,19 @@ VariableDeclaration::~VariableDeclaration() = default;
 VarStatement::VarStatement() : VariableDeclaration(SyntaxCode::VarStatement) {}
 
 VarStatement::~VarStatement() = default;
+
+bool IsDeclarationKeyword(const Node& name) {
+  if (name != SyntaxCode::Name)
+    return false;
+  return name == TokenKind::Const || name == TokenKind::Let ||
+         name == TokenKind::Var;
+}
+
+bool IsValidForBinding(const Node& binding) {
+  return binding.Is<BindingNameElement>() ||
+         binding.Is<ArrayBindingPattern>() ||
+         binding.Is<ObjectBindingPattern>();
+}
 
 }  // namespace ast
 }  // namespace joana

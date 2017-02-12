@@ -19,9 +19,6 @@ DECLARE_AST_SYNTAX_0(CaseClause)
 DECLARE_AST_SYNTAX_0(ContinueStatement)
 DECLARE_AST_SYNTAX_0(DoStatement)
 DECLARE_AST_SYNTAX_0(EmptyStatement)
-DECLARE_AST_SYNTAX_0(ForStatement)
-DECLARE_AST_SYNTAX_0(ForInStatement)
-DECLARE_AST_SYNTAX_0(ForOfStatement)
 DECLARE_AST_SYNTAX_0(IfElseStatement)
 DECLARE_AST_SYNTAX_0(IfStatement)
 DECLARE_AST_SYNTAX_0(InvalidStatement)
@@ -102,6 +99,67 @@ class JOANA_AST_EXPORT ExpressionStatement final
 };
 
 //
+// ForStatement
+//
+class JOANA_AST_EXPORT ForStatement final : public SyntaxTemplate<Syntax> {
+  DECLARE_CONCRETE_AST_SYNTAX(ForStatement, Syntax);
+
+ public:
+  ~ForStatement() final;
+
+  static const ast::Node& ConditionOf(const ast::Node& node);
+  static const ast::Node& InitializeOf(const ast::Node& node);
+  static const ast::Node& KeywordOf(const ast::Node& node);
+  static const ast::Node& StatementOf(const ast::Node& node);
+  static const ast::Node& StepOf(const ast::Node& node);
+
+ private:
+  ForStatement();
+
+  DISALLOW_COPY_AND_ASSIGN(ForStatement);
+};
+
+//
+// ForInStatement
+//
+class JOANA_AST_EXPORT ForInStatement final : public SyntaxTemplate<Syntax> {
+  DECLARE_CONCRETE_AST_SYNTAX(ForInStatement, Syntax);
+
+ public:
+  ~ForInStatement() final;
+
+  static const ast::Node& BindingOf(const ast::Node& node);
+  static const ast::Node& ExpressionOf(const ast::Node& node);
+  static const ast::Node& KeywordOf(const ast::Node& node);
+  static const ast::Node& StatementOf(const ast::Node& node);
+
+ private:
+  ForInStatement();
+
+  DISALLOW_COPY_AND_ASSIGN(ForInStatement);
+};
+
+//
+// ForOfStatement
+//
+class JOANA_AST_EXPORT ForOfStatement final : public SyntaxTemplate<Syntax> {
+  DECLARE_CONCRETE_AST_SYNTAX(ForOfStatement, Syntax);
+
+ public:
+  ~ForOfStatement() final;
+
+  static const ast::Node& BindingOf(const ast::Node& node);
+  static const ast::Node& ExpressionOf(const ast::Node& node);
+  static const ast::Node& KeywordOf(const ast::Node& node);
+  static const ast::Node& StatementOf(const ast::Node& node);
+
+ private:
+  ForOfStatement();
+
+  DISALLOW_COPY_AND_ASSIGN(ForOfStatement);
+};
+
+//
 // LetStatement
 //
 class JOANA_AST_EXPORT LetStatement final : public VariableDeclaration {
@@ -148,6 +206,9 @@ class JOANA_AST_EXPORT VarStatement final : public VariableDeclaration {
 
   DISALLOW_COPY_AND_ASSIGN(VarStatement);
 };
+
+JOANA_AST_EXPORT bool IsDeclarationKeyword(const Node& name);
+JOANA_AST_EXPORT bool IsValidForBinding(const Node& binding);
 
 }  // namespace ast
 }  // namespace joana

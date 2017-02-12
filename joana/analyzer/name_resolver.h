@@ -90,6 +90,10 @@ class NameResolver final : public Pass, public ast::SyntaxVisitor {
                        const Annotation& annotation,
                        const ast::Node* alias);
 
+  void ProcessMethod(const ast::Node& node,
+                     const Annotation& annotation,
+                     const Class& class_value);
+
   void ProcessPropertyAssignment(const ast::Node& lhs,
                                  const ast::Node* maybe_rhs,
                                  const Annotation& annotation);

@@ -444,6 +444,37 @@ TEST_F(NameResolverTest, FunctionAnnotation) {
       RunOn("/** @constructor @template KEY, VALUE */ function Map() {}"));
 }
 
+TEST_F(NameResolverTest, GenericMethod) {
+  EXPECT_EQ(
+      "Module\n"
+      "+--Class Class[Foo@1002]\n"
+      "|  +--Name |Foo|\n"
+      "|  +--ElisionExpression ||\n"
+      "|  +--ObjectInitializer\n"
+      "|  |  +--Annotation\n"
+      "|  |  |  +--JsDocDocument\n"
+      "|  |  |  |  +--JsDocText |/**|\n"
+      "|  |  |  |  +--JsDocTag\n"
+      "|  |  |  |  |  +--Name |@template|\n"
+      "|  |  |  |  |  +--TypeName {T@1002}\n"
+      "|  |  |  |  |  |  +--Name |T|\n"
+      "|  |  |  |  +--JsDocTag\n"
+      "|  |  |  |  |  +--Name |@param|\n"
+      "|  |  |  |  |  +--TypeName {T@1002}\n"
+      "|  |  |  |  |  |  +--Name |T|\n"
+      "|  |  |  |  |  +--ReferenceExpression ParameterVar[x@1006]\n"
+      "|  |  |  |  |  |  +--Name |x|\n"
+      "|  |  |  |  |  +--JsDocText |*/|\n"
+      "|  |  |  +--Method<NonStatic,Normal> Function[constructor@1004]\n"
+      "|  |  |  |  +--Name |constructor|\n"
+      "|  |  |  |  +--ParameterList\n"
+      "|  |  |  |  |  +--BindingNameElement ParameterVar[x@1006]\n"
+      "|  |  |  |  |  |  +--Name |x|\n"
+      "|  |  |  |  |  |  +--ElisionExpression ||\n"
+      "|  |  |  |  +--BlockStatement |{}|\n",
+      RunOn("class Foo { /** @template T @param {T} x */ constructor(x) {} }"));
+}
+
 TEST_F(NameResolverTest, Global) {
   EXPECT_EQ(
       "Module\n"

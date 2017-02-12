@@ -433,50 +433,61 @@ void NameResolver::ProcessClass(const ast::Node& node,
   Visit(ast::Class::HeritageOf(node));
 
   // Populate class properties and prototype properties with methods.
-  const auto& prototype_property = class_value.properties().Get(
-      BuiltInWorld::GetInstance()->NameOf(ast::TokenKind::Prototype));
   for (const auto& child :
        ast::NodeTraversal::ChildNodesOf(ast::Class::BodyOf(node))) {
-    const auto& member = child.Is<ast::Annotation>()
-                             ? ast::Annotation::AnnotatedOf(child)
-                             : child;
-
-    if (member != ast::SyntaxCode::Method) {
-      AddError(member, ErrorCode::ENVIRONMENT_EXPECT_METHOD);
+    if (child.Is<ast::Method>()) {
+      ProcessMethod(child, Annotation(), class_value);
       continue;
     }
-
-    const auto& method_name = ast::Method::NameOf(member);
-    if (method_name == ast::TokenKind::Constructor &&
-        !IsValidConstructor(member)) {
-      AddError(member, ErrorCode::ENVIRONMENT_INVALID_CONSTRUCTOR);
-    }
-
-    // Check multiple occurrence
-    Properties& properties = ast::Method::IsStatic(member)
-                                 ? class_value.properties()
-                                 : prototype_property.properties();
-
-    const auto& method = factory().NewFunction(method_name, member);
-    context().RegisterValue(member, method);
-    if (auto* present = properties.TryGet(method_name)) {
-      AddError(member, ErrorCode::ENVIRONMENT_MULTIPLE_OCCURRENCES,
-               present->node());
-      Value::Editor().AddAssignment(*present, member);
-    } else {
-      const auto& property = NewProperty(Visibility::Public, method_name);
-      Properties::Editor().Add(&properties, property);
-      Value::Editor().AddAssignment(property, member);
-    }
-
-    Environment environment(this);
-    BindTypeParameters(class_value);
-    VisitDefault(member);
-
-    if (!child.Is<ast::Annotation>())
+    if (child.Is<ast::Annotation>()) {
+      const auto& member = ast::Annotation::AnnotatedOf(child);
+      if (member != ast::SyntaxCode::Method) {
+        AddError(member, ErrorCode::ENVIRONMENT_EXPECT_METHOD);
+        continue;
+      }
+      const auto& method_annotation =
+          Annotation::Compiler(&context())
+              .Compile(ast::Annotation::DocumentOf(child), member);
+      ProcessMethod(member, method_annotation, class_value);
       continue;
-    VisitDefault(ast::Annotation::DocumentOf(child));
+    }
+    AddError(child, ErrorCode::ENVIRONMENT_EXPECT_METHOD);
   }
+}
+
+void NameResolver::ProcessMethod(const ast::Node& method_node,
+                                 const Annotation& annotation,
+                                 const Class& class_value) {
+  const auto& method_name = ast::Method::NameOf(method_node);
+  if (method_name == ast::TokenKind::Constructor &&
+      !IsValidConstructor(method_node)) {
+    AddError(method_node, ErrorCode::ENVIRONMENT_INVALID_CONSTRUCTOR);
+  }
+
+  // Check multiple occurrence
+  Properties& properties = ast::Method::IsStatic(method_node)
+                               ? class_value.properties()
+                               : class_value.prototype_properties();
+  const auto& method = factory().NewFunction(method_name, method_node);
+  context().RegisterValue(method_node, method);
+  if (auto* present = properties.TryGet(method_name)) {
+    AddError(method_node, ErrorCode::ENVIRONMENT_MULTIPLE_OCCURRENCES,
+             present->node());
+    Value::Editor().AddAssignment(*present, method_node);
+  } else {
+    const auto& property = NewProperty(Visibility::Public, method_name);
+    Properties::Editor().Add(&properties, property);
+    Value::Editor().AddAssignment(property, method_node);
+  }
+  Environment environment(this);
+  BindTypeParameters(class_value);
+  const auto& type_parameters =
+      ProcessTypeParameterNames(annotation.type_parameter_names());
+  for (const auto& type_parameter : type_parameters)
+    BindType(type_parameter->name(), *type_parameter);
+  if (annotation.has_document())
+    Visit(annotation.document());
+  VisitChildNodes(method_node);
 }
 
 // Bind name in "@param {type} name" tags.
@@ -871,6 +882,8 @@ void NameResolver::VisitInternal(const ast::VarStatement& syntax,
 void NameResolver::VisitInternal(const ast::TypeName& syntax,
                                  const ast::Node& node) {
   if (const auto* present = FindType(ast::TypeName::NameOf(node))) {
+    if (context().TryTypeOf(node))
+      return;
     context().RegisterType(node, *present);
     return;
   }

@@ -593,6 +593,12 @@ const Node& NodeFactory::NewForStatement(const SourceCodeRange& range,
                                          const Node& condition,
                                          const Node& step,
                                          const Node& body) {
+  if (IsDeclarationKeyword(keyword)) {
+    DCHECK(IsValidForBinding(init)) << init;
+  } else {
+    DCHECK(keyword.Is<Empty>()) << keyword;
+    DCHECK(!IsValidForBinding(init)) << init;
+  }
   return NewNode(range, syntax_factory_->NewForStatement(), keyword, init,
                  condition, step, body);
 }
@@ -602,6 +608,12 @@ const Node& NodeFactory::NewForInStatement(const SourceCodeRange& range,
                                            const Node& binding,
                                            const Node& expression,
                                            const Node& body) {
+  if (IsDeclarationKeyword(keyword)) {
+    DCHECK(IsValidForBinding(binding)) << binding;
+  } else {
+    DCHECK(keyword.Is<Empty>()) << keyword;
+    DCHECK(!IsValidForBinding(binding)) << binding;
+  }
   return NewNode(range, syntax_factory_->NewForInStatement(), keyword, binding,
                  expression, body);
 }
@@ -611,6 +623,12 @@ const Node& NodeFactory::NewForOfStatement(const SourceCodeRange& range,
                                            const Node& binding,
                                            const Node& expression,
                                            const Node& body) {
+  if (IsDeclarationKeyword(keyword)) {
+    DCHECK(IsValidForBinding(binding)) << binding;
+  } else {
+    DCHECK(keyword.Is<Empty>()) << keyword;
+    DCHECK(!IsValidForBinding(binding)) << binding;
+  }
   return NewNode(range, syntax_factory_->NewForOfStatement(), keyword, binding,
                  expression, body);
 }

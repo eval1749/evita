@@ -62,7 +62,7 @@ class TypeAnnotationTransformer final : public ContextUser {
   const Type& TransformType(const ast::Node& node);
 
   // Return |Class| value associated to |node|
-  Class* TryClassValueOf(const ast::Node& node) const;
+  const Class* TryClassValueOf(const ast::Node& node) const;
 
   const Annotation& annotation_;
   const ast::Node& node_;

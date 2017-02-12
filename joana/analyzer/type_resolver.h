@@ -33,7 +33,7 @@ class TypeResolver final : public Pass, public ast::SyntaxVisitor {
   void PrepareForTesting();
 
  private:
-  void SetClassHeritage(Class* class_value,
+  void SetClassHeritage(const Class& class_value,
                         const Annotation& annotation,
                         const ast::Node& node);
   const Type* ComputeClassType(const ast::Node& node) const;
@@ -67,8 +67,8 @@ class TypeResolver final : public Pass, public ast::SyntaxVisitor {
                               const Annotation& annotation,
                               const Type* maybe_this_type);
 
-  Class* ResolveClass(const ast::Node& node);
-  Value* SingleValueOf(const ast::Node& node) const;
+  const Class* ResolveClass(const ast::Node& node);
+  const Value* SingleValueOf(const ast::Node& node) const;
 
   // |Pass| members
   void RunOnAll() final;
@@ -82,7 +82,7 @@ class TypeResolver final : public Pass, public ast::SyntaxVisitor {
   void VisitInternal(const ast::Class& syntax, const ast::Node& node) final;
 
   const std::unique_ptr<ClassTreeBuilder> class_tree_builder_;
-  Class* object_class_ = nullptr;
+  const Class* object_class_ = nullptr;
 
   DISALLOW_COPY_AND_ASSIGN(TypeResolver);
 };

@@ -31,10 +31,10 @@ class ClassTreeBuilder final : public ContextUser {
   ~ClassTreeBuilder();
 
   void Build();
-  void ProcessClassDefinition(Class* clazz);
+  void ProcessClassDefinition(const Class& clazz);
 
   // Returns true if |clazz| is finalized.
-  bool ProcessClassReference(Class* clazz);
+  bool ProcessClassReference(const Class& clazz);
 
  private:
   class ClassNode;
@@ -50,13 +50,13 @@ class ClassTreeBuilder final : public ContextUser {
 
   class ClassNode : public ClassGraph::GraphNodeBase, public ZoneAllocated {
    public:
-    ClassNode(Zone* zone, Class* clazz);
+    ClassNode(Zone* zone, const Class& clazz);
     ~ClassNode();
 
-    Class& value() const { return class_; }
+    const Class& value() const { return class_; }
 
    private:
-    Class& class_;
+    const Class& class_;
 
     DISALLOW_COPY_AND_ASSIGN(ClassNode);
   };
@@ -64,20 +64,21 @@ class ClassTreeBuilder final : public ContextUser {
   using ArgumentMap = std::unordered_map<const TypeParameter*, const Type*>;
 
   bool CanFinalize(const Class& clazz) const;
-  Class& ConstructClass(Class* base_class, const ArgumentMap& argument_map);
-  void FinalizeClass(Class* clazz);
-  void FinalizeConstructedClass(ConstructedClass* clazz);
-  ClassNode& GetOrNewNode(Class* clazz);
+  const Class& ConstructClass(const Class& base_class,
+                              const ArgumentMap& argument_map);
+  void FinalizeClass(const Class& clazz);
+  void FinalizeConstructedClass(const ConstructedClass& clazz);
+  ClassNode& GetOrNewNode(const Class& clazz);
   bool IsProcessed(const Class& clazz) const;
   void ValidateClassTree();
 
-  std::unordered_set<ConstructedClass*> pending_constructed_classes_;
+  std::unordered_set<const ConstructedClass*> pending_constructed_classes_;
 
   // A set of classes passed in |Process()|.
   std::unordered_set<const Class*> processed_classes_;
 
   // Mapping from |Class| to |ClassNode|.
-  std::unordered_map<Class*, ClassNode*> class_map_;
+  std::unordered_map<const Class*, ClassNode*> class_map_;
 
   // Holds non-finalized classes in directional graph, each vertex is a
   // |ClassNode| and each edge is user class to using class.

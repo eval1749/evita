@@ -261,8 +261,9 @@ const Type& TypeTransformer::TransformTypeApplication(const ast::Node& node) {
   for (const auto& argument_node :
        ast::NodeTraversal::ChildNodesOf(arguments_node))
     arguments.push_back(&Transform(argument_node));
-  auto& value = factory().NewConstructedClass(generic_class_value, arguments);
-  return type_factory().NewClassType(&value);
+  const auto& value =
+      factory().NewConstructedClass(*generic_class_value, arguments);
+  return type_factory().NewClassType(value);
 }
 
 const Type& TypeTransformer::TransformTypeName(const ast::Node& node) {

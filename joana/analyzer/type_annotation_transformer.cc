@@ -542,12 +542,12 @@ const Type& TypeAnnotationTransformer::TransformAsFunctionType() {
 }
 
 const Type& TypeAnnotationTransformer::TransformAsInterface() {
-  auto* const class_value = TryClassValueOf(node_);
+  const auto* const class_value = TryClassValueOf(node_);
   if (!class_value) {
     AddError(node_, ErrorCode::JSDOC_UNEXPECT_TAG);
     return unspecified_type();
   }
-  return type_factory().NewClassType(class_value);
+  return type_factory().NewClassType(*class_value);
 }
 
 const Type& TypeAnnotationTransformer::TransformType(const ast::Node& node) {
@@ -555,7 +555,8 @@ const Type& TypeAnnotationTransformer::TransformType(const ast::Node& node) {
   return TypeTransformer(&context()).Transform(node);
 }
 
-Class* TypeAnnotationTransformer::TryClassValueOf(const ast::Node& node) const {
+const Class* TypeAnnotationTransformer::TryClassValueOf(
+    const ast::Node& node) const {
   if (node.Is<ast::Class>())
     return &context().ValueOf(node).As<Class>();
   if (node.Is<ast::Function>())

@@ -43,39 +43,40 @@ class Factory final {
   ~Factory();
 
   // Factory members
-  Class& NewConstructedClass(GenericClass* generic_class,
-                             const std::vector<const Type*>& arguments);
+  const Class& NewConstructedClass(const GenericClass& generic_class,
+                                   const std::vector<const Type*>& arguments);
 
-  Function& NewFunction(const ast::Node& name, const ast::Node& node);
+  const Function& NewFunction(const ast::Node& name, const ast::Node& node);
 
-  Class& NewGenericClass(ClassKind kind,
-                         const ast::Node& name,
-                         const ast::Node& node,
-                         const std::vector<const TypeParameter*>& parameters,
-                         Properties* properties);
+  const Class& NewGenericClass(
+      ClassKind kind,
+      const ast::Node& name,
+      const ast::Node& node,
+      const std::vector<const TypeParameter*>& parameters,
+      Properties* properties);
 
-  Class& NewNormalClass(ClassKind kind,
-                        const ast::Node& name,
-                        const ast::Node& node,
-                        Properties* properties);
+  const Class& NewNormalClass(ClassKind kind,
+                              const ast::Node& name,
+                              const ast::Node& node,
+                              Properties* properties);
 
-  Value& NewOrdinaryObject(const ast::Node& node);
+  const Value& NewOrdinaryObject(const ast::Node& node);
 
   Properties& NewProperties(const ast::Node& node);
 
-  Property& NewProperty(Visibility visibility,
-                        const ast::Node& node,
-                        ValueHolderData* data,
-                        Properties* properties);
+  const Property& NewProperty(Visibility visibility,
+                              const ast::Node& node,
+                              ValueHolderData* data,
+                              Properties* properties);
 
-  Value& NewUndefined(const ast::Node& node);
+  const Value& NewUndefined(const ast::Node& node);
 
   ValueHolderData& NewValueHolderData();
 
-  Variable& NewVariable(VariableKind kind,
-                        const ast::Node& name,
-                        ValueHolderData* data,
-                        Properties* properties);
+  const Variable& NewVariable(VariableKind kind,
+                              const ast::Node& name,
+                              ValueHolderData* data,
+                              Properties* properties);
 
   void ResetValueId();
 

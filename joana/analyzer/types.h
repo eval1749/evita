@@ -93,12 +93,12 @@ class ClassType final : public Type {
   ~ClassType() final;
 
   const ast::Node& name() const;
-  Class& value() const { return value_; }
+  const Class& value() const { return value_; }
 
  private:
-  ClassType(int id, Class* value);
+  ClassType(int id, const Class& value);
 
-  Class& value_;
+  const Class& value_;
 
   DISALLOW_COPY_AND_ASSIGN(ClassType);
 };
@@ -157,7 +157,7 @@ class InvalidType final : public Type {
 };
 
 //
-// LabeledType
+// LabeledType represents member of |RecordType|.
 //
 class LabeledType final : public Type {
   DECLARE_CONCRETE_ANALYZE_TYPE(LabeledType, Type)

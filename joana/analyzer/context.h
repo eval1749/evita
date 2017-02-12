@@ -55,17 +55,17 @@ class Context final {
 
   // Query
   const Type* TryTypeOf(const ast::Node& node) const;
-  Value* TryValueOf(const ast::Node& node) const;
+  const Value* TryValueOf(const ast::Node& node) const;
   const Type& TypeOf(const ast::Node& node) const;
-  Value& ValueOf(const ast::Node& node) const;
+  const Value& ValueOf(const ast::Node& node) const;
 
   // Registration
   void RegisterType(const ast::Node& node, const Type& type);
-  void RegisterValue(const ast::Node& node, Value* value);
+  void RegisterValue(const ast::Node& node, const Value& value);
 
   // Global object
-  Class& InstallClass(ast::TokenKind name_id);
-  Class* TryClassOf(ast::TokenKind name_id) const;
+  const Class& InstallClass(ast::TokenKind name_id);
+  const Class* TryClassOf(ast::TokenKind name_id) const;
 
  private:
   Zone& zone() const;

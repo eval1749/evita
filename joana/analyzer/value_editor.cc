@@ -34,23 +34,24 @@ bool IsValidAssignment(const ast::Node& node) {
 Value::Editor::Editor() = default;
 Value::Editor::~Editor() = default;
 
-void Value::Editor::AddAssignment(ValueHolder* binding, const ast::Node& node) {
-  DCHECK(IsValidAssignment(node)) << *binding << ' ' << node;
-  binding->data_.assignments_.push_back(&node);
+void Value::Editor::AddAssignment(const ValueHolder& binding,
+                                  const ast::Node& node) {
+  DCHECK(IsValidAssignment(node)) << binding << ' ' << node;
+  const_cast<ValueHolder&>(binding).data_.assignments_.push_back(&node);
 }
 
-void Value::Editor::SetClassHeritage(Class* class_value,
-                                     const std::vector<Class*>& classes) {
-  auto& base_classes = class_value->base_classes_;
-  DCHECK(base_classes.empty()) << *class_value;
+void Value::Editor::SetClassHeritage(const Class& class_value,
+                                     const std::vector<const Class*>& classes) {
+  auto& base_classes = const_cast<Class&>(class_value).base_classes_;
+  DCHECK(base_classes.empty()) << class_value;
   base_classes.reserve(classes.size());
   base_classes.insert(base_classes.begin(), classes.begin(), classes.end());
 }
 
-void Value::Editor::SetClassList(Class* class_value,
-                                 const std::vector<Class*>& classes) {
-  auto& class_list = class_value->class_list_;
-  DCHECK(class_list.empty()) << *class_value;
+void Value::Editor::SetClassList(const Class& class_value,
+                                 const std::vector<const Class*>& classes) {
+  auto& class_list = const_cast<Class&>(class_value).class_list_;
+  DCHECK(class_list.empty()) << class_value;
   class_list.reserve(classes.size());
   class_list.insert(class_list.begin(), classes.begin(), classes.end());
 }

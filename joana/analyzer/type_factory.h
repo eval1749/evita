@@ -45,7 +45,7 @@ class TypeFactory final {
   const Type& unspecified_type() const { return unspecified_type_; }
   const Type& void_type() const { return void_type_; }
 
-  const Type& NewClassType(Class* class_value);
+  const Type& NewClassType(const Class& class_value);
   const Type& NewFunctionType(
       FunctionTypeKind kind,
       const std::vector<const TypeParameter*>& type_parameters,

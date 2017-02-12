@@ -48,7 +48,8 @@ class Factory::Cache final {
   }
 
  private:
-  using ConstructedClassKey = std::tuple<Class*, std::vector<const Type*>>;
+  using ConstructedClassKey =
+      std::tuple<const Class*, std::vector<const Type*>>;
   using ConstructedClassMap = std::map<ConstructedClassKey, Value*>;
 
   ConstructedClassMap& MapFor(const ConstructedClassKey&) {
@@ -71,9 +72,10 @@ Factory::Factory(Zone* zone) : cache_(new Cache()), zone_(*zone) {}
 Factory::~Factory() = default;
 
 // Factory members
-Class& Factory::NewConstructedClass(GenericClass* generic_class,
-                                    const std::vector<const Type*>& arguments) {
-  const auto& key = std::make_tuple(generic_class, arguments);
+const Class& Factory::NewConstructedClass(
+    const GenericClass& generic_class,
+    const std::vector<const Type*>& arguments) {
+  const auto& key = std::make_tuple(&generic_class, arguments);
   if (auto* present = cache_->Find(key))
     return present->As<ConstructedClass>();
   const auto size = SizeOf<ConstructedClass>(arguments.size());
@@ -83,13 +85,14 @@ Class& Factory::NewConstructedClass(GenericClass* generic_class,
   return new_value;
 }
 
-Function& Factory::NewFunction(const ast::Node& name, const ast::Node& node) {
+const Function& Factory::NewFunction(const ast::Node& name,
+                                     const ast::Node& node) {
   DCHECK(CanBeValueName(name)) << name;
   auto& properties = NewProperties(node);
   return *new (&zone_) Function(NextValueId(), name, node, &properties);
 }
 
-Class& Factory::NewGenericClass(
+const Class& Factory::NewGenericClass(
     ClassKind kind,
     const ast::Node& name,
     const ast::Node& node,
@@ -100,15 +103,15 @@ Class& Factory::NewGenericClass(
       &zone_, NextValueId(), kind, name, node, parameters, properties);
 }
 
-Class& Factory::NewNormalClass(ClassKind kind,
-                               const ast::Node& name,
-                               const ast::Node& node,
-                               Properties* properties) {
+const Class& Factory::NewNormalClass(ClassKind kind,
+                                     const ast::Node& name,
+                                     const ast::Node& node,
+                                     Properties* properties) {
   return *new (&zone_)
       NormalClass(&zone_, NextValueId(), kind, name, node, properties);
 }
 
-Value& Factory::NewOrdinaryObject(const ast::Node& node) {
+const Value& Factory::NewOrdinaryObject(const ast::Node& node) {
   auto& properties = NewProperties(node);
   return *new (&zone_) OrdinaryObject(NextValueId(), node, &properties);
 }
@@ -117,15 +120,15 @@ Properties& Factory::NewProperties(const ast::Node& owner) {
   return *new (&zone_) Properties(&zone_, owner);
 }
 
-Property& Factory::NewProperty(Visibility visibility,
-                               const ast::Node& key,
-                               ValueHolderData* data,
-                               Properties* properties) {
+const Property& Factory::NewProperty(Visibility visibility,
+                                     const ast::Node& key,
+                                     ValueHolderData* data,
+                                     Properties* properties) {
   return *new (&zone_)
       Property(NextValueId(), visibility, key, data, properties);
 }
 
-Value& Factory::NewUndefined(const ast::Node& node) {
+const Value& Factory::NewUndefined(const ast::Node& node) {
   return *new (&zone_) Undefined(NextValueId(), node);
 }
 
@@ -133,10 +136,10 @@ ValueHolderData& Factory::NewValueHolderData() {
   return *new (&zone_) ValueHolderData(&zone_);
 }
 
-Variable& Factory::NewVariable(VariableKind kind,
-                               const ast::Node& name,
-                               ValueHolderData* data,
-                               Properties* properties) {
+const Variable& Factory::NewVariable(VariableKind kind,
+                                     const ast::Node& name,
+                                     ValueHolderData* data,
+                                     Properties* properties) {
   DCHECK_EQ(name, ast::SyntaxCode::Name);
   return *new (&zone_) Variable(NextValueId(), kind, name, data, properties);
 }

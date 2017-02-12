@@ -18,7 +18,7 @@ class Properties::Editor final {
   Editor();
   ~Editor();
 
-  void Add(Properties* properties, Property* property);
+  void Add(Properties* properties, const Property& property);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(Editor);

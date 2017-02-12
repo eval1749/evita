@@ -55,8 +55,8 @@ ClassTreeBuilder::ClassGraph::~ClassGraph() = default;
 //
 // ClassTreeBuilder::ClassNode
 //
-ClassTreeBuilder::ClassNode::ClassNode(Zone* zone, Class* clazz)
-    : GraphNodeBase(zone), class_(*clazz) {}
+ClassTreeBuilder::ClassNode::ClassNode(Zone* zone, const Class& clazz)
+    : GraphNodeBase(zone), class_(clazz) {}
 
 ClassTreeBuilder::ClassNode::~ClassNode() = default;
 
@@ -71,55 +71,55 @@ ClassTreeBuilder::~ClassTreeBuilder() = default;
 // public
 void ClassTreeBuilder::Build() {
   for (const auto& node : graph_.nodes()) {
-    auto& clazz = node->value();
+    const auto& clazz = node->value();
     if (!CanFinalize(clazz))
       continue;
     DCHECK(node->HasPredecessor()) << clazz;
-    FinalizeClass(&clazz);
+    FinalizeClass(clazz);
   }
   for (const auto& constructed_class : pending_constructed_classes_) {
     if (constructed_class->is_finalized())
       continue;
-    FinalizeConstructedClass(constructed_class);
+    FinalizeConstructedClass(*constructed_class);
     DCHECK(constructed_class->is_finalized()) << constructed_class;
   }
   ValidateClassTree();
 }
 
-void ClassTreeBuilder::ProcessClassDefinition(Class* derived_class) {
-  DCHECK(!derived_class->Is<ConstructedClass>()) << derived_class;
-  DCHECK(!IsFinalized(*derived_class)) << *derived_class;
-  const auto& emplaced = processed_classes_.emplace(derived_class);
+void ClassTreeBuilder::ProcessClassDefinition(const Class& derived_class) {
+  DCHECK(!derived_class.Is<ConstructedClass>()) << derived_class;
+  DCHECK(!IsFinalized(derived_class)) << derived_class;
+  const auto& emplaced = processed_classes_.emplace(&derived_class);
   DCHECK(emplaced.second) << derived_class;
-  std::unordered_set<Class*> pending_classes;
-  for (auto& original_base_class : derived_class->base_classes()) {
-    auto& base_class =
+  std::unordered_set<const Class*> pending_classes;
+  for (const auto& original_base_class : derived_class.base_classes()) {
+    const auto& base_class =
         original_base_class.Is<ConstructedClass>()
             ? original_base_class.As<ConstructedClass>().generic_class()
             : original_base_class;
-    if (ProcessClassReference(&base_class))
+    if (ProcessClassReference(base_class))
       continue;
     pending_classes.insert(&base_class);
   }
   if (pending_classes.empty()) {
     FinalizeClass(derived_class);
-    DCHECK(IsFinalized(*derived_class)) << *derived_class;
+    DCHECK(IsFinalized(derived_class)) << derived_class;
     return;
   }
   auto& derived_class_node = GetOrNewNode(derived_class);
   for (const auto& base_class : pending_classes) {
-    auto& base_class_node = GetOrNewNode(base_class);
+    auto& base_class_node = GetOrNewNode(*base_class);
     ClassGraph::Editor().AddEdge(&graph_, &base_class_node,
                                  &derived_class_node);
   }
 }
 
-bool ClassTreeBuilder::ProcessClassReference(Class* clazz) {
-  if (!clazz->Is<ConstructedClass>())
-    return clazz->is_finalized();
-  auto& constructed_class = clazz->As<ConstructedClass>();
+bool ClassTreeBuilder::ProcessClassReference(const Class& clazz) {
+  if (!clazz.Is<ConstructedClass>())
+    return clazz.is_finalized();
+  auto& constructed_class = clazz.As<ConstructedClass>();
   if (constructed_class.generic_class().is_finalized()) {
-    FinalizeConstructedClass(&constructed_class);
+    FinalizeConstructedClass(constructed_class);
     return true;
   }
   pending_constructed_classes_.insert(&constructed_class);
@@ -143,17 +143,17 @@ bool ClassTreeBuilder::CanFinalize(const Class& clazz) const {
   return true;
 }
 
-Class& ClassTreeBuilder::ConstructClass(Class* clazz,
-                                        const ArgumentMap& argument_map) {
-  DCHECK(!clazz->Is<GenericClass>()) << clazz;
-  if (!clazz->Is<ConstructedClass>()) {
-    DCHECK(clazz->is_finalized()) << clazz;
-    return *clazz;
+const Class& ClassTreeBuilder::ConstructClass(const Class& clazz,
+                                              const ArgumentMap& argument_map) {
+  DCHECK(!clazz.Is<GenericClass>()) << clazz;
+  if (!clazz.Is<ConstructedClass>()) {
+    DCHECK(clazz.is_finalized()) << clazz;
+    return clazz;
   }
-  DCHECK(clazz->As<ConstructedClass>().generic_class().is_finalized()) << clazz;
+  DCHECK(clazz.As<ConstructedClass>().generic_class().is_finalized()) << clazz;
   std::vector<const Type*> arguments;
   auto has_parameters = false;
-  for (const auto& argument : clazz->As<ConstructedClass>().arguments()) {
+  for (const auto& argument : clazz.As<ConstructedClass>().arguments()) {
     if (!argument.Is<TypeParameter>()) {
       arguments.push_back(&argument);
       continue;
@@ -167,30 +167,30 @@ Class& ClassTreeBuilder::ConstructClass(Class* clazz,
     has_parameters = true;
   }
   if (!has_parameters) {
-    if (clazz->is_finalized())
-      return *clazz;
-    FinalizeConstructedClass(&clazz->As<ConstructedClass>());
-    return *clazz;
+    if (clazz.is_finalized())
+      return clazz;
+    FinalizeConstructedClass(clazz.As<ConstructedClass>());
+    return clazz;
   }
-  auto& constructed_class = factory().NewConstructedClass(
-      &clazz->As<ConstructedClass>().generic_class(), arguments);
+  const auto& constructed_class = factory().NewConstructedClass(
+      clazz.As<ConstructedClass>().generic_class(), arguments);
   if (constructed_class.is_finalized())
     return constructed_class;
-  FinalizeConstructedClass(&constructed_class.As<ConstructedClass>());
+  FinalizeConstructedClass(constructed_class.As<ConstructedClass>());
   return constructed_class;
 }
 
-void ClassTreeBuilder::FinalizeClass(Class* clazz) {
-  DCHECK(!clazz->Is<ConstructedClass>()) << clazz;
-  DCHECK(CanFinalize(*clazz)) << clazz;
+void ClassTreeBuilder::FinalizeClass(const Class& clazz) {
+  DCHECK(!clazz.Is<ConstructedClass>()) << clazz;
+  DCHECK(CanFinalize(clazz)) << clazz;
   // Make class list in Breadth-First-Search order.
-  std::vector<Class*> class_list;
+  std::vector<const Class*> class_list;
   std::unordered_set<const Class*> presents;
-  class_list.push_back(clazz);
+  class_list.push_back(&clazz);
   for (size_t index = 0; index < class_list.size(); ++index) {
     for (auto& base_class : class_list[index]->base_classes()) {
       if (base_class.Is<ConstructedClass>() && !base_class.is_finalized())
-        FinalizeConstructedClass(&base_class.As<ConstructedClass>());
+        FinalizeConstructedClass(base_class.As<ConstructedClass>());
       DCHECK(base_class.is_finalized()) << base_class << " in " << clazz;
       if (presents.count(&base_class) > 0)
         continue;
@@ -209,34 +209,35 @@ void ClassTreeBuilder::FinalizeClass(Class* clazz) {
       continue;
     auto& derived_class = successor->value();
     if (derived_class.Is<ConstructedClass>()) {
-      FinalizeConstructedClass(&derived_class.As<ConstructedClass>());
+      FinalizeConstructedClass(derived_class.As<ConstructedClass>());
       continue;
     }
-    FinalizeClass(&derived_class);
+    FinalizeClass(derived_class);
   }
 }
 
 void ClassTreeBuilder::FinalizeConstructedClass(
-    ConstructedClass* constructed_class) {
-  auto& generic_class = constructed_class->generic_class();
+    const ConstructedClass& constructed_class) {
+  auto& generic_class = constructed_class.generic_class();
   DCHECK(generic_class.is_finalized()) << constructed_class;
-  const auto& argument_map = ComputeArgumentMap(*constructed_class);
-  std::vector<Class*> class_list;
-  class_list.push_back(constructed_class);
+  const auto& argument_map = ComputeArgumentMap(constructed_class);
+  std::vector<const Class*> class_list;
+  class_list.push_back(&constructed_class);
   for (auto& base_class : generic_class.class_list()) {
     if (base_class == generic_class)
       continue;
-    class_list.push_back(&ConstructClass(&base_class, argument_map));
+    class_list.push_back(&ConstructClass(base_class, argument_map));
   }
   Value::Editor().SetClassList(constructed_class, class_list);
 }
 
-ClassTreeBuilder::ClassNode& ClassTreeBuilder::GetOrNewNode(Class* clazz) {
-  const auto& it = class_map_.find(clazz);
+ClassTreeBuilder::ClassNode& ClassTreeBuilder::GetOrNewNode(
+    const Class& clazz) {
+  const auto& it = class_map_.find(&clazz);
   if (it != class_map_.end())
     return *it->second;
   auto& new_node = *new (&zone_) ClassNode(&zone_, clazz);
-  const auto& result = class_map_.emplace(clazz, &new_node);
+  const auto& result = class_map_.emplace(&clazz, &new_node);
   DCHECK(result.second);
   ClassGraph::Editor().AppendNode(&graph_, &new_node);
   return new_node;
@@ -251,7 +252,7 @@ bool ClassTreeBuilder::IsProcessed(const Class& clazz) const {
 }
 
 void ClassTreeBuilder::ValidateClassTree() {
-  std::set<std::pair<Class*, Class*>> cycles;
+  std::set<std::pair<const Class*, const Class*>> cycles;
   for (const auto& node : graph_.nodes()) {
     auto& user_class = node->value();
     if (user_class.Is<ConstructedClass>())

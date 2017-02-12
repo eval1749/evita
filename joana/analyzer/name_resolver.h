@@ -53,23 +53,24 @@ class NameResolver final : public Pass, public ast::SyntaxVisitor {
   void BindType(const ast::Node& name, const Type& type);
 
   // Bind |name| as |variable| in current environment.
-  Variable& BindVariable(VariableKind kind, const ast::Node& name);
+  const Variable& BindVariable(VariableKind kind, const ast::Node& name);
 
   // Bind type parameters of |type| in current environment.
   void BindTypeParameters(const Class& class_value);
 
   const Type* FindType(const ast::Node& name) const;
-  Variable* FindVariable(const ast::Node& name) const;
+  const Variable* FindVariable(const ast::Node& name) const;
 
-  Property& GetOrNewProperty(Properties* properties, const ast::Node& node);
+  const Property& GetOrNewProperty(Properties* properties,
+                                   const ast::Node& node);
 
-  Class& NewClass(ClassKind kind,
-                  const ast::Node& name,
-                  const ast::Node& node,
-                  const std::vector<const TypeParameter*>& parameters,
-                  Properties* properties = nullptr);
+  const Class& NewClass(ClassKind kind,
+                        const ast::Node& name,
+                        const ast::Node& node,
+                        const std::vector<const TypeParameter*>& parameters,
+                        Properties* properties = nullptr);
 
-  Property& NewProperty(Visibility visibility, const ast::Node& node);
+  const Property& NewProperty(Visibility visibility, const ast::Node& node);
 
   void ProcessAssignment(const ast::Node& lhs,
                          const ast::Node* maybe_rhs,

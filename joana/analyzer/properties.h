@@ -30,11 +30,11 @@ class Properties final : public ZoneAllocated {
 
   ~Properties();
 
-  Property& Get(const ast::Node& key) const;
+  const Property& Get(const ast::Node& key) const;
 
   // Returns associated property of |key| or null if there is no associated
   // property.
-  Property* TryGet(const ast::Node& key) const;
+  const Property* TryGet(const ast::Node& key) const;
 
  private:
   friend class Factory;
@@ -43,10 +43,12 @@ class Properties final : public ZoneAllocated {
 
   // TODO(eval1749): We should use another way to handle computed property
   // name.
-  ZoneUnorderedMap<base::StringPiece16, Property*, base::StringPiece16Hash>
+  ZoneUnorderedMap<base::StringPiece16,
+                   const Property*,
+                   base::StringPiece16Hash>
       computed_name_map_;
 
-  ZoneUnorderedMap<int, Property*> name_map_;
+  ZoneUnorderedMap<int, const Property*> name_map_;
 
   // AST node which creates this |Properties|.
   const ast::Node& owner_;

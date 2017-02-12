@@ -17,29 +17,30 @@ namespace analyzer {
 ValueMap::ValueMap() {}
 ValueMap::~ValueMap() = default;
 
-Value& ValueMap::RegisterValue(const ast::Node& node, Value* value) {
+const Value& ValueMap::RegisterValue(const ast::Node& node,
+                                     const Value& value) {
 #if DCHECK_IS_ON()
   if (node.Is<ast::Class>()) {
-    DCHECK(value->Is<Class>()) << node << ' ' << value;
+    DCHECK(value.Is<Class>()) << node << ' ' << value;
   } else if (node.Is<ast::Function>()) {
-    DCHECK(value->Is<Class>() || value->Is<Function>()) << node << ' ' << value;
+    DCHECK(value.Is<Class>() || value.Is<Function>()) << node << ' ' << value;
   } else if (node.Is<ast::Method>()) {
-    DCHECK(value->Is<Function>()) << node << ' ' << value;
+    DCHECK(value.Is<Function>()) << node << ' ' << value;
   }
 #endif
-  const auto& result = value_map_.emplace(&node, value);
+  const auto& result = value_map_.emplace(&node, &value);
   DCHECK(result.second) << "Node can have only one value " << node << std::endl
-                        << *value << std::endl
+                        << value << std::endl
                         << *result.first->second;
-  return *value;
+  return value;
 }
 
-Value* ValueMap::TryValueOf(const ast::Node& node) const {
+const Value* ValueMap::TryValueOf(const ast::Node& node) const {
   const auto& it = value_map_.find(&node);
   return it == value_map_.end() ? nullptr : it->second;
 }
 
-Value& ValueMap::ValueOf(const ast::Node& node) const {
+const Value& ValueMap::ValueOf(const ast::Node& node) const {
   if (auto* present = TryValueOf(node))
     return *present;
   NOTREACHED() << "No value for " << node;

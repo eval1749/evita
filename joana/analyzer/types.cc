@@ -22,7 +22,7 @@ AnyType::~AnyType() = default;
 //
 // ClassType
 //
-ClassType::ClassType(int id, Class* value) : Type(id), value_(*value) {}
+ClassType::ClassType(int id, const Class& value) : Type(id), value_(value) {}
 ClassType::~ClassType() = default;
 
 const ast::Node& ClassType::name() const {

@@ -78,8 +78,7 @@ class Object : public Value {
  public:
   ~Object() override;
 
-  const Properties& properties() const { return properties_; }
-  Properties& properties() { return properties_; }
+  Properties& properties() const { return properties_; }
 
  protected:
   Object(int id, const ast::Node& node, Properties* properties);
@@ -100,8 +99,8 @@ class Class : public Object {
   ~Class() override;
 
   auto base_classes() const { return ReferenceRangeOf(base_classes_); }
-  internal::ReferenceRange<ZoneVector<Class*>::const_iterator> class_list()
-      const;
+  internal::ReferenceRange<ZoneVector<const Class*>::const_iterator>
+  class_list() const;
   bool is_class() const { return kind_ == ClassKind::Class; }
   bool is_finalized() const { return !class_list_.empty(); }
   ClassKind kind() const { return kind_; }
@@ -116,8 +115,8 @@ class Class : public Object {
         Properties* properties);
 
  private:
-  ZoneVector<Class*> base_classes_;
-  ZoneVector<Class*> class_list_;
+  ZoneVector<const Class*> base_classes_;
+  ZoneVector<const Class*> class_list_;
   const ClassKind kind_;
   const ast::Node& name_;
 
@@ -162,8 +161,7 @@ class ValueHolder : public Object {
     return data_.assignments();
   }
 
-  const ValueHolderData& data() const { return data_; }
-  ValueHolderData& data() { return data_; }
+  ValueHolderData& data() const { return data_; }
 
   const ZoneVector<const ast::Node*>& references() const {
     return data_.references();
@@ -193,15 +191,15 @@ class ConstructedClass : public Class {
   ~ConstructedClass() final;
 
   BlockRange<const Type*> arguments() const;
-  GenericClass& generic_class() const { return generic_class_; }
+  const GenericClass& generic_class() const { return generic_class_; }
 
  private:
   ConstructedClass(Zone* zone,
                    int id,
-                   GenericClass* generic_class,
+                   const GenericClass& generic_class,
                    const std::vector<const Type*>& arguments);
 
-  GenericClass& generic_class_;
+  const GenericClass& generic_class_;
   const size_t number_of_arguments_;
   const Type* arguments_[1];
 

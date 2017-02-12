@@ -27,14 +27,14 @@ class ValueMap final {
   ValueMap();
   ~ValueMap();
 
-  Value& RegisterValue(const ast::Node& node, Value* value);
-  Value* TryValueOf(const ast::Node& node) const;
-  Value& ValueOf(const ast::Node& node) const;
+  const Value& RegisterValue(const ast::Node& node, const Value& value);
+  const Value* TryValueOf(const ast::Node& node) const;
+  const Value& ValueOf(const ast::Node& node) const;
 
  private:
   friend class NameResolver;
 
-  std::unordered_map<const ast::Node*, Value*> value_map_;
+  std::unordered_map<const ast::Node*, const Value*> value_map_;
 
   DISALLOW_COPY_AND_ASSIGN(ValueMap);
 };

@@ -68,15 +68,15 @@ void Context::AddError(const SourceCodeRange& range, ErrorCode error_code) {
   error_sink().AddError(range, error_code);
 }
 
-void Context::RegisterValue(const ast::Node& node, Value* value) {
+void Context::RegisterValue(const ast::Node& node, const Value& value) {
   value_map_->RegisterValue(node, value);
 }
 
-Value* Context::TryValueOf(const ast::Node& node) const {
+const Value* Context::TryValueOf(const ast::Node& node) const {
   return value_map_->TryValueOf(node);
 }
 
-Value& Context::ValueOf(const ast::Node& node) const {
+const Value& Context::ValueOf(const ast::Node& node) const {
   return value_map_->ValueOf(node);
 }
 
@@ -93,24 +93,24 @@ const Type& Context::TypeOf(const ast::Node& node) const {
 }
 
 // Global class
-Class& Context::InstallClass(ast::TokenKind name_id) {
+const Class& Context::InstallClass(ast::TokenKind name_id) {
   const auto& object_name = BuiltInWorld::GetInstance()->NameOf(name_id);
-  auto& object_class =
+  const auto& object_class =
       factory().NewNormalClass(ClassKind::Class, object_name, object_name,
                                &factory().NewProperties(object_name));
-  auto& object_variable = factory().NewVariable(
+  const auto& object_variable = factory().NewVariable(
       VariableKind::Const, object_name, &factory().NewValueHolderData(),
       &factory().NewProperties(object_name));
-  auto& object_property = factory().NewProperty(Visibility::Public, object_name,
-                                                &object_variable.data(),
-                                                &object_variable.properties());
-  RegisterValue(object_name, &object_class);
-  Value::Editor().AddAssignment(&object_property, object_name);
-  Properties::Editor().Add(&global_properties(), &object_property);
+  const auto& object_property = factory().NewProperty(
+      Visibility::Public, object_name, &object_variable.data(),
+      &object_variable.properties());
+  RegisterValue(object_name, object_class);
+  Value::Editor().AddAssignment(object_property, object_name);
+  Properties::Editor().Add(&global_properties(), object_property);
   return object_class;
 }
 
-Class* Context::TryClassOf(ast::TokenKind name_id) const {
+const Class* Context::TryClassOf(ast::TokenKind name_id) const {
   const auto& object_name = BuiltInWorld::GetInstance()->NameOf(name_id);
   auto* object_property = global_properties().TryGet(object_name);
   if (object_property->assignments().size() != 1)

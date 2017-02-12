@@ -52,7 +52,7 @@ TypeResolver::~TypeResolver() = default;
 // The entry point
 void TypeResolver::PrepareForTesting() {
   object_class_ = context().TryClassOf(ast::TokenKind::Object);
-  class_tree_builder_->ProcessClassDefinition(object_class_);
+  class_tree_builder_->ProcessClassDefinition(*object_class_);
 }
 
 void TypeResolver::RunOnAll() {
@@ -73,19 +73,19 @@ void TypeResolver::RunOn(const ast::Node& node) {
 }
 
 // private
-void TypeResolver::SetClassHeritage(Class* class_value,
+void TypeResolver::SetClassHeritage(const Class& class_value,
                                     const Annotation& annotation,
                                     const ast::Node& node) {
-  const auto is_class = class_value->is_class();
-  std::vector<std::pair<const ast::Node*, Class*>> references;
-  std::vector<Class*> class_list;
+  const auto is_class = class_value.is_class();
+  std::vector<std::pair<const ast::Node*, const Class*>> references;
+  std::vector<const Class*> class_list;
   if (node.Is<ast::Class>()) {
     const auto& reference = ast::Class::HeritageOf(node);
     if (!reference.Is<ast::ElisionExpression>()) {
-      auto* class_value = ResolveClass(reference);
-      if (class_value && class_value->is_class()) {
-        references.emplace_back(&reference, class_value);
-        class_list.emplace_back(class_value);
+      const auto* referenced_class = ResolveClass(reference);
+      if (referenced_class && referenced_class->is_class()) {
+        references.emplace_back(&reference, referenced_class);
+        class_list.emplace_back(referenced_class);
       } else {
         AddError(reference, ErrorCode::TYPE_RESOLVER_EXPECT_CLASS);
       }
@@ -95,16 +95,16 @@ void TypeResolver::SetClassHeritage(Class* class_value,
   // Process @extends tags
   for (const auto& extends_tag : annotation.extends_tags()) {
     const auto& reference = extends_tag->child_at(1);
-    auto* const class_value = ResolveClass(reference);
-    if (!class_value || is_class != class_value->is_class()) {
+    auto* const referenced_class = ResolveClass(reference);
+    if (!referenced_class || is_class != referenced_class->is_class()) {
       AddError(reference, ErrorCode::TYPE_RESOLVER_EXPECT_CLASS);
       continue;
     }
-    const auto& it =
-        std::find_if(references.begin(), references.end(),
-                     [&](const std::pair<const ast::Node*, Class*>& present) {
-                       return present.second == class_value;
-                     });
+    const auto& it = std::find_if(
+        references.begin(), references.end(),
+        [&](const std::pair<const ast::Node*, const Class*>& present) {
+          return present.second == referenced_class;
+        });
     if (it != references.end()) {
       AddError(*extends_tag, ErrorCode::TYPE_RESOLVER_MULTIPLE_OCCURRENCES,
                *it->first);
@@ -118,12 +118,12 @@ void TypeResolver::SetClassHeritage(Class* class_value,
       AddError(*extends_tag, ErrorCode::TYPE_RESOLVER_UNEXPECT_EXTENDS, node);
       continue;
     }
-    references.emplace_back(&reference, class_value);
-    class_list.emplace_back(class_value);
+    references.emplace_back(&reference, referenced_class);
+    class_list.emplace_back(referenced_class);
   }
 
   // Install default base class |Object|.
-  if (class_value->is_class() && class_list.empty() &&
+  if (class_value.is_class() && class_list.empty() &&
       class_value != object_class_) {
     references.emplace_back(&object_class_->name(), object_class_);
     class_list.emplace_back(object_class_);
@@ -132,16 +132,16 @@ void TypeResolver::SetClassHeritage(Class* class_value,
   // Process @implements tags
   for (const auto& implements_tag : annotation.implements_tags()) {
     const auto& reference = implements_tag->child_at(1);
-    auto* const class_value = ResolveClass(reference);
-    if (!class_value || class_value->is_class()) {
+    auto* const referenced_class = ResolveClass(reference);
+    if (!referenced_class || referenced_class->is_class()) {
       AddError(*implements_tag, ErrorCode::TYPE_RESOLVER_EXPECT_INTERFACE);
       continue;
     }
-    const auto& it =
-        std::find_if(references.begin(), references.end(),
-                     [&](const std::pair<const ast::Node*, Class*>& present) {
-                       return present.second == class_value;
-                     });
+    const auto& it = std::find_if(
+        references.begin(), references.end(),
+        [&](const std::pair<const ast::Node*, const Class*>& present) {
+          return present.second == referenced_class;
+        });
     if (it != references.end()) {
       AddError(*implements_tag, ErrorCode::TYPE_RESOLVER_MULTIPLE_OCCURRENCES,
                *it->first);
@@ -152,8 +152,8 @@ void TypeResolver::SetClassHeritage(Class* class_value,
                node);
       continue;
     }
-    references.emplace_back(&reference, class_value);
-    class_list.emplace_back(class_value);
+    references.emplace_back(&reference, referenced_class);
+    class_list.emplace_back(referenced_class);
   }
   DCHECK_EQ(class_list.size(), references.size());
   Value::Editor().SetClassHeritage(class_value, class_list);
@@ -204,9 +204,9 @@ void TypeResolver::ProcessAssignment(const ast::Node& lhs,
                                      const Annotation& annotation) {
   auto* const value = SingleValueOf(lhs);
   if (value && value->Is<Class>()) {
-    auto& class_value = value->As<Class>();
-    SetClassHeritage(&class_value, annotation, lhs);
-    const auto& class_type = type_factory().NewClassType(&class_value);
+    const auto& class_value = value->As<Class>();
+    SetClassHeritage(class_value, annotation, lhs);
+    const auto& class_type = type_factory().NewClassType(class_value);
     RegisterTypeIfPossible(lhs, annotation, &class_type);
     return;
   }
@@ -225,9 +225,9 @@ void TypeResolver::ProcessBinding(const ast::Node& node, const Type& type) {
 
 void TypeResolver::ProcessClass(const ast::Node& node,
                                 const Annotation& annotation) {
-  auto& class_value = context().ValueOf(node).As<Class>();
-  SetClassHeritage(&class_value, annotation, node);
-  const auto& class_type = type_factory().NewClassType(&class_value);
+  const auto& class_value = context().ValueOf(node).As<Class>();
+  SetClassHeritage(class_value, annotation, node);
+  const auto& class_type = type_factory().NewClassType(class_value);
   for (const auto& child :
        ast::NodeTraversal::ChildNodesOf(ast::Class::BodyOf(node))) {
     if (!child.Is<ast::Annotation>())
@@ -245,10 +245,10 @@ void TypeResolver::ProcessClass(const ast::Node& node,
 
 void TypeResolver::ProcessFunction(const ast::Node& node,
                                    const Annotation& annotation) {
-  auto* const class_value = context().ValueOf(node).TryAs<Class>();
+  const auto* const class_value = context().ValueOf(node).TryAs<Class>();
   if (!class_value)
     return ProcessAnnotation(node, annotation, nullptr);
-  SetClassHeritage(class_value, annotation, node);
+  SetClassHeritage(*class_value, annotation, node);
 }
 
 void TypeResolver::ProcessObjectBinding(const ast::Node& node,
@@ -288,7 +288,7 @@ void TypeResolver::RegisterTypeIfPossible(const ast::Node& node,
   RegisterType(node, *type);
 }
 
-Class* TypeResolver::ResolveClass(const ast::Node& node) {
+const Class* TypeResolver::ResolveClass(const ast::Node& node) {
   if (node.Is<ast::TypeName>()) {
     auto* type = context().TryTypeOf(node);
     if (!type || !type->Is<ClassType>())
@@ -320,7 +320,7 @@ Class* TypeResolver::ResolveClass(const ast::Node& node) {
 }
 
 // Returns value associated to |node|.
-Value* TypeResolver::SingleValueOf(const ast::Node& node) const {
+const Value* TypeResolver::SingleValueOf(const ast::Node& node) const {
   DCHECK(IsMemberExpression(node) || node.Is<ast::BindingNameElement>())
       << node;
   auto* value = context().TryValueOf(node);

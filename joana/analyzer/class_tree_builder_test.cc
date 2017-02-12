@@ -29,16 +29,16 @@ namespace {
 
 const char* const kSourceCode = "A B C D E F G T U V W X Y Z";
 
-std::vector<Class*> ClassListOf(const Class& clazz) {
-  std::vector<Class*> class_list;
+std::vector<const Class*> ClassListOf(const Class& clazz) {
+  std::vector<const Class*> class_list;
   for (auto& element : clazz.class_list())
     class_list.push_back(&element);
   return class_list;
 }
 
 template <typename... Args>
-std::vector<Class*> ClassListFrom(const Args&... classes) {
-  return std::vector<Class*>{const_cast<Class*>(&classes)...};
+std::vector<const Class*> ClassListFrom(const Args&... classes) {
+  return std::vector<const Class*>{const_cast<const Class*>(&classes)...};
 }
 
 const SourceCode& NewSourceCode(Zone* zone) {
@@ -64,11 +64,12 @@ class ClassTreeBuilderTest : public AnalyzerTestBase {
 
   std::string GetErrors() const;
 
-  Class& NewClass(base::StringPiece name_piece);
-  Class& NewConstructedClass(Class* generic_class,
-                             const std::vector<const Type*>& parameters);
-  Class& NewGenericClass(base::StringPiece name_piece,
-                         const std::vector<const TypeParameter*>& parameters);
+  const Class& NewClass(base::StringPiece name_piece);
+  const Class& NewConstructedClass(const Class& generic_class,
+                                   const std::vector<const Type*>& parameters);
+  const Class& NewGenericClass(
+      base::StringPiece name_piece,
+      const std::vector<const TypeParameter*>& parameters);
   const ast::Node& NewName(base::StringPiece name_piece);
   const TypeParameter& NewTypeParameter(base::StringPiece name_piece);
 
@@ -94,21 +95,21 @@ std::string ClassTreeBuilderTest::GetErrors() const {
   return ostream.str();
 }
 
-Class& ClassTreeBuilderTest::NewClass(base::StringPiece name_piece) {
+const Class& ClassTreeBuilderTest::NewClass(base::StringPiece name_piece) {
   const auto& name = NewName(name_piece);
   auto& properties = context_->factory().NewProperties(name);
   return context_->factory().NewNormalClass(ClassKind::Class, name, name,
                                             &properties);
 }
 
-Class& ClassTreeBuilderTest::NewConstructedClass(
-    Class* generic_class,
+const Class& ClassTreeBuilderTest::NewConstructedClass(
+    const Class& generic_class,
     const std::vector<const Type*>& arguments) {
   return context_->factory().NewConstructedClass(
-      &generic_class->As<GenericClass>(), arguments);
+      generic_class.As<GenericClass>(), arguments);
 }
 
-Class& ClassTreeBuilderTest::NewGenericClass(
+const Class& ClassTreeBuilderTest::NewGenericClass(
     base::StringPiece name_piece,
     const std::vector<const TypeParameter*>& parameters) {
   const auto& name = NewName(name_piece);
@@ -117,8 +118,8 @@ Class& ClassTreeBuilderTest::NewGenericClass(
                                              parameters, &properties);
 }
 
-Class& NewGenericClass(base::StringPiece name_piece,
-                       const std::vector<TypeParameter*>& parameters);
+const Class& NewGenericClass(base::StringPiece name_piece,
+                             const std::vector<TypeParameter*>& parameters);
 
 const ast::Node& ClassTreeBuilderTest::NewName(base::StringPiece name_piece) {
   const auto start = base::StringPiece(kSourceCode).find(name_piece);
@@ -134,16 +135,16 @@ const TypeParameter& ClassTreeBuilderTest::NewTypeParameter(
 }
 
 TEST_F(ClassTreeBuilderTest, Basic) {
-  auto& class_a = NewClass("A");
-  auto& class_b = NewClass("B");
-  auto& class_c = NewClass("C");
-  Value::Editor().SetClassHeritage(&class_b, {&class_a});
-  Value::Editor().SetClassHeritage(&class_c, {&class_b});
+  const auto& class_a = NewClass("A");
+  const auto& class_b = NewClass("B");
+  const auto& class_c = NewClass("C");
+  Value::Editor().SetClassHeritage(class_b, {&class_a});
+  Value::Editor().SetClassHeritage(class_c, {&class_b});
 
   ClassTreeBuilder builder(&analyze_context());
-  builder.ProcessClassDefinition(&class_a);
-  builder.ProcessClassDefinition(&class_b);
-  builder.ProcessClassDefinition(&class_c);
+  builder.ProcessClassDefinition(class_a);
+  builder.ProcessClassDefinition(class_b);
+  builder.ProcessClassDefinition(class_c);
   builder.Build();
 
   EXPECT_EQ("", GetErrors());
@@ -153,15 +154,15 @@ TEST_F(ClassTreeBuilderTest, Basic) {
 }
 
 TEST_F(ClassTreeBuilderTest, Basic2) {
-  auto& class_a = NewClass("A");
-  auto& class_b = NewClass("B");
-  auto& class_c = NewClass("C");
-  Value::Editor().SetClassHeritage(&class_c, {&class_a, &class_b});
+  const auto& class_a = NewClass("A");
+  const auto& class_b = NewClass("B");
+  const auto& class_c = NewClass("C");
+  Value::Editor().SetClassHeritage(class_c, {&class_a, &class_b});
 
   ClassTreeBuilder builder(&analyze_context());
-  builder.ProcessClassDefinition(&class_a);
-  builder.ProcessClassDefinition(&class_b);
-  builder.ProcessClassDefinition(&class_c);
+  builder.ProcessClassDefinition(class_a);
+  builder.ProcessClassDefinition(class_b);
+  builder.ProcessClassDefinition(class_c);
   builder.Build();
 
   EXPECT_EQ("", GetErrors());
@@ -171,17 +172,17 @@ TEST_F(ClassTreeBuilderTest, Basic2) {
 }
 
 TEST_F(ClassTreeBuilderTest, ConstructedClass) {
-  auto& class_a = NewClass("A");
-  auto& generic_class = NewGenericClass("G", {&NewTypeParameter("T")});
-  auto& constructed_class = NewConstructedClass(
-      &generic_class, {&type_factory().NewClassType(&class_a)});
-  auto& class_b = NewClass("B");
-  Value::Editor().SetClassHeritage(&class_b, {&constructed_class});
+  const auto& class_a = NewClass("A");
+  const auto& generic_class = NewGenericClass("G", {&NewTypeParameter("T")});
+  const auto& constructed_class = NewConstructedClass(
+      generic_class, {&type_factory().NewClassType(class_a)});
+  const auto& class_b = NewClass("B");
+  Value::Editor().SetClassHeritage(class_b, {&constructed_class});
 
   ClassTreeBuilder builder(&analyze_context());
-  builder.ProcessClassDefinition(&class_a);
-  builder.ProcessClassDefinition(&class_b);
-  builder.ProcessClassDefinition(&generic_class);
+  builder.ProcessClassDefinition(class_a);
+  builder.ProcessClassDefinition(class_b);
+  builder.ProcessClassDefinition(generic_class);
   builder.Build();
 
   EXPECT_EQ("", GetErrors());
@@ -190,48 +191,48 @@ TEST_F(ClassTreeBuilderTest, ConstructedClass) {
 }
 
 TEST_F(ClassTreeBuilderTest, ConstructedClass2) {
-  auto& class_a = NewGenericClass("A", {&NewTypeParameter("T")});
-  auto& class_b = NewGenericClass("B", {&NewTypeParameter("U")});
+  const auto& class_a = NewGenericClass("A", {&NewTypeParameter("T")});
+  const auto& class_b = NewGenericClass("B", {&NewTypeParameter("U")});
   const auto& number_type =
       type_factory().NewPrimitiveType(ast::TokenKind::Number);
   const auto& string_type =
       type_factory().NewPrimitiveType(ast::TokenKind::String);
   const auto& parameter_x = NewTypeParameter("X");
   const auto& parameter_y = NewTypeParameter("Y");
-  auto& class_c = NewGenericClass("C", {&parameter_x, &parameter_y});
-  auto& class_d = NewConstructedClass(&class_c, {&number_type, &string_type});
+  const auto& class_c = NewGenericClass("C", {&parameter_x, &parameter_y});
+  const auto& class_d =
+      NewConstructedClass(class_c, {&number_type, &string_type});
   Value::Editor().SetClassHeritage(
-      &class_c, {&NewConstructedClass(&class_a, {&parameter_x}),
-                 &NewConstructedClass(&class_b, {&parameter_y})});
+      class_c, {&NewConstructedClass(class_a, {&parameter_x}),
+                &NewConstructedClass(class_b, {&parameter_y})});
 
   ClassTreeBuilder builder(&analyze_context());
-  builder.ProcessClassDefinition(&class_a);
-  builder.ProcessClassDefinition(&class_b);
-  builder.ProcessClassDefinition(&class_c);
-  builder.ProcessClassReference(&class_d);
+  builder.ProcessClassDefinition(class_a);
+  builder.ProcessClassDefinition(class_b);
+  builder.ProcessClassDefinition(class_c);
+  builder.ProcessClassReference(class_d);
   builder.Build();
 
   EXPECT_EQ("", GetErrors());
-  EXPECT_EQ(
-      ClassListFrom(class_d, NewConstructedClass(&class_a, {&number_type}),
-                    NewConstructedClass(&class_b, {&string_type})),
-      ClassListOf(class_d));
+  EXPECT_EQ(ClassListFrom(class_d, NewConstructedClass(class_a, {&number_type}),
+                          NewConstructedClass(class_b, {&string_type})),
+            ClassListOf(class_d));
 }
 
 TEST_F(ClassTreeBuilderTest, Diamond) {
-  auto& class_a = NewClass("A");
-  auto& class_b = NewClass("B");
-  auto& class_c = NewClass("C");
-  auto& class_d = NewClass("D");
-  Value::Editor().SetClassHeritage(&class_b, {&class_a});
-  Value::Editor().SetClassHeritage(&class_c, {&class_a});
-  Value::Editor().SetClassHeritage(&class_d, {&class_b, &class_c});
+  const auto& class_a = NewClass("A");
+  const auto& class_b = NewClass("B");
+  const auto& class_c = NewClass("C");
+  const auto& class_d = NewClass("D");
+  Value::Editor().SetClassHeritage(class_b, {&class_a});
+  Value::Editor().SetClassHeritage(class_c, {&class_a});
+  Value::Editor().SetClassHeritage(class_d, {&class_b, &class_c});
 
   ClassTreeBuilder builder(&analyze_context());
-  builder.ProcessClassDefinition(&class_a);
-  builder.ProcessClassDefinition(&class_b);
-  builder.ProcessClassDefinition(&class_c);
-  builder.ProcessClassDefinition(&class_d);
+  builder.ProcessClassDefinition(class_a);
+  builder.ProcessClassDefinition(class_b);
+  builder.ProcessClassDefinition(class_c);
+  builder.ProcessClassDefinition(class_d);
   builder.Build();
 
   EXPECT_EQ("", GetErrors());
@@ -243,17 +244,17 @@ TEST_F(ClassTreeBuilderTest, Diamond) {
 }
 
 TEST_F(ClassTreeBuilderTest, ErrorCycle) {
-  auto& class_a = NewClass("A");
-  auto& class_b = NewClass("B");
-  auto& class_c = NewClass("C");
-  Value::Editor().SetClassHeritage(&class_a, {&class_c});
-  Value::Editor().SetClassHeritage(&class_b, {&class_a});
-  Value::Editor().SetClassHeritage(&class_c, {&class_b});
+  const auto& class_a = NewClass("A");
+  const auto& class_b = NewClass("B");
+  const auto& class_c = NewClass("C");
+  Value::Editor().SetClassHeritage(class_a, {&class_c});
+  Value::Editor().SetClassHeritage(class_b, {&class_a});
+  Value::Editor().SetClassHeritage(class_c, {&class_b});
 
   ClassTreeBuilder builder(&analyze_context());
-  builder.ProcessClassDefinition(&class_a);
-  builder.ProcessClassDefinition(&class_b);
-  builder.ProcessClassDefinition(&class_c);
+  builder.ProcessClassDefinition(class_a);
+  builder.ProcessClassDefinition(class_b);
+  builder.ProcessClassDefinition(class_c);
   builder.Build();
 
   EXPECT_EQ(
@@ -265,11 +266,11 @@ TEST_F(ClassTreeBuilderTest, ErrorCycle) {
 }
 
 TEST_F(ClassTreeBuilderTest, ErrorSelf) {
-  auto& class_a = NewClass("A");
-  Value::Editor().SetClassHeritage(&class_a, {&class_a});
+  const auto& class_a = NewClass("A");
+  Value::Editor().SetClassHeritage(class_a, {&class_a});
 
   ClassTreeBuilder builder(&analyze_context());
-  builder.ProcessClassDefinition(&class_a);
+  builder.ProcessClassDefinition(class_a);
   builder.Build();
 
   EXPECT_EQ("ANALYZER_ERROR_CLASS_TREE_CYCLE@0:1\n", GetErrors())
@@ -277,12 +278,12 @@ TEST_F(ClassTreeBuilderTest, ErrorSelf) {
 }
 
 TEST_F(ClassTreeBuilderTest, ErrorUndefined) {
-  auto& class_a = NewClass("A");
-  auto& class_b = NewClass("B");
-  Value::Editor().SetClassHeritage(&class_b, {&class_a});
+  const auto& class_a = NewClass("A");
+  const auto& class_b = NewClass("B");
+  Value::Editor().SetClassHeritage(class_b, {&class_a});
 
   ClassTreeBuilder builder(&analyze_context());
-  builder.ProcessClassDefinition(&class_b);
+  builder.ProcessClassDefinition(class_b);
   builder.Build();
 
   EXPECT_EQ("ANALYZER_ERROR_CLASS_TREE_UNDEFINED_CLASS@0:1\n", GetErrors())
@@ -290,16 +291,16 @@ TEST_F(ClassTreeBuilderTest, ErrorUndefined) {
 }
 
 TEST_F(ClassTreeBuilderTest, ForwardRefernce) {
-  auto& class_a = NewClass("A");
-  auto& class_b = NewClass("B");
-  auto& class_c = NewClass("C");
-  Value::Editor().SetClassHeritage(&class_b, {&class_a});
-  Value::Editor().SetClassHeritage(&class_c, {&class_b});
+  const auto& class_a = NewClass("A");
+  const auto& class_b = NewClass("B");
+  const auto& class_c = NewClass("C");
+  Value::Editor().SetClassHeritage(class_b, {&class_a});
+  Value::Editor().SetClassHeritage(class_c, {&class_b});
 
   ClassTreeBuilder builder(&analyze_context());
-  builder.ProcessClassDefinition(&class_b);
-  builder.ProcessClassDefinition(&class_c);
-  builder.ProcessClassDefinition(&class_a);
+  builder.ProcessClassDefinition(class_b);
+  builder.ProcessClassDefinition(class_c);
+  builder.ProcessClassDefinition(class_a);
   builder.Build();
 
   EXPECT_EQ("", GetErrors());

@@ -31,8 +31,8 @@ Class::Class(Zone* zone,
 
 Class::~Class() = default;
 
-internal::ReferenceRange<ZoneVector<Class*>::const_iterator> Class::class_list()
-    const {
+internal::ReferenceRange<ZoneVector<const Class*>::const_iterator>
+Class::class_list() const {
   DCHECK(is_finalized()) << *this;
   return ReferenceRangeOf(class_list_);
 }
@@ -42,18 +42,17 @@ internal::ReferenceRange<ZoneVector<Class*>::const_iterator> Class::class_list()
 //
 ConstructedClass::ConstructedClass(Zone* zone,
                                    int id,
-                                   GenericClass* generic_class,
+                                   const GenericClass& generic_class,
                                    const std::vector<const Type*>& arguments)
     : Class(zone,
             id,
-            generic_class->kind(),
-            generic_class->name(),
-            generic_class->node(),
-            &generic_class->properties()),
-      generic_class_(*generic_class),
+            generic_class.kind(),
+            generic_class.name(),
+            generic_class.node(),
+            &generic_class.properties()),
+      generic_class_(generic_class),
       number_of_arguments_(arguments.size()) {
-  DCHECK(generic_class);
-  DCHECK_EQ(arguments.size(), generic_class->parameters().size());
+  DCHECK_EQ(arguments.size(), generic_class.parameters().size());
   DCHECK_GE(arguments.size(), static_cast<size_t>(1));
   auto* runner = arguments_;
   for (const auto& argument : arguments) {

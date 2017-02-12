@@ -170,6 +170,22 @@ const Node& NodeFactory::NewNode4(const SourceCodeRange& range,
   return *node;
 }
 
+const Node& NodeFactory::NewNode5(const SourceCodeRange& range,
+                                  const Syntax& tag,
+                                  const Node& node0,
+                                  const Node& node1,
+                                  const Node& node2,
+                                  const Node& node3,
+                                  const Node& node4) {
+  auto* const node = new (AllocateNode(&zone_, 5)) Node(range, tag, 5);
+  node->nodes_[0] = &node0;
+  node->nodes_[1] = &node1;
+  node->nodes_[2] = &node2;
+  node->nodes_[3] = &node3;
+  node->nodes_[4] = &node4;
+  return *node;
+}
+
 const Node& NodeFactory::NewTuple(const SourceCodeRange& range,
                                   const std::vector<const Node*>& nodes) {
   return NewNode(range, syntax_factory_->NewTuple(), nodes);
@@ -612,16 +628,17 @@ const Node& NodeFactory::NewForStatement(const SourceCodeRange& range,
                                          const Node& condition,
                                          const Node& step,
                                          const Node& body) {
-  return NewNode4(range, syntax_factory_->NewForStatement(), init, condition,
-                  step, body);
+  return NewNode5(range, syntax_factory_->NewForStatement(), keyword, init,
+                  condition, step, body);
 }
 
 const Node& NodeFactory::NewForInStatement(const SourceCodeRange& range,
                                            const Node& keyword,
+                                           const Node& binding,
                                            const Node& expression,
                                            const Node& body) {
-  return NewNode2(range, syntax_factory_->NewForInStatement(), expression,
-                  body);
+  return NewNode4(range, syntax_factory_->NewForInStatement(), keyword, binding,
+                  expression, body);
 }
 
 const Node& NodeFactory::NewForOfStatement(const SourceCodeRange& range,
@@ -629,7 +646,7 @@ const Node& NodeFactory::NewForOfStatement(const SourceCodeRange& range,
                                            const Node& binding,
                                            const Node& expression,
                                            const Node& body) {
-  return NewNode3(range, syntax_factory_->NewForOfStatement(), binding,
+  return NewNode4(range, syntax_factory_->NewForOfStatement(), keyword, binding,
                   expression, body);
 }
 

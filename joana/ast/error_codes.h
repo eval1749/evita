@@ -93,6 +93,7 @@ namespace ast {
   V(STATEMENT, EXPECT_COLON)                 \
   V(STATEMENT, EXPECT_LABEL)                 \
   V(STATEMENT, EXPECT_LBRACE)                \
+  V(STATEMENT, EXPECT_LHS)                   \
   V(STATEMENT, EXPECT_LPAREN)                \
   V(STATEMENT, EXPECT_RBRACE)                \
   V(STATEMENT, EXPECT_RPAREN)                \

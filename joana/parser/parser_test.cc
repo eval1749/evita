@@ -1600,6 +1600,7 @@ TEST_F(ParserTest, ForStatement) {
   EXPECT_EQ(
       "Module\n"
       "+--ForStatement\n"
+      "|  +--Empty ||\n"
       "|  +--AssignmentExpression<=>\n"
       "|  |  +--ReferenceExpression\n"
       "|  |  |  +--Name |index|\n"
@@ -1624,10 +1625,23 @@ TEST_F(ParserTest, ForStatement) {
             "  call(index);\n"));
 }
 
+TEST_F(ParserTest, ForStatementError) {
+  EXPECT_EQ(
+      "Module\n"
+      "+--InvalidStatement |for (bar)|\n"
+      "+--ExpressionStatement\n"
+      "|  +--CallExpression\n"
+      "|  |  +--ReferenceExpression\n"
+      "|  |  |  +--Name |baz|\n"
+      "PASER_ERROR_STATEMENT_INVALID@0:9\n",
+      Parse("for (bar) baz();"));
+}
+
 TEST_F(ParserTest, ForStatementInfinite) {
   EXPECT_EQ(
       "Module\n"
       "+--ForStatement\n"
+      "|  +--Empty ||\n"
       "|  +--ElisionExpression ||\n"
       "|  +--ElisionExpression ||\n"
       "|  +--ElisionExpression ||\n"
@@ -1645,14 +1659,29 @@ TEST_F(ParserTest, ForInStatement) {
   EXPECT_EQ(
       "Module\n"
       "+--ForInStatement\n"
-      "|  +--BinaryExpression<in>\n"
-      "|  |  +--MemberExpression\n"
+      "|  +--Name |var|\n"
+      "|  +--BindingNameElement\n"
+      "|  |  +--Name |x|\n"
+      "|  |  +--ElisionExpression ||\n"
+      "|  +--ReferenceExpression\n"
+      "|  |  +--Name |foo|\n"
+      "|  +--ExpressionStatement\n"
+      "|  |  +--CallExpression\n"
       "|  |  |  +--ReferenceExpression\n"
-      "|  |  |  |  +--Name |foo|\n"
-      "|  |  |  +--Name |x|\n"
-      "|  |  +--Name |in|\n"
+      "|  |  |  |  +--Name |call|\n"
+      "|  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  +--Name |foo|\n",
+      Parse("for (var x in foo) call(foo);"));
+  EXPECT_EQ(
+      "Module\n"
+      "+--ForInStatement\n"
+      "|  +--Empty ||\n"
+      "|  +--MemberExpression\n"
       "|  |  +--ReferenceExpression\n"
-      "|  |  |  +--Name |bar|\n"
+      "|  |  |  +--Name |foo|\n"
+      "|  |  +--Name |x|\n"
+      "|  +--ReferenceExpression\n"
+      "|  |  +--Name |bar|\n"
       "|  +--ExpressionStatement\n"
       "|  |  +--CallExpression\n"
       "|  |  |  +--ReferenceExpression\n"
@@ -1665,12 +1694,43 @@ TEST_F(ParserTest, ForInStatement) {
             "  call(foo.x);\n"));
 }
 
+TEST_F(ParserTest, ForInStatementError) {
+  EXPECT_EQ(
+      "Module\n"
+      "+--ForInStatement\n"
+      "|  +--Empty ||\n"
+      "|  +--CallExpression\n"
+      "|  |  +--ReferenceExpression\n"
+      "|  |  |  +--Name |bar|\n"
+      "|  +--ReferenceExpression\n"
+      "|  |  +--Name |baz|\n"
+      "|  +--ExpressionStatement\n"
+      "|  |  +--CallExpression\n"
+      "|  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  +--Name |call|\n"
+      "PASER_ERROR_STATEMENT_EXPECT_LHS@5:10\n",
+      Parse("for (bar() in baz) call();"));
+  EXPECT_EQ(
+      "Module\n"
+      "+--InvalidStatement |for (var x = foo in bar)|\n"
+      "+--ExpressionStatement\n"
+      "|  +--CallExpression\n"
+      "|  |  +--ReferenceExpression\n"
+      "|  |  |  +--Name |call|\n"
+      "|  |  +--ReferenceExpression\n"
+      "|  |  |  +--Name |x|\n"
+      "PASER_ERROR_STATEMENT_INVALID@0:24\n",
+      Parse("for (var x = foo in bar) call(x);"));
+}
+
 TEST_F(ParserTest, ForOfStatement) {
   EXPECT_EQ(
       "Module\n"
       "+--ForOfStatement\n"
-      "|  +--ReferenceExpression\n"
+      "|  +--Name |const|\n"
+      "|  +--BindingNameElement\n"
       "|  |  +--Name |element|\n"
+      "|  |  +--ElisionExpression ||\n"
       "|  +--ReferenceExpression\n"
       "|  |  +--Name |elements|\n"
       "|  +--ExpressionStatement\n"
@@ -1681,6 +1741,55 @@ TEST_F(ParserTest, ForOfStatement) {
       "|  |  |  |  +--Name |element|\n",
       Parse("for (const element of elements)\n"
             "  call(element);\n"));
+}
+
+TEST_F(ParserTest, ForOfStatementError) {
+  EXPECT_EQ(
+      "Module\n"
+      "+--ForOfStatement\n"
+      "|  +--Name |let|\n"
+      "|  +--BindingNameElement\n"
+      "|  |  +--Name |x|\n"
+      "|  |  +--NumericLiteral |1|\n"
+      "|  +--ReferenceExpression\n"
+      "|  |  +--Name |elements|\n"
+      "|  +--ExpressionStatement\n"
+      "|  |  +--CallExpression\n"
+      "|  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  +--Name |call|\n"
+      "|  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  +--Name |x|\n"
+      "PASER_ERROR_STATEMENT_UNEXPECT_INITIALIZER@9:14\n",
+      Parse("for (let x = 1 of elements) call(x);"));
+}
+
+TEST_F(ParserTest, ForOfStatementPattern) {
+  EXPECT_EQ(
+      "Module\n"
+      "+--ForOfStatement\n"
+      "|  +--Name |const|\n"
+      "|  +--ArrayBindingPattern\n"
+      "|  |  +--ElisionExpression ||\n"
+      "|  |  +--BindingNameElement\n"
+      "|  |  |  +--Name |x|\n"
+      "|  |  |  +--ElisionExpression ||\n"
+      "|  |  +--BindingCommaElement |,|\n"
+      "|  |  +--BindingNameElement\n"
+      "|  |  |  +--Name |y|\n"
+      "|  |  |  +--ElisionExpression ||\n"
+      "|  +--ReferenceExpression\n"
+      "|  |  +--Name |elements|\n"
+      "|  +--ExpressionStatement\n"
+      "|  |  +--CallExpression\n"
+      "|  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  +--Name |call|\n"
+      "|  |  |  +--CommaExpression\n"
+      "|  |  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  |  +--Name |x|\n"
+      "|  |  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  |  +--Name |y|\n",
+      Parse("for (const [x,y] of elements)\n"
+            "  call(x, y);\n"));
 }
 
 TEST_F(ParserTest, FunctionStatement) {

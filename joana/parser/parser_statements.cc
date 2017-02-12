@@ -22,6 +22,17 @@ namespace parser {
 
 namespace {
 
+const ast::Node& BindingIntializerOf(const ast::Node& binding) {
+  if (binding.Is<ast::BindingNameElement>())
+    return ast::BindingNameElement::InitializerOf(binding);
+  if (binding.Is<ast::ArrayBindingPattern>())
+    return ast::ArrayBindingPattern::InitializerOf(binding);
+  if (binding.Is<ast::ObjectBindingPattern>())
+    return ast::ObjectBindingPattern::InitializerOf(binding);
+  NOTREACHED();
+  return binding;
+}
+
 bool HasInitializer(const ast::Node& node) {
   if (node.Is<ast::BindingNameElement>()) {
     const auto& initializer = ast::BindingNameElement::InitializerOf(node);
@@ -43,6 +54,24 @@ bool IsDeclarationKeyword(const ast::Node& name) {
     return false;
   return name == ast::TokenKind::Const || name == ast::TokenKind::Let ||
          name == ast::TokenKind::Var;
+}
+
+bool IsInExpression(const ast::Node& expression) {
+  return expression.Is<ast::BinaryExpression>() &&
+         ast::BinaryExpression::OperatorOf(expression) == ast::TokenKind::In;
+}
+
+bool IsLeftHandSide(const ast::Node& expression) {
+  return expression.Is<ast::ReferenceExpression>() ||
+         expression.Is<ast::ComputedMemberExpression>() ||
+         expression.Is<ast::MemberExpression>() ||
+         expression.Is<ast::ObjectInitializer>();
+}
+
+bool IsValidForBinding(const ast::Node& binding) {
+  return binding.Is<ast::BindingNameElement>() ||
+         binding.Is<ast::ArrayBindingPattern>() ||
+         binding.Is<ast::ObjectBindingPattern>();
 }
 
 }  // namespace
@@ -209,45 +238,94 @@ const ast::Node& Parser::ParseForStatement() {
   ExpectPunctuator(ast::TokenKind::LeftParenthesis,
                    ErrorCode::ERROR_STATEMENT_EXPECT_LPAREN);
 
-  auto* const jsdoc =
+  const auto* const document =
       CanPeekToken() && PeekToken() == ast::SyntaxCode::JsDocDocument
           ? &ConsumeToken()
           : nullptr;
 
-  auto& keyword = CanPeekToken() && IsDeclarationKeyword(PeekToken())
-                      ? ConsumeToken()
-                      : NewEmptyName();
+  const auto& keyword = CanPeekToken() && IsDeclarationKeyword(PeekToken())
+                            ? ConsumeToken()
+                            : NewEmptyName();
 
-  auto& expression = CanPeekToken() && PeekToken() == ast::TokenKind::Semicolon
-                         ? NewElisionExpression()
-                         : ParseExpression();
-
-  if (jsdoc) {
-    if (keyword == ast::SyntaxCode::Empty)
-      AddError(*jsdoc, ErrorCode::ERROR_STATEMENT_UNEXPECT_ANNOTATION);
+  if (IsDeclarationKeyword(keyword)) {
+    const auto& binding = ParseBindingElement();
+    if (!IsValidForBinding(binding))
+      return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
+    if (ConsumeTokenIf(ast::TokenKind::In)) {
+      // 'for' '(' keyword binding 'in' expression ')'
+      const auto& initializer = BindingIntializerOf(binding);
+      if (!initializer.Is<ast::ElisionExpression>())
+        AddError(binding, ErrorCode::ERROR_STATEMENT_UNEXPECT_INITIALIZER);
+      const auto& expression = ParseExpression();
+      ExpectPunctuator(ast::TokenKind::RightParenthesis,
+                       ErrorCode::ERROR_STATEMENT_EXPECT_RPAREN);
+      const auto& statement = ParseStatement();
+      return node_factory().NewForInStatement(GetSourceCodeRange(), keyword,
+                                              binding, expression, statement);
+    }
+    if (ConsumeTokenIf(ast::TokenKind::Of)) {
+      // 'for' '(' keyword binding 'of' expression ')'
+      const auto& initializer = BindingIntializerOf(binding);
+      if (!initializer.Is<ast::ElisionExpression>())
+        AddError(binding, ErrorCode::ERROR_STATEMENT_UNEXPECT_INITIALIZER);
+      const auto& expression = ParseExpression();
+      ExpectPunctuator(ast::TokenKind::RightParenthesis,
+                       ErrorCode::ERROR_STATEMENT_EXPECT_RPAREN);
+      const auto& statement = ParseStatement();
+      return node_factory().NewForOfStatement(GetSourceCodeRange(), keyword,
+                                              binding, expression, statement);
+    }
+    if (ConsumeTokenIf(ast::TokenKind::Semicolon)) {
+      // 'for' '(' keyword binding ';' condition? ';' step? ')
+      const auto& condition =
+          CanPeekToken() && PeekToken() == ast::TokenKind::Semicolon
+              ? NewElisionExpression()
+              : ParseExpression();
+      ExpectPunctuator(ast::TokenKind::Semicolon,
+                       ErrorCode::ERROR_STATEMENT_EXPECT_SEMICOLON);
+      const auto& step =
+          CanPeekToken() && PeekToken() == ast::TokenKind::RightParenthesis
+              ? NewElisionExpression()
+              : ParseExpression();
+      ExpectPunctuator(ast::TokenKind::RightParenthesis,
+                       ErrorCode::ERROR_STATEMENT_EXPECT_RPAREN);
+      const auto& statement = ParseStatement();
+      return node_factory().NewForStatement(
+          GetSourceCodeRange(), keyword, binding, condition, step, statement);
+    }
+    ConsumeTokenIf(ast::TokenKind::RightParenthesis);
+    return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
   }
 
+  if (document)
+    AddError(*document, ErrorCode::ERROR_STATEMENT_UNEXPECT_ANNOTATION);
+
+  const auto& expression =
+      CanPeekToken() && PeekToken() == ast::TokenKind::Semicolon
+          ? NewElisionExpression()
+          : ParseExpression();
   if (ConsumeTokenIf(ast::TokenKind::Semicolon)) {
-    // 'for' '(' binding ';' condition ';' step ')' statement
-    auto& condition = CanPeekToken() && PeekToken() == ast::TokenKind::Semicolon
-                          ? NewElisionExpression()
-                          : ParseExpression();
+    // 'for' '(' expression ';' condition ';' step ')' statement
+    const auto& condition =
+        CanPeekToken() && PeekToken() == ast::TokenKind::Semicolon
+            ? NewElisionExpression()
+            : ParseExpression();
     ExpectPunctuator(ast::TokenKind::Semicolon,
                      ErrorCode::ERROR_STATEMENT_EXPECT_SEMICOLON);
-    auto& step =
+    const auto& step =
         CanPeekToken() && PeekToken() == ast::TokenKind::RightParenthesis
             ? NewElisionExpression()
             : ParseExpression();
     ExpectPunctuator(ast::TokenKind::RightParenthesis,
                      ErrorCode::ERROR_STATEMENT_EXPECT_RPAREN);
-    auto& body = ParseStatement();
-    return node_factory().NewForStatement(GetSourceCodeRange(), keyword,
-                                          expression, condition, step, body);
+    const auto& statement = ParseStatement();
+    return node_factory().NewForStatement(
+        GetSourceCodeRange(), keyword, expression, condition, step, statement);
   }
 
   if (ConsumeTokenIf(ast::TokenKind::Of)) {
     // 'for' '(' binding 'of' expression ')' statement
-    auto& expression2 = ParseAssignmentExpression();
+    const auto& expression2 = ParseAssignmentExpression();
     ExpectPunctuator(ast::TokenKind::RightParenthesis,
                      ErrorCode::ERROR_STATEMENT_EXPECT_RPAREN);
     auto& body = ParseStatement();
@@ -256,10 +334,17 @@ const ast::Node& Parser::ParseForStatement() {
   }
 
   if (ConsumeTokenIf(ast::TokenKind::RightParenthesis)) {
-    // 'for' '(' binding 'in' expression ')' statement
-    auto& body = ParseStatement();
-    return node_factory().NewForInStatement(GetSourceCodeRange(), keyword,
-                                            expression, body);
+    if (!IsInExpression(expression))
+      return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);
+    // 'for' '(' left_hand_side 'in' expression ')' statement
+    const auto& left_hand_side =
+        ast::BinaryExpression::LeftHandSideOf(expression);
+    if (!IsLeftHandSide(left_hand_side))
+      AddError(left_hand_side, ErrorCode::ERROR_STATEMENT_EXPECT_LHS);
+    const auto& statement = ParseStatement();
+    return node_factory().NewForInStatement(
+        GetSourceCodeRange(), keyword, left_hand_side,
+        ast::BinaryExpression::RightHandSideOf(expression), statement);
   }
 
   return NewInvalidStatement(ErrorCode::ERROR_STATEMENT_INVALID);

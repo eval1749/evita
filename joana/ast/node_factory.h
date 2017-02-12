@@ -278,6 +278,7 @@ class JOANA_AST_EXPORT NodeFactory final {
 
   const Node& NewForInStatement(const SourceCodeRange& range,
                                 const Node& keyword,
+                                const Node& binding,
                                 const Node& expression,
                                 const Node& body);
 
@@ -420,6 +421,14 @@ class JOANA_AST_EXPORT NodeFactory final {
                        const Node& node1,
                        const Node& node2,
                        const Node& node3);
+
+  const Node& NewNode5(const SourceCodeRange& range,
+                       const Syntax& tag,
+                       const Node& node0,
+                       const Node& node1,
+                       const Node& node2,
+                       const Node& node3,
+                       const Node& node4);
 
   std::unique_ptr<NameIdMap> name_id_map_;
   std::unique_ptr<SyntaxFactory> syntax_factory_;

@@ -285,10 +285,7 @@ ScriptHost* ScriptHost::Create(Scheduler* scheduler,
                                domapi::IoDelegate* io_delegate) {
   // See v8/src/flag-definitions.h
   // Note: |EnsureV8Initialized()| in "gin/isolate_holder.cc" also sets flags.
-  char flags[] =
-      " --harmony-function-name"
-      " --harmony-species"
-      " --harmony-do-expressions";
+  char flags[] = " --harmony-do-expressions";
   v8::V8::SetFlagsFromString(flags, sizeof(flags) - 1);
   gin::IsolateHolder::Initialize(gin::IsolateHolder::kStrictMode,
                                  gin::IsolateHolder::kStableV8Extras,

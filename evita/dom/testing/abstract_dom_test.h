@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "base/strings/string_piece.h"
+#include "base/test/scoped_async_task_scheduler.h"
 #include "evita/ginx/runner.h"
 #include "evita/ginx/v8.h"
 #include "testing/gtest/include/gtest/gtest.h"
@@ -122,6 +123,10 @@ class AbstractDomTest : public ::testing::Test {
 
   // Note: ScriptHost is a singleton.
   ScriptHost* script_host_;
+
+  // Required by gin::V8Platform::CallOnBackgroundThread(). Can't be a
+  // ScopedTaskScheduler because v8 synchronously waits for tasks to run.
+  base::test::ScopedAsyncTaskScheduler scoped_async_task_scheduler_;
 
   DISALLOW_COPY_AND_ASSIGN(AbstractDomTest);
 };

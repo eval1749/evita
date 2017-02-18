@@ -7,7 +7,9 @@
 #include "base/bind.h"
 #include "base/callback.h"
 #include "base/message_loop/message_loop.h"
+#include "base/sys_info.h"
 #include "base/task_runner.h"
+#include "base/task_scheduler/task_scheduler.h"
 #include "base/threading/thread.h"
 #include "base/time/time.h"
 #include "base/trace_event/trace_event.h"
@@ -66,6 +68,8 @@ void ScriptThread::ScheduleScriptTask(const base::Closure& task) {
 void ScriptThread::Start() {
   DCHECK_CALLED_ON_NON_SCRIPT_THREAD();
   thread_->Start();
+  base::TaskScheduler::CreateAndSetSimpleTaskScheduler(
+      base::SysInfo::NumberOfProcessors());
   scheduler_->Start(thread_->message_loop());
   thread_->message_loop()->task_runner()->PostTask(
       FROM_HERE, base::Bind(&ScriptHost::CreateAndStart,

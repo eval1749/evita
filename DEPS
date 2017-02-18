@@ -7,14 +7,14 @@ vars = {
   'boringssl_git': 'https://boringssl.googlesource.com',
   'github.git': 'https://github.com',
 
-  'base_revision': '86e1322a92ee761c487148210d27164122bc2c78',
+  'base_revision': 'abda15d6dde1dae9da4db27426382d306bdb38f7',
   'build_revision': '1ecc6e71abb0d6ca5fba8c749a93ff053e1969ce',
-  'buildtools_revision': 'a7cc7a3e21a061975b33dcdcd81a9716ba614c3c',
+  'buildtools_revision': 'cf493f8b1ae59611b19b000d7af922559b6ae92a',
   'ced_revision': '368a9cc09ad868a3d28f0b5ad4a733f263c46409',
   'crypto_revision': 'f005f09961ae00cf6611c948033beaa226d66572',
   'cygwin_revision': 'c89e446b273697fadf3a10ff1007a97c0b7de6df',
   'gmock_revision': '0421b6f358139f02e102c9c332ce19a33faf75be', # from svn revision 566
-  'grit_revision': 'b0336743af4d045cae05b9201207325115e9c013',
+  'grit_revision': '05bef23f9c8acbfd710d0d54032b21ffb7ba1bbc',
   'gtest_revision': '6f8a66431cb592dad629028a50b3dd418a408c87',
   'gyp_revision': 'e7079f0e0e14108ab0dba58728ff219637458563',
   'icu_revision': '9cd2828740572ba6f694b9365236a8356fd06147',
@@ -24,9 +24,9 @@ vars = {
   'markupsafe_revision': '8f45f5cfa0009d2a70589bcda0349b8cb2b72783',
   'modp_b64_revision': '28e3fbba4cb4ec3ffd85b53d0a3904525d08f5a6',
   'ply_revision': '4a6baf95860033d4c69d3e3087696b30c687622c',
-  'testing_revision': 'ac4d6ca5297ff5c77045c11daa63766c5fb9766d',
+  'testing_revision': '94e5046865181a121596d9564f13b132dfaa6973',
   'v8_revision': 'ee5db9409665e270a377c2c3be7d3b017830cfc2', # 5.8.244
-  'zlib_revision': '709ed02efa0d048f1308fe3c9fcc5e07b1b68524',
+  'zlib_revision': '13dc246a58e4b72104d35f9b1809af95221ebda7',
 
   # boringssl
   'boringssl_revision': 'dc8c1d962e688c01cd8903d40ada70a75f700ad7',

@@ -1158,6 +1158,8 @@ TEST_F(ParserTest, ExpressionObjectInitializer) {
       "|  |  |  |  +--Name |foo|\n"
       "|  |  |  |  +--NumericLiteral |1|\n"
       "|  |  |  +--DelimiterExpression |,|\n"
+      "|  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  +--Name |options|\n"
       "|  |  |  +--Method<NonStatic,Normal>\n"
       "|  |  |  |  +--Name |bar|\n"
       "|  |  |  |  +--ParameterList |()|\n"
@@ -1210,6 +1212,7 @@ TEST_F(ParserTest, ExpressionObjectInitializer) {
       "|  |  |  |  |  |  +--NumericLiteral |7|\n",
       Parse("x = {\n"
             "  foo: 1,\n"
+            "  options,\n"
             "  bar() { 1; }\n"
             "  *baz() { 2; }\n"
             "  async quux() { 3; }\n"

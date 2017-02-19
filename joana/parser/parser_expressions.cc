@@ -636,7 +636,7 @@ const ast::Node& Parser::ParsePropertyAfterName(
     return property_name;
 
   if (ConsumeTokenIf(ast::TokenKind::Comma))
-    return property_name;
+    return node_factory().NewReferenceExpression(property_name);
 
   if (ConsumeTokenIf(ast::TokenKind::Colon)) {
     auto& expression = ParseAssignmentExpression();

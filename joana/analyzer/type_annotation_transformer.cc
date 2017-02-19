@@ -337,6 +337,10 @@ void TypeAnnotationTransformer::FunctionParameters::Builder::RecordTag(
 const Type&
 TypeAnnotationTransformer::FunctionParameters::Builder::TransformType(
     const ast::Node& node) {
+  if (!node.syntax().Is<ast::Type>()) {
+    AddError(node, ErrorCode::JSDOC_EXPECT_TYPE);
+    return unspecified_type();
+  }
   return TypeTransformer(&context()).Transform(node);
 }
 
@@ -368,8 +372,14 @@ const Type* TypeAnnotationTransformer::Compile() {
     case Annotation::Kind::Interface:
       return &TransformAsInterface();
     case Annotation::Kind::Type:
-    case Annotation::Kind::TypeDef:
-      return &TransformType(annotation_.type_node());
+    case Annotation::Kind::TypeDef: {
+      const auto& type_node = annotation_.type_node();
+      if (!type_node.syntax().Is<ast::Type>()) {
+        AddError(type_node, ErrorCode::JSDOC_EXPECT_TYPE);
+        return nullptr;
+      }
+      return &TransformType(type_node);
+    }
   }
   return nullptr;
 }
@@ -377,7 +387,11 @@ const Type* TypeAnnotationTransformer::Compile() {
 const Type& TypeAnnotationTransformer::ComputeReturnType() {
   if (!annotation_.return_tag())
     return void_type();
-  return TransformType(annotation_.return_tag()->child_at(1));
+  const auto& type_node = annotation_.return_tag()->child_at(1);
+  if (type_node.syntax().Is<ast::Type>())
+    return TransformType(type_node);
+  AddError(type_node, ErrorCode::JSDOC_EXPECT_TYPE);
+  return unspecified_type();
 }
 
 // Type of "this" is determined by:
@@ -431,8 +445,13 @@ TypeAnnotationTransformer::ProcessParameterTags() {
     const auto& type_node = parameter_tag->child_at(1);
     const auto is_optional = type_node.Is<ast::OptionalType>();
     const auto is_rest = type_node.Is<ast::RestType>();
-    const auto& type = TransformType(
-        is_optional || is_rest ? type_node.child_at(0) : type_node);
+    if (!type_node.syntax().Is<ast::Type>())
+      AddError(type_node, ErrorCode::JSDOC_EXPECT_TYPE);
+    const auto& type =
+        type_node.syntax().Is<ast::Type>()
+            ? TransformType(is_optional || is_rest ? type_node.child_at(0)
+                                                   : type_node)
+            : unspecified_type();
     switch (state) {
       case State::Required:
         if (is_optional) {
@@ -591,7 +610,7 @@ const Class* TypeAnnotationTransformer::TryClassValueOf(
         context().TryValueOf(*property.assignments().front());
     return property_value ? property_value->TryAs<Class>() : nullptr;
   }
-  NOTREACHED() << node;
+  DVLOG(0) << "We should handle: " << node;
   return nullptr;
 }
 }  // namespace analyzer

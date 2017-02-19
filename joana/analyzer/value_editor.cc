@@ -17,12 +17,11 @@ namespace analyzer {
 namespace {
 
 bool IsValidAssignment(const ast::Node& node) {
-  return node.Is<ast::AssignmentExpression>() ||
-         node.Is<ast::BindingNameElement>() || node.Is<ast::Class>() ||
-         node.Is<ast::ComputedMemberExpression>() ||
-         node.Is<ast::JsDocDocument>() || node.Is<ast::Function>() ||
-         node.Is<ast::Method>() || node.Is<ast::MemberExpression>() ||
-         node.Is<ast::ObjectInitializer>() ||
+  return node.Is<ast::BindingNameElement>() || node.Is<ast::Class>() ||
+         node.syntax().Is<ast::Expression>() || node.Is<ast::JsDocDocument>() ||
+         node.Is<ast::Function>() || node.Is<ast::Method>() ||
+         // TODO(eval1749): We should introduce |ast::TypeCastExpression|.
+         node.Is<ast::Annotation>() ||
          node == BuiltInWorld::GetInstance()->NameOf(ast::TokenKind::Global) ||
          node == BuiltInWorld::GetInstance()->NameOf(ast::TokenKind::Array) ||
          node == BuiltInWorld::GetInstance()->NameOf(ast::TokenKind::Object);

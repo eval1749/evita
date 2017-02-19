@@ -28,7 +28,7 @@ Class::Class(Zone* zone,
       class_list_(zone),
       kind_(kind),
       name_(name) {
-  DCHECK(CanBeValueName(name));
+  DCHECK(CanBeValueName(name)) << name;
 }
 
 Class::~Class() = default;
@@ -154,7 +154,7 @@ Property::Property(int id,
                    ValueHolderData* data,
                    Properties* properties)
     : ValueHolder(id, key, data, properties), visibility_(visibility) {
-  DCHECK(key == ast::SyntaxCode::Name || ast::IsKnownSymbol(key)) << key;
+  DCHECK(CanBeValueName(key)) << key;
 }
 
 Property::~Property() = default;
@@ -200,10 +200,12 @@ Variable::Variable(int id,
 
 Variable::~Variable() = default;
 
+// Returns true if |node| can be value name.
+// Example:
+//  var unique = { 'foo': 1 }
 bool CanBeValueName(const ast::Node& node) {
   return node.Is<ast::Name>() || node.Is<ast::Empty>() ||
-         node.Is<ast::MemberExpression>() ||
-         node.Is<ast::ComputedMemberExpression>();
+         node.syntax().Is<ast::Expression>();
 }
 
 }  // namespace analyzer

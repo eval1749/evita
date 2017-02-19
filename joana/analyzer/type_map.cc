@@ -24,7 +24,8 @@ void TypeMap::RegisterType(const ast::Node& node, const Type& type) {
   } else if (node.Is<ast::Function>()) {
     DCHECK(type.Is<ClassType>() || type.Is<FunctionType>()) << node << ' '
                                                             << type;
-  } else if (node.Is<ast::Method>()) {
+  } else if (node.Is<ast::Method>() &&
+             ast::Method::FunctionKindOf(node) != ast::FunctionKind::Getter) {
     DCHECK(type.Is<FunctionType>()) << node << ' ' << type;
   }
 #endif

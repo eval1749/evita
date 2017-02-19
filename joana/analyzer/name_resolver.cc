@@ -240,15 +240,26 @@ void NameResolver::RunOn(const ast::Node& node) {
 }
 
 void NameResolver::BindType(const ast::Node& name, const Type& type) {
-  DCHECK_EQ(name, ast::SyntaxCode::Name);
-  const auto& present = environment_->FindNameAndType(name);
-  const auto* present_name = present.first;
-  const auto* present_type = present.second;
-  if (!present_type) {
-    environment_->BindType(name, type);
+  if (name.Is<ast::Name>()) {
+    const auto& present = environment_->FindNameAndType(name);
+    const auto* present_name = present.first;
+    const auto* present_type = present.second;
+    if (!present_type) {
+      environment_->BindType(name, type);
+      return;
+    }
+    AddError(name, ErrorCode::ENVIRONMENT_MULTIPLE_OCCURRENCES, *present_name);
     return;
   }
-  AddError(name, ErrorCode::ENVIRONMENT_MULTIPLE_OCCURRENCES, *present_name);
+  if (name.Is<ast::MemberExpression>()) {
+    AddError(name, ErrorCode::ENVIRONMENT_NYI_BIND_TYPE);
+    return;
+  }
+  if (name.Is<ast::ComputedMemberExpression>()) {
+    AddError(name, ErrorCode::ENVIRONMENT_NYI_BIND_TYPE);
+    return;
+  }
+  AddError(name, ErrorCode::ENVIRONMENT_EXPECT_NAME);
 }
 
 void NameResolver::BindTypeParameters(const Class& class_value) {
@@ -376,7 +387,7 @@ void NameResolver::ProcessAssignment(const ast::Node& lhs,
     case Annotation::Kind::Type:
       return;
     case Annotation::Kind::Enum:
-      DVLOG(0) << "NYI @enum";
+      DVLOG(0) << "NYI @enum: " << annotation.document();
       return;
     case Annotation::Kind::Function: {
       if (!maybe_rhs) {
@@ -393,10 +404,16 @@ void NameResolver::ProcessAssignment(const ast::Node& lhs,
       return;
     }
     case Annotation::Kind::TypeDef: {
-      if (maybe_rhs && !maybe_rhs->Is<ast::ElisionExpression>())
+      if (maybe_rhs && !maybe_rhs->Is<ast::ElisionExpression>()) {
         AddError(lhs, ErrorCode::ENVIRONMENT_UNEXPECT_INITIALIZER);
-      const auto& type =
-          type_factory().NewTypeAlias(name, annotation.kind_tag()->child_at(1));
+        return;
+      }
+      const auto& type_spec = annotation.kind_tag()->child_at(1);
+      if (!type_spec.syntax().Is<ast::Type>()) {
+        AddError(lhs, ErrorCode::ENVIRONMENT_EXPECT_TYPE);
+        return;
+      }
+      const auto& type = type_factory().NewTypeAlias(name, type_spec);
       if (!lhs.Is<ast::BindingNameElement>())
         return;
       BindType(name, type);
@@ -564,6 +581,37 @@ void NameResolver::ProcessFunction(const ast::Node& node,
   VisitChildNodes(node);
 }
 
+void NameResolver::ProcessObjectMember(const Class& class_value,
+                                       const ast::Node& node,
+                                       const Annotation& annotation) {
+  auto& properties = class_value.properties();
+  if (node.Is<ast::Property>()) {
+    const auto& property_name = ast::Property::NameOf(node);
+    const auto& property_value = ast::Property::ValueOf(node);
+    if (property_name.Is<ast::Name>()) {
+      const auto& property = GetOrNewProperty(&properties, property_name);
+      context().RegisterValue(node, property);
+    }
+    if (property_value.Is<ast::Class>())
+      return ProcessClass(property_value, annotation, &property_name);
+    if (property_value.Is<ast::Function>())
+      return ProcessFunction(property_value, annotation, &property_name);
+    Visit(property_value);
+    return;
+  }
+  if (node.Is<ast::Method>()) {
+    GetOrNewProperty(&properties, ast::Method::NameOf(node));
+    ProcessMethod(node, annotation, class_value);
+    return;
+  }
+  if (node.Is<ast::ReferenceExpression>()) {
+    GetOrNewProperty(&properties, ast::ReferenceExpression::NameOf(node));
+    Visit(node);
+    return;
+  }
+  AddError(node, ErrorCode::ENVIRONMENT_EXPECT_OBJECT_MEMBER);
+}
+
 void NameResolver::ProcessPropertyAssignment(const ast::Node& lhs,
                                              const ast::Node* maybe_rhs,
                                              const Annotation& annotation) {
@@ -611,7 +659,7 @@ void NameResolver::ProcessPropertyAssignment(const ast::Node& lhs,
   Environment environment(this);
   if (const auto* class_value = TryClassOfPrototype(container))
     BindTypeParameters(*class_value);
-  ProcessAssignment(lhs, maybe_rhs, key, annotation);
+  ProcessAssignment(lhs, maybe_rhs, lhs, annotation);
 }
 
 // Bind name of @template tags
@@ -819,6 +867,10 @@ void NameResolver::VisitInternal(const ast::AssignmentExpression& syntax,
     // We've not known value of reference expression.
     return;
   }
+  if (!value->Is<ValueHolder>()) {
+    AddError(lhs, ErrorCode::ENVIRONMENT_EXPECT_VALUE_HOLDER);
+    return;
+  }
   const auto& holder = value->As<ValueHolder>();
   Value::Editor().AddAssignment(holder, node);
 }
@@ -864,40 +916,15 @@ void NameResolver::VisitInternal(const ast::ObjectInitializer& syntax,
     // property names.
     if (child.Is<ast::Annotation>()) {
       const auto& member = ast::Annotation::AnnotatedOf(child);
-      if (member != ast::SyntaxCode::Method) {
-        AddError(member, ErrorCode::ENVIRONMENT_EXPECT_METHOD);
-        continue;
-      }
-      const auto& method_annotation =
+      const auto& annotation =
           Annotation::Compiler(&context())
               .Compile(ast::Annotation::DocumentOf(child), member);
-      ProcessMethod(member, method_annotation, class_value);
-      // TODO(eval1749): We should get visibility from annotation.
-      GetOrNewProperty(&properties, ast::Method::NameOf(member));
+      ProcessObjectMember(class_value, member, annotation);
       continue;
     }
     if (child.Is<ast::DelimiterExpression>())
       continue;
-    if (child.Is<ast::Method>()) {
-      GetOrNewProperty(&properties, ast::Method::NameOf(child));
-      ProcessMethod(child, Annotation(), class_value);
-      continue;
-    }
-    if (child.Is<ast::ReferenceExpression>()) {
-      GetOrNewProperty(&properties, ast::ReferenceExpression::NameOf(child));
-      Visit(child);
-      continue;
-    }
-    if (child.Is<ast::Property>()) {
-      const auto& property_name = ast::Property::NameOf(child);
-      if (property_name.Is<ast::Name>()) {
-        const auto& property = GetOrNewProperty(&properties, property_name);
-        context().RegisterValue(child, property);
-      }
-      Visit(ast::Property::ValueOf(child));
-      continue;
-    }
-    AddError(child, ErrorCode::ENVIRONMENT_EXPECT_OBJECT_MEMBER);
+    ProcessObjectMember(class_value, child, Annotation());
   }
 }
 

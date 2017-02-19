@@ -262,8 +262,11 @@ void Compiler::ValidateForInterface(const ast::Node& target) {
 }
 
 void Compiler::ValidateForType(const ast::Node& target) {
-  if (target.Is<ast::Class>())
-    AddError(*annotation_.kind_tag_, ErrorCode::JSDOC_UNEXPECT_TAG);
+  if (!target.Is<ast::Class>())
+    return;
+  if (!annotation_.kind_tag_)
+    return;
+  AddError(*annotation_.kind_tag_, ErrorCode::JSDOC_UNEXPECT_TAG);
 }
 
 }  // namespace analyzer

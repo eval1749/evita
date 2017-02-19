@@ -26,7 +26,7 @@ bool CanBeNullable(const Type& type) {
   if (type.Is<AnyType>())
     return false;
   if (type.Is<LabeledType>()) {
-    NOTREACHED() << type;
+    VLOG(0) << "NYI : " << type;
     return false;
   }
   if (type.Is<NilType>())
@@ -34,7 +34,7 @@ bool CanBeNullable(const Type& type) {
   if (type.Is<NullType>())
     return false;
   if (type.Is<TypeAlias>()) {
-    NOTREACHED() << type;
+    VLOG(0) << "NYI : " << type;
     return false;
   }
   if (type.Is<UnspecifiedType>())
@@ -67,7 +67,9 @@ const Type& TypeTransformer::NewNullableType(const Type& type) {
       type.Is<UnspecifiedType>()) {
     return type;
   }
-  DCHECK(CanBeNullable(type)) << type;
+  // TODO(eval1749): We should expand |TypeAlia| in another place.
+  if (!type.Is<TypeAlias>())
+    DCHECK(CanBeNullable(type)) << type;
   return type_factory().NewUnionType(type, null_type());
 }
 
@@ -173,7 +175,8 @@ const Type& TypeTransformer::TransformFunctionType(const ast::Node& node) {
         state = State::Required;
         continue;
     }
-    NOTREACHED() << "Invalid state " << static_cast<int>(state) << parameter;
+    VLOG(0) << "NYI : "
+            << "Invalid state " << static_cast<int>(state) << parameter;
   }
   DCHECK_NE(state, State::This);
   return type_factory().NewFunctionType(
@@ -240,16 +243,21 @@ const Type& TypeTransformer::TransformRecordType(const ast::Node& node) {
 }
 
 const Type& TypeTransformer::TransformTypeApplication(const ast::Node& node) {
-  const auto& generic_type =
-      context().TypeOf(ast::TypeApplication::NameOf(node));
+  const auto& generic_type_name = ast::TypeApplication::NameOf(node);
+  const auto* maybe_generic_type = context().TryTypeOf(generic_type_name);
+  if (!maybe_generic_type) {
+    AddError(generic_type_name, ErrorCode::JSDOC_EXPECT_GENERIC_CLASS);
+    return unspecified_type();
+  }
+  const auto& generic_type = *maybe_generic_type;
   if (!generic_type.Is<ClassType>()) {
-    AddError(node, ErrorCode::JSDOC_EXPECT_GENERIC_CLASS);
+    AddError(generic_type_name, ErrorCode::JSDOC_EXPECT_GENERIC_CLASS);
     return unspecified_type();
   }
   auto* const generic_class_value =
       generic_type.As<ClassType>().value().TryAs<GenericClass>();
   if (!generic_class_value) {
-    AddError(node, ErrorCode::JSDOC_EXPECT_GENERIC_CLASS);
+    AddError(generic_type_name, ErrorCode::JSDOC_EXPECT_GENERIC_CLASS);
     return unspecified_type();
   }
   const auto& arguments_node = ast::TypeApplication::ArgumentsOf(node);

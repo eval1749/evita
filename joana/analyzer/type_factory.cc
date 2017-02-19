@@ -14,6 +14,7 @@
 #include "joana/analyzer/built_in_world.h"
 #include "joana/analyzer/types.h"
 #include "joana/analyzer/values.h"
+#include "joana/ast/expressions.h"
 #include "joana/ast/tokens.h"
 #include "joana/ast/types.h"
 
@@ -246,7 +247,7 @@ const Type& TypeFactory::NewTupleTypeFromVector(
 
 const Type& TypeFactory::NewTypeAlias(const ast::Node& name,
                                       const ast::Node& type) {
-  DCHECK_EQ(name, ast::SyntaxCode::Name);
+  DCHECK(name.Is<ast::Name>() || name.Is<ast::MemberExpression>()) << name;
   DCHECK(type.syntax().Is<ast::Type>()) << name << ' ' << type;
   return *new (&zone_) TypeAlias(NextTypeId(), name, type);
 }

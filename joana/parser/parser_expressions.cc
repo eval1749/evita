@@ -432,7 +432,8 @@ const ast::Node& Parser::ParseNameAsExpression() {
     return NewInvalidExpression(name, ErrorCode::ERROR_EXPRESSION_INVALID);
   if (ConsumeTokenIf(ast::TokenKind::Arrow)) {
     auto& statement = ParseArrowFunctionBody();
-    auto& parameter = node_factory().NewReferenceExpression(name);
+    const auto& parameter = node_factory().NewBindingNameElement(
+        name.range(), name, NewElisionExpression());
     return node_factory().NewArrowFunction(
         GetSourceCodeRange(), ast::FunctionKind::Normal, parameter, statement);
   }

@@ -262,7 +262,7 @@ const Node& NodeFactory::NewArrowFunction(const SourceCodeRange& range,
                                           const Node& parameter_list,
                                           const Node& body) {
   DCHECK(parameter_list == SyntaxCode::ParameterList ||
-         parameter_list == ast::SyntaxCode::ReferenceExpression)
+         parameter_list == ast::SyntaxCode::BindingNameElement)
       << parameter_list;
   return NewNode(range, syntax_factory_->NewArrowFunction(kind), parameter_list,
                  body);

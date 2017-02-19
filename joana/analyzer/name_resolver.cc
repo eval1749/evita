@@ -783,6 +783,9 @@ void NameResolver::VisitInternal(const ast::Annotation& syntax,
   AddError(node, ErrorCode::ENVIRONMENT_UNEXPECT_ANNOTATION);
 }
 
+void NameResolver::VisitInternal(const ast::ArrowFunction& syntax,
+                                 const ast::Node& node) {}
+
 void NameResolver::VisitInternal(const ast::Class& syntax,
                                  const ast::Node& node) {
   ProcessClass(node, Annotation(), nullptr);

@@ -80,7 +80,7 @@ class JOANA_AST_EXPORT ArrowFunction final
 
   static const Node& BodyOf(const Node& node);
 
-  //  - x = ReferenceExpression
+  //  - x = BindingNameElement
   //  - () = ParameterList
   //  - (a, b, ...) = ParameterList
   static const Node& ParametersOf(const Node& node);

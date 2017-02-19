@@ -72,17 +72,17 @@ ast::NodeFactory& RegExpLexer::node_factory() const {
 const ast::Node& RegExpLexer::HandleCharSet() {
   const auto is_complement = ConsumeCharIf('^');
   // TODO(eval1749): NYI parse char set
-  while (!ConsumeCharIf(']')) {
+  while (CanPeekChar() && PeekChar() != kRightBracket) {
     if (!ConsumeCharIf(kBackslash)) {
       ConsumeChar();
       continue;
     }
-    if (!CanPeekChar()) {
-      AddError(RegExpErrorCode::REGEXP_EXPECT_RBRACKET);
+    if (!CanPeekChar())
       break;
-    }
     ConsumeChar();
   }
+  if (!CanPeekChar() || !ConsumeCharIf(kRightBracket))
+    AddError(RegExpErrorCode::REGEXP_EXPECT_RBRACKET);
   return is_complement
              ? node_factory().NewComplementCharSetRegExp(MakeTokenRange())
              : node_factory().NewCharSetRegExp(MakeTokenRange());

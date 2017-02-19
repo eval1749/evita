@@ -97,6 +97,17 @@ TEST_F(RegExpParserTest, Basic) {
       << "'{}' is non-syntax char";
 }
 
+TEST_F(RegExpParserTest, CharSetError) {
+  EXPECT_EQ(
+      "CharSetRegExp |[fo|\n"
+      "REGEXP_ERROR_REGEXP_EXPECT_RBRACKET@0:3\n",
+      Parse("[fo"));
+  EXPECT_EQ(
+      "CharSetRegExp |[fo\\|\n"
+      "REGEXP_ERROR_REGEXP_EXPECT_RBRACKET@0:4\n",
+      Parse("[fo\\"));
+}
+
 TEST_F(RegExpParserTest, GroupingError) {
   EXPECT_EQ("LiteralRegExp |)foo|\n", Parse(")foo"))
       << "')' is not syntax character";

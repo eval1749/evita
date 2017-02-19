@@ -55,8 +55,9 @@ const ast::Node& Parser::ParseClassName() {
 }
 
 const ast::Node& Parser::ParseFunction(ast::FunctionKind kind) {
-  auto& name =
-      PeekToken() == ast::SyntaxCode::Name ? ConsumeToken() : NewEmptyName();
+  const auto& name = CanPeekToken() && PeekToken() == ast::SyntaxCode::Name
+                         ? ConsumeToken()
+                         : NewEmptyName();
   const auto& parameter_list = ParseParameterList();
   auto& body = ParseFunctionBody();
   return node_factory().NewFunction(GetSourceCodeRange(), kind, name,
@@ -64,9 +65,9 @@ const ast::Node& Parser::ParseFunction(ast::FunctionKind kind) {
 }
 
 const ast::Node& Parser::ParseFunctionBody() {
-  NodeRangeScope scope(this);
   if (!CanPeekToken() || PeekToken() != ast::TokenKind::LeftBrace)
     return NewInvalidStatement(ErrorCode::ERROR_FUNCTION_EXPECT_LBRACE);
+  NodeRangeScope scope(this);
   return ParseStatement();
 }
 
@@ -81,8 +82,10 @@ const ast::Node& Parser::ParseMethod(ast::MethodKind method_kind,
 
 const ast::Node& Parser::ParseParameterList() {
   NodeRangeScope scope(this);
-  ExpectPunctuator(ast::TokenKind::LeftParenthesis,
-                   ErrorCode::ERROR_FUNCTION_EXPECT_LPAREN);
+  if (!ConsumeTokenIf(ast::TokenKind::LeftParenthesis)) {
+    AddError(ErrorCode::ERROR_FUNCTION_EXPECT_LPAREN);
+    return node_factory().NewParameterList(GetSourceCodeRange(), {});
+  }
   if (ConsumeTokenIf(ast::TokenKind::RightParenthesis))
     return node_factory().NewParameterList(GetSourceCodeRange(), {});
   const auto& parameters = ParseBindingElements();

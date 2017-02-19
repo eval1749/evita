@@ -941,6 +941,34 @@ TEST_F(ParserTest, ExpressionFunctionGenerator) {
             "};\n"));
 }
 
+TEST_F(ParserTest, ExpressionFunctionError) {
+  EXPECT_EQ(
+      "Module\n"
+      "+--Function<Normal>\n"
+      "|  +--Empty ||\n"
+      "|  +--ParameterList ||\n"
+      "|  +--InvalidStatement |function|\n"
+      "PASER_ERROR_FUNCTION_EXPECT_LPAREN@8:8\n"
+      "PASER_ERROR_FUNCTION_EXPECT_LBRACE@0:8\n",
+      Parse("function"));
+  EXPECT_EQ(
+      "Module\n"
+      "+--Function<Normal>\n"
+      "|  +--Empty ||\n"
+      "|  +--ParameterList ||\n"
+      "|  +--InvalidStatement |function|\n"
+      "+--ExpressionStatement\n"
+      "|  +--Invalid |.|\n"
+      "+--ExpressionStatement\n"
+      "|  +--ReferenceExpression\n"
+      "|  |  +--Name |foo|\n"
+      "PASER_ERROR_FUNCTION_EXPECT_LPAREN@8:9\n"
+      "PASER_ERROR_FUNCTION_EXPECT_LBRACE@0:8\n"
+      "PASER_ERROR_EXPRESSION_INVALID@8:9\n"
+      "PASER_ERROR_STATEMENT_EXPECT_SEMICOLON@8:9\n",
+      Parse("function.foo"));
+}
+
 TEST_F(ParserTest, ExpressionFunctionNormal) {
   EXPECT_EQ(
       "Module\n"

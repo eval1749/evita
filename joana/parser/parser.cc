@@ -71,7 +71,9 @@ std::unique_ptr<BracketTracker> NewBracketTracker(
 //
 Parser::NodeRangeScope::NodeRangeScope(Parser* parser)
     : offset_holder_(&parser->node_start_,
-                     parser->PeekToken().range().start()) {}
+                     parser->CanPeekToken()
+                         ? parser->PeekToken().range().start()
+                         : parser->source_code().end().end()) {}
 
 Parser::NodeRangeScope::~NodeRangeScope() = default;
 
@@ -109,7 +111,7 @@ void Parser::AddError(const SourceCodeRange& range, ErrorCode error_code) {
 void Parser::AddError(ErrorCode error_code) {
   if (CanPeekToken())
     return AddError(PeekToken(), error_code);
-  return AddError(source_code().end(), error_code);
+  AddError(source_code().end(), error_code);
 }
 
 void Parser::Advance() {

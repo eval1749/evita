@@ -717,6 +717,42 @@ TEST_F(NameResolverTest, MemberExpression) {
       << "Function declaration shortcut.";
 }
 
+TEST_F(NameResolverTest, ObjectInitializer) {
+  EXPECT_EQ(
+      "Module\n"
+      "+--VarStatement\n"
+      "|  +--BindingNameElement VarVar[bar@1001]\n"
+      "|  |  +--Name |bar|\n"
+      "|  |  +--ElisionExpression ||\n"
+      "+--VarStatement\n"
+      "|  +--BindingNameElement VarVar[x@1009]\n"
+      "|  |  +--Name |x|\n"
+      "|  |  +--ObjectInitializer Class[Object@1002]\n"
+      "|  |  |  +--Property PublicProperty[foo@1004]\n"
+      "|  |  |  |  +--Name |foo|\n"
+      "|  |  |  |  +--NumericLiteral |1|\n"
+      "|  |  |  +--DelimiterExpression |,|\n"
+      "|  |  |  +--ReferenceExpression VarVar[bar@1001]\n"
+      "|  |  |  |  +--Name |bar|\n"
+      "|  |  |  +--Method<NonStatic,Normal> Function[baz@1007]\n"
+      "|  |  |  |  +--Name |baz|\n"
+      "|  |  |  |  +--ParameterList |()|\n"
+      "|  |  |  |  +--BlockStatement |{}|\n",
+      RunOn("var bar; var x = { foo: 1, bar, baz() {} }"));
+}
+
+TEST_F(NameResolverTest, ObjectInitializerError) {
+  EXPECT_EQ(
+      "Module\n"
+      "+--VarStatement\n"
+      "|  +--BindingNameElement VarVar[x@1003]\n"
+      "|  |  +--Name |x|\n"
+      "|  |  +--ObjectInitializer Class[Object@1001]\n"
+      "|  |  |  +--NumericLiteral |1|\n"
+      "ANALYZER_ERROR_ENVIRONMENT_EXPECT_OBJECT_MEMBER@9:10\n",
+      RunOn("var x = {1}"));
+}
+
 TEST_F(NameResolverTest, Property) {
   EXPECT_EQ(
       "Module\n"

@@ -139,6 +139,9 @@ class NameResolver final : public Pass, public ast::SyntaxVisitor {
   void VisitInternal(const ast::MemberExpression& syntax,
                      const ast::Node& node) final;
 
+  void VisitInternal(const ast::ObjectInitializer& syntax,
+                     const ast::Node& node) final;
+
   void VisitInternal(const ast::ParameterList& syntax,
                      const ast::Node& node) final;
 

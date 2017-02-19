@@ -840,6 +840,56 @@ void NameResolver::VisitInternal(const ast::MemberExpression& syntax,
   context().RegisterValue(node, property);
 }
 
+void NameResolver::VisitInternal(const ast::ObjectInitializer& syntax,
+                                 const ast::Node& node) {
+  const auto& empty_name =
+      BuiltInWorld::GetInstance()->NameOf(ast::TokenKind::Object);
+  auto& properties = factory().NewProperties(empty_name);
+  const auto& class_value =
+      NewClass(ClassKind::Class, empty_name, node, {}, &properties);
+  context().RegisterValue(node, class_value);
+  for (const auto& child : ast::NodeTraversal::ChildNodesOf(node)) {
+    // TODO(eval1749): We should report error for multiple occurrences of
+    // property names.
+    if (child.Is<ast::Annotation>()) {
+      const auto& member = ast::Annotation::AnnotatedOf(child);
+      if (member != ast::SyntaxCode::Method) {
+        AddError(member, ErrorCode::ENVIRONMENT_EXPECT_METHOD);
+        continue;
+      }
+      const auto& method_annotation =
+          Annotation::Compiler(&context())
+              .Compile(ast::Annotation::DocumentOf(child), member);
+      ProcessMethod(member, method_annotation, class_value);
+      // TODO(eval1749): We should get visibility from annotation.
+      GetOrNewProperty(&properties, ast::Method::NameOf(member));
+      continue;
+    }
+    if (child.Is<ast::DelimiterExpression>())
+      continue;
+    if (child.Is<ast::Method>()) {
+      GetOrNewProperty(&properties, ast::Method::NameOf(child));
+      ProcessMethod(child, Annotation(), class_value);
+      continue;
+    }
+    if (child.Is<ast::ReferenceExpression>()) {
+      GetOrNewProperty(&properties, ast::ReferenceExpression::NameOf(child));
+      Visit(child);
+      continue;
+    }
+    if (child.Is<ast::Property>()) {
+      const auto& property_name = ast::Property::NameOf(child);
+      if (property_name.Is<ast::Name>()) {
+        const auto& property = GetOrNewProperty(&properties, property_name);
+        context().RegisterValue(child, property);
+      }
+      Visit(ast::Property::ValueOf(child));
+      continue;
+    }
+    AddError(child, ErrorCode::ENVIRONMENT_EXPECT_OBJECT_MEMBER);
+  }
+}
+
 void NameResolver::VisitInternal(const ast::ParameterList& syntax,
                                  const ast::Node& node) {
   base::AutoReset<VariableKind> scope(&variable_kind_, VariableKind::Parameter);

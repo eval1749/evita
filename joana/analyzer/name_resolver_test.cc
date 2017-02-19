@@ -50,6 +50,70 @@ std::string NameResolverTest::RunOn(base::StringPiece script_text) {
   return ostream.str();
 }
 
+TEST_F(NameResolverTest, ArrowFunction) {
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--ArrowFunction\n"
+      "|  |  +--ParameterList |()|\n"
+      "|  |  +--NumericLiteral |1|\n",
+      RunOn("() => 1"));
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--ArrowFunction\n"
+      "|  |  +--BindingNameElement ParameterVar[x@1001]\n"
+      "|  |  |  +--Name |x|\n"
+      "|  |  |  +--ElisionExpression ||\n"
+      "|  |  +--BinaryExpression<+>\n"
+      "|  |  |  +--ReferenceExpression ParameterVar[x@1001]\n"
+      "|  |  |  |  +--Name |x|\n"
+      "|  |  |  +--Punctuator |+|\n"
+      "|  |  |  +--NumericLiteral |1|\n",
+      RunOn("x => x + 1"));
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--ArrowFunction\n"
+      "|  |  +--ParameterList\n"
+      "|  |  |  +--BindingNameElement ParameterVar[x@1001]\n"
+      "|  |  |  |  +--Name |x|\n"
+      "|  |  |  |  +--ElisionExpression ||\n"
+      "|  |  +--BinaryExpression<+>\n"
+      "|  |  |  +--ReferenceExpression ParameterVar[x@1001]\n"
+      "|  |  |  |  +--Name |x|\n"
+      "|  |  |  +--Punctuator |+|\n"
+      "|  |  |  +--NumericLiteral |1|\n",
+      RunOn("(x) => x + 1"));
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--ArrowFunction\n"
+      "|  |  +--ParameterList\n"
+      "|  |  |  +--BindingNameElement ParameterVar[x@1001]\n"
+      "|  |  |  |  +--Name |x|\n"
+      "|  |  |  |  +--ElisionExpression ||\n"
+      "|  |  |  +--BindingNameElement ParameterVar[y@1002]\n"
+      "|  |  |  |  +--Name |y|\n"
+      "|  |  |  |  +--ElisionExpression ||\n"
+      "|  |  +--BinaryExpression<+>\n"
+      "|  |  |  +--ReferenceExpression ParameterVar[x@1001]\n"
+      "|  |  |  |  +--Name |x|\n"
+      "|  |  |  +--Punctuator |+|\n"
+      "|  |  |  +--ReferenceExpression ParameterVar[y@1002]\n"
+      "|  |  |  |  +--Name |y|\n",
+      RunOn("(x, y) => x + y"));
+  EXPECT_EQ(
+      "Module\n"
+      "+--ExpressionStatement\n"
+      "|  +--ArrowFunction\n"
+      "|  |  +--ParameterList |()|\n"
+      "|  |  +--BlockStatement\n"
+      "|  |  |  +--ReturnStatement\n"
+      "|  |  |  |  +--NumericLiteral |1|\n",
+      RunOn("() => { return 1; }"));
+}
+
 TEST_F(NameResolverTest, Catch) {
   EXPECT_EQ(
       "Module\n"

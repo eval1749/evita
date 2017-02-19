@@ -784,7 +784,15 @@ void NameResolver::VisitInternal(const ast::Annotation& syntax,
 }
 
 void NameResolver::VisitInternal(const ast::ArrowFunction& syntax,
-                                 const ast::Node& node) {}
+                                 const ast::Node& node) {
+  Environment environment(this);
+  {
+    base::AutoReset<VariableKind> scope(&variable_kind_,
+                                        VariableKind::Parameter);
+    Visit(ast::ArrowFunction::ParametersOf(node));
+  }
+  Visit(ast::ArrowFunction::BodyOf(node));
+}
 
 void NameResolver::VisitInternal(const ast::Class& syntax,
                                  const ast::Node& node) {

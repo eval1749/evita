@@ -211,7 +211,9 @@ const ast::Node& TypeParser::NewTupleType(
 const ast::Node& TypeParser::NewTypeApplication(
     const ast::Node& name,
     const ast::Node& argument_list) {
-  DCHECK_EQ(name, ast::SyntaxCode::TypeName);
+  DCHECK(name == ast::SyntaxCode::TypeName ||
+         name == ast::SyntaxCode::MemberType)
+      << name;
   return node_factory().NewTypeApplication(ComputeNodeRange(), name,
                                            argument_list);
 }

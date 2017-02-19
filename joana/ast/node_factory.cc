@@ -802,7 +802,8 @@ const Node& NodeFactory::NewTupleType(const SourceCodeRange& range,
 const Node& NodeFactory::NewTypeApplication(const SourceCodeRange& range,
                                             const Node& name,
                                             const Node& argument_list) {
-  DCHECK_EQ(name, SyntaxCode::TypeName);
+  DCHECK(name == SyntaxCode::TypeName || name == SyntaxCode::MemberType)
+      << name;
   DCHECK_EQ(argument_list, SyntaxCode::Tuple);
   return NewNode(range, syntax_factory_->NewTypeApplication(), name,
                  argument_list);

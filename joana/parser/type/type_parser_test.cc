@@ -387,6 +387,16 @@ TEST_F(TypeParserTest, TypeApplication) {
       "|  +--TypeName\n"
       "|  |  +--Name |V|\n",
       Parse("Map<K, V>"));
+  EXPECT_EQ(
+      "TypeApplication\n"
+      "+--MemberType\n"
+      "|  +--TypeName\n"
+      "|  |  +--Name |Foo|\n"
+      "|  +--Name |Bar|\n"
+      "+--Tuple\n"
+      "|  +--TypeName\n"
+      "|  |  +--Name |T|\n",
+      Parse("Foo.Bar<T>"));
 }
 
 TEST_F(TypeParserTest, TypeApplicationError) {

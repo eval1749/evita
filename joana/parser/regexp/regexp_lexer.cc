@@ -132,7 +132,8 @@ const ast::Node& RegExpLexer::HandleRepeat() {
 bool RegExpLexer::IsSyntaxChar(base::char16 char_code) const {
   if (char_code == '$' || char_code == '*' || char_code == '+' ||
       char_code == '?' || char_code == '|' || char_code == kLeftParenthesis ||
-      char_code == kLeftBrace || char_code == kLeftBracket) {
+      char_code == kLeftBrace || char_code == kLeftBracket ||
+      char_code == kBackslash) {
     return true;
   }
   if (group_ > 0 && char_code == kRightParenthesis)

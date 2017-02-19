@@ -174,5 +174,30 @@ TEST_F(RegExpParserTest, Or) {
       << "empty or empty";
 }
 
+TEST_F(RegExpParserTest, RealWorld) {
+  EXPECT_EQ(
+      "OrRegExp\n"
+      "+--SequenceRegExp\n"
+      "|  +--AssertionRegExp |^|\n"
+      "|  +--LiteralRegExp |\\|\n"
+      "|  +--RepeatRegExp\n"
+      "|  |  +--LiteralRegExp |s|\n"  // This should be known charset
+      "|  |  +--RegExpRepeat<*> |*|\n"
+      "|  +--LiteralRegExp |<!|\n"
+      "|  +--OrRegExp\n"
+      "|  |  +--LiteralRegExp |\\[CDATA\\[|\n"
+      "|  |  +--LiteralRegExp |--|\n"
+      "+--SequenceRegExp\n"
+      "|  +--OrRegExp\n"
+      "|  |  +--LiteralRegExp |\\]\\]|\n"
+      "|  |  +--LiteralRegExp |--|\n"
+      "|  +--LiteralRegExp |>\\|\n"
+      "|  +--RepeatRegExp\n"
+      "|  |  +--LiteralRegExp |s|\n"  // This should be known charset
+      "|  |  +--RegExpRepeat<*> |*|\n"
+      "|  +--AssertionRegExp |$|\n",
+      ParseStrictly("^\\s*<!(?:\\[CDATA\\[|--)|(?:\\]\\]|--)>\\s*$"));
+}
+
 }  // namespace parser
 }  // namespace joana

@@ -303,9 +303,13 @@ const ast::Node& JsDocParser::ParseTag(const ast::Node& tag_name) {
     }
     case TagSyntax::TypeParameterDescription: {
       auto& type = ParseType();
-      auto& name = node_factory().NewReferenceExpression(ParseName());
+      const auto& maybe_name = ParseName();
+      auto& name_reference =
+          maybe_name.Is<ast::Name>()
+              ? node_factory().NewReferenceExpression(maybe_name)
+              : maybe_name;
       auto& description = ParseDescription();
-      return NewTag(tag_name, type, name, description);
+      return NewTag(tag_name, type, name_reference, description);
     }
     case TagSyntax::Unknown:
       AddError(tag_name.range(), JsDocErrorCode::ERROR_TAG_UNKNOWN_TAG);

@@ -404,6 +404,7 @@ const Node& NodeFactory::NewProperty(const SourceCodeRange& range,
 }
 
 const Node& NodeFactory::NewReferenceExpression(const Node& name) {
+  DCHECK(name.Is<ast::Name>());
   return NewNode(name.range(), syntax_factory_->NewReferenceExpression(), name);
 }
 

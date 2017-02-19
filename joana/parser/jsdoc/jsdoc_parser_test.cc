@@ -324,8 +324,7 @@ TEST_F(JsDocParserTest, SyntaxTypeVarDescriptionError) {
       "|  +--Name |@param|\n"
       "|  +--TypeName\n"
       "|  |  +--Name |string|\n"
-      "|  +--ReferenceExpression\n"
-      "|  |  +--Empty ||\n"
+      "|  +--Empty ||\n"
       "|  +--JsDocText ||\n"
       "JSDOC_ERROR_TAG_EXPECT_NAME@15:15\n",
       Parse("@param {string}"));

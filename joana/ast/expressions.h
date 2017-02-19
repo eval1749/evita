@@ -19,22 +19,44 @@ namespace ast {
 class ChildNodes;
 class Node;
 
-DECLARE_AST_SYNTAX_0(ArrayInitializer)
-DECLARE_AST_SYNTAX_0(CommaExpression)
-DECLARE_AST_SYNTAX_0(ConditionalExpression)
-DECLARE_AST_SYNTAX_0(DelimiterExpression)
-DECLARE_AST_SYNTAX_0(GroupExpression)
-DECLARE_AST_SYNTAX_0(ElisionExpression)
-DECLARE_AST_SYNTAX_0(ObjectInitializer)
-DECLARE_AST_SYNTAX_0(ParameterList)
-DECLARE_AST_SYNTAX_0(Tuple);
+//
+// Expression
+//
+class JOANA_AST_EXPORT Expression : public Syntax {
+  DECLARE_ABSTRACT_AST_SYNTAX(Expression, Syntax);
+
+ public:
+  ~Expression() override;
+
+ protected:
+  Expression(SyntaxCode syntax_code, const Format& format);
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(Expression);
+};
+
+//
+// ArrayInitializer
+//
+class JOANA_AST_EXPORT ArrayInitializer final
+    : public SyntaxTemplate<Expression> {
+  DECLARE_CONCRETE_AST_SYNTAX(ArrayInitializer, Expression);
+
+ public:
+  ~ArrayInitializer() final;
+
+ private:
+  ArrayInitializer();
+
+  DISALLOW_COPY_AND_ASSIGN(ArrayInitializer);
+};
 
 //
 // AssignmentExpression
 //
 class JOANA_AST_EXPORT AssignmentExpression final
-    : public SyntaxTemplate<Syntax, TokenKind> {
-  DECLARE_CONCRETE_AST_SYNTAX(AssignmentExpression, Syntax);
+    : public SyntaxTemplate<Expression, TokenKind> {
+  DECLARE_CONCRETE_AST_SYNTAX(AssignmentExpression, Expression);
 
  public:
   ~AssignmentExpression() final;
@@ -55,8 +77,8 @@ class JOANA_AST_EXPORT AssignmentExpression final
 // BinaryExpression
 //
 class JOANA_AST_EXPORT BinaryExpression final
-    : public SyntaxTemplate<Syntax, TokenKind> {
-  DECLARE_CONCRETE_AST_SYNTAX(BinaryExpression, Syntax);
+    : public SyntaxTemplate<Expression, TokenKind> {
+  DECLARE_CONCRETE_AST_SYNTAX(BinaryExpression, Expression);
 
  public:
   ~BinaryExpression() final;
@@ -76,8 +98,9 @@ class JOANA_AST_EXPORT BinaryExpression final
 //
 // CallExpression
 //
-class JOANA_AST_EXPORT CallExpression final : public SyntaxTemplate<Syntax> {
-  DECLARE_CONCRETE_AST_SYNTAX(CallExpression, Syntax);
+class JOANA_AST_EXPORT CallExpression final
+    : public SyntaxTemplate<Expression> {
+  DECLARE_CONCRETE_AST_SYNTAX(CallExpression, Expression);
 
  public:
   ~CallExpression() final;
@@ -92,11 +115,47 @@ class JOANA_AST_EXPORT CallExpression final : public SyntaxTemplate<Syntax> {
 };
 
 //
+// CommaExpression
+//
+class JOANA_AST_EXPORT CommaExpression final
+    : public SyntaxTemplate<Expression> {
+  DECLARE_CONCRETE_AST_SYNTAX(CommaExpression, Expression);
+
+ public:
+  ~CommaExpression() final;
+
+ private:
+  CommaExpression();
+
+  DISALLOW_COPY_AND_ASSIGN(CommaExpression);
+};
+
+//
+// ConditionalExpression
+//
+class JOANA_AST_EXPORT ConditionalExpression final
+    : public SyntaxTemplate<Expression> {
+  DECLARE_CONCRETE_AST_SYNTAX(ConditionalExpression, Expression);
+
+ public:
+  ~ConditionalExpression() final;
+
+  static const ast::Node& ConditionOf(const ast::Node& node);
+  static const ast::Node& FalseExpressionOf(const ast::Node& node);
+  static const ast::Node& TrueExpressionOf(const ast::Node& node);
+
+ private:
+  ConditionalExpression();
+
+  DISALLOW_COPY_AND_ASSIGN(ConditionalExpression);
+};
+
+//
 // ComputedMemberExpression
 //
 class JOANA_AST_EXPORT ComputedMemberExpression final
-    : public SyntaxTemplate<Syntax> {
-  DECLARE_CONCRETE_AST_SYNTAX(ComputedMemberExpression, Syntax);
+    : public SyntaxTemplate<Expression> {
+  DECLARE_CONCRETE_AST_SYNTAX(ComputedMemberExpression, Expression);
 
  public:
   ~ComputedMemberExpression() final;
@@ -111,10 +170,61 @@ class JOANA_AST_EXPORT ComputedMemberExpression final
 };
 
 //
+// DelimiterExpression
+//
+class JOANA_AST_EXPORT DelimiterExpression final
+    : public SyntaxTemplate<Expression> {
+  DECLARE_CONCRETE_AST_SYNTAX(DelimiterExpression, Expression);
+
+ public:
+  ~DelimiterExpression() final;
+
+ private:
+  DelimiterExpression();
+
+  DISALLOW_COPY_AND_ASSIGN(DelimiterExpression);
+};
+
+//
+// ElisionExpression
+//
+class JOANA_AST_EXPORT ElisionExpression final
+    : public SyntaxTemplate<Expression> {
+  DECLARE_CONCRETE_AST_SYNTAX(ElisionExpression, Expression);
+
+ public:
+  ~ElisionExpression() final;
+
+ private:
+  ElisionExpression();
+
+  DISALLOW_COPY_AND_ASSIGN(ElisionExpression);
+};
+
+//
+// GroupExpression
+//
+class JOANA_AST_EXPORT GroupExpression final
+    : public SyntaxTemplate<Expression> {
+  DECLARE_CONCRETE_AST_SYNTAX(GroupExpression, Expression);
+
+ public:
+  ~GroupExpression() final;
+
+  static const ast::Node& ExpressionOf(const ast::Node& node);
+
+ private:
+  GroupExpression();
+
+  DISALLOW_COPY_AND_ASSIGN(GroupExpression);
+};
+
+//
 // MemberExpression
 //
-class JOANA_AST_EXPORT MemberExpression final : public SyntaxTemplate<Syntax> {
-  DECLARE_CONCRETE_AST_SYNTAX(MemberExpression, Syntax);
+class JOANA_AST_EXPORT MemberExpression final
+    : public SyntaxTemplate<Expression> {
+  DECLARE_CONCRETE_AST_SYNTAX(MemberExpression, Expression);
 
  public:
   ~MemberExpression() final;
@@ -131,8 +241,8 @@ class JOANA_AST_EXPORT MemberExpression final : public SyntaxTemplate<Syntax> {
 //
 // NewExpression
 //
-class JOANA_AST_EXPORT NewExpression final : public SyntaxTemplate<Syntax> {
-  DECLARE_CONCRETE_AST_SYNTAX(NewExpression, Syntax);
+class JOANA_AST_EXPORT NewExpression final : public SyntaxTemplate<Expression> {
+  DECLARE_CONCRETE_AST_SYNTAX(NewExpression, Expression);
 
  public:
   ~NewExpression() final;
@@ -144,6 +254,37 @@ class JOANA_AST_EXPORT NewExpression final : public SyntaxTemplate<Syntax> {
   NewExpression();
 
   DISALLOW_COPY_AND_ASSIGN(NewExpression);
+};
+
+//
+// ObjectInitializer
+//
+class JOANA_AST_EXPORT ObjectInitializer final
+    : public SyntaxTemplate<Expression> {
+  DECLARE_CONCRETE_AST_SYNTAX(ObjectInitializer, Expression);
+
+ public:
+  ~ObjectInitializer() final;
+
+ private:
+  ObjectInitializer();
+
+  DISALLOW_COPY_AND_ASSIGN(ObjectInitializer);
+};
+
+//
+// ParameterList
+//
+class JOANA_AST_EXPORT ParameterList final : public SyntaxTemplate<Syntax> {
+  DECLARE_CONCRETE_AST_SYNTAX(ParameterList, Syntax);
+
+ public:
+  ~ParameterList() final;
+
+ private:
+  ParameterList();
+
+  DISALLOW_COPY_AND_ASSIGN(ParameterList);
 };
 
 //
@@ -168,8 +309,8 @@ class JOANA_AST_EXPORT Property final : public SyntaxTemplate<Syntax> {
 // ReferenceExpression
 //
 class JOANA_AST_EXPORT ReferenceExpression final
-    : public SyntaxTemplate<Syntax> {
-  DECLARE_CONCRETE_AST_SYNTAX(ReferenceExpression, Syntax);
+    : public SyntaxTemplate<Expression> {
+  DECLARE_CONCRETE_AST_SYNTAX(ReferenceExpression, Expression);
 
  public:
   ~ReferenceExpression() final;
@@ -186,8 +327,8 @@ class JOANA_AST_EXPORT ReferenceExpression final
 // RegExpLiteralExpression
 //
 class JOANA_AST_EXPORT RegExpLiteralExpression final
-    : public SyntaxTemplate<Syntax> {
-  DECLARE_CONCRETE_AST_SYNTAX(RegExpLiteralExpression, Syntax);
+    : public SyntaxTemplate<Expression> {
+  DECLARE_CONCRETE_AST_SYNTAX(RegExpLiteralExpression, Expression);
 
  public:
   ~RegExpLiteralExpression() final;
@@ -202,11 +343,26 @@ class JOANA_AST_EXPORT RegExpLiteralExpression final
 };
 
 //
+// Tuple
+//
+class JOANA_AST_EXPORT Tuple final : public SyntaxTemplate<Syntax> {
+  DECLARE_CONCRETE_AST_SYNTAX(Tuple, Syntax);
+
+ public:
+  ~Tuple() final;
+
+ private:
+  Tuple();
+
+  DISALLOW_COPY_AND_ASSIGN(Tuple);
+};
+
+//
 // UnaryExpression
 //
 class JOANA_AST_EXPORT UnaryExpression final
-    : public SyntaxTemplate<Syntax, TokenKind> {
-  DECLARE_CONCRETE_AST_SYNTAX(UnaryExpression, Syntax);
+    : public SyntaxTemplate<Expression, TokenKind> {
+  DECLARE_CONCRETE_AST_SYNTAX(UnaryExpression, Expression);
 
  public:
   ~UnaryExpression() final;

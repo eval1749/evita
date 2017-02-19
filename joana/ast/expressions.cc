@@ -12,11 +12,6 @@
 namespace joana {
 namespace ast {
 
-IMPLEMENT_AST_SYNTAX_0(Expression, ConditionalExpression, 3)
-IMPLEMENT_AST_SYNTAX_0(Expression, DelimiterExpression, 0)
-IMPLEMENT_AST_SYNTAX_0(Expression, ElisionExpression, 0)
-IMPLEMENT_AST_SYNTAX_0(Expression, GroupExpression, 1)
-
 //
 // ArrayInitializer
 //
@@ -128,6 +123,72 @@ const Node& ComputedMemberExpression::ContainerOf(const Node& node) {
 const Node& ComputedMemberExpression::ExpressionOf(const Node& node) {
   DCHECK_EQ(node, SyntaxCode::ComputedMemberExpression);
   return node.child_at(1);
+}
+
+//
+// ConditionalExpression
+//
+ConditionalExpression::ConditionalExpression()
+    : SyntaxTemplate(std::tuple<>(),
+                     SyntaxCode::ConditionalExpression,
+                     Format::Builder().set_arity(3).Build()) {}
+
+ConditionalExpression::~ConditionalExpression() = default;
+
+const Node& ConditionalExpression::ConditionOf(const Node& node) {
+  DCHECK_EQ(node, SyntaxCode::ConditionalExpression);
+  return node.child_at(0);
+}
+
+const Node& ConditionalExpression::FalseExpressionOf(const Node& node) {
+  DCHECK_EQ(node, SyntaxCode::ConditionalExpression);
+  return node.child_at(2);
+}
+
+const Node& ConditionalExpression::TrueExpressionOf(const Node& node) {
+  DCHECK_EQ(node, SyntaxCode::ConditionalExpression);
+  return node.child_at(1);
+}
+
+//
+// DelimiterExpression
+//
+DelimiterExpression::DelimiterExpression()
+    : SyntaxTemplate(std::tuple<>(),
+                     SyntaxCode::DelimiterExpression,
+                     Format()) {}
+
+DelimiterExpression::~DelimiterExpression() = default;
+
+//
+// ElisionExpression
+//
+ElisionExpression::ElisionExpression()
+    : SyntaxTemplate(std::tuple<>(), SyntaxCode::ElisionExpression, Format()) {}
+
+ElisionExpression::~ElisionExpression() = default;
+
+//
+// Expression
+//
+Expression::Expression(SyntaxCode syntax_code, const Format& format)
+    : Syntax(syntax_code, format) {}
+
+Expression::~Expression() = default;
+
+//
+// GroupExpression
+//
+GroupExpression::GroupExpression()
+    : SyntaxTemplate(std::tuple<>(),
+                     SyntaxCode::GroupExpression,
+                     Format::Builder().set_arity(1).Build()) {}
+
+GroupExpression::~GroupExpression() = default;
+
+const Node& GroupExpression::ExpressionOf(const Node& node) {
+  DCHECK_EQ(node, SyntaxCode::GroupExpression);
+  return node.child_at(0);
 }
 
 //

@@ -46,11 +46,7 @@ std::ostream& operator<<(std::ostream& ostream,
 std::ostream& operator<<(std::ostream& ostream,
                          const Printable<ClassType>& printable) {
   const auto& type = *printable.type;
-  const auto& name = type.name();
-  if (name.Is<ast::Name>())
-    ostream << ast::AsSourceCode(name);
-  else
-    ostream << "%anonymous%";
+  ostream << ast::AsSourceCode(type.name());
   const auto* delimiter = "<";
   if (auto* class_value = type.value().TryAs<GenericClass>()) {
     for (const auto& parameter : class_value->parameters()) {

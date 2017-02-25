@@ -124,9 +124,11 @@ const loader = new ScriptModuleLoader(new FileScriptTextProvider());
 async function load(scriptPath, options = {}) {
   if (options.verbose)
     console.log(LINE_COMMENT, 'loading', scriptPath);
-  const result = loader.load(scriptPath);
-  if (options.verbose)
-    console.log(LINE_COMMENT, 'loaded', scriptPath, result);
+  const result = await loader.load(scriptPath);
+  if (!options.verbose)
+    return result;
+  for (const fileName of result)
+    console.log(LINE_COMMENT, 'loaded', fileName);
   return result;
 }
 

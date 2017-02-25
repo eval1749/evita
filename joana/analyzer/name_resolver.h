@@ -182,8 +182,6 @@ class NameResolver final : public Pass, public ast::SyntaxVisitor {
   // Types
   void VisitInternal(const ast::TypeName& syntax, const ast::Node& node) final;
 
-  std::vector<const ast::Node*> ancestors_;
-
   Environment* environment_ = nullptr;
 
   const std::unique_ptr<Environment> global_environment_;

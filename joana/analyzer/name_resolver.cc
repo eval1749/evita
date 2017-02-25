@@ -737,10 +737,8 @@ const Class* NameResolver::TryClassOfPrototype(const ast::Node& node) const {
 }
 
 void NameResolver::VisitChildNodes(const ast::Node& node) {
-  ancestors_.push_back(&node);
   for (const auto& child : ast::NodeTraversal::ChildNodesOf(node))
     Visit(child);
-  ancestors_.pop_back();
 }
 
 //

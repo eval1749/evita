@@ -322,17 +322,14 @@ const Class& NameResolver::NewClass(
     const ast::Node& name,
     const ast::Node& node,
     const std::vector<const TypeParameter*>& parameters,
-    Properties* passed_properties) {
-  auto& properties =
-      passed_properties ? *passed_properties : factory().NewProperties(node);
+    Properties* properties) {
   const auto& class_value =
       parameters.empty()
-          ? factory().NewNormalClass(kind, name, node, &properties)
-          : factory().NewGenericClass(kind, name, node, parameters,
-                                      &properties);
+          ? factory().NewNormalClass(kind, name, node, properties)
+          : factory().NewGenericClass(kind, name, node, parameters, properties);
   const auto& prototype_name =
       BuiltInWorld::GetInstance()->NameOf(ast::TokenKind::Prototype);
-  if (properties.TryGet(prototype_name))
+  if (properties->TryGet(prototype_name))
     return class_value;
   const auto& prototype_property =
       NewProperty(Visibility::Public, prototype_name);
@@ -368,7 +365,8 @@ void NameResolver::ProcessAssignment(const ast::Node& lhs,
       const auto& type_parameters =
           ProcessTypeParameterNames(annotation.type_parameter_names());
       auto& class_value =
-          NewClass(annotation.class_kind(), name, lhs, type_parameters);
+          NewClass(annotation.class_kind(), name, lhs, type_parameters,
+                   &factory().NewProperties(lhs));
       if (maybe_rhs && !maybe_rhs->Is<ast::ElisionExpression>())
         AddError(lhs, ErrorCode::ENVIRONMENT_INVALID_CONSTRUCTOR);
       if (!maybe_rhs)
@@ -551,9 +549,9 @@ void NameResolver::ProcessFunction(const ast::Node& node,
           : nullptr;
 
   if (annotation.is_constructor() || annotation.is_interface()) {
-    auto& class_value =
-        NewClass(annotation.class_kind(), function.name(), node,
-                 type_parameters, variable ? &variable->properties() : nullptr);
+    const auto& class_value = NewClass(
+        annotation.class_kind(), function.name(), node, type_parameters,
+        variable ? &variable->properties() : &factory().NewProperties(node));
     context().RegisterValue(node, class_value);
     if (maybe_alias)
       BindType(*maybe_alias, type_factory().NewClassType(class_value));

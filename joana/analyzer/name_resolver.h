@@ -68,7 +68,7 @@ class NameResolver final : public Pass, public ast::SyntaxVisitor {
                         const ast::Node& name,
                         const ast::Node& node,
                         const std::vector<const TypeParameter*>& parameters,
-                        Properties* properties = nullptr);
+                        Properties* properties);
 
   const Property& NewProperty(Visibility visibility, const ast::Node& node);
 

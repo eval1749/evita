@@ -103,7 +103,30 @@ const ast::Node& Parser::ParseJsDocAsStatement() {
   if (statement == ast::SyntaxCode::Annotation) {
     // We don't allow statement/expression has more than one annotation.
     AddError(jsdoc, ErrorCode::ERROR_STATEMENT_UNEXPECT_ANNOTATION);
+    return node_factory().NewAnnotation(GetSourceCodeRange(), jsdoc, statement);
   }
+  if (statement != ast::SyntaxCode::ExpressionStatement)
+    return node_factory().NewAnnotation(GetSourceCodeRange(), jsdoc, statement);
+  const auto& expression = ast::ExpressionStatement::ExpressionOf(statement);
+  if (expression.Is<ast::AssignmentExpression>() &&
+      ast::AssignmentExpression::OperatorOf(expression) ==
+          ast::TokenKind::Equal &&
+      IsMemberExpression(
+          ast::AssignmentExpression::LeftHandSideOf(expression))) {
+    return node_factory().NewAnnotation(
+        GetSourceCodeRange(), jsdoc,
+        node_factory().NewDeclaration(
+            expression.range(),
+            ast::AssignmentExpression::LeftHandSideOf(expression),
+            ast::AssignmentExpression::RightHandSideOf(expression)));
+  }
+  if (IsMemberExpression(expression)) {
+    return node_factory().NewAnnotation(
+        GetSourceCodeRange(), jsdoc,
+        node_factory().NewDeclaration(expression.range(), expression,
+                                      NewElisionExpression(expression)));
+  }
+  AddError(jsdoc, ErrorCode::ERROR_STATEMENT_UNEXPECT_ANNOTATION);
   return node_factory().NewAnnotation(GetSourceCodeRange(), jsdoc, statement);
 }
 

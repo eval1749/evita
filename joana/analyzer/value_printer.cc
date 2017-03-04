@@ -103,8 +103,7 @@ std::ostream& operator<<(std::ostream& ostream,
 std::ostream& operator<<(std::ostream& ostream,
                          const Printable<OrdinaryObject>& printable) {
   const auto& value = *printable.value;
-  return ostream << value.class_name() << '@' << value.id() << ' '
-                 << value.node();
+  return ostream << value.class_name() << '@' << value.id();
 }
 
 std::ostream& operator<<(std::ostream& ostream,

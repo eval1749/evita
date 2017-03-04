@@ -36,11 +36,6 @@ namespace analyzer {
 
 namespace {
 
-bool IsMemberExpression(const ast::Node& node) {
-  return node == ast::SyntaxCode::MemberExpression ||
-         node == ast::SyntaxCode::ComputedMemberExpression;
-}
-
 // constructor can not be async/generator.
 bool IsValidConstructor(const ast::Node& method) {
   DCHECK_EQ(ast::Method::NameOf(method), ast::TokenKind::Constructor);
@@ -178,7 +173,9 @@ NameResolver::Environment::NewGlobalEnvironment(NameResolver* resolver) {
     auto& properties = resolver->context().global_properties();
     const auto& variable = resolver->factory().NewVariable(
         VariableKind::Const, name, &data, &properties);
-    Value::Editor().AddAssignment(variable, name);
+    const auto& global_object =
+        resolver->factory().NewOrdinaryObject(name, &properties);
+    Value::Editor().AddAssignment(variable, global_object);
     const auto& property = resolver->factory().NewProperty(
         Visibility::Public, name, &data, &properties);
     Properties::Editor().Add(&properties, property);
@@ -320,21 +317,28 @@ const Property& NameResolver::GetOrNewProperty(Properties* properties,
 const Class& NameResolver::NewClass(
     ClassKind kind,
     const ast::Node& name,
-    const ast::Node& node,
+    const ast::Node& class_node,
+    const ast::Node& prototype_node,
     const std::vector<const TypeParameter*>& parameters,
     Properties* properties) {
+  DCHECK_NE(class_node, prototype_node);
   const auto& class_value =
       parameters.empty()
-          ? factory().NewNormalClass(kind, name, node, properties)
-          : factory().NewGenericClass(kind, name, node, parameters, properties);
+          ? factory().NewNormalClass(kind, name, class_node, properties)
+          : factory().NewGenericClass(kind, name, class_node, parameters,
+                                      properties);
+  context().RegisterValue(class_node, class_value);
   const auto& prototype_name =
       BuiltInWorld::GetInstance()->NameOf(ast::TokenKind::Prototype);
   if (properties->TryGet(prototype_name))
     return class_value;
+  // Allocate "prototype" object.
   const auto& prototype_property =
       NewProperty(Visibility::Public, prototype_name);
-  Value::Editor().AddAssignment(prototype_property, node);
   Properties::Editor().Add(&class_value.properties(), prototype_property);
+  const auto& prototype_object = factory().NewOrdinaryObject(
+      prototype_node, &prototype_property.properties());
+  Value::Editor().AddAssignment(prototype_property, prototype_object);
   return class_value;
 }
 
@@ -345,18 +349,16 @@ const Property& NameResolver::NewProperty(Visibility visibility,
                                &factory().NewProperties(node));
 }
 
-void NameResolver::ProcessAssignment(const ast::Node& lhs,
-                                     const ast::Node* maybe_rhs,
+void NameResolver::ProcessAssignment(const ast::Node& node,
+                                     const ast::Node& lhs,
+                                     const ast::Node& rhs,
                                      const ast::Node& name,
                                      const Annotation& annotation) {
-  if (maybe_rhs) {
-    const auto& rhs = *maybe_rhs;
-    if (rhs.Is<ast::Class>())
-      return ProcessClass(rhs, annotation, &name);
-    if (rhs.Is<ast::Function>())
-      return ProcessFunction(rhs, annotation, &name);
-    Visit(rhs);
-  }
+  if (rhs.Is<ast::Class>())
+    return ProcessClass(rhs, annotation, &name);
+  if (rhs.Is<ast::Function>())
+    return ProcessFunction(rhs, annotation, &name);
+  Visit(rhs);
   ProcessTemplateTags(annotation);
   ProcessParamTags(annotation);
   switch (annotation.kind()) {
@@ -364,17 +366,13 @@ void NameResolver::ProcessAssignment(const ast::Node& lhs,
     case Annotation::Kind::Interface: {
       const auto& type_parameters =
           ProcessTypeParameterNames(annotation.type_parameter_names());
-      auto& class_value =
-          NewClass(annotation.class_kind(), name, lhs, type_parameters,
+      const auto& class_value =
+          NewClass(annotation.class_kind(), name, rhs, name, type_parameters,
                    &factory().NewProperties(lhs));
-      if (maybe_rhs && !maybe_rhs->Is<ast::ElisionExpression>())
+      if (!rhs.Is<ast::ElisionExpression>())
         AddError(lhs, ErrorCode::ENVIRONMENT_INVALID_CONSTRUCTOR);
-      if (!maybe_rhs)
-        context().RegisterValue(annotation.document(), class_value);
-      else if (maybe_rhs->Is<ast::ElisionExpression>())
-        context().RegisterValue(*maybe_rhs, class_value);
       const auto& class_type = type_factory().NewClassType(class_value);
-      if (!lhs.Is<ast::BindingNameElement>())
+      if (!node.Is<ast::BindingNameElement>())
         return;
       BindType(name, class_type);
       return;
@@ -388,21 +386,15 @@ void NameResolver::ProcessAssignment(const ast::Node& lhs,
       DVLOG(0) << "NYI @enum: " << annotation.document();
       return;
     case Annotation::Kind::Function: {
-      if (!maybe_rhs) {
-        const auto& function =
-            factory().NewFunction(name, annotation.document());
-        context().RegisterValue(annotation.document(), function);
-        return;
-      }
-      if (maybe_rhs->Is<ast::ElisionExpression>()) {
+      if (rhs.Is<ast::ElisionExpression>()) {
         auto& function = factory().NewFunction(name, annotation.document());
-        context().RegisterValue(*maybe_rhs, function);
+        context().RegisterValue(rhs, function);
         return;
       }
       return;
     }
     case Annotation::Kind::TypeDef: {
-      if (maybe_rhs && !maybe_rhs->Is<ast::ElisionExpression>()) {
+      if (!rhs.Is<ast::ElisionExpression>()) {
         AddError(lhs, ErrorCode::ENVIRONMENT_UNEXPECT_INITIALIZER);
         return;
       }
@@ -412,7 +404,7 @@ void NameResolver::ProcessAssignment(const ast::Node& lhs,
         return;
       }
       const auto& type = type_factory().NewTypeAlias(name, type_spec);
-      if (!lhs.Is<ast::BindingNameElement>())
+      if (!node.Is<ast::BindingNameElement>())
         return;
       BindType(name, type);
       return;
@@ -439,9 +431,9 @@ void NameResolver::ProcessClass(const ast::Node& node,
   auto& class_properties =
       variable ? variable->properties() : factory().NewProperties(node);
 
-  const auto& class_value = NewClass(annotation.class_kind(), class_name, node,
-                                     type_parameters, &class_properties);
-  context().RegisterValue(node, class_value);
+  const auto& class_value =
+      NewClass(annotation.class_kind(), class_name, node,
+               ast::Class::BodyOf(node), type_parameters, &class_properties);
   if (maybe_alias)
     BindType(*maybe_alias, type_factory().NewClassType(class_value));
   if (variable) {
@@ -449,9 +441,9 @@ void NameResolver::ProcessClass(const ast::Node& node,
       BindType(real_name, type_factory().NewClassType(class_value));
     } else {
       AddError(node, ErrorCode::ENVIRONMENT_MULTIPLE_OCCURRENCES,
-               *variable->assignments().front());
+               variable->assignments().front().node());
     }
-    Value::Editor().AddAssignment(*variable, node);
+    Value::Editor().AddAssignment(*variable, class_value);
   }
 
   // Class wide template parameters.
@@ -503,11 +495,11 @@ void NameResolver::ProcessMethod(const ast::Node& method_node,
   if (auto* present = properties.TryGet(method_name)) {
     AddError(method_node, ErrorCode::ENVIRONMENT_MULTIPLE_OCCURRENCES,
              present->node());
-    Value::Editor().AddAssignment(*present, method_node);
+    Value::Editor().AddAssignment(*present, method);
   } else {
     const auto& property = NewProperty(Visibility::Public, method_name);
     Properties::Editor().Add(&properties, property);
-    Value::Editor().AddAssignment(property, method_node);
+    Value::Editor().AddAssignment(property, method);
   }
   Environment environment(this);
   BindTypeParameters(class_value);
@@ -550,27 +542,26 @@ void NameResolver::ProcessFunction(const ast::Node& node,
 
   if (annotation.is_constructor() || annotation.is_interface()) {
     const auto& class_value = NewClass(
-        annotation.class_kind(), function.name(), node, type_parameters,
+        annotation.class_kind(), function.name(), node,
+        ast::Function::BodyOf(node), type_parameters,
         variable ? &variable->properties() : &factory().NewProperties(node));
-    context().RegisterValue(node, class_value);
     if (maybe_alias)
       BindType(*maybe_alias, type_factory().NewClassType(class_value));
+    if (variable) {
+      if (variable->assignments().empty()) {
+        Value::Editor().AddAssignment(*variable, class_value);
+      } else {
+        AddError(node, ErrorCode::ENVIRONMENT_MULTIPLE_OCCURRENCES,
+                 variable->assignments().front().node());
+      }
+      BindType(real_name, type_factory().NewClassType(class_value));
+    }
   } else {
     context().RegisterValue(node, function);
+    if (variable)
+      Value::Editor().AddAssignment(*variable, function);
   }
 
-  if (variable) {
-    if (variable->assignments().empty()) {
-      auto* class_value = context().TryValueOf(node);
-      if (class_value && class_value->Is<Class>())
-        BindType(real_name,
-                 type_factory().NewClassType(class_value->As<Class>()));
-    } else {
-      AddError(node, ErrorCode::ENVIRONMENT_MULTIPLE_OCCURRENCES,
-               *variable->assignments().front());
-    }
-    Value::Editor().AddAssignment(*variable, node);
-  }
   Environment environment(this);
   for (const auto& type_parameter : type_parameters)
     BindType(type_parameter->name(), *type_parameter);
@@ -579,14 +570,15 @@ void NameResolver::ProcessFunction(const ast::Node& node,
   VisitChildNodes(node);
 }
 
-void NameResolver::ProcessObjectMember(const Class& class_value,
+void NameResolver::ProcessObjectMember(const Object& object_value,
                                        const ast::Node& node,
                                        const Annotation& annotation) {
-  auto& properties = class_value.properties();
+  auto& properties = object_value.properties();
   if (node.Is<ast::Property>()) {
     const auto& property_name = ast::Property::NameOf(node);
     const auto& property_value = ast::Property::ValueOf(node);
     if (property_name.Is<ast::Name>()) {
+      // TODO(eval1749): We should check multiple occurrences of property.
       const auto& property = GetOrNewProperty(&properties, property_name);
       context().RegisterValue(node, property);
     }
@@ -598,8 +590,19 @@ void NameResolver::ProcessObjectMember(const Class& class_value,
     return;
   }
   if (node.Is<ast::Method>()) {
-    GetOrNewProperty(&properties, ast::Method::NameOf(node));
-    ProcessMethod(node, annotation, class_value);
+    // TODO(eval1749): We should check multiple occurrences of method.
+    const auto& method_name = ast::Method::NameOf(node);
+    const auto& property = GetOrNewProperty(&properties, method_name);
+    const auto& method = factory().NewFunction(method_name, node);
+    context().RegisterValue(node, method);
+    Value::Editor().AddAssignment(property, method);
+    const auto& type_parameters =
+        ProcessTypeParameterNames(annotation.type_parameter_names());
+    for (const auto& type_parameter : type_parameters)
+      BindType(type_parameter->name(), *type_parameter);
+    if (annotation.has_document())
+      Visit(annotation.document());
+    VisitChildNodes(node);
     return;
   }
   if (node.Is<ast::ReferenceExpression>()) {
@@ -610,10 +613,13 @@ void NameResolver::ProcessObjectMember(const Class& class_value,
   AddError(node, ErrorCode::ENVIRONMENT_EXPECT_OBJECT_MEMBER);
 }
 
-void NameResolver::ProcessPropertyAssignment(const ast::Node& lhs,
-                                             const ast::Node* maybe_rhs,
+void NameResolver::ProcessPropertyAssignment(const ast::Node& node,
+                                             const ast::Node& lhs,
+                                             const ast::Node& rhs,
                                              const Annotation& annotation) {
+  DCHECK_NE(node, lhs);
   DCHECK(IsMemberExpression(lhs)) << lhs;
+  DCHECK(annotation.has_document());
   const auto& container = lhs.child_at(0);
   const auto& key = lhs.child_at(1);
   Visit(container);
@@ -621,8 +627,7 @@ void NameResolver::ProcessPropertyAssignment(const ast::Node& lhs,
   if (!value || !value->Is<Object>()) {
     ProcessTemplateTags(annotation);
     ProcessParamTags(annotation);
-    if (maybe_rhs)
-      Visit(*maybe_rhs);
+    Visit(rhs);
     return;
   }
   if (key.Is<ast::Name>()) {
@@ -634,8 +639,7 @@ void NameResolver::ProcessPropertyAssignment(const ast::Node& lhs,
       const auto& property = NewProperty(annotation.visibility(), key);
       Properties::Editor().Add(&properties, property);
       context().RegisterValue(lhs, property);
-      Value::Editor().AddAssignment(
-          property, maybe_rhs ? *maybe_rhs : annotation.document());
+      RecordAssignment(property, rhs);
     }
   } else if (ast::IsKnownSymbol(key)) {
     Visit(key);
@@ -647,8 +651,7 @@ void NameResolver::ProcessPropertyAssignment(const ast::Node& lhs,
       const auto& property = NewProperty(annotation.visibility(), key);
       Properties::Editor().Add(&properties, property);
       context().RegisterValue(lhs, property);
-      Value::Editor().AddAssignment(
-          property, maybe_rhs ? *maybe_rhs : annotation.document());
+      RecordAssignment(property, rhs);
     }
   } else {
     AddError(lhs, ErrorCode::ENVIRONMENT_UNEXPECT_ANNOTATION);
@@ -657,7 +660,7 @@ void NameResolver::ProcessPropertyAssignment(const ast::Node& lhs,
   Environment environment(this);
   if (const auto* class_value = TryClassOfPrototype(container))
     BindTypeParameters(*class_value);
-  ProcessAssignment(lhs, maybe_rhs, lhs, annotation);
+  ProcessAssignment(node, lhs, rhs, lhs, annotation);
 }
 
 // Bind name of @template tags
@@ -704,15 +707,24 @@ void NameResolver::ProcessVariableDeclaration(VariableKind variable_kind,
     const auto& name = ast::BindingNameElement::NameOf(binding);
     const auto& variable = BindVariable(variable_kind, name);
     context().RegisterValue(binding, variable);
-    Value::Editor().AddAssignment(variable, binding);
     if (variable.assignments().size() > 1) {
       AddError(node, ErrorCode::ENVIRONMENT_MULTIPLE_OCCURRENCES,
-               *variable.assignments().front());
+               variable.assignments().front().node());
       return;
     }
-    ProcessAssignment(binding, &ast::BindingNameElement::InitializerOf(binding),
-                      name, annotation);
+    const auto& initializer = ast::BindingNameElement::InitializerOf(binding);
+    ProcessAssignment(binding, name, initializer, name, annotation);
+    RecordAssignment(variable, initializer);
   }
+}
+
+void NameResolver::RecordAssignment(const ValueHolder& lhs,
+                                    const ast::Node& rhs) {
+  if (const auto* value = context().TryValueOf(rhs)) {
+    Value::Editor().AddAssignment(lhs, *value);
+    return;
+  }
+  // TODO(eval1749): We should remember |lhs| has been assigned.
 }
 
 // AST node handlers
@@ -727,11 +739,8 @@ const Class* NameResolver::TryClassOfPrototype(const ast::Node& node) const {
     return nullptr;
   if (holder->As<ValueHolder>().assignments().size() != 1)
     return nullptr;
-  const auto* const value =
-      context().TryValueOf(*holder->As<ValueHolder>().assignments().front());
-  if (!value || !value->Is<Class>())
-    return nullptr;
-  return &value->As<Class>();
+  const auto& value = holder->As<ValueHolder>().assignments().front();
+  return value.TryAs<Class>();
 }
 
 void NameResolver::VisitChildNodes(const ast::Node& node) {
@@ -765,12 +774,12 @@ void NameResolver::VisitInternal(const ast::BindingNameElement& syntax,
   else
     Visit(initializer);
   const auto& variable = BindVariable(variable_kind_, name);
-  Value::Editor().AddAssignment(variable, node);
+  RecordAssignment(variable, initializer);
   context().RegisterValue(node, variable);
-  if (variable.assignments().size() == 1)
+  if (variable.assignments().size() <= 1)
     return;
   AddError(node, ErrorCode::ENVIRONMENT_MULTIPLE_OCCURRENCES,
-           *variable.assignments().front());
+           variable.assignments().front().node());
 }
 
 // Declarations
@@ -803,27 +812,11 @@ void NameResolver::VisitInternal(const ast::Annotation& syntax,
     return ProcessVariableDeclaration(VariableKind::Var, annotated, annotation);
   if (annotated.Is<ast::GroupExpression>())
     return VisitChildNodes(node);
-  if (!annotated.Is<ast::ExpressionStatement>()) {
-    AddError(node, ErrorCode::ENVIRONMENT_UNEXPECT_ANNOTATION);
-    return;
+  if (annotated.Is<ast::Declaration>()) {
+    return ProcessPropertyAssignment(
+        annotated, ast::Declaration::ExpressionOf(annotated),
+        ast::Declaration::InitializerOf(annotated), annotation);
   }
-  const auto& expression = ast::ExpressionStatement::ExpressionOf(annotated);
-  if (expression.Is<ast::AssignmentExpression>()) {
-    const auto& lhs = ast::AssignmentExpression::LeftHandSideOf(expression);
-    const auto& rhs = ast::AssignmentExpression::RightHandSideOf(expression);
-    if (!IsMemberExpression(lhs)) {
-      AddError(node, ErrorCode::ENVIRONMENT_UNEXPECT_ANNOTATION);
-      VisitChildNodes(node);
-      return;
-    }
-    ProcessPropertyAssignment(lhs, &rhs, annotation);
-    return;
-  }
-
-  if (IsMemberExpression(expression))
-    return ProcessPropertyAssignment(expression, nullptr, annotation);
-
-  VisitDefault(node);
   AddError(node, ErrorCode::ENVIRONMENT_UNEXPECT_ANNOTATION);
 }
 
@@ -868,7 +861,8 @@ void NameResolver::VisitInternal(const ast::AssignmentExpression& syntax,
     return;
   }
   const auto& holder = value->As<ValueHolder>();
-  Value::Editor().AddAssignment(holder, node);
+  const auto& rhs = ast::AssignmentExpression::RightHandSideOf(node);
+  RecordAssignment(holder, rhs);
 }
 
 void NameResolver::VisitInternal(const ast::ComputedMemberExpression& syntax,
@@ -904,9 +898,9 @@ void NameResolver::VisitInternal(const ast::ObjectInitializer& syntax,
   const auto& empty_name =
       BuiltInWorld::GetInstance()->NameOf(ast::TokenKind::Object);
   auto& properties = factory().NewProperties(empty_name);
-  const auto& class_value =
-      NewClass(ClassKind::Class, empty_name, node, {}, &properties);
-  context().RegisterValue(node, class_value);
+  const auto& object_value =
+      factory().NewOrdinaryObject(node, &properties).As<OrdinaryObject>();
+  context().RegisterValue(node, object_value);
   for (const auto& child : ast::NodeTraversal::ChildNodesOf(node)) {
     // TODO(eval1749): We should report error for multiple occurrences of
     // property names.
@@ -915,12 +909,12 @@ void NameResolver::VisitInternal(const ast::ObjectInitializer& syntax,
       const auto& annotation =
           Annotation::Compiler(&context())
               .Compile(ast::Annotation::DocumentOf(child), member);
-      ProcessObjectMember(class_value, member, annotation);
+      ProcessObjectMember(object_value, member, annotation);
       continue;
     }
     if (child.Is<ast::DelimiterExpression>())
       continue;
-    ProcessObjectMember(class_value, child, Annotation());
+    ProcessObjectMember(object_value, child, Annotation());
   }
 }
 

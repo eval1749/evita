@@ -345,10 +345,9 @@ TEST_F(ParserTest, AutomaticSemicolon) {
       "PASER_ERROR_EXPRESSION_UNEXPECT_NEWLINE@4:6\n"
       "PASER_ERROR_STATEMENT_EXPECT_SEMICOLON@0:3\n"
       "PASER_ERROR_STATEMENT_EXPECT_SEMICOLON@4:9\n",
-      Parse("foo\n++bar",
-            ParserOptions::Builder()
-                .set_disable_automatic_semicolon(true)
-                .Build()));
+      Parse("foo\n++bar", ParserOptions::Builder()
+                              .set_disable_automatic_semicolon(true)
+                              .Build()));
 }
 
 TEST_F(ParserTest, BlockStatement) {

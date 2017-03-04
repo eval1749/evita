@@ -27,9 +27,9 @@ namespace {
 bool CanHaveVisibility(const ast::Node& node) {
   if (node.Is<ast::Method>())
     return true;
-  if (!node.Is<ast::ExpressionStatement>())
+  if (!node.Is<ast::Declaration>())
     return false;
-  const auto& expression = ast::ExpressionStatement::ExpressionOf(node);
+  const auto& expression = ast::Declaration::ExpressionOf(node);
   return expression.Is<ast::ComputedMemberExpression>() ||
          expression.Is<ast::MemberExpression>();
 }

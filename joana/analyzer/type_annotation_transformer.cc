@@ -606,9 +606,8 @@ const Class* TypeAnnotationTransformer::TryClassValueOf(
     const auto& property = value->As<Property>();
     if (property.assignments().size() != 1)
       return nullptr;
-    auto* const property_value =
-        context().TryValueOf(*property.assignments().front());
-    return property_value ? property_value->TryAs<Class>() : nullptr;
+    const auto& property_value = property.assignments().front();
+    return property_value.TryAs<Class>();
   }
   DVLOG(0) << "We should handle: " << node;
   return nullptr;

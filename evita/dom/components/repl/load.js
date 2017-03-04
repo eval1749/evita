@@ -115,7 +115,7 @@ const loader = new ScriptModuleLoader(new FileScriptTextProvider());
 /**
  * @param {string} scriptPath
  * @param {!Object=} options
- * @return {!Promise<!Array<string>>}
+ * @return {!Promise<*>}
  *
  * Options:
  *  encoding: string
@@ -127,8 +127,7 @@ async function load(scriptPath, options = {}) {
   const result = await loader.load(scriptPath);
   if (!options.verbose)
     return result;
-  for (const fileName of result)
-    console.log(LINE_COMMENT, 'loaded', fileName);
+  console.log(LINE_COMMENT, scriptPath, 'returns', result);
   return result;
 }
 
@@ -138,6 +137,7 @@ async function load(scriptPath, options = {}) {
  * @return {!Promise}
  */
 repl.load = load;
+repl.loader = loader;
 });
 
 global.load = repl.load;

@@ -9,7 +9,7 @@ goog.scope(function() {
 const Initializer = core.Initializer;
 
 /**
- * @return {!Promise}
+ * @return {!Promise<*>}
  */
 async function loadUserScript() {
   /** @type {!Set<string>} */
@@ -29,6 +29,7 @@ async function loadUserScript() {
       if (error instanceof Os.File.Error)
         continue;
       console.log(`Failed to load ${fileName}: ${error}`);
+      console.log(error.stack);
       throw error;
     }
   }

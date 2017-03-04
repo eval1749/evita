@@ -40,6 +40,26 @@ class ScriptModule {
   /** @return {boolean} */
   get isCompiled() { return this.handle_ !== null; }
 
+  /**
+   * @public
+   * @return {*}
+   */
+  evaluate() {
+    // |NativeScriptModule#evaluate()| returns value of last evaluated value in
+    // module file, e.g. if module file ends with "42;", the returned value is
+    // number 42. See [1] for v8 implementation.
+    // [1] https://chromium-review.googlesource.com/c/446846/
+    return this.handle_.evaluate();
+  }
+
+  /**
+   * @public
+   * @param {!function(string, !NativeScriptModule):!NativeScriptModule} callback
+   */
+  instantiate(callback) {
+    this.handle_.instantiate(callback);
+  }
+
   /** @override */
   toString() { return `SciprtModule("${this.fullName_}")`; }
 }
@@ -150,7 +170,8 @@ class ScriptModuleLoader {
   /**
    * @public
    * @param {string} specifier
-   * @return {!Promise<!Array<string>>} A list of module full name.
+   * @return {!Promise<*>} A Promise object holding the last evaluated value
+   *    of module file
    */
   async load(specifier) {
     const fullName = await this.scriptTextProvider_.computeFullName(specifier);
@@ -159,13 +180,8 @@ class ScriptModuleLoader {
       this.unloadModule(present);
     const session = new Session();
     const module = await this.fetchModleTree(session, fullName, '-');
-    module.handle.instantiate(this.resolveCallback.bind(this));
-    const result = module.handle.evaluate();
-    // TODO(eval1749): We would like to known |Module::Evaluate()| returns
-    // other than |undefined|.
-    if (result !== undefined)
-      throw new Error(`${module} returns ${result}.`);
-    return session.modules.map(module => module.fullName);
+    module.instantiate(this.resolveCallback.bind(this));
+    return module.evaluate();
   }
 
   /**

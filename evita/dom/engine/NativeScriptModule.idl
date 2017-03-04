@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 callback ScriptModuleResolveCallbck =
-    NativeScriptModule(DOMString specifier, DOMString referrer);
+    NativeScriptModule(DOMString specifier, NativeScriptModule referrer);
 
 interface NativeScriptModule {
   [CallWith = ScriptHost] readonly attribute long id;

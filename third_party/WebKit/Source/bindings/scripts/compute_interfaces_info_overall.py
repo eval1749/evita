@@ -81,17 +81,21 @@ code changes (for inherited extended attributes).
 Design doc: http://www.chromium.org/developers/design-documents/idl-build
 """
 
-from collections import defaultdict
-import cPickle as pickle
+# pylint: disable=relative-import
+
 import optparse
 import sys
 
-from utilities import idl_filename_to_component, read_pickle_files, write_pickle_file, merge_dict_recursively
+from collections import defaultdict
+from utilities import idl_filename_to_component
+from utilities import merge_dict_recursively
+from utilities import read_pickle_files
+from utilities import shorten_union_name
+from utilities import write_pickle_file
 
 INHERITED_EXTENDED_ATTRIBUTES = set([
     'ActiveScriptWrappable',
     'DependentLifetime',
-    'JsNamespace',
 ])
 
 # Main variable (filled in and exported)
@@ -114,13 +118,8 @@ class IdlInterfaceFileNotFoundError(Exception):
 def parse_options():
     usage = 'Usage: %prog [InfoIndividual.pickle]... [Info.pickle]'
     parser = optparse.OptionParser(usage=usage)
-    parser.add_option('--write-file-only-if-changed', type='int', help='if true, do not write an output file if it would be identical to the existing one, which avoids unnecessary rebuilds in ninja')
 
-    options, args = parser.parse_args()
-    if options.write_file_only_if_changed is None:
-        parser.error('Must specify whether file is only written if changed using --write-file-only-if-changed.')
-    options.write_file_only_if_changed = bool(options.write_file_only_if_changed)
-    return options, args
+    return parser.parse_args()
 
 
 def dict_of_dicts_of_lists_update_or_append(existing, other):
@@ -167,7 +166,6 @@ def compute_global_type_info():
     ancestors = {}
     dictionaries = {}
     component_dirs = {}
-    namespaces = {}
     implemented_as_interfaces = {}
     garbage_collected_interfaces = set()
     callback_interfaces = set()
@@ -185,14 +183,11 @@ def compute_global_type_info():
             implemented_as_interfaces[interface_name] = interface_info['implemented_as']
 
         inherited_extended_attributes = interface_info['inherited_extended_attributes']
-        if 'JsNamespace' in inherited_extended_attributes:
-            namespaces[interface_name] = inherited_extended_attributes['JsNamespace']
         garbage_collected_interfaces.add(interface_name)
 
     interfaces_info['ancestors'] = ancestors
     interfaces_info['callback_interfaces'] = callback_interfaces
     interfaces_info['dictionaries'] = dictionaries
-    interfaces_info['namespaces'] = namespaces
     interfaces_info['implemented_as_interfaces'] = implemented_as_interfaces
     interfaces_info['garbage_collected_interfaces'] = garbage_collected_interfaces
     interfaces_info['component_dirs'] = component_dirs
@@ -265,12 +260,10 @@ def compute_interfaces_info_overall(info_individuals):
         # However, they are needed for legacy implemented interfaces that
         # are being treated as partial interfaces, until we remove these.
         # http://crbug.com/360435
-        implemented_interfaces_include_paths = []
-        for implemented_interface_info in implemented_interfaces_info:
-            if (implemented_interface_info['is_legacy_treat_as_partial_interface'] and
-                implemented_interface_info['include_path']):
-                implemented_interfaces_include_paths.append(
-                    implemented_interface_info['include_path'])
+        implemented_interfaces_include_paths = [
+            implemented_interface_info['include_path']
+            for implemented_interface_info in implemented_interfaces_info
+            if implemented_interface_info['is_legacy_treat_as_partial_interface']]
 
         dependencies_full_paths = implemented_interfaces_full_paths
         dependencies_include_paths = implemented_interfaces_include_paths
@@ -292,9 +285,10 @@ def compute_interfaces_info_overall(info_individuals):
             else:
                 dependencies_other_component_include_paths.append(include_path)
 
-        if interface_info['has_union_types']:
+        for union_type in interface_info.get('union_types', []):
+            name = shorten_union_name(union_type)
             dependencies_include_paths.append(
-                'bindings/%s/v8/UnionTypes%s.h' % (component, component.capitalize()))
+                'bindings/%s/v8/%s.h' % (component, name))
 
         interface_info.update({
             'dependencies_full_paths': dependencies_full_paths,
@@ -308,7 +302,7 @@ def compute_interfaces_info_overall(info_individuals):
     # Clean up temporary private information
     for interface_info in interfaces_info.itervalues():
         del interface_info['extended_attributes']
-        del interface_info['has_union_types']
+        del interface_info['union_types']
         del interface_info['is_legacy_treat_as_partial_interface']
 
     # Compute global_type_info to interfaces_info so that idl_compiler does
@@ -319,15 +313,13 @@ def compute_interfaces_info_overall(info_individuals):
 ################################################################################
 
 def main():
-    options, args = parse_options()
+    _, args = parse_options()
     # args = Input1, Input2, ..., Output
     interfaces_info_filename = args.pop()
     info_individuals = read_pickle_files(args)
 
     compute_interfaces_info_overall(info_individuals)
-    write_pickle_file(interfaces_info_filename,
-                      interfaces_info,
-                      options.write_file_only_if_changed)
+    write_pickle_file(interfaces_info_filename, interfaces_info)
 
 
 if __name__ == '__main__':

@@ -26,6 +26,8 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+# pylint: disable=relative-import
+
 """Generate template values for attributes.
 
 Extends IdlType with property |constructor_type_name|.
@@ -35,7 +37,7 @@ Design doc: http://www.chromium.org/developers/design-documents/idl-compiler
 
 import idl_types
 from idl_types import inherits_interface
-from v8_globals import includes, interfaces
+from v8_globals import includes
 import v8_types
 import v8_utilities
 from v8_utilities import (cpp_name_or_partial, capitalize, cpp_name, has_extended_attribute,
@@ -44,7 +46,19 @@ from v8_utilities import (cpp_name_or_partial, capitalize, cpp_name, has_extende
                           is_legacy_interface_type_checking)
 
 
-def attribute_context(interface, attribute):
+def attribute_context(interface, attribute, interfaces):
+    """Creates a Jinja template context for an attribute of an interface.
+
+    Args:
+        interface: An interface which |attribute| belongs to
+        attribute: An attribute to create the context for
+        interfaces: A dict which maps an interface name to the definition
+            which can be referred if needed
+
+    Returns:
+        A Jinja template context for |attribute|
+    """
+
     idl_type = attribute.idl_type
     base_idl_type = idl_type.base_type
     extended_attributes = attribute.extended_attributes
@@ -54,35 +68,40 @@ def attribute_context(interface, attribute):
         includes.add('core/inspector/ConsoleMessage.h')
 
     # [CheckSecurity]
-    is_do_not_check_security = 'DoNotCheckSecurity' in extended_attributes
+    is_cross_origin = 'CrossOrigin' in extended_attributes
     is_check_security_for_receiver = (
         has_extended_attribute_value(interface, 'CheckSecurity', 'Receiver') and
-        is_do_not_check_security)
+        is_cross_origin)
     is_check_security_for_return_value = (
         has_extended_attribute_value(attribute, 'CheckSecurity', 'ReturnValue'))
     if is_check_security_for_receiver or is_check_security_for_return_value:
         includes.add('bindings/core/v8/BindingSecurity.h')
+    # [CrossOrigin]
+    if has_extended_attribute_value(attribute, 'CrossOrigin', 'Setter'):
+        includes.add('bindings/core/v8/V8CrossOriginSetterInfo.h')
     # [Constructor]
     # TODO(yukishiino): Constructors are much like methods although constructors
     # are not methods.  Constructors must be data-type properties, and we can
     # support them as a kind of methods.
     constructor_type = idl_type.constructor_type_name if is_constructor_attribute(attribute) else None
+    # [CEReactions]
+    is_ce_reactions = 'CEReactions' in extended_attributes
+    if is_ce_reactions:
+        includes.add('core/dom/custom/CEReactionsScope.h')
     # [CustomElementCallbacks], [Reflect]
     is_custom_element_callbacks = 'CustomElementCallbacks' in extended_attributes
     is_reflect = 'Reflect' in extended_attributes
     if is_custom_element_callbacks or is_reflect:
         includes.add('core/dom/custom/V0CustomElementProcessingStack.h')
-    # [ImplementedInPrivateScript]
-    is_implemented_in_private_script = 'ImplementedInPrivateScript' in extended_attributes
-    if is_implemented_in_private_script:
-        includes.add('bindings/core/v8/PrivateScriptRunner.h')
-        includes.add('core/frame/LocalFrame.h')
-        includes.add('platform/ScriptForbiddenScope.h')
-    # [OnlyExposedToPrivateScript]
-    is_only_exposed_to_private_script = 'OnlyExposedToPrivateScript' in extended_attributes
     # [PerWorldBindings]
     if 'PerWorldBindings' in extended_attributes:
         assert idl_type.is_wrapper_type or 'LogActivity' in extended_attributes, '[PerWorldBindings] should only be used with wrapper types: %s.%s' % (interface.name, attribute.name)
+    # [SaveSameObject]
+    is_save_same_object = (
+        'SameObject' in attribute.extended_attributes and
+        'SaveSameObject' in attribute.extended_attributes)
+    if is_save_same_object:
+        includes.add('bindings/core/v8/V8PrivateProperty.h')
 
     if (base_idl_type == 'EventHandler' and
             interface.name in ['Window', 'WorkerGlobalScope'] and
@@ -94,12 +113,15 @@ def attribute_context(interface, attribute):
     if cached_attribute_validation_method or keep_alive_for_gc:
         includes.add('bindings/core/v8/V8HiddenValue.h')
 
+    # [CachedAccessor]
+    is_cached_accessor = 'CachedAccessor' in extended_attributes
+    if is_cached_accessor:
+        includes.add('bindings/core/v8/V8PrivateProperty.h')
+
     context = {
-        'access_control_list': access_control_list(interface, attribute),
         'activity_logging_world_list_for_getter': v8_utilities.activity_logging_world_list(attribute, 'Getter'),  # [ActivityLogging]
         'activity_logging_world_list_for_setter': v8_utilities.activity_logging_world_list(attribute, 'Setter'),  # [ActivityLogging]
         'activity_logging_world_check': v8_utilities.activity_logging_world_check(attribute),  # [ActivityLogging]
-        'argument_cpp_type': idl_type.cpp_type_args(used_as_rvalue_type=True),
         'cached_attribute_validation_method': cached_attribute_validation_method,
         'constructor_type': constructor_type,
         'cpp_name': cpp_name(attribute),
@@ -109,21 +131,26 @@ def attribute_context(interface, attribute):
         'enum_type': idl_type.enum_type,
         'enum_values': idl_type.enum_values,
         'exposed_test': v8_utilities.exposed(attribute, interface),  # [Exposed]
+        'has_cross_origin_getter':
+            has_extended_attribute_value(attribute, 'CrossOrigin', None) or
+            has_extended_attribute_value(attribute, 'CrossOrigin', 'Getter'),
+        'has_cross_origin_setter': has_extended_attribute_value(attribute, 'CrossOrigin', 'Setter'),
         'has_custom_getter': has_custom_getter(attribute),
         'has_custom_setter': has_custom_setter(attribute),
         'has_setter': has_setter(interface, attribute),
         'idl_type': str(idl_type),  # need trailing [] on array for Dictionary::ConversionContext::setConversionType
+        'is_cached_accessor': is_cached_accessor,
         'is_call_with_execution_context': has_extended_attribute_value(attribute, 'CallWith', 'ExecutionContext'),
         'is_call_with_script_state': has_extended_attribute_value(attribute, 'CallWith', 'ScriptState'),
+        'is_ce_reactions': is_ce_reactions,
         'is_check_security_for_receiver': is_check_security_for_receiver,
         'is_check_security_for_return_value': is_check_security_for_return_value,
         'is_custom_element_callbacks': is_custom_element_callbacks,
         # TODO(yukishiino): Make all DOM attributes accessor-type properties.
         'is_data_type_property': is_data_type_property(interface, attribute),
-        'is_getter_raises_exception': (  # [RaisesException]
+        'is_getter_raises_exception':  # [RaisesException]
             'RaisesException' in extended_attributes and
-            extended_attributes['RaisesException'] in (None, 'Getter')),
-        'is_implemented_in_private_script': is_implemented_in_private_script,
+            extended_attributes['RaisesException'] in (None, 'Getter'),
         'is_keep_alive_for_gc': keep_alive_for_gc,
         'is_lenient_this': 'LenientThis' in extended_attributes,
         'is_nullable': idl_type.is_nullable,
@@ -135,29 +162,30 @@ def attribute_context(interface, attribute):
         'is_read_only': attribute.is_read_only,
         'is_reflect': is_reflect,
         'is_replaceable': 'Replaceable' in attribute.extended_attributes,
+        'is_save_same_object': is_save_same_object,
         'is_static': attribute.is_static,
         'is_url': 'URL' in extended_attributes,
         'is_unforgeable': is_unforgeable(interface, attribute),
         'on_instance': v8_utilities.on_instance(interface, attribute),
         'on_interface': v8_utilities.on_interface(interface, attribute),
         'on_prototype': v8_utilities.on_prototype(interface, attribute),
-        'origin_trial_enabled_function': v8_utilities.origin_trial_enabled_function_name(attribute, interface),  # [OriginTrialEnabled]
+        'origin_trial_enabled_function': v8_utilities.origin_trial_enabled_function_name(attribute),  # [OriginTrialEnabled]
+        'origin_trial_feature_name': v8_utilities.origin_trial_feature_name(attribute),  # [OriginTrialEnabled]
         'use_output_parameter_for_result': idl_type.use_output_parameter_for_result,
         'measure_as': v8_utilities.measure_as(attribute, interface),  # [MeasureAs]
         'name': attribute.name,
-        'only_exposed_to_private_script': is_only_exposed_to_private_script,
-        'private_script_v8_value_to_local_cpp_value': idl_type.v8_value_to_local_cpp_value(
-            extended_attributes, 'v8Value', 'cppValue', bailout_return_value='false', isolate='scriptState->isolate()'),
         'property_attributes': property_attributes(interface, attribute),
         'reflect_empty': extended_attributes.get('ReflectEmpty'),
         'reflect_invalid': extended_attributes.get('ReflectInvalid', ''),
         'reflect_missing': extended_attributes.get('ReflectMissing'),
         'reflect_only': extended_attribute_value_as_list(attribute, 'ReflectOnly'),
-        'runtime_enabled_function': v8_utilities.runtime_enabled_function_name(attribute),  # [RuntimeEnabled]
-        'should_be_exposed_to_script': not (is_implemented_in_private_script and is_only_exposed_to_private_script),
-        'world_suffixes': (['', 'ForMainWorld']
-                           if 'PerWorldBindings' in extended_attributes
-                           else ['']),  # [PerWorldBindings]
+        'runtime_enabled_feature_name': v8_utilities.runtime_enabled_feature_name(attribute),  # [RuntimeEnabled]
+        'secure_context_test': v8_utilities.secure_context(attribute, interface),  # [SecureContext]
+        'cached_accessor_name': '%s%sCachedAccessor' % (interface.name, attribute.name.capitalize()),
+        'world_suffixes': (
+            ['', 'ForMainWorld']
+            if 'PerWorldBindings' in extended_attributes
+            else ['']),  # [PerWorldBindings]
     }
 
     if is_constructor_attribute(attribute):
@@ -165,9 +193,64 @@ def attribute_context(interface, attribute):
     if not has_custom_getter(attribute):
         getter_context(interface, attribute, context)
     if not has_custom_setter(attribute) and has_setter(interface, attribute):
-        setter_context(interface, attribute, context)
+        setter_context(interface, attribute, interfaces, context)
+
+    # [CrossOrigin] is incompatible with a number of other attributes, so check
+    # for them here.
+    if is_cross_origin:
+        if context['has_cross_origin_setter'] and context['has_custom_setter']:
+            raise Exception('[CrossOrigin] and [Custom] are incompatible on the same setter: %s.%s', interface.name, attribute.name)
+        if context['is_per_world_bindings']:
+            raise Exception('[CrossOrigin] and [PerWorldBindings] are incompatible: %s.%s', interface.name, attribute.name)
+        if context['constructor_type']:
+            raise Exception('[CrossOrigin] cannot be used for constructors: %s.%s', interface.name, attribute.name)
 
     return context
+
+
+def filter_accessors(attributes):
+    return [attribute for attribute in attributes if
+            not (attribute['exposed_test'] or
+                 attribute['secure_context_test'] or
+                 attribute['origin_trial_enabled_function'] or
+                 attribute['runtime_enabled_feature_name']) and
+            not attribute['is_data_type_property']]
+
+
+def is_data_attribute(attribute):
+    return (not (attribute['exposed_test'] or
+                 attribute['secure_context_test'] or
+                 attribute['origin_trial_enabled_function'] or
+                 attribute['runtime_enabled_feature_name']) and
+            attribute['is_data_type_property'])
+
+
+def is_lazy_data_attribute(attribute):
+    return ((attribute['constructor_type'] and not attribute['needs_constructor_getter_callback']) or
+            (attribute['idl_type'] == 'Window' and attribute['name'] == 'frames') or
+            (attribute['idl_type'] == 'Window' and attribute['name'] == 'self') or
+            (attribute['idl_type'] == 'Window' and attribute['name'] == 'window'))
+
+
+def filter_data_attributes(attributes):
+    return [attribute for attribute in attributes if is_data_attribute(attribute) and not is_lazy_data_attribute(attribute)]
+
+
+def filter_lazy_data_attributes(attributes):
+    return [attribute for attribute in attributes if is_data_attribute(attribute) and is_lazy_data_attribute(attribute)]
+
+
+def filter_origin_trial_enabled(attributes):
+    return [attribute for attribute in attributes if
+            attribute['origin_trial_feature_name'] and
+            not attribute['exposed_test']]
+
+
+def filter_runtime_enabled(attributes):
+    return [attribute for attribute in attributes if
+            not (attribute['exposed_test'] or
+                 attribute['secure_context_test']) and
+            attribute['runtime_enabled_feature_name']]
 
 
 ################################################################################
@@ -186,15 +269,7 @@ def getter_context(interface, attribute, context):
     # exceptions), we need to use a local variable.
     # FIXME: check if compilers are smart enough to inline this, and if so,
     # always use a local variable (for readability and CG simplicity).
-    if 'ImplementedInPrivateScript' in extended_attributes:
-        if (not idl_type.is_wrapper_type and
-                not idl_type.is_basic_type and
-                not idl_type.is_enum):
-            raise Exception('Private scripts supports only primitive types and DOM wrappers.')
-
-        context['cpp_value_original'] = cpp_value
-        cpp_value = 'result'
-    elif (idl_type.is_explicit_nullable or
+    if (idl_type.is_explicit_nullable or
             base_idl_type == 'EventHandler' or
             'CachedAttribute' in extended_attributes or
             'ReflectOnly' in extended_attributes or
@@ -210,21 +285,6 @@ def getter_context(interface, attribute, context):
             cpp_value, extended_attributes=extended_attributes, script_wrappable='impl',
             for_main_world=for_main_world, is_static=attribute.is_static)
 
-    def v8_set_return_value_statement_for_security_failure():
-        # In the case that the access check fails, there is no common rule for
-        # the return value.  The return value depends on each attribute.
-        # However, we shouldn't return null or undefiend for attributes of type
-        # boolean or DOMString at least.  We're making the best guess here.
-        if idl_type.is_explicit_nullable:
-            return 'v8SetReturnValueNull(info)'
-        if idl_type.is_boolean_type:
-            return 'v8SetReturnValueBool(info, false)'
-        if idl_type.is_numeric_type:
-            return 'v8SetReturnValueInt(info, 0)'
-        if idl_type.is_string_type:
-            return 'v8SetReturnValueEmptyString(info)'
-        return 'v8SetReturnValueNull(info)'
-
     context.update({
         'cpp_value': cpp_value,
         'cpp_value_to_v8_value': idl_type.cpp_value_to_v8_value(
@@ -232,27 +292,19 @@ def getter_context(interface, attribute, context):
             extended_attributes=extended_attributes),
         'v8_set_return_value_for_main_world': v8_set_return_value_statement(for_main_world=True),
         'v8_set_return_value': v8_set_return_value_statement(),
-        'v8_set_return_value_for_security_failure':
-            v8_set_return_value_statement_for_security_failure(),
     })
-
 
 def getter_expression(interface, attribute, context):
     arguments = []
     this_getter_base_name = getter_base_name(interface, attribute, arguments)
     getter_name = scoped_name(interface, attribute, this_getter_base_name)
 
-    if 'ImplementedInPrivateScript' in attribute.extended_attributes:
-        arguments.append('toLocalFrame(toFrameIfNotDetached(info.GetIsolate()->GetCurrentContext()))')
-        arguments.append('impl')
-        arguments.append('&result')
     arguments.extend(v8_utilities.call_with_arguments(
         attribute.extended_attributes.get('CallWith')))
     # Members of IDL partial interface definitions are implemented in C++ as
     # static member functions, which for instance members (non-static members)
     # take *impl as their first argument
     if ('PartialInterfaceImplementedAs' in attribute.extended_attributes and
-            'ImplementedInPrivateScript' not in attribute.extended_attributes and
             not attribute.is_static):
         arguments.append('*impl')
     if attribute.idl_type.is_explicit_nullable:
@@ -279,9 +331,6 @@ CONTENT_ATTRIBUTE_GETTER_NAMES = {
 
 def getter_base_name(interface, attribute, arguments):
     extended_attributes = attribute.extended_attributes
-
-    if 'ImplementedInPrivateScript' in extended_attributes:
-        return '%sAttributeGetter' % uncapitalize(cpp_name(attribute))
 
     if 'Reflect' not in extended_attributes:
         return uncapitalize(cpp_name(attribute))
@@ -327,7 +376,7 @@ def is_keep_alive_for_gc(interface, attribute):
 # Setter
 ################################################################################
 
-def setter_context(interface, attribute, context):
+def setter_context(interface, attribute, interfaces, context):
     if 'PutForwards' in attribute.extended_attributes:
         # Use target interface and attribute in place of original interface and
         # attribute from this point onwards.
@@ -344,7 +393,7 @@ def setter_context(interface, attribute, context):
                             (target_attribute_name, target_interface_name))
 
     if ('Replaceable' in attribute.extended_attributes):
-        context['cpp_setter'] = 'v8CallBoolean(info.This()->CreateDataProperty(info.GetIsolate()->GetCurrentContext(), propertyName, v8Value))'
+        context['cpp_setter'] = 'v8CallBoolean(info.Holder()->CreateDataProperty(info.GetIsolate()->GetCurrentContext(), propertyName, v8Value))'
         return
 
     extended_attributes = attribute.extended_attributes
@@ -367,9 +416,6 @@ def setter_context(interface, attribute, context):
         'is_setter_call_with_execution_context': has_extended_attribute_value(
             attribute, 'SetterCallWith', 'ExecutionContext'),
         'is_setter_raises_exception': is_setter_raises_exception,
-        'private_script_cpp_value_to_v8_value': idl_type.cpp_value_to_v8_value(
-            'cppValue', isolate='scriptState->isolate()',
-            creation_context='scriptState->context()->Global()'),
         'v8_value_to_local_cpp_value': idl_type.v8_value_to_local_cpp_value(
             extended_attributes, 'v8Value', 'cppValue'),
     })
@@ -391,24 +437,24 @@ def setter_expression(interface, attribute, context):
     # static member functions, which for instance members (non-static members)
     # take *impl as their first argument
     if ('PartialInterfaceImplementedAs' in extended_attributes and
-            'ImplementedInPrivateScript' not in extended_attributes and
             not attribute.is_static):
         arguments.append('*impl')
     idl_type = attribute.idl_type
-    if 'ImplementedInPrivateScript' in extended_attributes:
-        arguments.append('toLocalFrame(toFrameIfNotDetached(info.GetIsolate()->GetCurrentContext()))')
-        arguments.append('impl')
-        arguments.append('cppValue')
-    elif idl_type.base_type == 'EventHandler':
+    if idl_type.base_type == 'EventHandler':
         getter_name = scoped_name(interface, attribute, cpp_name(attribute))
         context['event_handler_getter_expression'] = '%s(%s)' % (
             getter_name, ', '.join(arguments))
         if (interface.name in ['Window', 'WorkerGlobalScope'] and
                 attribute.name == 'onerror'):
             includes.add('bindings/core/v8/V8ErrorHandler.h')
-            arguments.append('V8EventListenerList::findOrCreateWrapper<V8ErrorHandler>(v8Value, true, ScriptState::current(info.GetIsolate()))')
+            arguments.append(
+                'V8EventListenerHelper::ensureEventListener<V8ErrorHandler>(' +
+                'v8Value, true, ScriptState::forReceiverObject(info))')
         else:
-            arguments.append('V8EventListenerList::getEventListener(ScriptState::current(info.GetIsolate()), v8Value, true, ListenerFindOrCreate)')
+            arguments.append(
+                'V8EventListenerHelper::getEventListener(' +
+                'ScriptState::forReceiverObject(info), v8Value, true, ' +
+                'ListenerFindOrCreate)')
     else:
         arguments.append('cppValue')
     if context['is_setter_raises_exception']:
@@ -425,9 +471,6 @@ CONTENT_ATTRIBUTE_SETTER_NAMES = {
 
 
 def setter_base_name(interface, attribute, arguments):
-    if 'ImplementedInPrivateScript' in attribute.extended_attributes:
-        return '%sAttributeSetter' % uncapitalize(cpp_name(attribute))
-
     if 'Reflect' not in attribute.extended_attributes:
         return 'set%s' % capitalize(cpp_name(attribute))
     arguments.append(scoped_content_attribute_name(interface, attribute))
@@ -460,8 +503,10 @@ def is_writable(attribute):
 
 
 def is_data_type_property(interface, attribute):
+    if 'CachedAccessor' in attribute.extended_attributes:
+        return False
     return (is_constructor_attribute(attribute) or
-            'DoNotCheckSecurity' in attribute.extended_attributes)
+            'CrossOrigin' in attribute.extended_attributes)
 
 
 # [PutForwards], [Replaceable]
@@ -472,23 +517,6 @@ def has_setter(interface, attribute):
         return False
 
     return is_writable(attribute)
-
-
-# [DoNotCheckSecurity], [Unforgeable]
-def access_control_list(interface, attribute):
-    extended_attributes = attribute.extended_attributes
-    access_control = []
-    if 'DoNotCheckSecurity' in extended_attributes:
-        do_not_check_security = extended_attributes['DoNotCheckSecurity']
-        if do_not_check_security == 'Setter':
-            access_control.append('v8::ALL_CAN_WRITE')
-        else:
-            access_control.append('v8::ALL_CAN_READ')
-            if has_setter(interface, attribute):
-                access_control.append('v8::ALL_CAN_WRITE')
-    if is_unforgeable(interface, attribute):
-        access_control.append('v8::PROHIBITS_OVERWRITING')
-    return access_control or ['v8::DEFAULT']
 
 
 # [NotEnumerable], [Unforgeable]
@@ -535,4 +563,4 @@ def is_constructor_attribute(attribute):
 
 
 def update_constructor_attribute_context(interface, attribute, context):
-    context['needs_constructor_getter_callback'] = context['measure_as'] or context['deprecate_as'] or context['origin_trial_enabled_function']  # TODO(chasej): Should/can this be true when OriginTrialEnabled is inherited from containing interface?
+    context['needs_constructor_getter_callback'] = context['measure_as'] or context['deprecate_as']

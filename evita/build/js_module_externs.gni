@@ -101,7 +101,6 @@ template("js_module_externs") {
       rebase_path(target_gen_dir),
       "--info-dir",
       rebase_path(target_gen_dir),
-      "--write-file-only-if-changed=1",
       "--target-component=core",
       "{{source}}",
     ]

@@ -30,9 +30,6 @@ class IdlCompilerGlue(IdlCompiler):
 
     def __init__(self, *args, **kwargs):
         IdlCompiler.__init__(self, *args, **kwargs)
-        self.code_generator = CodeGeneratorGlue(self.info_provider,
-                                                self.cache_directory,
-                                                self.output_directory)
 
     def compile_file(self, idl_filename):
         definitions = self.reader.read_idl_definitions(idl_filename)
@@ -42,7 +39,7 @@ class IdlCompilerGlue(IdlCompiler):
         for file_data in files:
             file_name = os.path.join(self.output_directory,
                                      PREFIX + file_data['file_name'])
-            write_file(file_data['contents'], file_name, self.only_if_changed)
+            write_file(file_data['contents'], file_name)
 
 
 def main():
@@ -52,8 +49,8 @@ def main():
     idl_compiler = IdlCompilerGlue(
         options.output_directory,
         cache_directory=options.cache_directory,
+        code_generator_class=CodeGeneratorGlue,
         info_provider=info_provider,
-        only_if_changed=options.write_file_only_if_changed,
         target_component=options.target_component)
     idl_compiler.compile_file(idl_filename)
 

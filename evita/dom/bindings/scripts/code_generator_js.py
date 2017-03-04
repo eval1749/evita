@@ -59,7 +59,7 @@ global_namespace_map = dict()
 
 
 # We changed "compute_interfaces_info_overall.py"[1] to get JavaScript namespace
-# information in extended attributes into "InterfaceInfoOverall.pickle".
+# information in extended attributes into "InterfacesInfoCoreIndividual.pickle".
 # [1] third_party/WebKit/Source/bindings/scripts/
 def set_global_namespace_map(info_provider):
     global global_namespace_map

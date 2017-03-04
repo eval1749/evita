@@ -60,7 +60,6 @@ template("compiled_idl") {
       rebase_path("$target_gen_dir/core/InterfacesInfoCoreIndividual.pickle"),
       "--component-info-file",
       rebase_path("$target_gen_dir/core/ComponentInfoCore.pickle"),
-      "--write-file-only-if-changed=1",
       "--",
     ]
     deps = target_deps
@@ -79,7 +78,6 @@ template("compiled_idl") {
       "$target_gen_dir/modules/InterfacesInfoOverall.pickle",
     ]
     args = [
-      "--write-file-only-if-changed=1",
       "--",
       rebase_path("$target_gen_dir/core/InterfacesInfoCoreIndividual.pickle"),
       rebase_path("$target_gen_dir/modules/InterfacesInfoOverall.pickle"),

@@ -155,3 +155,8 @@ hooks = [
     'action': ['src\\evita\\build\\gn_evita.cmd']
   },
 ]
+
+recursedeps = [
+  # buildtools provides clang_format, libc++, and libc++abi
+  'src/buildtools',
+]

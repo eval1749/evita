@@ -32,15 +32,6 @@
 namespace joana {
 namespace analyzer {
 
-namespace {
-
-bool IsMemberExpression(const ast::Node& node) {
-  return node == ast::SyntaxCode::MemberExpression ||
-         node == ast::SyntaxCode::ComputedMemberExpression;
-}
-
-}  // namespace
-
 //
 // TypeResolver
 //
@@ -321,11 +312,8 @@ const Class* TypeResolver::ResolveClass(const ast::Node& node) {
   const auto& variable = value->As<Variable>();
   if (variable.assignments().size() != 1)
     return nullptr;
-  const auto& assignment = *variable.assignments().front();
-  auto* assignment_value = context().TryValueOf(assignment);
-  if (!assignment_value || !assignment_value->Is<Class>())
-    return nullptr;
-  return &assignment_value->As<Class>();
+  const auto& assignment_value = variable.assignments().front();
+  return assignment_value.TryAs<Class>();
 }
 
 // Returns value associated to |node|.
@@ -338,14 +326,7 @@ const Value* TypeResolver::SingleValueOf(const ast::Node& node) const {
   const auto& holder = value->As<ValueHolder>();
   if (holder.assignments().size() != 1)
     return nullptr;
-  const auto& assignment = *holder.assignments().front();
-  if (assignment.Is<ast::JsDocDocument>())
-    return context().TryValueOf(assignment);
-  if (assignment.Is<ast::BindingNameElement>()) {
-    return context().TryValueOf(
-        ast::BindingNameElement::InitializerOf(assignment));
-  }
-  return nullptr;
+  return &holder.assignments().front();
 }
 
 // |ast::SyntaxVisitor| members

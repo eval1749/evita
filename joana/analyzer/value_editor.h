@@ -24,7 +24,7 @@ class Value::Editor final {
   Editor();
   ~Editor();
 
-  void AddAssignment(const ValueHolder& binding, const ast::Node& node);
+  void AddAssignment(const ValueHolder& binding, const Value& value);
   void SetClassHeritage(const Class& class_value,
                         const std::vector<const Class*>& classes);
   void SetClassList(const Class& class_value,

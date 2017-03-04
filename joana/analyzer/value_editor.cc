@@ -10,24 +10,10 @@
 #include "joana/ast/declarations.h"
 #include "joana/ast/expressions.h"
 #include "joana/ast/jsdoc_syntaxes.h"
+#include "joana/ast/statements.h"
 
 namespace joana {
 namespace analyzer {
-
-namespace {
-
-bool IsValidAssignment(const ast::Node& node) {
-  return node.Is<ast::BindingNameElement>() || node.Is<ast::Class>() ||
-         node.syntax().Is<ast::Expression>() || node.Is<ast::JsDocDocument>() ||
-         node.Is<ast::Function>() || node.Is<ast::Method>() ||
-         // TODO(eval1749): We should introduce |ast::TypeCastExpression|.
-         node.Is<ast::Annotation>() ||
-         node == BuiltInWorld::GetInstance()->NameOf(ast::TokenKind::Global) ||
-         node == BuiltInWorld::GetInstance()->NameOf(ast::TokenKind::Array) ||
-         node == BuiltInWorld::GetInstance()->NameOf(ast::TokenKind::Object);
-}
-
-}  // namespace
 
 //
 // Value::Editor
@@ -36,9 +22,8 @@ Value::Editor::Editor() = default;
 Value::Editor::~Editor() = default;
 
 void Value::Editor::AddAssignment(const ValueHolder& binding,
-                                  const ast::Node& node) {
-  DCHECK(IsValidAssignment(node)) << binding << ' ' << node;
-  const_cast<ValueHolder&>(binding).data_.assignments_.push_back(&node);
+                                  const Value& value) {
+  const_cast<ValueHolder&>(binding).data_.assignments_.push_back(&value);
 }
 
 void Value::Editor::SetClassHeritage(const Class& class_value,

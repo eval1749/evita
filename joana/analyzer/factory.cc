@@ -111,9 +111,9 @@ const Class& Factory::NewNormalClass(ClassKind kind,
       NormalClass(&zone_, NextValueId(), kind, name, node, properties);
 }
 
-const Value& Factory::NewOrdinaryObject(const ast::Node& node) {
-  auto& properties = NewProperties(node);
-  return *new (&zone_) OrdinaryObject(NextValueId(), node, &properties);
+const Value& Factory::NewOrdinaryObject(const ast::Node& node,
+                                        Properties* properties) {
+  return *new (&zone_) OrdinaryObject(NextValueId(), node, properties);
 }
 
 Properties& Factory::NewProperties(const ast::Node& owner) {

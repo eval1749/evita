@@ -378,7 +378,9 @@ class JOANA_AST_EXPORT UnaryExpression final
   DISALLOW_COPY_AND_ASSIGN(UnaryExpression);
 };
 
-JOANA_AST_EXPORT bool IsKnownSymbol(const ast::Node& node);
+JOANA_AST_EXPORT bool IsExpression(const Node& node);
+JOANA_AST_EXPORT bool IsKnownSymbol(const Node& node);
+JOANA_AST_EXPORT bool IsMemberExpression(const Node& node);
 
 }  // namespace ast
 }  // namespace joana

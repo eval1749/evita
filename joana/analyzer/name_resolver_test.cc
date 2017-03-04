@@ -142,11 +142,11 @@ TEST_F(NameResolverTest, Class) {
       "|  +--Name |Foo|\n"
       "|  +--ElisionExpression ||\n"
       "|  +--ObjectInitializer\n"
-      "|  |  +--Method<NonStatic,Normal> Function[bar@1004]\n"
+      "|  |  +--Method<NonStatic,Normal> Function[bar@1005]\n"
       "|  |  |  +--Name |bar|\n"
       "|  |  |  +--ParameterList |()|\n"
       "|  |  |  +--BlockStatement |{}|\n"
-      "|  |  +--Method<NonStatic,Normal> Function[baz@1006]\n"
+      "|  |  +--Method<NonStatic,Normal> Function[baz@1007]\n"
       "|  |  |  +--Name |baz|\n"
       "|  |  |  +--ParameterList |()|\n"
       "|  |  |  +--BlockStatement |{}|\n",
@@ -165,13 +165,13 @@ TEST_F(NameResolverTest, Class) {
       "|  |  |  |  |  +--Name |@param|\n"
       "|  |  |  |  |  +--TypeName {%number%}\n"
       "|  |  |  |  |  |  +--Name |number|\n"
-      "|  |  |  |  |  +--ReferenceExpression ParameterVar[x@1006]\n"
+      "|  |  |  |  |  +--ReferenceExpression ParameterVar[x@1007]\n"
       "|  |  |  |  |  |  +--Name |x|\n"
       "|  |  |  |  |  +--JsDocText |*/|\n"
-      "|  |  |  +--Method<NonStatic,Normal> Function[foo@1004]\n"
+      "|  |  |  +--Method<NonStatic,Normal> Function[foo@1005]\n"
       "|  |  |  |  +--Name |foo|\n"
       "|  |  |  |  +--ParameterList\n"
-      "|  |  |  |  |  +--BindingNameElement ParameterVar[x@1006]\n"
+      "|  |  |  |  |  +--BindingNameElement ParameterVar[x@1007]\n"
       "|  |  |  |  |  |  +--Name |x|\n"
       "|  |  |  |  |  |  +--ElisionExpression ||\n"
       "|  |  |  |  +--BlockStatement |{}|\n",
@@ -182,7 +182,7 @@ TEST_F(NameResolverTest, ClassAnonymous) {
   EXPECT_EQ(
       "Module\n"
       "+--VarStatement\n"
-      "|  +--BindingNameElement VarVar[a@1003]\n"
+      "|  +--BindingNameElement VarVar[a@1004]\n"
       "|  |  +--Name |a|\n"
       "|  |  +--Class Class[a@1001]\n"
       "|  |  |  +--Empty ||\n"
@@ -262,11 +262,11 @@ TEST_F(NameResolverTest, ClassError) {
       "|  +--Name |Foo|\n"
       "|  +--ElisionExpression ||\n"
       "|  +--ObjectInitializer\n"
-      "|  |  +--Method<NonStatic,Normal> Function[bar@1004]\n"
+      "|  |  +--Method<NonStatic,Normal> Function[bar@1005]\n"
       "|  |  |  +--Name |bar|\n"
       "|  |  |  +--ParameterList |()|\n"
       "|  |  |  +--BlockStatement |{}|\n"
-      "|  |  +--Method<NonStatic,Normal> Function[bar@1006]\n"
+      "|  |  +--Method<NonStatic,Normal> Function[bar@1007]\n"
       "|  |  |  +--Name |bar|\n"
       "|  |  |  +--ParameterList |()|\n"
       "|  |  |  +--BlockStatement |{}|\n"
@@ -279,7 +279,7 @@ TEST_F(NameResolverTest, ClassError) {
       "|  +--Name |Foo|\n"
       "|  +--ElisionExpression ||\n"
       "|  +--ObjectInitializer\n"
-      "|  |  +--Method<Static,Normal> Function[constructor@1004]\n"
+      "|  |  +--Method<Static,Normal> Function[constructor@1005]\n"
       "|  |  |  +--Name |constructor|\n"
       "|  |  |  +--ParameterList |()|\n"
       "|  |  |  +--BlockStatement |{}|\n",
@@ -294,7 +294,7 @@ TEST_F(NameResolverTest, ClassErrorConstructor) {
       "|  +--Name |Foo|\n"
       "|  +--ElisionExpression ||\n"
       "|  +--ObjectInitializer\n"
-      "|  |  +--Method<NonStatic,Async> Function[constructor@1004]\n"
+      "|  |  +--Method<NonStatic,Async> Function[constructor@1005]\n"
       "|  |  |  +--Name |constructor|\n"
       "|  |  |  +--ParameterList |()|\n"
       "|  |  |  +--BlockStatement |{}|\n"
@@ -308,7 +308,7 @@ TEST_F(NameResolverTest, ClassErrorConstructor) {
       "|  +--Name |Foo|\n"
       "|  +--ElisionExpression ||\n"
       "|  +--ObjectInitializer\n"
-      "|  |  +--Method<NonStatic,Generator> Function[constructor@1004]\n"
+      "|  |  +--Method<NonStatic,Generator> Function[constructor@1005]\n"
       "|  |  |  +--Name |constructor|\n"
       "|  |  |  +--ParameterList |()|\n"
       "|  |  |  +--BlockStatement |{}|\n"
@@ -336,7 +336,7 @@ TEST_F(NameResolverTest, ComputedMemberExpression) {
       "|  |  +--JsDocTag\n"
       "|  |  |  +--Name |@constructor|\n"
       "|  |  +--JsDocText |*/|\n"
-      "|  +--Function<Normal> Class[Foo@1007]\n"
+      "|  +--Function<Normal> Class[Foo@1008]\n"
       "|  |  +--Name |Foo|\n"
       "|  |  +--ParameterList |()|\n"
       "|  |  +--BlockStatement |{}|\n"
@@ -346,14 +346,15 @@ TEST_F(NameResolverTest, ComputedMemberExpression) {
       "|  |  +--JsDocTag\n"
       "|  |  |  +--Name |@const|\n"
       "|  |  +--JsDocText |*/|\n"
-      "|  +--ExpressionStatement\n"
-      "|  |  +--ComputedMemberExpression PublicProperty[Symbol.iterator@1010]\n"
-      "|  |  |  +--ReferenceExpression FunctionVar[Foo@1006]\n"
+      "|  +--Declaration\n"
+      "|  |  +--ComputedMemberExpression PublicProperty[Symbol.iterator@1012]\n"
+      "|  |  |  +--ReferenceExpression FunctionVar[Foo@1007]\n"
       "|  |  |  |  +--Name |Foo|\n"
-      "|  |  |  +--MemberExpression PublicProperty[iterator@1009]\n"
+      "|  |  |  +--MemberExpression PublicProperty[iterator@1011]\n"
       "|  |  |  |  +--ReferenceExpression FunctionVar[Symbol@1002]\n"
       "|  |  |  |  |  +--Name |Symbol|\n"
-      "|  |  |  |  +--Name |iterator|\n",
+      "|  |  |  |  +--Name |iterator|\n"
+      "|  |  +--ElisionExpression ||\n",
       RunOn("/** @constructor */ function Symbol() {}\n"
             "/** @constructor */ function Foo() {}\n"
             "/** @const */ Foo[Symbol.iterator]\n"));
@@ -378,28 +379,30 @@ TEST_F(NameResolverTest, ComputedMemberExpressionPrototype) {
       "|  |  +--JsDocTag\n"
       "|  |  |  +--Name |@constructor|\n"
       "|  |  +--JsDocText |*/|\n"
-      "|  +--Function<Normal> Class[Foo@1007]\n"
+      "|  +--Function<Normal> Class[Foo@1008]\n"
       "|  |  +--Name |Foo|\n"
       "|  |  +--ParameterList |()|\n"
       "|  |  +--BlockStatement |{}|\n"
       "+--Annotation\n"
-      "|  +--JsDocDocument Function[Foo.prototype[Symbol.iterator]@1011]\n"
+      "|  +--JsDocDocument\n"
       "|  |  +--JsDocText |/**|\n"
       "|  |  +--JsDocTag\n"
       "|  |  |  +--Name |@return|\n"
       "|  |  |  +--TypeName {%number%}\n"
       "|  |  |  |  +--Name |number|\n"
       "|  |  |  +--JsDocText |*/|\n"
-      "|  +--ExpressionStatement\n"
-      "|  |  +--ComputedMemberExpression PublicProperty[Symbol.iterator@1010]\n"
-      "|  |  |  +--MemberExpression PublicProperty[prototype@1008]\n"
-      "|  |  |  |  +--ReferenceExpression FunctionVar[Foo@1006]\n"
+      "|  +--Declaration\n"
+      "|  |  +--ComputedMemberExpression PublicProperty[Symbol.iterator@1012]\n"
+      "|  |  |  +--MemberExpression PublicProperty[prototype@1009]\n"
+      "|  |  |  |  +--ReferenceExpression FunctionVar[Foo@1007]\n"
       "|  |  |  |  |  +--Name |Foo|\n"
       "|  |  |  |  +--Name |prototype|\n"
-      "|  |  |  +--MemberExpression PublicProperty[iterator@1009]\n"
+      "|  |  |  +--MemberExpression PublicProperty[iterator@1011]\n"
       "|  |  |  |  +--ReferenceExpression FunctionVar[Symbol@1002]\n"
       "|  |  |  |  |  +--Name |Symbol|\n"
-      "|  |  |  |  +--Name |iterator|\n",
+      "|  |  |  |  +--Name |iterator|\n"
+      "|  |  +--ElisionExpression || "
+      "Function[Foo.prototype[Symbol.iterator]@1013]\n",
       RunOn("/** @constructor */ function Symbol() {}\n"
             "/** @constructor */ function Foo() {}\n"
             "/** @return {number} */ Foo.prototype[Symbol.iterator]\n"));
@@ -415,8 +418,7 @@ TEST_F(NameResolverTest, ConstError) {
       "|  +--BindingNameElement ConstVar[foo@1001]\n"
       "|  |  +--Name |foo|\n"
       "|  |  +--NumericLiteral |2|\n"
-      "ANALYZER_ERROR_ENVIRONMENT_MULTIPLE_OCCURRENCES@6:18\n"
-      "ANALYZER_ERROR_ENVIRONMENT_MULTIPLE_OCCURRENCES@6:22\n",
+      "ANALYZER_ERROR_ENVIRONMENT_MULTIPLE_OCCURRENCES@6:18\n",
       RunOn("const foo = 1, foo = 2;"));
 }
 
@@ -643,13 +645,13 @@ TEST_F(NameResolverTest, GenericMethod) {
       "|  |  |  |  |  +--Name |@param|\n"
       "|  |  |  |  |  +--TypeName {T@1002}\n"
       "|  |  |  |  |  |  +--Name |T|\n"
-      "|  |  |  |  |  +--ReferenceExpression ParameterVar[x@1006]\n"
+      "|  |  |  |  |  +--ReferenceExpression ParameterVar[x@1007]\n"
       "|  |  |  |  |  |  +--Name |x|\n"
       "|  |  |  |  |  +--JsDocText |*/|\n"
-      "|  |  |  +--Method<NonStatic,Normal> Function[constructor@1004]\n"
+      "|  |  |  +--Method<NonStatic,Normal> Function[constructor@1005]\n"
       "|  |  |  |  +--Name |constructor|\n"
       "|  |  |  |  +--ParameterList\n"
-      "|  |  |  |  |  +--BindingNameElement ParameterVar[x@1006]\n"
+      "|  |  |  |  |  +--BindingNameElement ParameterVar[x@1007]\n"
       "|  |  |  |  |  |  +--Name |x|\n"
       "|  |  |  |  |  |  +--ElisionExpression ||\n"
       "|  |  |  |  +--BlockStatement |{}|\n",
@@ -712,8 +714,7 @@ TEST_F(NameResolverTest, LetError) {
       "|  +--BindingNameElement LetVar[foo@1001]\n"
       "|  |  +--Name |foo|\n"
       "|  |  +--NumericLiteral |2|\n"
-      "ANALYZER_ERROR_ENVIRONMENT_MULTIPLE_OCCURRENCES@4:16\n"
-      "ANALYZER_ERROR_ENVIRONMENT_MULTIPLE_OCCURRENCES@4:20\n",
+      "ANALYZER_ERROR_ENVIRONMENT_MULTIPLE_OCCURRENCES@4:16\n",
       RunOn("let foo = 1, foo = 2;"));
 }
 
@@ -736,13 +737,14 @@ TEST_F(NameResolverTest, MemberExpression) {
       "|  |  +--JsDocTag\n"
       "|  |  |  +--Name |@const|\n"
       "|  |  +--JsDocText |*/|\n"
-      "|  +--ExpressionStatement\n"
-      "|  |  +--MemberExpression PublicProperty[bar@1005]\n"
+      "|  +--Declaration\n"
+      "|  |  +--MemberExpression PublicProperty[bar@1006]\n"
       "|  |  |  +--MemberExpression PublicProperty[prototype@1004]\n"
       "|  |  |  |  +--ReferenceExpression FunctionVar[Foo@1002]\n"
       "|  |  |  |  |  +--Name |Foo|\n"
       "|  |  |  |  +--Name |prototype|\n"
-      "|  |  |  +--Name |bar|\n",
+      "|  |  |  +--Name |bar|\n"
+      "|  |  +--ElisionExpression ||\n",
       RunOn("/** @constructor */ function Foo() {}\n"
             "/** @const */ Foo.prototype.bar\n"))
       << "Old style class externs";
@@ -762,7 +764,7 @@ TEST_F(NameResolverTest, MemberExpression) {
       "|  |  +--ParameterList |()|\n"
       "|  |  +--BlockStatement |{}|\n"
       "+--Annotation\n"
-      "|  +--JsDocDocument Function[Foo.bar@1005]\n"
+      "|  +--JsDocDocument\n"
       "|  |  +--JsDocText |/**|\n"
       "|  |  +--JsDocTag\n"
       "|  |  |  +--Name |@param|\n"
@@ -771,11 +773,12 @@ TEST_F(NameResolverTest, MemberExpression) {
       "|  |  |  +--ReferenceExpression ParameterVar[x@1004]\n"
       "|  |  |  |  +--Name |x|\n"
       "|  |  |  +--JsDocText |*/|\n"
-      "|  +--ExpressionStatement\n"
+      "|  +--Declaration\n"
       "|  |  +--MemberExpression PublicProperty[bar@1003]\n"
       "|  |  |  +--ReferenceExpression FunctionVar[Foo@1002]\n"
       "|  |  |  |  +--Name |Foo|\n"
-      "|  |  |  +--Name |bar|\n",
+      "|  |  |  +--Name |bar|\n"
+      "|  |  +--ElisionExpression || Function[Foo.bar@1005]\n",
       RunOn("/** @return {symbol} */ function Foo() {}\n"
             "/** @param {number} x */ Foo.bar;\n"))
       << "Function declaration shortcut.";
@@ -789,16 +792,16 @@ TEST_F(NameResolverTest, ObjectInitializer) {
       "|  |  +--Name |bar|\n"
       "|  |  +--ElisionExpression ||\n"
       "+--VarStatement\n"
-      "|  +--BindingNameElement VarVar[x@1009]\n"
+      "|  +--BindingNameElement VarVar[x@1007]\n"
       "|  |  +--Name |x|\n"
-      "|  |  +--ObjectInitializer Class[Object@1002]\n"
-      "|  |  |  +--Property PublicProperty[foo@1004]\n"
+      "|  |  +--ObjectInitializer OrdinaryObject@1002\n"
+      "|  |  |  +--Property PublicProperty[foo@1003]\n"
       "|  |  |  |  +--Name |foo|\n"
       "|  |  |  |  +--NumericLiteral |1|\n"
       "|  |  |  +--DelimiterExpression |,|\n"
       "|  |  |  +--ReferenceExpression VarVar[bar@1001]\n"
       "|  |  |  |  +--Name |bar|\n"
-      "|  |  |  +--Method<NonStatic,Normal> Function[baz@1007]\n"
+      "|  |  |  +--Method<NonStatic,Normal> Function[baz@1006]\n"
       "|  |  |  |  +--Name |baz|\n"
       "|  |  |  |  +--ParameterList |()|\n"
       "|  |  |  |  +--BlockStatement |{}|\n",
@@ -809,9 +812,9 @@ TEST_F(NameResolverTest, ObjectInitializerError) {
   EXPECT_EQ(
       "Module\n"
       "+--VarStatement\n"
-      "|  +--BindingNameElement VarVar[x@1003]\n"
+      "|  +--BindingNameElement VarVar[x@1002]\n"
       "|  |  +--Name |x|\n"
-      "|  |  +--ObjectInitializer Class[Object@1001]\n"
+      "|  |  +--ObjectInitializer OrdinaryObject@1001\n"
       "|  |  |  +--NumericLiteral |1|\n"
       "ANALYZER_ERROR_ENVIRONMENT_EXPECT_OBJECT_MEMBER@9:10\n",
       RunOn("var x = {1}"));
@@ -832,7 +835,7 @@ TEST_F(NameResolverTest, Property) {
       "|  |  +--BlockStatement |{}|\n"
       "+--ExpressionStatement\n"
       "|  +--AssignmentExpression<=>\n"
-      "|  |  +--MemberExpression PublicProperty[bar@1005]\n"
+      "|  |  +--MemberExpression PublicProperty[bar@1006]\n"
       "|  |  |  +--MemberExpression PublicProperty[prototype@1004]\n"
       "|  |  |  |  +--ReferenceExpression FunctionVar[Foo@1002]\n"
       "|  |  |  |  |  +--Name |Foo|\n"
@@ -842,7 +845,7 @@ TEST_F(NameResolverTest, Property) {
       "|  |  +--NumericLiteral |1|\n"
       "+--ExpressionStatement\n"
       "|  +--AssignmentExpression<=>\n"
-      "|  |  +--MemberExpression PublicProperty[baz@1006]\n"
+      "|  |  +--MemberExpression PublicProperty[baz@1007]\n"
       "|  |  |  +--MemberExpression PublicProperty[prototype@1004]\n"
       "|  |  |  |  +--ReferenceExpression FunctionVar[Foo@1002]\n"
       "|  |  |  |  |  +--Name |Foo|\n"
@@ -912,13 +915,14 @@ TEST_F(NameResolverTest, Prototype) {
       "|  |  |  +--TypeName {T@1001}\n"
       "|  |  |  |  +--Name |T|\n"
       "|  |  +--JsDocText |*/|\n"
-      "|  +--ExpressionStatement\n"
-      "|  |  +--MemberExpression PublicProperty[baz@1005]\n"
+      "|  +--Declaration\n"
+      "|  |  +--MemberExpression PublicProperty[baz@1006]\n"
       "|  |  |  +--MemberExpression PublicProperty[prototype@1004]\n"
       "|  |  |  |  +--ReferenceExpression FunctionVar[Foo@1002]\n"
       "|  |  |  |  |  +--Name |Foo|\n"
       "|  |  |  |  +--Name |prototype|\n"
-      "|  |  |  +--Name |baz|\n",
+      "|  |  |  +--Name |baz|\n"
+      "|  |  +--ElisionExpression ||\n",
       RunOn("/** @constructor @template T */ function Foo() {}\n"
             "/** @type {T} */ Foo.prototype.baz;\n"))
       << "Bind template parameter for 'Foo.prototyp.baz'";
@@ -947,7 +951,7 @@ TEST_F(NameResolverTest, Prototype) {
       "|  |  |  +--TypeName {T@1001}\n"
       "|  |  |  |  +--Name |T|\n"
       "|  |  +--JsDocText |*/|\n"
-      "|  +--ExpressionStatement\n"
+      "|  +--Declaration\n"
       "|  |  +--ComputedMemberExpression\n"
       "|  |  |  +--MemberExpression PublicProperty[prototype@1004]\n"
       "|  |  |  |  +--ReferenceExpression FunctionVar[Foo@1002]\n"
@@ -955,6 +959,7 @@ TEST_F(NameResolverTest, Prototype) {
       "|  |  |  |  +--Name |prototype|\n"
       "|  |  |  +--ReferenceExpression\n"
       "|  |  |  |  +--Name |baz|\n"
+      "|  |  +--ElisionExpression ||\n"
       "ANALYZER_ERROR_ENVIRONMENT_UNEXPECT_ANNOTATION@67:85\n"
       "ANALYZER_ERROR_ENVIRONMENT_UNDEFINED_VARIABLE@81:84\n",
       RunOn("/** @constructor @template T */ function Foo() {}\n"
@@ -974,7 +979,7 @@ TEST_F(NameResolverTest, Prototype) {
       "|  |  +--ParameterList |()|\n"
       "|  |  +--BlockStatement |{}|\n"
       "+--Annotation\n"
-      "|  +--JsDocDocument Function[Map.prototype.set@1006]\n"
+      "|  +--JsDocDocument\n"
       "|  |  +--JsDocText |/**|\n"
       "|  |  +--JsDocTag\n"
       "|  |  |  +--Name |@template|\n"
@@ -985,13 +990,14 @@ TEST_F(NameResolverTest, Prototype) {
       "|  |  |  +--TypeName {THIS@1002}\n"
       "|  |  |  |  +--Name |THIS|\n"
       "|  |  |  +--JsDocText |*/|\n"
-      "|  +--ExpressionStatement\n"
-      "|  |  +--MemberExpression PublicProperty[set@1005]\n"
+      "|  +--Declaration\n"
+      "|  |  +--MemberExpression PublicProperty[set@1006]\n"
       "|  |  |  +--MemberExpression PublicProperty[prototype@1004]\n"
       "|  |  |  |  +--ReferenceExpression FunctionVar[Map@1002]\n"
       "|  |  |  |  |  +--Name |Map|\n"
       "|  |  |  |  +--Name |prototype|\n"
-      "|  |  |  +--Name |set|\n",
+      "|  |  |  +--Name |set|\n"
+      "|  |  +--ElisionExpression || Function[Map.prototype.set@1007]\n",
       RunOn("/** @constructor */ function Map() {}\n"
             "/** @template THIS @return {THIS} */ Map.prototype.set;"));
 }
@@ -1010,7 +1016,7 @@ TEST_F(NameResolverTest, StaticMember) {
       "|  |  |  +--Name |Foo|\n"
       "|  |  |  +--ElisionExpression || Class[Foo@1002]\n"
       "+--Annotation\n"
-      "|  +--JsDocDocument Function[Foo.bar@1005]\n"
+      "|  +--JsDocDocument\n"
       "|  |  +--JsDocText |/**|\n"
       "|  |  +--JsDocTag\n"
       "|  |  |  +--Name |@private|\n"
@@ -1019,11 +1025,12 @@ TEST_F(NameResolverTest, StaticMember) {
       "|  |  |  +--TypeName {%number%}\n"
       "|  |  |  |  +--Name |number|\n"
       "|  |  |  +--JsDocText |*/|\n"
-      "|  +--ExpressionStatement\n"
-      "|  |  +--MemberExpression PrivateProperty[bar@1004]\n"
+      "|  +--Declaration\n"
+      "|  |  +--MemberExpression PrivateProperty[bar@1005]\n"
       "|  |  |  +--ReferenceExpression VarVar[Foo@1001]\n"
       "|  |  |  |  +--Name |Foo|\n"
-      "|  |  |  +--Name |bar|\n",
+      "|  |  |  +--Name |bar|\n"
+      "|  |  +--ElisionExpression || Function[Foo.bar@1006]\n",
       RunOn("/** @constructor */ var Foo;\n"
             "/** @private @return {number} */ Foo.bar;"));
 }
@@ -1052,14 +1059,12 @@ TEST_F(NameResolverTest, Super) {
       "|  |  |  +--TypeName {%number%}\n"
       "|  |  |  |  +--Name |number|\n"
       "|  |  +--JsDocText |*/|\n"
-      "|  +--ExpressionStatement\n"
-      "|  |  +--AssignmentExpression<=>\n"
-      "|  |  |  +--MemberExpression\n"
-      "|  |  |  |  +--ReferenceExpression\n"
-      "|  |  |  |  |  +--Name |super|\n"
-      "|  |  |  |  +--Name |foo|\n"
-      "|  |  |  +--Punctuator |=|\n"
-      "|  |  |  +--NumericLiteral |1|\n",
+      "|  +--Declaration\n"
+      "|  |  +--MemberExpression\n"
+      "|  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  +--Name |super|\n"
+      "|  |  |  +--Name |foo|\n"
+      "|  |  +--NumericLiteral |1|\n",
       RunOn("/** @type {number} */ super.foo = 1;"))
       << "'super' has no value";
 }
@@ -1088,14 +1093,12 @@ TEST_F(NameResolverTest, This) {
       "|  |  |  +--TypeName {%number%}\n"
       "|  |  |  |  +--Name |number|\n"
       "|  |  +--JsDocText |*/|\n"
-      "|  +--ExpressionStatement\n"
-      "|  |  +--AssignmentExpression<=>\n"
-      "|  |  |  +--MemberExpression\n"
-      "|  |  |  |  +--ReferenceExpression\n"
-      "|  |  |  |  |  +--Name |this|\n"
-      "|  |  |  |  +--Name |foo|\n"
-      "|  |  |  +--Punctuator |=|\n"
-      "|  |  |  +--NumericLiteral |1|\n",
+      "|  +--Declaration\n"
+      "|  |  +--MemberExpression\n"
+      "|  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  +--Name |this|\n"
+      "|  |  |  +--Name |foo|\n"
+      "|  |  +--NumericLiteral |1|\n",
       RunOn("/** @type {number} */ this.foo = 1;"))
       << "'this' has no value";
 }
@@ -1123,7 +1126,7 @@ TEST_F(NameResolverTest, Type) {
       "|  |  |  |  |  +--Name |Foo|\n"
       "|  |  +--JsDocText |*/|\n"
       "|  +--VarStatement\n"
-      "|  |  +--BindingNameElement VarVar[foo@1004]\n"
+      "|  |  +--BindingNameElement VarVar[foo@1005]\n"
       "|  |  |  +--Name |foo|\n"
       "|  |  |  +--ElisionExpression ||\n",
       RunOn("/** @interface */ var Foo;\n"
@@ -1235,9 +1238,9 @@ TEST_F(NameResolverTest, TypeApplication) {
       "|  |  |  |  |  |  +--Name |number|\n"
       "|  |  +--JsDocText |*/|\n"
       "|  +--VarStatement\n"
-      "|  |  +--BindingNameElement VarVar[Bar@1004]\n"
+      "|  |  +--BindingNameElement VarVar[Bar@1005]\n"
       "|  |  |  +--Name |Bar|\n"
-      "|  |  |  +--ElisionExpression || Class[Bar@1005]\n",
+      "|  |  |  +--ElisionExpression || Class[Bar@1006]\n",
       RunOn("/** @interface @template T */ var Foo;"
             "/** @constructor @implements {Foo<number>} */ var Bar;"));
 }
@@ -1279,16 +1282,16 @@ TEST_F(NameResolverTest, VarConstructor) {
       "|  |  |  +--NonNullableType\n"
       "|  |  |  |  +--TypeName {Foo@1001}\n"
       "|  |  |  |  |  +--Name |Foo|\n"
-      "|  |  |  +--ReferenceExpression ParameterVar[x@1007]\n"
+      "|  |  |  +--ReferenceExpression ParameterVar[x@1008]\n"
       "|  |  |  |  +--Name |x|\n"
       "|  |  |  +--JsDocText |*/|\n"
       "|  +--VarStatement\n"
-      "|  |  +--BindingNameElement VarVar[foo@1005]\n"
+      "|  |  +--BindingNameElement VarVar[foo@1006]\n"
       "|  |  |  +--Name |foo|\n"
-      "|  |  |  +--Function<Normal> Function[foo@1006]\n"
+      "|  |  |  +--Function<Normal> Function[foo@1007]\n"
       "|  |  |  |  +--Empty ||\n"
       "|  |  |  |  +--ParameterList\n"
-      "|  |  |  |  |  +--BindingNameElement ParameterVar[x@1007]\n"
+      "|  |  |  |  |  +--BindingNameElement ParameterVar[x@1008]\n"
       "|  |  |  |  |  |  +--Name |x|\n"
       "|  |  |  |  |  |  +--ElisionExpression ||\n"
       "|  |  |  |  +--BlockStatement |{}|\n",
@@ -1309,9 +1312,9 @@ TEST_F(NameResolverTest, VarConstructorMultiple) {
       "|  |  +--BindingNameElement VarVar[Foo@1001]\n"
       "|  |  |  +--Name |Foo|\n"
       "|  |  |  +--ElisionExpression || Class[Foo@1002]\n"
-      "|  |  +--BindingNameElement VarVar[Bar@1004]\n"
+      "|  |  +--BindingNameElement VarVar[Bar@1005]\n"
       "|  |  |  +--Name |Bar|\n"
-      "|  |  |  +--ElisionExpression || Class[Bar@1005]\n",
+      "|  |  |  +--ElisionExpression || Class[Bar@1006]\n",
       RunOn("/** @constructor */ var Foo, Bar;"))
       << "It is OK to define multiple constructors once.";
 }
@@ -1326,8 +1329,7 @@ TEST_F(NameResolverTest, VarError) {
       "|  +--BindingNameElement VarVar[foo@1001]\n"
       "|  |  +--Name |foo|\n"
       "|  |  +--NumericLiteral |2|\n"
-      "ANALYZER_ERROR_ENVIRONMENT_MULTIPLE_OCCURRENCES@4:16\n"
-      "ANALYZER_ERROR_ENVIRONMENT_MULTIPLE_OCCURRENCES@4:20\n",
+      "ANALYZER_ERROR_ENVIRONMENT_MULTIPLE_OCCURRENCES@4:16\n",
       RunOn("var foo = 1, foo = 2;"))
       << "It is legal to bind same variable multiple times with 'var', but we "
          "report error.";

@@ -27,11 +27,13 @@ class Class;
 enum class ClassKind;
 class Context;
 class Function;
+class Object;
 class Properties;
 class Property;
 class Type;
 class TypeParameter;
 class Value;
+class ValueHolder;
 class Variable;
 enum class VariableKind;
 enum class Visibility;
@@ -67,13 +69,15 @@ class NameResolver final : public Pass, public ast::SyntaxVisitor {
   const Class& NewClass(ClassKind kind,
                         const ast::Node& name,
                         const ast::Node& node,
+                        const ast::Node& prototype_node,
                         const std::vector<const TypeParameter*>& parameters,
                         Properties* properties);
 
   const Property& NewProperty(Visibility visibility, const ast::Node& node);
 
-  void ProcessAssignment(const ast::Node& lhs,
-                         const ast::Node* maybe_rhs,
+  void ProcessAssignment(const ast::Node& node,
+                         const ast::Node& lhs,
+                         const ast::Node& rhs,
                          const ast::Node& name,
                          const Annotation& annotation);
 
@@ -94,12 +98,13 @@ class NameResolver final : public Pass, public ast::SyntaxVisitor {
                      const Annotation& annotation,
                      const Class& class_value);
 
-  void ProcessObjectMember(const Class& class_value,
+  void ProcessObjectMember(const Object& object,
                            const ast::Node& node,
                            const Annotation& annotation);
 
-  void ProcessPropertyAssignment(const ast::Node& lhs,
-                                 const ast::Node* maybe_rhs,
+  void ProcessPropertyAssignment(const ast::Node& node,
+                                 const ast::Node& lhs,
+                                 const ast::Node& rhs,
                                  const Annotation& annotation);
 
   // Bind name of @template tags.
@@ -111,6 +116,8 @@ class NameResolver final : public Pass, public ast::SyntaxVisitor {
   void ProcessVariableDeclaration(VariableKind kind,
                                   const ast::Node& node,
                                   const Annotation& annotated);
+
+  void RecordAssignment(const ValueHolder& lhs, const ast::Node& rhs);
 
   // Returns class of |node| if known.
   const Class* TryClassOfPrototype(const ast::Node& node) const;

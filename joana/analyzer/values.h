@@ -131,11 +131,8 @@ class ValueHolderData final : public ZoneAllocated {
  public:
   ~ValueHolderData();
 
-  const ZoneVector<const ast::Node*>& assignments() const {
-    return assignments_;
-  }
-
-  const ZoneVector<const ast::Node*>& references() const { return references_; }
+  auto assignments() const { return ReferenceRangeOf(assignments_); }
+  auto references() const { return ReferenceRangeOf(references_); }
 
  private:
   friend class Factory;
@@ -143,7 +140,7 @@ class ValueHolderData final : public ZoneAllocated {
 
   explicit ValueHolderData(Zone* zone);
 
-  ZoneVector<const ast::Node*> assignments_;
+  ZoneVector<const Value*> assignments_;
   ZoneVector<const ast::Node*> references_;
 
   DISALLOW_COPY_AND_ASSIGN(ValueHolderData);
@@ -158,15 +155,9 @@ class ValueHolder : public Object {
  public:
   ~ValueHolder() override;
 
-  const ZoneVector<const ast::Node*>& assignments() const {
-    return data_.assignments();
-  }
-
+  auto assignments() const { return data_.assignments(); }
   ValueHolderData& data() const { return data_; }
-
-  const ZoneVector<const ast::Node*>& references() const {
-    return data_.references();
-  }
+  auto references() const { return data_.references(); }
 
  protected:
   ValueHolder(int id,

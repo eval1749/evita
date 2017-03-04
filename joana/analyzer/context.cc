@@ -114,7 +114,7 @@ const Class& Context::InstallClass(ast::TokenKind name_id) {
       Visibility::Public, class_name, &object_variable.data(),
       &object_variable.properties());
   RegisterValue(class_name, object_class);
-  Value::Editor().AddAssignment(object_property, class_name);
+  Value::Editor().AddAssignment(object_property, object_class);
   Properties::Editor().Add(&global_properties(), object_property);
   return object_class;
 }
@@ -124,10 +124,8 @@ const Class* Context::TryClassOf(ast::TokenKind name_id) const {
   auto* object_property = global_properties().TryGet(object_name);
   if (object_property->assignments().size() != 1)
     return nullptr;
-  const auto& assignment = *object_property->assignments().front();
-  auto* object_value = TryValueOf(assignment);
-  return object_value && object_value->Is<Class>() ? &object_value->As<Class>()
-                                                   : nullptr;
+  const auto& object_value = object_property->assignments().front();
+  return object_value.TryAs<Class>();
 }
 
 void Context::ResetCurrentIdForTesting(int current_id) {

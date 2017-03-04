@@ -111,6 +111,24 @@ class JOANA_AST_EXPORT Class final : public SyntaxTemplate<Syntax> {
 };
 
 //
+// Declaration for /** annotation */ MemberExpression|AssignemntExpression
+//
+class JOANA_AST_EXPORT Declaration final : public Syntax {
+  DECLARE_CONCRETE_AST_SYNTAX(Declaration, Syntax);
+
+ public:
+  ~Declaration() final;
+
+  static const Node& ExpressionOf(const Node& node);
+  static const Node& InitializerOf(const Node& node);
+
+ private:
+  Declaration();
+
+  DISALLOW_COPY_AND_ASSIGN(Declaration);
+};
+
+//
 // Function
 //
 class JOANA_AST_EXPORT Function final

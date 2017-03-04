@@ -27,6 +27,7 @@ namespace ast {
   V(ArrowFunction)                  \
   V(Class)                          \
   V(Function)                       \
+  V(Declaration)                    \
   V(Method)
 
 #define FOR_EACH_AST_EXPRESSION(V) \

@@ -275,6 +275,13 @@ const Node& NodeFactory::NewClass(const SourceCodeRange& range,
   return NewNode(range, syntax_factory_->NewClass(), name, heritage, body);
 }
 
+const Node& NodeFactory::NewDeclaration(const SourceCodeRange& range,
+                                        const Node& member,
+                                        const Node& initializer) {
+  DCHECK(IsMemberExpression(member)) << member;
+  return NewNode(range, syntax_factory_->NewDeclaration(), member, initializer);
+}
+
 const Node& NodeFactory::NewFunction(const SourceCodeRange& range,
                                      FunctionKind kind,
                                      const Node& name,

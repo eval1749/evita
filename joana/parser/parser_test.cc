@@ -172,14 +172,12 @@ TEST_F(ParserTest, AnnotateStatement) {
       "|  |  |  +--TypeName\n"
       "|  |  |  |  +--Name |number|\n"
       "|  |  +--JsDocText |*/|\n"
-      "|  +--ExpressionStatement\n"
-      "|  |  +--AssignmentExpression<=>\n"
-      "|  |  |  +--MemberExpression\n"
-      "|  |  |  |  +--ReferenceExpression\n"
-      "|  |  |  |  |  +--Name |foo|\n"
-      "|  |  |  |  +--Name |bar|\n"
-      "|  |  |  +--Punctuator |=|\n"
-      "|  |  |  +--NumericLiteral |1|\n",
+      "|  +--Declaration\n"
+      "|  |  +--MemberExpression\n"
+      "|  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  +--Name |foo|\n"
+      "|  |  |  +--Name |bar|\n"
+      "|  |  +--NumericLiteral |1|\n",
       Parse("/** @type {number} */ foo.bar = 1;"));
 
   EXPECT_EQ(
@@ -196,22 +194,20 @@ TEST_F(ParserTest, AnnotateStatement) {
       "|  |  |  |  |  +--TypeName\n"
       "|  |  |  |  |  |  +--Name |T|\n"
       "|  |  |  +--JsDocText |*/|\n"
-      "|  +--ExpressionStatement\n"
-      "|  |  +--AssignmentExpression<=>\n"
-      "|  |  |  +--ComputedMemberExpression\n"
-      "|  |  |  |  +--MemberExpression\n"
-      "|  |  |  |  |  +--ReferenceExpression\n"
-      "|  |  |  |  |  |  +--Name |Array|\n"
-      "|  |  |  |  |  +--Name |prototype|\n"
-      "|  |  |  |  +--MemberExpression\n"
-      "|  |  |  |  |  +--ReferenceExpression\n"
-      "|  |  |  |  |  |  +--Name |Symbol|\n"
-      "|  |  |  |  |  +--Name |iterator|\n"
-      "|  |  |  +--Punctuator |=|\n"
-      "|  |  |  +--Function<Normal>\n"
-      "|  |  |  |  +--Empty ||\n"
-      "|  |  |  |  +--ParameterList |()|\n"
-      "|  |  |  |  +--BlockStatement |{}|\n",
+      "|  +--Declaration\n"
+      "|  |  +--ComputedMemberExpression\n"
+      "|  |  |  +--MemberExpression\n"
+      "|  |  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  |  +--Name |Array|\n"
+      "|  |  |  |  +--Name |prototype|\n"
+      "|  |  |  +--MemberExpression\n"
+      "|  |  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  |  +--Name |Symbol|\n"
+      "|  |  |  |  +--Name |iterator|\n"
+      "|  |  +--Function<Normal>\n"
+      "|  |  |  +--Empty ||\n"
+      "|  |  |  +--ParameterList |()|\n"
+      "|  |  |  +--BlockStatement |{}|\n",
       Parse("/** @return {Iterator<T>} */\n"
             "Array.prototype[Symbol.iterator] = function() {};\n"));
   EXPECT_EQ(
@@ -227,7 +223,8 @@ TEST_F(ParserTest, AnnotateStatement) {
       "|  |  |  +--ReferenceExpression\n"
       "|  |  |  |  +--Name |foo|\n"
       "|  |  |  +--Punctuator |=|\n"
-      "|  |  |  +--NumericLiteral |1|\n",
+      "|  |  |  +--NumericLiteral |1|\n"
+      "PASER_ERROR_STATEMENT_UNEXPECT_ANNOTATION@0:13\n",
       Parse("/** @const */ foo = 1;"))
       << "Parser does not check statement can have annotation";
 
@@ -244,7 +241,8 @@ TEST_F(ParserTest, AnnotateStatement) {
       "|  |  |  +--ReferenceExpression\n"
       "|  |  |  |  +--Name |foo|\n"
       "|  |  |  +--Punctuator |+=|\n"
-      "|  |  |  +--NumericLiteral |1|\n",
+      "|  |  |  +--NumericLiteral |1|\n"
+      "PASER_ERROR_STATEMENT_UNEXPECT_ANNOTATION@0:13\n",
       Parse("/** @const */ foo += 1;"))
       << "Parser does not check statement can have annotation";
 }
@@ -460,14 +458,6 @@ TEST_F(ParserTest, ConstStatement) {
       "+--ConstStatement\n"
       "|  +--BindingNameElement\n"
       "|  |  +--Name |foo|\n"
-      "|  |  +--NumericLiteral |1|\n",
-      Parse("const foo = 1;"));
-
-  EXPECT_EQ(
-      "Module\n"
-      "+--ConstStatement\n"
-      "|  +--BindingNameElement\n"
-      "|  |  +--Name |foo|\n"
       "|  |  +--NumericLiteral |1|\n"
       "|  +--BindingNameElement\n"
       "|  |  +--Name |bar|\n"
@@ -518,6 +508,42 @@ TEST_F(ParserTest, DebuggerStatement) {
       "|  |  +--Name |debugger|\n",
       Parse("debugger"))
       << "automatic semicolon";
+}
+
+TEST_F(ParserTest, Declaration) {
+  EXPECT_EQ(
+      "Module\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@constructor|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--Declaration\n"
+      "|  |  +--MemberExpression\n"
+      "|  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  +--Name |Foo|\n"
+      "|  |  |  +--Name |Bar|\n"
+      "|  |  +--ElisionExpression ||\n",
+      Parse("/** @constructor */ Foo.Bar;"));
+  EXPECT_EQ(
+      "Module\n"
+      "+--Annotation\n"
+      "|  +--JsDocDocument\n"
+      "|  |  +--JsDocText |/**|\n"
+      "|  |  +--JsDocTag\n"
+      "|  |  |  +--Name |@constructor|\n"
+      "|  |  +--JsDocText |*/|\n"
+      "|  +--Declaration\n"
+      "|  |  +--MemberExpression\n"
+      "|  |  |  +--ReferenceExpression\n"
+      "|  |  |  |  +--Name |Foo|\n"
+      "|  |  |  +--Name |Bar|\n"
+      "|  |  +--Function<Normal>\n"
+      "|  |  |  +--Empty ||\n"
+      "|  |  |  +--ParameterList |()|\n"
+      "|  |  |  +--BlockStatement |{}|\n",
+      Parse("/** @constructor */ Foo.Bar = function() {};"));
 }
 
 TEST_F(ParserTest, DoStatement) {

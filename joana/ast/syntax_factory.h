@@ -41,6 +41,7 @@ class JOANA_AST_EXPORT SyntaxFactory final {
   DECLARE_FACTORY_MEMBER_0(Annotation)
   DECLARE_FACTORY_MEMBER_1(ArrowFunction, FunctionKind, kind)
   DECLARE_FACTORY_MEMBER_0(Class)
+  DECLARE_FACTORY_MEMBER_0(Declaration)
   DECLARE_FACTORY_MEMBER_1(Function, FunctionKind, kind)
   DECLARE_FACTORY_MEMBER_2(Method, MethodKind, method_kind, FunctionKind, kind)
 

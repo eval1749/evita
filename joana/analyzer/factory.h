@@ -60,7 +60,7 @@ class Factory final {
                               const ast::Node& node,
                               Properties* properties);
 
-  const Value& NewOrdinaryObject(const ast::Node& node);
+  const Value& NewOrdinaryObject(const ast::Node& node, Properties* properties);
 
   Properties& NewProperties(const ast::Node& node);
 

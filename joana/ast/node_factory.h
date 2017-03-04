@@ -102,6 +102,10 @@ class JOANA_AST_EXPORT NodeFactory final {
                        const Node& heritage,
                        const Node& body);
 
+  const Node& NewDeclaration(const SourceCodeRange& range,
+                             const Node& member,
+                             const Node& initializer);
+
   const Node& NewFunction(const SourceCodeRange& range,
                           FunctionKind kind,
                           const Node& name,

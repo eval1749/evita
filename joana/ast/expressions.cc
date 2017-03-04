@@ -338,6 +338,10 @@ const Node& UnaryExpression::OperatorOf(const Node& node) {
   return node.child_at(0);
 }
 
+bool IsExpression(const ast::Node& node) {
+  return node.syntax().Is<ast::Expression>();
+}
+
 bool IsKnownSymbol(const ast::Node& node) {
   if (node != SyntaxCode::MemberExpression)
     return false;
@@ -354,6 +358,11 @@ bool IsKnownSymbol(const ast::Node& node) {
          name == TokenKind::Search || name == TokenKind::Split ||
          name == TokenKind::ToPrimitive || name == TokenKind::ToStringTag ||
          name == TokenKind::Unscopables;
+}
+
+bool IsMemberExpression(const Node& node) {
+  return node == SyntaxCode::MemberExpression ||
+         node == SyntaxCode::ComputedMemberExpression;
 }
 
 }  // namespace ast

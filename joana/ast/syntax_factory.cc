@@ -169,6 +169,7 @@ const Syntax& SyntaxFactory::NewArrowFunction(FunctionKind kind) {
 }
 
 IMPLEMENT_FACTORY_MEMBER_0(Class)
+IMPLEMENT_FACTORY_MEMBER_0(Declaration)
 IMPLEMENT_FACTORY_MEMBER_1(Function, FunctionKind, kind)
 
 const Syntax& SyntaxFactory::NewMethod(MethodKind method_kind,

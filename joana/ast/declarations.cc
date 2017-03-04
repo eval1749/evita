@@ -76,6 +76,24 @@ const Node& Class::NameOf(const Node& node) {
 }
 
 //
+// Declaration
+//
+Declaration::Declaration()
+    : Syntax(SyntaxCode::Declaration, Format::Builder().set_arity(2).Build()) {}
+
+Declaration::~Declaration() = default;
+
+const Node& Declaration::ExpressionOf(const Node& node) {
+  DCHECK_EQ(node, SyntaxCode::Declaration);
+  return node.child_at(0);
+}
+
+const Node& Declaration::InitializerOf(const Node& node) {
+  DCHECK_EQ(node, SyntaxCode::Declaration);
+  return node.child_at(1);
+}
+
+//
 // Function
 //
 Function::Function(FunctionKind kind)

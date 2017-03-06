@@ -11,6 +11,5 @@
 group("root") {
   deps = [
     "//evita",
-    "//joana",
   ]
 }

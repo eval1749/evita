@@ -58,8 +58,8 @@ void DataTransferItemList::Add(DataTransferData* data,
     return;
   auto const format = Clipboard::Format::Get(type);
   if (!format) {
-    exception_state->ThrowError(
-        base::StringPrintf("Unsupported type for clipboard: %ls", type));
+    exception_state->ThrowError(base::StringPrintf(
+        "Unsupported type for clipboard: %ls", type.c_str()));
     return;
   }
   auto const item = new DataTransferItem(format, data);

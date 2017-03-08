@@ -37,9 +37,9 @@ base::char16 TextDocument::charCodeAt(text::Offset position,
                                       ExceptionState* exception_state) const {
   if (position >= text::Offset(0) && position < buffer_->GetEnd())
     return buffer_->GetCharAt(position);
-  exception_state->ThrowRangeError(
-      base::StringPrintf("Bad index %d, valid index is [%d, %d]", position, 0,
-                         (buffer_->GetEnd() - text::OffsetDelta(1)).value()));
+  exception_state->ThrowRangeError(base::StringPrintf(
+      "Bad index %d, valid index is [%d, %d]", position.value(), 0,
+      (buffer_->GetEnd() - text::OffsetDelta(1)).value()));
   return 0;
 }
 
@@ -124,7 +124,7 @@ bool TextDocument::IsValidPosition(text::Offset offset,
     return true;
   exception_state->ThrowRangeError(
       base::StringPrintf("Invalid offset %d, valid range is [%d, %d]",
-                         offset.value(), 0, buffer_->GetEnd()));
+                         offset.value(), 0, buffer_->GetEnd().value()));
   return false;
 }
 
@@ -133,9 +133,9 @@ bool TextDocument::IsValidRange(text::Offset start,
                                 ExceptionState* exception_state) const {
   if (start <= end && end <= buffer_->GetEnd())
     return true;
-  exception_state->ThrowRangeError(
-      base::StringPrintf("Invalid range %d, valid range is [%d, %d]",
-                         end.value(), start.value(), buffer_->GetEnd()));
+  exception_state->ThrowRangeError(base::StringPrintf(
+      "Invalid range %d, valid range is [%d, %d]", end.value(), start.value(),
+      buffer_->GetEnd().value()));
   return false;
 }
 
@@ -214,7 +214,7 @@ text::Offset TextDocument::ValidateOffset(
     return text::Offset(offsetLike);
   exception_state->ThrowRangeError(
       base::StringPrintf("Invalid offset %d, valid range is [%d, %d]",
-                         offsetLike, 0, buffer_->GetEnd()));
+                         offsetLike, 0, buffer_->GetEnd().value()));
   return text::Offset::Invalid();
 }
 

@@ -8,7 +8,7 @@ vars = {
   'github.git': 'https://github.com',
 
   'base_revision': '8fe126945cb9fe557d679362b4e228324efa8a2b',
-  'build_revision': '2d722d1684b43ee840d499c818f012a18942a349',
+  'build_revision': '957a0ba4d6375e502c04e8099bec7ef8e11d0efe',
   'buildtools_revision': 'b3771b1935ea74c388b6fb1750e83f5d83b39dec',
   'ced_revision': '368a9cc09ad868a3d28f0b5ad4a733f263c46409',
   'crypto_revision': 'f005f09961ae00cf6611c948033beaa226d66572',
@@ -19,13 +19,13 @@ vars = {
   'gyp_revision': 'e7079f0e0e14108ab0dba58728ff219637458563',
   'icu_revision': '450be73c9ee8ae29d43d4fdc82febb2a5f62bfb5',
   'idl_parser_revision': '9e23d86a85a09c462ce7b80f93c0ebbd13cedf2a',
-  'instrumented_libraries_revision': 'f68b0bb5676091db9078119f165739620655dff2',
+  'instrumented_libraries_revision': '62275386c19e927797e8ae6b0c6e57a76c9c6f3c',
   'jinja2_revision': 'd34383206fa42d52faa10bb9931d6d538f3a57e0',
   'markupsafe_revision': '8f45f5cfa0009d2a70589bcda0349b8cb2b72783',
   'modp_b64_revision': '28e3fbba4cb4ec3ffd85b53d0a3904525d08f5a6',
   'ply_revision': '4a6baf95860033d4c69d3e3087696b30c687622c',
   'testing_revision': 'a4984ec2b072cebb77259815511f85cfcfec8a4a',
-  'v8_revision': '819af83f01a01ee7d56c1e0874acefbe57f6b670', # 5.8.301
+  'v8_revision': '5362e552a9186bfec815cacfb469bce66b4655fd', # 5.9.35
   'zlib_revision': '13dc246a58e4b72104d35f9b1809af95221ebda7',
 
   # boringssl

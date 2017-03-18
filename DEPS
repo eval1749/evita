@@ -8,7 +8,7 @@ vars = {
   'github.git': 'https://github.com',
 
   'base_revision': '052e3e949ac291e7e02f175964bacd687b59b8ba',
-  'build_revision': 'cc228aba0c2511ca3558b1675ab588808738f00d',
+  'build_revision': '72004d5fb07002e58048ddc8e04f9c7461c6613c',
   'buildtools_revision': 'b3771b1935ea74c388b6fb1750e83f5d83b39dec',
   'ced_revision': 'e21eb6aed10b9f6e2727f136c52420033214d458',
   'crypto_revision': 'f005f09961ae00cf6611c948033beaa226d66572',
@@ -25,7 +25,7 @@ vars = {
   'modp_b64_revision': '28e3fbba4cb4ec3ffd85b53d0a3904525d08f5a6',
   'ply_revision': '4a6baf95860033d4c69d3e3087696b30c687622c',
   'testing_revision': '90e54f215063904de88d299c52fa76c06f49864d',
-  'v8_revision': '5362e552a9186bfec815cacfb469bce66b4655fd', # 5.9.35
+  'v8_revision': '94517126459ce2cab3565ed9ed7fd00e4de9a81f', # 5.9.57
   'zlib_revision': '13dc246a58e4b72104d35f9b1809af95221ebda7',
 
   # boringssl

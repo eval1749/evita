@@ -46,6 +46,7 @@ Mode.registerExtension('mm', 'c++', 'Objective-C Source');
 Mode.registerExtension('pl', 'perl', 'Perl Source');
 Mode.registerExtension('pm', 'perl', 'Perl Module Source');
 Mode.registerExtension('py', 'python', 'Python Source');
+Mode.registerExtension('rs', 'rust', 'Rust Source');
 Mode.registerExtension('scm', 'lisp', 'Scheme Source');
 Mode.registerExtension('stanza', 'config', 'Config File');
 Mode.registerExtension('t', 'perl', 'Perl Test Source');

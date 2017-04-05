@@ -19,6 +19,7 @@ Mode.registerMode('java', 'Java');
 Mode.registerMode('javascript', 'JavaScript');
 Mode.registerMode('plain', 'Plain');
 Mode.registerMode('python', 'Python');
+Mode.registerMode('rust', 'Rust');
 Mode.registerMode('xml', 'XML');
 
 Mode.registerModeAlias('haskell', 'Haskell', 'plain');

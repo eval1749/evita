@@ -24,6 +24,7 @@ js_module("highlights") {
     "$target_gen_dir/java_tokens.js",
     "$target_gen_dir/plain_tokens.js",
     "$target_gen_dir/python_tokens.js",
+    "$target_gen_dir/rust_tokens.js",
     "$target_gen_dir/xml_tokens.js",
     "langs/cmd_painter.js",
     "langs/config_painter.js",
@@ -36,6 +37,7 @@ js_module("highlights") {
     "langs/java_painter.js",
     "langs/plain_painter.js",
     "langs/python_painter.js",
+    "langs/rust_painter.js",
     "langs/xml_painter.js",
     "langs/html_painter.js",
   ]
@@ -68,6 +70,7 @@ action_foreach("token_state_machines") {
     "langs/javascript_tokens.xml",
     "langs/plain_tokens.xml",
     "langs/python_tokens.xml",
+    "langs/rust_tokens.xml",
     "langs/xml_tokens.xml",
     "langs/xmltag_tokens.xml",
   ]

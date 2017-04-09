@@ -6,7 +6,8 @@
 
 #include <dcomp.h>
 
-#include "base/win/scoped_comptr.h"
+#include <wrl/client.h>
+
 #include "evita/gfx/rect.h"
 #include "evita/ui/compositor/compositor.h"
 #include "evita/ui/widget.h"
@@ -23,7 +24,7 @@ class NativeRootLayer final {
   ~NativeRootLayer() = default;
 
  private:
-  base::win::ScopedComPtr<IDCompositionTarget> composition_target_;
+  Microsoft::WRL::ComPtr<IDCompositionTarget> composition_target_;
 
   DISALLOW_COPY_AND_ASSIGN(NativeRootLayer);
 };
@@ -31,7 +32,7 @@ class NativeRootLayer final {
 NativeRootLayer::NativeRootLayer(Widget* widget, RootLayer* layer) {
   const auto kTopmost = false;
   COM_VERIFY(layer->compositor()->desktop_device()->CreateTargetForHwnd(
-      widget->AssociatedHwnd(), kTopmost, composition_target_.Receive()));
+      widget->AssociatedHwnd(), kTopmost, composition_target_.GetAddressOf()));
   composition_target_->SetRoot(layer->visual());
 }
 

@@ -6,9 +6,9 @@
 #define EVITA_GFX_DIRECT_WRITE_FACTORY_WIN_H_
 
 #include <dwrite.h>
+#include <wrl/client.h>
 
 #include "base/macros.h"
-#include "base/win/scoped_comptr.h"
 
 namespace gfx {
 
@@ -21,12 +21,12 @@ class DirectWriteFactory {
   DirectWriteFactory();
   ~DirectWriteFactory();
 
-  const base::win::ScopedComPtr<IDWriteFactory>& impl() { return impl_; }
+  const Microsoft::WRL::ComPtr<IDWriteFactory>& impl() { return impl_; }
 
   static DirectWriteFactory* GetInstance();
 
  private:
-  base::win::ScopedComPtr<IDWriteFactory> impl_;
+  Microsoft::WRL::ComPtr<IDWriteFactory> impl_;
 
   DISALLOW_COPY_AND_ASSIGN(DirectWriteFactory);
 };

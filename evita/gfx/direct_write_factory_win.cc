@@ -12,11 +12,11 @@
 namespace gfx {
 
 namespace {
-base::win::ScopedComPtr<IDWriteFactory> CreateDWriteFactory() {
-  base::win::ScopedComPtr<IDWriteFactory> factory;
-  COM_VERIFY(
-      ::DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, factory.iid(),
-                            reinterpret_cast<IUnknown**>(factory.Receive())));
+Microsoft::WRL::ComPtr<IDWriteFactory> CreateDWriteFactory() {
+  Microsoft::WRL::ComPtr<IDWriteFactory> factory;
+  COM_VERIFY(::DWriteCreateFactory(
+      DWRITE_FACTORY_TYPE_SHARED, __uuidof(IDWriteFactory),
+      reinterpret_cast<IUnknown**>(factory.GetAddressOf())));
   return factory;
 }
 }  // namespace

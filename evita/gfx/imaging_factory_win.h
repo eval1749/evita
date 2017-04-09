@@ -6,9 +6,9 @@
 #define EVITA_GFX_IMAGING_FACTORY_WIN_H_
 
 #include <wincodec.h>
+#include <wrl/client.h>
 
 #include "base/macros.h"
-#include "base/win/scoped_comptr.h"
 
 namespace gfx {
 
@@ -21,12 +21,12 @@ class ImagingFactory {
   ImagingFactory();
   ~ImagingFactory();
 
-  const base::win::ScopedComPtr<IWICImagingFactory>& impl() { return impl_; }
+  const Microsoft::WRL::ComPtr<IWICImagingFactory>& impl() { return impl_; }
 
   static ImagingFactory* GetInstance();
 
  private:
-  base::win::ScopedComPtr<IWICImagingFactory> impl_;
+  Microsoft::WRL::ComPtr<IWICImagingFactory> impl_;
 
   DISALLOW_COPY_AND_ASSIGN(ImagingFactory);
 };

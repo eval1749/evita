@@ -12,11 +12,10 @@
 namespace gfx {
 
 namespace {
-base::win::ScopedComPtr<IWICImagingFactory> CreateImagingFactory() {
-  base::win::ScopedComPtr<IWICImagingFactory> factory;
+Microsoft::WRL::ComPtr<IWICImagingFactory> CreateImagingFactory() {
+  Microsoft::WRL::ComPtr<IWICImagingFactory> factory;
   COM_VERIFY(::CoCreateInstance(CLSID_WICImagingFactory, nullptr,
-                                CLSCTX_INPROC_SERVER, factory.iid(),
-                                factory.ReceiveVoid()));
+                                CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&factory)));
   return factory;
 }
 }  // namespace

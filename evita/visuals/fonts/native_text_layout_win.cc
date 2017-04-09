@@ -6,6 +6,7 @@
 #include <stdint.h>
 
 #include <cmath>
+#include <utility>
 
 #include "evita/visuals/fonts/native_text_layout_win.h"
 
@@ -26,7 +27,8 @@ NativeTextLayout::NativeTextLayout(const NativeTextFormat& text_format,
   DCHECK(!size.IsEmpty());
   COM_VERIFY(DirectWriteFactory::GetInstance()->get()->CreateTextLayout(
       text.data(), static_cast<uint32_t>(text.length()),
-      text_format.get().get(), size.width(), size.height(), value_.Receive()));
+      text_format.get().Get(), size.width(), size.height(),
+      value_.GetAddressOf()));
 }
 
 NativeTextLayout::NativeTextLayout(const NativeTextLayout& other)

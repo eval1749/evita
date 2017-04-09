@@ -135,7 +135,7 @@ void PaintVisitor::VisitDrawRect(DrawRectDisplayItem* item) {
 
 void PaintVisitor::VisitDrawText(DrawTextDisplayItem* item) {
   (*canvas_)->DrawTextLayout(ToPointF(item->bounds().origin()),
-                             item->text_layout().impl().get().get(),
+                             item->text_layout().impl().get().Get(),
                              gfx::Brush(canvas_, ToColorF(item->color())),
                              D2D1_DRAW_TEXT_OPTIONS_CLIP);
 }

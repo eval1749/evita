@@ -40,7 +40,7 @@ NativeTextFormat::NativeTextFormat(const FontDescription& description) {
       description.family().c_str(), nullptr,
       DirectWriteFontWeightOf(description), DirectWriteFontStyleOf(description),
       DirectWriteFontStretchOf(description), description.size(), L"en-us",
-      text_format_.Receive()));
+      text_format_.GetAddressOf()));
 }
 
 NativeTextFormat::~NativeTextFormat() {}
@@ -49,11 +49,11 @@ NativeTextFormat::~NativeTextFormat() {}
 // since it returns width of word.
 gfx::FloatSize NativeTextFormat::ComputeMetrics(
     const base::string16& text) const {
-  base::win::ScopedComPtr<IDWriteTextLayout> text_layout;
+  Microsoft::WRL::ComPtr<IDWriteTextLayout> text_layout;
   const auto kHuge = 1e6f;
   COM_VERIFY(DirectWriteFactory::GetInstance()->get()->CreateTextLayout(
-      text.data(), static_cast<UINT32>(text.length()), text_format_.get(),
-      kHuge, kHuge, text_layout.Receive()));
+      text.data(), static_cast<UINT32>(text.length()), text_format_.Get(),
+      kHuge, kHuge, text_layout.GetAddressOf()));
   DWRITE_TEXT_METRICS metrics;
   COM_VERIFY(text_layout->GetMetrics(&metrics));
   return gfx::FloatSize(metrics.width, metrics.height);

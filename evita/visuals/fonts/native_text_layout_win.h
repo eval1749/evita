@@ -7,11 +7,11 @@
 
 #include <dwrite.h>
 
+#include <wrl/client.h>
 #include <memory>
 
 #include "base/macros.h"
 #include "base/strings/string16.h"
-#include "base/win/scoped_comptr.h"
 
 namespace gfx {
 class FloatPoint;
@@ -39,7 +39,7 @@ class NativeTextLayout final {
   bool operator==(const NativeTextLayout& other) const;
   bool operator!=(const NativeTextLayout& other) const;
 
-  const base::win::ScopedComPtr<IDWriteTextLayout>& get() const {
+  const Microsoft::WRL::ComPtr<IDWriteTextLayout>& get() const {
     return value_;
   }
 
@@ -48,7 +48,7 @@ class NativeTextLayout final {
   gfx::FloatRect HitTestTextPosition(size_t offset) const;
 
  private:
-  base::win::ScopedComPtr<IDWriteTextLayout> value_;
+  Microsoft::WRL::ComPtr<IDWriteTextLayout> value_;
 
   DISALLOW_ASSIGN(NativeTextLayout);
 };

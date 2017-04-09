@@ -7,11 +7,11 @@
 
 #include <dwrite.h>
 
+#include <wrl/client.h>
 #include <memory>
 
 #include "base/macros.h"
 #include "base/strings/string16.h"
-#include "base/win/scoped_comptr.h"
 
 namespace gfx {
 class FloatSize;
@@ -31,14 +31,14 @@ class NativeTextFormat final {
   explicit NativeTextFormat(const FontDescription& description);
   ~NativeTextFormat();
 
-  const base::win::ScopedComPtr<IDWriteTextFormat>& get() const {
+  const Microsoft::WRL::ComPtr<IDWriteTextFormat>& get() const {
     return text_format_;
   }
 
   gfx::FloatSize ComputeMetrics(const base::string16& text) const;
 
  private:
-  base::win::ScopedComPtr<IDWriteTextFormat> text_format_;
+  Microsoft::WRL::ComPtr<IDWriteTextFormat> text_format_;
 
   DISALLOW_COPY_AND_ASSIGN(NativeTextFormat);
 };

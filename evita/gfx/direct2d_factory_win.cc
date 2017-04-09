@@ -13,8 +13,8 @@ namespace gfx {
 
 namespace {
 
-base::win::ScopedComPtr<ID2D1Factory1> CreateD2D1Factory() {
-  base::win::ScopedComPtr<ID2D1Factory1> factory;
+Microsoft::WRL::ComPtr<ID2D1Factory1> CreateD2D1Factory() {
+  Microsoft::WRL::ComPtr<ID2D1Factory1> factory;
   D2D1_FACTORY_OPTIONS options;
 #if _DEBUG
   options.debugLevel = D2D1_DEBUG_LEVEL_INFORMATION;
@@ -22,7 +22,7 @@ base::win::ScopedComPtr<ID2D1Factory1> CreateD2D1Factory() {
   options.debugLevel = D2D1_DEBUG_LEVEL_NONE;
 #endif
   COM_VERIFY(::D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, options,
-                                 factory.Receive()));
+                                 factory.GetAddressOf()));
   return factory;
 }
 

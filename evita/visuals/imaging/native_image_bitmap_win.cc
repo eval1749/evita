@@ -5,6 +5,7 @@
 #include "evita/visuals/imaging/native_image_bitmap_win.h"
 
 #include <unordered_map>
+#include <utility>
 
 #include "base/logging.h"
 #include "base/macros.h"
@@ -75,54 +76,55 @@ ImageFormatMap* ImageFormatMap::GetInstance() {
 }
 
 gfx::FloatSize ComputeSize(
-    const base::win::ScopedComPtr<IWICBitmapSource>& bitmap) {
+    const Microsoft::WRL::ComPtr<IWICBitmapSource>& bitmap) {
   uint32_t width = 0;
   uint32_t height = 0;
   COM_VERIFY(bitmap->GetSize(&width, &height));
   return gfx::FloatSize(static_cast<float>(width), static_cast<float>(height));
 }
 
-base::win::ScopedComPtr<IWICBitmapSource>
+Microsoft::WRL::ComPtr<IWICBitmapSource>
 CreateBitmap(const void* data, size_t data_size, const gfx::FloatSize& size) {
-  base::win::ScopedComPtr<IWICBitmap> bitmap;
+  Microsoft::WRL::ComPtr<IWICBitmap> bitmap;
   COM_VERIFY2(
       gfx::ImagingFactory::GetInstance()->impl()->CreateBitmap(
           static_cast<uint32_t>(size.width()),
           static_cast<uint32_t>(size.height()), GUID_WICPixelFormat32bppRGBA,
-          WICBitmapCacheOnDemand, bitmap.Receive()),
-      base::win::ScopedComPtr<IWICBitmapSource>());
+          WICBitmapCacheOnDemand, bitmap.GetAddressOf()),
+      Microsoft::WRL::ComPtr<IWICBitmapSource>());
   {
-    base::win::ScopedComPtr<IWICBitmapLock> lock;
-    COM_VERIFY2(bitmap->Lock(nullptr, WICBitmapLockRead, lock.Receive()),
-                base::win::ScopedComPtr<IWICBitmapSource>());
+    Microsoft::WRL::ComPtr<IWICBitmapLock> lock;
+    COM_VERIFY2(bitmap->Lock(nullptr, WICBitmapLockRead, lock.GetAddressOf()),
+                Microsoft::WRL::ComPtr<IWICBitmapSource>());
     uint8_t* pixels = nullptr;
     uint32_t pixels_size = 0;
     COM_VERIFY2(lock->GetDataPointer(&pixels_size, &pixels),
-                base::win::ScopedComPtr<IWICBitmapSource>());
+                Microsoft::WRL::ComPtr<IWICBitmapSource>());
     if (pixels_size != data_size) {
       DCHECK_EQ(pixels_size, data_size);
-      return base::win::ScopedComPtr<IWICBitmapSource>();
+      return Microsoft::WRL::ComPtr<IWICBitmapSource>();
     }
     ::memcpy(pixels, data, pixels_size);
   }
-  return base::win::ScopedComPtr<IWICBitmapSource>(bitmap.get());
+  return Microsoft::WRL::ComPtr<IWICBitmapSource>(bitmap.Get());
 }
 
-base::win::ScopedComPtr<IWICBitmapSource> CreateBitmap(
+Microsoft::WRL::ComPtr<IWICBitmapSource> CreateBitmap(
     const gfx::FloatSize& size) {
-  base::win::ScopedComPtr<IWICBitmap> bitmap;
+  Microsoft::WRL::ComPtr<IWICBitmap> bitmap;
   COM_VERIFY(gfx::ImagingFactory::GetInstance()->impl()->CreateBitmap(
       static_cast<uint32_t>(size.width()), static_cast<uint32_t>(size.height()),
-      GUID_WICPixelFormat32bppRGBA, WICBitmapCacheOnDemand, bitmap.Receive()));
-  return base::win::ScopedComPtr<IWICBitmapSource>(bitmap.get());
+      GUID_WICPixelFormat32bppRGBA, WICBitmapCacheOnDemand,
+      bitmap.GetAddressOf()));
+  return Microsoft::WRL::ComPtr<IWICBitmapSource>(bitmap.Get());
 }
 
-base::win::ScopedComPtr<IWICBitmapSource> CreateBitmapFromIcon(
+Microsoft::WRL::ComPtr<IWICBitmapSource> CreateBitmapFromIcon(
     const base::win::ScopedHICON& icon) {
-  base::win::ScopedComPtr<IWICBitmap> bitmap;
+  Microsoft::WRL::ComPtr<IWICBitmap> bitmap;
   COM_VERIFY(gfx::ImagingFactory::GetInstance()->impl()->CreateBitmapFromHICON(
-      icon.get(), bitmap.Receive()));
-  return base::win::ScopedComPtr<IWICBitmapSource>(bitmap.get());
+      icon.get(), bitmap.GetAddressOf()));
+  return Microsoft::WRL::ComPtr<IWICBitmapSource>(bitmap.Get());
 }
 
 }  // namespace
@@ -137,11 +139,11 @@ NativeImageBitmap::NativeImageBitmap(const void* data,
     : impl_(CreateBitmap(data, data_size, size)), size_(size) {}
 
 NativeImageBitmap::NativeImageBitmap(
-    const base::win::ScopedComPtr<IWICBitmapSource>& impl)
+    const Microsoft::WRL::ComPtr<IWICBitmapSource>& impl)
     : impl_(impl), size_(ComputeSize(impl_)) {}
 
 NativeImageBitmap::NativeImageBitmap(
-    base::win::ScopedComPtr<IWICBitmapSource>&& impl)
+    Microsoft::WRL::ComPtr<IWICBitmapSource>&& impl)
     : impl_(std::move(impl)), size_(ComputeSize(impl_)) {}
 
 NativeImageBitmap::NativeImageBitmap(const gfx::FloatSize& size)
@@ -184,13 +186,13 @@ bool NativeImageBitmap::operator!=(const NativeImageBitmap& other) const {
 }
 
 std::vector<uint8_t> NativeImageBitmap::data() const {
-  base::win::ScopedComPtr<IWICFormatConverter> converter;
+  Microsoft::WRL::ComPtr<IWICFormatConverter> converter;
   COM_VERIFY(gfx::ImagingFactory::GetInstance()->impl()->CreateFormatConverter(
-      converter.Receive()));
+      converter.GetAddressOf()));
   const auto palette = static_cast<IWICPalette*>(nullptr);
   const auto alpha_threshold = 0.0f;
   COM_VERIFY(converter->Initialize(
-      impl_.get(), GUID_WICPixelFormat32bppRGBA, WICBitmapDitherTypeNone,
+      impl_.Get(), GUID_WICPixelFormat32bppRGBA, WICBitmapDitherTypeNone,
       palette, alpha_threshold, WICBitmapPaletteTypeMedianCut));
   const auto stride = static_cast<uint32_t>(size_.width()) * 4;
   std::vector<uint8_t> pixels(static_cast<size_t>(stride * size_.height()));
@@ -236,28 +238,28 @@ NativeImageBitmap NativeImageBitmap::Decode(base::StringPiece16 format,
     }
     return NativeImageBitmap(icon_handle);
   }
-  base::win::ScopedComPtr<IWICBitmapDecoder> decoder;
+  Microsoft::WRL::ComPtr<IWICBitmapDecoder> decoder;
   const auto vendor_guid = static_cast<GUID*>(nullptr);
   COM_VERIFY2(gfx::ImagingFactory::GetInstance()->impl()->CreateDecoder(
-                  format_guid, vendor_guid, decoder.Receive()),
+                  format_guid, vendor_guid, decoder.GetAddressOf()),
               NativeImageBitmap());
-  base::win::ScopedComPtr<IWICStream> stream;
+  Microsoft::WRL::ComPtr<IWICStream> stream;
   COM_VERIFY2(gfx::ImagingFactory::GetInstance()->impl()->CreateStream(
-                  stream.Receive()),
+                  stream.GetAddressOf()),
               NativeImageBitmap());
   COM_VERIFY2(stream->InitializeFromMemory(
                   reinterpret_cast<uint8_t*>(const_cast<void*>(data)),
                   static_cast<uint32_t>(data_size)),
               NativeImageBitmap());
-  COM_VERIFY2(decoder->Initialize(stream.get(), WICDecodeMetadataCacheOnDemand),
+  COM_VERIFY2(decoder->Initialize(stream.Get(), WICDecodeMetadataCacheOnDemand),
               NativeImageBitmap());
   uint32_t frame_count;
   COM_VERIFY2(decoder->GetFrameCount(&frame_count), NativeImageBitmap());
   if (frame_count == 0)
     return NativeImageBitmap();
-  base::win::ScopedComPtr<IWICBitmapFrameDecode> frame;
-  COM_VERIFY2(decoder->GetFrame(0, frame.Receive()), NativeImageBitmap());
-  base::win::ScopedComPtr<IWICBitmapSource> bitmap(frame.get());
+  Microsoft::WRL::ComPtr<IWICBitmapFrameDecode> frame;
+  COM_VERIFY2(decoder->GetFrame(0, frame.GetAddressOf()), NativeImageBitmap());
+  Microsoft::WRL::ComPtr<IWICBitmapSource> bitmap(frame.Get());
   return NativeImageBitmap(std::move(bitmap));
 }
 
@@ -266,20 +268,21 @@ std::vector<uint8_t> NativeImageBitmap::Encode(
   const auto& format_guid = ImageFormatMap::GetInstance()->Get(format);
   if (format_guid == GUID_NULL)
     return std::vector<uint8_t>();
-  base::win::ScopedComPtr<IWICBitmapEncoder> encoder;
+  Microsoft::WRL::ComPtr<IWICBitmapEncoder> encoder;
   const auto vendor_guid = static_cast<GUID*>(nullptr);
   COM_VERIFY2(gfx::ImagingFactory::GetInstance()->impl()->CreateEncoder(
-                  format_guid, vendor_guid, encoder.Receive()),
+                  format_guid, vendor_guid, encoder.GetAddressOf()),
               std::vector<uint8_t>());
   // TOOD(eval1749): Implement |NativeImageBitmap::Encode()|
-  // 1. create stream
-  // 2. encoder->Initialize(stream.get(), WICBitmapEncoderNoCache);
-  // 3. encoder->CreateNewFrame(frame.Receive(), &property_bar.Receive());
-  // 4. set encode options in |property_bag|
-  // 5. frame->SetPiexlFormat();
-  // 6. frame->WritePixels()
-  // 7. frame->Commit()
-  // 8. encoder->Commit()
+  //  1. create stream
+  //  2. encoder->Initialize(stream.get(), WICBitmapEncoderNoCache);
+  //  3. encoder->CreateNewFrame(frame.GetAddressOf(),
+  //     &property_bar.GetAddressOf());
+  //  4. set encode options in |property_bag|
+  //  5. frame->SetPiexlFormat();
+  //  6. frame->WritePixels()
+  //  7. frame->Commit()
+  //  8. encoder->Commit()
   return std::vector<uint8_t>();
 }
 

@@ -8,12 +8,12 @@
 #include <stdint.h>
 #include <wincodec.h>
 
+#include <wrl/client.h>
 #include <string>
 #include <vector>
 
 #include "base/strings/string16.h"
 #include "base/strings/string_piece.h"
-#include "base/win/scoped_comptr.h"
 #include "base/win/scoped_gdi_object.h"
 #include "evita/gfx/base/geometry/float_size.h"
 
@@ -28,9 +28,9 @@ class NativeImageBitmap final {
   NativeImageBitmap(const void* data,
                     size_t data_size,
                     const gfx::FloatSize& size);
-  explicit NativeImageBitmap(base::win::ScopedComPtr<IWICBitmapSource>&& data);
+  explicit NativeImageBitmap(Microsoft::WRL::ComPtr<IWICBitmapSource>&& data);
   explicit NativeImageBitmap(
-      const base::win::ScopedComPtr<IWICBitmapSource>& data);
+      const Microsoft::WRL::ComPtr<IWICBitmapSource>& data);
   explicit NativeImageBitmap(const base::win::ScopedHICON& icon);
   explicit NativeImageBitmap(const gfx::FloatSize& size);
   NativeImageBitmap(const NativeImageBitmap& other);
@@ -45,7 +45,7 @@ class NativeImageBitmap final {
 
   std::vector<uint8_t> data() const;
   base::string16 format() const;
-  const base::win::ScopedComPtr<IWICBitmapSource>& get() const { return impl_; }
+  const Microsoft::WRL::ComPtr<IWICBitmapSource>& get() const { return impl_; }
   gfx::FloatSize resolution() const;
   const gfx::FloatSize& size() const { return size_; }
 
@@ -58,7 +58,7 @@ class NativeImageBitmap final {
  private:
   NativeImageBitmap();
 
-  base::win::ScopedComPtr<IWICBitmapSource> impl_;
+  Microsoft::WRL::ComPtr<IWICBitmapSource> impl_;
   gfx::FloatSize size_;
 };
 

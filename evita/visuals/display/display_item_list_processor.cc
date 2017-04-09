@@ -70,7 +70,7 @@ std::unique_ptr<gfx::Bitmap> CreateBitmapFromImage(gfx::Canvas* canvas,
   const auto palette = static_cast<IWICPalette*>(nullptr);
   const auto alpha_threshold = 0.0f;
   COM_VERIFY(converter->Initialize(
-      image.impl().get().get(), GUID_WICPixelFormat32bppPBGRA,
+      image.impl().get().Get(), GUID_WICPixelFormat32bppPBGRA,
       WICBitmapDitherTypeNone, palette, alpha_threshold,
       WICBitmapPaletteTypeMedianCut));
   common::ComPtr<ID2D1Bitmap> bitmap;

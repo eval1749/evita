@@ -11,7 +11,7 @@ vars = {
   'build_revision': '94c06fe70f3f6429c59e3ec0f6acd4f6710050b2',
   'buildtools_revision': 'd3074448541662f242bcee623049c13a231b5648',
   'ced_revision': 'e21eb6aed10b9f6e2727f136c52420033214d458',
-  'crypto_revision': 'd518e66e2026e24c3df4778d34dde3d58ffd04b7',
+  'crypto_revision': 'b5ebe6ad7f0e821f8d35de76d3951af8295ccaef',
   'cygwin_revision': 'c89e446b273697fadf3a10ff1007a97c0b7de6df',
   'gmock_revision': '0421b6f358139f02e102c9c332ce19a33faf75be', # from svn revision 566
   'grit_revision': '5fa6fc4ea593e280f4d821ce9977d4184bb6d6ca',
@@ -28,8 +28,8 @@ vars = {
   'v8_revision': 'fe9bb7e6e251159852770160cfb21dad3cf03523', # 5.9.221
   'zlib_revision': 'b39941038e335b20aa810208f5de1dd1460fa840',
 
-  # boringssl
-  'boringssl_revision': 'dc8c1d962e688c01cd8903d40ada70a75f700ad7',
+  # boringssl: we should get third_parser/boringssl too.
+  'boringssl_revision': 'c8ff30cbe716c72279a6f6a9d7d7d0d4091220fa',
 
   # github
   'autopep8_revision': '9eb1121f357077c7d71fc770e25d3678f906a401',

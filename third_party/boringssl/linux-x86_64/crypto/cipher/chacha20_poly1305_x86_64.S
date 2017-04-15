@@ -1,7 +1,10 @@
-#if defined(__x86_64__)
+#if defined(__x86_64__) && !defined(OPENSSL_NO_ASM)
 .text	
 .extern	OPENSSL_ia32cap_P
 .hidden OPENSSL_ia32cap_P
+
+chacha20_poly1305_constants:
+
 .align	64
 .chacha20_consts:
 .byte	'e','x','p','a','n','d',' ','3','2','-','b','y','t','e',' ','k'

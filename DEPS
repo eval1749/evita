@@ -8,13 +8,13 @@ vars = {
   'github.git': 'https://github.com',
 
   'base_revision': '812666e537533815e63d43baab4e402dac03040e',
-  'build_revision': 'a9eff4d3d2a7c61a9315ab67780413f20962e541',
-  'buildtools_revision': '88811f48a6b79786ef35be86825642fc33011151',
+  'build_revision': 'ff3857b96f27368d8fc9c22d34d97e805ddbe14d',
+  'buildtools_revision': '98f00fa10dbad2cdbb2e297a66c3d6d5bc3994f3',
   'ced_revision': 'e21eb6aed10b9f6e2727f136c52420033214d458',
   'crypto_revision': 'b5ebe6ad7f0e821f8d35de76d3951af8295ccaef',
   'cygwin_revision': 'c89e446b273697fadf3a10ff1007a97c0b7de6df',
   'gmock_revision': '0421b6f358139f02e102c9c332ce19a33faf75be', # from svn revision 566
-  'grit_revision': 'eac00aec66a3758297473f47bf117f1a5b324ed8',
+  'grit_revision': 'e7f3ccb0333d92a68a0fe40648b3c5140f16ad8a',
   'gtest_revision': '6f8a66431cb592dad629028a50b3dd418a408c87',
   'gyp_revision': 'e7079f0e0e14108ab0dba58728ff219637458563',
   'icu_revision': 'b34251f8b762f8e2112a89c587855ca4297fed96',
@@ -25,7 +25,7 @@ vars = {
   'modp_b64_revision': '28e3fbba4cb4ec3ffd85b53d0a3904525d08f5a6',
   'ply_revision': '4a6baf95860033d4c69d3e3087696b30c687622c',
   'testing_revision': 'fcb5801cff7bca96f2720a95bc495c01264645c6',
-  'v8_revision': 'fe9bb7e6e251159852770160cfb21dad3cf03523', # 5.9.221
+  'v8_revision': '0512f9ad8a5fda58196ce7bd9f5ab1233507d7e2', # 6.0.59
   'zlib_revision': '24ab14872e8e068ba08cc31cc3d43bcc6d5cb832',
 
   # boringssl: we should get third_parser/boringssl too.

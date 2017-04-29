@@ -68,7 +68,7 @@ void ScriptThread::ScheduleScriptTask(const base::Closure& task) {
 void ScriptThread::Start() {
   DCHECK_CALLED_ON_NON_SCRIPT_THREAD();
   thread_->Start();
-  base::TaskScheduler::CreateAndSetSimpleTaskScheduler("ScriptThread");
+  base::TaskScheduler::CreateAndStartWithDefaultParams("ScriptThread");
   scheduler_->Start(thread_->message_loop());
   thread_->message_loop()->task_runner()->PostTask(
       FROM_HERE, base::Bind(&ScriptHost::CreateAndStart,

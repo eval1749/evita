@@ -8,7 +8,7 @@ vars = {
   'github.git': 'https://github.com',
 
   'base_revision': '3ec90df7cfb29595524e156ab0ace08d7bf42ba9',
-  'build_revision': '02044bf86ad40003cf375b99b8b1a58a8a9c209f',
+  'build_revision': '0fffbdfeb66c822cb33c74825c91d4ef3fef4d49',
   'buildtools_revision': '98f00fa10dbad2cdbb2e297a66c3d6d5bc3994f3',
   'ced_revision': 'e21eb6aed10b9f6e2727f136c52420033214d458',
   'crypto_revision': 'b5ebe6ad7f0e821f8d35de76d3951af8295ccaef',
@@ -25,7 +25,7 @@ vars = {
   'modp_b64_revision': '28e3fbba4cb4ec3ffd85b53d0a3904525d08f5a6',
   'ply_revision': '4a6baf95860033d4c69d3e3087696b30c687622c',
   'testing_revision': '762ed82b673e5fdadbf3d63bb855967434a8e2d1',
-  'v8_revision': '10b9a3e5fedf25be365758a2cec66284b3d3874b', # 6.0.116
+  'v8_revision': 'd7cf0462b60565374f2c04226b2e39d09b2845d0', # 6.0.170
   'zlib_revision': '24ab14872e8e068ba08cc31cc3d43bcc6d5cb832',
 
   # boringssl: we should get third_parser/boringssl too.

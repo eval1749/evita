@@ -53,6 +53,7 @@ v8.log
 /third/boringssl/src
 /third_party/ced/src
 /third_party/cygwin/
+/third_party/googletest/src/
 /third_party/icu
 /third_party/instrumented_libraries/
 /third_party/jinja2/

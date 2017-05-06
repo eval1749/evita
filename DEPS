@@ -13,9 +13,8 @@ vars = {
   'ced_revision': 'e21eb6aed10b9f6e2727f136c52420033214d458',
   'crypto_revision': 'b5ebe6ad7f0e821f8d35de76d3951af8295ccaef',
   'cygwin_revision': 'c89e446b273697fadf3a10ff1007a97c0b7de6df',
-  'gmock_revision': '0421b6f358139f02e102c9c332ce19a33faf75be', # from svn revision 566
+  'googletest_revision': '43359642a1c16ad3f4fc575c7edd0cb935810815',
   'grit_revision': 'e7f3ccb0333d92a68a0fe40648b3c5140f16ad8a',
-  'gtest_revision': '6f8a66431cb592dad629028a50b3dd418a408c87',
   'gyp_revision': 'e7079f0e0e14108ab0dba58728ff219637458563',
   'icu_revision': 'b34251f8b762f8e2112a89c587855ca4297fed96',
   'idl_parser_revision': '9e23d86a85a09c462ce7b80f93c0ebbd13cedf2a',
@@ -24,7 +23,7 @@ vars = {
   'markupsafe_revision': '8f45f5cfa0009d2a70589bcda0349b8cb2b72783',
   'modp_b64_revision': '28e3fbba4cb4ec3ffd85b53d0a3904525d08f5a6',
   'ply_revision': '4a6baf95860033d4c69d3e3087696b30c687622c',
-  'testing_revision': '762ed82b673e5fdadbf3d63bb855967434a8e2d1',
+  'testing_revision': '441e621b9dc932a06a17058798b7b4b07f313ca6',
   'v8_revision': 'd7cf0462b60565374f2c04226b2e39d09b2845d0', # 6.0.170
   'zlib_revision': '24ab14872e8e068ba08cc31cc3d43bcc6d5cb832',
 
@@ -53,14 +52,11 @@ deps = {
   'src/testing':
     Var('chromium_git') + '/chromium/src/testing' + '@' + Var('testing_revision'),
 
-  'src/testing/gmock':
-    Var('chromium_git') + '/external/googlemock.git' + '@' + Var('gmock_revision'),
-
-  'src/testing/gtest':
-    Var('chromium_git') + '/external/github.com/google/googletest.git' + '@' + Var('gtest_revision'),
-
   'src/third_party/ced/src':
     Var('chromium_git') + '/external/github.com/google/compact_enc_det.git' + '@' + Var('ced_revision'),
+
+ 'src/third_party/googletest/src':
+    Var('chromium_git') + '/external/github.com/google/googletest.git' + '@' + Var('googletest_revision'),
 
   'src/third_party/cygwin':
     Var('chromium_git') + '/chromium/deps/cygwin.git' + '@' + Var('cygwin_revision'),

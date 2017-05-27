@@ -13,10 +13,10 @@ vars = {
   'ced_revision': 'e21eb6aed10b9f6e2727f136c52420033214d458',
   'crypto_revision': 'a7086ad8750e149f6f0f111796e693f877f81e7c',
   'cygwin_revision': 'c89e446b273697fadf3a10ff1007a97c0b7de6df',
-  'googletest_revision': '8c7f93fedaca1b0158e67af0f5dd63a044066eab',
+  'googletest_revision': '42bc671f47b122fad36db5eccbc06868afdf7862',
   'grit_revision': 'e7f3ccb0333d92a68a0fe40648b3c5140f16ad8a',
   'gyp_revision': 'eb296f67da078ec01f5e3a9ea9cdc6d26d680161',
-  'icu_revision': '4b06aadd0556135d3a90a4eb03eca24ef249e03e',
+  'icu_revision': 'c844075aa0f1758d04f9192825f1b1e7e607992e',
   'idl_parser_revision': '2394cf7cea774af7cbece767217a1bb7f47efae5',
   'instrumented_libraries_revision': '644afd349826cb68204226a16c38bde13abe9c3c',
   'jinja2_revision': 'd34383206fa42d52faa10bb9931d6d538f3a57e0',
@@ -26,7 +26,7 @@ vars = {
   'testing_revision': '800b3c5e8464dca0e0a3dd02de74bb50d73c0dd3',
   'tools_win_revision': 'ae1bd409b04f63272fc6797f3fb12346329fb120',
   'v8_revision': '75aa1b4ec1bfa7663f3af99b0e17a813b66283c2', # 6.0.317
-  'zlib_revision': 'bc23d3cd8b1b0c68cd732fcd5f29bf231176f28a',
+  'zlib_revision': 'b4fc53679f4648faf43fee73bf390862baca6b65',
 
   # boringssl: we should get third_parser/boringssl too.
   'boringssl_revision': 'c8ff30cbe716c72279a6f6a9d7d7d0d4091220fa',

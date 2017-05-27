@@ -7,9 +7,9 @@ vars = {
   'boringssl_git': 'https://boringssl.googlesource.com',
   'github.git': 'https://github.com',
 
-  'base_revision': '6633e9d7eae61a2a1020818680a5ac1739a3ee5d',
-  'build_revision': '00764a82f63ad8f5bade586e39ef5f9a324b0c42',
-  'buildtools_revision': '98f00fa10dbad2cdbb2e297a66c3d6d5bc3994f3',
+  'base_revision': '01fa4ad4a7c12be437197276652ad123a508a914',
+  'build_revision': '4249339127fe1beda6c62cb872f44db1ef9324e3',
+  'buildtools_revision': '104574186c17cd4701857454feba8872e52a7d82',
   'ced_revision': 'e21eb6aed10b9f6e2727f136c52420033214d458',
   'crypto_revision': 'a7086ad8750e149f6f0f111796e693f877f81e7c',
   'cygwin_revision': 'c89e446b273697fadf3a10ff1007a97c0b7de6df',
@@ -23,8 +23,9 @@ vars = {
   'markupsafe_revision': '8f45f5cfa0009d2a70589bcda0349b8cb2b72783',
   'modp_b64_revision': '28e3fbba4cb4ec3ffd85b53d0a3904525d08f5a6',
   'ply_revision': '4a6baf95860033d4c69d3e3087696b30c687622c',
-  'testing_revision': 'd1ca1a24f712f175fc4d604eb6c9a8e0e1830544',
-  'v8_revision': 'b466961fa7703b53d09f4af9ee28d57878b7e43c', # 6.0.202
+  'testing_revision': '800b3c5e8464dca0e0a3dd02de74bb50d73c0dd3',
+  'tools_win_revision': 'ae1bd409b04f63272fc6797f3fb12346329fb120',
+  'v8_revision': '75aa1b4ec1bfa7663f3af99b0e17a813b66283c2', # 6.0.317
   'zlib_revision': 'bc23d3cd8b1b0c68cd732fcd5f29bf231176f28a',
 
   # boringssl: we should get third_parser/boringssl too.
@@ -87,6 +88,9 @@ deps = {
 
   'src/third_party/ply':
     Var('chromium_git') + '/chromium/src/third_party/ply' + '@' +  Var('ply_revision'),
+
+  'src/tools/win':
+    Var('chromium_git') + '/chromium/src/tools/win' + '@' +  Var('tools_win_revision'),
 
   'src/v8':
     Var('chromium_git') + '/v8/v8.git' + '@' +  Var('v8_revision'),

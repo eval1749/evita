@@ -68,4 +68,5 @@ v8.log
 /tools/grit/
 /tools/gyp/
 /tools/idl_parser/
+/tools/win/
 /v8/

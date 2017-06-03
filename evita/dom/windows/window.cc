@@ -201,11 +201,13 @@ void Window::DidSetFocus() {
   ginx::Runner::Scope runner_scope(runner);
   auto const instance = GetWrapper(isolate);
   auto const klass = runner->global()->Get(v8Strings::Window.Get(isolate));
-  instance->ForceSet(v8Strings::focusTick_.Get(isolate),
-                     v8::Integer::New(isolate, global_focus_tick),
-                     kDefaultPropertyAttribute);
-  klass->ToObject()->ForceSet(v8Strings::focus.Get(isolate), instance,
-                              kDefaultPropertyAttribute);
+  const auto& set_focus_tick =
+      instance->Set(runner->context(), v8Strings::focusTick_.Get(isolate),
+                    v8::Integer::New(isolate, global_focus_tick));
+  CHECK(set_focus_tick.ToChecked());
+  const auto& set_focus = klass->ToObject()->ForceSet(
+      runner->context(), v8Strings::focus.Get(isolate), instance);
+  CHECK(set_focus.ToChecked());
 }
 
 void Window::DidShowWindow() {

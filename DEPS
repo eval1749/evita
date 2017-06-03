@@ -7,10 +7,10 @@ vars = {
   'boringssl_git': 'https://boringssl.googlesource.com',
   'github.git': 'https://github.com',
 
-  'base_revision': '01fa4ad4a7c12be437197276652ad123a508a914',
+  'base_revision': '1388609df64d8c3fe3ff85b9567dd18a4b8cc236',
   'build_revision': 'a055d2ec5f779067cf53e0e6c4b3687a43d83d24',
   'buildtools_revision': '104574186c17cd4701857454feba8872e52a7d82',
-  'ced_revision': 'e21eb6aed10b9f6e2727f136c52420033214d458',
+  'ced_revision': '910cca22d881b02cbc8950fa02ccbcdcfb782456',
   'crypto_revision': 'a7086ad8750e149f6f0f111796e693f877f81e7c',
   'cygwin_revision': 'c89e446b273697fadf3a10ff1007a97c0b7de6df',
   'googletest_revision': '42bc671f47b122fad36db5eccbc06868afdf7862',
@@ -23,8 +23,8 @@ vars = {
   'markupsafe_revision': '8f45f5cfa0009d2a70589bcda0349b8cb2b72783',
   'modp_b64_revision': '28e3fbba4cb4ec3ffd85b53d0a3904525d08f5a6',
   'ply_revision': '4a6baf95860033d4c69d3e3087696b30c687622c',
-  'testing_revision': '800b3c5e8464dca0e0a3dd02de74bb50d73c0dd3',
-  'tools_win_revision': 'ae1bd409b04f63272fc6797f3fb12346329fb120',
+  'testing_revision': 'ccf0efafb1dc51339b00022bd178b79e3c1fce9d',
+  'tools_win_revision': '99386a5f9834f61a0c9c0a277d2c6a6dee398d25',
   'v8_revision': '45b10d7b5f00dc5d1a84c10864f1ab2e4af97b14', # 6.1.62
   'zlib_revision': 'b4fc53679f4648faf43fee73bf390862baca6b65',
 

@@ -8,7 +8,7 @@ vars = {
   'github.git': 'https://github.com',
 
   'base_revision': '01fa4ad4a7c12be437197276652ad123a508a914',
-  'build_revision': '4249339127fe1beda6c62cb872f44db1ef9324e3',
+  'build_revision': 'a055d2ec5f779067cf53e0e6c4b3687a43d83d24',
   'buildtools_revision': '104574186c17cd4701857454feba8872e52a7d82',
   'ced_revision': 'e21eb6aed10b9f6e2727f136c52420033214d458',
   'crypto_revision': 'a7086ad8750e149f6f0f111796e693f877f81e7c',
@@ -16,7 +16,7 @@ vars = {
   'googletest_revision': '42bc671f47b122fad36db5eccbc06868afdf7862',
   'grit_revision': 'e7f3ccb0333d92a68a0fe40648b3c5140f16ad8a',
   'gyp_revision': 'eb296f67da078ec01f5e3a9ea9cdc6d26d680161',
-  'icu_revision': 'c844075aa0f1758d04f9192825f1b1e7e607992e',
+  'icu_revision': 'ae18d60831126f902d778541495194380ff77fd8',
   'idl_parser_revision': '2394cf7cea774af7cbece767217a1bb7f47efae5',
   'instrumented_libraries_revision': '644afd349826cb68204226a16c38bde13abe9c3c',
   'jinja2_revision': 'd34383206fa42d52faa10bb9931d6d538f3a57e0',
@@ -25,7 +25,7 @@ vars = {
   'ply_revision': '4a6baf95860033d4c69d3e3087696b30c687622c',
   'testing_revision': '800b3c5e8464dca0e0a3dd02de74bb50d73c0dd3',
   'tools_win_revision': 'ae1bd409b04f63272fc6797f3fb12346329fb120',
-  'v8_revision': '75aa1b4ec1bfa7663f3af99b0e17a813b66283c2', # 6.0.317
+  'v8_revision': '45b10d7b5f00dc5d1a84c10864f1ab2e4af97b14', # 6.1.62
   'zlib_revision': 'b4fc53679f4648faf43fee73bf390862baca6b65',
 
   # boringssl: we should get third_parser/boringssl too.

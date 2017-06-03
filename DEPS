@@ -4,14 +4,12 @@
 
 vars = {
   'chromium_git': 'https://chromium.googlesource.com',
-  'boringssl_git': 'https://boringssl.googlesource.com',
   'github.git': 'https://github.com',
 
   'base_revision': '1388609df64d8c3fe3ff85b9567dd18a4b8cc236',
   'build_revision': 'a055d2ec5f779067cf53e0e6c4b3687a43d83d24',
   'buildtools_revision': '104574186c17cd4701857454feba8872e52a7d82',
   'ced_revision': '910cca22d881b02cbc8950fa02ccbcdcfb782456',
-  'crypto_revision': 'a7086ad8750e149f6f0f111796e693f877f81e7c',
   'cygwin_revision': 'c89e446b273697fadf3a10ff1007a97c0b7de6df',
   'googletest_revision': '42bc671f47b122fad36db5eccbc06868afdf7862',
   'grit_revision': 'e7f3ccb0333d92a68a0fe40648b3c5140f16ad8a',
@@ -28,9 +26,6 @@ vars = {
   'v8_revision': '45b10d7b5f00dc5d1a84c10864f1ab2e4af97b14', # 6.1.62
   'zlib_revision': 'b4fc53679f4648faf43fee73bf390862baca6b65',
 
-  # boringssl: we should get third_parser/boringssl too.
-  'boringssl_revision': 'c8ff30cbe716c72279a6f6a9d7d7d0d4091220fa',
-
   # github
   'autopep8_revision': '9eb1121f357077c7d71fc770e25d3678f906a401',
   'pep8_revision': '4dc42d842274ba27d2724e76eb83ff69e7db226f',
@@ -43,9 +38,6 @@ deps = {
 
   'src/build':
     Var('chromium_git') + '/chromium/src/build' + '@' +  Var('build_revision'),
-
-  'src/crypto':
-    Var('chromium_git') + '/chromium/src/crypto' + '@' +  Var('crypto_revision'),
 
   'src/buildtools':
     Var('chromium_git') + '/chromium/buildtools.git' + '@' +  Var('buildtools_revision'),
@@ -98,23 +90,12 @@ deps = {
   'src/third_party/zlib':
     Var('chromium_git') + '/chromium/src/third_party/zlib' + '@' +  Var('zlib_revision'),
 
-  # From boringssl
-  'src/third_party/boringssl/src':
-    Var('boringssl_git') + '/boringssl.git' + '@' +  Var('boringssl_revision'),
-
   # From github
   'src/third_party/autopep8':
     Var('github.git') + '/hhatto/autopep8.git' + '@' + Var('autopep8_revision'),
 
   'src/third_party/pep8':
     Var('github.git') + '/PyCQA/pep8.git' + '@' + Var('pep8_revision'),
-
-  # For boringssl
-  'src/third_party/yasm/source/patched-yasm':
-    Var('chromium_git') + '/chromium/deps/yasm/patched-yasm.git' + '@' + '7da28c6c7c6a1387217352ce02b31754deb54d2a',
-
-  'src/third_party/yasm/binaries':
-    Var('chromium_git') + '/chromium/deps/yasm/binaries.git' + '@' + '52f9b3f4b0aa06da24ef8b123058bb61ee468881',
 }
 
 hooks = [

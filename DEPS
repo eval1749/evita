@@ -6,12 +6,12 @@ vars = {
   'chromium_git': 'https://chromium.googlesource.com',
   'github.git': 'https://github.com',
 
-  'base_revision': 'e8041a52f9134378b2662f226c65453c1da8d7f9',
-  'build_revision': 'c6f78e980d8811b7112d8fda419fb965597a2a97',
+  'base_revision': '12890c2e8666116d65262849c3ce3595b664eea5',
+  'build_revision': '9ec24027abe46339fe15cbe91513c7262e00caea',
   'buildtools_revision': 'ee9c3a70889f452fb0cf10792ba3cb26de2d071e',
   'ced_revision': '910cca22d881b02cbc8950fa02ccbcdcfb782456',
   'cygwin_revision': 'c89e446b273697fadf3a10ff1007a97c0b7de6df',
-  'googletest_revision': '42bc671f47b122fad36db5eccbc06868afdf7862',
+  'googletest_revision': 'c2d90bddc6a2a562ee7750c14351e9ca16a6a37a',
   'grit_revision': '955d00fd5db79550806d033f7e29d338cd848dee',
   'gyp_revision': 'eb296f67da078ec01f5e3a9ea9cdc6d26d680161',
   'icu_revision': 'dfa798fe694702b43a3debc3290761f22b1acaf8',
@@ -21,14 +21,14 @@ vars = {
   'markupsafe_revision': '8f45f5cfa0009d2a70589bcda0349b8cb2b72783',
   'modp_b64_revision': '28e3fbba4cb4ec3ffd85b53d0a3904525d08f5a6',
   'ply_revision': '4a6baf95860033d4c69d3e3087696b30c687622c',
-  'testing_revision': '9c7fe7afcada0846b223dfa9137d8b77844206e7',
+  'testing_revision': '678424b639091ce05a8bedcd3f75f80a90c8187f',
   'tools_win_revision': '99386a5f9834f61a0c9c0a277d2c6a6dee398d25',
   'v8_revision': 'cdf1a8a4c6b3cdab3b89568a2c146fcaf525ce05', # 6.1.200
-  'zlib_revision': 'b4fc53679f4648faf43fee73bf390862baca6b65',
+  'zlib_revision': '1782c7b1c6934f6970c4517fddc92537812cfd4f',
 
   # github
-  'autopep8_revision': '9eb1121f357077c7d71fc770e25d3678f906a401',
-  'pep8_revision': '4dc42d842274ba27d2724e76eb83ff69e7db226f',
+  'autopep8_revision': '93fff80de7dd0819b36281bc0868e5b17c81fb7f', # 1.3.2
+  'pep8_revision': '8053c7c1d5597b062c58c5991231b62e11b435e9', # 2.2.0
 }
 
 deps = {

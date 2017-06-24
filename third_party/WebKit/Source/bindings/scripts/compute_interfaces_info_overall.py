@@ -96,7 +96,6 @@ from utilities import write_pickle_file
 INHERITED_EXTENDED_ATTRIBUTES = set([
     'ActiveScriptWrappable',
     'DependentLifetime',
-    'JsNamespace',
 ])
 
 # Main variable (filled in and exported)
@@ -167,7 +166,6 @@ def compute_global_type_info():
     ancestors = {}
     dictionaries = {}
     component_dirs = {}
-    namespaces = {}
     implemented_as_interfaces = {}
     garbage_collected_interfaces = set()
     callback_interfaces = set()
@@ -185,14 +183,11 @@ def compute_global_type_info():
             implemented_as_interfaces[interface_name] = interface_info['implemented_as']
 
         inherited_extended_attributes = interface_info['inherited_extended_attributes']
-        if 'JsNamespace' in inherited_extended_attributes:
-            namespaces[interface_name] = inherited_extended_attributes['JsNamespace']
         garbage_collected_interfaces.add(interface_name)
 
     interfaces_info['ancestors'] = ancestors
     interfaces_info['callback_interfaces'] = callback_interfaces
     interfaces_info['dictionaries'] = dictionaries
-    interfaces_info['namespaces'] = namespaces
     interfaces_info['implemented_as_interfaces'] = implemented_as_interfaces
     interfaces_info['garbage_collected_interfaces'] = garbage_collected_interfaces
     interfaces_info['component_dirs'] = component_dirs
@@ -289,11 +284,6 @@ def compute_interfaces_info_overall(info_individuals):
                 dependencies_include_paths.append(include_path)
             else:
                 dependencies_other_component_include_paths.append(include_path)
-
-        for union_type in interface_info.get('union_types', []):
-            name = shorten_union_name(union_type)
-            dependencies_include_paths.append(
-                'bindings/%s/v8/%s.h' % (component, name))
 
         interface_info.update({
             'dependencies_full_paths': dependencies_full_paths,

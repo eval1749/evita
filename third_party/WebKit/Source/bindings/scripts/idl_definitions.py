@@ -320,11 +320,19 @@ class IdlInterface(object):
         has_indexed_property_getter = False
         has_integer_typed_length = False
 
+        def is_blacklisted_attribute_type(idl_type):
+            return idl_type.is_callback_function or \
+                idl_type.is_dictionary or \
+                idl_type.is_record_type or \
+                idl_type.is_sequence_type
+
         children = node.GetChildren()
         for child in children:
             child_class = child.GetClass()
             if child_class == 'Attribute':
                 attr = IdlAttribute(child)
+                if is_blacklisted_attribute_type(attr.idl_type):
+                    raise ValueError('Type "%s" cannot be used as an attribute.' % attr.idl_type)
                 if attr.idl_type.is_integer_type and attr.name == 'length':
                     has_integer_typed_length = True
                 self.attributes.append(attr)
@@ -528,7 +536,7 @@ class IdlLiteral(object):
             if self.value:
                 return '"%s"' % self.value
             else:
-                return 'WTF::emptyString'
+                return 'WTF::g_empty_string'
         if self.idl_type == 'integer':
             return '%d' % self.value
         if self.idl_type == 'float':
@@ -873,7 +881,6 @@ def ext_attributes_node_to_extended_attributes(node):
         possible signatures of the custom constructor.
       NamedConstructor: value is a Call node, corresponding to the single
         signature of the named constructor.
-      SetWrapperReferenceTo: value is an Arguments node.
     """
     # Primarily just make a dictionary from the children.
     # The only complexity is handling various types of constructors:
@@ -912,15 +919,6 @@ def ext_attributes_node_to_extended_attributes(node):
             if child_class and child_class != 'Call':
                 raise ValueError('[NamedConstructor] only supports Call as child, but has child of class: %s' % child_class)
             extended_attributes[name] = child
-        elif name == 'SetWrapperReferenceTo':
-            if not child:
-                raise ValueError('[SetWrapperReferenceTo] requires a child, but has none.')
-            children = child.GetChildren()
-            if len(children) != 1:
-                raise ValueError('[SetWrapperReferenceTo] supports only one child.')
-            if child_class != 'Arguments':
-                raise ValueError('[SetWrapperReferenceTo] only supports Arguments as child, but has child of class: %s' % child_class)
-            extended_attributes[name] = IdlArgument(children[0])
         elif name == 'Exposed':
             if child_class and child_class != 'Arguments':
                 raise ValueError('[Exposed] only supports Arguments as child, but has child of class: %s' % child_class)

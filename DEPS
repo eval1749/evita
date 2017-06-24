@@ -7,8 +7,8 @@ vars = {
   'github.git': 'https://github.com',
 
   'base_revision': '12890c2e8666116d65262849c3ce3595b664eea5',
-  'build_revision': '9ec24027abe46339fe15cbe91513c7262e00caea',
-  'buildtools_revision': 'ee9c3a70889f452fb0cf10792ba3cb26de2d071e',
+  'build_revision': 'a4ae1b793d57e070e6417fe9d3048dca2ab4f46c',
+  'buildtools_revision': '38477c2e103caf651d113dad07cd3e4efb992209',
   'ced_revision': '910cca22d881b02cbc8950fa02ccbcdcfb782456',
   'cygwin_revision': 'c89e446b273697fadf3a10ff1007a97c0b7de6df',
   'googletest_revision': 'c2d90bddc6a2a562ee7750c14351e9ca16a6a37a',
@@ -23,7 +23,7 @@ vars = {
   'ply_revision': '4a6baf95860033d4c69d3e3087696b30c687622c',
   'testing_revision': '678424b639091ce05a8bedcd3f75f80a90c8187f',
   'tools_win_revision': '99386a5f9834f61a0c9c0a277d2c6a6dee398d25',
-  'v8_revision': 'cdf1a8a4c6b3cdab3b89568a2c146fcaf525ce05', # 6.1.200
+  'v8_revision': 'f9b1cd343df071f543f07539513692367af25b06', # 6.1.266
   'zlib_revision': '1782c7b1c6934f6970c4517fddc92537812cfd4f',
 
   # github

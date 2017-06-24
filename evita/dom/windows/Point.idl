@@ -5,7 +5,7 @@
 [
     ImplementedAs=JavaScript,
     Constructor(),
-    Constructor(float x, float y),
+    Constructor(float x, float y)
 ]
 interface Point {
   attribute float x;

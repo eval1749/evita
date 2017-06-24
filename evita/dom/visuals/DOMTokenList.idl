@@ -4,7 +4,7 @@
 
 [
   JsNamespace=visuals,
-  ImplementedAs=JavaScript,
+  ImplementedAs=JavaScript
 ]
 interface DOMTokenList {
   readonly attribute unsigned long length;

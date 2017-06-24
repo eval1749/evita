@@ -21,7 +21,7 @@ enum RangeCase {
   CustomConstructor((TextDocument or TextRange)document_or_range, long offset),
   CustomConstructor((TextDocument or TextRange)document_or_range,
                     long start_offset,
-                    long end_offset),
+                    long end_offset)
 ] interface TextRange {
   readonly attribute boolean collapsed;
   readonly attribute TextDocument document;

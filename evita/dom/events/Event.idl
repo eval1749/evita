@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 [
-  Constructor(DOMString typeArg, optional EventInit eventInitDict),
+  Constructor(DOMString typeArg, optional EventInit eventInitDict)
 ]
 interface Event {
   // DOM PhaseType

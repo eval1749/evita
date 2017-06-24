@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 [
-  Constructor(DOMString typeArg, optional MouseEventInit eventInitDict),
+  Constructor(DOMString typeArg, optional MouseEventInit eventInitDict)
 ]
 interface MouseEvent : UiEvent {
   readonly attribute boolean altKey;

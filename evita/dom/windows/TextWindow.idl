@@ -4,7 +4,7 @@
 
 [
   CallWith = ScriptHost,
-  Constructor(TextRange range, optional CSSStyleSheetHandle handle),
+  Constructor(TextRange range, optional CSSStyleSheetHandle handle)
 ] interface TextWindow : Window {
   readonly attribute TextDocument document;
   readonly attribute TextSelection selection;

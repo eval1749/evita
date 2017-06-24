@@ -5,7 +5,7 @@
 // TODO(eval1749): We should make |Node| to be derived from |EventTarget|
 [
   JsNamespace = visuals,
-  ImplementedAs = JavaScript,
+  ImplementedAs = JavaScript
 ] interface Node {
   // TODO(eval1749): We should use |Generator<Node>| instead of
   // |FrozenArray<Node>|

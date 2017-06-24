@@ -5,7 +5,7 @@
 [
     RaisesException=Constructor,
     CustomConstructor(DOMString source),
-    CustomConstructor(DOMString source, RegExpInit options),
+    CustomConstructor(DOMString source, RegExpInit options)
 ]
 interface RegularExpression {
   readonly attribute boolean backward;

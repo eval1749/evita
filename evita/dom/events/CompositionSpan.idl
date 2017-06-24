@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 [
-  Constructor(long start, long end, long data),
+  Constructor(long start, long end, long data)
 ]
 interface CompositionSpan {
   const unsigned short ATTR_INPUT = 0;

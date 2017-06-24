@@ -4,7 +4,7 @@
 
 [
     ImplementedAs=JavaScript,
-    Constructor(long column, long lineNumber),
+    Constructor(long column, long lineNumber)
 ]
 interface LineAndColumn {
   attribute long column;

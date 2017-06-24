@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 [
-  Constructor(DOMString typeArg, optional FocusEventInit eventInitDict),
+  Constructor(DOMString typeArg, optional FocusEventInit eventInitDict)
 ]
 interface FocusEvent : UiEvent {
   readonly attribute EventTarget? relatedTarget;

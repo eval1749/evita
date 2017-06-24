@@ -98,6 +98,7 @@ v8::MaybeLocal<v8::Module> ModuleResolver::Callback(
     v8::Local<v8::Module> referrer) {
   auto* const runner = ginx::Runner::From(context);
   auto* const isolate = runner->isolate();
+  v8::Isolate::AllowJavascriptExecutionScope js_allow(isolate);
   auto callback = GetInstance()->stack_.top();
   auto script_referrer = ModuleMap::GetInstance()->Get(referrer);
   auto result =

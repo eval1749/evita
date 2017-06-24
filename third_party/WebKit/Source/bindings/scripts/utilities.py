@@ -15,7 +15,7 @@ import string
 import subprocess
 
 
-KNOWN_COMPONENTS = frozenset(['core', 'modules'])
+KNOWN_COMPONENTS = frozenset(['core', 'modules', 'dom'])
 KNOWN_COMPONENTS_WITH_TESTING = frozenset(['core', 'modules', 'testing'])
 
 

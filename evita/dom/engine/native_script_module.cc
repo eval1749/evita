@@ -226,7 +226,8 @@ void NativeScriptModule::Instantiate(ScriptHost* script_host,
   auto context = script_host->runner()->context();
   auto module = ToV8(isolate);
   ModuleResolver::Scope scope(callback);
-  if (!module->Instantiate(context, ModuleResolver::Callback)) {
+  if (!module->InstantiateModule(context, ModuleResolver::Callback)
+           .FromMaybe(false)) {
     state_ = State::Failed;
     exception_state->set_is_thrown();
     return;

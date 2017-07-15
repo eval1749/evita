@@ -6,7 +6,7 @@ vars = {
   'chromium_git': 'https://chromium.googlesource.com',
   'github.git': 'https://github.com',
 
-  'base_revision': 'e97cb732ff30d92a356ebbcdf33c9b327a8fd81a',
+  'base_revision': 'd351f307d46b42163031ca5449d8c05b87f57b8b',
   'build_revision': '63efa355f9ec17e0470e16b693284817a6eb3d74',
   'buildtools_revision': '5ad14542a6a74dd914f067b948c5d3e8d170396b',
   'ced_revision': '910cca22d881b02cbc8950fa02ccbcdcfb782456',
@@ -21,8 +21,8 @@ vars = {
   'markupsafe_revision': '8f45f5cfa0009d2a70589bcda0349b8cb2b72783',
   'modp_b64_revision': '28e3fbba4cb4ec3ffd85b53d0a3904525d08f5a6',
   'ply_revision': '4a6baf95860033d4c69d3e3087696b30c687622c',
-  'testing_revision': '42ff042710011d0e87155283672b76384c01b3e8',
-  'tools_win_revision': '415b2728076e0da56d7a92f55c30cd6f2ca8c70b',
+  'testing_revision': 'f6cc382f24defcd8d5d48b2a5621cc63e52c8057',
+  'tools_win_revision': '955e8f7918e90834ee69aa65f1d38666771b9440',
   'v8_revision': '248b789e106abdf7b0a92d11a43f038307403358', # 6.1.496
   'zlib_revision': '1782c7b1c6934f6970c4517fddc92537812cfd4f',
 

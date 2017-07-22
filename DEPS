@@ -7,14 +7,14 @@ vars = {
   'github.git': 'https://github.com',
 
   'base_revision': 'd351f307d46b42163031ca5449d8c05b87f57b8b',
-  'build_revision': '63efa355f9ec17e0470e16b693284817a6eb3d74',
+  'build_revision': '995d75919aba0ec377d78494d3ddbcc3c3314759',
   'buildtools_revision': '5ad14542a6a74dd914f067b948c5d3e8d170396b',
   'ced_revision': '910cca22d881b02cbc8950fa02ccbcdcfb782456',
   'cygwin_revision': 'c89e446b273697fadf3a10ff1007a97c0b7de6df',
   'googletest_revision': '4bab34d2084259cba67f3bfb51217c10d606e175',
   'grit_revision': '23c6349a5deb7adc87c3eaf663e49e16bc965665',
   'gyp_revision': 'eb296f67da078ec01f5e3a9ea9cdc6d26d680161',
-  'icu_revision': 'dfa798fe694702b43a3debc3290761f22b1acaf8',
+  'icu_revision': '1fec0c83e9ad7f5a075ae0b50af9a3889f54be0e',
   'idl_parser_revision': 'd74461af78482f3a0da6bb24b1850eb671f871f6',
   'instrumented_libraries_revision': '644afd349826cb68204226a16c38bde13abe9c3c',
   'jinja2_revision': 'd34383206fa42d52faa10bb9931d6d538f3a57e0',
@@ -23,7 +23,7 @@ vars = {
   'ply_revision': '4a6baf95860033d4c69d3e3087696b30c687622c',
   'testing_revision': 'f6cc382f24defcd8d5d48b2a5621cc63e52c8057',
   'tools_win_revision': '955e8f7918e90834ee69aa65f1d38666771b9440',
-  'v8_revision': '248b789e106abdf7b0a92d11a43f038307403358', # 6.1.496
+  'v8_revision': 'd725114e6aed1b2ee60db68e398b3716a8b2bb10', # 6.2.2
   'zlib_revision': '1782c7b1c6934f6970c4517fddc92537812cfd4f',
 
   # github

@@ -31,10 +31,12 @@
 #       arbitrary, but that "X" is standard, e.g. [Attr=X], [Attr=Foo].
 #
 
+# Evita extensions
 CallWith=Runner|ScriptHost|ViewDelegate
 JsNamespace=*
 
 ActiveScriptWrappable
+AllowShared
 CEReactions
 CachedAccessor
 CachedAttribute=*
@@ -45,6 +47,7 @@ Constructor
 # FIXME: remove [ConstructorCallWith=Document], as can instead use
 # [ConstructorCallWith=ExecutionContext] + toDocument(executionContext)
 ConstructorCallWith=ExecutionContext|ScriptState|Document
+ContextEnabled=*
 CrossOrigin=|Getter|Setter
 Custom=|Getter|Setter|LegacyCallAsFunction|PropertyGetter|PropertyEnumerator|PropertyQuery|CallPrologue|CallEpilogue
 CustomConstructor
@@ -55,7 +58,6 @@ DeprecateAs=*
 DoNotCheckConstants
 DoNotTestNewObject
 EnforceRange
-ExperimentalCallbackFunction
 Exposed=*
 FeaturePolicy=*
 FlexibleArrayBufferView
@@ -63,7 +65,6 @@ Global=|*
 HTMLConstructor
 ImmutablePrototype
 ImplementedAs=*
-Iterable
 LegacyInterfaceTypeChecking
 LegacyTreatAsPartialInterface
 LenientThis
@@ -93,6 +94,9 @@ Replaceable
 # Valid values for [RuntimeEnabled] are the Runtime Enabled Features, listed in
 # Source/platform/RuntimeEnabledFeatures.json5
 RuntimeEnabled=*
+# Valid values for [RuntimeCallStatsCounter] are counters defined in
+# Source/platform/bindings/RuntimeCallStats.h
+RuntimeCallStatsCounter=*
 SameObject
 SaveSameObject
 SecureContext

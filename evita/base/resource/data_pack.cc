@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <iterator>
+#include <utility>
 
 #include "base/files/file.h"
 #include "base/files/memory_mapped_file.h"
@@ -21,13 +22,15 @@ namespace {
 // Format of Data Pack file
 //
 //      +-----------------------+
-//  +0  | version(=4)           |
+//  +0  | version(=5)           |
 //      +-----------------------+
-//  +4  | number of entries(=N) |
+//  +4  | encoding type         | 0=binary, 1=UTF8, 2=UTF16
 //      +-----------------------+
-//  +8  | encoding type         | 0=binary, 1=UTF8, 2=UTF16
+//  +8  | resource_count        |
 //      +-----------------------+
-//  +9  | DataPackEntry[0]      |
+//  +10 | alias_count           |
+//      +-----------------------+
+//  +12 | DataPackEntry[0]      |
 //      +-----------------------+
 //  +15 | DataPackEntry[1]      |
 //      +-----------------------+
@@ -40,14 +43,29 @@ namespace {
 //      | ... data ...          |
 //
 
-const uint32_t kFileFormatVersion = 4;
-// Length of file header: version, entry count and text encoding type.
-const size_t kHeaderLength = 2 * sizeof(uint32_t) + sizeof(uint8_t);
+const uint32_t kFileFormatVersion = 5;
+
+// int32(version), int8(encoding), 3 bytes padding,
+// int16(resource_count), int16(alias_count)
+static const size_t kHeaderLength =
+    sizeof(uint32_t) + sizeof(uint8_t) * 4 + sizeof(uint16_t) * 2;
 
 #pragma pack(push, 2)
 struct DataPackEntry {
   uint16_t resource_id;
   uint32_t file_offset;
+};
+
+struct DataPackAlias {
+  uint16_t resource_id;
+  uint16_t entry_index;
+
+  static int CompareById(const void* void_key, const void* void_entry) {
+    uint16_t key = *reinterpret_cast<const uint16_t*>(void_key);
+    const DataPackAlias* entry =
+        reinterpret_cast<const DataPackAlias*>(void_entry);
+    return key - entry->resource_id;
+  }
 };
 #pragma pack(pop)
 
@@ -170,20 +188,23 @@ bool DataPack::LoadInternal(std::unique_ptr<base::MemoryMappedFile> mmap) {
 
   // Parse the header of the file.
   // First uint32_t: version; second: resource count;
-  const uint32_t* ptr = reinterpret_cast<const uint32_t*>(mmap->data());
-  uint32_t version = ptr[0];
+  const auto* ptr = reinterpret_cast<const uint8_t*>(mmap->data());
+  uint32_t version = *reinterpret_cast<const uint32_t*>(ptr);
   if (version != kFileFormatVersion) {
     LOG(ERROR) << "Bad data pack version: got " << version << ", expected "
                << kFileFormatVersion;
     return false;
   }
-  resource_count_ = ptr[1];
+  resource_count_ = *reinterpret_cast<const uint16_t*>(ptr + 8);
+  int alias_count = *reinterpret_cast<const uint16_t*>(ptr + 10);
 
   // Sanity check the file.
   // 1) Check we have enough entries. There's an extra entry after the last item
   // which gives the length of the last item.
-  if (kHeaderLength + (resource_count_ + 1) * sizeof(DataPackEntry) >
-      mmap->length()) {
+  const size_t resource_table_size =
+      (resource_count_ + 1) * sizeof(DataPackEntry);
+  const size_t alias_table_size = alias_count * sizeof(DataPackAlias);
+  if (kHeaderLength + resource_table_size + alias_table_size > mmap->length()) {
     LOG(ERROR) << "Data pack file corruption: too short for number of "
                   "entries specified.";
     mmap.reset();
@@ -195,8 +216,10 @@ bool DataPack::LoadInternal(std::unique_ptr<base::MemoryMappedFile> mmap) {
     const DataPackEntry* entry = reinterpret_cast<const DataPackEntry*>(
         mmap->data() + kHeaderLength + (i * sizeof(DataPackEntry)));
     if (entry->file_offset > mmap->length()) {
-      LOG(ERROR) << "Entry #" << i << " in data pack points off end of file. "
-                 << "Was the file corrupted?";
+      LOG(ERROR) << "Entry[" << i << "]=" << entry->resource_id << "@"
+                 << entry->file_offset << " resource_cont=" << resource_count_
+                 << " alias_count=" << alias_count
+                 << " file size=" << mmap->length();
       return false;
     }
   }

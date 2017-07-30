@@ -11,5 +11,4 @@ windows_manifest("evita_exe_manifest") {
     common_controls_manifest,
     default_compatibility_manifest,
   ]
-  type = "exe"
 }

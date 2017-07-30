@@ -4,7 +4,7 @@
 
 vars = {
   'chromium_git': 'https://chromium.googlesource.com',
-  'github.git': 'https://github.com',
+  'github_git': 'https://github.com',
 
   'base_revision': '9ac67cf1f07810cf661c17d80b8bd290c8de6064',
   'build_revision': '277effef1fee496ae92426e3b0f59eaa645bfe81',
@@ -92,10 +92,10 @@ deps = {
 
   # From github
   'src/third_party/autopep8':
-    Var('github.git') + '/hhatto/autopep8.git' + '@' + Var('autopep8_revision'),
+    Var('github_git') + '/hhatto/autopep8.git' + '@' + Var('autopep8_revision'),
 
   'src/third_party/pep8':
-    Var('github.git') + '/PyCQA/pep8.git' + '@' + Var('pep8_revision'),
+    Var('github_git') + '/PyCQA/pep8.git' + '@' + Var('pep8_revision'),
 }
 
 hooks = [

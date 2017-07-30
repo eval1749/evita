@@ -107,7 +107,8 @@ Application* Application::GetInstance() {
 
 void Application::Quit() {
   is_quit_ = true;
-  message_loop_->QuitWhenIdle();
+  message_loop_->task_runner()->PostTask(
+      FROM_HERE, base::MessageLoop::QuitWhenIdleClosure());
 }
 
 void Application::Run() {

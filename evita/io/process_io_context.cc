@@ -77,7 +77,8 @@ uint32_t ProcessIoContext::CloseProcess() {
     stdin_write_.release();
   }
   if (gateway_thread_->IsRunning())
-    gateway_thread_->message_loop()->QuitWhenIdle();
+    gateway_thread_->message_loop()->task_runner()->PostTask(
+        FROM_HERE, base::MessageLoop::QuitWhenIdleClosure());
   return 0;
 }
 

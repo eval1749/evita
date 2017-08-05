@@ -24,7 +24,7 @@ void IdleTaskQueue::CancelTask(int task_id) {
 }
 
 int IdleTaskQueue::GiveTask(const IdleTask& task_in) {
-  auto const task = new IdleTask(task_in);
+  auto* const task = new IdleTask(task_in);
   task_map_.insert({task->id(), task});
   if (task->delayed_run_time != base::TimeTicks())
     waiting_tasks_.push(task);
@@ -56,7 +56,7 @@ void IdleTaskQueue::RunIdleTasks(const base::TimeTicks& deadline) {
       break;
     if (should_stop_.load())
       break;
-    auto const task = ready_tasks_.front();
+    auto* const task = ready_tasks_.front();
     ready_tasks_.pop();
     if (!task->IsCanceled())
       task->Run(deadline);

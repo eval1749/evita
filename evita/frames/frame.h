@@ -9,6 +9,7 @@
 
 #include <shellapi.h>
 
+#include <memory>
 #include <unordered_set>
 #include <vector>
 
@@ -97,7 +98,7 @@ class Frame final : public views::Window,
   void WillRemoveChildWidget(ui::Widget* old_child) final;
 
   // views::TabContentObserver
-  void DidActivateTabContent(TabContent* tab_content);
+  void DidActivateTabContent(TabContent* tab_content) final;
 
   // views::TabDataSet::Observer
   void DidSetTabData(domapi::WindowId window_id,

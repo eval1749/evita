@@ -25,7 +25,7 @@ common::ComPtr<IDWriteTextFormat> CreateTextFormat(
       font_face_name.c_str(), nullptr, DWRITE_FONT_WEIGHT_REGULAR,
       DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, size.height,
       L"en-us", &text_format));
-  return std::move(text_format);
+  return text_format;
 }
 
 }  // namespace

@@ -24,8 +24,6 @@ namespace dom {
 class PromiseResolver final
     : public base::RefCountedThreadSafe<PromiseResolver> {
  public:
-  ~PromiseResolver();
-
   template <typename ResolveType, typename RejectType>
   static v8::Local<v8::Promise> Call(
       const tracked_objects::Location& from_here,
@@ -41,8 +39,12 @@ class PromiseResolver final
   void Resolve(T value);
 
  private:
+  friend class base::RefCountedThreadSafe<PromiseResolver>;
+
   PromiseResolver(const tracked_objects::Location& from_here,
                   ginx::Runner* runner);
+
+  ~PromiseResolver();
 
   ginx::Runner* runner() const {
     return reinterpret_cast<ginx::Runner*>(runner_.get());
@@ -63,7 +65,7 @@ template <typename T, typename U>
 v8::Local<v8::Promise> PromiseResolver::Call(
     const tracked_objects::Location& from_here,
     const base::Callback<void(const domapi::Promise<T, U>&)> closure) {
-  const auto runner = ScriptHost::instance()->runner();
+  auto* const runner = ScriptHost::instance()->runner();
   ginx::Runner::EscapableHandleScope runner_scope(runner);
 
   const auto& resolver =
@@ -82,7 +84,7 @@ void PromiseResolver::Reject(T reason) {
   if (!runner_)
     return;
   ginx::Runner::Scope runner_scope(runner());
-  const auto isolate = runner()->isolate();
+  auto* const isolate = runner()->isolate();
   v8::Local<v8::Value> v8_value;
   if (!gin::TryConvertToV8(isolate, reason, &v8_value))
     return;
@@ -94,7 +96,7 @@ void PromiseResolver::Resolve(T value) {
   if (!runner_)
     return;
   ginx::Runner::Scope runner_scope(runner());
-  const auto isolate = runner()->isolate();
+  auto* const isolate = runner()->isolate();
   v8::Local<v8::Value> v8_value;
   if (!gin::TryConvertToV8(isolate, value, &v8_value))
     return;

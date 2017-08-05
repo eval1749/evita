@@ -17,7 +17,7 @@ TEST(AtomicStringTest, Map) {
   map.emplace(AtomicString(L"one"), 1);
   map.emplace(AtomicString(L"two"), 2);
 
-  EXPECT_EQ(2, map.size());
+  EXPECT_EQ(2u, map.size());
   EXPECT_EQ(AtomicString(L"one"), map.find(AtomicString(L"one"))->first);
   EXPECT_EQ(1, map.find(AtomicString(L"one"))->second);
   EXPECT_EQ(AtomicString(L"two"), map.find(AtomicString(L"two"))->first);
@@ -47,7 +47,7 @@ TEST(AtomicStringTest, UnorderedMap) {
   map.emplace(AtomicString(L"one"), 1);
   map.emplace(AtomicString(L"two"), 2);
 
-  EXPECT_EQ(2, map.size());
+  EXPECT_EQ(2u, map.size());
   EXPECT_EQ(AtomicString(L"one"), map.find(AtomicString(L"one"))->first);
   EXPECT_EQ(1, map.find(AtomicString(L"one"))->second);
   EXPECT_EQ(AtomicString(L"two"), map.find(AtomicString(L"two"))->first);

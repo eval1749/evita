@@ -49,7 +49,7 @@ Zone::Segment::Segment(size_t size, Segment* next)
       memory_(new char[max_offset_]) {}
 
 Zone::Segment::~Segment() {
-  delete memory_;
+  delete[] memory_;
 }
 
 void* Zone::Segment::Allocate(size_t size) {
@@ -57,7 +57,7 @@ void* Zone::Segment::Allocate(size_t size) {
   const auto next_offset = offset_ + allocate_size;
   if (next_offset > max_offset_)
     return nullptr;
-  const auto result = &memory_[offset_];
+  auto* const result = &memory_[offset_];
   offset_ = next_offset;
   return result;
 }
@@ -73,9 +73,9 @@ Zone::Zone(Zone&& other) : name_(other.name_), segment_(other.segment_) {
 Zone::Zone(const char* name) : name_(name), segment_(new Segment(0, nullptr)) {}
 
 Zone::~Zone() {
-  auto segment = segment_;
+  auto* segment = segment_;
   while (segment) {
-    const auto next_segment = segment->next();
+    auto* const next_segment = segment->next();
     delete segment;
     segment = next_segment;
   }
@@ -89,7 +89,7 @@ Zone& Zone::operator=(Zone&& other) {
 
 void* Zone::Allocate(size_t size) {
   for (;;) {
-    if (const auto pointer = segment_->Allocate(size))
+    if (auto* const pointer = segment_->Allocate(size))
       return pointer;
     segment_ = new Segment(size, segment_);
   }

@@ -37,7 +37,7 @@ bool FormControl::State::operator!=(const State& other) const {
 std::ostream& operator<<(std::ostream& ostream,
                          const FormControl::State& state) {
   ostream << '{';
-  auto delimiter = "";
+  auto* delimiter = "";
 
 #define V(Name, name)              \
   if (state.name()) {              \
@@ -200,7 +200,7 @@ TextField::~TextField() {}
 
 // FormControl
 bool TextField::InternalEqualsTo(const FormControl& other) const {
-  const auto other_text_field = other.as<TextField>();
+  auto* const other_text_field = other.as<TextField>();
   return scroll_left_ == other_text_field->scroll_left_ &&
          selection_ == other_text_field->selection_ &&
          text_ == other_text_field->text_;

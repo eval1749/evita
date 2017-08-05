@@ -15,7 +15,7 @@ const char* UnitToString(Unit unit) {
       FOR_EACH_CSS_UNIT(V)
 #undef V
   };
-  const auto& it = std::begin(texts) + static_cast<size_t>(unit);
+  auto* const* it = std::begin(texts) + static_cast<size_t>(unit);
   if (it < std::begin(texts) || it >= std::end(texts))
     return "???";
   return *it;

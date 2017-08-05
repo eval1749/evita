@@ -14,7 +14,7 @@ std::ostream& operator<<(std::ostream& ostream, CursorId cursor_id) {
       FOR_EACH_DOMAPI_CURSOR(V)
 #undef V
   };
-  const auto& it = std::begin(texts) + static_cast<size_t>(cursor_id);
+  auto* const* const it = std::begin(texts) + static_cast<size_t>(cursor_id);
   if (it < std::begin(texts) || it >= std::end(texts))
     return ostream << "CursorId::???";
   return ostream << "CursorId::" << *it;

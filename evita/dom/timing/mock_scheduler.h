@@ -5,6 +5,7 @@
 #ifndef EVITA_DOM_TIMING_MOCK_SCHEDULER_H_
 #define EVITA_DOM_TIMING_MOCK_SCHEDULER_H_
 
+#include <memory>
 #include <queue>
 #include <unordered_map>
 
@@ -36,7 +37,7 @@ class MockScheduler final : public Scheduler {
   // dom::Scheduler
   void CancelAnimationFrame(int callback_id) final;
   void CancelIdleTask(int task_id) final;
-  void DidBeginFrame(const base::TimeTicks& deadline) final { NOTREACHED(); }
+  void DidBeginFrame(const base::TimeTicks& deadline) final;
   int RequestAnimationFrame(
       std::unique_ptr<AnimationFrameCallback> callback) final;
   int ScheduleIdleTask(const IdleTask& task) final;

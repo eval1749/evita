@@ -14,7 +14,7 @@ std::ostream& operator<<(std::ostream& ostream, ScrollBarOrientation part) {
       FOR_EACH_SCROLL_BAR_ORIENTATION(V)
 #undef V
   };
-  const auto& it = std::begin(texts) + static_cast<size_t>(part);
+  auto* const* const it = std::begin(texts) + static_cast<size_t>(part);
   if (it < std::begin(texts) || it >= std::end(texts))
     return ostream << "ScrollBarOrientation::???";
   return ostream << "ScrollBarOrientation::" << *it;

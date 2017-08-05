@@ -18,7 +18,7 @@ template <typename BaseType, typename PointType, typename SizeType>
 class Rect_ final : public BaseType {
  public:
   typedef typename SizeType::UnitType UnitType;
-  Rect_() { left = top = right = bottom = 0; }
+  Rect_() { this->left = this->top = this->right = this->bottom = 0; }
   Rect_(UnitType left, UnitType top, UnitType right, UnitType bottom) {
     this->left = left;
     this->top = top;
@@ -39,30 +39,30 @@ class Rect_ final : public BaseType {
     this->bottom = static_cast<UnitType>(other.bottom());
   }
   Rect_(const PointType& origin, const PointType& bottom_right) {
-    left = origin.x;
-    top = origin.y;
-    right = bottom_right.x;
-    bottom = bottom_right.y;
+    this->left = origin.x;
+    this->top = origin.y;
+    this->right = bottom_right.x;
+    this->bottom = bottom_right.y;
   }
   Rect_(const PointType& origin, const SizeType& size) {
-    left = origin.x;
-    top = origin.y;
-    right = left + size.width;
-    bottom = top + size.height;
+    this->left = origin.x;
+    this->top = origin.y;
+    this->right = this->left + size.width;
+    this->bottom = this->top + size.height;
   }
   explicit Rect_(const SizeType& size) {
-    left = 0;
-    top = 0;
-    right = size.width;
-    bottom = size.height;
+    this->left = 0;
+    this->top = 0;
+    this->right = size.width;
+    this->bottom = size.height;
   }
 
   operator RECT() const {
     RECT rc;
-    rc.left = static_cast<long>(left);      // NOLINT
-    rc.top = static_cast<long>(top);        // NOLINT
-    rc.right = static_cast<long>(right);    // NOLINT
-    rc.bottom = static_cast<long>(bottom);  // NOLINT
+    rc.left = static_cast<long>(this->left);      // NOLINT
+    rc.top = static_cast<long>(this->top);        // NOLINT
+    rc.right = static_cast<long>(this->right);    // NOLINT
+    rc.bottom = static_cast<long>(this->bottom);  // NOLINT
     return rc;
   }
 
@@ -89,21 +89,21 @@ class Rect_ final : public BaseType {
   }
 
   Rect_& operator*=(const SizeType& size) {
-    left *= size.width;
-    top *= size.height;
-    right *= size.width;
-    bottom *= size.height;
+    this->left *= size.width;
+    this->top *= size.height;
+    this->right *= size.width;
+    this->bottom *= size.height;
     return *this;
   }
 
   bool operator==(const Rect_& other) const {
-    return left == other.left && top == other.top && right == other.right &&
-           bottom == other.bottom;
+    return this->left == other.left && this->top == other.top &&
+           this->right == other.right && this->bottom == other.bottom;
   }
 
   bool operator!=(const Rect_& other) const {
-    return left != other.left || top != other.top || right != other.right ||
-           bottom != other.bottom;
+    return this->left != other.left || this->top != other.top ||
+           this->right != other.right || this->bottom != other.bottom;
   }
 
   bool operator<(const Rect_& other) const;
@@ -112,9 +112,11 @@ class Rect_ final : public BaseType {
   bool operator>=(const Rect_& other) const;
 
   UnitType area() const { return width() * height(); }
-  PointType bottom_left() const { return PointType(left, bottom); }
-  PointType bottom_right() const { return PointType(right, bottom); }
-  UnitType height() const { return bottom - top; }
+  PointType bottom_left() const { return PointType(this->left, this->bottom); }
+  PointType bottom_right() const {
+    return PointType(this->right, this->bottom);
+  }
+  UnitType height() const { return this->bottom - this->top; }
 
   // Return true if the area is zero or negative.
   bool empty() const { return width() <= 0 || height() <= 0; }
@@ -122,25 +124,25 @@ class Rect_ final : public BaseType {
   // Returns true if the area of the rectangle is zero.
   bool is_zero() const { return !width() && !height(); }
 
-  PointType origin() const { return PointType(left, top); }
+  PointType origin() const { return PointType(this->left, this->top); }
   void set_origin(const PointType& origin) {
     auto const width = this->width();
     auto const height = this->height();
-    left = origin.x;
-    top = origin.y;
-    right = left + width;
-    bottom = top + height;
+    this->left = origin.x;
+    this->top = origin.y;
+    this->right = this->left + width;
+    this->bottom = this->top + height;
   }
 
   SizeType size() const { return SizeType(width(), height()); }
   void set_size(const SizeType& size) {
-    right = left + size.width;
-    bottom = top + size.height;
+    this->right = this->left + size.width;
+    this->bottom = this->top + size.height;
   }
 
-  PointType top_right() const { return PointType(right, top); }
+  PointType top_right() const { return PointType(this->right, this->top); }
 
-  UnitType width() const { return right - left; }
+  UnitType width() const { return this->right - this->left; }
 
   // Returns true if the point identified by point_x and point_y falls inside
   // this rectangle.  The point (x, y) is inside the rectangle, but the

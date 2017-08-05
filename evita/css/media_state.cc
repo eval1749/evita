@@ -17,7 +17,7 @@ std::ostream& operator<<(std::ostream& ostream, MediaState media_state) {
       FOR_EACH_CSS_MEDIA_STATE(V)
 #undef V
   };
-  const auto& it = std::begin(texts) + static_cast<size_t>(media_state);
+  auto* const* it = std::begin(texts) + static_cast<size_t>(media_state);
   return ostream << (it < std::end(texts) ? *it : "???");
 }
 

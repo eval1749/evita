@@ -29,7 +29,7 @@ class StyleSheet final : public gc::Collectable<StyleSheet> {
 
  public:
   StyleSheet();
-  ~StyleSheet();
+  ~StyleSheet() final;
 
   const std::vector<Rule*>& rules() const { return rules_; }
 

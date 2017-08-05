@@ -43,7 +43,7 @@ class AbstractScriptable : public gc::Collectable<AbstractScriptable> {
 
  protected:
   AbstractScriptable();
-  virtual ~AbstractScriptable();
+  ~AbstractScriptable() override;
 
  private:
   static void WeakCallback(

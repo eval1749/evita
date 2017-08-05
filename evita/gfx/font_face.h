@@ -20,10 +20,10 @@ namespace gfx {
 // FontProperties
 //
 struct FontProperties {
-  bool bold;
+  bool bold = false;
   base::string16 family_name;
-  float font_size_pt;
-  bool italic;
+  float font_size_pt = 0;
+  bool italic = false;
 
   FontProperties();
   bool operator==(const FontProperties& other) const;

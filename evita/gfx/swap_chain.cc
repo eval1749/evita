@@ -102,7 +102,7 @@ std::unique_ptr<SwapChain> SwapChain::CreateForComposition(
 std::unique_ptr<SwapChain> SwapChain::CreateForHwnd(HWND hwnd) {
   DCHECK(hwnd);
 
-  auto const device = DxDevice::instance();
+  auto* const device = DxDevice::instance();
 
   DXGI_SWAP_CHAIN_DESC1 swap_chain_desc = {0};
   swap_chain_desc.Width = 0;  // use automatic sizing

@@ -15,7 +15,7 @@ namespace domapi {
 Form::Form(int id) : id_(id) {}
 
 Form::~Form() {
-  for (const auto& control : controls_)
+  for (auto* const control : controls_)
     delete control;
 }
 
@@ -27,7 +27,7 @@ bool Form::operator==(const Form& other) const {
   if (controls_.size() != other.controls_.size())
     return false;
   auto other_controls = other.controls_.begin();
-  for (const auto& control : other.controls_) {
+  for (auto* const control : other.controls_) {
     if (control != *other_controls)
       return false;
   }

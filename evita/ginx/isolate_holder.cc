@@ -12,4 +12,6 @@ IsolateHolder::IsolateHolder()
     : gin::IsolateHolder(base::ThreadTaskRunnerHandle::Get()),
       isolate_data_(new PerIsolateData(isolate())) {}
 
+IsolateHolder::~IsolateHolder() = default;
+
 }  // namespace ginx

@@ -50,7 +50,7 @@ class Lock final : public common::Singleton<Lock> {
     DISALLOW_COPY_AND_ASSIGN(AutoUnlock);
   };
 
-  virtual ~Lock();
+  ~Lock() final;
 
   bool locked_by_dom() const { return locked_by_dom_; }
   void set_locked_by_dom() { locked_by_dom_ = true; }

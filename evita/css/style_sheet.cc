@@ -17,13 +17,13 @@ namespace css {
 StyleSheet::StyleSheet() {}
 
 StyleSheet::~StyleSheet() {
-  for (const auto& rule : rules_)
+  for (auto* const rule : rules_)
     delete rule;
 }
 
 void StyleSheet::AppendRule(const Selector& selector,
                             std::unique_ptr<css::Style> style) {
-  const auto rule = new Rule(selector, std::move(style));
+  auto* const rule = new Rule(selector, std::move(style));
   const auto index = rules_.size();
   rules_.push_back(rule);
   for (auto& observer : observers_)
@@ -37,7 +37,7 @@ void StyleSheet::AddObserver(StyleSheetObserver* observer) const {
 void StyleSheet::InsertRule(const Selector& selector,
                             std::unique_ptr<css::Style> style,
                             size_t index) {
-  const auto rule = new Rule(selector, std::move(style));
+  auto* const rule = new Rule(selector, std::move(style));
   rules_.insert(rules_.begin() + index, rule);
   for (auto& observer : observers_)
     observer.DidInsertRule(*rule, index);
@@ -49,7 +49,7 @@ void StyleSheet::RemoveObserver(StyleSheetObserver* observer) const {
 
 void StyleSheet::RemoveRule(size_t index) {
   const auto& it = rules_.begin() + index;
-  const auto& old_rule = *it;
+  auto* const old_rule = *it;
   rules_.erase(it);
   for (auto& observer : observers_)
     observer.DidRemoveRule(*old_rule, index);

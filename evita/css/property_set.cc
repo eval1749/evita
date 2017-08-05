@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include <ostream>
+#include <utility>
 
 #include "evita/css/property_set.h"
 
@@ -77,7 +78,7 @@ Value PropertySet::ValueOf(PropertyId property_id) const {
 std::ostream& operator<<(std::ostream& ostream,
                          const PropertySet& property_set) {
   ostream << '{';
-  auto delimiter = "";
+  auto* delimiter = "";
   for (const auto& property : property_set) {
     ostream << delimiter << property.id() << ':' << property.value();
     delimiter = ", ";

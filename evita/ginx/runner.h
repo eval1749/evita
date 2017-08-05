@@ -73,7 +73,7 @@ class Runner : public gin::Runner {
   };
 
   explicit Runner(v8::Isolate* isolate, RunnerDelegate* delegate);
-  ~Runner();
+  ~Runner() final;
 
   v8::Local<v8::Context> context() const;
   v8::Isolate* isolate() const;

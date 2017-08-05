@@ -14,8 +14,8 @@ class Point_ final : public BaseType {
  public:
   typedef typename SizeType::UnitType UnitType;
   Point_(const Point_& other) {
-    x = other.x;
-    y = other.y;
+    this->x = other.x;
+    this->y = other.y;
   }
   Point_(UnitType x, UnitType y) {
     this->x = x;
@@ -26,8 +26,8 @@ class Point_ final : public BaseType {
     this->y = static_cast<UnitType>(y);
   }
   explicit Point_(const POINT& point) {
-    x = static_cast<UnitType>(point.x);
-    y = static_cast<UnitType>(point.y);
+    this->x = static_cast<UnitType>(point.x);
+    this->y = static_cast<UnitType>(point.y);
   }
   Point_() {
     this->x = static_cast<UnitType>(0);
@@ -35,69 +35,69 @@ class Point_ final : public BaseType {
   }
 
   Point_& operator=(const Point_& other) {
-    x = other.x;
-    y = other.y;
+    this->x = other.x;
+    this->y = other.y;
     return *this;
   }
 
   Point_& operator+=(const Point_& other) {
-    x += other.x;
-    y += other.y;
+    this->x += other.x;
+    this->y += other.y;
     return *this;
   }
 
   Point_& operator+=(const SizeType& other) {
-    x += other.width;
-    y += other.height;
+    this->x += other.width;
+    this->y += other.height;
     return *this;
   }
 
   Point_& operator-=(const Point_& other) {
-    x -= other.x y -= other.y;
+    this->x -= other.x y -= other.y;
     return *this;
   }
 
   Point_& operator-=(const SizeType& other) {
-    x -= other.width y -= other.height;
+    this->x -= other.width y -= other.height;
     return *this;
   }
 
   bool operator==(const Point_& other) const {
-    return x == other.x && y == other.y;
+    return this->x == other.x && this->y == other.y;
   }
 
   bool operator!=(const Point_& other) const { return !operator==(other); }
 
   Point_ operator+(const Point_& other) const {
-    return Point_(x + other.x, y + other.y);
+    return Point_(this->x + other.x, this->y + other.y);
   }
 
   Point_ operator+(const SizeType& size) const {
-    return Point_(x + size.width, y + size.height);
+    return Point_(this->x + size.width, this->y + size.height);
   }
 
   Point_ operator-(const Point_& other) const {
-    return Point_(x - other.x, y - other.y);
+    return Point_(this->x - other.x, this->y - other.y);
   }
 
   Point_ operator-(const SizeType& size) const {
-    return Point_(x - size.width, y - size.height);
+    return Point_(this->x - size.width, this->y - size.height);
   }
 
   Point_ operator*(const Point_& other) const {
-    return Point_(x * other.x, y * other.y);
+    return Point_(this->x * other.x, this->y * other.y);
   }
 
   Point_ operator*(const SizeType& size) const {
-    return Point_(x * size.width, y * size.height);
+    return Point_(this->x * size.width, this->y * size.height);
   }
 
   Point_ operator/(UnitType divisor) const {
-    return Point_(x / divisor, y / divisor);
+    return Point_(this->x / divisor, this->y / divisor);
   }
 
   Point_ Offset(UnitType delta_x, UnitType delta_y) const {
-    return Point_(x + delta_x, y + delta_y);
+    return Point_(this->x + delta_x, this->y + delta_y);
   }
 };
 typedef Point_<D2D1_POINT_2F, SizeF> PointF;

@@ -21,7 +21,8 @@ IdleTask::IdleTask(const tracked_objects::Location& posted_from,
                    const Callback& callback)
     : IdleTask(posted_from, callback, base::TimeTicks()) {}
 
-IdleTask::~IdleTask() {}
+IdleTask::IdleTask(const IdleTask&) = default;
+IdleTask::~IdleTask() = default;
 
 bool IdleTask::operator<(const IdleTask& other) const {
   // Since the top of a priority queue is defined as the "greatest" element, we

@@ -15,10 +15,10 @@ class Size_ final : public BaseType {
  public:
   typedef UnitType UnitType;
 
-  Size_() { width = height = 0; }
+  Size_() { this->width = this->height = 0; }
   explicit Size_(const BaseType& other) {
-    width = other.width;
-    height = other.height;
+    this->width = other.width;
+    this->height = other.height;
   }
   Size_(UnitType width, UnitType height) {
     // TODO(eval1749): We should not allow negative |width| and |height|.
@@ -48,10 +48,10 @@ class Size_ final : public BaseType {
   Size_ operator/(const Size_& other) const;
   Size_ operator/(UnitType scalar) const;
 
-  bool empty() const { return width <= 0 || height <= 0; }
-  bool is_zero() const { return !width && !height; }
+  bool empty() const { return this->width <= 0 || this->height <= 0; }
+  bool is_zero() const { return !this->width && !this->height; }
 
-  UnitType GetArea() const { return width * height; }
+  UnitType GetArea() const { return this->width * this->height; }
 };
 
 template <typename BaseType, typename UnitType>

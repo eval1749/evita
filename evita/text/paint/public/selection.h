@@ -22,7 +22,6 @@ class Selection final : public base::RefCounted<Selection> {
  public:
   Selection(const gfx::ColorF& color,
             const std::unordered_set<gfx::RectF>& bounds_set);
-  ~Selection();
 
   const gfx::ColorF& color() const { return color_; }
   const std::unordered_set<gfx::RectF>& bounds_set() const {
@@ -33,6 +32,8 @@ class Selection final : public base::RefCounted<Selection> {
 
  private:
   friend class base::RefCounted<Selection>;
+
+  ~Selection();
 
   const std::unordered_set<gfx::RectF> bounds_set_;
   const gfx::ColorF color_;

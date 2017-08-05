@@ -77,7 +77,7 @@ base::string16 WinRegistry::ReadString(const base::string16& path,
   const auto last_slash = path.find_last_of('\\');
   DCHECK_NE(last_slash, base::string16::npos);
   const auto& root_name = path.substr(0, first_slash);
-  const auto root_key = RootKeyMap::GetInstance()->Get(root_name);
+  auto* const root_key = RootKeyMap::GetInstance()->Get(root_name);
   if (!root_key) {
     exception_state->ThrowError(
         base::StringPrintf("Invalid root key %ls", root_name.c_str()));

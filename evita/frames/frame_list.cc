@@ -19,7 +19,7 @@ void FrameList::AddFrame(Frame* frame) {
 }
 
 Frame* FrameList::FindFrameByHwnd(HWND hwnd) const {
-  for (auto frame : frames_) {
+  for (auto* frame : frames_) {
     if (frame->AssociatedHwnd() == hwnd)
       return frame;
   }
@@ -39,7 +39,7 @@ void FrameList::RemoveFrame(Frame* frame) {
 
   if (active_frame_ == frame) {
     active_frame_ = nullptr;
-    for (auto candidate : frames_) {
+    for (auto* candidate : frames_) {
       if (!active_frame_ ||
           active_frame_->active_tick() < candidate->active_tick()) {
         active_frame_ = candidate;

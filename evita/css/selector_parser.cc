@@ -191,7 +191,7 @@ Selector Parser::Parse(base::StringPiece16 text) {
     case kTagName:
       if (text[start] == ':' && length < 3)
         return Error(L"Empty pseudo-element", text.length());
-      DCHECK_GT(length, 0);
+      DCHECK_GT(length, 0u);
       builder.SetTagName(text.substr(start, length));
       break;
     default:

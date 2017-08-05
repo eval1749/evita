@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include "evita/gfx/font.h"
@@ -21,7 +22,7 @@ bool IsCacheableChar(base::char16 wch) {
 }
 
 bool IsCachableString(const base::char16* pwch, size_t cwch) {
-  for (auto s = pwch; s < pwch + cwch; ++s) {
+  for (auto* s = pwch; s < pwch + cwch; ++s) {
     if (!IsCacheableChar(*s))
       return false;
   }
@@ -44,7 +45,7 @@ class Font::Cache final : public common::Singleton<Font::Cache> {
 
  private:
   Cache() = default;
-  ~Cache() = default;
+  ~Cache() final = default;
 
   std::unordered_map<gfx::FontProperties, Font*> map_;
 
@@ -55,7 +56,7 @@ const Font& Font::Cache::GetOrCreate(const gfx::FontProperties& font_props) {
   const auto present = map_.find(font_props);
   if (present != map_.end())
     return *present->second;
-  auto new_font = new Font(font_props);
+  auto* const new_font = new Font(font_props);
   map_[font_props] = new_font;
   return *new_font;
 }
@@ -186,7 +187,7 @@ std::vector<uint16_t> Font::FontImpl::GetGlyphIndexes(const base::char16* chars,
   DCHECK_GE(num_chars, 1u);
   std::vector<uint32_t> code_points(num_chars);
   auto it = code_points.begin();
-  for (auto s = chars; s < chars + num_chars; ++s) {
+  for (auto* s = chars; s < chars + num_chars; ++s) {
     *it = *s;
     ++it;
   }

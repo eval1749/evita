@@ -87,30 +87,30 @@ TEST_F(PropertySetTest, Editor) {
           .Build();
 
   PropertySet::Editor().SetColor(&set1, Value(ColorValue::Rgba(192, 192, 128)));
-  EXPECT_EQ(2, NumberOfProperties(set1));
+  EXPECT_EQ(2u, NumberOfProperties(set1));
   EXPECT_EQ(Value(ColorValue::Rgba(192, 192, 128)),
             set1.ValueOf(PropertyId::Color));
 
   PropertySet::Editor().SetDisplay(&set1, Value(Keyword::None));
   EXPECT_TRUE(set1.Contains(PropertyId::Display));
-  EXPECT_EQ(3, NumberOfProperties(set1));
+  EXPECT_EQ(3u, NumberOfProperties(set1));
 
   PropertySet::Editor().SetDisplay(&set1, Value(Keyword::Inline));
-  EXPECT_EQ(3, NumberOfProperties(set1));
+  EXPECT_EQ(3u, NumberOfProperties(set1));
 
   PropertySet::Editor().RemoveColor(&set1);
-  EXPECT_EQ(2, NumberOfProperties(set1));
+  EXPECT_EQ(2u, NumberOfProperties(set1));
   EXPECT_FALSE(set1.Contains(PropertyId::Color));
 
   PropertySet::Editor().SetWidth(&set1, Value(Dimension(1.5f, Unit::px)));
-  EXPECT_EQ(3, NumberOfProperties(set1));
+  EXPECT_EQ(3u, NumberOfProperties(set1));
 
   PropertySet::Editor().SetWidth(&set1, Value(Dimension(123.456f, Unit::px)));
-  EXPECT_EQ(3, NumberOfProperties(set1))
+  EXPECT_EQ(3u, NumberOfProperties(set1))
       << "small dimension to normal dimension";
 
   PropertySet::Editor().SetWidth(&set1, Value(Dimension(0.0f, Unit::px)));
-  EXPECT_EQ(3, NumberOfProperties(set1))
+  EXPECT_EQ(3u, NumberOfProperties(set1))
       << "normal dimension to small dimension";
 }
 

@@ -15,7 +15,7 @@ std::ostream& operator<<(std::ostream& ostream, ValueType type) {
       FOR_EACH_CSS_VALUE_TYPE(V)
 #undef V
   };
-  const auto& it = std::begin(texts) + static_cast<size_t>(type);
+  auto* const* it = std::begin(texts) + static_cast<size_t>(type);
   if (it < std::begin(texts) || it >= std::end(texts))
     return ostream << "???";
   return ostream << *it;

@@ -15,10 +15,10 @@ namespace css {
 //
 // MockMedia
 //
-class MockMedia : public Media {
+class MockMedia final : public Media {
  public:
   MockMedia();
-  ~MockMedia();
+  ~MockMedia() final;
 
   MediaState media_state() const final;
   MediaType media_type() const final;

@@ -5,6 +5,7 @@
 #ifndef EVITA_TEXT_PAINT_PUBLIC_VIEW_H_
 #define EVITA_TEXT_PAINT_PUBLIC_VIEW_H_
 
+#include <memory>
 #include <vector>
 
 #include "base/macros.h"
@@ -37,7 +38,6 @@ class View final : public base::RefCounted<View> {
        const gfx::ColorF& bgcolor,
        const Ruler& ruler,
        const Caret& caret);
-  ~View();
 
   const gfx::ColorF& bgcolor() const { return bgcolor_; }
   const gfx::RectF& bounds() const { return bounds_; }
@@ -48,6 +48,10 @@ class View final : public base::RefCounted<View> {
   int layout_version() const { return layout_version_; }
 
  private:
+  friend class base::RefCounted<View>;
+
+  ~View();
+
   const gfx::ColorF bgcolor_;
   const gfx::RectF bounds_;
   const std::unique_ptr<Caret> caret_;

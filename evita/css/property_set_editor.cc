@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <cmath>
 #include <unordered_set>
+#include <utility>
 
 #include "evita/css/property_set_editor.h"
 
@@ -21,8 +22,6 @@
 
 namespace css {
 
-const auto kUnitBits = 5;
-
 using Editor = PropertySet::Editor;
 
 //////////////////////////////////////////////////////////////////////
@@ -37,8 +36,7 @@ void Editor::Add(PropertySet* property_set,
                  const Value& value) {
   DCHECK(!property_set->Contains(property_id))
       << "Property '" << property_id << "' is already in " << *property_set;
-  property_set->properties_.emplace_back(
-      std::move(Property(property_id, value)));
+  property_set->properties_.emplace_back(Property(property_id, value));
 }
 
 void Editor::Merge(PropertySet* left, const PropertySet& right) {
@@ -73,7 +71,7 @@ void Editor::Set(PropertySet* property_set,
                                   return property.id() == property_id;
                                 });
   if (it == properties.end()) {
-    properties.emplace_back(std::move(Property(property_id, new_value)));
+    properties.emplace_back(Property(property_id, new_value));
     return;
   }
   Property::Editor().SetValue(&*it, new_value);

@@ -4,6 +4,8 @@
 
 #include "evita/css/property_set_builder.h"
 
+#include <utility>
+
 #include "evita/css/property_set.h"
 #include "evita/css/property_set_editor.h"
 #include "evita/css/values/percentage.h"

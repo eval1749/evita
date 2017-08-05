@@ -15,6 +15,8 @@ namespace gfx {
 //
 class DpiHandler {
  public:
+  DpiHandler();
+
   const SizeF& pixels_per_dip() const { return pixels_per_dip_; }
   SizeF AlignToPixel(const SizeF& size) const;
   SizeF CeilToPixel(const SizeF& size) const;

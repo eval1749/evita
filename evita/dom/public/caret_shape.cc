@@ -15,7 +15,7 @@ std::ostream& operator<<(std::ostream& ostream, CaretShape caret_shape) {
       FOR_EACH_DOMAPI_CARET_SHAPE(V)
 #undef V
   };
-  const auto& it = std::begin(texts) + static_cast<size_t>(caret_shape);
+  auto* const* const it = std::begin(texts) + static_cast<size_t>(caret_shape);
   if (it < std::begin(texts) || it >= std::end(texts))
     return ostream << "???";
   return ostream << *it;

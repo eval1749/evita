@@ -40,7 +40,7 @@ common::ComPtr<IDWriteFontFace> CreateFontFace(
 
   common::ComPtr<IDWriteFontFace> font_face;
   COM_VERIFY(font->CreateFontFace(&font_face));
-  return std::move(font_face);
+  return font_face;
 }
 
 DWRITE_FONT_METRICS GetFontMetrics(IDWriteFontFace* font) {
@@ -55,8 +55,7 @@ DWRITE_FONT_METRICS GetFontMetrics(IDWriteFontFace* font) {
 //
 // Font::Properties
 //
-FontProperties::FontProperties()
-    : bold(false), italic(false), font_size_pt(0) {}
+FontProperties::FontProperties() = default;
 
 bool FontProperties::operator==(const FontProperties& other) const {
   return bold == other.bold && font_size_pt == other.font_size_pt &&

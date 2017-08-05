@@ -25,9 +25,9 @@ StringList::Iterator::~Iterator() = default;
 
 StringList::Iterator::value_type StringList::Iterator::operator*() const {
   DCHECK_LE(current_ + 1, list_->end_entry());
-  const auto data =
+  auto* const data =
       reinterpret_cast<const char*>(list_->start_ + current_->offset);
-  auto const size = (current_ + 1)->offset - current_->offset;
+  const auto size = (current_ + 1)->offset - current_->offset;
   return base::StringPiece(data, size);
 }
 

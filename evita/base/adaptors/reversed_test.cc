@@ -41,7 +41,7 @@ TEST(ReversedTest, ReversedArray) {
 #endif
 
 TEST(ReversedTest, ReversedStdArray) {
-  std::array<int, 3> v{3, 2, 1};
+  std::array<int, 3> v{{3, 2, 1}};
   int j = 0;
   for (int& i : base::Reversed(v)) {
     EXPECT_EQ(++j, i);

@@ -66,7 +66,7 @@ class FormControl : public base::Castable<FormControl> {
     std::bitset<static_cast<size_t>(Index::Size)> values_;
   };
 
-  virtual ~FormControl();
+  ~FormControl() override;
 
   bool operator==(const FormControl& other) const;
   bool operator!=(const FormControl& other) const;

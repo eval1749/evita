@@ -21,7 +21,7 @@ std::ostream& operator<<(std::ostream& ostream, MediaType media_type) {
       FOR_EACH_VISUALS_CSS_MEDIA_TYPE(V)
 #undef V
   };
-  const auto& it = std::begin(texts) + static_cast<size_t>(media_type);
+  auto* const* it = std::begin(texts) + static_cast<size_t>(media_type);
   return ostream << (it < std::end(texts) ? *it : "???");
 }
 

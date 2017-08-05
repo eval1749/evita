@@ -14,7 +14,7 @@ std::ostream& operator<<(std::ostream& ostream, ScrollBarState state) {
       FOR_EACH_SCROLL_BAR_STATE(V)
 #undef V
   };
-  const auto& it = std::begin(texts) + static_cast<size_t>(state);
+  auto* const* const it = std::begin(texts) + static_cast<size_t>(state);
   if (it < std::begin(texts) || it >= std::end(texts))
     return ostream << "ScrollBarState::???";
   return ostream << "ScrollBarState::" << *it;

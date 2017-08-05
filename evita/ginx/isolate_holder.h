@@ -20,7 +20,7 @@ class PerIsolateData;
 class IsolateHolder final : public gin::IsolateHolder {
  public:
   IsolateHolder();
-  ~IsolateHolder() = default;
+  ~IsolateHolder();
 
  private:
   std::unique_ptr<PerIsolateData> isolate_data_;

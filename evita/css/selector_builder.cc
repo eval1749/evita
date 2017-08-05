@@ -4,6 +4,8 @@
 
 #include "evita/css/selector_builder.h"
 
+#include <utility>
+
 namespace css {
 
 using Builder = Selector::Builder;
@@ -29,7 +31,7 @@ Selector Builder::Build() {
   selector.classes_ = std::move(classes_);
   selector.id_ = id_;
   selector.tag_name_ = tag_name_;
-  return std::move(selector);
+  return selector;
 }
 
 Builder& Builder::SetId(base::AtomicString id) {

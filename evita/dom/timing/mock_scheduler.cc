@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include <vector>
+#include <utility>
 
 #include "evita/dom/timing/mock_scheduler.h"
 
@@ -40,7 +41,7 @@ void MockScheduler::RunPendingTasks() {
 
   const auto& deadline = now + idle_time_remaining_;
   while (!ready_idle_tasks_.empty()) {
-    auto const idle_task = ready_idle_tasks_.front();
+    auto* const idle_task = ready_idle_tasks_.front();
     ready_idle_tasks_.pop();
     if (!idle_task->IsCanceled())
       idle_task->Run(deadline);
@@ -77,6 +78,10 @@ void MockScheduler::CancelIdleTask(int task_id) {
   it->second->Cancel();
 }
 
+void MockScheduler::DidBeginFrame(const base::TimeTicks& deadline) {
+  NOTREACHED();
+}
+
 int MockScheduler::RequestAnimationFrame(
     std::unique_ptr<AnimationFrameCallback> callback) {
   ++last_animation_frame_callback_id_;
@@ -86,7 +91,7 @@ int MockScheduler::RequestAnimationFrame(
 }
 
 int MockScheduler::ScheduleIdleTask(const IdleTask& task) {
-  auto const idle_task = new IdleTask(task);
+  auto* const idle_task = new IdleTask(task);
   if (idle_task->delayed_run_time == base::TimeTicks())
     ready_idle_tasks_.push(idle_task);
   else

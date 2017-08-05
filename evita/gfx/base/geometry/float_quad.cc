@@ -26,7 +26,7 @@ FloatQuad::FloatQuad(const FloatPoint& point1,
                      const FloatPoint& point2,
                      const FloatPoint& point3,
                      const FloatPoint& point4)
-    : data_({point1, point2, point3, point4}) {}
+    : data_({{point1, point2, point3, point4}}) {}
 
 FloatQuad::FloatQuad(const std::array<FloatPoint, 4>& data) : data_(data) {}
 

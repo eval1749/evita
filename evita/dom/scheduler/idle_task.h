@@ -25,6 +25,7 @@ class IdleTask final : public base::TrackingInfo {
            base::TimeTicks delayed_run_time);
   IdleTask(const tracked_objects::Location& posted_from,
            const Callback& callback);
+  IdleTask(const IdleTask&);
   ~IdleTask();
 
   // Used to support sorting.

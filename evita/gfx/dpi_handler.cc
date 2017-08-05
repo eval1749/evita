@@ -18,6 +18,8 @@ float MultipleOf(float x, float unit) {
 //
 // DpiHandler
 //
+DpiHandler::DpiHandler() = default;
+
 SizeF DpiHandler::AlignToPixel(const SizeF& size) const {
   DCHECK(!pixels_per_dip_.empty());
   return SizeF(MultipleOf(size.width, pixels_per_dip_.width),

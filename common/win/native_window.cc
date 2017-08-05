@@ -43,8 +43,7 @@ NativeWindow::~NativeWindow() {
 
 std::unique_ptr<NativeWindow> NativeWindow::Create(
     MessageDelegate* message_delegate) {
-  return std::move(
-      std::unique_ptr<NativeWindow>(new NativeWindow(message_delegate)));
+  return std::unique_ptr<NativeWindow>(new NativeWindow(message_delegate));
 }
 
 std::unique_ptr<NativeWindow> NativeWindow::Create() {
@@ -84,9 +83,9 @@ bool NativeWindow::CreateWindowEx(DWORD dwExStyle,
 
   // For child window, we need to assign unique id in parent window.
   // |ui::Widget::child_window_id()| exposes child window id.
-  auto const child_id = dwStyle & WS_CHILD ? reinterpret_cast<HMENU>(this)
-                                           : static_cast<HMENU>(nullptr);
-  auto const hwnd =
+  auto* const child_id = dwStyle & WS_CHILD ? reinterpret_cast<HMENU>(this)
+                                            : static_cast<HMENU>(nullptr);
+  auto* const hwnd =
       ::CreateWindowEx(dwExStyle, MAKEINTATOM(s_window_class), title, dwStyle,
                        origin.x(), origin.y(), size.width(), size.height(),
                        parent_hwnd, child_id, s_hInstance, 0);
@@ -118,6 +117,10 @@ void NativeWindow::Init(HINSTANCE hInstance) {
   Init(hInstance, hInstance);
 }
 
+bool NativeWindow::IsRealized() const {
+  return hwnd_ != nullptr;
+}
+
 NativeWindow* NativeWindow::MapHwnToNativeWindow(HWND const hwnd) {
   DCHECK(hwnd);
   return reinterpret_cast<NativeWindow*>(
@@ -128,7 +131,7 @@ LRESULT CALLBACK NativeWindow::WindowProc(HWND hwnd,
                                           UINT message,
                                           WPARAM wParam,
                                           LPARAM lParam) {
-  if (auto const window = s_creating_window) {
+  if (auto* const window = s_creating_window) {
     s_creating_window = nullptr;
     window->hwnd_ = hwnd;
     ::SetWindowLongPtrW(hwnd, GWLP_USERDATA,
@@ -136,7 +139,7 @@ LRESULT CALLBACK NativeWindow::WindowProc(HWND hwnd,
     return window->WindowProc(message, wParam, lParam);
   }
 
-  auto const window = MapHwnToNativeWindow(hwnd);
+  auto* const window = MapHwnToNativeWindow(hwnd);
   DCHECK(window);
   if (message == WM_NCDESTROY) {
     window->hwnd_ = nullptr;

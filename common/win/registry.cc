@@ -53,7 +53,7 @@ base::string16 Registry::GetValue() const {
   // Remove trailing zero.
   if (!value.back())
     value.pop_back();
-  return std::move(value);
+  return value;
 }
 
 }  // namespace win

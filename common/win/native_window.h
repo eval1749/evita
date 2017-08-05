@@ -60,7 +60,7 @@ class COMMON_EXPORT NativeWindow {
                       const Size& size);
   void Destroy();
   LRESULT DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam);
-  virtual bool IsRealized() const { return hwnd_ != nullptr; }
+  virtual bool IsRealized() const;
 
   LRESULT SendMessage(UINT uMsg, WPARAM wParam = 0, LPARAM lParam = 0) {
     return ::SendMessage(hwnd_, uMsg, wParam, lParam);

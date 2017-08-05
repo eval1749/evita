@@ -7,8 +7,8 @@ vars = {
   'github_git': 'https://github.com',
 
   'base_revision': 'bf7babf705d243d5296bf9238f8abef29ee07e61',
-  'build_revision': 'ece477b2f8f02e5c4297a1dd6b4367bdb3939dfa',
-  'buildtools_revision': '5ad14542a6a74dd914f067b948c5d3e8d170396b',
+  'build_revision': '181c09809995f97bbe97c709c23f3b402a896ed9',
+  'buildtools_revision': 'f4bcb07d88cdb7d748813c3d150e08bf88435fb9',
   'ced_revision': '910cca22d881b02cbc8950fa02ccbcdcfb782456',
   'cygwin_revision': 'c89e446b273697fadf3a10ff1007a97c0b7de6df',
   'googletest_revision': 'e5b88b227e6adfa7196575b1264384e718d16cab',
@@ -22,8 +22,9 @@ vars = {
   'modp_b64_revision': '28e3fbba4cb4ec3ffd85b53d0a3904525d08f5a6',
   'ply_revision': '4a6baf95860033d4c69d3e3087696b30c687622c',
   'testing_revision': 'a2fec596d15762e16cc47dd41c2150fd86a4cbc0',
+  'tools_clang_revision': 'ec00334c9e8a3673986ee2af220e51439dc93406',
   'tools_win_revision': '955e8f7918e90834ee69aa65f1d38666771b9440',
-  'v8_revision': 'bf07eadc7055c5a2ea96379199a63b9046ac54bb', # 6.2.84
+  'v8_revision': '277ee04ee25845bcfa532a5511566a3adf25e6de', # 6.2.151
   'zlib_revision': '1782c7b1c6934f6970c4517fddc92537812cfd4f',
 
   # github
@@ -81,6 +82,9 @@ deps = {
   'src/third_party/ply':
     Var('chromium_git') + '/chromium/src/third_party/ply' + '@' +  Var('ply_revision'),
 
+  'src/tools/clang':
+    Var('chromium_git') + '/chromium/src/tools/clang' + '@' +  Var('tools_clang_revision'),
+
   'src/tools/win':
     Var('chromium_git') + '/chromium/src/tools/win' + '@' +  Var('tools_win_revision'),
 
@@ -130,6 +134,13 @@ hooks = [
                 '--bucket', 'chromium-clang-format',
                 '-s', 'src/buildtools/win/clang-format.exe.sha1',
     ],
+  },
+  {
+    # Pull clang if needed or requested via GYP_DEFINES.
+    # Note: On Win, this should run after win_toolchain, as it may use it.
+    'name': 'clang',
+    'pattern': '.',
+    'action': ['python', 'src/tools/clang/scripts/update.py', '--if-needed'],
   },
   {
     'pattern': '.',

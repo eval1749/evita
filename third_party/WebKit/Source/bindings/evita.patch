@@ -1,16 +1,69 @@
+diff --git a/third_party/WebKit/Source/bindings/evita.patch b/third_party/WebKit/Source/bindings/evita.patch
+index c1aec6b68..e69de29bb 100644
+--- a/third_party/WebKit/Source/bindings/evita.patch
++++ b/third_party/WebKit/Source/bindings/evita.patch
+@@ -1,48 +0,0 @@
+-diff --git a/third_party/WebKit/Source/bindings/scripts/compute_interfaces_info_overall.py b/third_party/WebKit/Source/bindings/scripts/compute_interfaces_info_overall.py
+-index eb412e7..5452cd7 100644
+---- a/third_party/WebKit/Source/bindings/scripts/compute_interfaces_info_overall.py
+-+++ b/third_party/WebKit/Source/bindings/scripts/compute_interfaces_info_overall.py
+-@@ -96,6 +96,7 @@ from utilities import write_pickle_file
+- INHERITED_EXTENDED_ATTRIBUTES = set([
+-     'ActiveScriptWrappable',
+-     'DependentLifetime',
+-+    'JsNamespace',
+- ])
+- 
+- # Main variable (filled in and exported)
+-@@ -166,6 +167,7 @@ def compute_global_type_info():
+-     ancestors = {}
+-     dictionaries = {}
+-     component_dirs = {}
+-+    namespaces = {}
+-     implemented_as_interfaces = {}
+-     garbage_collected_interfaces = set()
+-     callback_interfaces = set()
+-@@ -183,11 +185,14 @@ def compute_global_type_info():
+-             implemented_as_interfaces[interface_name] = interface_info['implemented_as']
+- 
+-         inherited_extended_attributes = interface_info['inherited_extended_attributes']
+-+        if 'JsNamespace' in inherited_extended_attributes:
+-+            namespaces[interface_name] = inherited_extended_attributes['JsNamespace']
+-         garbage_collected_interfaces.add(interface_name)
+- 
+-     interfaces_info['ancestors'] = ancestors
+-     interfaces_info['callback_interfaces'] = callback_interfaces
+-     interfaces_info['dictionaries'] = dictionaries
+-+    interfaces_info['namespaces'] = namespaces
+-     interfaces_info['implemented_as_interfaces'] = implemented_as_interfaces
+-     interfaces_info['garbage_collected_interfaces'] = garbage_collected_interfaces
+-     interfaces_info['component_dirs'] = component_dirs
+-diff --git a/third_party/WebKit/Source/bindings/scripts/utilities.py b/third_party/WebKit/Source/bindings/scripts/utilities.py
+-index a212453..78006b2 100644
+---- a/third_party/WebKit/Source/bindings/scripts/utilities.py
+-+++ b/third_party/WebKit/Source/bindings/scripts/utilities.py
+-@@ -15,7 +15,7 @@ import string
+- import subprocess
+- 
+- 
+--KNOWN_COMPONENTS = frozenset(['core', 'modules'])
+-+KNOWN_COMPONENTS = frozenset(['core', 'modules', 'dom'])
+- KNOWN_COMPONENTS_WITH_TESTING = frozenset(['core', 'modules', 'testing'])
+- 
+- 
 diff --git a/third_party/WebKit/Source/bindings/scripts/compute_interfaces_info_overall.py b/third_party/WebKit/Source/bindings/scripts/compute_interfaces_info_overall.py
-index eb412e7..5452cd7 100644
+index 2791a9aa1..8345ece65 100644
 --- a/third_party/WebKit/Source/bindings/scripts/compute_interfaces_info_overall.py
 +++ b/third_party/WebKit/Source/bindings/scripts/compute_interfaces_info_overall.py
-@@ -96,6 +96,7 @@ from utilities import write_pickle_file
+@@ -94,6 +94,7 @@ from utilities import shorten_union_name
+ from utilities import write_pickle_file
+ 
  INHERITED_EXTENDED_ATTRIBUTES = set([
++    'JsNamespace',
      'ActiveScriptWrappable',
      'DependentLifetime',
-+    'JsNamespace',
- ])
- 
- # Main variable (filled in and exported)
-@@ -166,6 +167,7 @@ def compute_global_type_info():
+     'LegacyUnenumerableNamedProperties',
+@@ -167,6 +168,7 @@ def compute_global_type_info():
      ancestors = {}
      dictionaries = {}
      component_dirs = {}
@@ -18,7 +71,7 @@ index eb412e7..5452cd7 100644
      implemented_as_interfaces = {}
      garbage_collected_interfaces = set()
      callback_interfaces = set()
-@@ -183,11 +185,14 @@ def compute_global_type_info():
+@@ -184,11 +186,14 @@ def compute_global_type_info():
              implemented_as_interfaces[interface_name] = interface_info['implemented_as']
  
          inherited_extended_attributes = interface_info['inherited_extended_attributes']
@@ -34,7 +87,7 @@ index eb412e7..5452cd7 100644
      interfaces_info['garbage_collected_interfaces'] = garbage_collected_interfaces
      interfaces_info['component_dirs'] = component_dirs
 diff --git a/third_party/WebKit/Source/bindings/scripts/utilities.py b/third_party/WebKit/Source/bindings/scripts/utilities.py
-index a212453..78006b2 100644
+index 43ccd50c7..053130504 100644
 --- a/third_party/WebKit/Source/bindings/scripts/utilities.py
 +++ b/third_party/WebKit/Source/bindings/scripts/utilities.py
 @@ -15,7 +15,7 @@ import string

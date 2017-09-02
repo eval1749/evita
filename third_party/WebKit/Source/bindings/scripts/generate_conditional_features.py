@@ -43,6 +43,7 @@ def get_install_functions(interfaces, feature_names):
         {"condition": 'OriginTrials::%sEnabled' % uncapitalize(feature_name),
          "name": feature_name,
          "install_method": "install%s" % feature_name,
+         "interface_is_global": interface_info.is_global,
          "v8_class": interface_info.v8_class,
          "v8_class_or_partial": interface_info.v8_class_or_partial}
         for feature_name in feature_names
@@ -62,14 +63,16 @@ def get_conditional_feature_names_from_interface(interface):
         if 'OriginTrialEnabled' in attribute.extended_attributes:
             feature_names.add(
                 attribute.extended_attributes['OriginTrialEnabled'])
-    return list(feature_names)
+    return feature_names
 
 
 def read_idl_file(reader, idl_filename):
-    interfaces = reader.read_idl_file(idl_filename).interfaces
+    definitions = reader.read_idl_file(idl_filename)
+    interfaces = definitions.interfaces
+    implements = definitions.implements
     # There should only be a single interface defined in an IDL file. Return it.
     assert len(interfaces) == 1
-    return interfaces.values()[0]
+    return (interfaces.values()[0], implements)
 
 
 def interface_is_global(interface):
@@ -92,8 +95,19 @@ def conditional_features_info(info_provider, reader, idl_filenames, target_compo
     includes = set()
 
     for idl_filename in idl_filenames:
-        interface = read_idl_file(reader, idl_filename)
+        interface, implements = read_idl_file(reader, idl_filename)
         feature_names = get_conditional_feature_names_from_interface(interface)
+
+        # If this interface implements another one,
+        # it inherits any conditional features from it.
+        for implement in implements:
+            assert implement.left_interface == interface.name
+            implemented_interface, _ = read_idl_file(
+                reader,
+                info_provider.interfaces_info[implement.right_interface].get('full_path'))
+            feature_names |= get_conditional_feature_names_from_interface(implemented_interface)
+
+        feature_names = list(feature_names)
         if feature_names:
             is_global = interface_is_global(interface)
             if interface.is_partial:
@@ -101,7 +115,7 @@ def conditional_features_info(info_provider, reader, idl_filenames, target_compo
                 # includes if the parent interface is in a different
                 # component.
                 parent_interface_info = info_provider.interfaces_info[interface.name]
-                parent_interface = read_idl_file(
+                parent_interface, _ = read_idl_file(
                     reader, parent_interface_info.get('full_path'))
                 is_global = is_global or interface_is_global(parent_interface)
                 parent_component = idl_filename_to_component(
@@ -163,6 +177,7 @@ def conditional_features_context(generator_name, feature_info):
     # functions to call, organized by interface.
     context['installers_by_feature'] = [
         {"name": feature_name,
+         "name_constant": "OriginTrials::k%sTrialName" % feature_name,
          "installers": get_install_functions(interfaces, [feature_name])}
         for feature_name, interfaces in types_for_feature.items()]
     context['installers_by_feature'].sort(key=lambda x: x['name'])

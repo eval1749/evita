@@ -255,6 +255,7 @@ ginx::Runner* ScriptHost::runner() const {
 void ScriptHost::set_testing_runner(ginx::Runner* runner) {
   testing_runner_ = runner;
   runner->set_user_data(this);
+  message_loop_for_script_ = base::MessageLoop::current();
   DidStartScriptHost();
 }
 

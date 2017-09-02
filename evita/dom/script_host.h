@@ -117,7 +117,7 @@ class ScriptHost final : public ginx::RunnerDelegate {
   domapi::IoDelegate* io_delegate_;
   // A |MessageLoop| where script runs on. We don't allow to run script other
   // than this message loop.
-  base::MessageLoop* const message_loop_for_script_;
+  base::MessageLoop* message_loop_for_script_;
   std::unique_ptr<Performance> performance_;
   std::unique_ptr<ginx::Runner> runner_;
   Scheduler* scheduler_;

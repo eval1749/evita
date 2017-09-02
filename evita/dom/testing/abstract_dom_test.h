@@ -10,7 +10,7 @@
 #include <vector>
 
 #include "base/strings/string_piece.h"
-#include "base/test/scoped_async_task_scheduler.h"
+#include "base/test/scoped_task_environment.h"
 #include "evita/ginx/runner.h"
 #include "evita/ginx/v8.h"
 #include "testing/gtest/include/gtest/gtest.h"
@@ -115,6 +115,10 @@ class AbstractDomTest : public ::testing::Test {
   base::FilePath BuildPath(const std::vector<base::StringPiece>& components);
   void UnhandledException(ginx::Runner* runner, const v8::TryCatch& try_catch);
 
+  // Must be the first member (or at least before any member that cares
+  // about tasks) to be initialized first and destroyed last.
+  base::test::ScopedTaskEnvironment scoped_task_environment_;
+
   std::string exception_;
   const std::unique_ptr<MockIoDelegate> mock_io_delegate_;
   const std::unique_ptr<MockScheduler> mock_scheduler_;
@@ -123,10 +127,6 @@ class AbstractDomTest : public ::testing::Test {
 
   // Note: ScriptHost is a singleton.
   ScriptHost* script_host_;
-
-  // Required by gin::V8Platform::CallOnBackgroundThread(). Can't be a
-  // ScopedTaskScheduler because v8 synchronously waits for tasks to run.
-  base::test::ScopedAsyncTaskScheduler scoped_async_task_scheduler_;
 
   DISALLOW_COPY_AND_ASSIGN(AbstractDomTest);
 };

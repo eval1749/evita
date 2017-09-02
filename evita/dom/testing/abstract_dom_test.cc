@@ -11,9 +11,7 @@
 #include "base/files/file_path.h"
 #include "base/files/file_util.h"
 #include "base/logging.h"
-#include "base/message_loop/message_loop.h"
 #include "base/path_service.h"
-#include "base/run_loop.h"
 #include "base/strings/stringprintf.h"
 #include "base/strings/utf_string_conversions.h"
 #include "common/memory/singleton.h"
@@ -294,15 +292,12 @@ bool AbstractDomTest::RunScript(const base::StringPiece& script_text,
 }
 
 void AbstractDomTest::RunMessageLoopUntilIdle() {
-  base::RunLoop run_loop;
-  run_loop.RunUntilIdle();
+  scoped_task_environment_.RunUntilIdle();
   mock_scheduler_->RunPendingTasks();
   script_host_->RunMicrotasks();
 }
 
 void AbstractDomTest::SetUp() {
-  CR_DEFINE_STATIC_LOCAL(base::MessageLoop, message_loop, ());
-
   RunnerDelegate::instance()->set_test_instance(this);
 
   script_host_ = dom::ScriptHost::StartForTesting(
@@ -340,8 +335,7 @@ void AbstractDomTest::SetUp() {
 
 void AbstractDomTest::TearDown() {
   // Discard schedule tasks, e.g. TextDocumentSet::Observer callbacks.
-  base::RunLoop run_loop;
-  run_loop.RunUntilIdle();
+  scoped_task_environment_.RunUntilIdle();
   if (!static_runner || static_runner == runner_.get())
     static_runner = runner_.release();
 }

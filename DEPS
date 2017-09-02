@@ -15,7 +15,7 @@ vars = {
   'grit_revision': '6692eb5e229a7a564ff08221653dc1a9e5fa7e51',
   'gyp_revision': 'd61a9397e668fa9843c4aa7da9e79460fe590bfb',
   'icu_revision': '08cb956852a5ccdba7f9c941728bb833529ba3c6',
-  'idl_parser_revision': 'd1b85afeae3761297fefc39ac3360e2055d688a2',
+  'idl_parser_revision': '24fd6107e4e876d2eb1fde9642cce5e6bb34b985',
   'instrumented_libraries_revision': '644afd349826cb68204226a16c38bde13abe9c3c',
   'jinja2_revision': 'd34383206fa42d52faa10bb9931d6d538f3a57e0',
   'markupsafe_revision': '8f45f5cfa0009d2a70589bcda0349b8cb2b72783',

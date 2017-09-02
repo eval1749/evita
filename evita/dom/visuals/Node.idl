@@ -7,8 +7,8 @@
   JsNamespace = visuals,
   ImplementedAs = JavaScript
 ] interface Node {
-  // TODO(eval1749): We should use |Generator<Node>| instead of
-  // |FrozenArray<Node>|
+  // TODO(eval1749): We should use |interface NodeList { iterable<Node>; }|
+  // instead of |FrozenArray<Node>|
   readonly attribute FrozenArray<Node> childNodes;
   readonly attribute Node ? firstChild;
   readonly attribute Node ? lastChild;

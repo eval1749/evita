@@ -6,26 +6,26 @@ vars = {
   'chromium_git': 'https://chromium.googlesource.com',
   'github_git': 'https://github.com',
 
-  'base_revision': '7a63311ba7f6637af898bd3e69b138a66ea46c90',
-  'build_revision': '181c09809995f97bbe97c709c23f3b402a896ed9',
-  'buildtools_revision': 'f4bcb07d88cdb7d748813c3d150e08bf88435fb9',
+  'base_revision': '9d5400e32f11537c1f2172b7d6348b6cc503819f',
+  'build_revision': '9ba89a255477d1f3877e01b66e52ec5bec7ba6cf',
+  'buildtools_revision': '5af0a3a8b89827a8634132080a39ab4b63dee489',
   'ced_revision': '910cca22d881b02cbc8950fa02ccbcdcfb782456',
   'cygwin_revision': 'c89e446b273697fadf3a10ff1007a97c0b7de6df',
   'googletest_revision': 'ca102b1f9d1f4c8a8c6f7a87b3e80d0af4b8789f',
-  'grit_revision': 'dfe7b7e9dca29fa218cb1cad963d55e229343341',
+  'grit_revision': '6692eb5e229a7a564ff08221653dc1a9e5fa7e51',
   'gyp_revision': 'd61a9397e668fa9843c4aa7da9e79460fe590bfb',
-  'icu_revision': '1fec0c83e9ad7f5a075ae0b50af9a3889f54be0e',
+  'icu_revision': '08cb956852a5ccdba7f9c941728bb833529ba3c6',
   'idl_parser_revision': 'd1b85afeae3761297fefc39ac3360e2055d688a2',
   'instrumented_libraries_revision': '644afd349826cb68204226a16c38bde13abe9c3c',
   'jinja2_revision': 'd34383206fa42d52faa10bb9931d6d538f3a57e0',
   'markupsafe_revision': '8f45f5cfa0009d2a70589bcda0349b8cb2b72783',
   'modp_b64_revision': '28e3fbba4cb4ec3ffd85b53d0a3904525d08f5a6',
   'ply_revision': '4a6baf95860033d4c69d3e3087696b30c687622c',
-  'testing_revision': '01c595d49031ef226e55d889ecc557bb9dbf5169',
-  'tools_clang_revision': 'ec00334c9e8a3673986ee2af220e51439dc93406',
+  'testing_revision': 'fcdcaa04669ab4d88ced6bce6f503947598fce47',
+  'tools_clang_revision': '3b354e887452b944b758fe791b0ccca60af834d6',
   'tools_win_revision': '955e8f7918e90834ee69aa65f1d38666771b9440',
-  'v8_revision': '277ee04ee25845bcfa532a5511566a3adf25e6de', # 6.2.151
-  'zlib_revision': 'b4298b0c2e9791d352e160809e5c5831f421df82',
+  'v8_revision': 'de30bd3d36e7b353e73d3e058df4b8cdcd75a53e', # 6.3.2
+  'zlib_revision': '718f686437b89038ac83525f4f1b1888aadd9bfc',
 
   # github
   'autopep8_revision': '93fff80de7dd0819b36281bc0868e5b17c81fb7f', # 1.3.2

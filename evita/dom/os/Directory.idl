@@ -4,7 +4,7 @@
 
 [JsNamespace=Os]
 interface Directory {
-  Promise<FileInfo[]> read(long numRead);
+  Promise<FrozenArray<FileInfo>> read(long numRead);
   void close();
 
   // |dirName| is the starting directory to enumerate for. It may or may not

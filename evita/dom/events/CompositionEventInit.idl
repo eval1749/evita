@@ -5,5 +5,5 @@
 dictionary CompositionEventInit : UiEventInit {
   long caret = 0;
   DOMString data;
-  CompositionSpan[] spans;
+  sequence<CompositionSpan> spans;
 };

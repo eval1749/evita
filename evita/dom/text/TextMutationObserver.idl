@@ -3,12 +3,12 @@
 // found in the LICENSE file.
 
 callback MutationCallback =
-    void(TextMutationRecord[] records, TextMutationObserver observer);
+    void(FrozenArray<TextMutationRecord> records, TextMutationObserver observer);
 
 [
   CallWith = ScriptHost, Constructor(MutationCallback callback)
 ] interface TextMutationObserver {
   void disconnect();
   void observe(TextDocument document, TextMutationObserverInit options);
-  TextMutationRecord[] takeRecords();
+  FrozenArray<TextMutationRecord> takeRecords();
 };

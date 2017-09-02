@@ -7,7 +7,7 @@
   Constructor
 ]
 interface EditorWindow : Window {
-  static readonly attribute EditorWindow[] list;
+  static readonly attribute FrozenArray<EditorWindow> list;
 
-  void setStatusBar(DOMString[] texts);
+  void setStatusBar(sequence<DOMString> texts);
 };

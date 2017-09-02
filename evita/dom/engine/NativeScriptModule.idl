@@ -7,7 +7,7 @@ callback ScriptModuleResolveCallbck =
 
 interface NativeScriptModule {
   [CallWith = ScriptHost] readonly attribute long id;
-  [CallWith = ScriptHost] readonly attribute DOMString[] requests;
+  [CallWith = ScriptHost] readonly attribute FrozenArray<DOMString> requests;
   readonly attribute DOMString specifier;
 
   [ CallWith = ScriptHost, RaisesException ] static NativeScriptModule compile(

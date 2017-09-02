@@ -5,7 +5,7 @@
 [
   JsNamespace = css, ImplementedAs = JavaScript, Constructor()
 ] interface CSSStyleSheet {
-  readonly attribute CSSRule[] cssRules;
+  readonly attribute FrozenArray<CSSRule> cssRules;
   readonly attribute DOMString type;
 
   void appendRule(CSSStyleRule rule);

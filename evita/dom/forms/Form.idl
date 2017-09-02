@@ -4,7 +4,7 @@
 
 [Constructor()]
 interface Form : ViewEventTarget {
-  readonly attribute FormControl[] controls;
+  readonly attribute FrozenArray<FormControl> controls;
   attribute FormControl? focusControl;
   attribute float height;
   attribute float width;

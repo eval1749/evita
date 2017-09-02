@@ -47,7 +47,7 @@ interface Editor {
                                                DOMString file_name);
   static Promise<DOMString> getFileNameForSave(Window? window,
                                                DOMString file_name);
-  static Promise<DOMString[]> getSpellingSuggestions(DOMString wrong_word);
+  static Promise<FrozenArray<DOMString>> getSpellingSuggestions(DOMString wrong_word);
 
   [CallWith = ScriptHost] static boolean loadModule(DOMString name);
 
@@ -57,7 +57,7 @@ interface Editor {
   [ImplementedAs = JavaScript] static DOMString localizeText(
       DOMString format_text, StringDict opt_dict);
 
-  /**
+  /*@
    * @param {Window?} window
    * @param {string} message
    * @param {number} flags
@@ -75,7 +75,7 @@ interface Editor {
   [ImplementedAs = JavaScript] static long parseKeyCombination(DOMString spec);
 
   [ImplementedAs = JavaScript] static void processCommandLine(
-      DOMString directory, DOMString[] args);
+      DOMString directory, sequence<DOMString> args);
 
   static void setTabData(Window window, TabData tabData);
 
@@ -83,9 +83,9 @@ interface Editor {
 
   [ImplementedAs = GetSwitch] static SwitchValue switch (DOMString name);
 
-  [ImplementedAs = GetSwitchNames] static DOMString[] switcheNames();
+  [ImplementedAs = GetSwitchNames] static FrozenArray<DOMString> switcheNames();
 
-  /**
+  /*@
    * @param {string} script_text
    * @param {string=} opt_file_name
    * @return {*}

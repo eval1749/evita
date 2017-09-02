@@ -10,7 +10,7 @@ interface Window : ViewEventTarget {
   [ImplementedAs = JavaScript] static void handleKeyboardEvent(
       KeyboardEvent event);
 
-  [ImplementedAs = child_windows] readonly attribute Window[] children;
+  [ImplementedAs = child_windows] readonly attribute FrozenArray<Window> children;
 
   // Window bounds in client coordinate is represented by
   //  * |clientLeft|, |clientTop| + |clientWidth| x |clientHeight|.

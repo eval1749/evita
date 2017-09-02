@@ -13,7 +13,8 @@
   [ImplementedAs = JavaScript] static TextDocument
       ? findFile(DOMString absoluteFileName);
 
-  [ImplementedAs = JavaScript] static readonly attribute TextDocument[] list;
+  [ImplementedAs = JavaScript] static readonly attribute
+      FrozenArray<TextDocument> list;
 
   [ImplementedAs = JavaScript] static TextDocument new (DOMString name);
 
@@ -76,11 +77,11 @@
   [ ImplementedAs = GetLineAndColumn, RaisesException ] LineAndColumn
   getLineAndColumn_(TextOffset offset);
 
-  [ImplementedAs = JavaScript] TextWindow[] listWindows();
+  [ImplementedAs = JavaScript] FrozenArray<TextWindow> listWindows();
 
   [ImplementedAs = JavaScript] Promise<long> load(optional DOMString fileName);
 
-  [ImplementedAs = Match] RegExpMatch[] match_(
+  [ImplementedAs = Match] FrozenArray<RegExpMatch> match_(
       RegularExpression regexp, TextOffset start, TextOffset end);
 
   [ImplementedAs = JavaScript] boolean needSave();

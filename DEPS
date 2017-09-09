@@ -24,7 +24,7 @@ vars = {
   'testing_revision': 'fcdcaa04669ab4d88ced6bce6f503947598fce47',
   'tools_clang_revision': '3b354e887452b944b758fe791b0ccca60af834d6',
   'tools_win_revision': '955e8f7918e90834ee69aa65f1d38666771b9440',
-  'v8_revision': 'de30bd3d36e7b353e73d3e058df4b8cdcd75a53e', # 6.3.2
+  'v8_revision': 'b2bd0782982e33addf9e29ee6e779a52f139399a', # 6.3.90
   'zlib_revision': '718f686437b89038ac83525f4f1b1888aadd9bfc',
 
   # github

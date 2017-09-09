@@ -6,23 +6,22 @@ vars = {
   'chromium_git': 'https://chromium.googlesource.com',
   'github_git': 'https://github.com',
 
-  'base_revision': '9d5400e32f11537c1f2172b7d6348b6cc503819f',
-  'build_revision': '9ba89a255477d1f3877e01b66e52ec5bec7ba6cf',
-  'buildtools_revision': '5af0a3a8b89827a8634132080a39ab4b63dee489',
+  'base_revision': '1b6d70138fd078c55fc665991211e22dce33918c',
+  'build_revision': '898597f665820182fc979b13c1b2e6de06a608c4',
+  'buildtools_revision': 'cbc33b9c0a9d1bb913895a4319a742c504a2d541',
   'ced_revision': '910cca22d881b02cbc8950fa02ccbcdcfb782456',
-  'cygwin_revision': 'c89e446b273697fadf3a10ff1007a97c0b7de6df',
   'googletest_revision': 'ca102b1f9d1f4c8a8c6f7a87b3e80d0af4b8789f',
   'grit_revision': '6692eb5e229a7a564ff08221653dc1a9e5fa7e51',
   'gyp_revision': 'd61a9397e668fa9843c4aa7da9e79460fe590bfb',
   'icu_revision': '08cb956852a5ccdba7f9c941728bb833529ba3c6',
-  'idl_parser_revision': '24fd6107e4e876d2eb1fde9642cce5e6bb34b985',
+  'idl_parser_revision': '108134e25ae0a87391e8eb07a544090093cc8788',
   'instrumented_libraries_revision': '644afd349826cb68204226a16c38bde13abe9c3c',
   'jinja2_revision': 'd34383206fa42d52faa10bb9931d6d538f3a57e0',
   'markupsafe_revision': '8f45f5cfa0009d2a70589bcda0349b8cb2b72783',
   'modp_b64_revision': '28e3fbba4cb4ec3ffd85b53d0a3904525d08f5a6',
   'ply_revision': '4a6baf95860033d4c69d3e3087696b30c687622c',
-  'testing_revision': 'fcdcaa04669ab4d88ced6bce6f503947598fce47',
-  'tools_clang_revision': '3b354e887452b944b758fe791b0ccca60af834d6',
+  'testing_revision': 'c477500ca9899059116c944c133614dc4d733c42',
+  'tools_clang_revision': 'cf5e2ed6a9fe35e792587a111a4b2a515deff772',
   'tools_win_revision': '955e8f7918e90834ee69aa65f1d38666771b9440',
   'v8_revision': 'b2bd0782982e33addf9e29ee6e779a52f139399a', # 6.3.90
   'zlib_revision': '718f686437b89038ac83525f4f1b1888aadd9bfc',
@@ -51,9 +50,6 @@ deps = {
 
  'src/third_party/googletest/src':
     Var('chromium_git') + '/external/github.com/google/googletest.git' + '@' + Var('googletest_revision'),
-
-  'src/third_party/cygwin':
-    Var('chromium_git') + '/chromium/deps/cygwin.git' + '@' + Var('cygwin_revision'),
 
   'src/tools/grit':
     Var('chromium_git') + '/chromium/src/tools/grit' + '@' + Var('grit_revision'),

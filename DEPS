@@ -10,10 +10,8 @@ vars = {
   'build_revision': '9ba89a255477d1f3877e01b66e52ec5bec7ba6cf',
   'buildtools_revision': '5af0a3a8b89827a8634132080a39ab4b63dee489',
   'ced_revision': '910cca22d881b02cbc8950fa02ccbcdcfb782456',
-  'cygwin_revision': 'c89e446b273697fadf3a10ff1007a97c0b7de6df',
   'googletest_revision': 'ca102b1f9d1f4c8a8c6f7a87b3e80d0af4b8789f',
   'grit_revision': '6692eb5e229a7a564ff08221653dc1a9e5fa7e51',
-  'gyp_revision': 'd61a9397e668fa9843c4aa7da9e79460fe590bfb',
   'icu_revision': '08cb956852a5ccdba7f9c941728bb833529ba3c6',
   'idl_parser_revision': '24fd6107e4e876d2eb1fde9642cce5e6bb34b985',
   'instrumented_libraries_revision': '644afd349826cb68204226a16c38bde13abe9c3c',
@@ -52,14 +50,8 @@ deps = {
  'src/third_party/googletest/src':
     Var('chromium_git') + '/external/github.com/google/googletest.git' + '@' + Var('googletest_revision'),
 
-  'src/third_party/cygwin':
-    Var('chromium_git') + '/chromium/deps/cygwin.git' + '@' + Var('cygwin_revision'),
-
   'src/tools/grit':
     Var('chromium_git') + '/chromium/src/tools/grit' + '@' + Var('grit_revision'),
-
-  'src/tools/gyp':
-    Var('chromium_git') + '/external/gyp.git' + '@' + Var('gyp_revision'),
 
   'src/third_party/icu':
     Var('chromium_git') + '/chromium/deps/icu.git' + '@' + Var('icu_revision'),

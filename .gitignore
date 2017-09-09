@@ -52,7 +52,6 @@ v8.log
 /third_party/autopep8/
 /third/boringssl/src
 /third_party/ced/src
-/third_party/cygwin/
 /third_party/googletest/src/
 /third_party/icu
 /third_party/instrumented_libraries/
@@ -68,7 +67,6 @@ third_party/llvm-build/
 /third_party/zlib/
 /tools/clang/
 /tools/grit/
-/tools/gyp/
 /tools/idl_parser/
 /tools/win/
 /v8/

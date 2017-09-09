@@ -13,7 +13,7 @@ namespace dom {
 AnimationFrameCallback::AnimationFrameCallback(
     const tracked_objects::Location& posted_from,
     const Callback& callback)
-    : base::TrackingInfo(posted_from, base::TimeTicks()), callback_(callback) {}
+    : callback_(callback), posted_from_(posted_from) {}
 
 AnimationFrameCallback::~AnimationFrameCallback() {}
 

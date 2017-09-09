@@ -26,7 +26,7 @@ void IdleTaskQueue::CancelTask(int task_id) {
 int IdleTaskQueue::GiveTask(const IdleTask& task_in) {
   auto* const task = new IdleTask(task_in);
   task_map_.insert({task->id(), task});
-  if (task->delayed_run_time != base::TimeTicks())
+  if (task->delayed_run_time() != base::TimeTicks())
     waiting_tasks_.push(task);
   else
     ready_tasks_.push(task);
@@ -45,7 +45,7 @@ void IdleTaskQueue::RunIdleTasks(const base::TimeTicks& deadline) {
   TRACE_EVENT1("script", "IdleTaskQueue::RunIdleTasks", "deadline",
                (deadline - now).InMilliseconds());
   while (!waiting_tasks_.empty() &&
-         waiting_tasks_.top()->delayed_run_time <= now) {
+         waiting_tasks_.top()->delayed_run_time() <= now) {
     ready_tasks_.push(waiting_tasks_.top());
     waiting_tasks_.pop();
   }

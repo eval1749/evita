@@ -34,7 +34,7 @@ void MockScheduler::RunPendingTasks() {
 
   auto const now = NowTicks();
   while (!waiting_idle_tasks_.empty() &&
-         waiting_idle_tasks_.front()->delayed_run_time <= now) {
+         waiting_idle_tasks_.front()->delayed_run_time() <= now) {
     ready_idle_tasks_.push(waiting_idle_tasks_.front());
     waiting_idle_tasks_.pop();
   }
@@ -92,7 +92,7 @@ int MockScheduler::RequestAnimationFrame(
 
 int MockScheduler::ScheduleIdleTask(const IdleTask& task) {
   auto* const idle_task = new IdleTask(task);
-  if (idle_task->delayed_run_time == base::TimeTicks())
+  if (idle_task->delayed_run_time() == base::TimeTicks())
     ready_idle_tasks_.push(idle_task);
   else
     waiting_idle_tasks_.push(idle_task);

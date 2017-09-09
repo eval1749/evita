@@ -13,8 +13,9 @@ static int current_sequence_num;
 IdleTask::IdleTask(const tracked_objects::Location& posted_from,
                    const Callback& callback,
                    base::TimeTicks delay_run_time)
-    : base::TrackingInfo(posted_from, delay_run_time),
-      callback_(callback),
+    : callback_(callback),
+      delayed_run_time_(delay_run_time),
+      posted_from_(posted_from),
       sequence_num_(++current_sequence_num) {}
 
 IdleTask::IdleTask(const tracked_objects::Location& posted_from,
@@ -29,10 +30,10 @@ bool IdleTask::operator<(const IdleTask& other) const {
   // need to invert the comparison here.  We want the smaller time to be at the
   // top of the heap.
 
-  if (delayed_run_time < other.delayed_run_time)
+  if (delayed_run_time_ < other.delayed_run_time_)
     return false;
 
-  if (delayed_run_time > other.delayed_run_time)
+  if (delayed_run_time_ > other.delayed_run_time_)
     return true;
 
   // If the times happen to match, then we use the sequence number to decide.

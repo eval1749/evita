@@ -8,7 +8,6 @@
 #include "base/callback.h"
 #include "base/location.h"
 #include "base/time/time.h"
-#include "base/tracking_info.h"
 
 namespace dom {
 
@@ -16,7 +15,7 @@ namespace dom {
 //
 // IdleTask
 //
-class IdleTask final : public base::TrackingInfo {
+class IdleTask final {
  public:
   using Callback = base::Callback<void(const base::TimeTicks&)>;
 
@@ -31,6 +30,7 @@ class IdleTask final : public base::TrackingInfo {
   // Used to support sorting.
   bool operator<(const IdleTask& other) const;
 
+  base::TimeTicks delayed_run_time() const { return delayed_run_time_; }
   int id() const { return sequence_num_; }
 
   void Cancel() { is_canceled_ = true; }
@@ -39,6 +39,13 @@ class IdleTask final : public base::TrackingInfo {
 
  private:
   Callback callback_;
+
+  // The time when the task should be run.
+  base::TimeTicks delayed_run_time_;
+
+  // The site this PendingTask was posted from.
+  tracked_objects::Location posted_from_;
+
   int const sequence_num_;
   bool is_canceled_ = false;
 };

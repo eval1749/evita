@@ -67,7 +67,6 @@ third_party/llvm-build/
 /third_party/zlib/
 /tools/clang/
 /tools/grit/
-/tools/gyp/
 /tools/idl_parser/
 /tools/win/
 /v8/

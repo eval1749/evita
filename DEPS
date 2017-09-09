@@ -12,7 +12,6 @@ vars = {
   'ced_revision': '910cca22d881b02cbc8950fa02ccbcdcfb782456',
   'googletest_revision': 'ca102b1f9d1f4c8a8c6f7a87b3e80d0af4b8789f',
   'grit_revision': '6692eb5e229a7a564ff08221653dc1a9e5fa7e51',
-  'gyp_revision': 'd61a9397e668fa9843c4aa7da9e79460fe590bfb',
   'icu_revision': '08cb956852a5ccdba7f9c941728bb833529ba3c6',
   'idl_parser_revision': '108134e25ae0a87391e8eb07a544090093cc8788',
   'instrumented_libraries_revision': '644afd349826cb68204226a16c38bde13abe9c3c',
@@ -53,9 +52,6 @@ deps = {
 
   'src/tools/grit':
     Var('chromium_git') + '/chromium/src/tools/grit' + '@' + Var('grit_revision'),
-
-  'src/tools/gyp':
-    Var('chromium_git') + '/external/gyp.git' + '@' + Var('gyp_revision'),
 
   'src/third_party/icu':
     Var('chromium_git') + '/chromium/deps/icu.git' + '@' + Var('icu_revision'),

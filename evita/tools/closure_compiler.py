@@ -18,7 +18,7 @@ JAVA_OPTIONS = [
     '-XX:+TieredCompilation',
 ]
 CLOSURE_DIR = os.path.join(evita_src, 'third_party', 'closure_compiler')
-CLOSURE_JAR = os.path.join(CLOSURE_DIR, 'closure-compiler-v20170806.jar')
+CLOSURE_JAR = os.path.join(CLOSURE_DIR, 'closure-compiler-v20170910.jar')
 ES6_MORE_EXTERNS_JS = os.path.join(CLOSURE_DIR, 'es6_more.js')
 
 # See below list of warnings:

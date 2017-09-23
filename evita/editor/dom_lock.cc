@@ -15,7 +15,7 @@ namespace editor {
 //
 // DomLock::AutoLock
 //
-DomLock::AutoLock::AutoLock(const Location& location) {
+DomLock::AutoLock::AutoLock(const base::Location& location) {
   TRACE_EVENT_ASYNC_BEGIN2("view", "ViewLock", this, "function",
                            location.function_name(), "type", "AutoLock");
   if (DomLock::GetInstance()->TryLock(location))
@@ -33,7 +33,7 @@ DomLock::AutoLock::~AutoLock() {
 //
 // DomLock::AutoTryLock
 //
-DomLock::AutoTryLock::AutoTryLock(const Location& location)
+DomLock::AutoTryLock::AutoTryLock(const base::Location& location)
     : locked_(DomLock::GetInstance()->TryLock(location)) {
   if (!locked_) {
     TRACE_EVENT_INSTANT1("view", "ViewTryLock", TRACE_EVENT_SCOPE_THREAD,
@@ -55,7 +55,7 @@ DomLock::AutoTryLock::~AutoTryLock() {
 //
 // DomLock::AutoUnlock
 //
-DomLock::AutoUnlock::AutoUnlock(const Location& location) {
+DomLock::AutoUnlock::AutoUnlock(const base::Location& location) {
   TRACE_EVENT_ASYNC_BEGIN2("view", "ViewLock", this, "function",
                            location.function_name(), "type", "AutoUnlock");
   DomLock::GetInstance()->Release(location);
@@ -74,17 +74,17 @@ DomLock::DomLock() : locked_(false) {}
 
 DomLock::~DomLock() {}
 
-const tracked_objects::Location& DomLock::location() const {
+const base::Location& DomLock::location() const {
   return dom::Lock::instance()->location();
 }
 
-void DomLock::Acquire(const Location& location) {
+void DomLock::Acquire(const base::Location& location) {
   DCHECK(thread_checker_.CalledOnValidThread());
   dom::Lock::instance()->Acquire(location);
   locked_ = true;
 }
 
-void DomLock::AssertLocked(const Location& location) {
+void DomLock::AssertLocked(const base::Location& location) {
   if (locked_)
     return;
   LOG(ERROR) << "Assert locked at " << location.ToString() << ", but locked by "
@@ -97,13 +97,13 @@ DomLock* DomLock::GetInstance() {
   return base::Singleton<DomLock>::get();
 }
 
-void DomLock::Release(const Location& location) {
+void DomLock::Release(const base::Location& location) {
   DCHECK(thread_checker_.CalledOnValidThread());
   dom::Lock::instance()->Release(location);
   locked_ = false;
 }
 
-bool DomLock::TryLock(const Location& location) {
+bool DomLock::TryLock(const base::Location& location) {
   DCHECK(thread_checker_.CalledOnValidThread());
   DCHECK(!locked_);
   locked_ = dom::Lock::instance()->TryLock(location);

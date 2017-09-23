@@ -19,11 +19,10 @@ class IdleTask final {
  public:
   using Callback = base::Callback<void(const base::TimeTicks&)>;
 
-  IdleTask(const tracked_objects::Location& posted_from,
+  IdleTask(const base::Location& posted_from,
            const Callback& callback,
            base::TimeTicks delayed_run_time);
-  IdleTask(const tracked_objects::Location& posted_from,
-           const Callback& callback);
+  IdleTask(const base::Location& posted_from, const Callback& callback);
   IdleTask(const IdleTask&);
   ~IdleTask();
 
@@ -44,7 +43,7 @@ class IdleTask final {
   base::TimeTicks delayed_run_time_;
 
   // The site this PendingTask was posted from.
-  tracked_objects::Location posted_from_;
+  base::Location posted_from_;
 
   int const sequence_num_;
   bool is_canceled_ = false;

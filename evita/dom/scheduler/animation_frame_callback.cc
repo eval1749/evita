@@ -6,12 +6,12 @@
 
 #include "base/bind.h"
 #include "base/callback.h"
-#include "base/tracked_objects.h"
+#include "base/location.h"
 
 namespace dom {
 
 AnimationFrameCallback::AnimationFrameCallback(
-    const tracked_objects::Location& posted_from,
+    const base::Location& posted_from,
     const Callback& callback)
     : callback_(callback), posted_from_(posted_from) {}
 

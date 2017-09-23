@@ -13,11 +13,9 @@ namespace editor {
 
 class DomLock {
  public:
-  typedef tracked_objects::Location Location;
-
   class AutoLock {
    public:
-    explicit AutoLock(const Location& location);
+    explicit AutoLock(const base::Location& location);
     ~AutoLock();
 
    private:
@@ -26,7 +24,7 @@ class DomLock {
 
   class AutoTryLock {
    public:
-    explicit AutoTryLock(const Location& location);
+    explicit AutoTryLock(const base::Location& location);
     ~AutoTryLock();
 
     bool locked() const { return locked_; }
@@ -39,7 +37,7 @@ class DomLock {
 
   class AutoUnlock {
    public:
-    explicit AutoUnlock(const Location& location);
+    explicit AutoUnlock(const base::Location& location);
     ~AutoUnlock();
 
    private:
@@ -49,16 +47,16 @@ class DomLock {
   DomLock();
   ~DomLock();
 
-  const Location& location() const;
+  const base::Location& location() const;
   bool locked() const {
     DCHECK(thread_checker_.CalledOnValidThread());
     return locked_;
   }
 
-  void Acquire(const Location& location);
-  void AssertLocked(const Location& location);
-  void Release(const Location& location);
-  bool TryLock(const Location& location);
+  void Acquire(const base::Location& location);
+  void AssertLocked(const base::Location& location);
+  void Release(const base::Location& location);
+  bool TryLock(const base::Location& location);
 
   static DomLock* GetInstance();
 

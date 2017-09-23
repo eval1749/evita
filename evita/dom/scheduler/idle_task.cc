@@ -4,13 +4,13 @@
 
 #include "evita/dom/scheduler/idle_task.h"
 
-#include "base/tracked_objects.h"
+#include "base/location.h"
 
 namespace dom {
 
 static int current_sequence_num;
 
-IdleTask::IdleTask(const tracked_objects::Location& posted_from,
+IdleTask::IdleTask(const base::Location& posted_from,
                    const Callback& callback,
                    base::TimeTicks delay_run_time)
     : callback_(callback),
@@ -18,8 +18,7 @@ IdleTask::IdleTask(const tracked_objects::Location& posted_from,
       posted_from_(posted_from),
       sequence_num_(++current_sequence_num) {}
 
-IdleTask::IdleTask(const tracked_objects::Location& posted_from,
-                   const Callback& callback)
+IdleTask::IdleTask(const base::Location& posted_from, const Callback& callback)
     : IdleTask(posted_from, callback, base::TimeTicks()) {}
 
 IdleTask::IdleTask(const IdleTask&) = default;

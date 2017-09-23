@@ -26,7 +26,7 @@ class PromiseResolver final
  public:
   template <typename ResolveType, typename RejectType>
   static v8::Local<v8::Promise> Call(
-      const tracked_objects::Location& from_here,
+      const base::Location& from_here,
       const base::Callback<
           void(const domapi::Promise<ResolveType, RejectType>&)> closure);
 
@@ -41,8 +41,7 @@ class PromiseResolver final
  private:
   friend class base::RefCountedThreadSafe<PromiseResolver>;
 
-  PromiseResolver(const tracked_objects::Location& from_here,
-                  ginx::Runner* runner);
+  PromiseResolver(const base::Location& from_here, ginx::Runner* runner);
 
   ~PromiseResolver();
 
@@ -53,7 +52,7 @@ class PromiseResolver final
   void DoReject(v8::Local<v8::Value> reason);
   void DoResolve(v8::Local<v8::Value> value);
 
-  tracked_objects::Location from_here_;
+  base::Location from_here_;
   const ginx::ScopedPersistent<v8::Promise::Resolver> resolver_;
   base::WeakPtr<gin::Runner> runner_;
   const int sequence_num_;
@@ -63,7 +62,7 @@ class PromiseResolver final
 
 template <typename T, typename U>
 v8::Local<v8::Promise> PromiseResolver::Call(
-    const tracked_objects::Location& from_here,
+    const base::Location& from_here,
     const base::Callback<void(const domapi::Promise<T, U>&)> closure) {
   auto* const runner = ScriptHost::instance()->runner();
   ginx::Runner::EscapableHandleScope runner_scope(runner);

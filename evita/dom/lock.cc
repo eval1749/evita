@@ -9,7 +9,7 @@
 #include "base/trace_event/trace_event.h"
 
 std::ostream& operator<<(std::ostream& ostream,
-                         const tracked_objects::Location& location) {
+                         const base::Location& location) {
   return ostream << location.ToString();
 }
 
@@ -19,7 +19,7 @@ namespace dom {
 //
 // Lock::AutoLock
 //
-Lock::AutoLock::AutoLock(const Location& location) {
+Lock::AutoLock::AutoLock(const base::Location& location) {
   TRACE_EVENT_ASYNC_BEGIN2("script", "DomLock", this, "function",
                            location.function_name(), "type", "AutoLock");
   DVLOG(9) << "Lock dom at " << location;
@@ -42,7 +42,7 @@ Lock::AutoLock::~AutoLock() {
 //
 // Lock::AutoTryLock
 //
-Lock::AutoTryLock::AutoTryLock(const Location& location)
+Lock::AutoTryLock::AutoTryLock(const base::Location& location)
     : locked_(Lock::instance()->lock()->Try()) {
   DVLOG(9) << "TryLock dom at " << location;
   Lock::instance()->location_ = location;
@@ -69,7 +69,7 @@ Lock::AutoTryLock::~AutoTryLock() {
 //
 // Lock::AutoUnlock
 //
-Lock::AutoUnlock::AutoUnlock(const Location& location)
+Lock::AutoUnlock::AutoUnlock(const base::Location& location)
     : base::AutoUnlock(*Lock::instance()->lock()) {
   TRACE_EVENT_ASYNC_BEGIN2("script", "DomLock", this, "function",
                            location.function_name(), "type", "AutoUnlock");
@@ -92,17 +92,17 @@ Lock::Lock() : lock_(new base::Lock()), locked_by_dom_(false) {}
 
 Lock::~Lock() {}
 
-void Lock::Acquire(const tracked_objects::Location& location) {
+void Lock::Acquire(const base::Location& location) {
   location_ = location;
   lock_->Acquire();
 }
 
-void Lock::Release(const tracked_objects::Location& location) {
+void Lock::Release(const base::Location& location) {
   location_ = location;
   lock_->Release();
 }
 
-bool Lock::TryLock(const tracked_objects::Location& location) {
+bool Lock::TryLock(const base::Location& location) {
   if (!lock_->Try())
     return false;
   location_ = location;

@@ -19,7 +19,7 @@ class AnimationFrameCallback final {
  public:
   using Callback = base::Callback<void(const base::TimeTicks&)>;
 
-  AnimationFrameCallback(const tracked_objects::Location& posted_from,
+  AnimationFrameCallback(const base::Location& posted_from,
                          const Callback& callback);
   ~AnimationFrameCallback();
 
@@ -29,7 +29,7 @@ class AnimationFrameCallback final {
   Callback callback_;
 
   // The site this PendingTask was posted from.
-  tracked_objects::Location posted_from_;
+  base::Location posted_from_;
 };
 
 }  // namespace dom

@@ -18,11 +18,9 @@ class Lock final : public common::Singleton<Lock> {
   DECLARE_SINGLETON_CLASS(Lock);
 
  public:
-  using Location = tracked_objects::Location;
-
   class AutoLock final {
    public:
-    explicit AutoLock(const Location& location);
+    explicit AutoLock(const base::Location& location);
     ~AutoLock();
 
    private:
@@ -31,7 +29,7 @@ class Lock final : public common::Singleton<Lock> {
 
   class AutoTryLock final {
    public:
-    explicit AutoTryLock(const Location& location);
+    explicit AutoTryLock(const base::Location& location);
     ~AutoTryLock();
 
     bool locked() const { return locked_; }
@@ -43,7 +41,7 @@ class Lock final : public common::Singleton<Lock> {
 
   class AutoUnlock final : public base::AutoUnlock {
    public:
-    explicit AutoUnlock(const Location& location);
+    explicit AutoUnlock(const base::Location& location);
     ~AutoUnlock();
 
    private:
@@ -54,13 +52,13 @@ class Lock final : public common::Singleton<Lock> {
 
   bool locked_by_dom() const { return locked_by_dom_; }
   void set_locked_by_dom() { locked_by_dom_ = true; }
-  const Location& location() const { return location_; }
+  const base::Location& location() const { return location_; }
   base::Lock* lock() const { return lock_.get(); }
 
-  void Acquire(const Location& location);
+  void Acquire(const base::Location& location);
   void AssertAcquired() { lock_->AssertAcquired(); }
-  void Release(const Location& location);
-  bool TryLock(const Location& location);
+  void Release(const base::Location& location);
+  bool TryLock(const base::Location& location);
 
  private:
   friend class AutoLock;
@@ -69,7 +67,7 @@ class Lock final : public common::Singleton<Lock> {
 
   Lock();
 
-  Location location_;
+  base::Location location_;
   std::unique_ptr<base::Lock> lock_;
   bool locked_by_dom_;
 

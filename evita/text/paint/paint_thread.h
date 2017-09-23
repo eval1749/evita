@@ -18,7 +18,7 @@ namespace gfx {
 class DxDevice;
 }
 
-namespace tracked_objects {
+namespace base {
 class Location;
 }
 
@@ -38,8 +38,7 @@ class PaintThread final {
   static PaintThread* instance();
 
   void CommitIfNeeded();
-  void PostTask(const tracked_objects::Location& from_here,
-                const base::Closure& task);
+  void PostTask(const base::Location& from_here, const base::Closure& task);
   void SchedulePaintTask(const base::Closure& task);
   void Start();
 

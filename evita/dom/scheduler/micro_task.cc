@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <memory>
+
 #include "evita/dom/scheduler/micro_task.h"
 
 namespace dom {
@@ -10,7 +12,7 @@ namespace dom {
 //
 // MicroTask
 //
-MicroTask::MicroTask(const tracked_objects::Location& posted_from,
+MicroTask::MicroTask(const base::Location& posted_from,
                      const base::Closure& callback)
     : callback_(callback), posted_from_(posted_from) {}
 

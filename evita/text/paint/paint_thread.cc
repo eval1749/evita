@@ -151,7 +151,7 @@ void PaintThread::DidStartThread() {
   compositor_.reset(new ui::Compositor(device_.get()));
 }
 
-void PaintThread::PostTask(const tracked_objects::Location& from_here,
+void PaintThread::PostTask(const base::Location& from_here,
                            const base::Closure& task) {
   DCHECK_CALLED_ON_NON_PAINT_THREAD();
   thread_->task_runner()->PostTask(from_here, task);

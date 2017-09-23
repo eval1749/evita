@@ -43,11 +43,11 @@ TEST_F(TimerTest, RepeatingTimer) {
       "  didFire = true;"
       "});");
   EXPECT_SCRIPT_TRUE("timer.isRunning");
-  ::Sleep(1);
+  ::Sleep(10);
   RunMessageLoopUntilIdle();
   EXPECT_SCRIPT_TRUE("didFire");
   EXPECT_SCRIPT_TRUE("timer.isRunning");
-  ::Sleep(1);
+  ::Sleep(10);
   RunMessageLoopUntilIdle();
   EXPECT_SCRIPT_FALSE("timer.isRunning");
   EXPECT_SCRIPT_EQ("2", "count");

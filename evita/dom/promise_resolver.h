@@ -68,7 +68,7 @@ v8::Local<v8::Promise> PromiseResolver::Call(
   ginx::Runner::EscapableHandleScope runner_scope(runner);
 
   const auto& resolver =
-      make_scoped_refptr(new PromiseResolver(from_here, runner));
+      base::WrapRefCounted(new PromiseResolver(from_here, runner));
 
   domapi::Promise<T, U> promise;
   promise.reject = base::Bind(&PromiseResolver::Reject<U>, resolver);

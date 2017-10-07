@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include <list>
+#include <unordered_set>
 #include <vector>
 
 #include "evita/text/layout/paint_view_builder.h"
@@ -215,7 +216,7 @@ scoped_refptr<paint::View> PaintViewBuilder::Build(
   for (const auto& line : block.lines())
     lines.push_back(CreatePaintRootInlineBox(*line));
   return new paint::View(block.version(), block.bounds(), lines,
-                         make_scoped_refptr(new paint::Selection(
+                         base::WrapRefCounted(new paint::Selection(
                              selection.color(), selection_bounds_set)),
                          bgcolor, ruler, caret);
 }

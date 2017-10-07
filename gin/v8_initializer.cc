@@ -150,8 +150,7 @@ base::PlatformFile OpenV8File(const char* file_name,
       }
     } else if (file.error_details() != base::File::FILE_ERROR_IN_USE) {
       result = OpenV8FileResult::FAILED_OTHER;
-#ifdef OS_WIN
-#if defined(V8_USE_EXTERNAL_STARTUP_DATA)
+#ifdef OS_WIN_FOO
       // TODO(oth): temporary diagnostics for http://crbug.com/479537
       std::string narrow(kNativesFileName);
       base::FilePath::StringType nativesBlob(narrow.begin(), narrow.end());
@@ -161,7 +160,6 @@ base::PlatformFile OpenV8File(const char* file_name,
         LOG(FATAL) << "Failed to open V8 file '" << path.value()
                    << "' (reason: " << file.error_details() << ")";
       }
-#endif
 #endif  // OS_WIN
       break;
     } else if (kMaxOpenAttempts - 1 != attempt) {
@@ -213,14 +211,13 @@ LoadV8FileResult MapOpenedFile(const OpenedFileMap::mapped_type& file_region,
 }
 
 void GetMappedFileData(base::MemoryMappedFile* mapped_file,
-                       const char** data_out,
-                       int* size_out) {
+                       v8::StartupData* data) {
   if (mapped_file) {
-    *data_out = reinterpret_cast<const char*>(mapped_file->data());
-    *size_out = static_cast<int>(mapped_file->length());
+    data->data = reinterpret_cast<const char*>(mapped_file->data());
+    data->raw_size = static_cast<int>(mapped_file->length());
   } else {
-    *data_out = nullptr;
-    *size_out = 0;
+    data->data = nullptr;
+    data->raw_size = 0;
   }
 }
 
@@ -360,12 +357,24 @@ void V8Initializer::Initialize(IsolateHolder::ScriptMode mode,
 }
 
 // static
+void V8Initializer::GetV8ExternalSnapshotData(v8::StartupData* natives,
+                                              v8::StartupData* snapshot) {
+  GetMappedFileData(g_mapped_natives, natives);
+  GetMappedFileData(g_mapped_snapshot, snapshot);
+}
+
+// static
 void V8Initializer::GetV8ExternalSnapshotData(const char** natives_data_out,
                                               int* natives_size_out,
                                               const char** snapshot_data_out,
                                               int* snapshot_size_out) {
-  GetMappedFileData(g_mapped_natives, natives_data_out, natives_size_out);
-  GetMappedFileData(g_mapped_snapshot, snapshot_data_out, snapshot_size_out);
+  v8::StartupData natives;
+  v8::StartupData snapshot;
+  GetV8ExternalSnapshotData(&natives, &snapshot);
+  *natives_data_out = natives.data;
+  *natives_size_out = natives.raw_size;
+  *snapshot_data_out = snapshot.data;
+  *snapshot_size_out = snapshot.raw_size;
 }
 
 // static
@@ -401,9 +410,8 @@ void V8Initializer::LoadV8ContextSnapshotFromFD(base::PlatformFile snapshot_pf,
 }
 
 // static
-void V8Initializer::GetV8ContextSnapshotData(const char** data_out,
-                                             int* size_out) {
-  GetMappedFileData(g_mapped_v8_context_snapshot, data_out, size_out);
+void V8Initializer::GetV8ContextSnapshotData(v8::StartupData* snapshot) {
+  GetMappedFileData(g_mapped_v8_context_snapshot, snapshot);
 }
 
 }  // namespace gin

@@ -46,7 +46,7 @@ testing.test('Unicode.SCRIPT_NAMES', function(t) {
   t.expect(Unicode.SCRIPT_NAMES[100]).toEqual('VISIBLE_SPEECH');
   t.expect(Unicode.SCRIPT_NAMES[166]).toEqual('SIDDHAM');
   t.expect(Unicode.SCRIPT_NAMES[174]).toEqual('SYMBOLS_EMOJI');
-  t.expect(Unicode.SCRIPT_NAMES.length).toEqual(175);
+  t.expect(Unicode.SCRIPT_NAMES.length).toEqual(178);
 });
 
 testing.test('unicode.categoryOf', function(t) {

@@ -7,18 +7,18 @@
 
 namespace dom {
 
-class UnicodTest : public dom::AbstractDomTest {
+class UnicodeTest : public dom::AbstractDomTest {
  public:
-  ~UnicodTest() override = default;
+  ~UnicodeTest() override = default;
 
  protected:
-  UnicodTest() = default;
+  UnicodeTest() = default;
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(UnicodTest);
+  DISALLOW_COPY_AND_ASSIGN(UnicodeTest);
 };
 
-TEST_F(UnicodTest, File) {
+TEST_F(UnicodeTest, File) {
   RunFile({"unicode", "unicode_test.js"});
 }
 

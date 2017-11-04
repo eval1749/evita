@@ -6,13 +6,13 @@ vars = {
   'chromium_git': 'https://chromium.googlesource.com',
   'github_git': 'https://github.com',
 
-  'base_revision': '618ec41c124765b997ff24edcb2bf177ee04f36c',
+  'base_revision': 'debb89a9613f31ee1aed22ced049801c983a5ebb',
   'build_revision': 'be729974cabf69294b1fd5244294e97db9fbf7f7',
   'buildtools_revision': 'df36429e1847e38fda6a7413ba1aa2cbafbc4a34',
   'ced_revision': '94c367a1fe3a13207f4b22604fcfd1d9f9ddf6d9',
-  'depot_tools_revision': '7d1c484ecd93e94c5258dc330602ac37c5efab44',
+  'depot_tools_revision': '4810aa703e61eb49aa0b5c5ca8379d9b5cdf6889',
   'googletest_revision': '7f8fefabedf2965980585be8c2bff97458f28e0b',
-  'grit_revision': '72c065ebe6b46a0e6e6e41696b3760570848761b',
+  'grit_revision': '3753363e0608ada9cc10ac908cf7ff33ec304c9a',
   'gyp_revision': 'd61a9397e668fa9843c4aa7da9e79460fe590bfb',
   'icu_revision': '02218e5349740696eada56a1ba4db988f41b3f51',
   'idl_parser_revision': '5fb1ebf49d235b5a70c9f49047e83b0654031eb7',
@@ -21,11 +21,11 @@ vars = {
   'markupsafe_revision': '8f45f5cfa0009d2a70589bcda0349b8cb2b72783',
   'modp_b64_revision': '28e3fbba4cb4ec3ffd85b53d0a3904525d08f5a6',
   'ply_revision': '4a6baf95860033d4c69d3e3087696b30c687622c',
-  'testing_revision': '86ac3e57506c42c63d464a667765e098b34d979e',
-  'tools_clang_revision': '41c1728ed6d56bae8acfe62b4cdfb68bf7770a13',
-  'tools_win_revision': 'd9ee45530462be0f4ed0c102048c0bac020e4fc5',
+  'testing_revision': '5414bae87f43211483bb7ee09f251a189eb28bad',
+  'tools_clang_revision': '723b25997f0aab45fe1776a0f74a14782e350f8f',
+  'tools_win_revision': '8878b12abb3c73d8a9c2c4ba7385c8b51d1ed406',
   'v8_revision': 'd0225ccd551272ffab2b9cce98e36b2fcd59275c', # 6.4.200.1
-  'zlib_revision': '945bc9fbe26f06ea07308eee946b907735a75519',
+  'zlib_revision': 'd6c529516088eb603ea77742ccfe3b3f1dadf489',
 
   # github
   'autopep8_revision': '93fff80de7dd0819b36281bc0868e5b17c81fb7f', # 1.3.2

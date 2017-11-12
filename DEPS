@@ -142,10 +142,6 @@ hooks = [
     'pattern': '.',
     'action': ['python', 'src/tools/clang/scripts/update.py', '--if-needed'],
   },
-  {
-    'pattern': '.',
-    'action': ['src\\evita\\build\\gn_evita.cmd']
-  },
   # Pull rc binaries using checked-in hashes.
   {
     'name': 'rc_win',

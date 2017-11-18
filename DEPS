@@ -7,8 +7,8 @@ vars = {
   'github_git': 'https://github.com',
 
   'base_revision': 'ce09bb159440ea591335ce0a9477c1b5de840b02',
-  'build_revision': '98bbbff4731a0b844cb0e77a7afdb955329826b3',
-  'buildtools_revision': '93a751e41bd93e373548759c6c5453bd95b6f35e',
+  'build_revision': '610a81804b19c57e16cf4e83011b10c4a8b206e2',
+  'buildtools_revision': '9c40f80c99981e0e3b8ab444ead3d8de8751c103',
   'ced_revision': '94c367a1fe3a13207f4b22604fcfd1d9f9ddf6d9',
   'depot_tools_revision': '1ea21322e369836d6989d54ed645bb69cdc3acef',
   'googletest_revision': '7f8fefabedf2965980585be8c2bff97458f28e0b',
@@ -16,7 +16,7 @@ vars = {
   'gyp_revision': 'd61a9397e668fa9843c4aa7da9e79460fe590bfb',
   'icu_revision': '5ed26985c0171755d7542e7ad6bce12cde4dccfb',
   'idl_parser_revision': '5fb1ebf49d235b5a70c9f49047e83b0654031eb7',
-  'instrumented_libraries_revision': 'e07d437dc8b65ca96ebd3b7d4aa303cd2ec0ec45',
+  'instrumented_libraries_revision': '7f70365acd64e5fc31b780f18284521772c0dea7',
   'jinja2_revision': 'd34383206fa42d52faa10bb9931d6d538f3a57e0',
   'markupsafe_revision': '8f45f5cfa0009d2a70589bcda0349b8cb2b72783',
   'modp_b64_revision': '28e3fbba4cb4ec3ffd85b53d0a3904525d08f5a6',
@@ -24,7 +24,7 @@ vars = {
   'testing_revision': '7220d9f76ff592ca7c738b50d7214e339bd4e094',
   'tools_clang_revision': '4b585122606d6daecc97b89b69f0f3454afb170a',
   'tools_win_revision': '66f69221de06b65a6ef3e9d6f01a2dc3bfb8bf03',
-  'v8_revision': 'ad1474a10f76712669b926fb1e53313c9921b487', # 6.4.244
+  'v8_revision': 'e6c939bacd2520091f3cb923409366f37eeb0dc6', # 6.4.326
   'zlib_revision': '69ad9a4ce2f1cc917e51fa5db740f305bfd3d394',
 
   # github

@@ -7,14 +7,14 @@ vars = {
   'github_git': 'https://github.com',
 
   'base_revision': '2103b5a0387fcc78e981e291efacf6a8a46311a3',
-  'build_revision': '571871636f333d4ecf5583eb6cd205fedf3bfdf7',
-  'buildtools_revision': '9c40f80c99981e0e3b8ab444ead3d8de8751c103',
+  'build_revision': '404c19d76296b03d4f3b4e46249aca829dd95744',
+  'buildtools_revision': '282996b8c3cf7f05bbb5209432e9fe8162c6e7ac',
   'ced_revision': '94c367a1fe3a13207f4b22604fcfd1d9f9ddf6d9',
   'depot_tools_revision': 'ddfead3483f2c1b49419de2b9f561cb32763f2b3',
   'googletest_revision': '7f8fefabedf2965980585be8c2bff97458f28e0b',
   'grit_revision': '1f3a0729d36cd5938d5f6fc28ca1427a03487a9b',
   'gyp_revision': 'd61a9397e668fa9843c4aa7da9e79460fe590bfb',
-  'icu_revision': '5ed26985c0171755d7542e7ad6bce12cde4dccfb',
+  'icu_revision': '26f7d8ad2f7c6c902825a985146a1d9d68e783cb',
   'idl_parser_revision': '5fb1ebf49d235b5a70c9f49047e83b0654031eb7',
   'instrumented_libraries_revision': 'ebf8d92daa24c7c6fbc1709cfc9b0787c9c8f3aa',
   'jinja2_revision': 'd34383206fa42d52faa10bb9931d6d538f3a57e0',
@@ -24,7 +24,7 @@ vars = {
   'testing_revision': '14acaa118cfb712cd3ffc6de40646fb3498d631f',
   'tools_clang_revision': 'f2ca3e05e48b1bf8343fb270dc086e39c6e6017c',
   'tools_win_revision': '66f69221de06b65a6ef3e9d6f01a2dc3bfb8bf03',
-  'v8_revision': 'e6c939bacd2520091f3cb923409366f37eeb0dc6', # 6.4.326
+  'v8_revision': '95d3c08c1c9a278603b40e99de6a7efaf73ea1b3', # 6.5.36
   'zlib_revision': '079f41943ea7fb4ec0ccb726a21fd86ee37b024b',
 
   # github

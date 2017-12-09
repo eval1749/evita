@@ -59,14 +59,11 @@ class GIN_EXPORT IsolateHolder {
                 AccessMode access_mode);
   IsolateHolder(scoped_refptr<base::SingleThreadTaskRunner> task_runner,
                 AccessMode access_mode,
-                AllowAtomicsWaitMode atomics_wait_mode,
-                const intptr_t* reference_table,
-                v8::StartupData* startup_data);
+                AllowAtomicsWaitMode atomics_wait_mode);
 
   // This constructor is to create V8 snapshot for Blink.
   // Note this constructor calls isolate->Enter() internally.
-  IsolateHolder(const intptr_t* reference_table,
-                v8::StartupData* existing_blob);
+  explicit IsolateHolder(v8::StartupData* existing_blob);
 
   ~IsolateHolder();
 
@@ -78,9 +75,13 @@ class GIN_EXPORT IsolateHolder {
   // snapshot file is available, it should also be loaded (by calling
   // V8Initializer::LoadV8SnapshotFromFD or
   // V8Initializer::LoadV8Snapshot) before calling this method.
+  // If the snapshot file contains customised contexts which have static
+  // external references, |reference_table| needs to point an array of those
+  // reference pointers. Otherwise, it can be nullptr.
   static void Initialize(ScriptMode mode,
                          V8ExtrasMode v8_extras_mode,
-                         v8::ArrayBuffer::Allocator* allocator);
+                         v8::ArrayBuffer::Allocator* allocator,
+                         const intptr_t* reference_table = nullptr);
 
   v8::Isolate* isolate() { return isolate_; }
 

@@ -40,3 +40,10 @@ echo.
 echo You should set OUTDIR environment variable, e.g. OUTDIR=..\out
 echo.
 exit/b 1
+
+is_component_build = true
+is_debug = true
+is_clang = false
+is_win_fastlink = true
+use_v8_context_snapshot = false
+v8_use_external_startup_data = false

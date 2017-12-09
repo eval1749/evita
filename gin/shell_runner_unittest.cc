@@ -24,13 +24,17 @@ using v8::String;
 
 namespace gin {
 
-TEST(RunnerTest, Run) {
+// TODO(yzshen): crbug.com/793480
+TEST(RunnerTest, DISABLED_Run) {
   base::test::ScopedTaskEnvironment scoped_task_environment;
   std::string source = "this.result = 'PASS';\n";
 
 #ifdef V8_USE_EXTERNAL_STARTUP_DATA
   gin::V8Initializer::LoadV8Snapshot();
   gin::V8Initializer::LoadV8Natives();
+#endif
+#ifdef USE_V8_CONTEXT_SNAPSHOT
+  gin::V8Initializer::LoadV8ContextSnapshot();
 #endif
 
   gin::IsolateHolder::Initialize(gin::IsolateHolder::kStrictMode,

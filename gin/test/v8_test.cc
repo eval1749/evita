@@ -15,17 +15,19 @@ using v8::HandleScope;
 
 namespace gin {
 
-V8Test::V8Test() {
-}
+V8Test::V8Test() = default;
 
-V8Test::~V8Test() {
-}
+V8Test::~V8Test() = default;
 
 void V8Test::SetUp() {
 #ifdef V8_USE_EXTERNAL_STARTUP_DATA
   gin::V8Initializer::LoadV8Snapshot();
   gin::V8Initializer::LoadV8Natives();
 #endif
+#ifdef USE_V8_CONTEXT_SNAPSHOT
+  gin::V8Initializer::LoadV8ContextSnapshot();
+#endif
+
   gin::IsolateHolder::Initialize(gin::IsolateHolder::kStrictMode,
                                  gin::IsolateHolder::kStableV8Extras,
                                  gin::ArrayBufferAllocator::SharedInstance());

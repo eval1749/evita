@@ -266,7 +266,7 @@ base::string16 Value::ToString16() const {
     case ValueType::Integer:
       return base::IntToString16(as_integer());
     case ValueType::Number:
-      return base::UTF8ToUTF16(base::DoubleToString(as_number()));
+      return base::UTF8ToUTF16(base::NumberToString(as_number()));
     case ValueType::Keyword:
       return KeywordToString16(as_keyword());
     case ValueType::Percentage:

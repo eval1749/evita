@@ -157,8 +157,10 @@ v8::Local<v8::Promise> Editor::CheckSpelling(
 }
 
 bool Editor::CollectGarbage(int hint) {
-  if (hint >= 1 && hint <= 1000)
-    return ScriptHost::instance()->isolate()->IdleNotification(hint);
+  if (hint >= 1 && hint <= 1000) {
+    return ScriptHost::instance()->isolate()->IdleNotificationDeadline(
+        static_cast<double>(hint) / 1000);
+  }
   ScriptHost::instance()->isolate()->LowMemoryNotification();
   return false;
 }

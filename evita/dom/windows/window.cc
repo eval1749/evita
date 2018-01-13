@@ -205,7 +205,7 @@ void Window::DidSetFocus() {
       instance->Set(runner->context(), v8Strings::focusTick_.Get(isolate),
                     v8::Integer::New(isolate, global_focus_tick));
   CHECK(set_focus_tick.ToChecked());
-  const auto& set_focus = klass->ToObject()->ForceSet(
+  const auto& set_focus = klass->ToObject()->Set(
       runner->context(), v8Strings::focus.Get(isolate), instance);
   CHECK(set_focus.ToChecked());
 }

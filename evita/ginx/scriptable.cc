@@ -36,7 +36,9 @@ v8::Local<v8::Object> AbstractScriptable::GetWrapper(
   auto ctor =
       wrapper_info()->GetOrCreateConstructorTemplate(isolate)->GetFunction();
   ConstructorModeScope constructor_mode_scope(isolate, kWrapExistingObject);
-  auto const wrapper = ctor->NewInstance();
+  // TODO(eval1749): We should make |GetWrapper()| to take |v8::Context|.
+  auto const wrapper =
+      ctor->NewInstance(isolate->GetCurrentContext()).ToLocalChecked();
   CHECK(!wrapper.IsEmpty());
   const_cast<AbstractScriptable*>(this)->Bind(isolate, wrapper);
   return wrapper;

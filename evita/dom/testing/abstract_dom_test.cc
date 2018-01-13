@@ -247,7 +247,7 @@ void AbstractDomTest::RunFile(const base::FilePath& path) {
     return;
   }
   auto context = runner_->context();
-  if (!module->Instantiate(context, ModuleResolverCallback)) {
+  if (!module->InstantiateModule(context, ModuleResolverCallback).FromJust()) {
     FAIL() << "Failed to resolve \"" << file_name << '"';
     return;
   }

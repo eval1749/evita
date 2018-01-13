@@ -47,7 +47,9 @@ typedef v8::Eternal<v8::String> V8String;
 static v8::Local<v8::String> NewString(v8::Isolate* isolate,
                                         const char* string) {
   return v8::String::NewFromOneByte(isolate,
-                                    reinterpret_cast<const uint8_t*>(string));
+                                    reinterpret_cast<const uint8_t*>(string),
+                                    v8::NewStringType::kInternalized)
+            .ToLocalChecked();
 }
 
 void Init(v8::Isolate* isolate) {
@@ -97,6 +99,7 @@ def main():
     output_prefix = sys.argv[1]
     input_file = sys.argv[2]
     generate(output_prefix, input_file)
+
 
 if __name__ == '__main__':
     main()

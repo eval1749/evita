@@ -84,6 +84,11 @@ class Runner : public gin::Runner {
   }
   void set_user_data(void* data) { user_data_ = data; }
 
+  v8::Local<v8::Value> Call(v8::Local<v8::Function> function,
+                            v8::Local<v8::Value> receiver,
+                            int argc,
+                            v8::Local<v8::Value> argv[]);
+
   v8::Local<v8::Value> CallAsFunction(v8::Local<v8::Value> callee,
                                       v8::Local<v8::Value> receiver,
                                       const Args& args);
@@ -119,10 +124,6 @@ class Runner : public gin::Runner {
                                 const base::string16& script_name);
 
   // gin::Runner
-  v8::Local<v8::Value> Call(v8::Local<v8::Function> function,
-                            v8::Local<v8::Value> receiver,
-                            int argc,
-                            v8::Local<v8::Value> argv[]) final;
   gin::ContextHolder* GetContextHolder() final;
   void Run(const std::string& source, const std::string& resource_name) final;
 

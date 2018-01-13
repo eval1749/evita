@@ -33,7 +33,9 @@ v8::Local<v8::Value> Converter<gfx::FloatPoint>::ToV8(
       context->Global()->Get(dom::v8Strings::Point.Get(isolate));
   v8::Local<v8::Value> argv[]{ConvertToV8(isolate, point.x()),
                               ConvertToV8(isolate, point.y())};
-  return point_ctor->ToObject()->CallAsConstructor(arraysize(argv), argv);
+  return point_ctor->ToObject()
+      ->CallAsConstructor(context, arraysize(argv), argv)
+      .ToLocalChecked();
 }
 
 }  // namespace gin

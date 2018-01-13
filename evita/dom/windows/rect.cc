@@ -49,7 +49,9 @@ v8::Local<v8::Value> Converter<gfx::FloatRect>::ToV8(
       ConvertToV8(isolate, rect.x()), ConvertToV8(isolate, rect.y()),
       ConvertToV8(isolate, rect.width()), ConvertToV8(isolate, rect.height()),
   };
-  return rect_ctor->ToObject()->CallAsConstructor(4, argv);
+  return rect_ctor->ToObject()
+      ->CallAsConstructor(context, 4, argv)
+      .ToLocalChecked();
 }
 
 }  // namespace gin

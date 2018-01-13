@@ -7,6 +7,7 @@
 
 #include "evita/ginx/runner.h"
 
+#include "base/i18n/icu_util.h"
 #include "base/macros.h"
 #include "base/message_loop/message_loop.h"
 #include "evita/ginx/converter.h"
@@ -50,7 +51,7 @@ RunnerTest::RunnerTest() {
   gin::IsolateHolder::Initialize(gin::IsolateHolder::kStrictMode,
                                  gin::IsolateHolder::kStableV8Extras,
                                  gin::ArrayBufferAllocator::SharedInstance());
-  v8::V8::InitializeICU();
+  base::i18n::InitializeICU();
   isolate_holder_.reset(new IsolateHolder());
   runner_.reset(new Runner(isolate_holder_->isolate(), &delegate_));
 }

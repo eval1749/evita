@@ -14,9 +14,10 @@
 #undef GetOpenFileName
 #undef GetSaveFileName
 
+#include <iterator>
+
 #include "base/macros.h"
 #include "base/message_loop/message_loop.h"
-
 
 namespace views {
 
@@ -37,7 +38,7 @@ bool FileDialogBox::GetOpenFileName(Param* pParam) {
   oOfn.lpstrFile = pParam->m_wsz;
   oOfn.lpstrInitialDir = pParam->m_wszDir[0] ? pParam->m_wszDir : nullptr;
 
-  oOfn.nMaxFile = arraysize(pParam->m_wsz);
+  oOfn.nMaxFile = static_cast<DWORD>(std::size(pParam->m_wsz));
   oOfn.Flags = 0;
   oOfn.Flags |= OFN_ENABLESIZING;
   oOfn.Flags |= OFN_EXPLORER;
@@ -61,7 +62,7 @@ bool FileDialogBox::GetSaveFileName(Param* pParam) {
   oOfn.hwndOwner = pParam->m_hwndOwner;
   oOfn.lpstrFilter = L"All Files\0*.*\0";
   oOfn.lpstrFile = pParam->m_wsz;
-  oOfn.nMaxFile = arraysize(pParam->m_wsz);
+  oOfn.nMaxFile = static_cast<DWORD>(std::size(pParam->m_wsz));
   oOfn.lpstrInitialDir = pParam->m_wszDir[0] ? pParam->m_wszDir : nullptr;
 
   oOfn.Flags = 0;
@@ -84,7 +85,8 @@ void FileDialogBox::Param::SetDirectory(const base::char16* pwszFile) {
     return;
   base::char16* pwszFilePart;
   auto const cwchFull =
-      ::GetFullPathName(pwszFile, arraysize(m_wszDir), m_wszDir, &pwszFilePart);
+      ::GetFullPathName(pwszFile, static_cast<DWORD>(std::size(m_wszDir)),
+                        m_wszDir, &pwszFilePart);
   if (cwchFull >= 1 && pwszFilePart)
     *pwszFilePart = 0;
 }

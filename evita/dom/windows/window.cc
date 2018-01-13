@@ -4,6 +4,8 @@
 
 #include "evita/dom/windows/window.h"
 
+#include <iterator>
+
 #include "base/bind.h"
 #include "base/logging.h"
 #include "base/strings/stringprintf.h"
@@ -29,7 +31,7 @@ const char* WindowStateString(dom::Window::State state) {
   auto const index =
       static_cast<size_t>(static_cast<int>(state) -
                           static_cast<int>(dom::Window::State::Destroyed));
-  DCHECK_LE(index, arraysize(state_strings) - 1);
+  DCHECK_LE(index, std::size(state_strings) - 1);
   return state_strings[index];
 }
 }  // namespace internal

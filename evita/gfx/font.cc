@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <iterator>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -131,7 +132,7 @@ uint32_t Font::FontImpl::CalculateFixedWidth() const {
   }
 
   const auto metrics =
-      GetGlyphMetrics(cacheable_chars, arraysize(cacheable_chars));
+      GetGlyphMetrics(cacheable_chars, std::size(cacheable_chars));
   const auto width = metrics[0].advanceWidth;
   for (const auto metric : metrics) {
     if (width != metric.advanceWidth)
@@ -209,11 +210,11 @@ std::vector<DWRITE_GLYPH_METRICS> Font::FontImpl::GetGlyphMetrics(
     const std::vector<uint16_t> glyph_indexes) const {
   const auto is_side_ways = false;
   std::vector<DWRITE_GLYPH_METRICS> metrics(glyph_indexes.size());
-  COM_VERIFY((*font_face_)
-                 ->GetDesignGlyphMetrics(
-                     &glyph_indexes[0],
-                     static_cast<DWORD>(glyph_indexes.size()), &metrics[0],
-                     is_side_ways));
+  COM_VERIFY(
+      (*font_face_)
+          ->GetDesignGlyphMetrics(&glyph_indexes[0],
+                                  static_cast<DWORD>(glyph_indexes.size()),
+                                  &metrics[0], is_side_ways));
   return std::move(metrics);
 }
 

@@ -3,6 +3,8 @@
 
 #include "evita/dom/windows/point.h"
 
+#include <iterator>
+
 #include "evita/dom/v8_strings.h"
 
 namespace gin {
@@ -34,7 +36,7 @@ v8::Local<v8::Value> Converter<gfx::FloatPoint>::ToV8(
   v8::Local<v8::Value> argv[]{ConvertToV8(isolate, point.x()),
                               ConvertToV8(isolate, point.y())};
   return point_ctor->ToObject()
-      ->CallAsConstructor(context, arraysize(argv), argv)
+      ->CallAsConstructor(context, static_cast<int>(std::size(argv)), argv)
       .ToLocalChecked();
 }
 

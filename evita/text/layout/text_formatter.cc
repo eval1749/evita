@@ -3,7 +3,9 @@
 // found in the LICENSE file.
 
 #include <algorithm>
+#include <iterator>
 #include <string>
+#include <utility>
 
 #include "evita/text/layout/text_formatter.h"
 
@@ -159,7 +161,7 @@ base::char16 TextFormatter::TextScanner::GetChar() {
   if (text_offset_ < buffer_cache_start_ || text_offset_ >= buffer_cache_end_) {
     buffer_cache_start_ = text_offset_;
     buffer_cache_end_ = std::min(
-        buffer_cache_start_ + text::OffsetDelta(arraysize(buffer_cache_)),
+        buffer_cache_start_ + text::OffsetDelta(std::size(buffer_cache_)),
         buffer_.GetEnd());
     buffer_.GetText(buffer_cache_, buffer_cache_start_, buffer_cache_end_);
   }

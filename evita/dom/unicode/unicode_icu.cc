@@ -5,6 +5,7 @@
 #include <stdint.h>
 
 #include <array>
+#include <iterator>
 #include <memory>
 
 #include "base/i18n/icu_util.h"
@@ -273,9 +274,10 @@ v8::Local<v8::Object> CreateUnicode(v8::Isolate* isolate) {
   auto unicode = v8::Object::New(isolate);
 
   // Category name
-  auto category_names = v8::Array::New(isolate, arraysize(kCategoryNames));
+  auto category_names =
+      v8::Array::New(isolate, static_cast<int>(std::size(kCategoryNames)));
   auto category_object = v8::Object::New(isolate);
-  for (auto i = 0; i < arraysize(kCategoryNames); ++i) {
+  for (auto i = 0; i < std::size(kCategoryNames); ++i) {
     auto name = gin::StringToV8(isolate, kCategoryNames[i]);
     category_object->Set(name, name);
     category_names->Set(static_cast<size_t>(i), name);
@@ -311,7 +313,7 @@ v8::Local<v8::Object> CreateUnicode(v8::Isolate* isolate) {
   for (auto code = 0; code <= UCHAR_MAX_VALUE; ++code) {
     // category
     const auto category_index = u_charType(code);
-    CHECK(category_index < arraysize(kCategoryNames));
+    CHECK(category_index < std::size(kCategoryNames));
     category_data[code] = static_cast<uint8_t>(category_index);
 
     // script

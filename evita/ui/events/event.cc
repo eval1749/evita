@@ -354,7 +354,7 @@ const char* MouseButton(const ui::MouseEvent& event) {
   static const char* button_names[] = {
       "Left", "Middle", "Right", "Other1", "Other2",
   };
-  if (static_cast<size_t>(event.button()) < arraysize(button_names))
+  if (static_cast<size_t>(event.button()) < std::size(button_names))
     return button_names[static_cast<int>(event.button())];
   return "?";
 }
@@ -364,7 +364,7 @@ const char* MouseModifiers(const ui::MouseEvent& event) {
       "", "Ctrl+", "Shift+", "Ctrl+Shift+",
   };
   static_assert(sizeof(modifier_names) == sizeof(const char*) * 4,
-                "arraysize(modifier_names[]) must be 4.");
+                "std::size(modifier_names[]) must be 4.");
   auto index = 0;
   if (event.control_key())
     index |= 1;

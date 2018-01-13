@@ -5,6 +5,8 @@
 #ifndef EVITA_TEXT_MODELS_UNDO_STEP_H_
 #define EVITA_TEXT_MODELS_UNDO_STEP_H_
 
+#include <utility>
+
 #include "base/macros.h"
 #include "base/strings/string16.h"
 #include "evita/base/castable.h"
@@ -19,11 +21,16 @@ class UndoStack;
 //
 // UndoStep
 //
-class UndoStep : public base::DeprecatedCastable<UndoStep> {
-  DECLARE_DEPRECATED_CASTABLE_CLASS(UndoStep, DeprecatedCastable);
+class UndoStep : public base::Castable<UndoStep> {
+  DECLARE_CASTABLE_CLASS(UndoStep, Castable);
 
  public:
   virtual ~UndoStep();
+
+  virtual bool is_begin_undo_step() const;
+  virtual bool is_delete_undo_step() const;
+  virtual bool is_end_undo_step() const;
+  virtual bool is_insert_undo_step() const;
 
   virtual Offset GetAfterRedo() const;
   virtual Offset GetAfterUndo() const;
@@ -45,7 +52,7 @@ class UndoStep : public base::DeprecatedCastable<UndoStep> {
 // NamedUndoStep
 //
 class NamedUndoStep : public UndoStep {
-  DECLARE_DEPRECATED_CASTABLE_CLASS(NamedUndoStep, UndoStep);
+  DECLARE_CASTABLE_CLASS(NamedUndoStep, UndoStep);
 
  public:
   const base::string16& name() const { return name_; }
@@ -65,7 +72,7 @@ class NamedUndoStep : public UndoStep {
 // TextUndoStep
 //
 class TextUndoStep : public UndoStep {
-  DECLARE_DEPRECATED_CASTABLE_CLASS(TextUndoStep, UndoStep);
+  DECLARE_CASTABLE_CLASS(TextUndoStep, UndoStep);
 
  public:
   Offset end() const { return end_; }
@@ -94,15 +101,19 @@ class TextUndoStep : public UndoStep {
 // BeginUndoStep
 //
 class BeginUndoStep final : public NamedUndoStep {
-  DECLARE_DEPRECATED_CASTABLE_CLASS(BeginUndoStep, NamedUndoStep);
+  DECLARE_CASTABLE_CLASS(BeginUndoStep, NamedUndoStep);
 
  public:
   explicit BeginUndoStep(const base::string16& name);
   ~BeginUndoStep() final;
 
+  static bool Is(const UndoStep& step) { return step.is_begin_undo_step(); }
+
  private:
   // UndoStep
   bool TryMerge(const Buffer* buffer, const UndoStep* other) final;
+
+  bool is_begin_undo_step() const final;
 
   DISALLOW_COPY_AND_ASSIGN(BeginUndoStep);
 };
@@ -112,7 +123,7 @@ class BeginUndoStep final : public NamedUndoStep {
 // DeleteUndoStep
 //
 class DeleteUndoStep final : public TextUndoStep {
-  DECLARE_DEPRECATED_CASTABLE_CLASS(DeleteUndoStep, TextUndoStep);
+  DECLARE_CASTABLE_CLASS(DeleteUndoStep, TextUndoStep);
 
  public:
   DeleteUndoStep(int revision,
@@ -121,8 +132,12 @@ class DeleteUndoStep final : public TextUndoStep {
                  const base::string16& text);
   ~DeleteUndoStep() final;
 
+  static bool Is(const UndoStep& step) { return step.is_delete_undo_step(); }
+
  private:
   // Record
+  bool is_delete_undo_step() const final;
+
   Offset GetAfterRedo() const final;
   Offset GetAfterUndo() const final;
   Offset GetBeforeRedo() const final;
@@ -139,14 +154,18 @@ class DeleteUndoStep final : public TextUndoStep {
 // EndUndoStep
 //
 class EndUndoStep final : public NamedUndoStep {
-  DECLARE_DEPRECATED_CASTABLE_CLASS(EndUndoStep, NamedUndoStep);
+  DECLARE_CASTABLE_CLASS(EndUndoStep, NamedUndoStep);
 
  public:
   explicit EndUndoStep(const base::string16& name);
   ~EndUndoStep() final;
 
+  static bool Is(const UndoStep& step) { return step.is_end_undo_step(); }
+
  private:
   // UndoStep
+  bool is_end_undo_step() const final;
+
   bool TryMerge(const Buffer* buffer, const UndoStep* other) final;
 
   DISALLOW_COPY_AND_ASSIGN(EndUndoStep);
@@ -157,14 +176,18 @@ class EndUndoStep final : public NamedUndoStep {
 // InsertUndoStep
 //
 class InsertUndoStep final : public TextUndoStep {
-  DECLARE_DEPRECATED_CASTABLE_CLASS(InsertUndoStep, TextUndoStep);
+  DECLARE_CASTABLE_CLASS(InsertUndoStep, TextUndoStep);
 
  public:
   InsertUndoStep(int revision, Offset start, Offset end);
   ~InsertUndoStep() final;
 
+  static bool Is(const UndoStep& step) { return step.is_insert_undo_step(); }
+
  private:
   // UndoStep
+  bool is_insert_undo_step() const final;
+
   Offset GetAfterRedo() const final;
   Offset GetAfterUndo() const final;
   Offset GetBeforeRedo() const final;

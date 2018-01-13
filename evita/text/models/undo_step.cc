@@ -18,6 +18,19 @@ UndoStep::UndoStep() {}
 
 UndoStep::~UndoStep() {}
 
+bool UndoStep::is_begin_undo_step() const {
+  return false;
+}
+bool UndoStep::is_delete_undo_step() const {
+  return false;
+}
+bool UndoStep::is_end_undo_step() const {
+  return false;
+}
+bool UndoStep::is_insert_undo_step() const {
+  return false;
+}
+
 Offset UndoStep::GetAfterRedo() const {
   return Offset::Invalid();
 }
@@ -87,6 +100,10 @@ bool BeginUndoStep::TryMerge(const Buffer*, const UndoStep* new_undo_step) {
     return true;
   }
   return false;
+}
+
+bool BeginUndoStep::is_begin_undo_step() const {
+  return true;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -165,6 +182,10 @@ void DeleteUndoStep::Undo(Buffer* buffer) {
   buffer->ResetRevision(revision());
 }
 
+bool DeleteUndoStep::is_delete_undo_step() const {
+  return true;
+}
+
 //////////////////////////////////////////////////////////////////////
 //
 // EndUndoStep
@@ -176,6 +197,10 @@ EndUndoStep::~EndUndoStep() {}
 // UndoStep
 bool EndUndoStep::TryMerge(const Buffer*, const UndoStep*) {
   return false;
+}
+
+bool EndUndoStep::is_end_undo_step() const {
+  return true;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -237,6 +262,10 @@ void InsertUndoStep::Redo(Buffer* buffer) {
 void InsertUndoStep::Undo(Buffer* buffer) {
   buffer->Delete(start(), end());
   buffer->ResetRevision(revision());
+}
+
+bool InsertUndoStep::is_insert_undo_step() const {
+  return true;
 }
 
 }  // namespace text

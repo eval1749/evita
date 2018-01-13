@@ -25,7 +25,7 @@ class UndoStep : public base::Castable<UndoStep> {
   DECLARE_CASTABLE_CLASS(UndoStep, Castable);
 
  public:
-  virtual ~UndoStep();
+  ~UndoStep() override;
 
   virtual bool is_begin_undo_step() const;
   virtual bool is_delete_undo_step() const;

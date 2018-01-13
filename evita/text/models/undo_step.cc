@@ -14,9 +14,9 @@ namespace text {
 //
 // UndoStep
 //
-UndoStep::UndoStep() {}
+UndoStep::UndoStep() = default;
 
-UndoStep::~UndoStep() {}
+UndoStep::~UndoStep() = default;
 
 bool UndoStep::is_begin_undo_step() const {
   return false;
@@ -63,7 +63,7 @@ NamedUndoStep::NamedUndoStep(const base::string16& name) : name_(name) {
   DCHECK(!name_.empty());
 }
 
-NamedUndoStep::~NamedUndoStep() {}
+NamedUndoStep::~NamedUndoStep() = default;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -75,7 +75,7 @@ TextUndoStep::TextUndoStep(int revision, Offset start, Offset end)
   DCHECK_GE(revision_, 0);
 }
 
-TextUndoStep::~TextUndoStep() {}
+TextUndoStep::~TextUndoStep() = default;
 
 void TextUndoStep::set_text(const base::string16& text) {
   DCHECK(!text.empty());
@@ -90,7 +90,7 @@ void TextUndoStep::set_text(const base::string16& text) {
 BeginUndoStep::BeginUndoStep(const base::string16& name)
     : NamedUndoStep(name) {}
 
-BeginUndoStep::~BeginUndoStep() {}
+BeginUndoStep::~BeginUndoStep() = default;
 
 // UndoStep
 bool BeginUndoStep::TryMerge(const Buffer*, const UndoStep* new_undo_step) {
@@ -118,7 +118,7 @@ DeleteUndoStep::DeleteUndoStep(int revision,
   set_text(text);
 }
 
-DeleteUndoStep::~DeleteUndoStep() {}
+DeleteUndoStep::~DeleteUndoStep() = default;
 
 // UndoStep
 Offset DeleteUndoStep::GetAfterRedo() const {
@@ -192,7 +192,7 @@ bool DeleteUndoStep::is_delete_undo_step() const {
 //
 EndUndoStep::EndUndoStep(const base::string16& name) : NamedUndoStep(name) {}
 
-EndUndoStep::~EndUndoStep() {}
+EndUndoStep::~EndUndoStep() = default;
 
 // UndoStep
 bool EndUndoStep::TryMerge(const Buffer*, const UndoStep*) {
@@ -210,7 +210,7 @@ bool EndUndoStep::is_end_undo_step() const {
 InsertUndoStep::InsertUndoStep(int revision, Offset start, Offset end)
     : TextUndoStep(revision, start, end) {}
 
-InsertUndoStep::~InsertUndoStep() {}
+InsertUndoStep::~InsertUndoStep() = default;
 
 // Merge "Insert" UndoStep if
 // o [last][new]

@@ -35,25 +35,7 @@ void Sampling::AddSample(float sample) {
 }
 
 base::TimeTicks Sampling::NowTimeTicks() {
-#if _WIN32_WINNT >= _WIN32_WINNT_WIN8
-  // The number of 100-naooseconds until since the start of January 1, 1601.
-  FILETIME ft_now;
-  ::GetSystemTimePreciseAsFileTime(&ft_now);
-  LARGE_INTEGER now;
-  now.HighPart = static_cast<int32_t>(ft_now.dwHighDateTime);
-  now.LowPart = ft_now.dwLowDateTime;
-  return base::TimeTicks::FromInternalValue(
-      now.QuadPart / (base::Time::kNanosecondsPerMicrosecond / 100));
-#else
-  static LARGE_INTEGER ticks_per_sec;
-  if (!ticks_per_sec.QuadPart)
-    ::QueryPerformanceFrequency(&ticks_per_sec);
-  LARGE_INTEGER counter;
-  ::QueryPerformanceCounter(&counter);
-  return base::TimeTicks::FromInternalValue(counter.QuadPart *
-                                            base::Time::kMicrosecondsPerSecond /
-                                            ticks_per_sec.QuadPart);
-#endif
+  return base::TimeTicks::Now();
 }
 
 }  // namespace metrics

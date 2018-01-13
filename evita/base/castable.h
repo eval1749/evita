@@ -14,6 +14,43 @@ namespace base {
 // bool is<T>()
 // static const char* static_class_name()
 template <typename Base>
+class Castable {
+ public:
+  template <class Class>
+  Class* as() {
+    return is<Class>() ? static_cast<Class*>(this) : nullptr;
+  }
+
+  template <class Class>
+  const Class* as() const {
+    return is<Class>() ? static_cast<const Class*>(this) : nullptr;
+  }
+
+  template <class Class>
+  bool is() const {
+    static_assert(std::is_base_of<Base, Class>::value, "Unrelated classes");
+    return Class::Is(static_cast<const Base&>(*this));
+  }
+
+ protected:
+  Castable() = default;
+  virtual ~Castable() = default;
+
+ public:
+  static const char* static_class_name() { return "Castable"; }
+};
+
+#define DECLARE_CASTABLE_CLASS(this_name, base_name)            \
+ public:                                                        \
+  static const char* static_class_name() { return #this_name; } \
+                                                                \
+ private:
+
+// T* as()
+// const char* class_name()
+// bool is<T>()
+// static const char* static_class_name()
+template <typename Base>
 class DeprecatedCastable {
  public:
   template <class Class>

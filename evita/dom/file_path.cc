@@ -3,6 +3,8 @@
 
 #include "evita/dom/file_path.h"
 
+#include <windows.h>
+
 #include "base/strings/string16.h"
 
 namespace dom {

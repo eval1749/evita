@@ -4,6 +4,8 @@
 
 #include "evita/io/io_delegate_impl.h"
 
+#include <windows.h>
+
 #include <unordered_map>
 #include <utility>
 

@@ -4,6 +4,9 @@
 
 #include "evita/dom/testing/mock_io_delegate.h"
 
+#include <windows.h>
+#undef MoveFile
+
 #include <algorithm>
 
 #include "base/callback.h"

@@ -4,6 +4,8 @@
 
 #include "evita/dom/components/win_resource/win_resource.h"
 
+#include <windows.h>
+
 #include "evita/dom/os/io_error.h"
 #include "evita/dom/promise_resolver.h"
 #include "evita/dom/public/io_delegate.h"

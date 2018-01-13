@@ -5,6 +5,8 @@
 #ifndef EVITA_REGEX_REGEX_UTIL_H_
 #define EVITA_REGEX_REGEX_UTIL_H_
 
+#include <iterator>
+
 #include "base/logging.h"
 #include "base/strings/string16.h"
 #include "evita/regex/precomp.h"
@@ -401,7 +403,7 @@ class CharSink final {
   explicit CharSink(LocalHeap* pHeap)
       : m_pHeap(pHeap),
         m_pwch(m_rgwch),
-        m_pwchEnd(m_rgwch + ARRAYSIZE(m_rgwch)),
+        m_pwchEnd(m_rgwch + std::size(m_rgwch)),
         m_pwchStart(m_rgwch) {}
 
   void Add(base::char16 ch) {
@@ -461,7 +463,7 @@ class Sink final {
   explicit Sink(LocalHeap* pHeap)
       : m_pHeap(pHeap),
         m_pwch(m_rgwch),
-        m_pwchEnd(m_rgwch + ARRAYSIZE(m_rgwch)),
+        m_pwchEnd(m_rgwch + std::size(m_rgwch)),
         m_pwchStart(m_rgwch) {}
 
   void Add(T ch) {

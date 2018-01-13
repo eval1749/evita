@@ -8,9 +8,12 @@
 //
 // @(#)$Id: //proj/evedit2/mainline/regex/regex_parse.cpp#11 $
 //
-#include "evita/regex/regex.h"
+
+#include <iterator>
+
 #include "base/logging.h"
 #include "evita/regex/precomp.h"
+#include "evita/regex/regex.h"
 #include "evita/regex/regex_node.h"
 
 namespace Regex {
@@ -448,7 +451,7 @@ class Parser {
         // Note: we must do zero-width assertion test before backslash
         // map, since backslash map contains entry of "\b".
         for (const ZeroWidthEntry* p = k_rgoZeroWidthMap;
-             p < &k_rgoZeroWidthMap[ARRAYSIZE(k_rgoZeroWidthMap)]; p++) {
+             p < &k_rgoZeroWidthMap[std::size(k_rgoZeroWidthMap)]; p++) {
           if (p->m_wch == wch) {
             return newZeroWidth(isUnicode() ? p->m_eOpUnicode : p->m_eOpAscii);
           }
@@ -466,7 +469,7 @@ class Parser {
 
     // \D \d \S \s \W \w
     for (const OneWidthEntry* p = k_rgoOneWidthMap;
-         p < &k_rgoOneWidthMap[ARRAYSIZE(k_rgoOneWidthMap)]; p++) {
+         p < &k_rgoOneWidthMap[std::size(k_rgoOneWidthMap)]; p++) {
       if (p->m_wch == wch) {
         if (BackslashFlavor_RangeMax == eFlavor) {
           return nullptr;
@@ -480,7 +483,7 @@ class Parser {
 
     // \a \b \e \f \n \r \t \v
     for (const char16* pwch = k_rgwchBackslashMap;
-         pwch < &k_rgwchBackslashMap[ARRAYSIZE(k_rgwchBackslashMap)];
+         pwch < &k_rgwchBackslashMap[std::size(k_rgwchBackslashMap)];
          pwch += 2) {
       if (*pwch == wch)
         return newChar(pwch[1]);

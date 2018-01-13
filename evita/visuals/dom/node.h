@@ -49,7 +49,7 @@ class Node : public base::Castable<Node>, public gc::Collectable<Node> {
   class Descendants;
   class DescendantsOrSelf;
 
-  virtual ~Node();
+  ~Node() override;
 
   bool operator==(const Node& other) const;
   bool operator==(const Node* other) const;

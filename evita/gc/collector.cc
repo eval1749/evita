@@ -95,12 +95,12 @@ void Collector::CollectGarbage() {
   }
 
   CollectableSet live_set;
-  for (auto const collectable : visitor.live_set()) {
+  for (auto* const collectable : visitor.live_set()) {
     live_set_.erase(collectable);
     live_set.insert(collectable);
   }
 
-  for (auto const collectable : live_set_) {
+  for (auto* const collectable : live_set_) {
     delete collectable;
   }
 
@@ -114,7 +114,7 @@ base::string16 Collector::GetJson(const base::string16& name) const {
     return base::string16();
 
   CounterMap live_map;
-  for (auto const collectable : live_set_) {
+  for (auto* const collectable : live_set_) {
     base::StringPiece key(collectable->visitable_class_name());
     auto it = live_map.find(key);
     if (it == live_map.end())
@@ -124,7 +124,7 @@ base::string16 Collector::GetJson(const base::string16& name) const {
   }
 
   CounterMap root_map;
-  for (auto const visitable : root_set_) {
+  for (auto* const visitable : root_set_) {
     base::StringPiece key(visitable->visitable_class_name());
     auto it = root_map.find(key);
     if (it == root_map.end())

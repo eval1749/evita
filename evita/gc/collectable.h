@@ -25,7 +25,7 @@ class AbstractCollectable : public Visitable {
 
  protected:
   AbstractCollectable();
-  virtual ~AbstractCollectable();
+  ~AbstractCollectable() override;
 
  private:
   friend class Collector;

@@ -32,7 +32,7 @@ class Collector final : public common::Singleton<Collector> {
   typedef std::unordered_set<Collectable*> CollectableSet;
   typedef std::unordered_set<Visitable*> VisitableSet;
 
-  ~Collector();
+  ~Collector() override;
 
   void AddToRootSet(Visitable* visitable);
   void AddToLiveSet(Collectable* collectable);

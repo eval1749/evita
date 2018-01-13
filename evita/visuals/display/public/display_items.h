@@ -19,8 +19,8 @@
 
 namespace visuals {
 
-#define DECLARE_DISPLAY_ITEM_CLASS(self, super) \
-  DECLARE_CASTABLE_CLASS(self, super)           \
+#define DECLARE_DISPLAY_ITEM_CLASS(self, super)  \
+  DECLARE_DEPRECATED_CASTABLE_CLASS(self, super) \
   friend class DisplayItemEditor;
 
 #define DECLARE_DISPLAY_ITEM_ABSTRACT_CLASS(self, super) \
@@ -35,8 +35,8 @@ namespace visuals {
 //
 // DisplayItem
 //
-class DisplayItem : public base::Castable<DisplayItem> {
-  DECLARE_DISPLAY_ITEM_ABSTRACT_CLASS(DisplayItem, Castable)
+class DisplayItem : public base::DeprecatedCastable<DisplayItem> {
+  DECLARE_DISPLAY_ITEM_ABSTRACT_CLASS(DisplayItem, DeprecatedCastable)
 
  public:
   virtual ~DisplayItem();

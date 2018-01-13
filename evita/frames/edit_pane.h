@@ -5,6 +5,8 @@
 #ifndef EVITA_FRAMES_EDIT_PANE_H_
 #define EVITA_FRAMES_EDIT_PANE_H_
 
+#include <memory>
+
 #include "evita/views/tabs/tab_content.h"
 
 class Frame;
@@ -24,7 +26,7 @@ class ContentWindow;
 // EditPane is a container of multiple ContentWindow windows and layouts
 // them vertically with draggable splitter.
 class EditPane final : public views::TabContent {
-  DECLARE_CASTABLE_CLASS(EditPane, TabContent);
+  DECLARE_DEPRECATED_CASTABLE_CLASS(EditPane, TabContent);
 
   typedef views::ContentWindow ContentWindow;
 

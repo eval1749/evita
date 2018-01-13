@@ -16,7 +16,7 @@ class Canvas;
 namespace views {
 
 class CanvasContentWindow : public ContentWindow {
-  DECLARE_CASTABLE_CLASS(CanvasContentWindow, ContentWindow);
+  DECLARE_DEPRECATED_CASTABLE_CLASS(CanvasContentWindow, ContentWindow);
 
  public:
   ~CanvasContentWindow() override;

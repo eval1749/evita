@@ -21,7 +21,7 @@ namespace domapi {
 enum class CaretShape;
 
 #define DECLARE_DOMAPI_FORM_MODEL_CLASS(name, base_name) \
-  DECLARE_CASTABLE_CLASS(name, base_name)
+  DECLARE_DEPRECATED_CASTABLE_CLASS(name, base_name)
 
 #define DECLARE_ABSTRACT_DOM_FORM_MODEL_CLASS(name, base_name) \
   DECLARE_DOMAPI_FORM_MODEL_CLASS(name, base_name)
@@ -34,8 +34,8 @@ enum class CaretShape;
 //
 // FormControl
 //
-class FormControl : public base::Castable<FormControl> {
-  DECLARE_ABSTRACT_DOM_FORM_MODEL_CLASS(FormControl, Castable);
+class FormControl : public base::DeprecatedCastable<FormControl> {
+  DECLARE_ABSTRACT_DOM_FORM_MODEL_CLASS(FormControl, DeprecatedCastable);
 
  public:
   class State final {

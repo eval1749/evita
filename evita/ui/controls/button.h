@@ -30,7 +30,7 @@ class ButtonListener {
 // Button
 //
 class Button : public ui::Widget {
-  DECLARE_CASTABLE_CLASS(Button, ui::Widget);
+  DECLARE_DEPRECATED_CASTABLE_CLASS(Button, ui::Widget);
 
  public:
   enum class State {

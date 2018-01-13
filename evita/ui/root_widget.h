@@ -9,7 +9,7 @@
 namespace ui {
 
 class RootWidget final : public Widget, public common::Singleton<RootWidget> {
-  DECLARE_CASTABLE_CLASS(RootWidget, Widget);
+  DECLARE_DEPRECATED_CASTABLE_CLASS(RootWidget, Widget);
 
  public:
   RootWidget();

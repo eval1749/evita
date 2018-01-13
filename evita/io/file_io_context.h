@@ -20,7 +20,7 @@ namespace io {
 class FileIoContext final : private base::MessagePumpForIO::IOContext,
                             private base::MessagePumpForIO::IOHandler,
                             public BlockIoContext {
-  DECLARE_CASTABLE_CLASS(FileIoContext, BlockIoContext);
+  DECLARE_DEPRECATED_CASTABLE_CLASS(FileIoContext, BlockIoContext);
 
  public:
   explicit FileIoContext(HANDLE handle);

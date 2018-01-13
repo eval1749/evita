@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <utility>
 #include <vector>
 
 #include "evita/frames/edit_pane.h"
@@ -138,8 +139,8 @@ struct HitTestResult {
 class EditPane::Box : public Bounds,
                       public base::RefCounted<EditPane::Box>,
                       public base::tree::Node<EditPane::Box>,
-                      public base::Castable<Box> {
-  DECLARE_CASTABLE_CLASS(Box, Castable);
+                      public base::DeprecatedCastable<Box> {
+  DECLARE_DEPRECATED_CASTABLE_CLASS(Box, DeprecatedCastable);
 
  public:
   ~Box() override;
@@ -262,7 +263,7 @@ void ContentWatcher::DidUpdateContent(views::ContentWindow*) {
 // HorizontalBox
 //
 class HorizontalBox final : public EditPane::Box {
-  DECLARE_CASTABLE_CLASS(HorizontalBox, Box);
+  DECLARE_DEPRECATED_CASTABLE_CLASS(HorizontalBox, Box);
 
  public:
   HorizontalBox(EditPane* edit_pane, const gfx::RectF& bounds);
@@ -286,7 +287,7 @@ class HorizontalBox final : public EditPane::Box {
 // LeafBox
 //
 class LeafBox final : public EditPane::Box {
-  DECLARE_CASTABLE_CLASS(LeafBox, Box);
+  DECLARE_DEPRECATED_CASTABLE_CLASS(LeafBox, Box);
 
  public:
   LeafBox(EditPane* edit_pane,
@@ -328,7 +329,7 @@ class LeafBox final : public EditPane::Box {
 // RootBox
 //
 class RootBox final : public EditPane::Box {
-  DECLARE_CASTABLE_CLASS(RootBox, Box);
+  DECLARE_DEPRECATED_CASTABLE_CLASS(RootBox, Box);
 
  public:
   explicit RootBox(EditPane* edit_pane);
@@ -358,7 +359,7 @@ class RootBox final : public EditPane::Box {
 // VerticalBox
 //
 class VerticalBox final : public EditPane::Box {
-  DECLARE_CASTABLE_CLASS(VerticalBox, Box);
+  DECLARE_DEPRECATED_CASTABLE_CLASS(VerticalBox, Box);
 
  public:
   VerticalBox(EditPane* edit_pane, const gfx::RectF& bounds);
@@ -516,8 +517,9 @@ void HorizontalBox::Split(Box* left_box,
   DCHECK_GE(left_box_width, kMinBoxWidth);
 
   auto right_box =
-      new LeafBox(edit_pane_, gfx::RectF(gfx::PointF(right(), top()),
-                                         gfx::SizeF(right_box_width, height())),
+      new LeafBox(edit_pane_,
+                  gfx::RectF(gfx::PointF(right(), top()),
+                             gfx::SizeF(right_box_width, height())),
                   right_window);
   InsertAfter(right_box, left_box);
   right_box->AddRef();
@@ -897,8 +899,9 @@ void VerticalBox::Split(Box* above_box,
   DCHECK_GE(above_box_height, kMinBoxHeight);
 
   const auto below_box =
-      new LeafBox(edit_pane_, gfx::RectF(gfx::PointF(left(), bottom()),
-                                         gfx::SizeF(width(), below_box_height)),
+      new LeafBox(edit_pane_,
+                  gfx::RectF(gfx::PointF(left(), bottom()),
+                             gfx::SizeF(width(), below_box_height)),
                   below_window);
   InsertAfter(below_box, above_box);
   below_box->AddRef();

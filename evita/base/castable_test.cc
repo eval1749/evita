@@ -7,23 +7,23 @@
 
 namespace base {
 
-class Class1 : public base::Castable<Class1> {
-  DECLARE_CASTABLE_CLASS(Class1, Castable);
+class Class1 : public base::DeprecatedCastable<Class1> {
+  DECLARE_DEPRECATED_CASTABLE_CLASS(Class1, DeprecatedCastable);
 };
 
 class Class2 : public Class1 {
-  DECLARE_CASTABLE_CLASS(Class2, Class1);
+  DECLARE_DEPRECATED_CASTABLE_CLASS(Class2, Class1);
 };
 
 class Class3 : public Class2 {
-  DECLARE_CASTABLE_CLASS(Class3, Class2);
+  DECLARE_DEPRECATED_CASTABLE_CLASS(Class3, Class2);
 };
 
 class Class4 : public Class2 {
-  DECLARE_CASTABLE_CLASS(Class4, Class2);
+  DECLARE_DEPRECATED_CASTABLE_CLASS(Class4, Class2);
 };
 
-TEST(Castable, All) {
+TEST(DeprecatedCastable, All) {
   Class1 instance1;
   Class2 instance2;
   Class3 instance3;

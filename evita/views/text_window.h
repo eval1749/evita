@@ -35,7 +35,7 @@ class MetricsView;
 class TextWindow final : public CanvasContentWindow,
                          public gfx::CanvasObserver,
                          public ui::TextInputDelegate {
-  DECLARE_CASTABLE_CLASS(TextWindow, ContentWindow);
+  DECLARE_DEPRECATED_CASTABLE_CLASS(TextWindow, ContentWindow);
 
   using TextAreaDisplayItem = domapi::TextAreaDisplayItem;
 

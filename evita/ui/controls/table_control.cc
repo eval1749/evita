@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include "common/win/scoped_comptr.h"
@@ -124,7 +125,7 @@ void CanvasPainter::SetBounds(const gfx::RectF& new_bounds) {
 class CanvasWindow : public ui::AnimatableWindow,
                      protected ui::PaintScheduler,
                      protected ui::LayerOwnerDelegate {
-  DECLARE_CASTABLE_CLASS(CanvasWindow, AnimatableWindow);
+  DECLARE_DEPRECATED_CASTABLE_CLASS(CanvasWindow, AnimatableWindow);
 
  public:
   ~CanvasWindow() override;
@@ -230,8 +231,8 @@ gfx::ColorF RgbToColorF(int red, int green, int blue, float alpha) {
 //
 // Item
 //
-class Item : public ui::CanvasPainter, public base::Castable<Item> {
-  DECLARE_CASTABLE_CLASS(Item, Castable);
+class Item : public ui::CanvasPainter, public base::DeprecatedCastable<Item> {
+  DECLARE_DEPRECATED_CASTABLE_CLASS(Item, DeprecatedCastable);
 
  public:
   ~Item() override;
@@ -263,7 +264,7 @@ Item* Item::HitTest(const gfx::PointF& point) const {
 // Column
 //
 class Column final : public Item {
-  DECLARE_CASTABLE_CLASS(Column, Item);
+  DECLARE_DEPRECATED_CASTABLE_CLASS(Column, Item);
 
  public:
   enum class State {
@@ -373,7 +374,7 @@ void Column::OnPaintCanvas(gfx::Canvas* canvas) {
 // ColumnCollection
 //
 class ColumnCollection final : public ui::Widget, private PaintScheduler {
-  DECLARE_CASTABLE_CLASS(ColumnCollection, Widget);
+  DECLARE_DEPRECATED_CASTABLE_CLASS(ColumnCollection, Widget);
 
  public:
   explicit ColumnCollection(const std::vector<TableColumn>& columns);
@@ -512,7 +513,7 @@ void ColumnCollection::OnMouseMoved(const ui::MouseEvent& event) {
 // Row
 //
 class Row final : public Item {
-  DECLARE_CASTABLE_CLASS(Row, Item);
+  DECLARE_DEPRECATED_CASTABLE_CLASS(Row, Item);
 
  public:
   enum RowFlags {
@@ -669,7 +670,7 @@ struct RowCompare {
 // RowCollection
 //
 class RowCollection final : public CanvasWindow, public TableModelObserver {
-  DECLARE_CASTABLE_CLASS(RowCollection, CanvasWindow);
+  DECLARE_DEPRECATED_CASTABLE_CLASS(RowCollection, CanvasWindow);
 
  public:
   RowCollection(const TableModel* model,
@@ -1084,7 +1085,7 @@ void RowCollection::OnMousePressed(const ui::MouseEvent& event) {
 // TableControl::View
 //
 class TableControl::View final : public ui::Widget {
-  DECLARE_CASTABLE_CLASS(View, Widget);
+  DECLARE_DEPRECATED_CASTABLE_CLASS(View, Widget);
 
  public:
   View(ui::Widget* widget_,

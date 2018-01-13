@@ -14,8 +14,9 @@ namespace ui {
 //
 // EventTarget
 //
-class EventTarget : public base::Castable<EventTarget>, public EventHandler {
-  DECLARE_CASTABLE_CLASS(EventTarget, Castable);
+class EventTarget : public base::DeprecatedCastable<EventTarget>,
+                    public EventHandler {
+  DECLARE_DEPRECATED_CASTABLE_CLASS(EventTarget, DeprecatedCastable);
 
  public:
   ~EventTarget() override;

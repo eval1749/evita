@@ -31,7 +31,7 @@ class TableModel;
 // scrolling row list.
 //
 class TableControl final : public ui::Widget {
-  DECLARE_CASTABLE_CLASS(TableControl, Widget);
+  DECLARE_DEPRECATED_CASTABLE_CLASS(TableControl, Widget);
 
  public:
   TableControl(const std::vector<TableColumn>& columns,

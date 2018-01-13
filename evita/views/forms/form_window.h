@@ -25,7 +25,7 @@ class Canvas;
 using common::win::Point;
 using common::win::Rect;
 using common::win::Size;
-}
+}  // namespace gfx
 
 namespace views {
 
@@ -36,7 +36,7 @@ class FormPaintState;
 // FormWindow
 //
 class FormWindow final : public views::Window, private gfx::CanvasOwner {
-  DECLARE_CASTABLE_CLASS(FormWindow, views::Window);
+  DECLARE_DEPRECATED_CASTABLE_CLASS(FormWindow, views::Window);
 
  public:
   FormWindow(WindowId window_id,

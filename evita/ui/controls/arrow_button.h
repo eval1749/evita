@@ -21,7 +21,7 @@ namespace ui {
 // ArrowButton
 //
 class ArrowButton : public ui::Button {
-  DECLARE_CASTABLE_CLASS(ArrowButton, Button);
+  DECLARE_DEPRECATED_CASTABLE_CLASS(ArrowButton, Button);
 
  public:
   enum class Direction {
@@ -52,7 +52,7 @@ class ArrowButton : public ui::Button {
 // RepetableArrowButton
 //
 class RepetableArrowButton final : public ArrowButton {
-  DECLARE_CASTABLE_CLASS(RepetableArrowButton, ArrowButton);
+  DECLARE_DEPRECATED_CASTABLE_CLASS(RepetableArrowButton, ArrowButton);
 
  public:
   RepetableArrowButton(Direction direction, ButtonListener* listener);

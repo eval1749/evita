@@ -26,7 +26,7 @@ class TabContent;
 class TabStripDelegate;
 
 class TabStrip final : public ui::AnimatableWindow {
-  DECLARE_CASTABLE_CLASS(TabStrip, AnimatableWindow);
+  DECLARE_DEPRECATED_CASTABLE_CLASS(TabStrip, AnimatableWindow);
 
  public:
   explicit TabStrip(TabStripDelegate* delegate);

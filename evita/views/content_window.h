@@ -25,7 +25,7 @@ namespace views {
 class ContentObserver;
 
 class ContentWindow : public Window, public ui::LayerOwnerDelegate {
-  DECLARE_CASTABLE_CLASS(ContentWindow, Window);
+  DECLARE_DEPRECATED_CASTABLE_CLASS(ContentWindow, Window);
 
  public:
   ~ContentWindow() override;

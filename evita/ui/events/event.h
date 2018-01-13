@@ -110,8 +110,8 @@ class EventEditor;
 //
 // Event
 //
-class Event : public base::Castable<Event> {
-  DECLARE_CASTABLE_CLASS(Event, Castable);
+class Event : public base::DeprecatedCastable<Event> {
+  DECLARE_DEPRECATED_CASTABLE_CLASS(Event, DeprecatedCastable);
 
  public:
   ~Event() override;
@@ -142,7 +142,7 @@ class Event : public base::Castable<Event> {
 // KeyEvent
 //
 class KeyEvent final : public Event {
-  DECLARE_CASTABLE_CLASS(KeyEvent, Event);
+  DECLARE_DEPRECATED_CASTABLE_CLASS(KeyEvent, Event);
 
  public:
   KeyEvent(EventType type, int key_code, bool repeat);
@@ -177,7 +177,7 @@ class KeyEvent final : public Event {
 // LocatedEvent
 //
 class LocatedEvent : public Event {
-  DECLARE_CASTABLE_CLASS(LocatedEvent, Event);
+  DECLARE_DEPRECATED_CASTABLE_CLASS(LocatedEvent, Event);
 
  public:
   ~LocatedEvent() override;
@@ -203,7 +203,7 @@ class LocatedEvent : public Event {
 // MouseEvent
 //
 class MouseEvent : public LocatedEvent {
-  DECLARE_CASTABLE_CLASS(MouseEvent, LocatedEvent);
+  DECLARE_DEPRECATED_CASTABLE_CLASS(MouseEvent, LocatedEvent);
 
  public:
   MouseEvent(EventType type,
@@ -262,7 +262,7 @@ class MouseEvent : public LocatedEvent {
 // MouseWheelEvent
 //
 class MouseWheelEvent final : public MouseEvent {
-  DECLARE_CASTABLE_CLASS(MouseEvent, MouseEvent);
+  DECLARE_DEPRECATED_CASTABLE_CLASS(MouseEvent, MouseEvent);
 
  public:
   MouseWheelEvent(EventTarget* widget,

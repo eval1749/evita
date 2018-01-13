@@ -14,7 +14,7 @@ class ControlController;
 class TextInputDelegate;
 
 class Control : public Widget {
-  DECLARE_CASTABLE_CLASS(Control, Widget);
+  DECLARE_DEPRECATED_CASTABLE_CLASS(Control, Widget);
 
  public:
   enum class State {

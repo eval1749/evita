@@ -15,8 +15,8 @@ namespace io {
 //
 // IoContext
 //
-class IoContext : public base::Castable<IoContext> {
-  DECLARE_CASTABLE_CLASS(IoContext, Castable);
+class IoContext : public base::DeprecatedCastable<IoContext> {
+  DECLARE_DEPRECATED_CASTABLE_CLASS(IoContext, DeprecatedCastable);
 
  public:
   virtual ~IoContext();

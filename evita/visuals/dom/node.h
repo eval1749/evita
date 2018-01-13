@@ -22,9 +22,9 @@ namespace visuals {
 class NodeEditor;
 class Document;
 
-#define DECLARE_VISUAL_NODE_CLASS(self, super) \
-  DECLARE_CASTABLE_CLASS(self, super)          \
-  DECLARE_GC_VISITABLE_OBJECT(Node)            \
+#define DECLARE_VISUAL_NODE_CLASS(self, super)   \
+  DECLARE_DEPRECATED_CASTABLE_CLASS(self, super) \
+  DECLARE_GC_VISITABLE_OBJECT(Node)              \
   friend class NodeEditor;
 
 #define DECLARE_VISUAL_NODE_ABSTRACT_CLASS(self, super) \
@@ -39,8 +39,9 @@ class Document;
 //
 // Node
 //
-class Node : public base::Castable<Node>, public gc::Collectable<Node> {
-  DECLARE_VISUAL_NODE_ABSTRACT_CLASS(Node, Castable);
+class Node : public base::DeprecatedCastable<Node>,
+             public gc::Collectable<Node> {
+  DECLARE_VISUAL_NODE_ABSTRACT_CLASS(Node, DeprecatedCastable);
 
  public:
   class Ancestors;

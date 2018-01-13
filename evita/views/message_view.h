@@ -19,7 +19,7 @@ namespace views {
 // MessageView
 //
 class MessageView final : public ui::AnimatableWindow {
-  DECLARE_CASTABLE_CLASS(MessageView, ui::AnimatableWindow);
+  DECLARE_DEPRECATED_CASTABLE_CLASS(MessageView, ui::AnimatableWindow);
 
  public:
   MessageView();

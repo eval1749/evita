@@ -14,7 +14,7 @@ namespace base {
 // bool is<T>()
 // static const char* static_class_name()
 template <typename Base>
-class Castable {
+class DeprecatedCastable {
  public:
   template <class Class>
   Class* as() {
@@ -35,18 +35,18 @@ class Castable {
   }
 
  protected:
-  Castable() = default;
-  virtual ~Castable() = default;
+  DeprecatedCastable() = default;
+  virtual ~DeprecatedCastable() = default;
 
   virtual bool is_class_of(const char* other_name) const {
     return static_class_name() == other_name;
   }
 
  public:
-  static const char* static_class_name() { return "Castable"; }
+  static const char* static_class_name() { return "DeprecatedCastable"; }
 };
 
-#define DECLARE_CASTABLE_CLASS(this_name, base_name)                      \
+#define DECLARE_DEPRECATED_CASTABLE_CLASS(this_name, base_name)           \
  public:                                                                  \
   static const char* static_class_name() { return #this_name; }           \
                                                                           \

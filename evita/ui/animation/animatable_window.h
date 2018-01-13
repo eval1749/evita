@@ -5,13 +5,15 @@
 #ifndef EVITA_UI_ANIMATION_ANIMATABLE_WINDOW_H_
 #define EVITA_UI_ANIMATION_ANIMATABLE_WINDOW_H_
 
+#include <memory>
+
 #include "evita/ui/animation/animation_frame_handler.h"
 #include "evita/ui/widget.h"
 
 namespace ui {
 
 class AnimatableWindow : public AnimationFrameHandler, public Widget {
-  DECLARE_CASTABLE_CLASS(AnimatableWindow, Widget);
+  DECLARE_DEPRECATED_CASTABLE_CLASS(AnimatableWindow, Widget);
 
  protected:
   explicit AnimatableWindow(std::unique_ptr<NativeWindow> native_window);

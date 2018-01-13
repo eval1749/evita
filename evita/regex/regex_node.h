@@ -65,7 +65,7 @@ struct MinMax {
 /// <remark>
 /// Base class of parse tree node
 /// </remark>
-class Node : public Castable_<Node>,
+class Node : public DeprecatedCastable_<Node>,
              public DoubleLinkedItem_<Node>,
              public LocalObject {
  public:

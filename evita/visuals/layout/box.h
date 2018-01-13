@@ -28,8 +28,8 @@ class BoxEditor;
 class Node;
 class RootBox;
 
-#define DECLARE_VISUAL_BOX_CLASS(self, super) \
-  DECLARE_CASTABLE_CLASS(self, super)         \
+#define DECLARE_VISUAL_BOX_CLASS(self, super)    \
+  DECLARE_DEPRECATED_CASTABLE_CLASS(self, super) \
   friend class BoxEditor;
 
 #define DECLARE_VISUAL_BOX_ABSTRACT_CLASS(self, super) \
@@ -44,8 +44,8 @@ class RootBox;
 //
 // Box
 //
-class Box : public base::Castable<Box> {
-  DECLARE_VISUAL_BOX_ABSTRACT_CLASS(Box, Castable);
+class Box : public base::DeprecatedCastable<Box> {
+  DECLARE_VISUAL_BOX_ABSTRACT_CLASS(Box, DeprecatedCastable);
 
  public:
   class Ancestors;

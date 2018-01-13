@@ -20,7 +20,7 @@ class Thread;
 namespace io {
 
 class ProcessIoContext final : public BlockIoContext {
-  DECLARE_CASTABLE_CLASS(ProcessIoContext, BlockIoContext);
+  DECLARE_DEPRECATED_CASTABLE_CLASS(ProcessIoContext, BlockIoContext);
 
  public:
   ProcessIoContext(domapi::IoContextId context_id,

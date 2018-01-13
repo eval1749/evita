@@ -40,7 +40,7 @@ class Widget : public EventTarget,
                public base::tree::Node<Widget>,
                public common::win::MessageDelegate,
                public LayerOwner {
-  DECLARE_CASTABLE_CLASS(Widget, EventTarget);
+  DECLARE_DEPRECATED_CASTABLE_CLASS(Widget, EventTarget);
 
  public:
   ~Widget() override;

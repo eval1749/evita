@@ -19,7 +19,7 @@ namespace views {
 //
 class MetricsView final : public ui::AnimatableWindow,
                           public ui::LayerOwnerDelegate {
-  DECLARE_CASTABLE_CLASS(MetricsView, ui::AnimatableWindow);
+  DECLARE_DEPRECATED_CASTABLE_CLASS(MetricsView, ui::AnimatableWindow);
 
  public:
   class TimingScope final {

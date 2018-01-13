@@ -24,7 +24,7 @@ class Window;
 // TabContent
 //
 class TabContent : public ui::Widget {
-  DECLARE_CASTABLE_CLASS(TabContent, ui::Widget);
+  DECLARE_DEPRECATED_CASTABLE_CLASS(TabContent, ui::Widget);
 
  public:
   ~TabContent() override;

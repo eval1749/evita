@@ -24,7 +24,7 @@ namespace gfx {
 class Canvas;
 class DxDevice;
 using common::win::Rect;
-}
+}  // namespace gfx
 
 namespace ui {
 class Layer;
@@ -47,7 +47,7 @@ class TabContent;
 class TitleBar;
 class TabStrip;
 class TabStripAnimator;
-}
+}  // namespace views
 
 /// <summary>
 ///   Represents a frame window aka top-level window. This window communicates
@@ -57,7 +57,7 @@ class Frame final : public views::Window,
                     private views::TabContentObserver,
                     private views::TabDataSet::Observer,
                     public views::TabStripDelegate {
-  DECLARE_CASTABLE_CLASS(Frame, views::Window);
+  DECLARE_DEPRECATED_CASTABLE_CLASS(Frame, views::Window);
 
   typedef views::FrameObserver FrameObserver;
   typedef views::MessageView MessageView;

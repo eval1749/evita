@@ -10,7 +10,7 @@
 namespace io {
 
 class BlockIoContext : public IoContext {
-  DECLARE_CASTABLE_CLASS(BlockIoContext, IoContext);
+  DECLARE_DEPRECATED_CASTABLE_CLASS(BlockIoContext, IoContext);
 
  public:
   virtual ~BlockIoContext();

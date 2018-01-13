@@ -29,7 +29,7 @@ enum class TextMarker {
 };
 
 #define DECLARE_PAINT_INLINE_BOX_CLASS(self, super) \
-  DECLARE_CASTABLE_CLASS(self, super)
+  DECLARE_DEPRECATED_CASTABLE_CLASS(self, super)
 
 #define DECLARE_PAINT_INLINE_BOX_ABSTRACT_CLASS(self, super) \
   DECLARE_PAINT_INLINE_BOX_CLASS(self, super)
@@ -43,8 +43,8 @@ enum class TextMarker {
 //
 // InlineBox
 //
-class InlineBox : public base::Castable<InlineBox> {
-  DECLARE_PAINT_INLINE_BOX_ABSTRACT_CLASS(InlineBox, Castable);
+class InlineBox : public base::DeprecatedCastable<InlineBox> {
+  DECLARE_PAINT_INLINE_BOX_ABSTRACT_CLASS(InlineBox, DeprecatedCastable);
 
  public:
   using ComputedStyle = layout::ComputedStyle;

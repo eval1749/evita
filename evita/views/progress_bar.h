@@ -19,7 +19,7 @@ namespace views {
 
 class ProgressBar final : public ui::AnimatableWindow,
                           public ui::LayerOwnerDelegate {
-  DECLARE_CASTABLE_CLASS(MetricsView, ui::AnimatableWindow);
+  DECLARE_DEPRECATED_CASTABLE_CLASS(MetricsView, ui::AnimatableWindow);
 
  public:
   ProgressBar(const ProgressBar& other) = delete;

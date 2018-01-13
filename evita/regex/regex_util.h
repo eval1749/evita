@@ -15,9 +15,9 @@ namespace Regex {
 namespace RegexPrivate {
 
 template <class T>
-class Castable_ {
+class DeprecatedCastable_ {
  private:
-  typedef Castable_<T> Self;
+  typedef DeprecatedCastable_<T> Self;
 
   // [D]
  public:

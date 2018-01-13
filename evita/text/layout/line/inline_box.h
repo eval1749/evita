@@ -28,7 +28,7 @@ enum class TextMarker {
 class ComputedStyle;
 
 #define DECLARE_INLINE_BOX_CLASS(self, super) \
-  DECLARE_CASTABLE_CLASS(self, super)
+  DECLARE_DEPRECATED_CASTABLE_CLASS(self, super)
 
 #define DECLARE_INLINE_BOX_ABSTRACT_CLASS(self, super) \
   DECLARE_INLINE_BOX_CLASS(self, super)
@@ -42,8 +42,8 @@ class ComputedStyle;
 //
 // InlineBox
 //
-class InlineBox : public base::Castable<InlineBox> {
-  DECLARE_INLINE_BOX_ABSTRACT_CLASS(InlineBox, Castable);
+class InlineBox : public base::DeprecatedCastable<InlineBox> {
+  DECLARE_INLINE_BOX_ABSTRACT_CLASS(InlineBox, DeprecatedCastable);
 
  public:
   virtual ~InlineBox();

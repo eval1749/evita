@@ -20,10 +20,10 @@ namespace views {
 //
 // TabStripAnimator::Action
 //
-class TabStripAnimator::Action : public base::Castable<Action>,
+class TabStripAnimator::Action : public base::DeprecatedCastable<Action>,
                                  private ui::AnimationObserver,
                                  private TabContentObserver {
-  DECLARE_CASTABLE_CLASS(Action, Castable);
+  DECLARE_DEPRECATED_CASTABLE_CLASS(Action, DeprecatedCastable);
 
  public:
   virtual ~Action();
@@ -162,7 +162,7 @@ namespace {
 // SelectTab
 //
 class SelectTabAction final : public TabStripAnimator::Action {
-  DECLARE_CASTABLE_CLASS(SelectTabAction, Action);
+  DECLARE_DEPRECATED_CASTABLE_CLASS(SelectTabAction, Action);
 
  public:
   SelectTabAction(TabStripAnimator* tab_strip_animator,

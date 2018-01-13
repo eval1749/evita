@@ -22,7 +22,7 @@ class ScrollBarObserver;
 // ScrollBar
 //
 class ScrollBar final : public ui::Widget {
-  DECLARE_CASTABLE_CLASS(ScrollBar, Widget);
+  DECLARE_DEPRECATED_CASTABLE_CLASS(ScrollBar, Widget);
 
  public:
   struct Data final {

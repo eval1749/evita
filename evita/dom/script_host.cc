@@ -330,8 +330,7 @@ void ScriptHost::DidStartScriptHost() {
   }
 
   const auto& args = base::CommandLine::ForCurrentProcess()->GetArgs();
-  const auto& js_args = gin::ConvertToV8(runner()->context(), args)
-                            .FromMaybe(v8::Local<v8::Value>());
+  const auto& js_args = gin::ConvertToV8(isolate, args);
   if (js_args.IsEmpty()) {
     ExceptionState exception_state(ExceptionState::Situation::MethodCall,
                                    runner()->context(), "global", "start");

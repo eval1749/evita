@@ -5,6 +5,7 @@
 #include "evita/io/io_context_utils.h"
 
 #include "base/bind.h"
+#include "base/callback.h"
 #include "evita/dom/public/io_error.h"
 #include "evita/dom/public/view_event_handler.h"
 #include "evita/editor/application.h"

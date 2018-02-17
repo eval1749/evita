@@ -7,6 +7,7 @@
 #include "evita/io/directory_io_context.h"
 
 #include "base/bind.h"
+#include "base/callback.h"
 #include "base/files/file_enumerator.h"
 #include "evita/dom/public/promise.h"
 #include "evita/dom/public/view_event_handler.h"

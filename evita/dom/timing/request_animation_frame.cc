@@ -64,9 +64,9 @@ void Editor::CancelAnimationFrame(int handle) {
 int Editor::RequestAnimationFrame(v8::Local<v8::Function> callback) {
   auto const isolate = ScriptHost::instance()->isolate();
   auto request = std::make_unique<AnimationFrameCallback>(
-      FROM_HERE, base::Bind(&FrameRequestCallbackWrapper::Run,
-                            base::Owned(new FrameRequestCallbackWrapper(
-                                isolate, callback))));
+      FROM_HERE, base::BindOnce(&FrameRequestCallbackWrapper::Run,
+                                base::Owned(new FrameRequestCallbackWrapper(
+                                    isolate, callback))));
   return ScriptHost::instance()->scheduler()->RequestAnimationFrame(
       std::move(request));
 }

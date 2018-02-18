@@ -2,17 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <queue>
-#include <unordered_map>
-#include <vector>
-
 #include "evita/dom/scheduler/scheduler_impl.h"
 
+#include <queue>
+#include <unordered_map>
+#include <utility>
+#include <vector>
+
+#include "base/bind.h"
+#include "base/callback.h"
 #include "base/message_loop/message_loop.h"
 #include "base/synchronization/lock.h"
 #include "base/trace_event/trace_event.h"
 #include "evita/base/maybe.h"
 #include "evita/dom/scheduler/animation_frame_callback.h"
+#include "evita/dom/scheduler/idle_task.h"
 #include "evita/dom/scheduler/idle_task_queue.h"
 #include "evita/dom/scheduler/scheduler_client.h"
 
@@ -74,20 +78,20 @@ class SchedulerImpl::TaskQueue {
   ~TaskQueue() = default;
 
   // Returns true if there is only one task in queue.
-  bool GiveTask(const base::Closure& closure);
+  bool GiveTask(base::OnceClosure closure);
   bool IsEmpty() const;
-  base::Maybe<base::Closure> TakeTask();
+  base::Maybe<base::OnceClosure> TakeTask();
 
  private:
   mutable base::Lock lock_;
-  std::queue<base::Closure> tasks_;
+  std::queue<base::OnceClosure> tasks_;
 
   DISALLOW_COPY_AND_ASSIGN(TaskQueue);
 };
 
-bool SchedulerImpl::TaskQueue::GiveTask(const base::Closure& task) {
+bool SchedulerImpl::TaskQueue::GiveTask(base::OnceClosure task) {
   base::AutoLock lock_scope(lock_);
-  tasks_.push(task);
+  tasks_.push(std::move(task));
   return tasks_.size() == 1;
 }
 
@@ -96,13 +100,13 @@ bool SchedulerImpl::TaskQueue::IsEmpty() const {
   return tasks_.empty();
 }
 
-base::Maybe<base::Closure> SchedulerImpl::TaskQueue::TakeTask() {
+base::Maybe<base::OnceClosure> SchedulerImpl::TaskQueue::TakeTask() {
   base::AutoLock lock_scope(lock_);
   if (tasks_.empty())
-    return base::Nothing<base::Closure>();
-  auto task = base::Just(tasks_.front());
+    return base::Nothing<base::OnceClosure>();
+  auto task = std::move(tasks_.front());
   tasks_.pop();
-  return task;
+  return std::move(base::Just(std::move(task)));
 }
 
 enum class SchedulerImpl::State {
@@ -154,7 +158,8 @@ void SchedulerImpl::ProcessTasks() {
         break;
       continue;
     }
-    maybe_task.FromJust().Run();
+    auto task = std::move(maybe_task.MoveFromJust());
+    std::move(task).Run();
   }
   state_.store(State::Sleep);
 }
@@ -184,8 +189,8 @@ void SchedulerImpl::CancelIdleTask(int task_id) {
 void SchedulerImpl::DidBeginFrame(const base::TimeTicks& deadline) {
   ASSERT_ON_VIEW_THREAD();
   script_message_loop_->task_runner()->PostTask(
-      FROM_HERE,
-      base::Bind(&SchedulerImpl::BeginFrame, base::Unretained(this), deadline));
+      FROM_HERE, base::BindOnce(&SchedulerImpl::BeginFrame,
+                                base::Unretained(this), deadline));
 }
 
 int SchedulerImpl::RequestAnimationFrame(
@@ -197,20 +202,20 @@ int SchedulerImpl::RequestAnimationFrame(
   return callback_id;
 }
 
-int SchedulerImpl::ScheduleIdleTask(const IdleTask& task) {
+int SchedulerImpl::ScheduleIdleTask(IdleTask task) {
   TRACE_EVENT0("script", "SchedulerImpl::ScheduleIdleTask");
-  return idle_task_queue_->GiveTask(task);
+  return idle_task_queue_->GiveTask(std::move(task));
 }
 
-void SchedulerImpl::ScheduleTask(const base::Closure& task) {
+void SchedulerImpl::ScheduleTask(base::OnceClosure task) {
   TRACE_EVENT0("script", "SchedulerImpl::ScheduleTask");
   DCHECK(script_message_loop_->task_runner());
-  if (normal_task_queue_->GiveTask(task)) {
+  if (normal_task_queue_->GiveTask(std::move(task))) {
     // Since file I/O is done in less than 1ms, we should run a task to
     // schedule next file I/O rather than waiting animation frame.
     script_message_loop_->task_runner()->PostTask(
         FROM_HERE,
-        base::Bind(&SchedulerImpl::ProcessTasks, base::Unretained(this)));
+        base::BindOnce(&SchedulerImpl::ProcessTasks, base::Unretained(this)));
   }
   idle_task_queue_->StopIdleTasks();
 }

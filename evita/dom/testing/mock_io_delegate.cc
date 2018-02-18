@@ -8,6 +8,7 @@
 #undef MoveFile
 
 #include <algorithm>
+#include <utility>
 
 #include "base/callback.h"
 #include "base/logging.h"
@@ -113,49 +114,48 @@ void MockIoDelegate::SetStrings(base::StringPiece name,
 
 // domapi::IoDelegate
 void MockIoDelegate::CheckSpelling(const base::string16&,
-                                   const CheckSpellingResolver& promise) {
-  promise.resolve.Run(check_spelling_result_);
+                                   CheckSpellingResolver promise) {
+  std::move(promise.resolve).Run(check_spelling_result_);
 }
 
 void MockIoDelegate::CloseContext(const domapi::IoContextId&,
-                                  const domapi::IoIntPromise& resolver) {
+                                  domapi::IoIntPromise resolver) {
   ++num_close_called_;
   auto const result = PopCallResult("CloseContext");
   if (auto const error_code = result.error_code)
-    resolver.reject.Run(domapi::IoError(error_code));
+    std::move(resolver.reject).Run(domapi::IoError(error_code));
   else
-    resolver.resolve.Run(true);
+    std::move(resolver.resolve).Run(true);
 }
 
-void MockIoDelegate::ComputeFullPathName(
-    const base::string16& path_name,
-    const ComputeFullPathNamePromise& promise) {
+void MockIoDelegate::ComputeFullPathName(const base::string16& path_name,
+                                         ComputeFullPathNamePromise promise) {
   const auto& result = PopCallResult("ComputeFullPathName");
   if (auto const error_code = result.error_code) {
-    promise.reject.Run(domapi::IoError(error_code));
+    std::move(promise.reject).Run(domapi::IoError(error_code));
     return;
   }
-  promise.resolve.Run(strings_.back());
+  std::move(promise.resolve).Run(strings_.back());
   strings_.pop_back();
 }
 
 void MockIoDelegate::GetWinResourceNames(
     const domapi::WinResourceId& resource_id,
     const base::string16& type,
-    const GetWinResourceNamessPromise& promise) {
+    GetWinResourceNamessPromise promise) {
   auto const result = PopCallResult("GetWinResourceNames");
   if (const auto error_code = result.error_code)
-    return promise.reject.Run(domapi::IoError(error_code));
-  promise.resolve.Run(strings_);
+    return std::move(promise.reject).Run(domapi::IoError(error_code));
+  std::move(promise.resolve).Run(strings_);
 }
 
 void MockIoDelegate::GetSpellingSuggestions(
     const base::string16&,
-    const GetSpellingSuggestionsResolver& promise) {
+    GetSpellingSuggestionsResolver promise) {
   auto const result = PopCallResult("GetSpellingSuggestions");
   if (const auto error_code = result.error_code)
-    return promise.reject.Run(error_code);
-  promise.resolve.Run(strings_);
+    return std::move(promise.reject).Run(error_code);
+  std::move(promise.resolve).Run(strings_);
 }
 
 void MockIoDelegate::LoadWinResource(const domapi::WinResourceId& resource_id,
@@ -163,141 +163,137 @@ void MockIoDelegate::LoadWinResource(const domapi::WinResourceId& resource_id,
                                      const base::string16& name,
                                      uint8_t* buffer,
                                      size_t buffer_size,
-                                     const domapi::IoIntPromise& promise) {
+                                     domapi::IoIntPromise promise) {
   auto const result = PopCallResult("LoadWinResource");
   if (auto const error_code = result.error_code)
-    return promise.reject.Run(domapi::IoError(error_code));
+    return std::move(promise.reject).Run(domapi::IoError(error_code));
   const auto expected_type = strings_.back();
   strings_.pop_back();
   const auto expected_name = strings_.back();
   strings_.pop_back();
   if (expected_type != type || expected_name != name)
-    return promise.reject.Run(domapi::IoError(ERROR_NOT_FOUND));
+    return std::move(promise.reject).Run(domapi::IoError(ERROR_NOT_FOUND));
   ::memcpy(buffer, resource_data_.data(),
            std::min(resource_data_.size(), buffer_size));
-  promise.resolve.Run(static_cast<int>(resource_data_.size()));
+  std::move(promise.resolve).Run(static_cast<int>(resource_data_.size()));
 }
 
 void MockIoDelegate::MakeTempFileName(
     const base::string16& dir_name,
     const base::string16& prefix,
-    const domapi::MakeTempFileNamePromise& resolver) {
+    domapi::MakeTempFileNamePromise resolver) {
   auto const result = PopCallResult("MakeTempFileName");
   if (auto const error_code = result.error_code) {
-    resolver.reject.Run(domapi::IoError(error_code));
+    std::move(resolver.reject).Run(domapi::IoError(error_code));
     return;
   }
-  resolver.resolve.Run(dir_name + L"\\" + prefix + strings_.back());
+  std::move(resolver.resolve).Run(dir_name + L"\\" + prefix + strings_.back());
   strings_.pop_back();
 }
 
 void MockIoDelegate::MoveFile(const base::string16&,
                               const base::string16&,
                               const domapi::MoveFileOptions& options,
-                              const domapi::IoBoolPromise& resolver) {
+                              domapi::IoBoolPromise resolver) {
   auto const result = PopCallResult("MoveFile");
   if (auto const error_code = result.error_code)
-    resolver.reject.Run(domapi::IoError(error_code));
+    std::move(resolver.reject).Run(domapi::IoError(error_code));
   else
-    resolver.resolve.Run(options.no_overwrite);
+    std::move(resolver.resolve).Run(options.no_overwrite);
 }
 
-void MockIoDelegate::OpenDirectory(
-    const base::string16&,
-    const domapi::OpenDirectoryPromise& promise) {
+void MockIoDelegate::OpenDirectory(const base::string16&,
+                                   domapi::OpenDirectoryPromise promise) {
   auto const result = PopCallResult("OpenDirectory");
   if (auto const error_code = result.error_code) {
-    promise.reject.Run(domapi::IoError(error_code));
+    std::move(promise.reject).Run(domapi::IoError(error_code));
     return;
   }
-  promise.resolve.Run(domapi::DirectoryId(context_id_));
+  std::move(promise.resolve).Run(domapi::DirectoryId(context_id_));
 }
 
 void MockIoDelegate::OpenFile(const base::string16&,
                               const base::string16&,
-                              const domapi::OpenFilePromise& promise) {
+                              domapi::OpenFilePromise promise) {
   auto const result = PopCallResult("OpenFile");
   if (auto const error_code = result.error_code)
-    promise.reject.Run(domapi::IoError(error_code));
+    std::move(promise.reject).Run(domapi::IoError(error_code));
   else
-    promise.resolve.Run(domapi::FileId(context_id_));
+    std::move(promise.resolve).Run(domapi::FileId(context_id_));
 }
 
 void MockIoDelegate::OpenProcess(const base::string16&,
-                                 const domapi::OpenProcessPromise& promise) {
+                                 domapi::OpenProcessPromise promise) {
   auto const result = PopCallResult("OpenFile");
   if (auto const error_code = result.error_code)
-    promise.reject.Run(domapi::IoError(error_code));
+    std::move(promise.reject).Run(domapi::IoError(error_code));
   else
-    promise.resolve.Run(domapi::ProcessId(context_id_));
+    std::move(promise.resolve).Run(domapi::ProcessId(context_id_));
 }
 
-void MockIoDelegate::OpenWinResource(
-    const base::string16& file_name,
-    const domapi::OpenWinResourcePromise& promise) {
+void MockIoDelegate::OpenWinResource(const base::string16& file_name,
+                                     domapi::OpenWinResourcePromise promise) {
   const auto result = PopCallResult("OpenWinResource");
   if (const auto error_code = result.error_code)
-    return promise.reject.Run(domapi::IoError(error_code));
-  promise.resolve.Run(domapi::WinResourceId(context_id_));
+    return std::move(promise.reject).Run(domapi::IoError(error_code));
+  std::move(promise.resolve).Run(domapi::WinResourceId(context_id_));
 }
 
-void MockIoDelegate::QueryFileStatus(
-    const base::string16&,
-    const domapi::QueryFileStatusPromise& promise) {
+void MockIoDelegate::QueryFileStatus(const base::string16&,
+                                     domapi::QueryFileStatusPromise promise) {
   auto const result = PopCallResult("QueryFileStatus");
   if (auto const error_code = result.error_code)
-    promise.reject.Run(domapi::IoError(error_code));
+    std::move(promise.reject).Run(domapi::IoError(error_code));
   else
-    promise.resolve.Run(file_status_);
+    std::move(promise.resolve).Run(file_status_);
 }
 
-void MockIoDelegate::ReadDirectory(
-    domapi::IoContextId,
-    size_t num_read,
-    const domapi::ReadDirectoryPromise& promise) {
+void MockIoDelegate::ReadDirectory(domapi::IoContextId,
+                                   size_t num_read,
+                                   domapi::ReadDirectoryPromise promise) {
   auto const result = PopCallResult("ReadDirectory");
   if (auto const error_code = result.error_code) {
-    promise.reject.Run(domapi::IoError(error_code));
+    std::move(promise.reject).Run(domapi::IoError(error_code));
     return;
   }
-  promise.resolve.Run(directory_entries_);
+  std::move(promise.resolve).Run(directory_entries_);
 }
 
 void MockIoDelegate::ReadFile(domapi::IoContextId,
                               void* bytes,
                               size_t num_bytes,
-                              const domapi::IoIntPromise& promise) {
+                              domapi::IoIntPromise promise) {
   auto const result = PopCallResult("ReadFile");
   if (auto const error_code = result.error_code) {
-    promise.reject.Run(domapi::IoError(error_code));
+    std::move(promise.reject).Run(domapi::IoError(error_code));
     return;
   }
-  promise.resolve.Run(result.num_transferred);
+  std::move(promise.resolve).Run(result.num_transferred);
   ::memcpy(bytes, bytes_.data(), std::min(bytes_.size(), num_bytes));
 }
 
 void MockIoDelegate::RemoveFile(const base::string16&,
-                                const domapi::IoBoolPromise& resolver) {
+                                domapi::IoBoolPromise resolver) {
   ++num_remove_called_;
   auto const result = PopCallResult("RemoveFile");
   if (auto const error_code = result.error_code)
-    resolver.reject.Run(domapi::IoError(error_code));
+    std::move(resolver.reject).Run(domapi::IoError(error_code));
   else
-    resolver.resolve.Run(true);
+    std::move(resolver.resolve).Run(true);
 }
 
 void MockIoDelegate::WriteFile(domapi::IoContextId,
                                void* bytes,
                                size_t num_bytes,
-                               const domapi::IoIntPromise& promise) {
+                               domapi::IoIntPromise promise) {
   auto const result = PopCallResult("WriteFile");
   if (auto const error_code = result.error_code) {
-    promise.reject.Run(domapi::IoError(error_code));
+    std::move(promise.reject).Run(domapi::IoError(error_code));
     return;
   }
   bytes_.resize(num_bytes);
   ::memcpy(&bytes_[0], bytes, num_bytes);
-  promise.resolve.Run(result.num_transferred);
+  std::move(promise.resolve).Run(result.num_transferred);
 }
 
 }  // namespace dom

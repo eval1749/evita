@@ -16,13 +16,13 @@ namespace dom {
 //
 class MicroTask final {
  public:
-  MicroTask(const base::Location& posted_from, const base::Closure& callback);
+  MicroTask(const base::Location& posted_from, base::OnceClosure callback);
   ~MicroTask();
 
   static void Run(void* data);
 
  private:
-  base::Closure callback_;
+  base::OnceClosure callback_;
   base::Location posted_from_;
 
   DISALLOW_COPY_AND_ASSIGN(MicroTask);

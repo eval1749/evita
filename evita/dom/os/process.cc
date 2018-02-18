@@ -32,9 +32,9 @@ Process::~Process() {}
 v8::Local<v8::Promise> Process::Open(const base::string16& command_line) {
   return PromiseResolver::Call(
       FROM_HERE,
-      base::Bind(&domapi::IoDelegate::OpenProcess,
-                 base::Unretained(ScriptHost::instance()->io_delegate()),
-                 command_line));
+      base::BindOnce(&domapi::IoDelegate::OpenProcess,
+                     base::Unretained(ScriptHost::instance()->io_delegate()),
+                     command_line));
 }
 
 }  // namespace dom

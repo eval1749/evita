@@ -38,8 +38,8 @@ class PaintThread final {
   static PaintThread* instance();
 
   void CommitIfNeeded();
-  void PostTask(const base::Location& from_here, const base::Closure& task);
-  void SchedulePaintTask(const base::Closure& task);
+  void PostTask(const base::Location& from_here, base::OnceClosure task);
+  void SchedulePaintTask(base::OnceClosure task);
   void Start();
 
  private:

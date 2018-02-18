@@ -39,9 +39,9 @@ struct CreateFileParams {
 
 }  // namespace
 
-void Resolve(const base::Callback<void(domapi::FileId)>& resolve,
+void Resolve(base::OnceCallback<void(domapi::FileId)> resolve,
              domapi::FileId context_id) {
-  RunCallback(base::Bind(resolve, context_id));
+  RunCallback(base::BindOnce(std::move(resolve), context_id));
 }
 
 FileIoContext::FileIoContext(HANDLE handle) : file_handle_(handle) {
@@ -66,16 +66,16 @@ void FileIoContext::OnIOCompleted(IOContext*,
   auto const operation = operation_;
   operation_ = nullptr;
   if (!error || error == ERROR_HANDLE_EOF)
-    Resolve(promise_.resolve, bytes_transferred);
+    Resolve(std::move(promise_.resolve), bytes_transferred);
   else
-    Reject(promise_.reject, error);
+    Reject(std::move(promise_.reject), error);
   if (!file_handle_.is_valid())
     delete this;
   TRACE_EVENT_ASYNC_END0("io", operation, promise_.sequence_num);
 }
 
 // io::IoContext
-void FileIoContext::Close(const domapi::IoIntPromise& promise) {
+void FileIoContext::Close(domapi::IoIntPromise promise) {
   TRACE_EVENT_WITH_FLOW0("promise", "FileIoContext::Close",
                          promise.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT);
@@ -83,14 +83,14 @@ void FileIoContext::Close(const domapi::IoIntPromise& promise) {
     if (!::CloseHandle(file_handle_.get())) {
       const auto last_error = ::GetLastError();
       PLOG(ERROR) << "CloseHandle failed.";
-      Reject(promise.reject, last_error);
+      Reject(std::move(promise.reject), last_error);
       return;
     }
     file_handle_.release();
   }
   if (!IsRunning())
     delete this;
-  Resolve(promise.resolve, 0u);
+  Resolve(std::move(promise.resolve), 0u);
 }
 
 // static
@@ -110,15 +110,15 @@ std::pair<HANDLE, int> FileIoContext::Open(const base::string16& file_name,
 
 void FileIoContext::Read(void* buffer,
                          size_t num_read,
-                         const domapi::IoIntPromise& promise) {
+                         domapi::IoIntPromise promise) {
   TRACE_EVENT_WITH_FLOW0("promise", "FileIoContext::Read", promise.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT);
   if (IsRunning()) {
-    Reject(promise.reject, ERROR_BUSY);
+    Reject(std::move(promise.reject), ERROR_BUSY);
     return;
   }
 
-  promise_ = promise;
+  promise_ = std::move(promise);
   operation_ = "ReadFile";
   TRACE_EVENT_ASYNC_BEGIN0("io", operation_, promise.sequence_num);
   DWORD read;
@@ -137,16 +137,16 @@ void FileIoContext::Read(void* buffer,
 
 void FileIoContext::Write(void* buffer,
                           size_t num_write,
-                          const domapi::IoIntPromise& promise) {
+                          domapi::IoIntPromise promise) {
   TRACE_EVENT_WITH_FLOW0("promise", "FileIoContext::Write",
                          promise.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT);
   if (IsRunning()) {
-    Reject(promise.reject, ERROR_BUSY);
+    Reject(std::move(promise.reject), ERROR_BUSY);
     return;
   }
 
-  promise_ = promise;
+  promise_ = std::move(promise);
   operation_ = "WriteFile";
   TRACE_EVENT_ASYNC_BEGIN0("io", operation_, promise.sequence_num);
   DWORD written;

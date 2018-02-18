@@ -38,76 +38,74 @@ class IoDelegate {
 
   // Check spelling of |word_to_check|.
   virtual void CheckSpelling(const base::string16& word_to_check,
-                             const CheckSpellingResolver& callback) = 0;
+                             CheckSpellingResolver callback) = 0;
 
   virtual void CloseContext(const IoContextId& context_id,
-                            const IoIntPromise& promise) = 0;
+                            IoIntPromise promise) = 0;
 
   // Returns full path name of |path_name|.
-  virtual void ComputeFullPathName(
-      const base::string16& path_name,
-      const ComputeFullPathNamePromise& promise) = 0;
+  virtual void ComputeFullPathName(const base::string16& path_name,
+                                   ComputeFullPathNamePromise promise) = 0;
 
   // Returns list of resource names of specified resource type.
-  virtual void GetWinResourceNames(
-      const domapi::WinResourceId& resource_id,
-      const base::string16& type,
-      const GetWinResourceNamessPromise& promise) = 0;
+  virtual void GetWinResourceNames(const domapi::WinResourceId& resource_id,
+                                   const base::string16& type,
+                                   GetWinResourceNamessPromise promise) = 0;
 
   // Returns list of suggested words for |wrong_word|.
   virtual void GetSpellingSuggestions(
       const base::string16& wrong_word,
-      const GetSpellingSuggestionsResolver& callback) = 0;
+      GetSpellingSuggestionsResolver callback) = 0;
 
   virtual void LoadWinResource(const WinResourceId& resource_id,
                                const base::string16& type,
                                const base::string16& name,
                                uint8_t* buffer,
                                size_t buffer_size,
-                               const IoIntPromise& promise) = 0;
+                               IoIntPromise promise) = 0;
 
   // Make temporary file and returns its name.
   virtual void MakeTempFileName(const base::string16& dir_name,
                                 const base::string16& prefix,
-                                const MakeTempFileNamePromise& resolver) = 0;
+                                MakeTempFileNamePromise resolver) = 0;
 
   // Move file
   virtual void MoveFile(const base::string16& src_path,
                         const base::string16& dst_path,
                         const MoveFileOptions& options,
-                        const IoBoolPromise& resolver) = 0;
+                        IoBoolPromise resolver) = 0;
 
   // Open directory for reading entries
   virtual void OpenDirectory(const base::string16& dir_name,
-                             const OpenDirectoryPromise& promise) = 0;
+                             OpenDirectoryPromise promise) = 0;
 
   virtual void OpenFile(const base::string16& file_name,
                         const base::string16& mode,
-                        const OpenFilePromise& promise) = 0;
+                        OpenFilePromise promise) = 0;
   virtual void OpenProcess(const base::string16& command_line,
-                           const OpenProcessPromise& promise) = 0;
+                           OpenProcessPromise promise) = 0;
   virtual void QueryFileStatus(const base::string16& file_name,
-                               const QueryFileStatusPromise& promise) = 0;
+                               QueryFileStatusPromise promise) = 0;
 
   virtual void OpenWinResource(const base::string16& file_name,
-                               const OpenWinResourcePromise& promise) = 0;
+                               OpenWinResourcePromise promise) = 0;
 
   virtual void ReadDirectory(IoContextId context_id,
                              size_t num_read,
-                             const ReadDirectoryPromise& promise) = 0;
+                             ReadDirectoryPromise promise) = 0;
 
   virtual void ReadFile(IoContextId context_id,
                         void* buffer,
                         size_t num_read,
-                        const IoIntPromise& promise) = 0;
+                        IoIntPromise promise) = 0;
   // Remove file
   virtual void RemoveFile(const base::string16& file_name,
-                          const IoBoolPromise& resolver) = 0;
+                          IoBoolPromise resolver) = 0;
 
   virtual void WriteFile(IoContextId context_id,
                          void* buffer,
                          size_t num_write,
-                         const IoIntPromise& promise) = 0;
+                         IoIntPromise promise) = 0;
 
  protected:
   IoDelegate();

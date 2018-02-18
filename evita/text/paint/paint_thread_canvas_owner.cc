@@ -113,8 +113,8 @@ void PaintThreadCanvasOwner::DidBeginAnimationFrame(
                          "PaintThreadCanvasOwner::DidBeginAnimationFrame", this,
                          TRACE_EVENT_FLAG_FLOW_OUT);
   paint::PaintThread::instance()->SchedulePaintTask(
-      base::Bind(&PaintThreadCanvasOwner::Impl::DidBeginAnimationFrame,
-                 base::Unretained(impl_.get()), now));
+      base::BindOnce(&PaintThreadCanvasOwner::Impl::DidBeginAnimationFrame,
+                     base::Unretained(impl_.get()), now));
 }
 
 void PaintThreadCanvasOwner::DidRealize() {
@@ -122,15 +122,15 @@ void PaintThreadCanvasOwner::DidRealize() {
   is_realized_ = true;
 #endif
   paint::PaintThread::instance()->PostTask(
-      FROM_HERE, base::Bind(&PaintThreadCanvasOwner::Impl::DidRealize,
-                            base::Unretained(impl_.get())));
+      FROM_HERE, base::BindOnce(&PaintThreadCanvasOwner::Impl::DidRealize,
+                                base::Unretained(impl_.get())));
 }
 
 void PaintThreadCanvasOwner::DidRecreateParentLayer() {
   paint::PaintThread::instance()->PostTask(
       FROM_HERE,
-      base::Bind(&PaintThreadCanvasOwner::Impl::DidRecreateParentLayer,
-                 base::Unretained(impl_.get())));
+      base::BindOnce(&PaintThreadCanvasOwner::Impl::DidRecreateParentLayer,
+                     base::Unretained(impl_.get())));
 }
 
 void PaintThreadCanvasOwner::RequestAnimationFrame() {

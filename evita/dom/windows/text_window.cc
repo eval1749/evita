@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <algorithm>
-
 #include "evita/dom/windows/text_window.h"
+
+#include <algorithm>
+#include <utility>
 
 #include "base/logging.h"
 #include "base/timer/timer.h"
@@ -472,8 +473,8 @@ void TextWindow::RequestAnimationFrame() {
     return;
   is_waiting_animation_frame_ = true;
   auto callback = std::make_unique<AnimationFrameCallback>(
-      FROM_HERE,
-      base::Bind(&TextWindow::DidBeginAnimationFrame, base::Unretained(this)));
+      FROM_HERE, base::BindOnce(&TextWindow::DidBeginAnimationFrame,
+                                base::Unretained(this)));
   script_host()->scheduler()->RequestAnimationFrame(std::move(callback));
 }
 

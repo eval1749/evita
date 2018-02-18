@@ -20,21 +20,21 @@ namespace internal {
 
 // Base template - used only for non-member function pointers. Other types
 // either go to one of the below specializations, or go here and fail to compile
-// because of base::Bind().
+// because of base::BindOnce().
 template <typename T, typename Enable = void>
 struct CallbackTraits {
   static v8::Local<v8::FunctionTemplate> CreateTemplate(v8::Isolate* isolate,
                                                         T callback) {
-    return gin::CreateFunctionTemplate(isolate, base::Bind(callback));
+    return gin::CreateFunctionTemplate(isolate, base::BindOnce(callback));
   }
 };
 
-// Specialization for base::Callback.
+// Specialization for base::OnceCallback.
 template <typename T>
-struct CallbackTraits<base::Callback<T>> {
+struct CallbackTraits<base::OnceCallback<T>> {
   static v8::Local<v8::FunctionTemplate> CreateTemplate(
       v8::Isolate* isolate,
-      const base::Callback<T>& callback) {
+      const base::OnceCallback<T>& callback) {
     return gin::CreateFunctionTemplate(isolate, callback);
   }
 };
@@ -49,7 +49,7 @@ struct CallbackTraits<
     typename std::enable_if<std::is_member_function_pointer<T>::value>::type> {
   static v8::Local<v8::FunctionTemplate> CreateTemplate(v8::Isolate* isolate,
                                                         T callback) {
-    return gin::CreateFunctionTemplate(isolate, base::Bind(callback),
+    return gin::CreateFunctionTemplate(isolate, base::BindOnce(callback),
                                        gin::HolderIsFirstArgument);
   }
 };
@@ -84,9 +84,9 @@ class FunctionTemplateBuilder final {
   }
 
   // In the following methods, T and U can be function pointer, member function
-  // pointer, base::Callback, or v8::FunctionTemplate. Most clients will want to
-  // use one of the first two options. Also see gin::CreateFunctionTemplate()
-  // for creating raw function templates.
+  // pointer, base::OnceCallback, or v8::FunctionTemplate. Most clients will
+  // want to use one of the first two options. Also see
+  // gin::CreateFunctionTemplate() for creating raw function templates.
   template <typename T>
   FunctionTemplateBuilder& SetMethod(const base::StringPiece& name,
                                      const T& callback) {

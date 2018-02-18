@@ -101,7 +101,7 @@ Mode.registerExtension('e', 'c#');
     // Chromium
     'DCHECK', 'DCHECK_EQ', 'DCHECK_NE', 'DCHECK_LE', 'DCHECK_LT', 'DCHECK_GE',
     'DCHECK_GT', 'DISALLOW_COPY_AND_ASSIGN', 'NOTREACHED', 'arraysize',
-    'base::Bind', 'base::Callback', 'base::Closure', 'base::checked_cast',
+    'base::Bind', 'base::OnceCallback', 'base::OnceClosure', 'base::checked_cast',
     'base::char16', 'base::string16', 'base::StringPiece',
     'base::StringPiece16', 'base::StringPrintf', 'base::Time',
     'base::TimeDelta', 'base::TimeTicks', 'base::Unretained', 'scoped_refptr',

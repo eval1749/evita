@@ -45,7 +45,7 @@ class ScriptThread final : public base::PingProvider,
   Scheduler* scheduler() const;
   domapi::ViewEventHandler* view_event_handler() const;
 
-  void ScheduleScriptTask(const base::Closure& task);
+  void ScheduleScriptTask(base::OnceClosure task);
 
   // base::PingProvider
   void Ping(std::atomic<bool>* cookie) final;
@@ -75,7 +75,7 @@ class ScriptThread final : public base::PingProvider,
   void ProcessCommandLine(const base::string16& working_directory,
                           const std::vector<base::string16>& args) final;
   void QueryClose(domapi::WindowId window_id) final;
-  void RunCallback(const base::Closure& callback) final;
+  void RunCallback(base::OnceClosure callback) final;
   void WillDestroyViewHost() final;
 
   // SchedulerClient

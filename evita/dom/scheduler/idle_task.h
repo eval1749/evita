@@ -17,13 +17,14 @@ namespace dom {
 //
 class IdleTask final {
  public:
-  using Callback = base::Callback<void(const base::TimeTicks&)>;
+  using Callback = base::OnceCallback<void(const base::TimeTicks&)>;
 
   IdleTask(const base::Location& posted_from,
-           const Callback& callback,
+           Callback callback,
            base::TimeTicks delayed_run_time);
-  IdleTask(const base::Location& posted_from, const Callback& callback);
-  IdleTask(const IdleTask&);
+  IdleTask(const base::Location& posted_from, Callback callback);
+  IdleTask(const IdleTask&) = delete;
+  IdleTask(IdleTask&&);
   ~IdleTask();
 
   // Used to support sorting.

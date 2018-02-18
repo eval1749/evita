@@ -4,6 +4,8 @@
 
 #include "evita/visuals/demo/demo_window.h"
 
+#include <utility>
+
 #include "base/message_loop/message_loop.h"
 #include "base/threading/thread_task_runner_handle.h"
 #include "base/time/time.h"
@@ -29,13 +31,14 @@ WindowEventHandler::~WindowEventHandler() {}
 // DemoWindow
 //
 DemoWindow::DemoWindow(WindowEventHandler* event_handler,
-                       const base::Closure& quit_closure)
+                       base::OnceClosure quit_closure)
     : ui::AnimatableWindow(ui::NativeWindow::Create(this)),
       event_handler_(event_handler),
-      quit_closure_(quit_closure) {}
+      quit_closure_(std::move(quit_closure)) {}
 
 DemoWindow::~DemoWindow() {
-  base::ThreadTaskRunnerHandle::Get()->PostTask(FROM_HERE, quit_closure_);
+  base::ThreadTaskRunnerHandle::Get()->PostTask(FROM_HERE,
+                                                std::move(quit_closure_));
 }
 
 gfx::Canvas* DemoWindow::GetCanvas() const {

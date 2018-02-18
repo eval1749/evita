@@ -4,6 +4,9 @@
 
 #include "evita/dom/testing/mock_view_impl.h"
 
+#include <memory>
+#include <utility>
+
 #include "base/synchronization/waitable_event.h"
 #include "evita/dom/public/form.h"
 #include "evita/dom/public/form_controls.h"
@@ -18,26 +21,28 @@ MockViewImpl::MockViewImpl() : check_spelling_result_(false) {}
 MockViewImpl::~MockViewImpl() {}
 
 // domapi::ViewDelegate
-void MockViewImpl::GetFileNameForLoad(
-    domapi::WindowId,
-    const base::string16& dir_path,
-    const GetFileNameForLoadResolver& resolver) {
-  resolver.resolve.Run(dir_path + L"/foo.bar");
+void MockViewImpl::GetFileNameForLoad(domapi::WindowId,
+                                      const base::string16& dir_path,
+                                      GetFileNameForLoadResolver resolver) {
+  std::move(resolver.resolve).Run(dir_path + L"/foo.bar");
 }
 
-void MockViewImpl::GetFileNameForSave(
-    domapi::WindowId,
-    const base::string16& dir_path,
-    const GetFileNameForSaveResolver& resolver) {
-  resolver.resolve.Run(dir_path + L"/foo.bar");
+void MockViewImpl::GetFileNameForSave(domapi::WindowId,
+                                      const base::string16& dir_path,
+                                      GetFileNameForSaveResolver resolver) {
+  std::move(resolver.resolve).Run(dir_path + L"/foo.bar");
+}
+
+void MockViewImpl::GetMetrics(const base::string16&, domapi::StringPromise) {
+  NOTREACHED() << "We should implement MockViewImpl::GetMetrics()";
 }
 
 void MockViewImpl::MessageBox(domapi::WindowId,
                               const base::string16&,
                               const base::string16&,
                               int flags,
-                              const MessageBoxResolver& resolver) {
-  resolver.resolve.Run(flags);
+                              MessageBoxResolver resolver) {
+  std::move(resolver.resolve).Run(flags);
 }
 
 void MockViewImpl::PaintForm(domapi::WindowId window_id,

@@ -36,25 +36,25 @@ Directory::~Directory() {
 v8::Local<v8::Promise> Directory::Close() {
   return PromiseResolver::Call(
       FROM_HERE,
-      base::Bind(&domapi::IoDelegate::CloseContext,
-                 base::Unretained(ScriptHost::instance()->io_delegate()),
-                 context_id_));
+      base::BindOnce(&domapi::IoDelegate::CloseContext,
+                     base::Unretained(ScriptHost::instance()->io_delegate()),
+                     context_id_));
 }
 
 v8::Local<v8::Promise> Directory::Open(const base::string16& root_path) {
   return PromiseResolver::Call(
       FROM_HERE,
-      base::Bind(&domapi::IoDelegate::OpenDirectory,
-                 base::Unretained(ScriptHost::instance()->io_delegate()),
-                 root_path));
+      base::BindOnce(&domapi::IoDelegate::OpenDirectory,
+                     base::Unretained(ScriptHost::instance()->io_delegate()),
+                     root_path));
 }
 
 v8::Local<v8::Promise> Directory::Read(int num_read) {
   return PromiseResolver::Call(
       FROM_HERE,
-      base::Bind(&domapi::IoDelegate::ReadDirectory,
-                 base::Unretained(ScriptHost::instance()->io_delegate()),
-                 context_id_, num_read));
+      base::BindOnce(&domapi::IoDelegate::ReadDirectory,
+                     base::Unretained(ScriptHost::instance()->io_delegate()),
+                     context_id_, num_read));
 }
 
 }  // namespace dom

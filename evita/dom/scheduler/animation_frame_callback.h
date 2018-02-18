@@ -17,10 +17,9 @@ namespace dom {
 //
 class AnimationFrameCallback final {
  public:
-  using Callback = base::Callback<void(const base::TimeTicks&)>;
+  using Callback = base::OnceCallback<void(const base::TimeTicks&)>;
 
-  AnimationFrameCallback(const base::Location& posted_from,
-                         const Callback& callback);
+  AnimationFrameCallback(const base::Location& posted_from, Callback callback);
   ~AnimationFrameCallback();
 
   void Run(const base::TimeTicks& time);

@@ -328,15 +328,16 @@ MessageView::~MessageView() {}
 void MessageView::SetMessage(base::StringPiece16 text) {
   TRACE_EVENT0("view", "MessageView::SetMessage");
   paint::PaintThread::instance()->PostTask(
-      FROM_HERE, base::Bind(&MessageView::View::SetMessage,
-                            base::Unretained(view_.get()), text.as_string()));
+      FROM_HERE,
+      base::BindOnce(&MessageView::View::SetMessage,
+                     base::Unretained(view_.get()), text.as_string()));
 }
 
 void MessageView::SetStatus(const std::vector<base::string16>& texts) {
   TRACE_EVENT1("view", "MessageView::SetStatusText", "texts", texts.size());
   paint::PaintThread::instance()->PostTask(
-      FROM_HERE, base::Bind(&MessageView::View::SetStatus,
-                            base::Unretained(view_.get()), texts));
+      FROM_HERE, base::BindOnce(&MessageView::View::SetStatus,
+                                base::Unretained(view_.get()), texts));
 }
 
 // ui::AnimationFrameHandler

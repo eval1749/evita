@@ -35,18 +35,18 @@ WinResource::~WinResource() {}
 
 v8::Local<v8::Promise> WinResource::Close(ScriptHost* script_host) {
   return PromiseResolver::Call(
-      FROM_HERE,
-      base::Bind(&domapi::IoDelegate::CloseContext,
-                 base::Unretained(script_host->io_delegate()), resource_id_));
+      FROM_HERE, base::BindOnce(&domapi::IoDelegate::CloseContext,
+                                base::Unretained(script_host->io_delegate()),
+                                resource_id_));
 }
 
 v8::Local<v8::Promise> WinResource::GetResourceNames(
     ScriptHost* script_host,
     const base::string16& type) {
   return PromiseResolver::Call(
-      FROM_HERE, base::Bind(&domapi::IoDelegate::GetWinResourceNames,
-                            base::Unretained(script_host->io_delegate()),
-                            resource_id_, type));
+      FROM_HERE, base::BindOnce(&domapi::IoDelegate::GetWinResourceNames,
+                                base::Unretained(script_host->io_delegate()),
+                                resource_id_, type));
 }
 
 v8::Local<v8::Promise> WinResource::Load(ScriptHost* script_host,
@@ -55,10 +55,10 @@ v8::Local<v8::Promise> WinResource::Load(ScriptHost* script_host,
                                          const gin::ArrayBufferView& buffer) {
   return PromiseResolver::Call(
       FROM_HERE,
-      base::Bind(&domapi::IoDelegate::LoadWinResource,
-                 base::Unretained(script_host->io_delegate()), resource_id_,
-                 type, name, static_cast<uint8_t*>(buffer.bytes()),
-                 buffer.num_bytes()));
+      base::BindOnce(&domapi::IoDelegate::LoadWinResource,
+                     base::Unretained(script_host->io_delegate()), resource_id_,
+                     type, name, static_cast<uint8_t*>(buffer.bytes()),
+                     buffer.num_bytes()));
 }
 
 int WinResource::LookupIcon(const gin::ArrayBufferView& buffer, int icon_size) {
@@ -72,8 +72,8 @@ v8::Local<v8::Promise> WinResource::Open(ScriptHost* script_host,
                                          const base::string16& file_name) {
   return PromiseResolver::Call(
       FROM_HERE,
-      base::Bind(&domapi::IoDelegate::OpenWinResource,
-                 base::Unretained(script_host->io_delegate()), file_name));
+      base::BindOnce(&domapi::IoDelegate::OpenWinResource,
+                     base::Unretained(script_host->io_delegate()), file_name));
 }
 
 }  // namespace dom

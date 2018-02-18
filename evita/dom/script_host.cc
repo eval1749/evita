@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "evita/dom/script_host.h"
+
 #include <algorithm>
 #include <array>
-
-#include "evita/dom/script_host.h"
+#include <utility>
 
 #include "base/bind.h"
 #include "base/command_line.h"
@@ -93,11 +94,11 @@ void MessageBox(const base::string16& message, int flags) {
   if (suppress_message_box)
     return;
   domapi::Promise<int, int> resolver;
-  resolver.reject = base::Bind(MessageBoxCallback);
-  resolver.resolve = base::Bind(MessageBoxCallback);
+  resolver.reject = base::BindOnce(MessageBoxCallback);
+  resolver.resolve = base::BindOnce(MessageBoxCallback);
   ScriptHost::instance()->view_delegate()->MessageBox(
       domapi::kInvalidWindowId, message, L"Evita System Message", flags,
-      resolver);
+      std::move(resolver));
 }
 
 const char* GcTypeToString(v8::GCType type) {
@@ -366,8 +367,8 @@ void ScriptHost::RunMicrotasks() {
   runner()->HandleTryCatch(try_catch);
 }
 
-void ScriptHost::ScheduleIdleTask(const IdleTask::Callback& callback) {
-  scheduler_->ScheduleIdleTask(IdleTask(FROM_HERE, callback));
+void ScriptHost::ScheduleIdleTask(IdleTask::Callback callback) {
+  scheduler_->ScheduleIdleTask(IdleTask(FROM_HERE, std::move(callback)));
 }
 
 void ScriptHost::Start() {

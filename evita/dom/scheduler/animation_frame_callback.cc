@@ -4,6 +4,8 @@
 
 #include "evita/dom/scheduler/animation_frame_callback.h"
 
+#include <utility>
+
 #include "base/bind.h"
 #include "base/callback.h"
 #include "base/location.h"
@@ -12,13 +14,13 @@ namespace dom {
 
 AnimationFrameCallback::AnimationFrameCallback(
     const base::Location& posted_from,
-    const Callback& callback)
-    : callback_(callback), posted_from_(posted_from) {}
+    Callback callback)
+    : callback_(std::move(callback)), posted_from_(posted_from) {}
 
 AnimationFrameCallback::~AnimationFrameCallback() {}
 
 void AnimationFrameCallback::Run(const base::TimeTicks& time) {
-  callback_.Run(time);
+  std::move(callback_).Run(time);
 }
 
 }  // namespace dom

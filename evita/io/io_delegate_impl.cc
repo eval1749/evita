@@ -71,31 +71,30 @@ IoContext* IoDelegateImpl::IoContextOf(domapi::IoContextId context_id) const {
 
 // domapi::IoDelegate
 void IoDelegateImpl::CheckSpelling(const base::string16& word_to_check,
-                                   const CheckSpellingResolver& promise) {
+                                   CheckSpellingResolver promise) {
   TRACE_EVENT_WITH_FLOW1("promise", "Promise", promise.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT,
                          "step", "IoDelegateImpl::CheckSpelling");
-  RunCallback(base::Bind(
-      promise.resolve,
+  RunCallback(base::BindOnce(
+      std::move(promise.resolve),
       spellchecker::SpellingEngine::GetSpellingEngine()->CheckSpelling(
           word_to_check)));
 }
 
 void IoDelegateImpl::CloseContext(const domapi::IoContextId& context_id,
-                                  const domapi::IoIntPromise& promise) {
+                                  domapi::IoIntPromise promise) {
   const auto& it = context_map_.find(context_id);
   if (it == context_map_.end())
-    return Reject(promise.reject, ERROR_INVALID_HANDLE);
+    return Reject(std::move(promise.reject), ERROR_INVALID_HANDLE);
   const auto context = it->second->as<IoContext>();
   if (!context)
-    return Reject(promise.reject, ERROR_INVALID_HANDLE);
-  context->Close(promise);
+    return Reject(std::move(promise.reject), ERROR_INVALID_HANDLE);
+  context->Close(std::move(promise));
   context_map_.erase(it);
 }
 
-void IoDelegateImpl::ComputeFullPathName(
-    const base::string16& path_name,
-    const ComputeFullPathNamePromise& promise) {
+void IoDelegateImpl::ComputeFullPathName(const base::string16& path_name,
+                                         ComputeFullPathNamePromise promise) {
   base::string16 full_name(MAX_PATH + 1, 0);
   base::char16* file_start = nullptr;
   const auto length = ::GetFullPathNameW(path_name.c_str(),
@@ -105,36 +104,36 @@ void IoDelegateImpl::ComputeFullPathName(
   if (length == 0) {
     const auto last_error = ::GetLastError();
     PLOG(ERROR) << "GetFullPathName failed";
-    Reject(promise.reject, last_error);
+    Reject(std::move(promise.reject), last_error);
     return;
   }
-  RunCallback(base::Bind(promise.resolve, full_name));
+  RunCallback(base::BindOnce(std::move(promise.resolve), full_name));
 }
 
 void IoDelegateImpl::GetWinResourceNames(
     const domapi::WinResourceId& resource_id,
     const base::string16& type,
-    const GetWinResourceNamessPromise& promise) {
+    GetWinResourceNamessPromise promise) {
   const auto& it = context_map_.find(resource_id);
   if (it == context_map_.end())
-    return Reject(promise.reject, ERROR_INVALID_HANDLE);
+    return Reject(std::move(promise.reject), ERROR_INVALID_HANDLE);
   const auto resource = it->second->as<WinResourceIoContext>();
   if (!resource)
-    return Reject(promise.reject, ERROR_INVALID_HANDLE);
+    return Reject(std::move(promise.reject), ERROR_INVALID_HANDLE);
   const auto& pair = resource->GetResourceName(type);
   if (pair.second)
-    return Reject(promise.reject, pair.second);
-  return RunCallback(base::Bind(promise.resolve, pair.first));
+    return Reject(std::move(promise.reject), pair.second);
+  return RunCallback(base::BindOnce(std::move(promise.resolve), pair.first));
 }
 
 void IoDelegateImpl::GetSpellingSuggestions(
     const base::string16& wrong_word,
-    const GetSpellingSuggestionsResolver& promise) {
+    GetSpellingSuggestionsResolver promise) {
   TRACE_EVENT_WITH_FLOW1("promise", "Promise", promise.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT,
                          "step", "IoDelegateImpl::GetSpellingSuggestions");
-  RunCallback(base::Bind(
-      promise.resolve,
+  RunCallback(base::BindOnce(
+      std::move(promise.resolve),
       spellchecker::SpellingEngine::GetSpellingEngine()->GetSpellingSuggestions(
           wrong_word)));
 }
@@ -144,23 +143,23 @@ void IoDelegateImpl::LoadWinResource(const domapi::WinResourceId& resource_id,
                                      const base::string16& name,
                                      uint8_t* buffer,
                                      size_t buffer_size,
-                                     const domapi::IoIntPromise& promise) {
+                                     domapi::IoIntPromise promise) {
   const auto& it = context_map_.find(resource_id);
   if (it == context_map_.end())
-    return Reject(promise.reject, ERROR_INVALID_HANDLE);
+    return Reject(std::move(promise.reject), ERROR_INVALID_HANDLE);
   const auto resource = it->second->as<WinResourceIoContext>();
   if (!resource)
-    return Reject(promise.reject, ERROR_INVALID_HANDLE);
+    return Reject(std::move(promise.reject), ERROR_INVALID_HANDLE);
   const auto& pair = resource->Load(type, name, buffer, buffer_size);
   if (pair.second)
-    return Reject(promise.reject, pair.second);
-  return RunCallback(base::Bind(promise.resolve, pair.first));
+    return Reject(std::move(promise.reject), pair.second);
+  return RunCallback(base::BindOnce(std::move(promise.resolve), pair.first));
 }
 
 void IoDelegateImpl::MakeTempFileName(
     const base::string16& dir_name,
     const base::string16& prefix,
-    const domapi::MakeTempFileNamePromise& resolver) {
+    domapi::MakeTempFileNamePromise resolver) {
   TRACE_EVENT_WITH_FLOW1("promise", "Promise", resolver.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT,
                          "step", "IoDelegateImpl::MakeTempFileName");
@@ -170,19 +169,19 @@ void IoDelegateImpl::MakeTempFileName(
   if (!unique_id) {
     const auto last_error = ::GetLastError();
     PLOG(ERROR) << "GetTempFileName failed";
-    Reject(resolver.reject, last_error);
+    Reject(std::move(resolver.reject), last_error);
     return;
   }
   const auto nul_pos = file_name.find(static_cast<base::char16>(0));
   if (nul_pos != base::string16::npos)
     file_name.resize(nul_pos);
-  RunCallback(base::Bind(resolver.resolve, file_name));
+  RunCallback(base::BindOnce(std::move(resolver.resolve), file_name));
 }
 
 void IoDelegateImpl::MoveFile(const base::string16& src_path,
                               const base::string16& dst_path,
                               const domapi::MoveFileOptions& options,
-                              const domapi::IoBoolPromise& resolver) {
+                              domapi::IoBoolPromise resolver) {
   TRACE_EVENT0("io", "IoDelegateImpl::MoveFile");
   TRACE_EVENT_WITH_FLOW1("promise", "Promise", resolver.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT,
@@ -195,65 +194,66 @@ void IoDelegateImpl::MoveFile(const base::string16& src_path,
   if (!succeeded) {
     const auto last_error = ::GetLastError();
     PLOG(ERROR) << "MoveFileEx failed";
-    Reject(resolver.reject, last_error);
+    Reject(std::move(resolver.reject), last_error);
     return;
   }
-  RunCallback(base::Bind(resolver.resolve, true));
+  RunCallback(base::BindOnce(std::move(resolver.resolve), true));
 }
 
-void IoDelegateImpl::OpenDirectory(
-    const base::string16& dir_name,
-    const domapi::OpenDirectoryPromise& promise) {
+void IoDelegateImpl::OpenDirectory(const base::string16& dir_name,
+                                   domapi::OpenDirectoryPromise promise) {
   auto directory = std::make_unique<DirectoryIoContext>(dir_name);
   const auto directory_id = domapi::IoContextId::New();
   context_map_.insert(std::make_pair(directory_id, directory.release()));
-  RunCallback(base::Bind(promise.resolve, domapi::DirectoryId(directory_id)));
+  RunCallback(base::BindOnce(std::move(promise.resolve),
+                             domapi::DirectoryId(directory_id)));
 }
 
 void IoDelegateImpl::OpenFile(const base::string16& file_name,
                               const base::string16& mode,
-                              const domapi::OpenFilePromise& promise) {
+                              domapi::OpenFilePromise promise) {
   TRACE_EVENT0("io", "IoDelegateImpl::OpenFile");
   TRACE_EVENT_WITH_FLOW1("promise", "Promise", promise.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT,
                          "step", "IoDelegateImpl::OpenFile");
   const auto& pair = FileIoContext::Open(file_name, mode);
   if (pair.second)
-    return Reject(promise.reject, pair.second);
+    return Reject(std::move(promise.reject), pair.second);
   const auto file = new FileIoContext(pair.first);
   const auto file_id = domapi::IoContextId::New();
   context_map_.emplace(file_id, file);
-  RunCallback(base::Bind(promise.resolve, domapi::FileId(file_id)));
+  RunCallback(
+      base::BindOnce(std::move(promise.resolve), domapi::FileId(file_id)));
 }
 
 void IoDelegateImpl::OpenProcess(const base::string16& command_line,
-                                 const domapi::OpenProcessPromise& promise) {
+                                 domapi::OpenProcessPromise promise) {
   TRACE_EVENT0("io", "IoDelegateImpl::OpenProcess");
   TRACE_EVENT_WITH_FLOW1("promise", "Promise", promise.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT,
                          "step", "IoDelegateImpl::OpenProcess");
   const auto process_id = domapi::IoContextId::New();
-  const auto process = new ProcessIoContext(process_id, command_line, promise);
+  const auto process =
+      new ProcessIoContext(process_id, command_line, std::move(promise));
   context_map_.insert(std::make_pair(process_id, process));
   // Note: |ProcessIoContext| constructor delegate promise resolution to the
   // gateway thread which spawns process with specified command line.
 }
 
-void IoDelegateImpl::OpenWinResource(
-    const base::string16& file_name,
-    const domapi::OpenWinResourcePromise& promise) {
+void IoDelegateImpl::OpenWinResource(const base::string16& file_name,
+                                     domapi::OpenWinResourcePromise promise) {
   const auto& pair = WinResourceIoContext::Open(file_name);
   if (pair.second)
-    return Reject(promise.reject, pair.second);
+    return Reject(std::move(promise.reject), pair.second);
   const auto resource_id = domapi::IoContextId::New();
   const auto resource = new WinResourceIoContext(pair.first);
   context_map_.emplace(resource_id, resource);
-  RunCallback(base::Bind(promise.resolve, domapi::WinResourceId(resource_id)));
+  RunCallback(base::BindOnce(std::move(promise.resolve),
+                             domapi::WinResourceId(resource_id)));
 }
 
-void IoDelegateImpl::QueryFileStatus(
-    const base::string16& file_name,
-    const domapi::QueryFileStatusPromise& promise) {
+void IoDelegateImpl::QueryFileStatus(const base::string16& file_name,
+                                     domapi::QueryFileStatusPromise promise) {
   TRACE_EVENT0("io", "IoDelegateImpl::QueryFileStatus");
   TRACE_EVENT_WITH_FLOW1("promise", "Promise", promise.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT,
@@ -264,12 +264,12 @@ void IoDelegateImpl::QueryFileStatus(
   if (!find_handle.is_valid()) {
     const auto last_error = ::GetLastError();
     PLOG(ERROR) << "FindFirstFileW failed";
-    Reject(promise.reject, last_error);
+    Reject(std::move(promise.reject), last_error);
     return;
   }
 
   if (find_data.nFileSizeHigh || find_data.nFileSizeLow > kHugeFileSize) {
-    Reject(promise.reject, ERROR_NOT_ENOUGH_MEMORY);
+    Reject(std::move(promise.reject), ERROR_NOT_ENOUGH_MEMORY);
     return;
   }
 
@@ -282,52 +282,51 @@ void IoDelegateImpl::QueryFileStatus(
   data.last_write_time = base::Time::FromFileTime(find_data.ftLastWriteTime);
   data.readonly = (find_data.dwFileAttributes & FILE_ATTRIBUTE_READONLY) != 0;
 
-  RunCallback(base::Bind(promise.resolve, data));
+  RunCallback(base::BindOnce(std::move(promise.resolve), data));
 }
 
-void IoDelegateImpl::ReadDirectory(
-    domapi::IoContextId context_id,
-    size_t num_read,
-    const domapi::ReadDirectoryPromise& promise) {
+void IoDelegateImpl::ReadDirectory(domapi::IoContextId context_id,
+                                   size_t num_read,
+                                   domapi::ReadDirectoryPromise promise) {
   const auto context = IoContextOf(context_id)->as<DirectoryIoContext>();
   if (!context)
-    return Reject(promise.reject, ERROR_INVALID_HANDLE);
-  context->Read(num_read, promise);
+    return Reject(std::move(promise.reject), ERROR_INVALID_HANDLE);
+  context->Read(num_read, std::move(promise));
 }
 
 void IoDelegateImpl::ReadFile(domapi::IoContextId context_id,
                               void* buffer,
                               size_t num_read,
-                              const domapi::IoIntPromise& promise) {
+                              domapi::IoIntPromise promise) {
   TRACE_EVENT0("io", "IoDelegateImpl::ReadFile");
   const auto context = IoContextOf(context_id)->as<BlockIoContext>();
   if (!context)
-    return Reject(promise.reject, ERROR_INVALID_HANDLE);
-  context->Read(buffer, num_read, promise);
+    return Reject(std::move(promise.reject), ERROR_INVALID_HANDLE);
+  context->Read(buffer, num_read, std::move(promise));
 }
 
 void IoDelegateImpl::RemoveFile(const base::string16& file_name,
-                                const domapi::IoBoolPromise& resolver) {
+                                domapi::IoBoolPromise resolver) {
   TRACE_EVENT0("io", "IoDelegateImpl::RemoveFile");
   const auto succeeded = ::DeleteFileW(file_name.c_str());
   if (!succeeded) {
     const auto last_error = ::GetLastError();
     PLOG(ERROR) << "DeleteFileEx failed";
-    Reject(resolver.reject, last_error);
+    Reject(std::move(resolver.reject), last_error);
     return;
   }
-  RunCallback(base::Bind(resolver.resolve, true));
+  RunCallback(base::BindOnce(std::move(resolver.resolve), true));
 }
 
 void IoDelegateImpl::WriteFile(domapi::IoContextId context_id,
                                void* buffer,
                                size_t num_write,
-                               const domapi::IoIntPromise& promise) {
+                               domapi::IoIntPromise promise) {
   TRACE_EVENT0("io", "IoDelegateImpl::WriteFile");
   const auto context = IoContextOf(context_id)->as<BlockIoContext>();
   if (!context)
-    return Reject(promise.reject, ERROR_INVALID_HANDLE);
-  context->Write(buffer, num_write, promise);
+    return Reject(std::move(promise.reject), ERROR_INVALID_HANDLE);
+  context->Write(buffer, num_write, std::move(promise));
 }
 
 }  // namespace io

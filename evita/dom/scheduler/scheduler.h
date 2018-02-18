@@ -26,8 +26,8 @@ class Scheduler : public base::TickClock {
   virtual void DidBeginFrame(const base::TimeTicks& deadline) = 0;
   virtual int RequestAnimationFrame(
       std::unique_ptr<AnimationFrameCallback> callback) = 0;
-  virtual int ScheduleIdleTask(const IdleTask& task) = 0;
-  virtual void ScheduleTask(const base::Closure& task) = 0;
+  virtual int ScheduleIdleTask(IdleTask task) = 0;
+  virtual void ScheduleTask(base::OnceClosure task) = 0;
 
  protected:
   Scheduler();

@@ -133,14 +133,14 @@ std::pair<HMODULE, int> WinResourceIoContext::Open(
 }
 
 // io::IoContext
-void WinResourceIoContext::Close(const domapi::IoIntPromise& promise) {
+void WinResourceIoContext::Close(domapi::IoIntPromise promise) {
   if (!module_)
-    return Resolve(promise.resolve, 0);
+    return Resolve(std::move(promise.resolve), 0);
   if (::FreeLibrary(module_))
-    return Resolve(promise.resolve, 0);
+    return Resolve(std::move(promise.resolve), 0);
   const auto last_error = ::GetLastError();
   PLOG(ERROR) << "FreeLibrary failed";
-  return Reject(promise.reject, last_error);
+  return Reject(std::move(promise.reject), last_error);
 }
 
 }  // namespace io

@@ -28,7 +28,7 @@ void MockScheduler::RunPendingTasks() {
   }
 
   while (!normal_tasks_.empty()) {
-    normal_tasks_.front().Run();
+    std::move(normal_tasks_.front()).Run();
     normal_tasks_.pop();
   }
 
@@ -90,18 +90,18 @@ int MockScheduler::RequestAnimationFrame(
   return last_animation_frame_callback_id_;
 }
 
-int MockScheduler::ScheduleIdleTask(const IdleTask& task) {
-  auto* const idle_task = new IdleTask(task);
+int MockScheduler::ScheduleIdleTask(IdleTask task) {
+  auto* const idle_task = new IdleTask(std::move(task));
   if (idle_task->delayed_run_time() == base::TimeTicks())
-    ready_idle_tasks_.push(idle_task);
+    ready_idle_tasks_.push(std::move(idle_task));
   else
     waiting_idle_tasks_.push(idle_task);
   idle_task_map_.insert({idle_task->id(), idle_task});
   return idle_task->id();
 }
 
-void MockScheduler::ScheduleTask(const base::Closure& task) {
-  normal_tasks_.push(task);
+void MockScheduler::ScheduleTask(base::OnceClosure task) {
+  normal_tasks_.push(std::move(task));
 }
 
 }  // namespace dom

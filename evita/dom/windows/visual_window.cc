@@ -4,6 +4,8 @@
 
 #include "evita/dom/windows/visual_window.h"
 
+#include <utility>
+
 #include "base/logging.h"
 #include "base/strings/stringprintf.h"
 #include "base/trace_event/trace_event.h"
@@ -72,8 +74,8 @@ void VisualWindow::RequestAnimationFrame() {
   if (animation_request_id_)
     return;
   auto callback = std::make_unique<AnimationFrameCallback>(
-      FROM_HERE, base::Bind(&VisualWindow::DidBeginAnimationFrame,
-                            base::Unretained(this)));
+      FROM_HERE, base::BindOnce(&VisualWindow::DidBeginAnimationFrame,
+                                base::Unretained(this)));
   animation_request_id_ =
       script_host()->scheduler()->RequestAnimationFrame(std::move(callback));
 }

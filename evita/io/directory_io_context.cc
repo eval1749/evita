@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <vector>
-
 #include "evita/io/directory_io_context.h"
+
+#include <utility>
+#include <vector>
 
 #include "base/bind.h"
 #include "base/callback.h"
@@ -34,12 +35,12 @@ DirectoryIoContext::DirectoryIoContext(const base::string16& dir_name)
 
 DirectoryIoContext::~DirectoryIoContext() {}
 
-void DirectoryIoContext::Close(const domapi::IoIntPromise& promise) {
-  Resolve(promise.resolve, 0);
+void DirectoryIoContext::Close(domapi::IoIntPromise promise) {
+  Resolve(std::move(promise.resolve), 0);
 }
 
 void DirectoryIoContext::Read(size_t num_read,
-                              const domapi::ReadDirectoryPromise& promise) {
+                              domapi::ReadDirectoryPromise promise) {
   std::vector<domapi::FileStatus> entries;
   while (entries.size() < num_read) {
     const auto& file_path = file_enumerator_->Next();
@@ -55,7 +56,7 @@ void DirectoryIoContext::Read(size_t num_read,
         !!(file_info.find_data().dwFileAttributes & FILE_ATTRIBUTE_READONLY);
     entries.push_back(entry);
   }
-  RunCallback(base::Bind(promise.resolve, entries));
+  RunCallback(base::BindOnce(std::move(promise.resolve), entries));
 }
 
 }  // namespace io

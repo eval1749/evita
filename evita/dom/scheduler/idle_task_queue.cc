@@ -4,6 +4,8 @@
 
 #include "evita/dom/scheduler/idle_task_queue.h"
 
+#include <utility>
+
 #include "base/trace_event/trace_event.h"
 #include "evita/dom/scheduler/idle_task.h"
 
@@ -23,8 +25,8 @@ void IdleTaskQueue::CancelTask(int task_id) {
   it->second->Cancel();
 }
 
-int IdleTaskQueue::GiveTask(const IdleTask& task_in) {
-  auto* const task = new IdleTask(task_in);
+int IdleTaskQueue::GiveTask(IdleTask task_in) {
+  auto* const task = new IdleTask(std::move(task_in));
   task_map_.insert({task->id(), task});
   if (task->delayed_run_time() != base::TimeTicks())
     waiting_tasks_.push(task);

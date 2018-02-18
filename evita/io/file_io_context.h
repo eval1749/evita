@@ -38,13 +38,13 @@ class FileIoContext final : private base::MessagePumpForIO::IOContext,
                      DWORD error) override;
 
   // io::IoContext
-  void Close(const domapi::IoIntPromise& promise) override;
+  void Close(domapi::IoIntPromise promise) override;
   void Read(void* buffer,
             size_t num_read,
-            const domapi::IoIntPromise& promise) override;
+            domapi::IoIntPromise promise) override;
   void Write(void* buffer,
              size_t num_write,
-             const domapi::IoIntPromise& promise) override;
+             domapi::IoIntPromise promise) override;
 
   domapi::IoIntPromise promise_;
   common::win::scoped_handle file_handle_;

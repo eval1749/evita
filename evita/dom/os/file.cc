@@ -39,18 +39,18 @@ v8::Local<v8::Promise> File::ComputeFullPathName(
     const base::string16& path_name) {
   return PromiseResolver::Call(
       FROM_HERE,
-      base::Bind(&domapi::IoDelegate::ComputeFullPathName,
-                 base::Unretained(ScriptHost::instance()->io_delegate()),
-                 path_name));
+      base::BindOnce(&domapi::IoDelegate::ComputeFullPathName,
+                     base::Unretained(ScriptHost::instance()->io_delegate()),
+                     path_name));
 }
 
 v8::Local<v8::Promise> File::MakeTempFileName(const base::string16& dir_name,
                                               const base::string16& prefix) {
   return PromiseResolver::Call(
       FROM_HERE,
-      base::Bind(&domapi::IoDelegate::MakeTempFileName,
-                 base::Unretained(ScriptHost::instance()->io_delegate()),
-                 dir_name, prefix));
+      base::BindOnce(&domapi::IoDelegate::MakeTempFileName,
+                     base::Unretained(ScriptHost::instance()->io_delegate()),
+                     dir_name, prefix));
 }
 
 v8::Local<v8::Promise> File::Move(const base::string16& src_path,
@@ -60,9 +60,9 @@ v8::Local<v8::Promise> File::Move(const base::string16& src_path,
   api_options.no_overwrite = options.no_overwrite();
   return PromiseResolver::Call(
       FROM_HERE,
-      base::Bind(&domapi::IoDelegate::MoveFile,
-                 base::Unretained(ScriptHost::instance()->io_delegate()),
-                 src_path, dst_path, api_options));
+      base::BindOnce(&domapi::IoDelegate::MoveFile,
+                     base::Unretained(ScriptHost::instance()->io_delegate()),
+                     src_path, dst_path, api_options));
 }
 
 v8::Local<v8::Promise> File::Move(const base::string16& src_path,
@@ -74,9 +74,9 @@ v8::Local<v8::Promise> File::Open(const base::string16& file_name,
                                   const base::string16& mode) {
   return PromiseResolver::Call(
       FROM_HERE,
-      base::Bind(&domapi::IoDelegate::OpenFile,
-                 base::Unretained(ScriptHost::instance()->io_delegate()),
-                 file_name, mode));
+      base::BindOnce(&domapi::IoDelegate::OpenFile,
+                     base::Unretained(ScriptHost::instance()->io_delegate()),
+                     file_name, mode));
 }
 
 v8::Local<v8::Promise> File::Open(const base::string16& file_name) {
@@ -86,17 +86,17 @@ v8::Local<v8::Promise> File::Open(const base::string16& file_name) {
 v8::Local<v8::Promise> File::Remove(const base::string16& file_name) {
   return PromiseResolver::Call(
       FROM_HERE,
-      base::Bind(&domapi::IoDelegate::RemoveFile,
-                 base::Unretained(ScriptHost::instance()->io_delegate()),
-                 file_name));
+      base::BindOnce(&domapi::IoDelegate::RemoveFile,
+                     base::Unretained(ScriptHost::instance()->io_delegate()),
+                     file_name));
 }
 
 v8::Local<v8::Promise> File::Stat(const base::string16& file_name) {
   return PromiseResolver::Call(
       FROM_HERE,
-      base::Bind(&domapi::IoDelegate::QueryFileStatus,
-                 base::Unretained(ScriptHost::instance()->io_delegate()),
-                 file_name));
+      base::BindOnce(&domapi::IoDelegate::QueryFileStatus,
+                     base::Unretained(ScriptHost::instance()->io_delegate()),
+                     file_name));
 }
 
 }  // namespace dom

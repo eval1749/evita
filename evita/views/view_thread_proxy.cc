@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <string>
-#include <vector>
-
 #include "evita/views/view_thread_proxy.h"
+
+#include <string>
+#include <utility>
+#include <vector>
 
 #include "base/bind.h"
 #include "base/callback.h"
@@ -35,9 +36,9 @@ namespace {
 template <typename Result, typename... Params>
 class SynchronousCaller final {
  public:
-  SynchronousCaller(const base::Callback<Result(Params...)>& task,
+  SynchronousCaller(base::OnceCallback<Result(Params...)> task,
                     base::WaitableEvent* event)
-      : event_(event), task_(task) {}
+      : event_(event), task_(std::move(task)) {}
 
   ~SynchronousCaller() = default;
 
@@ -46,18 +47,18 @@ class SynchronousCaller final {
     DOM_AUTO_UNLOCK_SCOPE();
     message_loop->task_runner()->PostTask(
         FROM_HERE,
-        base::Bind(&SynchronousCaller::RunTask, base::Unretained(this)));
+        base::BindOnce(&SynchronousCaller::RunTask, base::Unretained(this)));
     event_->Wait();
     return result_;
   }
 
  private:
   void RunTask() {
-    result_ = task_.Run();
+    result_ = std::move(task_).Run();
     event_->Signal();
   }
 
-  base::Callback<Result(Params...)> task_;
+  base::OnceCallback<Result(Params...)> task_;
   base::WaitableEvent* event_;
   Result result_;
 
@@ -65,10 +66,10 @@ class SynchronousCaller final {
 };
 
 template <typename Result, typename... Params>
-Result DoSynchronousCall(const base::Callback<Result(Params...)>& task,
+Result DoSynchronousCall(base::OnceCallback<Result(Params...)> task,
                          base::MessageLoop* message_loop,
                          base::WaitableEvent* event) {
-  SynchronousCaller<Result, Params...> caller(task, event);
+  SynchronousCaller<Result, Params...> caller(std::move(task), event);
   return caller.Call(message_loop);
 }
 
@@ -80,9 +81,9 @@ Result DoSynchronousCall(const base::Callback<Result(Params...)>& task,
 template <typename... Params>
 class SynchronousRunner final {
  public:
-  SynchronousRunner(const base::Callback<void(Params...)>& task,
+  SynchronousRunner(base::OnceCallback<void(Params...)> task,
                     base::WaitableEvent* event)
-      : event_(event), task_(task) {}
+      : event_(event), task_(std::move(task)) {}
 
   ~SynchronousRunner() = default;
 
@@ -91,29 +92,43 @@ class SynchronousRunner final {
     DOM_AUTO_UNLOCK_SCOPE();
     message_loop->task_runner()->PostTask(
         FROM_HERE,
-        base::Bind(&SynchronousRunner::RunTask, base::Unretained(this)));
+        base::BindOnce(&SynchronousRunner::RunTask, base::Unretained(this)));
     event_->Wait();
   }
 
  private:
   void RunTask() {
-    task_.Run();
+    std::move(task_).Run();
     event_->Signal();
   }
 
-  base::Callback<void(Params...)> task_;
+  base::OnceCallback<void(Params...)> task_;
   base::WaitableEvent* event_;
 
   DISALLOW_COPY_AND_ASSIGN(SynchronousRunner);
 };
 
 template <typename... Params>
-void RunSynchronously(const base::Callback<void(Params...)>& task,
+void RunSynchronously(base::OnceCallback<void(Params...)> task,
                       base::MessageLoop* message_loop,
                       base::WaitableEvent* event) {
-  SynchronousRunner<Params...> caller(task, event);
+  SynchronousRunner<Params...> caller(std::move(task), event);
   caller.Run(message_loop);
 }
+
+// TODO(eval1749): We should share |Wrapper| with |IoThreadProxy|.
+template <typename T, bool = std::is_const<T>::value>
+struct Wrapper;
+
+template <typename T>
+struct Wrapper<T, false> {
+  static T MoveIfNeeded(T&& value) { return std::move(value); }
+};
+
+template <typename T>
+struct Wrapper<T, true> {
+  static T MoveIfNeeded(T value) { return value; }
+};
 
 }  // namespace
 
@@ -131,46 +146,58 @@ ViewThreadProxy::ViewThreadProxy(base::MessageLoop* message_loop)
 ViewThreadProxy::~ViewThreadProxy() {}
 
 // ViewDelegate
-#define DEFINE_DELEGATE_0(name)                                              \
-  void ViewThreadProxy::name() {                                             \
-    DCHECK_CALLED_ON_SCRIPT_THREAD();                                        \
-    if (!message_loop_)                                                      \
-      return;                                                                \
-    message_loop_->task_runner()->PostTask(                                  \
-        FROM_HERE,                                                           \
-        base::Bind(&ViewDelegate::name, base::Unretained(delegate_.get()))); \
+#define DEFINE_DELEGATE_0(name)                                        \
+  void ViewThreadProxy::name() {                                       \
+    DCHECK_CALLED_ON_SCRIPT_THREAD();                                  \
+    if (!message_loop_)                                                \
+      return;                                                          \
+    message_loop_->task_runner()->PostTask(                            \
+        FROM_HERE, base::BindOnce(&ViewDelegate::name,                 \
+                                  base::Unretained(delegate_.get()))); \
   }
 
-#define DEFINE_DELEGATE_1(name, type1)                                     \
-  void ViewThreadProxy::name(type1 param1) {                               \
-    DCHECK_CALLED_ON_SCRIPT_THREAD();                                      \
-    if (!message_loop_)                                                    \
-      return;                                                              \
-    message_loop_->task_runner()->PostTask(                                \
-        FROM_HERE, base::Bind(&ViewDelegate::name,                         \
-                              base::Unretained(delegate_.get()), param1)); \
+#define DEFINE_DELEGATE_1(name, type1)                                         \
+  void ViewThreadProxy::name(type1 param1) {                                   \
+    DCHECK_CALLED_ON_SCRIPT_THREAD();                                          \
+    if (!message_loop_)                                                        \
+      return;                                                                  \
+    message_loop_->task_runner()->PostTask(                                    \
+        FROM_HERE, base::BindOnce(&ViewDelegate::name,                         \
+                                  base::Unretained(delegate_.get()), param1)); \
   }
 
-#define DEFINE_DELEGATE_2(name, type1, type2)                              \
-  void ViewThreadProxy::name(type1 param1, type2 param2) {                 \
-    DCHECK_CALLED_ON_SCRIPT_THREAD();                                      \
-    if (!message_loop_)                                                    \
-      return;                                                              \
-    message_loop_->task_runner()->PostTask(                                \
-        FROM_HERE,                                                         \
-        base::Bind(&ViewDelegate::name, base::Unretained(delegate_.get()), \
-                   param1, param2));                                       \
+#define DEFINE_DELEGATE_2(name, type1, type2)                               \
+  void ViewThreadProxy::name(type1 param1, type2 param2) {                  \
+    DCHECK_CALLED_ON_SCRIPT_THREAD();                                       \
+    if (!message_loop_)                                                     \
+      return;                                                               \
+    message_loop_->task_runner()->PostTask(                                 \
+        FROM_HERE,                                                          \
+        base::BindOnce(                                                     \
+            &ViewDelegate::name, base::Unretained(delegate_.get()), param1, \
+            Wrapper<type2>::MoveIfNeeded(std::forward<type2>(param2))));    \
   }
 
-#define DEFINE_DELEGATE_3(name, type1, type2, type3)                       \
-  void ViewThreadProxy::name(type1 param1, type2 param2, type3 param3) {   \
-    DCHECK_CALLED_ON_SCRIPT_THREAD();                                      \
-    if (!message_loop_)                                                    \
-      return;                                                              \
-    message_loop_->task_runner()->PostTask(                                \
-        FROM_HERE,                                                         \
-        base::Bind(&ViewDelegate::name, base::Unretained(delegate_.get()), \
-                   param1, param2, param3));                               \
+#define DEFINE_DELEGATE_3(name, type1, type2, type3)                           \
+  void ViewThreadProxy::name(type1 param1, type2 param2, type3 param3) {       \
+    DCHECK_CALLED_ON_SCRIPT_THREAD();                                          \
+    if (!message_loop_)                                                        \
+      return;                                                                  \
+    message_loop_->task_runner()->PostTask(                                    \
+        FROM_HERE,                                                             \
+        base::BindOnce(&ViewDelegate::name, base::Unretained(delegate_.get()), \
+                       param1, param2, param3));                               \
+  }
+
+#define DEFINE_DELEGATE_3_PROMISE(name, type1, type2, type3)                   \
+  void ViewThreadProxy::name(type1 param1, type2 param2, type3 param3) {       \
+    DCHECK_CALLED_ON_SCRIPT_THREAD();                                          \
+    if (!message_loop_)                                                        \
+      return;                                                                  \
+    message_loop_->task_runner()->PostTask(                                    \
+        FROM_HERE,                                                             \
+        base::BindOnce(&ViewDelegate::name, base::Unretained(delegate_.get()), \
+                       param1, param2, std::move(param3)));                    \
   }
 
 #define DEFINE_DELEGATE_4(name, type1, type2, type3, type4)                    \
@@ -180,11 +207,11 @@ ViewThreadProxy::~ViewThreadProxy() {}
       return;                                                                  \
     message_loop_->task_runner()->PostTask(                                    \
         FROM_HERE,                                                             \
-        base::Bind(&ViewDelegate::name, base::Unretained(delegate_.get()), p1, \
-                   p2, p3, p4));                                               \
+        base::BindOnce(&ViewDelegate::name, base::Unretained(delegate_.get()), \
+                       p1, p2, p3, p4));                                       \
   }
 
-#define DEFINE_DELEGATE_5(name, type1, type2, type3, type4, type5)             \
+#define DEFINE_DELEGATE_5_PROMISE(name, type1, type2, type3, type4, type5)     \
   void ViewThreadProxy::name(type1 p1, type2 p2, type3 p3, type4 p4,           \
                              type5 p5) {                                       \
     DCHECK_CALLED_ON_SCRIPT_THREAD();                                          \
@@ -192,8 +219,8 @@ ViewThreadProxy::~ViewThreadProxy() {}
       return;                                                                  \
     message_loop_->task_runner()->PostTask(                                    \
         FROM_HERE,                                                             \
-        base::Bind(&ViewDelegate::name, base::Unretained(delegate_.get()), p1, \
-                   p2, p3, p4, p5));                                           \
+        base::BindOnce(&ViewDelegate::name, base::Unretained(delegate_.get()), \
+                       p1, p2, p3, p4, std::move(p5)));                        \
   }
 
 DEFINE_DELEGATE_2(AddWindow, domapi::WindowId, domapi::WindowId)
@@ -210,24 +237,22 @@ DEFINE_DELEGATE_1(DestroyWindow, domapi::WindowId)
 DEFINE_DELEGATE_1(DidStartScriptHost, domapi::ScriptHostState)
 
 DEFINE_DELEGATE_1(FocusWindow, domapi::WindowId)
-DEFINE_DELEGATE_3(GetFileNameForLoad,
-                  domapi::WindowId,
-                  const base::string16&,
-                  const GetFileNameForLoadResolver&)
-DEFINE_DELEGATE_3(GetFileNameForSave,
-                  domapi::WindowId,
-                  const base::string16&,
-                  const GetFileNameForSaveResolver&)
-DEFINE_DELEGATE_2(GetMetrics,
-                  const base::string16&,
-                  const domapi::StringPromise&)
+DEFINE_DELEGATE_3_PROMISE(GetFileNameForLoad,
+                          domapi::WindowId,
+                          const base::string16&,
+                          GetFileNameForLoadResolver)
+DEFINE_DELEGATE_3_PROMISE(GetFileNameForSave,
+                          domapi::WindowId,
+                          const base::string16&,
+                          GetFileNameForSaveResolver)
+DEFINE_DELEGATE_2(GetMetrics, const base::string16&, domapi::StringPromise)
 DEFINE_DELEGATE_1(HideWindow, domapi::WindowId)
-DEFINE_DELEGATE_5(MessageBox,
-                  domapi::WindowId,
-                  const base::string16&,
-                  const base::string16&,
-                  int,
-                  const MessageBoxResolver&)
+DEFINE_DELEGATE_5_PROMISE(MessageBox,
+                          domapi::WindowId,
+                          const base::string16&,
+                          const base::string16&,
+                          int,
+                          MessageBoxResolver)
 
 void ViewThreadProxy::PaintForm(domapi::WindowId window_id,
                                 std::unique_ptr<domapi::Form> form) {
@@ -235,9 +260,9 @@ void ViewThreadProxy::PaintForm(domapi::WindowId window_id,
   if (!message_loop_)
     return;
   message_loop_->task_runner()->PostTask(
-      FROM_HERE,
-      base::Bind(&ViewDelegate::PaintForm, base::Unretained(delegate_.get()),
-                 window_id, base::Passed(std::move(form))));
+      FROM_HERE, base::BindOnce(&ViewDelegate::PaintForm,
+                                base::Unretained(delegate_.get()), window_id,
+                                base::Passed(std::move(form))));
 }
 
 void ViewThreadProxy::PaintTextArea(
@@ -247,9 +272,9 @@ void ViewThreadProxy::PaintTextArea(
   if (!message_loop_)
     return;
   message_loop_->task_runner()->PostTask(
-      FROM_HERE, base::Bind(&ViewDelegate::PaintTextArea,
-                            base::Unretained(delegate_.get()), window_id,
-                            base::Passed(std::move(display_item))));
+      FROM_HERE, base::BindOnce(&ViewDelegate::PaintTextArea,
+                                base::Unretained(delegate_.get()), window_id,
+                                base::Passed(std::move(display_item))));
 }
 
 void ViewThreadProxy::PaintVisualDocument(
@@ -259,9 +284,9 @@ void ViewThreadProxy::PaintVisualDocument(
   if (!message_loop_)
     return;
   message_loop_->task_runner()->PostTask(
-      FROM_HERE, base::Bind(&ViewDelegate::PaintVisualDocument,
-                            base::Unretained(delegate_.get()), window_id,
-                            base::Passed(std::move(display_item_list))));
+      FROM_HERE, base::BindOnce(&ViewDelegate::PaintVisualDocument,
+                                base::Unretained(delegate_.get()), window_id,
+                                base::Passed(std::move(display_item_list))));
 }
 
 DEFINE_DELEGATE_2(Reconvert, domapi::WindowId, const base::string16&);
@@ -277,29 +302,30 @@ DEFINE_DELEGATE_1(ShowWindow, domapi::WindowId)
 DEFINE_DELEGATE_2(SplitHorizontally, domapi::WindowId, domapi::WindowId)
 DEFINE_DELEGATE_2(SplitVertically, domapi::WindowId, domapi::WindowId)
 DEFINE_DELEGATE_1(StartTraceLog, const std::string&)
-DEFINE_DELEGATE_1(StopTraceLog, const domapi::TraceLogOutputCallback&);
+DEFINE_DELEGATE_1(StopTraceLog, domapi::TraceLogOutputCallback);
 
-#define DEFINE_SYNC_DELEGATE_0(name, return_type)                           \
-  return_type ViewThreadProxy::name() {                                     \
-    DCHECK_CALLED_ON_SCRIPT_THREAD();                                       \
-    if (!message_loop_)                                                     \
-      return return_type();                                                 \
-    TRACE_EVENT0("script", "ViewThreadProxy::" #name);                      \
-    return DoSynchronousCall(                                               \
-        base::Bind(&ViewDelegate::name, base::Unretained(delegate_.get())), \
-        message_loop_, waitable_event_.get());                              \
+#define DEFINE_SYNC_DELEGATE_0(name, return_type)          \
+  return_type ViewThreadProxy::name() {                    \
+    DCHECK_CALLED_ON_SCRIPT_THREAD();                      \
+    if (!message_loop_)                                    \
+      return return_type();                                \
+    TRACE_EVENT0("script", "ViewThreadProxy::" #name);     \
+    return DoSynchronousCall(                              \
+        base::BindOnce(&ViewDelegate::name,                \
+                       base::Unretained(delegate_.get())), \
+        message_loop_, waitable_event_.get());             \
   }
 
-#define DEFINE_SYNC_DELEGATE_1(name, return_type, type1)                   \
-  return_type ViewThreadProxy::name(type1 p1) {                            \
-    DCHECK_CALLED_ON_SCRIPT_THREAD();                                      \
-    if (!message_loop_)                                                    \
-      return return_type();                                                \
-    TRACE_EVENT0("script", "ViewThreadProxy::" #name);                     \
-    return DoSynchronousCall(                                              \
-        base::Bind(&ViewDelegate::name, base::Unretained(delegate_.get()), \
-                   p1),                                                    \
-        message_loop_, waitable_event_.get());                             \
+#define DEFINE_SYNC_DELEGATE_1(name, return_type, type1)                       \
+  return_type ViewThreadProxy::name(type1 p1) {                                \
+    DCHECK_CALLED_ON_SCRIPT_THREAD();                                          \
+    if (!message_loop_)                                                        \
+      return return_type();                                                    \
+    TRACE_EVENT0("script", "ViewThreadProxy::" #name);                         \
+    return DoSynchronousCall(                                                  \
+        base::BindOnce(&ViewDelegate::name, base::Unretained(delegate_.get()), \
+                       p1),                                                    \
+        message_loop_, waitable_event_.get());                                 \
   }
 
 #define DEFINE_SYNC_DELEGATE_2(name, return_type, type1, type2)                \
@@ -309,8 +335,8 @@ DEFINE_DELEGATE_1(StopTraceLog, const domapi::TraceLogOutputCallback&);
       return return_type();                                                    \
     TRACE_EVENT0("script", "ViewThreadProxy::" #name);                         \
     return DoSynchronousCall(                                                  \
-        base::Bind(&ViewDelegate::name, base::Unretained(delegate_.get()), p1, \
-                   p2),                                                        \
+        base::BindOnce(&ViewDelegate::name, base::Unretained(delegate_.get()), \
+                       p1, p2),                                                \
         message_loop_, waitable_event_.get());                                 \
   }
 
@@ -321,8 +347,8 @@ DEFINE_DELEGATE_1(StopTraceLog, const domapi::TraceLogOutputCallback&);
       return return_type();                                                    \
     TRACE_EVENT0("script", "ViewThreadProxy::" #name);                         \
     return DoSynchronousCall(                                                  \
-        base::Bind(&ViewDelegate::name, base::Unretained(delegate_.get()), p1, \
-                   p2, p3),                                                    \
+        base::BindOnce(&ViewDelegate::name, base::Unretained(delegate_.get()), \
+                       p1, p2, p3),                                            \
         message_loop_, waitable_event_.get());                                 \
   }
 
@@ -336,8 +362,8 @@ void ViewThreadProxy::SetSwitch(const base::string16& name,
     return;
   TRACE_EVENT0("script", "ViewThreadProxy::SetSwitch");
   RunSynchronously(
-      base::Bind(&ViewDelegate::SetSwitch, base::Unretained(delegate_.get()),
-                 name, new_value),
+      base::BindOnce(&ViewDelegate::SetSwitch,
+                     base::Unretained(delegate_.get()), name, new_value),
       message_loop_, waitable_event_.get());
 }
 

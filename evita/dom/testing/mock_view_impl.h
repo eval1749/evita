@@ -5,6 +5,7 @@
 #ifndef EVITA_DOM_TESTING_MOCK_VIEW_IMPL_H_
 #define EVITA_DOM_TESTING_MOCK_VIEW_IMPL_H_
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -38,12 +39,11 @@ class MockViewImpl final : public domapi::ViewDelegate {
   MOCK_METHOD1(FocusWindow, void(domapi::WindowId));
   void GetFileNameForLoad(domapi::WindowId window_id,
                           const base::string16& dir_path,
-                          const GetFileNameForLoadResolver& resolver) final;
+                          GetFileNameForLoadResolver resolver) final;
   void GetFileNameForSave(domapi::WindowId window_id,
                           const base::string16& dir_path,
-                          const GetFileNameForSaveResolver& resolver) final;
-  MOCK_METHOD2(GetMetrics,
-               void(const base::string16&, const domapi::StringPromise&));
+                          GetFileNameForSaveResolver resolver) final;
+  void GetMetrics(const base::string16&, domapi::StringPromise) final;
   MOCK_METHOD1(GetSwitch, domapi::SwitchValue(const base::string16& name));
   MOCK_METHOD0(GetSwitchNames, std::vector<base::string16>());
   MOCK_METHOD1(HideWindow, void(domapi::WindowId));
@@ -52,7 +52,7 @@ class MockViewImpl final : public domapi::ViewDelegate {
                   const base::string16& message,
                   const base::string16& title,
                   int flags,
-                  const MessageBoxResolver& resolver) final;
+                  MessageBoxResolver resolver) final;
   void PaintForm(domapi::WindowId window_id,
                  std::unique_ptr<domapi::Form> form);
   void PaintTextArea(
@@ -76,8 +76,7 @@ class MockViewImpl final : public domapi::ViewDelegate {
   MOCK_METHOD2(SplitVertically, void(domapi::WindowId, domapi::WindowId));
 
   MOCK_METHOD1(StartTraceLog, void(const std::string& config));
-  MOCK_METHOD1(StopTraceLog,
-               void(const domapi::TraceLogOutputCallback& callback));
+  MOCK_METHOD1(StopTraceLog, void(domapi::TraceLogOutputCallback callback));
 
  private:
   bool check_spelling_result_;

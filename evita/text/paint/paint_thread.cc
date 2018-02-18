@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "evita/text/paint/paint_thread.h"
+
 #include <atomic>
 #include <queue>
-
-#include "evita/text/paint/paint_thread.h"
+#include <utility>
 
 #include "base/bind.h"
 #include "base/logging.h"
@@ -32,28 +33,28 @@ class TaskQueue final {
   bool empty() const { return tasks_.empty(); }
   size_t size() const { return tasks_.size(); }
 
-  void GiveTask(const base::Closure& closure);
-  base::Maybe<base::Closure> TakeTask();
+  void GiveTask(base::OnceClosure closure);
+  base::Maybe<base::OnceClosure> TakeTask();
 
  private:
   base::Lock lock_;
-  std::queue<base::Closure> tasks_;
+  std::queue<base::OnceClosure> tasks_;
 
   DISALLOW_COPY_AND_ASSIGN(TaskQueue);
 };
 
-void TaskQueue::GiveTask(const base::Closure& task) {
+void TaskQueue::GiveTask(base::OnceClosure task) {
   base::AutoLock lock_scope(lock_);
-  tasks_.push(task);
+  tasks_.push(std::move(task));
 }
 
-base::Maybe<base::Closure> TaskQueue::TakeTask() {
+base::Maybe<base::OnceClosure> TaskQueue::TakeTask() {
   base::AutoLock lock_scope(lock_);
   if (tasks_.empty())
-    return base::Nothing<base::Closure>();
-  auto task = base::Just(tasks_.front());
+    return base::Nothing<base::OnceClosure>();
+  auto task = std::move(tasks_.front());
   tasks_.pop();
-  return task;
+  return std::move(base::Just(std::move(task)));
 }
 
 }  // namespace
@@ -67,7 +68,7 @@ class PaintThread::Scheduler final {
   explicit Scheduler(PaintThread* paint_thread);
   ~Scheduler() = default;
 
-  void ScheduleTask(const base::Closure& task);
+  void ScheduleTask(base::OnceClosure task);
 
  private:
   enum class State {
@@ -93,18 +94,18 @@ void PaintThread::Scheduler::ProcessTasks() {
     auto maybe_task = task_queue_.TakeTask();
     if (maybe_task.IsNothing())
       break;
-    maybe_task.FromJust().Run();
+    std::move(maybe_task.MoveFromJust()).Run();
   }
   state_.store(State::Sleeping);
   paint_thread_->CommitIfNeeded();
 }
 
-void PaintThread::Scheduler::ScheduleTask(const base::Closure& task) {
-  task_queue_.GiveTask(task);
+void PaintThread::Scheduler::ScheduleTask(base::OnceClosure task) {
+  task_queue_.GiveTask(std::move(task));
   if (state_.load() == State::Running)
     return;
-  paint_thread_->PostTask(
-      FROM_HERE, base::Bind(&Scheduler::ProcessTasks, base::Unretained(this)));
+  paint_thread_->PostTask(FROM_HERE, base::BindOnce(&Scheduler::ProcessTasks,
+                                                    base::Unretained(this)));
 }
 
 #define DCHECK_CALLED_ON_NON_PAINT_THREAD() \
@@ -152,21 +153,21 @@ void PaintThread::DidStartThread() {
 }
 
 void PaintThread::PostTask(const base::Location& from_here,
-                           const base::Closure& task) {
+                           base::OnceClosure task) {
   DCHECK_CALLED_ON_NON_PAINT_THREAD();
-  thread_->task_runner()->PostTask(from_here, task);
+  thread_->task_runner()->PostTask(from_here, std::move(task));
 }
 
-void PaintThread::SchedulePaintTask(const base::Closure& task) {
+void PaintThread::SchedulePaintTask(base::OnceClosure task) {
   DCHECK_CALLED_ON_NON_PAINT_THREAD();
-  scheduler_->ScheduleTask(task);
+  scheduler_->ScheduleTask(std::move(task));
 }
 
 void PaintThread::Start() {
   DCHECK_CALLED_ON_NON_PAINT_THREAD();
   CHECK(thread_->Start()) << "failed to start paint thread";
-  PostTask(FROM_HERE,
-           base::Bind(&PaintThread::DidStartThread, base::Unretained(this)));
+  PostTask(FROM_HERE, base::BindOnce(&PaintThread::DidStartThread,
+                                     base::Unretained(this)));
 }
 
 }  // namespace paint

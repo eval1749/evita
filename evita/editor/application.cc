@@ -66,7 +66,7 @@ Application::Application()
   watch_dog_->Start();
   io_manager_->message_loop()->task_runner()->PostTask(
       FROM_HERE,
-      base::Bind(
+      base::BindOnce(
           base::IgnoreResult(&spellchecker::SpellingEngine::EnsureInitialized),
           base::Unretained(spellchecker::SpellingEngine::GetSpellingEngine())));
 }

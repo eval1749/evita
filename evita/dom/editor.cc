@@ -151,9 +151,9 @@ v8::Local<v8::Promise> Editor::CheckSpelling(
     const base::string16& word_to_check) {
   return PromiseResolver::Call(
       FROM_HERE,
-      base::Bind(&domapi::IoDelegate::CheckSpelling,
-                 base::Unretained(ScriptHost::instance()->io_delegate()),
-                 word_to_check));
+      base::BindOnce(&domapi::IoDelegate::CheckSpelling,
+                     base::Unretained(ScriptHost::instance()->io_delegate()),
+                     word_to_check));
 }
 
 bool Editor::CollectGarbage(int hint) {
@@ -175,10 +175,10 @@ v8::Local<v8::Promise> Editor::GetFileNameForLoad(
     const base::string16& dir_path) {
   return PromiseResolver::Call(
       FROM_HERE,
-      base::Bind(&domapi::ViewDelegate::GetFileNameForLoad,
-                 base::Unretained(ScriptHost::instance()->view_delegate()),
-                 window ? window->window_id() : domapi::kInvalidWindowId,
-                 dir_path));
+      base::BindOnce(&domapi::ViewDelegate::GetFileNameForLoad,
+                     base::Unretained(ScriptHost::instance()->view_delegate()),
+                     window ? window->window_id() : domapi::kInvalidWindowId,
+                     dir_path));
 }
 
 v8::Local<v8::Promise> Editor::GetFileNameForSave(
@@ -186,27 +186,27 @@ v8::Local<v8::Promise> Editor::GetFileNameForSave(
     const base::string16& dir_path) {
   return PromiseResolver::Call(
       FROM_HERE,
-      base::Bind(&domapi::ViewDelegate::GetFileNameForSave,
-                 base::Unretained(ScriptHost::instance()->view_delegate()),
-                 window ? window->window_id() : domapi::kInvalidWindowId,
-                 dir_path));
+      base::BindOnce(&domapi::ViewDelegate::GetFileNameForSave,
+                     base::Unretained(ScriptHost::instance()->view_delegate()),
+                     window ? window->window_id() : domapi::kInvalidWindowId,
+                     dir_path));
 }
 
 v8::Local<v8::Promise> Editor::GetMetrics(const base::string16& name) {
   return PromiseResolver::Call(
       FROM_HERE,
-      base::Bind(&domapi::ViewDelegate::GetMetrics,
-                 base::Unretained(ScriptHost::instance()->view_delegate()),
-                 name));
+      base::BindOnce(&domapi::ViewDelegate::GetMetrics,
+                     base::Unretained(ScriptHost::instance()->view_delegate()),
+                     name));
 }
 
 v8::Local<v8::Promise> Editor::GetSpellingSuggestions(
     const base::string16& wrong_word) {
   return PromiseResolver::Call(
       FROM_HERE,
-      base::Bind(&domapi::IoDelegate::GetSpellingSuggestions,
-                 base::Unretained(ScriptHost::instance()->io_delegate()),
-                 wrong_word));
+      base::BindOnce(&domapi::IoDelegate::GetSpellingSuggestions,
+                     base::Unretained(ScriptHost::instance()->io_delegate()),
+                     wrong_word));
 }
 
 domapi::SwitchValue Editor::GetSwitch(const base::string16& name) {
@@ -230,7 +230,7 @@ v8::Local<v8::Promise> Editor::MessageBox(Window* maybe_window,
                                           const base::string16& title) {
   return PromiseResolver::Call(
       FROM_HERE,
-      base::Bind(
+      base::BindOnce(
           &domapi::ViewDelegate::MessageBox,
           base::Unretained(ScriptHost::instance()->view_delegate()),
           maybe_window ? maybe_window->window_id() : domapi::kInvalidWindowId,

@@ -4,6 +4,9 @@
 
 #include "evita/dom/windows/form_window.h"
 
+#include <memory>
+#include <utility>
+
 #include "base/trace_event/trace_event.h"
 #include "evita/dom/bindings/ginx_FocusEventInit.h"
 #include "evita/dom/bindings/ginx_FormWindowInit.h"
@@ -72,8 +75,8 @@ void FormWindow::RequestAnimationFrame() {
     return;
   is_waiting_animation_frame_ = true;
   auto callback = std::make_unique<AnimationFrameCallback>(
-      FROM_HERE,
-      base::Bind(&FormWindow::DidBeginAnimationFrame, base::Unretained(this)));
+      FROM_HERE, base::BindOnce(&FormWindow::DidBeginAnimationFrame,
+                                base::Unretained(this)));
   script_host()->scheduler()->RequestAnimationFrame(std::move(callback));
 }
 

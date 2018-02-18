@@ -29,8 +29,8 @@ class DirectoryIoContext final : public IoContext {
   explicit DirectoryIoContext(const base::string16& dir_name);
   ~DirectoryIoContext() final;
 
-  void Close(const domapi::IoIntPromise& promise);
-  void Read(size_t num_read, const domapi::ReadDirectoryPromise& promise);
+  void Close(domapi::IoIntPromise promise);
+  void Read(size_t num_read, domapi::ReadDirectoryPromise promise);
 
  private:
   const base::string16& dir_name_;

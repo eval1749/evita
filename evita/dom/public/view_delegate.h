@@ -96,19 +96,17 @@ class ViewDelegate {
   virtual void FocusWindow(WindowId window_id) = 0;
 
   // Get file name for load by using open file modal dialog box.
-  virtual void GetFileNameForLoad(
-      WindowId window_id,
-      const base::string16& dir_path,
-      const GetFileNameForLoadResolver& resolver) = 0;
+  virtual void GetFileNameForLoad(WindowId window_id,
+                                  const base::string16& dir_path,
+                                  GetFileNameForLoadResolver resolver) = 0;
 
   // Get file name for save by using open file modal dialog box.
-  virtual void GetFileNameForSave(
-      WindowId window_id,
-      const base::string16& dir_path,
-      const GetFileNameForSaveResolver& resolver) = 0;
+  virtual void GetFileNameForSave(WindowId window_id,
+                                  const base::string16& dir_path,
+                                  GetFileNameForSaveResolver resolver) = 0;
 
   virtual void GetMetrics(const base::string16& name,
-                          const StringPromise& promise) = 0;
+                          StringPromise promise) = 0;
 
   // Get switch bool value
   virtual SwitchValue GetSwitch(const base::string16& name) = 0;
@@ -124,7 +122,7 @@ class ViewDelegate {
                           const base::string16& message,
                           const base::string16& title,
                           int flags,
-                          const MessageBoxResolver& callback) = 0;
+                          MessageBoxResolver callback) = 0;
 
   virtual void PaintForm(WindowId window_id, std::unique_ptr<Form> form) = 0;
 
@@ -166,7 +164,7 @@ class ViewDelegate {
 
   // Trace Log
   virtual void StartTraceLog(const std::string& config) = 0;
-  virtual void StopTraceLog(const TraceLogOutputCallback& callback) = 0;
+  virtual void StopTraceLog(TraceLogOutputCallback callback) = 0;
 
  protected:
   ViewDelegate();

@@ -73,11 +73,11 @@ int Editor::RequestIdleCallback(v8::Local<v8::Function> callback,
   auto const run_time = timeout
                             ? now + base::TimeDelta::FromMilliseconds(timeout)
                             : base::TimeTicks();
-  return ScriptHost::instance()->scheduler()->ScheduleIdleTask(
-      IdleTask(FROM_HERE,
-               base::Bind(&IdleTaskWrapper::Run,
-                          base::Owned(new IdleTaskWrapper(isolate, callback))),
-               run_time));
+  return ScriptHost::instance()->scheduler()->ScheduleIdleTask(IdleTask(
+      FROM_HERE,
+      base::BindOnce(&IdleTaskWrapper::Run,
+                     base::Owned(new IdleTaskWrapper(isolate, callback))),
+      run_time));
 }
 
 int Editor::RequestIdleCallback(v8::Local<v8::Function> callback) {

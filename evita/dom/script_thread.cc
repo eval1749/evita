@@ -4,6 +4,8 @@
 
 #include "evita/dom/script_thread.h"
 
+#include <utility>
+
 #include "base/bind.h"
 #include "base/callback.h"
 #include "base/message_loop/message_loop.h"
@@ -59,9 +61,9 @@ domapi::ViewEventHandler* ScriptThread::view_event_handler() const {
   return ScriptHost::instance()->event_handler();
 }
 
-void ScriptThread::ScheduleScriptTask(const base::Closure& task) {
+void ScriptThread::ScheduleScriptTask(base::OnceClosure task) {
   DCHECK_CALLED_ON_NON_SCRIPT_THREAD();
-  scheduler()->ScheduleTask(task);
+  scheduler()->ScheduleTask(std::move(task));
   RequestAnimationFrame();
 }
 
@@ -71,68 +73,68 @@ void ScriptThread::Start() {
   base::TaskScheduler::CreateAndStartWithDefaultParams("ScriptThread");
   scheduler_->Start(thread_->message_loop());
   thread_->message_loop()->task_runner()->PostTask(
-      FROM_HERE, base::Bind(&ScriptHost::CreateAndStart,
-                            base::Unretained(scheduler_.get()),
-                            base::Unretained(view_delegate_),
-                            base::Unretained(io_delegate_)));
+      FROM_HERE, base::BindOnce(&ScriptHost::CreateAndStart,
+                                base::Unretained(scheduler_.get()),
+                                base::Unretained(view_delegate_),
+                                base::Unretained(io_delegate_)));
 }
 
 // base::PingProvider
 void ScriptThread::Ping(std::atomic<bool>* cookie) {
   thread_->message_loop()->task_runner()->PostTask(
       FROM_HERE,
-      base::Bind(&ScriptThread::PingInternal, base::Unretained(cookie)));
+      base::BindOnce(&ScriptThread::PingInternal, base::Unretained(cookie)));
 }
 
 // domapi::ViewEventHandler
 #define DEFINE_VIEW_EVENT_HANDLER0(name)                                    \
   void ScriptThread::name() {                                               \
     DCHECK_CALLED_ON_NON_SCRIPT_THREAD();                                   \
-    ScheduleScriptTask(FROM_HERE,                                           \
-                       base::Bind(&ViewEventHandler::name,                  \
+    ScheduleScriptTask(                                                     \
+        FROM_HERE, base::BindOnce(&ViewEventHandler::name,                  \
                                   base::Unretained(view_event_handler()))); \
   }
 
-#define DEFINE_VIEW_EVENT_HANDLER1(name, type1)                           \
-  void ScriptThread::name(type1 param1) {                                 \
-    DCHECK_CALLED_ON_NON_SCRIPT_THREAD();                                 \
-    ScheduleScriptTask(base::Bind(&ViewEventHandler::name,                \
-                                  base::Unretained(view_event_handler()), \
-                                  param1));                               \
+#define DEFINE_VIEW_EVENT_HANDLER1(name, type1)                               \
+  void ScriptThread::name(type1 param1) {                                     \
+    DCHECK_CALLED_ON_NON_SCRIPT_THREAD();                                     \
+    ScheduleScriptTask(base::BindOnce(&ViewEventHandler::name,                \
+                                      base::Unretained(view_event_handler()), \
+                                      param1));                               \
   }
 
-#define DEFINE_VIEW_EVENT_HANDLER2(name, type1, type2)                    \
-  void ScriptThread::name(type1 param1, type2 param2) {                   \
-    DCHECK_CALLED_ON_NON_SCRIPT_THREAD();                                 \
-    ScheduleScriptTask(base::Bind(&ViewEventHandler::name,                \
-                                  base::Unretained(view_event_handler()), \
-                                  param1, param2));                       \
+#define DEFINE_VIEW_EVENT_HANDLER2(name, type1, type2)                        \
+  void ScriptThread::name(type1 param1, type2 param2) {                       \
+    DCHECK_CALLED_ON_NON_SCRIPT_THREAD();                                     \
+    ScheduleScriptTask(base::BindOnce(&ViewEventHandler::name,                \
+                                      base::Unretained(view_event_handler()), \
+                                      param1, param2));                       \
   }
 
-#define DEFINE_VIEW_EVENT_HANDLER3(name, type1, type2, type3)             \
-  void ScriptThread::name(type1 param1, type2 param2, type3 param3) {     \
-    DCHECK_CALLED_ON_NON_SCRIPT_THREAD();                                 \
-    ScheduleScriptTask(base::Bind(&ViewEventHandler::name,                \
-                                  base::Unretained(view_event_handler()), \
-                                  param1, param2, param3));               \
+#define DEFINE_VIEW_EVENT_HANDLER3(name, type1, type2, type3)                 \
+  void ScriptThread::name(type1 param1, type2 param2, type3 param3) {         \
+    DCHECK_CALLED_ON_NON_SCRIPT_THREAD();                                     \
+    ScheduleScriptTask(base::BindOnce(&ViewEventHandler::name,                \
+                                      base::Unretained(view_event_handler()), \
+                                      param1, param2, param3));               \
   }
 
-#define DEFINE_VIEW_EVENT_HANDLER4(name, type1, type2, type3, type4)      \
-  void ScriptThread::name(type1 param1, type2 param2, type3 param3,       \
-                          type4 param4) {                                 \
-    DCHECK_CALLED_ON_NON_SCRIPT_THREAD();                                 \
-    ScheduleScriptTask(base::Bind(&ViewEventHandler::name,                \
-                                  base::Unretained(view_event_handler()), \
-                                  param1, param2, param3, param4));       \
+#define DEFINE_VIEW_EVENT_HANDLER4(name, type1, type2, type3, type4)          \
+  void ScriptThread::name(type1 param1, type2 param2, type3 param3,           \
+                          type4 param4) {                                     \
+    DCHECK_CALLED_ON_NON_SCRIPT_THREAD();                                     \
+    ScheduleScriptTask(base::BindOnce(&ViewEventHandler::name,                \
+                                      base::Unretained(view_event_handler()), \
+                                      param1, param2, param3, param4));       \
   }
 
 #define DEFINE_VIEW_EVENT_HANDLER5(name, type1, type2, type3, type4, type5) \
   void ScriptThread::name(type1 param1, type2 param2, type3 param3,         \
                           type4 param4, type5 param5) {                     \
     DCHECK_CALLED_ON_NON_SCRIPT_THREAD();                                   \
-    ScheduleScriptTask(base::Bind(&ViewEventHandler::name,                  \
-                                  base::Unretained(view_event_handler()),   \
-                                  param1, param2, param3, param4, param5)); \
+    ScheduleScriptTask(base::BindOnce(                                      \
+        &ViewEventHandler::name, base::Unretained(view_event_handler()),    \
+        param1, param2, param3, param4, param5));                           \
   }
 
 void ScriptThread::DidBeginFrame(const base::TimeTicks& deadline) {
@@ -163,8 +165,9 @@ void ScriptThread::DispatchKeyboardEvent(const domapi::KeyboardEvent& event) {
     ScriptHost::instance()->TerminateScriptExecution();
     return;
   }
-  ScheduleScriptTask(base::Bind(&ViewEventHandler::DispatchKeyboardEvent,
-                                base::Unretained(view_event_handler()), event));
+  ScheduleScriptTask(base::BindOnce(&ViewEventHandler::DispatchKeyboardEvent,
+                                    base::Unretained(view_event_handler()),
+                                    event));
 }
 
 // TODO(eval1749): Combine |MouseMove| events if last event is also
@@ -179,12 +182,18 @@ DEFINE_VIEW_EVENT_HANDLER2(ProcessCommandLine,
                            const base::string16&,
                            const std::vector<base::string16>&)
 DEFINE_VIEW_EVENT_HANDLER1(QueryClose, domapi::WindowId)
-DEFINE_VIEW_EVENT_HANDLER1(RunCallback, const base::Closure&)
+
+void ScriptThread::RunCallback(base::OnceClosure callback) {
+  DCHECK_CALLED_ON_NON_SCRIPT_THREAD();
+  ScheduleScriptTask(base::BindOnce(&ViewEventHandler::RunCallback,
+                                    base::Unretained(view_event_handler()),
+                                    std::move(callback)));
+}
 
 void ScriptThread::WillDestroyViewHost() {
   DCHECK_CALLED_ON_NON_SCRIPT_THREAD();
-  ScheduleScriptTask(base::Bind(&ViewEventHandler::WillDestroyViewHost,
-                                base::Unretained(view_event_handler())));
+  ScheduleScriptTask(base::BindOnce(&ViewEventHandler::WillDestroyViewHost,
+                                    base::Unretained(view_event_handler())));
 }
 
 // SchedulerClient

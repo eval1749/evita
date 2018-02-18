@@ -68,7 +68,7 @@ bool Timer::is_running() const {
 
 void Timer::DidFireTimer() {
   ScriptHost::instance()->ScheduleIdleTask(
-      base::Bind(&Timer::RunCallback, base::Unretained(this)));
+      base::BindOnce(&Timer::RunCallback, base::Unretained(this)));
 }
 
 void Timer::RunCallback(const base::TimeTicks& deadline) {

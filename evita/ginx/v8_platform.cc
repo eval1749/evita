@@ -35,12 +35,12 @@ void V8Platform::CallOnBackgroundThread(
     v8::Task* task,
     v8::Platform::ExpectedRuntime expected_runtime) {
   base::PostTaskWithTraits(FROM_HERE, kBackgroundThreadTaskTraits,
-                           base::Bind(&v8::Task::Run, base::Owned(task)));
+                           base::BindOnce(&v8::Task::Run, base::Owned(task)));
 }
 
 void V8Platform::CallOnForegroundThread(v8::Isolate* isolate, v8::Task* task) {
   PerIsolateData::From(isolate)->task_runner()->PostTask(
-      FROM_HERE, base::Bind(&v8::Task::Run, base::Owned(task)));
+      FROM_HERE, base::BindOnce(&v8::Task::Run, base::Owned(task)));
 }
 
 }  // namespace ginx

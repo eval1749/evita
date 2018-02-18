@@ -77,7 +77,8 @@ void DemoScheduler::RequestAnimationFrame(ui::AnimationFrameHandler* handler) {
       last_frame_time_ + base::TimeDelta::FromMilliseconds(1000 / 60);
   const auto delta = next_frame_time - base::TimeTicks::Now();
   base::ThreadTaskRunnerHandle::Get()->PostDelayedTask(
-      FROM_HERE, base::Bind(&DemoScheduler::BeginFrame, base::Unretained(this)),
+      FROM_HERE,
+      base::BindOnce(&DemoScheduler::BeginFrame, base::Unretained(this)),
       std::min(base::TimeDelta::FromMilliseconds(3),
                std::max(delta, base::TimeDelta::FromMilliseconds(3))));
 }

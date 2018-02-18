@@ -43,12 +43,12 @@ class ViewThreadProxy : public domapi::ViewDelegate {
   void FocusWindow(domapi::WindowId window_id) final;
   void GetFileNameForLoad(domapi::WindowId window_id,
                           const base::string16& dir_path,
-                          const GetFileNameForLoadResolver& resolver) final;
+                          GetFileNameForLoadResolver resolver) final;
   void GetFileNameForSave(domapi::WindowId window_id,
                           const base::string16& dir_path,
-                          const GetFileNameForSaveResolver& resolver) final;
+                          GetFileNameForSaveResolver resolver) final;
   void GetMetrics(const base::string16& name,
-                  const domapi::StringPromise& promise) final;
+                  domapi::StringPromise promise) final;
   domapi::SwitchValue GetSwitch(const base::string16& name) final;
   std::vector<base::string16> GetSwitchNames() final;
   void HideWindow(domapi::WindowId window_id) final;
@@ -56,7 +56,7 @@ class ViewThreadProxy : public domapi::ViewDelegate {
                   const base::string16& message,
                   const base::string16& title,
                   int flags,
-                  const MessageBoxResolver& resolver) final;
+                  MessageBoxResolver resolver) final;
   void PaintForm(domapi::WindowId window_id,
                  std::unique_ptr<domapi::Form> form) final;
   void PaintTextArea(
@@ -83,7 +83,7 @@ class ViewThreadProxy : public domapi::ViewDelegate {
                        domapi::WindowId new_below_window) final;
 
   void StartTraceLog(const std::string& config) final;
-  void StopTraceLog(const domapi::TraceLogOutputCallback& callback) final;
+  void StopTraceLog(domapi::TraceLogOutputCallback callback) final;
 
   const std::unique_ptr<ViewDelegate> delegate_;
   base::MessageLoop* const message_loop_;

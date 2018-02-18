@@ -4,6 +4,8 @@
 
 #include "evita/dom/scheduler/idle_task.h"
 
+#include <utility>
+
 #include "base/location.h"
 
 namespace dom {
@@ -11,17 +13,17 @@ namespace dom {
 static int current_sequence_num;
 
 IdleTask::IdleTask(const base::Location& posted_from,
-                   const Callback& callback,
+                   Callback callback,
                    base::TimeTicks delay_run_time)
-    : callback_(callback),
+    : callback_(std::move(callback)),
       delayed_run_time_(delay_run_time),
       posted_from_(posted_from),
       sequence_num_(++current_sequence_num) {}
 
-IdleTask::IdleTask(const base::Location& posted_from, const Callback& callback)
-    : IdleTask(posted_from, callback, base::TimeTicks()) {}
+IdleTask::IdleTask(const base::Location& posted_from, Callback callback)
+    : IdleTask(posted_from, std::move(callback), base::TimeTicks()) {}
 
-IdleTask::IdleTask(const IdleTask&) = default;
+IdleTask::IdleTask(IdleTask&&) = default;
 IdleTask::~IdleTask() = default;
 
 bool IdleTask::operator<(const IdleTask& other) const {
@@ -41,7 +43,7 @@ bool IdleTask::operator<(const IdleTask& other) const {
 }
 
 void IdleTask::Run(const base::TimeTicks& deadline) {
-  callback_.Run(deadline);
+  std::move(callback_).Run(deadline);
 }
 
 }  // namespace dom

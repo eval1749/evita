@@ -46,8 +46,8 @@ class SchedulerImpl final : public Scheduler {
   void DidBeginFrame(const base::TimeTicks& deadline) final;
   int RequestAnimationFrame(
       std::unique_ptr<AnimationFrameCallback> request) final;
-  int ScheduleIdleTask(const IdleTask& task) final;
-  void ScheduleTask(const base::Closure& task) final;
+  int ScheduleIdleTask(IdleTask task) final;
+  void ScheduleTask(base::OnceClosure task) final;
 
   std::unique_ptr<AnimationFrameCallbackQueue> animation_frame_callback_queue_;
   std::unique_ptr<IdleTaskQueue> idle_task_queue_;

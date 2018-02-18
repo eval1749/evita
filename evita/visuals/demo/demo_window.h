@@ -48,8 +48,7 @@ class WindowEventHandler {
 class DemoWindow final : public ui::AnimatableWindow,
                          public ui::LayerOwnerDelegate {
  public:
-  DemoWindow(WindowEventHandler* event_handler,
-             const base::Closure& quit_closure);
+  DemoWindow(WindowEventHandler* event_handler, base::OnceClosure quit_closure);
   ~DemoWindow() final;
 
   gfx::Canvas* GetCanvas() const;
@@ -75,7 +74,7 @@ class DemoWindow final : public ui::AnimatableWindow,
 
   std::unique_ptr<gfx::Canvas> canvas_;
   WindowEventHandler* const event_handler_;
-  base::Closure quit_closure_;
+  base::OnceClosure quit_closure_;
 
   DISALLOW_COPY_AND_ASSIGN(DemoWindow);
 };

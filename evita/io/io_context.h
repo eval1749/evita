@@ -21,7 +21,7 @@ class IoContext : public base::DeprecatedCastable<IoContext> {
  public:
   virtual ~IoContext();
 
-  virtual void Close(const domapi::IoIntPromise& promise) = 0;
+  virtual void Close(domapi::IoIntPromise promise) = 0;
 
  protected:
   IoContext();

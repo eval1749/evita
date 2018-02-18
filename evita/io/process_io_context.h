@@ -25,30 +25,30 @@ class ProcessIoContext final : public BlockIoContext {
  public:
   ProcessIoContext(domapi::IoContextId context_id,
                    const base::string16& command_line,
-                   const domapi::OpenProcessPromise& promise);
+                   domapi::OpenProcessPromise promise);
   ~ProcessIoContext();
 
  private:
-  void CloseAndWaitProcess(const domapi::IoIntPromise& promise);
+  void CloseAndWaitProcess(domapi::IoIntPromise promise);
   uint32_t CloseProcess();
   void ReadFromProcess(void* buffer,
                        size_t num_read,
-                       const domapi::IoIntPromise& promise);
+                       domapi::IoIntPromise promise);
   void StartProcess(domapi::IoContextId context_id,
                     const base::string16& command_line,
-                    const domapi::OpenProcessPromise& promise);
+                    domapi::OpenProcessPromise promise);
   void WriteToProcess(void* buffer,
                       size_t num_read,
-                      const domapi::IoIntPromise& promise);
+                      domapi::IoIntPromise promise);
 
   // io::IoContext
-  void Close(const domapi::IoIntPromise& promise) override;
+  void Close(domapi::IoIntPromise promise) override;
   void Read(void* buffer,
             size_t num_read,
-            const domapi::IoIntPromise& promise) override;
+            domapi::IoIntPromise promise) override;
   void Write(void* buffer,
              size_t num_write,
-             const domapi::IoIntPromise& promise) override;
+             domapi::IoIntPromise promise) override;
 
   domapi::IoContextId context_id_;
   std::unique_ptr<base::Thread> gateway_thread_;

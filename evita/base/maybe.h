@@ -5,6 +5,8 @@
 #ifndef EVITA_BASE_MAYBE_H_
 #define EVITA_BASE_MAYBE_H_
 
+#include <utility>
+
 #include "base/logging.h"
 
 namespace base {
@@ -28,6 +30,7 @@ class Maybe {
 
   T FromJust() const;
   T FromMaybe(const T& default_value) const;
+  T MoveFromJust();
 
   bool IsJust() const { return has_value_; }
   bool IsNothing() const { return !has_value_; }
@@ -37,12 +40,16 @@ class Maybe {
   friend Maybe<U> Just(const U& value);
 
   template <typename U>
+  friend Maybe<U> Just(U&& value);
+
+  template <typename U>
   friend Maybe<U> Nothing();
 
-  explicit Maybe(T value) : has_value_(true), value_(value) {}
-  Maybe() : has_value_(false) {}
+  explicit Maybe(const T& value) : has_value_(true), value_(value) {}
+  explicit Maybe(T&& value) : has_value_(true), value_(std::move(value)) {}
+  Maybe() = default;
 
-  bool has_value_;
+  bool has_value_ = false;
   T value_;
 };
 
@@ -61,20 +68,31 @@ bool Maybe<T>::operator!=(const Maybe& other) const {
 }
 
 template <typename T>
-T Maybe<T>::FromJust() const {
-  DCHECK(IsJust());
-  return value_;
+T Maybe<T>::FromMaybe(const T& default_value) const {
+  return IsJust() ? value_ : default_value;
 }
 
 template <typename T>
-T Maybe<T>::FromMaybe(const T& default_value) const {
-  return IsJust() ? value_ : default_value;
+T Maybe<T>::MoveFromJust() {
+  DCHECK(IsJust());
+  return std::move(value_);
+}
+
+template <typename T>
+T Maybe<T>::FromJust() const {
+  DCHECK(IsJust());
+  return value_;
 }
 
 // Constructors
 template <typename T>
 Maybe<T> Just(const T& value) {
   return Maybe<T>(value);
+}
+
+template <typename T>
+Maybe<T> Just(T&& value) {
+  return Maybe<T>(std::move(value));
 }
 
 template <typename T>

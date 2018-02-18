@@ -13,13 +13,12 @@
 
 namespace io {
 
-void Reject(const base::Callback<void(domapi::IoError)>& reject,
+void Reject(base::OnceCallback<void(domapi::IoError)> reject,
             uint32_t last_error);
 
-void Resolve(const base::Callback<void(int)>& resolve,
-             uint32_t num_transferred);
+void Resolve(base::OnceCallback<void(int)> resolve, uint32_t num_transferred);
 
-void RunCallback(const base::Closure& callback);
+void RunCallback(base::OnceClosure callback);
 
 }  // namespace io
 

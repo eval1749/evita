@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <algorithm>
-#include <vector>
-
 #include "evita/dom/text/text_mutation_observer.h"
+
+#include <algorithm>
+#include <utility>
+#include <vector>
 
 #include "base/memory/weak_ptr.h"
 #include "evita/dom/bindings/ginx_TextMutationObserverInit.h"
@@ -153,7 +154,7 @@ void TextMutationObserver::Tracker::ScheduleNotify() {
     return;
   is_scheduled_ = true;
   script_host_->EnqueueMicroTask(std::make_unique<MicroTask>(
-      FROM_HERE, base::Bind(&Tracker::NotifyMutations, GetWeakPtr())));
+      FROM_HERE, base::BindOnce(&Tracker::NotifyMutations, GetWeakPtr())));
 }
 
 std::vector<TextMutationRecord*> TextMutationObserver::Tracker::TakeRecords() {

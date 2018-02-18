@@ -36,7 +36,7 @@ class WinResourceIoContext final : public IoContext {
 
  private:
   // io::IoContext
-  void Close(const domapi::IoIntPromise& promise) final;
+  void Close(domapi::IoIntPromise promise) final;
 
   HMODULE const module_;
 

@@ -85,7 +85,7 @@ class ScriptHost final : public ginx::RunnerDelegate {
   void RunMicrotasks();
 
   // Schedule idle task
-  void ScheduleIdleTask(const IdleTask::Callback& callback);
+  void ScheduleIdleTask(IdleTask::Callback callback);
 
   static ScriptHost* StartForTesting(Scheduler* scheduler,
                                      domapi::ViewDelegate* view_delegate,

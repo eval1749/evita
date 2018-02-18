@@ -6,15 +6,23 @@
 #define EVITA_DOM_PUBLIC_PROMISE_H_
 
 #include "base/callback_forward.h"
+#include "base/macros.h"
 #include "base/strings/string16.h"
 
 namespace domapi {
 
 template <typename ResolveType, typename RejectType = int>
 struct Promise final {
-  base::Callback<void(RejectType)> reject;
-  base::Callback<void(ResolveType)> resolve;
-  int sequence_num;
+  base::OnceCallback<void(RejectType)> reject;
+  base::OnceCallback<void(ResolveType)> resolve;
+  int sequence_num = 0;
+
+  Promise(Promise&& other) = default;
+  Promise() = default;
+
+  Promise& operator=(Promise&& other) = default;
+
+  DISALLOW_COPY(Promise);
 };
 
 using IntegerPromise = domapi::Promise<int>;

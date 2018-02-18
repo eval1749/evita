@@ -2,10 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <windows.h>
-#include <vector>
-
 #include "evita/io/process_io_context.h"
+
+#include <windows.h>
+
+#include <utility>
+#include <vector>
 
 #include "base/bind.h"
 #include "base/strings/utf_string_conversions.h"
@@ -19,29 +21,28 @@ namespace io {
 
 ProcessIoContext::ProcessIoContext(domapi::IoContextId context_id,
                                    const base::string16& command_line,
-                                   const domapi::OpenProcessPromise& promise)
+                                   domapi::OpenProcessPromise promise)
     : gateway_thread_(new base::Thread("process")) {
   TRACE_EVENT_ASYNC_BEGIN1("io", "ProcessContext", this, "command_line",
                            base::UTF16ToUTF8(command_line).c_str());
   gateway_thread_->Start();
   gateway_thread_->task_runner()->PostTask(
       FROM_HERE,
-      base::Bind(&ProcessIoContext::StartProcess, base::Unretained(this),
-                 context_id, command_line, promise));
+      base::BindOnce(&ProcessIoContext::StartProcess, base::Unretained(this),
+                     context_id, command_line, std::move(promise)));
 }
 
 ProcessIoContext::~ProcessIoContext() {
   TRACE_EVENT_ASYNC_END0("io", "ProcessContext", this);
 }
 
-void ProcessIoContext::CloseAndWaitProcess(
-    const domapi::IoIntPromise& promise) {
+void ProcessIoContext::CloseAndWaitProcess(domapi::IoIntPromise promise) {
   TRACE_EVENT0("io", "ProcessIoContext::CloseAndWaitProcess");
   TRACE_EVENT_WITH_FLOW1("promise", "Promise", promise.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT,
                          "step", "ProcessIoContext::CloseAndWaitProcess");
   if (auto const last_error = CloseProcess()) {
-    Reject(promise.reject, last_error);
+    Reject(std::move(promise.reject), last_error);
     return;
   }
 
@@ -50,12 +51,12 @@ void ProcessIoContext::CloseAndWaitProcess(
     if (value == WAIT_FAILED) {
       const auto last_error = ::GetLastError();
       PLOG(ERROR) << "WaitSingleObject failed";
-      Reject(promise.reject, last_error);
+      Reject(std::move(promise.reject), last_error);
       return;
     }
     process_.release();
   }
-  Resolve(promise.resolve, 0u);
+  Resolve(std::move(promise.resolve), 0u);
 }
 
 uint32_t ProcessIoContext::CloseProcess() {
@@ -84,7 +85,7 @@ uint32_t ProcessIoContext::CloseProcess() {
 
 void ProcessIoContext::ReadFromProcess(void* buffer,
                                        size_t num_read,
-                                       const domapi::IoIntPromise& promise) {
+                                       domapi::IoIntPromise promise) {
   TRACE_EVENT_WITH_FLOW1("promise", "ProcessIoContext::ReadFromProcess",
                          promise.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT,
@@ -97,15 +98,15 @@ void ProcessIoContext::ReadFromProcess(void* buffer,
     PLOG(ERROR) << "ReadFile failed";
     if (last_error == ERROR_BROKEN_PIPE)
       CloseProcess();
-    Reject(promise.reject, last_error);
+    Reject(std::move(promise.reject), last_error);
     return;
   }
-  Resolve(promise.resolve, read);
+  Resolve(std::move(promise.resolve), read);
 }
 
 void ProcessIoContext::StartProcess(domapi::IoContextId context_id,
                                     const base::string16& command_line,
-                                    const domapi::OpenProcessPromise& promise) {
+                                    domapi::OpenProcessPromise promise) {
   TRACE_EVENT_WITH_FLOW1("promise", "ProcessIoContext::StartProcess",
                          promise.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT,
@@ -119,13 +120,13 @@ void ProcessIoContext::StartProcess(domapi::IoContextId context_id,
                     &security_attributes, 0)) {
     const auto last_error = ::GetLastError();
     PLOG(ERROR) << "CreatePipe failed";
-    Reject(promise.reject, last_error);
+    Reject(std::move(promise.reject), last_error);
     return;
   }
   if (!::SetHandleInformation(stdin_write.get(), HANDLE_FLAG_INHERIT, 0)) {
     const auto last_error = ::GetLastError();
     PLOG(ERROR) << "SetHandleInformation failed";
-    Reject(promise.reject, last_error);
+    Reject(std::move(promise.reject), last_error);
     return;
   }
   common::win::scoped_handle stdout_read;
@@ -134,13 +135,13 @@ void ProcessIoContext::StartProcess(domapi::IoContextId context_id,
                     &security_attributes, 0)) {
     const auto last_error = ::GetLastError();
     PLOG(ERROR) << "CreatePipe failed";
-    Reject(promise.reject, last_error);
+    Reject(std::move(promise.reject), last_error);
     return;
   }
   if (!::SetHandleInformation(stdout_read.get(), HANDLE_FLAG_INHERIT, 0)) {
     const auto last_error = ::GetLastError();
     PLOG(ERROR) << "SetHandleInformation failed";
-    Reject(promise.reject, last_error);
+    Reject(std::move(promise.reject), last_error);
     return;
   }
 
@@ -163,13 +164,14 @@ void ProcessIoContext::StartProcess(domapi::IoContextId context_id,
   if (!succeeded) {
     const auto last_error = ::GetLastError();
     PLOG(ERROR) << "CreateProcessW failed";
-    Reject(promise.reject, last_error);
+    Reject(std::move(promise.reject), last_error);
     return;
   }
   ::ResumeThread(process_info.hThread);
   process_.reset(process_info.hProcess);
   ::CloseHandle(process_info.hThread);
-  RunCallback(base::Bind(promise.resolve, domapi::ProcessId(context_id)));
+  RunCallback(base::BindOnce(std::move(promise.resolve),
+                             domapi::ProcessId(context_id)));
   stdin_read.release();
   stdin_write_.reset(stdin_write.release());
   stdout_write.release();
@@ -178,7 +180,7 @@ void ProcessIoContext::StartProcess(domapi::IoContextId context_id,
 
 void ProcessIoContext::WriteToProcess(void* buffer,
                                       size_t num_write,
-                                      const domapi::IoIntPromise& promise) {
+                                      domapi::IoIntPromise promise) {
   TRACE_EVENT_WITH_FLOW1("promise", "ProcessIoContext::WriteToProcess",
                          promise.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT,
@@ -192,42 +194,42 @@ void ProcessIoContext::WriteToProcess(void* buffer,
     PLOG(ERROR) << "WriteFile failed";
     if (last_error == ERROR_BROKEN_PIPE)
       CloseProcess();
-    Reject(promise.reject, last_error);
+    Reject(std::move(promise.reject), last_error);
     return;
   }
-  Resolve(promise.resolve, written);
+  Resolve(std::move(promise.resolve), written);
 }
 
 // io::IoContext
-void ProcessIoContext::Close(const domapi::IoIntPromise& promise) {
+void ProcessIoContext::Close(domapi::IoIntPromise promise) {
   TRACE_EVENT0("io", "ProcessIoContext::Close");
   if (!gateway_thread_->IsRunning()) {
-    Reject(promise.reject, ERROR_INVALID_HANDLE);
+    Reject(std::move(promise.reject), ERROR_INVALID_HANDLE);
     return;
   }
   gateway_thread_->task_runner()->PostTask(
-      FROM_HERE, base::Bind(&ProcessIoContext::CloseAndWaitProcess,
-                            base::Unretained(this), promise));
+      FROM_HERE, base::BindOnce(&ProcessIoContext::CloseAndWaitProcess,
+                                base::Unretained(this), std::move(promise)));
 }
 
 void ProcessIoContext::Read(void* buffer,
                             size_t num_read,
-                            const domapi::IoIntPromise& promise) {
+                            domapi::IoIntPromise promise) {
   if (!gateway_thread_->IsRunning() || !stdout_read_.is_valid()) {
-    Reject(promise.reject, ERROR_INVALID_HANDLE);
+    Reject(std::move(promise.reject), ERROR_INVALID_HANDLE);
     return;
   }
   gateway_thread_->task_runner()->PostTask(
       FROM_HERE,
-      base::Bind(&ProcessIoContext::ReadFromProcess, base::Unretained(this),
-                 base::Unretained(buffer), num_read, promise));
+      base::BindOnce(&ProcessIoContext::ReadFromProcess, base::Unretained(this),
+                     base::Unretained(buffer), num_read, std::move(promise)));
 }
 
 void ProcessIoContext::Write(void* buffer,
                              size_t num_write,
-                             const domapi::IoIntPromise& promise) {
+                             domapi::IoIntPromise promise) {
   if (!gateway_thread_->IsRunning() || !stdin_write_.is_valid()) {
-    Reject(promise.reject, ERROR_INVALID_HANDLE);
+    Reject(std::move(promise.reject), ERROR_INVALID_HANDLE);
     return;
   }
 
@@ -243,7 +245,7 @@ void ProcessIoContext::Write(void* buffer,
     const auto last_error = ::GetLastError();
     if (last_error != ERROR_NOT_FOUND) {
       PLOG(ERROR) << "CancelSynchronousIo failed";
-      Reject(promise.reject, last_error);
+      Reject(std::move(promise.reject), last_error);
       return;
     }
   }
@@ -251,8 +253,8 @@ void ProcessIoContext::Write(void* buffer,
 
   gateway_thread_->task_runner()->PostTask(
       FROM_HERE,
-      base::Bind(&ProcessIoContext::WriteToProcess, base::Unretained(this),
-                 base::Unretained(buffer), num_write, promise));
+      base::BindOnce(&ProcessIoContext::WriteToProcess, base::Unretained(this),
+                     base::Unretained(buffer), num_write, std::move(promise)));
 }
 
 }  // namespace io

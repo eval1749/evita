@@ -17,10 +17,10 @@ class BlockIoContext : public IoContext {
 
   virtual void Read(void* buffer,
                     size_t num_read,
-                    const domapi::IoIntPromise& promise) = 0;
+                    domapi::IoIntPromise promise) = 0;
   virtual void Write(void* buffer,
                      size_t num_write,
-                     const domapi::IoIntPromise& promise) = 0;
+                     domapi::IoIntPromise promise) = 0;
 
  protected:
   BlockIoContext();

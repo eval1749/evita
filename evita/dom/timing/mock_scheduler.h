@@ -40,15 +40,15 @@ class MockScheduler final : public Scheduler {
   void DidBeginFrame(const base::TimeTicks& deadline) final;
   int RequestAnimationFrame(
       std::unique_ptr<AnimationFrameCallback> callback) final;
-  int ScheduleIdleTask(const IdleTask& task) final;
-  void ScheduleTask(const base::Closure& task) final;
+  int ScheduleIdleTask(IdleTask task) final;
+  void ScheduleTask(base::OnceClosure task) final;
 
   std::unordered_map<int, std::unique_ptr<AnimationFrameCallback>>
       animation_frame_callback_map_;
   base::TimeDelta idle_time_remaining_;
   int last_animation_frame_callback_id_ = 0;
   std::queue<IdleTask*> ready_idle_tasks_;
-  std::queue<base::Closure> normal_tasks_;
+  std::queue<base::OnceClosure> normal_tasks_;
   std::unordered_map<int, IdleTask*> idle_task_map_;
   base::TimeTicks now_ticks_;
   std::queue<IdleTask*> waiting_idle_tasks_;

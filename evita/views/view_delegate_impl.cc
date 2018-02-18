@@ -4,8 +4,10 @@
 
 #include "evita/views/view_delegate_impl.h"
 
+#include <memory>
 #include <sstream>
 #include <string>
+#include <utility>
 
 #include "base/logging.h"
 #include "base/message_loop/message_loop.h"
@@ -51,11 +53,13 @@ domapi::ViewEventHandler* ScriptDelegate() {
 
 template <typename ResolveType>
 void Reject(const domapi::Promise<ResolveType, int>& promise, int value) {
-  ScriptDelegate()->RunCallback(base::Bind(promise.reject, value));
+  ScriptDelegate()->RunCallback(
+      base::BindOnce(std::move(promise.reject), value));
 }
 
-void Resolve(const domapi::IntegerPromise& promise, int value) {
-  ScriptDelegate()->RunCallback(base::Bind(promise.resolve, value));
+void Resolve(domapi::IntegerPromise promise, int value) {
+  ScriptDelegate()->RunCallback(
+      base::BindOnce(std::move(promise.resolve), value));
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -64,8 +68,8 @@ void Resolve(const domapi::IntegerPromise& promise, int value) {
 //
 class TraceLogClient final {
  public:
-  explicit TraceLogClient(const domapi::TraceLogOutputCallback& callback)
-      : callback_(callback) {}
+  explicit TraceLogClient(domapi::TraceLogOutputCallback callback)
+      : callback_(std::move(callback)) {}
   ~TraceLogClient() = default;
 
   void DidGetEvent(const std::string& chunk, bool has_more_events);
@@ -78,7 +82,8 @@ class TraceLogClient final {
 
 void TraceLogClient::DidGetEvent(const std::string& chunk,
                                  bool has_more_events) {
-  ScriptDelegate()->RunCallback(base::Bind(callback_, chunk, has_more_events));
+  ScriptDelegate()->RunCallback(
+      base::BindOnce(std::move(callback_), chunk, has_more_events));
   if (has_more_events)
     return;
   delete this;
@@ -195,10 +200,9 @@ void ViewDelegateImpl::FocusWindow(domapi::WindowId window_id) {
   widget->RequestFocus();
 }
 
-void ViewDelegateImpl::GetFileNameForLoad(
-    domapi::WindowId window_id,
-    const base::string16& dir_path,
-    const GetFileNameForLoadResolver& resolver) {
+void ViewDelegateImpl::GetFileNameForLoad(domapi::WindowId window_id,
+                                          const base::string16& dir_path,
+                                          GetFileNameForLoadResolver resolver) {
   TRACE_EVENT_WITH_FLOW0("promise", "ViewDelegateImpl::GetFileNameForLoad",
                          resolver.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT);
@@ -208,7 +212,7 @@ void ViewDelegateImpl::GetFileNameForLoad(
   if (!widget) {
     DVLOG(0) << "GetFileNameForLoad: no such widget " << window_id;
     ScriptDelegate()->RunCallback(
-        base::Bind(resolver.resolve, base::string16()));
+        base::BindOnce(std::move(resolver.resolve), base::string16()));
     return;
   }
   FileDialogBox::Param params;
@@ -217,14 +221,13 @@ void ViewDelegateImpl::GetFileNameForLoad(
   FileDialogBox oDialog;
   if (!oDialog.GetOpenFileName(&params))
     return;
-  ScriptDelegate()->RunCallback(
-      base::Bind(resolver.resolve, base::string16(params.m_wsz)));
+  ScriptDelegate()->RunCallback(base::BindOnce(std::move(resolver.resolve),
+                                               base::string16(params.m_wsz)));
 }
 
-void ViewDelegateImpl::GetFileNameForSave(
-    domapi::WindowId window_id,
-    const base::string16& dir_path,
-    const GetFileNameForSaveResolver& resolver) {
+void ViewDelegateImpl::GetFileNameForSave(domapi::WindowId window_id,
+                                          const base::string16& dir_path,
+                                          GetFileNameForSaveResolver resolver) {
   TRACE_EVENT_WITH_FLOW0("promise", "ViewDelegateImpl::GetFileNameForSave",
                          resolver.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT);
@@ -234,7 +237,7 @@ void ViewDelegateImpl::GetFileNameForSave(
   if (!widget) {
     DVLOG(0) << "GetFileNameForSave: no such widget " << window_id;
     ScriptDelegate()->RunCallback(
-        base::Bind(resolver.resolve, base::string16()));
+        base::BindOnce(std::move(resolver.resolve), base::string16()));
     return;
   }
   FileDialogBox::Param params;
@@ -243,12 +246,12 @@ void ViewDelegateImpl::GetFileNameForSave(
   FileDialogBox oDialog;
   if (!oDialog.GetSaveFileName(&params))
     return;
-  ScriptDelegate()->RunCallback(
-      base::Bind(resolver.resolve, base::string16(params.m_wsz)));
+  ScriptDelegate()->RunCallback(base::BindOnce(std::move(resolver.resolve),
+                                               base::string16(params.m_wsz)));
 }
 
 void ViewDelegateImpl::GetMetrics(const base::string16& name,
-                                  const domapi::StringPromise& promise) {
+                                  domapi::StringPromise promise) {
   TRACE_EVENT_WITH_FLOW1("promise", "ViewDelegateImpl::GetMetrics",
                          promise.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT,
@@ -279,7 +282,8 @@ void ViewDelegateImpl::GetMetrics(const base::string16& name,
   }
 
   ostream << '}';
-  ScriptDelegate()->RunCallback(base::Bind(promise.resolve, ostream.str()));
+  ScriptDelegate()->RunCallback(
+      base::BindOnce(std::move(promise.resolve), ostream.str()));
 }
 
 // TODO(eval1749): We should make |GetSwitch()| to return value asynchronously.
@@ -309,7 +313,7 @@ void ViewDelegateImpl::MessageBox(domapi::WindowId window_id,
                                   const base::string16& message,
                                   const base::string16& title,
                                   int flags,
-                                  const MessageBoxResolver& resolver) {
+                                  MessageBoxResolver resolver) {
   TRACE_EVENT_WITH_FLOW0("promise", "ViewDelegateImpl::MessageBox",
                          resolver.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT);
@@ -327,7 +331,8 @@ void ViewDelegateImpl::MessageBox(domapi::WindowId window_id,
   if (!need_response && level != MessageLevel_Error) {
     if (frame)
       frame->ShowMessage(level, message);
-    ScriptDelegate()->RunCallback(base::Bind(resolver.resolve, IDOK));
+    ScriptDelegate()->RunCallback(
+        base::BindOnce(std::move(resolver.resolve), IDOK));
     return;
   }
 
@@ -340,7 +345,8 @@ void ViewDelegateImpl::MessageBox(domapi::WindowId window_id,
       base::MessageLoop::current());
   auto const response = ::MessageBoxW(hwnd, message.c_str(), title.c_str(),
                                       static_cast<UINT>(flags));
-  ScriptDelegate()->RunCallback(base::Bind(resolver.resolve, response));
+  ScriptDelegate()->RunCallback(
+      base::BindOnce(std::move(resolver.resolve), response));
 }
 
 void ViewDelegateImpl::PaintForm(domapi::WindowId window_id,
@@ -564,9 +570,8 @@ void ViewDelegateImpl::StartTraceLog(const std::string& config) {
       config);
 }
 
-void ViewDelegateImpl::StopTraceLog(
-    const domapi::TraceLogOutputCallback& callback) {
-  auto const trace_log_client = new TraceLogClient(callback);
+void ViewDelegateImpl::StopTraceLog(domapi::TraceLogOutputCallback callback) {
+  auto const trace_log_client = new TraceLogClient(std::move(callback));
   editor::Application::instance()->trace_log_controller()->StopRecording(
       base::Bind(&TraceLogClient::DidGetEvent,
                  base::Unretained(trace_log_client)));

@@ -29,7 +29,7 @@ class IdleTaskQueue final {
   ~IdleTaskQueue();
 
   void CancelTask(int task_id);
-  int GiveTask(const IdleTask& task);
+  int GiveTask(IdleTask task);
   void RunIdleTasks(const base::TimeTicks& deadline);
   void StopIdleTasks();
 

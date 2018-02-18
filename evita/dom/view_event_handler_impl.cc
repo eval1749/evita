@@ -4,6 +4,8 @@
 
 #include "evita/dom/view_event_handler_impl.h"
 
+#include <utility>
+
 #include "base/strings/utf_string_conversions.h"
 #include "base/trace_event/trace_event.h"
 #include "evita/dom/bindings/ginx_UiEventInit.h"
@@ -279,10 +281,10 @@ void ViewEventHandlerImpl::QueryClose(domapi::WindowId window_id) {
   DispatchEventWithInLock(window, new UiEvent(L"queryclose", init_dict));
 }
 
-void ViewEventHandlerImpl::RunCallback(const base::Closure& callback) {
+void ViewEventHandlerImpl::RunCallback(base::OnceClosure callback) {
   TRACE_EVENT0("script", "ViewEventHandlerImpl::RunCallback");
   DOM_AUTO_LOCK_SCOPE();
-  callback.Run();
+  std::move(callback).Run();
 }
 
 void ViewEventHandlerImpl::WillDestroyViewHost() {

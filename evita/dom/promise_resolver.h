@@ -5,6 +5,8 @@
 #ifndef EVITA_DOM_PROMISE_RESOLVER_H_
 #define EVITA_DOM_PROMISE_RESOLVER_H_
 
+#include <utility>
+
 #include "base/location.h"
 #include "base/memory/ref_counted.h"
 #include "base/memory/weak_ptr.h"
@@ -27,8 +29,8 @@ class PromiseResolver final
   template <typename ResolveType, typename RejectType>
   static v8::Local<v8::Promise> Call(
       const base::Location& from_here,
-      const base::Callback<
-          void(const domapi::Promise<ResolveType, RejectType>&)> closure);
+      base::OnceCallback<void(domapi::Promise<ResolveType, RejectType>)>
+          closure);
 
   v8::Local<v8::Promise> GetPromise(v8::Isolate* isolate) const;
 
@@ -63,7 +65,7 @@ class PromiseResolver final
 template <typename T, typename U>
 v8::Local<v8::Promise> PromiseResolver::Call(
     const base::Location& from_here,
-    const base::Callback<void(const domapi::Promise<T, U>&)> closure) {
+    base::OnceCallback<void(domapi::Promise<T, U>)> closure) {
   auto* const runner = ScriptHost::instance()->runner();
   ginx::Runner::EscapableHandleScope runner_scope(runner);
 
@@ -71,10 +73,10 @@ v8::Local<v8::Promise> PromiseResolver::Call(
       base::WrapRefCounted(new PromiseResolver(from_here, runner));
 
   domapi::Promise<T, U> promise;
-  promise.reject = base::Bind(&PromiseResolver::Reject<U>, resolver);
-  promise.resolve = base::Bind(&PromiseResolver::Resolve<T>, resolver);
+  promise.reject = base::BindOnce(&PromiseResolver::Reject<U>, resolver);
+  promise.resolve = base::BindOnce(&PromiseResolver::Resolve<T>, resolver);
   promise.sequence_num = resolver->sequence_num_;
-  closure.Run(promise);
+  std::move(closure).Run(std::move(promise));
   return runner_scope.Escape(resolver->GetPromise(runner->isolate()));
 }
 

@@ -146,8 +146,8 @@ MetricsView::TimingScope::~TimingScope() {
   auto const end = metrics::Sampling::NowTimeTicks();
   paint::PaintThread::instance()->PostTask(
       FROM_HERE,
-      base::Bind(&MetricsView::View::AddSample,
-                 base::Unretained(view_->view_.get()), end - start_));
+      base::BindOnce(&MetricsView::View::AddSample,
+                     base::Unretained(view_->view_.get()), end - start_));
   view_->RequestAnimationFrame();
 }
 
@@ -164,8 +164,8 @@ MetricsView::~MetricsView() {}
 void MetricsView::RecordTime() {
   auto const now = metrics::Sampling::NowTimeTicks();
   paint::PaintThread::instance()->PostTask(
-      FROM_HERE, base::Bind(&MetricsView::View::RecordTime,
-                            base::Unretained(view_.get()), now));
+      FROM_HERE, base::BindOnce(&MetricsView::View::RecordTime,
+                                base::Unretained(view_.get()), now));
   RequestAnimationFrame();
 }
 

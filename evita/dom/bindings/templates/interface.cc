@@ -19,9 +19,9 @@ namespace bindings {
  //     .parameters
  #}
 {% macro emit_arguments(signature) %}
-{%- set delimiter = '' %}
+{%- set ns = namespace(delimiter = '') %}
 {%- for call_with in signature.call_with_list %}
-{{ delimiter }}{% set delimiter = ', ' %}
+{{ ns.delimiter }}{% set ns.delimiter = ', ' %}
 {%-   if call_with == 'Runner' %}{{ 'script_host->runner()' }}
 {%-   elif call_with == 'ScriptHost' %}{{ 'script_host' }}
 {%-   elif call_with == 'ViewDelegate' %}{{ 'script_host->view_delegate()' }}
@@ -30,16 +30,16 @@ namespace bindings {
 {%-   endif %}
 {%- endfor %}
 {%- if signature.call_with_list|count %}
-{%-   set delimiter = ', '%}
+{%-   set ns.delimiter = ', '%}
 {%- endif %}
 {%- for parameter in signature.parameters -%}
-{{ delimiter }}{% set delimiter = ', ' %}param{{ loop.index0 }}
+{{ ns.delimiter }}{% set ns.delimiter = ', ' %}param{{ loop.index0 }}
 {%- endfor %}
 {%- if signature.parameters|count %}
-{%-   set delimiter = ', '%}
+{%-   set ns.delimiter = ', '%}
 {%- endif %}
 {% if signature.is_raises_exception %}
-{{ delimiter }}{% set delimiter = ', ' %}{{'&exception_state'}}
+{{ ns.delimiter }}{% set ns.delimiter = ', ' %}{{'&exception_state'}}
 {%- endif %}
 {%- endmacro %}
 {#

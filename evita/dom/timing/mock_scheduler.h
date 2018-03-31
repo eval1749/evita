@@ -32,7 +32,7 @@ class MockScheduler final : public Scheduler {
 
  private:
   // base::TickClock
-  base::TimeTicks NowTicks() final;
+  base::TimeTicks NowTicks() const final;
 
   // dom::Scheduler
   void CancelAnimationFrame(int callback_id) final;

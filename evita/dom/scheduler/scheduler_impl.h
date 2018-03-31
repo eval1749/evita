@@ -38,7 +38,7 @@ class SchedulerImpl final : public Scheduler {
   void ProcessTasks();
 
   // base::TickClock
-  base::TimeTicks NowTicks() final;
+  base::TimeTicks NowTicks() const final;
 
   // dom::Scheduler
   void CancelAnimationFrame(int request_id) final;

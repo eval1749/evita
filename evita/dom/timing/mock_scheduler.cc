@@ -59,7 +59,7 @@ void MockScheduler::SetNowTicks(int milliseconds) {
 }
 
 // base::TickClock
-base::TimeTicks MockScheduler::NowTicks() {
+base::TimeTicks MockScheduler::NowTicks() const {
   return now_ticks_;
 }
 

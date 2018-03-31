@@ -172,7 +172,7 @@ void SchedulerImpl::Start(base::MessageLoop* script_message_loop) {
 }
 
 // base::TickClock
-base::TimeTicks SchedulerImpl::NowTicks() {
+base::TimeTicks SchedulerImpl::NowTicks() const {
   return base::TimeTicks::Now();
 }
 

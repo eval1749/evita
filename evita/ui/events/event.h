@@ -8,10 +8,10 @@
 #include <stdint.h>
 #include <ostream>
 
-#include "base/event_types.h"
 #include "base/time/time.h"
 #include "common/win/rect.h"
 #include "evita/base/castable.h"
+#include "evita/ui/events/platform_event.h"
 
 namespace ui {
 
@@ -213,7 +213,7 @@ class MouseEvent : public LocatedEvent {
              EventTarget* widget,
              const Point& client_point,
              const Point& screen_point);
-  MouseEvent(const base::NativeEvent& native_event,
+  MouseEvent(const PlatformEvent& native_event,
              EventTarget* widget,
              const Point& client_point,
              const Point& screen_point);
@@ -242,10 +242,10 @@ class MouseEvent : public LocatedEvent {
   }
   EventTarget* target() const { return target_; }
 
-  static MouseButton ConvertToButton(const base::NativeEvent& native_event);
+  static MouseButton ConvertToButton(const PlatformEvent& native_event);
   static int ConvertToButtons(int flags);
-  static EventType ConvertToEventType(const base::NativeEvent& native_event);
-  static int ConvertToEventFlags(const base::NativeEvent& native_event);
+  static EventType ConvertToEventType(const PlatformEvent& native_event);
+  static int ConvertToEventFlags(const PlatformEvent& native_event);
 
  private:
   friend class MouseWheelEvent;

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <utility>
 #include <vector>
 
 #include "evita/ui/widget.h"
@@ -332,7 +333,7 @@ static bool DispatchMouseEvent(Widget* widget, MouseEvent* event) {
   return true;
 }
 
-bool Widget::HandleMouseMessage(const base::NativeEvent& native_event) {
+bool Widget::HandleMouseMessage(const PlatformEvent& native_event) {
   const auto client_point = GetClientPointFromNativeEvent(native_event);
   const auto screen_point = GetScreenPointFromNativeEvent(native_event);
   const auto message = native_event.message;
@@ -834,13 +835,12 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
 
   if ((message >= WM_MOUSEFIRST && message <= WM_MOUSELAST) ||
       (message >= WM_NCMOUSEMOVE && message <= WM_NCMBUTTONDBLCLK)) {
-    base::NativeEvent native_event = {
-        AssociatedHwnd(),
-        message,
-        wParam,
-        lParam,
-        0,
-        {GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)}};
+    PlatformEvent native_event = {AssociatedHwnd(),
+                                  message,
+                                  wParam,
+                                  lParam,
+                                  0,
+                                  {GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)}};
     if (HandleMouseMessage(native_event))
       return OnMessage(message, wParam, lParam);
     return 0;

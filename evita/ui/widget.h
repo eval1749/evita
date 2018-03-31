@@ -8,7 +8,6 @@
 #include <memory>
 #include <ostream>
 
-#include "base/event_types.h"
 #include "base/logging.h"
 #include "base/macros.h"
 #include "common/win/native_window.h"
@@ -17,6 +16,7 @@
 #include "evita/gfx/rect_f.h"
 #include "evita/ui/compositor/layer_owner.h"
 #include "evita/ui/events/event_target.h"
+#include "evita/ui/events/platform_event.h"
 #include "evita/ui/focus_controller.h"
 
 namespace gfx {
@@ -152,7 +152,7 @@ class Widget : public EventTarget,
   void DispatchMouseExited();
   void DispatchPaintMessage();
   LRESULT HandleKeyboardMessage(uint32_t message, WPARAM wParam, LPARAM lParam);
-  bool HandleMouseMessage(const base::NativeEvent& native_event);
+  bool HandleMouseMessage(const PlatformEvent& native_event);
   HitTestResult HitTest(const gfx::Point& point) const;
   HitTestResult HitTestForMouseEventTarget(const gfx::Point& point) const;
   void UpdateBounds();

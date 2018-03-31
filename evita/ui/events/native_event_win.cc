@@ -8,8 +8,7 @@
 
 namespace ui {
 
-gfx::Point GetClientPointFromNativeEvent(
-    const base::NativeEvent& native_event) {
+gfx::Point GetClientPointFromNativeEvent(const PlatformEvent& native_event) {
   auto const message = native_event.message;
   if (message == WM_MOUSEWHEEL ||
       (message >= WM_NCMOUSEMOVE && message <= WM_NCMBUTTONDBLCLK)) {
@@ -26,8 +25,7 @@ gfx::Point GetClientPointFromNativeEvent(
   return gfx::Point();
 }
 
-gfx::Point GetScreenPointFromNativeEvent(
-    const base::NativeEvent& native_event) {
+gfx::Point GetScreenPointFromNativeEvent(const PlatformEvent& native_event) {
   auto const message = native_event.message;
   if (message == WM_MOUSEWHEEL ||
       (message >= WM_NCMOUSEMOVE && message <= WM_NCMBUTTONDBLCLK)) {

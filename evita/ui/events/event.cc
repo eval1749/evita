@@ -74,7 +74,7 @@ int KeyCodeMapper::Map(int virtual_key_code) {
   return key_code;
 }
 
-bool IsNonClientMouseEvent(const base::NativeEvent& native_event) {
+bool IsNonClientMouseEvent(const PlatformEvent& native_event) {
   auto const message = native_event.message;
   if (message >= WM_NCMOUSEMOVE && message <= WM_NCMBUTTONDBLCLK)
     return true;
@@ -185,7 +185,7 @@ MouseEvent::MouseEvent(EventType event_type,
       click_count_(click_count),
       target_(event_target) {}
 
-MouseEvent::MouseEvent(const base::NativeEvent& native_event,
+MouseEvent::MouseEvent(const PlatformEvent& native_event,
                        EventTarget* event_target,
                        const gfx::Point& client_point,
                        const gfx::Point& screen_point)
@@ -208,7 +208,7 @@ MouseEvent::MouseEvent()
 
 MouseEvent::~MouseEvent() {}
 
-MouseButton MouseEvent::ConvertToButton(const base::NativeEvent& native_event) {
+MouseButton MouseEvent::ConvertToButton(const PlatformEvent& native_event) {
   switch (native_event.message) {
     // Left button
     case WM_LBUTTONDBLCLK:
@@ -260,7 +260,7 @@ int MouseEvent::ConvertToButtons(int flags) {
   return buttons;
 }
 
-int MouseEvent::ConvertToEventFlags(const base::NativeEvent& native_event) {
+int MouseEvent::ConvertToEventFlags(const PlatformEvent& native_event) {
   if (IsNonClientMouseEvent(native_event))
     return static_cast<int>(EventFlags::NonClient);
 
@@ -289,8 +289,7 @@ int MouseEvent::ConvertToEventFlags(const base::NativeEvent& native_event) {
 //  2 WM_LBUTTONUP
 //  3 WM_LBUTTONDBLCLK
 //  4 WM_LBUTTONUP
-EventType MouseEvent::ConvertToEventType(
-    const base::NativeEvent& native_event) {
+EventType MouseEvent::ConvertToEventType(const PlatformEvent& native_event) {
   switch (native_event.message) {
     case WM_LBUTTONDBLCLK:
     case WM_LBUTTONDOWN:

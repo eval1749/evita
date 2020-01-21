@@ -85,7 +85,7 @@ HunspellEngine::Dictionary::~Dictionary() {}
 base::string16 HunspellEngine::Dictionary::GetFileName() {
   base::string16 file_name(MAX_PATH, '?');
   auto length_with_zero = ::ExpandEnvironmentStrings(
-      L"%LOCALAPPDATA%/Google/Chrome/User Data/en-US-7-1.bdic", &file_name[0],
+      L"%LOCALAPPDATA%/Google/Chrome/User Data/en-US-8-0.bdic", &file_name[0],
       static_cast<DWORD>(file_name.size()));
   file_name.resize(length_with_zero - 1);
   return file_name;

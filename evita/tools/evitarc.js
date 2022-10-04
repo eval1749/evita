@@ -20,12 +20,13 @@ Mode.registerExtension('e', 'c#');
     // A
     'accessor', 'affine', 'allocator', 'allocatable', 'Allocatable',
     'Animatable', 'animatable', 'Animatables', 'animatables', 'Arity', 'arity',
-    'ast',
+    'ast', 'async',
     // B
     'bgcolor', 'boolean',
     // C
     'cancelable', 'cacheable', 'Castable', 'callee', 'ceil', 'Checkbox',
-    'checkbox', 'clazz', 'Collectable', 'contenteditable', 'css', 'ctor',
+    'checkbox', 'clazz', 'Collectable', 'contenteditable', 'copiable', 'css',
+    'ctor',
     // D
     'Decrement', 'decrement', 'destructor', 'doesn', 'dom', 'domapi',
     'Dominatee', 'dominatee', 'Dominator', 'dominator', 'dtor',
@@ -45,17 +46,20 @@ Mode.registerExtension('e', 'c#');
     'javascript',
     // L
     'Layouter', 'layouter', 'lifecycle', 'Liveness', 'liveness',
+    // M
+    'moveable',
     // N
     'nullable', 'nullptr',
     // O
     'Opcode', 'opcode', 'ostream', 'observee',
     // P
-    'Posn', 'Prepend', 'pointee', 'Punctuator', 'punctuator',
+    'Posn', 'Prepend', 'Prefetch', 'prefetch', 'prefetching',
+    'prefillable', 'preload', 'pointee', 'Punctuator', 'punctuator',
     // R
     'readonly', 'Rect', 'rect', 'Renderer', 'renderer', 'Resize', 'resize',
     'resizing', 'Runnable', 'runnable', 'runtime',
     // S
-    'Scriptable', 'scriptable', 'scrollable', 'setter', 'Signedness',
+    'Scriptable', 'scriptable', 'scrollable', 'setter', 'shaper', 'Signedness',
     'signedness', 'splitter', 'stringify', 'substr', 'substring', 'subtree',
     'subtype', 'supertype',
     // T
@@ -85,11 +89,17 @@ Mode.registerExtension('e', 'c#');
     'std::sort', 'std::stringstream', 'std::tie', 'std::tuple',
     'std::upper_bound',
 
+    // absl
+    'absl::make_optional',
+    'absl::nullopt',
+    'absl::optional',
+
     // <type_traits>
     'std::add_constant', 'std::add_cv', 'std::add_extent',
     'std::add_lvalue_reference', 'std::add_pointer',
     'std::add_rvalue_reference', 'std::add_volatile', 'std::aligned_storage',
     'std::aligned_union', 'std::alignment_of', 'std::common_type',
+    'std::atomic', 'std::atomic_flag',
     'std::conditional', 'std::decay', 'std::enable_if', 'std::extent',
     'std::false_type', 'std::integral_constant', 'std::is_base_of',
     'std::is_convertible', 'std::is_same', 'std::make_signed',
@@ -104,7 +114,9 @@ Mode.registerExtension('e', 'c#');
     'base::Bind', 'base::OnceCallback', 'base::OnceClosure', 'base::checked_cast',
     'base::char16', 'base::string16', 'base::StringPiece',
     'base::StringPiece16', 'base::StringPrintf', 'base::Time',
-    'base::TimeDelta', 'base::TimeTicks', 'base::Unretained', 'scoped_refptr',
+    'base::TimeDelta', 'base::TimeTicks', 'base::Unretained',
+    'base::WaitableEvent',
+    'scoped_refptr', 'wtf_size_t',
 
     // v8
     'v8::ArrayBuffer', 'v8::Context', 'v8::EscapableHandleScope', 'v8::Eternal',

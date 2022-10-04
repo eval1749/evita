@@ -25,6 +25,7 @@ namespace {
 
 base::win::ScopedHICON LoadSmallIconFromRegistry(
     base::StringPiece16 file_extension) {
+ #if 0
   const auto& extension = file_extension.as_string();
   common::win::Registry extension_key(HKEY_CLASSES_ROOT, extension);
   if (!extension_key)
@@ -56,7 +57,10 @@ base::win::ScopedHICON LoadSmallIconFromRegistry(
     DVLOG(0) << "Bad icon index: " << icon_location;
     return base::win::ScopedHICON();
   }
-
+#else
+  base::string16 icon_path = L"%SystemRoot%\\system32\\shell32.dll";
+  const int icon_index = 1;
+#endif
   // Note: ExtractIconEx expands environment variables in
   // pathname, e.g. "%lsystemRoot%\system32\imageres.dll,-102".
   HICON hIcon;

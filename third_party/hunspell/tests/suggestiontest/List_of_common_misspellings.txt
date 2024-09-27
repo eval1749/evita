@@ -1,5 +1,5 @@
 # source: http://en.wikipedia.org/wiki/Wikipedia:Lists_of_common_misspellings/For_machines
-abandonned	abandoned
+abandoned	abandoned
 aberation	aberration
 abilties	abilities
 abilty	ability
@@ -572,7 +572,7 @@ breif	brief
 breifly	briefly
 brethen	brethren
 bretheren	brethren
-briliant	brilliant
+brilliant	brilliant
 brillant	brilliant
 brimestone	brimstone
 Britian	Britain
